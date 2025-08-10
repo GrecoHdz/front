@@ -9,7 +9,7 @@ export default defineNuxtConfig({
       title: 'TecniServ - Servicios Técnicos a Domicilio',
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=0.7, user-scalable=no' },
         { hid: 'description', name: 'description', content: 'Servicios técnicos profesionales a domicilio. Fontanería, electricidad, aires acondicionados y más.' },
         { name: 'theme-color', content: '#2563eb' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
@@ -24,12 +24,18 @@ export default defineNuxtConfig({
       ]
     }
   },
+   // Server configuration 
+   devServer: {
+    host: '0.0.0.0',
+    port: process.env.PORT ? Number(process.env.PORT) : 3000 
+  },
   
   // Runtime config
   runtimeConfig: {
     public: {
       appName: 'TecniServ',
-      appVersion: '1.0.0'
+      appVersion: '1.0.0',
+      apiBase: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:4000'
     }
   }
 })

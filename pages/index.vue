@@ -355,6 +355,19 @@
 
             <div>
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                Identidad
+              </label>
+              <input 
+                v-model="form.identidad"
+                type="text" 
+                class="w-full px-4 py-4 text-base border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                placeholder="Tu identidad"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                 Email
               </label>
               <input 
@@ -362,6 +375,19 @@
                 type="email" 
                 class="w-full px-4 py-4 text-base border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 placeholder="tu@email.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                Telefono
+              </label>
+              <input 
+                v-model="form.telefono"
+                type="text" 
+                class="w-full px-4 py-4 text-base border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                placeholder="Tu telefono"
                 required
               />
             </div>
@@ -447,6 +473,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 // SEO and Meta
 useHead({
@@ -462,6 +489,9 @@ useHead({
   ]
 })
 
+const config = useRuntimeConfig()
+const apiBase = config.public.apiBase
+
 // Reactive data
 const showLoginModal = ref(false)
 const showSuccess = ref(false)
@@ -470,7 +500,9 @@ const isLogin = ref(true)
 const form = ref({
   name: '',
   email: '',
-  password: ''
+  password: '',
+  identidad: '',
+  telefono: ''
 })
 
 // Mock data for login
@@ -622,37 +654,42 @@ const getIconBg = (index) => {
 const router = useRouter()
 
 // Methods
-const handleAuth = () => {
-  if (isLogin.value) {
-    // Login logic
-    const user = mockUsers.find(u => u.email === form.value.email && u.password === form.value.password)
-    if (user) {
-      showLoginModal.value = false
-      showSuccess.value = true
-      // Redirect to dashboard after showing success message
-      setTimeout(() => {
-        showSuccess.value = false
-        router.push('/DashboardCliente')
-      }, 2000)
-      console.log('Login successful:', user)
-    } else {
-      showCustomAlert('Credenciales incorrectas. Intenta con los usuarios de prueba.')
-    }
-  } else {
-    // Register logic
-    showLoginModal.value = false
-    showSuccess.value = true
-    // Redirect to dashboard after showing success message
+const handleAuth = async () => {
+  try {
+    // Solo registro de usuario
+    const { data } = await axios.post(`${apiBase}/usuarios`, {
+      nombre: form.value.name,
+      email: form.value.email,
+      password_hash: form.value.password,
+      identidad: form.value.identidad,
+      telefono: form.value.telefono
+    });
+    
+    showLoginModal.value = false;
+    showSuccess.value = true;
+    
+    // Redirigir después de mostrar el mensaje de éxito
     setTimeout(() => {
-      showSuccess.value = false
-      router.push('/DashboardCliente')
-    }, 2000)
-    console.log('Registration successful:', form.value)
+      showSuccess.value = false;
+      router.push('/DashboardCliente');
+    }, 2000);
+    
+    console.log('Registro exitoso:', data);
+  } catch (error) {
+    console.error('Error en el registro:', error);
+    const errorMessage = error.response?.data?.message || 'Ocurrió un error al registrar el usuario';
+    showCustomAlert(errorMessage);
+  } finally {
+    // Reset form
+    form.value = { 
+      name: '', 
+      email: '', 
+      password: '',
+      identidad: '',
+      telefono: ''
+    };
   }
-  
-  // Reset form
-  form.value = { name: '', email: '', password: '' }
-}
+};
 
 // Custom alert function
 const showCustomAlert = (message) => {
