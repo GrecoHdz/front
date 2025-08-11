@@ -12,6 +12,7 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=0.7, user-scalable=no' },
         { hid: 'description', name: 'description', content: 'Servicios técnicos profesionales a domicilio. Fontanería, electricidad, aires acondicionados y más.' },
         { name: 'theme-color', content: '#2563eb' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' }
       ],
@@ -35,7 +36,7 @@ export default defineNuxtConfig({
     public: {
       appName: 'TecniServ',
       appVersion: '1.0.0',
-      apiBase: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:4000'
+      apiBase: 'http://localhost:4000'
     }
   }
 })

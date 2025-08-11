@@ -1,13 +1,43 @@
 <script setup>
-const router = useRouter()
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import LoadingSpinner from './ui/LoadingSpinner.vue'
 
-const navigateTo = (path) => {
-  router.push(path)
+const router = useRouter()
+const isLoading = ref(false)
+
+const navigateTo = async (path) => {
+  try {
+    // Mostrar el spinner
+    isLoading.value = true
+    
+    // Pequeño retraso para asegurar que se muestre el spinner
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    // Navegar a la ruta
+    await router.push(path)
+  } catch (error) {
+    console.error('Error en la navegación:', error)
+  } finally {
+    // Ocultar el spinner después de un pequeño retraso
+    // para asegurar una transición suave
+    setTimeout(() => {
+      isLoading.value = false
+    }, 300)
+  }
 }
 </script>
 
 <template>
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-50">
+    <!-- LoadingSpinner para navegación -->
+    <LoadingSpinner 
+      v-if="isLoading"
+      :loading="isLoading"
+      :hideDefaultMessage="true"
+      class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
+    />
+    
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-40">
       <div class="px-6 py-4 ">
         <div class="flex justify-around items-center ">
           <button 

@@ -1,17 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- SEO Head -->
-    <Head>
-      <title>HogarSeguro - Mantenimiento del Hogar en Honduras</title>
-      <meta name="description" content="HogarSeguro es la primera plataforma en Honduras que te da mantenimiento, descuentos y asistencia técnica en un solo lugar. Membresía mensual desde L. 250." />
-      <meta name="keywords" content="mantenimiento hogar, Honduras, fontanería, electricidad, aires acondicionados, electrodomésticos, pintura, cámaras seguridad" />
-      <meta property="og:title" content="HogarSeguro - Tu hogar protegido" />
-      <meta property="og:description" content="Mantenimiento, descuentos y asistencia técnica en un solo lugar. Tu casa es tu refugio." />
-      <meta property="og:type" content="website" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    </Head>
-
     <!-- Mobile Header -->
     <header class="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 overflow-hidden">
       <!-- Background Pattern -->
@@ -190,7 +178,7 @@
         </div>
       </section>
 
-<!-- No Emergencies Section -->
+      <!-- No Emergencies Section -->
       <section class="px-4 py-6">
         <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
           <div class="text-center mb-4">
@@ -339,57 +327,75 @@
             </p>
           </div>
 
-          <form @submit.prevent="handleAuth" class="space-y-6">
+          <form @submit.prevent="handleAuth" class="space-y-6" :autocomplete="isLogin ? 'on' : 'on'">
+            <!-- Campos adicionales para registro -->
             <div v-if="!isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                 Nombre Completo
               </label>
               <input 
-                v-model="form.name"
+                v-model="form.nombre"
                 type="text" 
-                class="w-full px-4 py-4 text-base border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                class="w-full px-4 py-4 text-base border-2 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                :class="formErrors.nombre ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
                 placeholder="Tu nombre completo"
-                required
+                :required="!isLogin"
+                autocomplete="name"
+                @input="form.nombre = form.nombre.replace(/[0-9]/g, ''); formErrors.nombre = ''"
+                @keydown="preventNumberInput"
               />
+              <p v-if="formErrors.nombre" class="mt-1 text-sm text-red-500">{{ formErrors.nombre }}</p>
             </div>
 
-            <div>
+            <div v-if="!isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                Identidad
-              </label>
-              <input 
-                v-model="form.identidad"
-                type="text" 
-                class="w-full px-4 py-4 text-base border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
-                placeholder="Tu identidad"
-                required
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                Email
+                Correo Electrónico
               </label>
               <input 
                 v-model="form.email"
                 type="email" 
                 class="w-full px-4 py-4 text-base border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 placeholder="tu@email.com"
-                required
+                :required="!isLogin"
+                autocomplete="email"
               />
+            </div>
+
+            <div v-if="!isLogin">
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                Teléfono
+              </label>
+              <input 
+                v-model="form.telefono"
+                type="tel" 
+                class="w-full px-4 py-4 text-base border-2 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                :class="{'border-red-500': formErrors.telefono, 'border-gray-200 dark:border-gray-600': !formErrors.telefono}"
+                placeholder="Ej: +504 9999-9999"
+                :required="!isLogin"
+                autocomplete="tel"
+                @input="form.telefono = form.telefono.replace(/[^0-9+\s-]/g, ''); formErrors.telefono = ''"
+                @keydown="preventLetterInput"
+              />
+              <p v-if="formErrors.telefono" class="mt-1 text-sm text-red-500">{{ formErrors.telefono }}</p>
             </div>
 
             <div>
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                Telefono
+                Número de Identidad
               </label>
               <input 
-                v-model="form.telefono"
+                v-model="form.identidad"
                 type="text" 
-                class="w-full px-4 py-4 text-base border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
-                placeholder="Tu telefono"
+                class="w-full px-4 py-4 text-base border-2 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                :class="formErrors.identidad ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
+                placeholder="Ej: 0801199912345"
                 required
+                autocomplete="username"
+                @input="form.identidad = form.identidad.replace(/\D/g, ''); formErrors.identidad = ''"
+                @keydown="preventLetterInput"
+                maxlength="13"
               />
+              <p v-if="formErrors.identidad" class="mt-1 text-sm text-red-500">{{ formErrors.identidad }}</p>
             </div>
 
             <div>
@@ -399,10 +405,14 @@
               <input 
                 v-model="form.password"
                 type="password" 
-                class="w-full px-4 py-4 text-base border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
-                placeholder="••••••••"
+                class="w-full px-4 py-4 text-base border-2 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                :class="formErrors.password ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
+                :placeholder="isLogin ? 'Ingresa tu contraseña' : 'Crea una contraseña segura'"
                 required
+                :autocomplete="isLogin ? 'current-password' : 'new-password'"
+                @input="formErrors.password = ''"
               />
+              <p v-if="formErrors.password" class="mt-1 text-sm text-red-500">{{ formErrors.password }}</p>
             </div>
 
             <button 
@@ -432,63 +442,42 @@
               </svg>
             </button>
           </div>
-
-          <!-- Mock Users Info -->
-          <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-2xl">
-            <p class="text-xs text-gray-600 dark:text-gray-400 mb-3 font-bold text-center">Usuarios de prueba:</p>
-            <div class="text-xs space-y-2">
-              <div class="flex justify-between items-center py-1">
-                <span class="text-gray-700 dark:text-gray-300"><strong>Cliente:</strong></span>
-                <span class="text-gray-600 dark:text-gray-400 font-mono">cliente@test.com / 123456</span>
-              </div>
-              <div class="flex justify-between items-center py-1">
-                <span class="text-gray-700 dark:text-gray-300"><strong>Técnico:</strong></span>
-                <span class="text-gray-600 dark:text-gray-400 font-mono">tecnico@test.com / 123456</span>
-              </div>
-              <div class="flex justify-between items-center py-1">
-                <span class="text-gray-700 dark:text-gray-300"><strong>Admin:</strong></span>
-                <span class="text-gray-600 dark:text-gray-400 font-mono">admin@test.com / 123456</span>
-              </div>
-            </div>
-          </div>
+ 
         </div>
       </div>
     </div>
 
-    <!-- Success Message -->
-    <div v-if="showSuccess" class="fixed top-6 left-6 right-6 z-50">
-      <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 rounded-2xl shadow-2xl">
-        <div class="flex items-center space-x-3">
-          <div class="text-2xl">🎉</div>
-          <div>
-            <p class="font-black text-lg">¡Bienvenido a HogarSeguro!</p>
-            <p class="text-green-100 text-sm">Tu hogar está ahora protegido</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Loading Spinner -->
+    <LoadingSpinner 
+      v-if="isLoading || authStatus"
+      :loading="isLoading"
+      :success="authStatus === 'success'"
+      :error="authStatus === 'error'"
+      :message="isLogin ? 'Iniciando sesión...' : 'Registrando cuenta...'"
+      :success-message="authStatus === 'success' ? '¡Operación exitosa!' : ''"
+      :error-message="authStatus === 'error' ? toast.message : ''"
+      @reset="authStatus = ''"
+    />
+
+    <!-- Toast Notification -->
+    <Toast 
+      v-if="toast.show"
+      ref="toastRef"
+      :message="toast.message"
+      :type="toast.type"
+      :duration="toast.duration"
+      @close="toast.show = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { navigateTo } from '#imports'
+import Toast from '~/components/ui/Toast.vue';
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 
-// SEO and Meta
-useHead({
-  title: 'HogarSeguro - Mantenimiento del Hogar en Honduras',
-  meta: [
-    { name: 'description', content: 'HogarSeguro es la primera plataforma en Honduras que te da mantenimiento, descuentos y asistencia técnica en un solo lugar. Membresía mensual desde L. 250.' },
-    { name: 'keywords', content: 'mantenimiento hogar, Honduras, fontanería, electricidad, aires acondicionados, electrodomésticos, pintura, cámaras seguridad' },
-    { property: 'og:title', content: 'HogarSeguro - Tu hogar protegido' },
-    { property: 'og:description', content: 'Mantenimiento, descuentos y asistencia técnica en un solo lugar. Tu casa es tu refugio.' },
-    { property: 'og:type', content: 'website' },
-    { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
-  ]
-})
-
+// API base URL
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
@@ -496,13 +485,51 @@ const apiBase = config.public.apiBase
 const showLoginModal = ref(false)
 const showSuccess = ref(false)
 const isLogin = ref(true)
+const isLoading = ref(false)
+const authStatus = ref('') // '', 'success', 'error'
+const formErrors = ref({})
+
+// Validation functions
+const validateForm = () => {
+  const errors = {}
+  
+  if (!isLogin.value) {
+    // Validar nombre completo (mínimo 2 palabras)
+    if (!form.value.nombre || form.value.nombre.trim().split(' ').filter(Boolean).length < 2) {
+      errors.nombre = 'Por favor ingresa tu nombre completo (mínimo 2 palabras)'
+    }
+    
+    // Validar teléfono (código de país + número)
+    const phoneRegex = /^\+?[0-9\s-]{10,15}$/
+    if (!form.value.telefono || !phoneRegex.test(form.value.telefono)) {
+      errors.telefono = 'Ingresa un número de teléfono válido (ej: +504 9999-9999)'
+    }
+    
+    // Validar número de identidad (13 dígitos)
+    const identidadRegex = /^\d{13}$/
+    if (!identidadRegex.test(form.value.identidad)) {
+      errors.identidad = 'El número de identidad debe tener 13 dígitos'
+    }
+  }
+  
+  // Validar contraseña (mínimo 6 caracteres)
+  if (form.value.password.length < 6) {
+    errors.password = 'La contraseña debe tener al menos 6 caracteres'
+  }
+  
+  formErrors.value = errors
+  return Object.keys(errors).length === 0
+}
+
+// Estado para el número de teléfono
+const phoneNumber = ref('')
 
 const form = ref({
-  name: '',
+  nombre: '',
   email: '',
-  password: '',
+  telefono: '',
   identidad: '',
-  telefono: ''
+  password: ''
 })
 
 // Mock data for login
@@ -650,70 +677,228 @@ const getIconBg = (index) => {
   return bgs[index % bgs.length]
 }
 
-// Router
-const router = useRouter()
-
 // Methods
 const handleAuth = async () => {
   try {
-    // Solo registro de usuario
-    const { data } = await axios.post(`${apiBase}/usuarios`, {
-      nombre: form.value.name,
-      email: form.value.email,
-      password_hash: form.value.password,
+    // Resetear estado
+    authStatus.value = ''
+    formErrors.value = {}
+    
+    // Validar formulario
+    if (!validateForm()) {
+      showToast('Por favor completa correctamente todos los campos', 'error')
+      return
+    }
+    
+    isLoading.value = true
+    
+    const authData = {
       identidad: form.value.identidad,
-      telefono: form.value.telefono
+      password: form.value.password
+    }
+    
+    console.log('Enviando al backend:', authData)
+    
+    let response;
+    
+    if (isLogin.value) {
+      // Llamada al endpoint de login
+      response = await fetch(`${apiBase}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identidad: form.value.identidad,
+          password: form.value.password
+        })
+      });
+    } else {
+      // Llamada al endpoint de registro
+      response = await fetch(`${apiBase}/usuarios`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre: form.value.nombre,
+          identidad: form.value.identidad,
+          email: form.value.email,
+          telefono: form.value.telefono,
+          password_hash: form.value.password
+        })
+      });
+    }
+    
+    const data = await response.json();
+    console.log('Respuesta del backend:', data);
+    
+    if (!response.ok) {
+      // Crear un error con el mensaje del backend
+      const error = new Error(data.message || 'Error en la solicitud');
+      error.response = response; // Incluir la respuesta para más detalles
+      throw error;
+    }
+    
+    // Si es login, guardar el token y redirigir
+    if (isLogin.value && data.token) {
+      // Mostrar estado de éxito en el spinner
+      authStatus.value = 'success';
+      
+      // Guardar datos del usuario
+      localStorage.setItem('token', data.token);
+      
+      const user = {
+        id: data.user?.id || 1,
+        name: data.user?.name || form.value.nombre || 'Usuario',
+        role: data.user?.role || 'cliente'
+      };
+      
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // Esperar para mostrar el estado de éxito
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Cerrar modal y redirigir
+      showLoginModal.value = false;
+      showSuccess.value = true;
+      
+      // Redirigir al dashboard
+      navigateTo('/DashboardCliente');
+    } else if (!isLogin.value) {
+      // Para registro, solo mostrar toast
+      showToast('¡Registro exitoso! Por favor inicia sesión.', 'success');
+      
+      // Cambiar a pestaña de login
+      isLogin.value = true;
+      
+      // Limpiar el formulario
+      form.value = {
+        nombre: '',
+        email: '',
+        telefono: '',
+        identidad: '',
+        password: ''
+      };
+      
+      // Cerrar el loading
+      isLoading.value = false;
+    }
+    
+  } catch (error) {
+    console.error('Error en la autenticación:', error);
+    
+    let errorMessage = 'Error de conexión con el servidor. ';
+    
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      errorMessage += 'No se pudo conectar con el servidor. ';
+      errorMessage += 'Por favor verifica que el servidor esté en ejecución y accesible en ' + apiBase;
+    } else {
+      errorMessage = error.message || (isLogin.value ? 'Error al iniciar sesión' : 'Error al registrarse');
+    }
+    
+    console.error('Detalles del error:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
     });
     
-    showLoginModal.value = false;
-    showSuccess.value = true;
-    
-    // Redirigir después de mostrar el mensaje de éxito
-    setTimeout(() => {
-      showSuccess.value = false;
-      router.push('/DashboardCliente');
-    }, 2000);
-    
-    console.log('Registro exitoso:', data);
-  } catch (error) {
-    console.error('Error en el registro:', error);
-    const errorMessage = error.response?.data?.message || 'Ocurrió un error al registrar el usuario';
-    showCustomAlert(errorMessage);
-  } finally {
-    // Reset form
-    form.value = { 
-      name: '', 
-      email: '', 
-      password: '',
-      identidad: '',
-      telefono: ''
-    };
-  }
-};
-
-// Custom alert function
-const showCustomAlert = (message) => {
-  const alertDiv = document.createElement('div')
-  alertDiv.className = 'fixed top-6 left-6 right-6 z-50 bg-red-500 text-white p-4 rounded-2xl shadow-2xl'
-  alertDiv.innerHTML = `
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <span class="text-xl">⚠️</span>
-        <span class="font-bold">${message}</span>
-      </div>
-      <button onclick="this.closest('.fixed').remove()" class="text-white hover:text-red-200 ml-4">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-  `
-  document.body.appendChild(alertDiv)
-  setTimeout(() => {
-    if (alertDiv.parentNode) {
-      alertDiv.remove()
+    if (isLogin.value) {
+      // Para login, mostrar error en el spinner con el mensaje del backend
+      authStatus.value = 'error';
+      // Usar el mensaje del error si está disponible
+      const errorMessage = error.response?.data?.message || error.message || 'Error al iniciar sesión';
+      // Actualizar el mensaje del toast pero mantenerlo oculto
+      toast.value = {
+        ...toast.value,
+        message: errorMessage,
+        type: 'error',
+        show: false // Importante: mantener oculto el toast
+      };
+      // Resetear después de 3 segundos
+      setTimeout(() => {
+        isLoading.value = false;
+        authStatus.value = '';
+      }, 3000);
+    } else {
+      // Para registro, mostrar toast de error
+      showToast(errorMessage, 'error');
+      isLoading.value = false;
     }
-  }, 5000)
+  } finally {
+    // Asegurarse de que el loading se desactive
+    if (authStatus.value !== 'success') {
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 500);
+    } else {
+      isLoading.value = false;
+    }
+  }
+}
+
+// Toast state
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'error',
+  duration: 5000,
+  timeoutId: null
+})
+
+// Show toast function
+const showToast = (message, type = 'error', duration = 5000) => {
+  // Limpiar timeout anterior si existe
+  if (toast.value.timeoutId) {
+    clearTimeout(toast.value.timeoutId)
+  }
+
+  // Actualizar el estado del toast
+  toast.value = {
+    show: true,
+    message,
+    type,
+    duration,
+    timeoutId: null
+  }
+
+  // Configurar el cierre automático
+  if (duration > 0) {
+    toast.value.timeoutId = setTimeout(() => {
+      toast.value.show = false
+    }, duration)
+  }
+}
+
+// Alias para compatibilidad con el código existente
+const showCustomAlert = (message) => {
+  showToast(message, 'error')
+}
+
+// Funciones de validación de teclado
+const preventNumberInput = (e) => {
+  if (e.key >= '0' && e.key <= '9') {
+    e.preventDefault();
+  }
+}
+
+const preventLetterInput = (e) => {
+  // Permitir teclas de control (backspace, delete, tab, etc.)
+  if ([8, 9, 13, 27, 46].includes(e.keyCode) || 
+      // Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      (e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode))) {
+    return;
+  }
+  
+  // Permitir números y teclas especiales para teléfono
+  if (e.target.name === 'telefono' && ['+', '-', ' '].includes(e.key)) {
+    return;
+  }
+  
+  // Solo permitir números
+  if ((e.key < '0' || e.key > '9') && e.keyCode !== 8) {
+    e.preventDefault();
+  }
 }
 
 // Dark mode support
@@ -721,17 +906,28 @@ onMounted(() => {
   if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.documentElement.classList.add('dark')
   }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+  
+  const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  
+  const handleColorSchemeChange = (event) => {
     if (event.matches) {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
-  })
+  }
+  
+  // Agregar el event listener
+  darkModeMediaQuery.addEventListener('change', handleColorSchemeChange)
+  
+  // Limpiar el event listener cuando el componente se desmonte
+  return () => {
+    darkModeMediaQuery.removeEventListener('change', handleColorSchemeChange)
+  }
 })
 </script>
 
-<style scoped>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 * {
@@ -831,5 +1027,9 @@ html {
 /* Shadow utilities */
 .shadow-glow {
   box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+}
+
+#app {
+  min-height: 100vh;
 }
 </style>
