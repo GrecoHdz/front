@@ -170,7 +170,7 @@
         </div>
       </div>
     </div> 
-    <Footer />  
+    <FootersFooter />  
   </div>
 </template>
 

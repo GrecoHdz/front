@@ -125,13 +125,13 @@
       </div>
     </div>
     
-    <Footer />
+    <FootersFooter />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import Footer from '@/components/Footer.vue'
+import FootersFooter from '@/components/footers/footer.vue'
 
 const activeFaq = ref(null)
 const isSubmitting = ref(false)

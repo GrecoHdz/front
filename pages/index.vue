@@ -764,7 +764,7 @@ const handleAuth = async () => {
       showSuccess.value = true;
       
       // Redirigir al dashboard
-      navigateTo('/DashboardCliente');
+      navigateTo('/cliente/DashboardCliente');
     } else if (!isLogin.value) {
       // Para registro, solo mostrar toast
       showToast('¡Registro exitoso! Por favor inicia sesión.', 'success');

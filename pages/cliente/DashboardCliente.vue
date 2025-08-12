@@ -314,7 +314,7 @@
       </div> <!-- Close pb-24 div -->
     </div> <!-- Close max-w-2xl container -->
 
-    <Footer />
+    <FootersFooter />
 
     <!-- Success Messages -->
     <div v-if="showSuccessMessage" class="fixed top-6 left-6 right-6 z-50">
@@ -332,6 +332,7 @@
 </template>
 
 <script setup>
+
 import { ref, computed, onMounted } from 'vue'
 
 // SEO and Meta

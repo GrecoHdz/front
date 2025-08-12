@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import LoadingSpinner from './ui/LoadingSpinner.vue'
+import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -41,7 +41,7 @@ const navigateTo = async (path) => {
       <div class="px-6 py-4 ">
         <div class="flex justify-around items-center ">
           <button 
-            @click="navigateTo('/DashboardCliente')" 
+            @click="navigateTo('/cliente/DashboardCliente')" 
             class="flex flex-col items-center space-y-1 text-emerald-600 ">
             <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@ const navigateTo = async (path) => {
             <span class="text-xs font-bold">Inicio</span>
           </button>
           <button 
-            @click="navigateTo('/Servicios')" 
+            @click="navigateTo('/cliente/Servicios')" 
             class="flex flex-col items-center space-y-1 text-blue-600">
             <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@ const navigateTo = async (path) => {
             <span class="text-xs font-bold">Servicios</span>
           </button>
           <button 
-            @click="navigateTo('/Perfil')"
+            @click="navigateTo('/cliente/Perfil')"
             class="flex flex-col items-center space-y-1 text-blue-600">
             <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +70,7 @@ const navigateTo = async (path) => {
             </div>
             <span class="text-xs font-bold">Perfil</span>
           </button>
-          <button @click="navigateTo('/Soporte')" class="flex flex-col items-center space-y-1 text-gray-400 dark:text-gray-500">
+          <button @click="navigateTo('/cliente/Soporte')" class="flex flex-col items-center space-y-1 text-gray-400 dark:text-gray-500">
             <div class="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>

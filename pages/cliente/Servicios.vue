@@ -7,7 +7,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </Head>
      
-     <HeaderServicios 
+     <HeadersHeaderServicios 
        :total-services="totalServices"
        :show-filters="showFilters"
        :service-filters="serviceFilters"
@@ -135,7 +135,7 @@
       </div> <!-- Close pb-24 div -->
     </div> <!-- Close max-w-2xl container -->
 
-    <Footer />
+    <FootersFooter />
     
     <!-- Service Detail Modal -->
   <div v-if="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
