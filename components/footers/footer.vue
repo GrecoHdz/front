@@ -1,5 +1,21 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '~/middleware/auth.store';
+
+const auth = useAuthStore();
+
+// Depuración: Mostrar información del usuario y su rol
+onMounted(() => {
+  console.log('=== DEPURACIÓN DE AUTENTICACIÓN ===');
+  console.log('Usuario actual:', auth.user);
+  console.log('Rol del usuario (id_rol):', auth.user?.id_rol);
+  console.log('Rol del usuario (userRole):', auth.userRole);
+  console.log('Es admin?', auth.hasRole('admin'));
+  console.log('Es técnico?', auth.hasRole('tecnico'));
+  console.log('Es usuario?', auth.hasRole('usuario'));
+  console.log('==================================');
+});
+
 import { useRouter } from 'vue-router'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
@@ -61,7 +77,8 @@ const navigateTo = async (path) => {
             <span class="text-xs font-bold">Servicios</span>
           </button>
           <button 
-            @click="navigateTo('/cliente/Perfil')"
+            v-if="auth.hasRole('Admin')"
+            @click="navigateTo('/cliente/Perfil')" 
             class="flex flex-col items-center space-y-1 text-blue-600">
             <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

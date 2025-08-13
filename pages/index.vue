@@ -393,7 +393,7 @@
                 autocomplete="username"
                 @input="form.identidad = form.identidad.replace(/\D/g, ''); formErrors.identidad = ''"
                 @keydown="preventLetterInput"
-                maxlength="13"
+                maxlength="15"
               />
               <p v-if="formErrors.identidad" class="mt-1 text-sm text-red-500">{{ formErrors.identidad }}</p>
             </div>
@@ -474,6 +474,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { navigateTo } from '#imports'
+import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 
@@ -505,10 +506,10 @@ const validateForm = () => {
       errors.telefono = 'Ingresa un número de teléfono válido (ej: +504 9999-9999)'
     }
     
-    // Validar número de identidad (13 dígitos)
-    const identidadRegex = /^\d{13}$/
+    // Validar número de identidad (15 dígitos)
+    const identidadRegex = /^\d{15}$/
     if (!identidadRegex.test(form.value.identidad)) {
-      errors.identidad = 'El número de identidad debe tener 13 dígitos'
+      errors.identidad = 'El número de identidad debe tener 15 dígitos'
     }
   }
   
@@ -678,6 +679,9 @@ const getIconBg = (index) => {
 }
 
 // Methods
+// Obtener instancia del store de autenticación
+const authStore = useAuthStore()
+
 const handleAuth = async () => {
   try {
     // Resetear estado
@@ -692,30 +696,39 @@ const handleAuth = async () => {
     
     isLoading.value = true
     
-    const authData = {
-      identidad: form.value.identidad,
-      password: form.value.password
-    }
-    
-    console.log('Enviando al backend:', authData)
-    
-    let response;
-    
     if (isLogin.value) {
-      // Llamada al endpoint de login
-      response = await fetch(`${apiBase}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          identidad: form.value.identidad,
-          password: form.value.password
-        })
+      // Usar el store de autenticación para el login
+      const loginResult = await authStore.login({
+        identidad: form.value.identidad,
+        password: form.value.password
       });
+      
+      if (loginResult?.success) {
+        // Mostrar estado de éxito en el spinner
+        authStatus.value = 'success';
+        
+        // Esperar para mostrar el estado de éxito
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Cerrar modal y redirigir
+        showLoginModal.value = false;
+        showSuccess.value = true;
+        
+        // Redirigir al dashboard según el rol
+        const userRole = authStore.userRole;
+        if (userRole === 'admin') {
+          navigateTo('/admin/DashboardAdmin');
+        } else if (userRole === 'tecnico') {
+          navigateTo('/tecnico/DashboardTecnico');
+        } else {
+          navigateTo('/cliente/DashboardCliente');
+        }
+      } else {
+        throw new Error('Error en las credenciales');
+      }
     } else {
       // Llamada al endpoint de registro
-      response = await fetch(`${apiBase}/usuarios`, {
+      const response = await fetch(`${apiBase}/usuarios`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -728,44 +741,16 @@ const handleAuth = async () => {
           password_hash: form.value.password
         })
       });
-    }
-    
-    const data = await response.json();
-    console.log('Respuesta del backend:', data);
-    
-    if (!response.ok) {
-      // Crear un error con el mensaje del backend
-      const error = new Error(data.message || 'Error en la solicitud');
-      error.response = response; // Incluir la respuesta para más detalles
-      throw error;
-    }
-    
-    // Si es login, guardar el token y redirigir
-    if (isLogin.value && data.token) {
-      // Mostrar estado de éxito en el spinner
-      authStatus.value = 'success';
       
-      // Guardar datos del usuario
-      localStorage.setItem('token', data.token);
+      const data = await response.json();
+      console.log('Respuesta del registro:', data);
       
-      const user = {
-        id: data.user?.id || 1,
-        name: data.user?.name || form.value.nombre || 'Usuario',
-        role: data.user?.role || 'cliente'
-      };
+      if (!response.ok) {
+        const error = new Error(data.message || 'Error en el registro');
+        error.response = response;
+        throw error;
+      }
       
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      // Esperar para mostrar el estado de éxito
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Cerrar modal y redirigir
-      showLoginModal.value = false;
-      showSuccess.value = true;
-      
-      // Redirigir al dashboard
-      navigateTo('/cliente/DashboardCliente');
-    } else if (!isLogin.value) {
       // Para registro, solo mostrar toast
       showToast('¡Registro exitoso! Por favor inicia sesión.', 'success');
       

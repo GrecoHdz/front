@@ -459,7 +459,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
+definePageMeta({
+  middleware: 'auth',
+  roles: 'Admin' // Solo administradores pueden acceder
+});
 // SEO and Meta
 useHead({
   title: 'HogarSeguro - Mis Servicios',
