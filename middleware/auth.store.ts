@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, useCookie } from '#imports';
 
 interface User {
   id_usuario: number;
@@ -30,27 +30,21 @@ interface ApiResponse<T = any> {
 export const useAuthStore = defineStore('auth', () => {
   // Estado
   const user = ref<User | null>(null);
-  const token = ref(process.client ? localStorage.getItem('token') : null);
+  const token = useCookie('token');
   const isAuthenticated = computed(() => !!token.value);
 
   // Acciones
   const setUser = (userData: User | null) => {
     user.value = userData;
-    // Si se está eliminando el usuario, limpiar también del localStorage
+    // Si se está eliminando el usuario, limpiar también las cookies
     if (!userData && process.client) {
-      localStorage.removeItem('user');
+      useCookie('user').value = null;
     }
   };
 
   const setToken = (newToken: string | null) => {
     token.value = newToken;
-    if (process.client) {
-      if (newToken) {
-        localStorage.setItem('token', newToken);
-      } else {
-        localStorage.removeItem('token');
-      }
-    }
+    // La cookie se manejará automáticamente por el navegador
   };
 
   const login = async (credentials: LoginCredentials) => {
@@ -82,10 +76,8 @@ export const useAuthStore = defineStore('auth', () => {
           console.log('Usuario autenticado:', userData);
           setUser(userData);
           
-          // Guardar el usuario en localStorage para persistencia
-          if (process.client) {
-            localStorage.setItem('user', JSON.stringify(userData));
-          }
+          // Guardar el usuario en una cookie para persistencia
+          useCookie('user').value = JSON.stringify(userData);
           
           return { success: true, user: userData };
         }
@@ -109,26 +101,23 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = () => {
     setToken(null);
     user.value = null;
-    if (process.client) {
-      localStorage.removeItem('token');
-    }
-    navigateTo('/login');
+    // Limpiar cookies
+    useCookie('user').value = null;
+    navigateTo('/');
   };
 
   const checkAuth = async () => {
     if (!token.value) {
-      // Intentar cargar el usuario desde localStorage si hay token
-      if (process.client) {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          try {
-            const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
-            return true;
-          } catch (e) {
-            console.error('Error al parsear usuario guardado:', e);
-            localStorage.removeItem('user');
-          }
+      // Intentar cargar el usuario desde las cookies
+      const storedUser = useCookie('user').value;
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          return true;
+        } catch (e) {
+          console.error('Error al parsear usuario guardado:', e);
+          useCookie('user').value = null;
         }
       }
       return false;
@@ -151,10 +140,8 @@ export const useAuthStore = defineStore('auth', () => {
         
         setUser(userData);
         
-        // Actualizar el usuario en localStorage
-        if (process.client) {
-          localStorage.setItem('user', JSON.stringify(userData));
-        }
+        // Actualizar el usuario en las cookies
+        useCookie('user').value = JSON.stringify(userData);
         
         return true;
       }

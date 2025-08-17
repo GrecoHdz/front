@@ -4,7 +4,7 @@ import { useAuthStore } from './auth.store';
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const auth = useAuthStore();
-  const token = process.client ? localStorage.getItem('token') : useCookie('token').value;
+  const token = useCookie('token').value;
   
   // Lista de rutas públicas (en minúsculas para comparación)
   const publicPaths = ['/','/acceso-denegado'];
@@ -83,21 +83,19 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
   
-  // Si hay token, verificar si está expirado (solo en cliente)
-  if (process.client) {
+  // Si hay token, verificar si está expirado
+  if (token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const exp = payload.exp * 1000; // Convertir a milisegundos
       
       if (Date.now() >= exp) {
-        localStorage.removeItem('token');
         auth.logout();
         return navigateTo('/');
       }
     } catch (error) {
       console.error('Error al verificar el token:', error);
       auth.logout();
-      localStorage.removeItem('token');
       return navigateTo('/');
     }
   }

@@ -376,7 +376,6 @@
                 @input="form.telefono = form.telefono.replace(/[^0-9+\s-]/g, ''); formErrors.telefono = ''"
                 @keydown="preventLetterInput"
               />
-              <p v-if="formErrors.telefono" class="mt-1 text-sm text-red-500">{{ formErrors.telefono }}</p>
             </div>
 
             <div>
@@ -394,6 +393,7 @@
                 @input="form.identidad = form.identidad.replace(/\D/g, ''); formErrors.identidad = ''"
                 @keydown="preventLetterInput"
                 maxlength="15"
+                minlength="13"
               />
               <p v-if="formErrors.identidad" class="mt-1 text-sm text-red-500">{{ formErrors.identidad }}</p>
             </div>
@@ -506,10 +506,10 @@ const validateForm = () => {
       errors.telefono = 'Ingresa un número de teléfono válido (ej: +504 9999-9999)'
     }
     
-    // Validar número de identidad (15 dígitos)
-    const identidadRegex = /^\d{15}$/
+    // Validar número de identidad (13 dígitos)
+    const identidadRegex = /^\d{13}$/
     if (!identidadRegex.test(form.value.identidad)) {
-      errors.identidad = 'El número de identidad debe tener 15 dígitos'
+      errors.identidad = 'El número de identidad debe tener 13 dígitos'
     }
   }
   
@@ -683,116 +683,223 @@ const getIconBg = (index) => {
 const authStore = useAuthStore()
 
 const handleAuth = async () => {
+  // Resetear estado
+  authStatus.value = ''
+  formErrors.value = {}
+  
+  // Validar formulario
+  if (!validateForm()) {
+    showToast('Por favor completa correctamente todos los campos', 'error')
+    return
+  }
+  
+  // Validar formato de identidad (min 13 dígitos max 15 dígitos)
+  if (form.value.identidad && !/^\d{13,15}$/.test(form.value.identidad)) {
+    showToast('El número de identidad debe tener entre 13 y 15 dígitos', 'error')
+    return
+  }
+  
+  isLoading.value = true
+  
   try {
-    // Resetear estado
-    authStatus.value = ''
-    formErrors.value = {}
-    
-    // Validar formulario
-    if (!validateForm()) {
-      showToast('Por favor completa correctamente todos los campos', 'error')
-      return
-    }
-    
-    isLoading.value = true
-    
     if (isLogin.value) {
-      // Usar el store de autenticación para el login
-      const loginResult = await authStore.login({
-        identidad: form.value.identidad,
-        password: form.value.password
-      });
-      
-      if (loginResult?.success) {
-        // Mostrar estado de éxito en el spinner
-        authStatus.value = 'success';
+      // Lógica de login
+      try {
+        // Usar el store de autenticación para el login
+        const loginResult = await authStore.login({
+          identidad: form.value.identidad,
+          password: form.value.password
+        });
         
-        // Esperar para mostrar el estado de éxito
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Cerrar modal y redirigir
-        showLoginModal.value = false;
-        showSuccess.value = true;
-        
-        // Redirigir al dashboard según el rol
-        const userRole = authStore.userRole;
-        if (userRole === 'admin') {
-          navigateTo('/admin/DashboardAdmin');
-        } else if (userRole === 'tecnico') {
-          navigateTo('/tecnico/DashboardTecnico');
+        if (loginResult?.success) {
+          // Mostrar estado de éxito en el spinner
+          authStatus.value = 'success';
+          
+          // Esperar para mostrar el estado de éxito
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          // Cerrar modal y redirigir
+          showLoginModal.value = false;
+          showSuccess.value = true;
+          
+          // Redirigir al dashboard según el rol
+          const userRole = authStore.userRole;
+          if (userRole === 'admin') {
+            navigateTo('/admin/DashboardAdmin');
+          } else if (userRole === 'tecnico') {
+            navigateTo('/tecnico/DashboardTecnico');
+          } else {
+            navigateTo('/cliente/DashboardCliente');
+          }
         } else {
-          navigateTo('/cliente/DashboardCliente');
+          throw new Error(loginResult?.error || 'Error en las credenciales');
         }
-      } else {
-        throw new Error('Error en las credenciales');
+      } catch (loginError) {
+        console.error('Error en login:', loginError);
+        authStatus.value = 'error';
+        const errorMessage = loginError.message || 'Error al iniciar sesión. Verifica tus credenciales.';
+        showToast(errorMessage, 'error');
+        setTimeout(() => {
+          isLoading.value = false;
+          authStatus.value = '';
+        }, 3000);
+        return;
       }
     } else {
-      // Llamada al endpoint de registro
-      const response = await fetch(`${apiBase}/usuarios`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre: form.value.nombre,
-          identidad: form.value.identidad,
-          email: form.value.email,
-          telefono: form.value.telefono,
-          password_hash: form.value.password
-        })
-      });
-      
-      const data = await response.json();
-      console.log('Respuesta del registro:', data);
-      
-      if (!response.ok) {
-        const error = new Error(data.message || 'Error en el registro');
-        error.response = response;
+      // Lógica de registro
+      try {
+        const response = await fetch(`${apiBase}/usuarios`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nombre: form.value.nombre,
+            identidad: form.value.identidad,
+            email: form.value.email,
+            telefono: form.value.telefono,
+            password_hash: form.value.password
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          // Si el servidor devuelve un mensaje específico, usarlo
+          const errorMessage = data.message || 'Error en el registro';
+          const error = new Error(errorMessage);
+          error.response = response;
+          error.data = data;
+          error.statusCode = response.status;
+          
+          // Si hay un campo específico con error, resaltarlo en el formulario
+          if (data.field) {
+            formErrors.value[data.field] = errorMessage;
+          }
+          
+          throw error;
+        }
+        
+        // Si el registro fue exitoso
+        showToast('¡Registro exitoso! Por favor inicia sesión.', 'success');
+        
+        // Cambiar a pestaña de login
+        isLogin.value = true;
+        
+        // Limpiar el formulario
+        form.value = {
+          nombre: '',
+          email: '',
+          telefono: '',
+          identidad: '',
+          password: ''
+        };
+      } catch (error) {
+        // Si hay un error en la petición o en el parseo de la respuesta
+        console.error('Error en la petición de registro:', error);
+        
+        // Si hay una respuesta del servidor, extraer el mensaje de error
+        if (error.response) {
+          // Si el servidor ya proporcionó un mensaje de error, usarlo
+          if (error.data?.message) {
+            const serverError = new Error(error.data.message);
+            serverError.response = error.response;
+            serverError.data = error.data;
+            serverError.statusCode = error.response.status;
+            throw serverError;
+          }
+          
+          // Para compatibilidad con respuestas antiguas
+          const serverError = new Error(error.data?.message || 'Error en el servidor');
+          serverError.response = error.response;
+          serverError.data = error.data;
+          serverError.statusCode = error.response.status;
+          
+          // Manejar específicamente errores de duplicado
+          if (error.data?.code === 'ER_DUP_ENTRY' || 
+              (error.data?.sqlMessage && error.data.sqlMessage.includes('Duplicate entry'))) {
+            
+            if (error.data.sqlMessage?.includes('usuario.identidad') || 
+                error.data.sqlMessage?.includes("for key 'usuario.identidad'")) {
+              serverError.message = 'Este número de identidad ya está registrado';
+              serverError.statusCode = 409;
+            } 
+            else if (error.data.sqlMessage?.includes('usuario.email') || 
+                    error.data.sqlMessage?.includes("for key 'usuario.email'")) {
+              serverError.message = 'Este correo electrónico ya está en uso';
+              serverError.statusCode = 409;
+            }
+            else if (error.data.sqlMessage?.includes('usuario.telefono') || 
+                    error.data.sqlMessage?.includes("for key 'usuario.telefono'")) {
+              serverError.message = 'Este número de teléfono ya está registrado';
+              serverError.statusCode = 409;
+            }
+          }
+          
+          throw serverError;
+        }
+        
+        // Si no hay respuesta del servidor, lanzar error de conexión
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+          const networkError = new Error('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
+          networkError.isNetworkError = true;
+          throw networkError;
+        }
+        
+        // Para cualquier otro error, lanzarlo de nuevo
         throw error;
       }
-      
-      // Para registro, solo mostrar toast
-      showToast('¡Registro exitoso! Por favor inicia sesión.', 'success');
-      
-      // Cambiar a pestaña de login
-      isLogin.value = true;
-      
-      // Limpiar el formulario
-      form.value = {
-        nombre: '',
-        email: '',
-        telefono: '',
-        identidad: '',
-        password: ''
-      };
-      
-      // Cerrar el loading
-      isLoading.value = false;
     }
-    
   } catch (error) {
-    console.error('Error en la autenticación:', error);
+    console.error('Error en la autenticación/registro:', error);
     
-    let errorMessage = 'Error de conexión con el servidor. ';
-    
-    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-      errorMessage += 'No se pudo conectar con el servidor. ';
-      errorMessage += 'Por favor verifica que el servidor esté en ejecución y accesible en ' + apiBase;
+    // Si es un error de registro
+    if (!isLogin.value) {
+      let userFriendlyMessage = error.message || 'Error al procesar la solicitud';
+      
+      // Si es un error de red
+      if (error.isNetworkError) {
+        userFriendlyMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+      }
+      // Si hay un código de estado de error
+      else if (error.statusCode === 409) {
+        // Usar el mensaje específico del error de duplicado
+        userFriendlyMessage = error.message;
+        
+        // Resaltar el campo con error en el formulario
+        if (error.data?.field) {
+          formErrors.value[error.data.field] = error.message;
+        }
+      }
+      // Error de validación del servidor
+      else if (error.response?.status === 400) {
+        userFriendlyMessage = error.message || 'Datos de registro inválidos';
+        
+        // Si hay un campo específico con error, resaltarlo
+        if (error.data?.field) {
+          formErrors.value[error.data.field] = userFriendlyMessage;
+        }
+      }
+      // Error de servidor
+      else if (error.response?.status >= 500) {
+        userFriendlyMessage = 'Error en el servidor. Por favor, inténtalo más tarde.';
+      }
+      
+      // Mostrar el mensaje de error
+      showToast(userFriendlyMessage, 'error');
+      console.error('Error en el registro:', error);
     } else {
-      errorMessage = error.message || (isLogin.value ? 'Error al iniciar sesión' : 'Error al registrarse');
-    }
-    
-    console.error('Detalles del error:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    });
-    
-    if (isLogin.value) {
       // Para login, mostrar error en el spinner con el mensaje del backend
       authStatus.value = 'error';
-      // Usar el mensaje del error si está disponible
-      const errorMessage = error.response?.data?.message || error.message || 'Error al iniciar sesión';
+      let errorMessage = error.message || 'Error al iniciar sesión';
+      
+      // Mensajes más amigables para errores comunes de login
+      if (error.message && (error.message.includes('credenciales') || error.message.includes('Credenciales Incorrectas'))) {
+        errorMessage = 'Usuario o contraseña incorrectos';
+      } else if (error.message && error.message.includes('Failed to fetch')) {
+        errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+      }
+      
       // Actualizar el mensaje del toast pero mantenerlo oculto
       toast.value = {
         ...toast.value,
@@ -800,16 +907,13 @@ const handleAuth = async () => {
         type: 'error',
         show: false // Importante: mantener oculto el toast
       };
-      // Resetear después de 3 segundos
-      setTimeout(() => {
-        isLoading.value = false;
-        authStatus.value = '';
-      }, 3000);
-    } else {
-      // Para registro, mostrar toast de error
-      showToast(errorMessage, 'error');
-      isLoading.value = false;
     }
+    
+    // Resetear después de 3 segundos
+    setTimeout(() => {
+      isLoading.value = false;
+      authStatus.value = '';
+    }, 3000);
   } finally {
     // Asegurarse de que el loading se desactive
     if (authStatus.value !== 'success') {
