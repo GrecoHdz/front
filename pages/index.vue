@@ -344,7 +344,6 @@
                 @input="form.nombre = form.nombre.replace(/[0-9]/g, ''); formErrors.nombre = ''"
                 @keydown="preventNumberInput"
               />
-              <p v-if="formErrors.nombre" class="mt-1 text-sm text-red-500">{{ formErrors.nombre }}</p>
             </div>
 
             <div v-if="!isLogin">
@@ -395,7 +394,6 @@
                 maxlength="15"
                 minlength="13"
               />
-              <p v-if="formErrors.identidad" class="mt-1 text-sm text-red-500">{{ formErrors.identidad }}</p>
             </div>
 
             <div>

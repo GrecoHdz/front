@@ -107,22 +107,41 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const checkAuth = async () => {
+    // Si no hay token, verificar si hay un usuario en las cookies
     if (!token.value) {
-      // Intentar cargar el usuario desde las cookies
       const storedUser = useCookie('user').value;
       if (storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
+          
+          // Verificar si el token está a punto de expirar (menos de 5 minutos)
+          if (token.value) {
+            try {
+              const payload = JSON.parse(atob(token.value.split('.')[1]));
+              const exp = payload.exp * 1000;
+              const now = Date.now();
+              
+              // Si el token expira en menos de 5 minutos, intentar renovarlo
+              if (exp - now < 5 * 60 * 1000) {
+                return await refreshToken();
+              }
+            } catch (e) {
+              console.error('Error al verificar expiración del token:', e);
+            }
+          }
+          
           return true;
         } catch (e) {
           console.error('Error al parsear usuario guardado:', e);
           useCookie('user').value = null;
+          return false;
         }
       }
       return false;
     }
     
+    // Si hay token, verificar con el servidor
     try {
       const config = useRuntimeConfig();
       const userData = await $fetch('/auth/me', {
@@ -145,11 +164,63 @@ export const useAuthStore = defineStore('auth', () => {
         
         return true;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al verificar autenticación:', error);
+      
+      // Si el token es inválido o ha expirado, intentar renovarlo
+      if (error.statusCode === 401) {
+        return await refreshToken();
+      }
+      
       // Limpiar datos de autenticación inválidos
       setToken(null);
       setUser(null);
+    }
+    
+    return false;
+  };
+  
+  // Función para renovar el token de acceso
+  const refreshToken = async () => {
+    try {
+      const config = useRuntimeConfig();
+      const refreshTokenCookie = useCookie('refreshToken');
+      
+      if (!refreshTokenCookie.value) {
+        throw new Error('No hay refresh token disponible');
+      }
+      
+      const response = await $fetch('/auth/refresh-token', {
+        method: 'POST',
+        baseURL: config.public.apiBase,
+        body: {
+          refreshToken: refreshTokenCookie.value
+        }
+      }) as { token: string; user: User };
+      
+      if (response.token) {
+        setToken(response.token);
+        
+        if (response.user) {
+          // Asegurarse de que el usuario tenga el campo role
+          const userData = response.user;
+          if (!userData.role && userData.id_rol) {
+            userData.role = roleMap[userData.id_rol] || 'usuario';
+          }
+          
+          setUser(userData);
+          useCookie('user').value = JSON.stringify(userData);
+        }
+        
+        return true;
+      }
+    } catch (error) {
+      console.error('Error al renovar el token:', error);
+      // Si hay un error al renovar, limpiar todo
+      setToken(null);
+      setUser(null);
+      useCookie('refreshToken').value = null;
+      useCookie('user').value = null;
     }
     
     return false;
