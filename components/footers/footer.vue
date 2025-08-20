@@ -8,8 +8,8 @@ const auth = useAuthStore();
 onMounted(() => {
   console.log('=== DEPURACIÓN DE AUTENTICACIÓN ===');
   console.log('Usuario actual:', auth.user);
-  console.log('Rol del usuario (id_rol):', auth.user?.id_rol);
-  console.log('Rol del usuario (userRole):', auth.userRole);
+  console.log('Rol del usuario (role):', auth.user?.role);
+  console.log('Nombre del rol (rol_nombre):', auth.user?.rol_nombre);
   console.log('Es admin?', auth.hasRole('admin'));
   console.log('Es técnico?', auth.hasRole('tecnico'));
   console.log('Es usuario?', auth.hasRole('usuario'));

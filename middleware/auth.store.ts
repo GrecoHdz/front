@@ -52,9 +52,11 @@ export const useAuthStore = defineStore('auth', () => {
       const config = useRuntimeConfig();
       console.log('Iniciando login con:', credentials);
       
+      // Hacer la petición con credentials: 'include' para manejar las cookies
       const response = await $fetch('/auth/login', {
         method: 'POST',
         baseURL: config.public.apiBase,
+        credentials: 'include', // Importante para enviar/recibir cookies
         body: {
           identidad: credentials.identidad,
           password: credentials.password
@@ -71,6 +73,11 @@ export const useAuthStore = defineStore('auth', () => {
           const userData = response.user;
           if (!userData.role && userData.id_rol) {
             userData.role = roleMap[userData.id_rol] || 'usuario';
+          }
+          
+          // Asegurarse de que el rol_nombre esté definido
+          if (!userData.rol_nombre && userData.role) {
+            userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
           }
           
           console.log('Usuario autenticado:', userData);
@@ -98,12 +105,26 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-  const logout = () => {
-    setToken(null);
-    user.value = null;
-    // Limpiar cookies
-    useCookie('user').value = null;
-    navigateTo('/');
+  const logout = async () => {
+    try {
+      const config = useRuntimeConfig();
+      // Llamar al endpoint de logout en el backend
+      await $fetch('/auth/logout', {
+        method: 'POST',
+        baseURL: config.public.apiBase,
+        credentials: 'include' // Importante para manejar las cookies
+      });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    } finally {
+      // Limpiar el estado local independientemente del resultado
+      setToken(null);
+      user.value = null;
+      // Limpiar la cookie del usuario
+      useCookie('user').value = null;
+      // Redirigir al inicio
+      navigateTo('/');
+    }
   };
 
   const checkAuth = async () => {
@@ -184,18 +205,16 @@ export const useAuthStore = defineStore('auth', () => {
   const refreshToken = async () => {
     try {
       const config = useRuntimeConfig();
-      const refreshTokenCookie = useCookie('refreshToken');
       
-      if (!refreshTokenCookie.value) {
-        throw new Error('No hay refresh token disponible');
-      }
+      // No necesitamos leer manualmente el refreshToken de las cookies
+      // ya que el navegador lo enviará automáticamente con credentials: 'include'
       
       const response = await $fetch('/auth/refresh-token', {
         method: 'POST',
         baseURL: config.public.apiBase,
-        body: {
-          refreshToken: refreshTokenCookie.value
-        }
+        credentials: 'include', // Importante para enviar/recibir cookies
+        // No es necesario enviar el refreshToken en el body
+        // ya que se envía automáticamente en la cookie
       }) as { token: string; user: User };
       
       if (response.token) {
