@@ -177,6 +177,10 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/middleware/auth.store'
+
+//Autenticacion
+const auth = useAuthStore()
 
 // List of major cities in Honduras
 const hondurasCities = [

@@ -180,15 +180,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '~/stores/auth';
+import { useAuthStore } from '~/middleware/auth.store'
+
+//Autenticacion
+const auth = useAuthStore()
 
 const router = useRouter();
-const authStore = useAuthStore();
-const currentUser = ref(authStore.user);
+const currentUser = ref(auth.user);
 
 // Verificar rol de técnico
 onMounted(() => {
-  if (!authStore.isAuthenticated || authStore.user.role !== 'Tecnico') {
+  if (!auth.isAuthenticated || auth.user.role !== 'Tecnico') {
     router.push('/acceso-denegado');
   }
   fetchServices();

@@ -189,6 +189,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '~/middleware/auth.store'
+
+//Autenticacion
+const auth = useAuthStore()
 
 const router = useRouter();
 

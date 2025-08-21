@@ -132,6 +132,10 @@
 <script setup>
 import { ref } from 'vue'
 import FootersFooter from '@/components/footers/footer.vue'
+import { useAuthStore } from '~/middleware/auth.store'
+
+//Autenticacion
+const auth = useAuthStore()
 
 const activeFaq = ref(null)
 const isSubmitting = ref(false)

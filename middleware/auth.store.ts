@@ -32,6 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
   const token = useCookie('token');
   const isAuthenticated = computed(() => !!token.value);
+  const isInitialized = ref(false);
 
   // Acciones
   const setUser = (userData: User | null) => {
@@ -39,6 +40,15 @@ export const useAuthStore = defineStore('auth', () => {
     // Si se está eliminando el usuario, limpiar también las cookies
     if (!userData && process.client) {
       useCookie('user').value = null;
+      token.value = null;
+    } else if (userData) {
+      // Asegurarse de que los campos requeridos estén presentes
+      if (!userData.role && userData.id_rol) {
+        userData.role = roleMap[userData.id_rol] || 'usuario';
+      }
+      if (!userData.rol_nombre && userData.role) {
+        userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
+      }
     }
   };
 
@@ -125,6 +135,28 @@ export const useAuthStore = defineStore('auth', () => {
       // Redirigir al inicio
       navigateTo('/');
     }
+  };
+
+  // Inicializar el estado de autenticación
+  const initAuth = async () => {
+    if (isInitialized.value) return true;
+    
+    const userCookie = useCookie('user').value;
+    
+    // Si hay un token pero no hay usuario, intentar restaurar la sesión
+    if (token.value && !user.value && userCookie) {
+      try {
+        const userData = typeof userCookie === 'string' ? JSON.parse(userCookie) : userCookie;
+        setUser(userData);
+      } catch (e) {
+        console.error('Error al restaurar la sesión:', e);
+        await logout();
+        return false;
+      }
+    }
+    
+    isInitialized.value = true;
+    return !!token.value;
   };
 
   const checkAuth = async () => {
@@ -298,6 +330,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     token,
     isAuthenticated,
+    isInitialized: computed(() => isInitialized.value),
     
     // Getters
     userRole,
@@ -310,6 +343,13 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     checkAuth,
+    initAuth,
+    refreshToken,
     hasRole
   };
+
+  // Inicializar el estado al cargar el store
+  if (process.client) {
+    initAuth();
+  }
 });

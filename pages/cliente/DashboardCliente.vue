@@ -323,7 +323,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useHead, useCookie } from '#imports'
+import { useAuthStore } from '~/middleware/auth.store'
 
+//Autenticacion
+const auth = useAuthStore()
 // Obtener los datos del usuario de las cookies
 const userCookie = useCookie('user')
 const userData = ref({
