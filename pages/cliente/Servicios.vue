@@ -1,11 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- SEO Head -->
-    <Head>
-      <title>HogarSeguro - Mis Servicios</title>
-      <meta name="description" content="Historial y seguimiento de todos tus servicios de HogarSeguro" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    </Head>
+    <!-- Loading Spinner -->
+    <LoadingSpinner 
+      :loading="isLoading" 
+      :message="'Cargando Servicios...'"
+    />
+
+    <!-- Contenido principal (oculto hasta completar autenticación) -->
+    <div v-if="!isLoading">
      
      <HeadersHeaderServicios 
        :total-services="totalServices"
@@ -454,23 +456,47 @@
     </div>
     </div>
   </div>
+  </div>
 
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
-
-//Autenticacion
-const auth = useAuthStore()
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Mis Servicios',
+  title: 'HogarSeguro - Dashboard',
   meta: [
-    { name: 'description', content: 'Historial y seguimiento de todos tus servicios de HogarSeguro' },
+    { name: 'description', content: 'Panel de Servicios - Gestiona tus servicios y membresía' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
   ]
+})
+
+// Autenticación
+const auth = useAuthStore()
+const router = useRouter() 
+const isLoading = ref(true) 
+
+// Datos del usuario
+const userCookie = useCookie('user')
+const userData = ref({
+  id: null,
+  identidad: '',
+  nombre: 'Invitado',
+  email: '',
+  role: '',
+  rol_nombre: 'Invitado',
+  // Mantener compatibilidad con el resto del código
+  name: 'Invitado',
+  ...(userCookie.value || {})
+})
+
+// Verificar autenticación al cargar el componente
+onMounted(async () => { 
+    isLoading.value = false 
 })
 
 // Reactive data
@@ -763,19 +789,6 @@ const getTimeAgo = (dateString) => {
   return `Hace ${Math.floor(diffInDays / 7)} semanas`
 }
 
-// Dark mode support
-onMounted(() => {
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.classList.add('dark')
-  }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-    if (event.matches) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  })
-})
 </script>
 
 <style scoped>

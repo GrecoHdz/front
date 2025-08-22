@@ -1,5 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
+      <!-- Loading Spinner -->
+    <LoadingSpinner 
+      :loading="isLoading" 
+      :message="'Cargando Perfil...'"
+    />
+
+    <!-- Contenido principal (oculto hasta completar autenticación) -->
+    <div v-if="!isLoading">
     <HeadersHeaderPerfil/>
 
     <!-- Main Content -->
@@ -171,16 +179,49 @@
       </div>
     </div> 
     <FootersFooter />  
+    </div>
   </div>
+  
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
-//Autenticacion
+// SEO and Meta
+useHead({
+  title: 'HogarSeguro - Perfil',
+  meta: [
+    { name: 'description', content: 'Perfil de usuario de HogarSeguro - Gestiona tus servicios y membresía' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+  ]
+})
+
+// Autenticación
 const auth = useAuthStore()
+const router = useRouter() 
+const isLoading = ref(true) 
+
+// Datos del usuario
+const userCookie = useCookie('user')
+const userData = ref({
+  id: null,
+  identidad: '',
+  nombre: 'Invitado',
+  email: '',
+  role: '',
+  rol_nombre: 'Invitado',
+  // Mantener compatibilidad con el resto del código
+  name: 'Invitado',
+  ...(userCookie.value || {})
+})
+
+// Verificar autenticación al cargar el componente
+onMounted(async () => { 
+    isLoading.value = false 
+})
 
 // List of major cities in Honduras
 const hondurasCities = [
@@ -346,16 +387,7 @@ watch(darkMode, (newVal) => {
   // Save preference to localStorage
   localStorage.setItem('darkMode', newVal)
 })
-
-// Initialize dark mode from localStorage or system preference
-onMounted(() => {
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    darkMode.value = savedDarkMode === 'true'
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    darkMode.value = true
-  }
-})
+ 
 </script>
 
 <style scoped>

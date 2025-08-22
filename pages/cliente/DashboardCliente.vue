@@ -1,11 +1,17 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- SEO Head -->
+    <!-- Loading Spinner -->
+    <LoadingSpinner 
+      :loading="isLoading" 
+      :message="'Cargando Dashboard...'"
+    />
 
-    <HeadersHeaderDashboard />
+    <!-- Contenido principal (oculto hasta completar autenticación) -->
+    <div v-if="!isLoading">
+      <HeadersHeaderDashboard />
 
-    <!-- Content Container with max-w-2xl -->
-    <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative">
+      <!-- Content Container with max-w-2xl -->
+      <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative">
       <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
       <div class="pb-24">
         <!-- Main Content -->
@@ -299,35 +305,49 @@
       </section>
       </main>
       </div> <!-- Close pb-24 div -->
-    </div> <!-- Close max-w-2xl container -->
+      </div> <!-- Close max-w-2xl container -->
 
-    <FootersFooter />
+      <FootersFooter />
 
-    <!-- Success Messages -->
-    <ClientOnly>
-      <div v-if="notification.show" class="fixed top-6 left-6 right-6 z-50">
-        <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 rounded-2xl shadow-2xl">
-          <div class="flex items-center space-x-3">
-            <div class="text-2xl">✅</div>
-            <div>
-              <p class="font-black text-lg">{{ notification.title }}</p>
-              <p class="text-green-100 text-sm">{{ notification.description }}</p>
+      <!-- Success Messages -->
+      <ClientOnly>
+        <div v-if="notification.show" class="fixed top-6 left-6 right-6 z-50">
+          <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 rounded-2xl shadow-2xl">
+            <div class="flex items-center space-x-3">
+              <div class="text-2xl">✅</div>
+              <div>
+                <p class="font-black text-lg">{{ notification.title }}</p>
+                <p class="text-green-100 text-sm">{{ notification.description }}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </ClientOnly>
+      </ClientOnly>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useHead, useCookie } from '#imports'
+import { ref, computed, onMounted, onBeforeMount } from 'vue'
+import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
-//Autenticacion
+// SEO and Meta
+useHead({
+  title: 'HogarSeguro - Dashboard',
+  meta: [
+    { name: 'description', content: 'Panel de control de HogarSeguro - Gestiona tus servicios y membresía' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+  ]
+})
+
+// Autenticación
 const auth = useAuthStore()
-// Obtener los datos del usuario de las cookies
+const router = useRouter() 
+const isLoading = ref(true) 
+
+// Datos del usuario
 const userCookie = useCookie('user')
 const userData = ref({
   id: null,
@@ -341,6 +361,11 @@ const userData = ref({
   ...(userCookie.value || {})
 })
 
+// Verificar autenticación al cargar el componente
+onMounted(async () => { 
+    isLoading.value = false 
+})
+
 // Asegurar que name siempre tenga un valor
 userData.value.name = userData.value.nombre || userData.value.name
 
@@ -351,23 +376,7 @@ const shortName = computed(() => {
   return names.length > 2 ? `${names[0]} ${names[1]}` : userData.value.nombre
 })
 
-// Configuración del head
-useHead({
-  title: 'HogarSeguro - Dashboard',
-  meta: [
-    { name: 'description', content: 'Panel de control de HogarSeguro - Gestiona tus servicios y membresía' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
-  ]
-})
 
-// SEO and Meta
-useHead({
-  title: 'HogarSeguro - Dashboard',
-  meta: [
-    { name: 'description', content: 'Panel de control de HogarSeguro - Gestiona tus servicios y membresía' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
-  ]
-})
 
 
 const statsData = ref({

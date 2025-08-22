@@ -1,5 +1,14 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
+
+      <!-- Loading Spinner -->
+    <LoadingSpinner 
+      :loading="isLoading" 
+      :message="'Verificando autenticación...'"
+    />
+
+    <!-- Contenido principal (oculto hasta completar autenticación) -->
+    <div v-if="!isLoading">
     <HeadersHeaderSoporte/>
 
     <!-- Main Content -->
@@ -126,16 +135,49 @@
     </div>
     
     <FootersFooter />
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import FootersFooter from '@/components/footers/footer.vue'
+import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
-//Autenticacion
+// SEO and Meta
+useHead({
+  title: 'HogarSeguro - Dashboard',
+  meta: [
+    { name: 'description', content: 'Panel de control de HogarSeguro - Gestiona tus servicios y membresía' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+  ]
+})
+
+// Autenticación
 const auth = useAuthStore()
+const router = useRouter() 
+const isLoading = ref(true) 
+
+// Datos del usuario
+const userCookie = useCookie('user')
+const userData = ref({
+  id: null,
+  identidad: '',
+  nombre: 'Invitado',
+  email: '',
+  role: '',
+  rol_nombre: 'Invitado',
+  // Mantener compatibilidad con el resto del código
+  name: 'Invitado',
+  ...(userCookie.value || {})
+})
+
+// Verificar autenticación al cargar el componente
+onMounted(async () => { 
+    isLoading.value = false 
+}) 
 
 const activeFaq = ref(null)
 const isSubmitting = ref(false)

@@ -66,20 +66,20 @@ export default defineNuxtRouteMiddleware(async (to) => {
   
   // Si la ruta no es pública y el usuario no está autenticado, redirigir al login
   if (!isAuthenticated) {
-    return navigateTo('/');
+    return navigateTo('/acceso-denegado', { replace: true, external: true });
   }
   
   // Verificar roles según la ruta
   if (to.path.startsWith('/admin') && !auth.hasRole('admin')) {
-    return navigateTo('/acceso-denegado');
+    return navigateTo('/acceso-denegado', { replace: true, external: true });
   }
   
   if (to.path.startsWith('/tecnico') && !(auth.hasRole('tecnico') || auth.hasRole('admin'))) {
-    return navigateTo('/acceso-denegado');
+    return navigateTo('/acceso-denegado', { replace: true, external: true });
   }
   
   if (to.path.startsWith('/cliente') && !auth.hasRole(['usuario', 'tecnico', 'admin'])) {
-    return navigateTo('/acceso-denegado');
+    return navigateTo('/acceso-denegado', { replace: true, external: true });
   }
   
   // Verificar roles personalizados en meta si existen
@@ -88,7 +88,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const hasPermission = auth.hasRole(requiredRoles);
     
     if (!hasPermission) {
-      return navigateTo('/acceso-denegado');
+      return navigateTo('/acceso-denegado', { replace: true, external: true });
     }
   }
   
