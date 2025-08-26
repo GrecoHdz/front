@@ -59,7 +59,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.path === '/') {
     // Si el usuario está autenticado, redirigir al dashboard correspondiente
     if (isAuthenticated) {
-      safeRedirect(getDashboardPath(auth));
+      return navigateTo(getDashboardPath(auth));
     }
     return;
   }
