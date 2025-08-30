@@ -95,7 +95,6 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
   const login = async (credentials: LoginCredentials) => {
     try {
       const config = useRuntimeConfig();
-      console.log('Iniciando login con:', credentials);
       
       // Hacer la petición con credentials: 'include' para manejar las cookies
       const response = await $fetch('/auth/login', {
@@ -107,8 +106,6 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
           password: credentials.password
         }
       }) as { token: string; user: any; message?: string };
-      
-      console.log('Respuesta del servidor:', response);
       
       if (response?.token) {
         setToken(response.token);
@@ -124,8 +121,7 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
           if (!userData.rol_nombre && userData.role) {
             userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
           }
-          
-          console.log('Usuario autenticado:', userData);
+           
           setUser(userData);
           
           return { success: true, user: userData };
@@ -171,30 +167,66 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
 
 // --- INIT AUTH 
 const initAuth = async (): Promise<boolean> => {
-  if (isInitialized.value) return isAuthenticated.value;
-  
-  console.log('🔐 Inicializando autenticación...');
+  if (isInitialized.value) return isAuthenticated.value; 
   
   // 1. Restaurar usuario desde cookie si existe
   if (userCookie.value) {
     try {
-      const userData = JSON.parse(userCookie.value);
-      setUser(userData);
-      console.log('👤 Usuario restaurado desde la cookie');
+      // Verificar si ya es un objeto
+      const userData = typeof userCookie.value === 'string' 
+        ? JSON.parse(userCookie.value) 
+        : userCookie.value;
+        
+      
+      setUser(userData); 
     } catch (e) {
-      console.error('❌ Error al parsear usuario de la cookie:', e);
+      console.error('❌ Error al procesar usuario de la cookie:', e, 'Valor de la cookie:', userCookie.value);
       userCookie.value = null;
     }
   }
   
-  // 2. Intentar restaurar sesión con el token de acceso
+  // 2. Siempre intentar con refresh token primero (no podemos verificar HTTP Only) 
+  try {
+    const refreshSuccess = await refreshToken();
+    if (refreshSuccess) {
+      isInitialized.value = true;
+      return true;
+    }
+  } catch (error) {
+    console.error('❌ Error al intentar autenticar con refresh token:', error);
+    // Continuar con el flujo normal si falla
+  }
+  
+  
+  
+  // 3. Si el refresh token falla, intentar con el token de acceso (si existe)
   if (token.value) {
-    console.log('🔑 Token de acceso encontrado, verificando validez...');
     try {
-      const tokenValid = await checkAuth();
-      if (tokenValid) {
+      // Validar el token de acceso directamente sin intentar refresh
+      const config = useRuntimeConfig();
+      const response = await $fetch('/auth/me', {
+        baseURL: config.public.apiBase,
+        headers: { 'Authorization': `Bearer ${token.value}` },
+        retry: 0,
+        timeout: 10000,
+        credentials: 'include'
+      }) as any;
+
+      if (response && (response.id_usuario || response.id)) {
+        // Normalizar datos del usuario
+        const userData = { ...response };
+        if (!userData.id_usuario && userData.id) {
+          userData.id_usuario = userData.id;
+        }
+        if (!userData.role && userData.id_rol) {
+          userData.role = roleMap[userData.id_rol] || 'usuario';
+        }
+        if (!userData.rol_nombre && userData.role) {
+          userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
+        }
+
+        setUser(userData);
         isInitialized.value = true;
-        console.log('✅ Token válido, usuario autenticado');
         return true;
       }
     } catch (error) {
@@ -202,114 +234,106 @@ const initAuth = async (): Promise<boolean> => {
     }
   }
   
-  // 3. Si el token no es válido o no existe, intentar con refresh token
-  console.log('🔄 Intentando renovar sesión con refresh token...');
-  try {
-    const refreshSuccess = await refreshToken();
-    if (refreshSuccess) {
-      isInitialized.value = true;
-      console.log('✅ Sesión restaurada exitosamente usando refresh token');
-      return true;
-    }
-  } catch (error) {
-    console.error('❌ Error al intentar renovar con refresh token:', error);
-  }
-  
-  // 4. Si todo falla, limpiar la sesión
-  console.log('⚠️ No se pudo restaurar la sesión, cerrando...');
-  await logout();
+  // 4. Si ambos métodos fallan, limpiar la sesión
   isInitialized.value = true;
+  await logout();
   return false;
 };
 
 // --- CHECK AUTH 
 const checkAuth = async (): Promise<boolean> => {
-  console.log('🔍 Verificando autenticación...');
-
-  if (!token.value) {
-    console.log('🔑 No hay token de acceso, intentando con refresh token...');
-    return await refreshToken();
-  }
-
-  // Validación local de expiración
-  try {
-    const payload = JSON.parse(atob(token.value.split('.')[1]));
-    const exp = payload.exp * 1000;
-    const now = Date.now();
-    
-    // Si ya expiró o está a punto de expirar (en menos de 1 minuto)
-    if (now >= exp - 60000) {
-      console.log('⏳ Token expirado o próximo a expirar, intentando refresh...');
-      return await refreshToken();
+  
+  // 1. Si hay un token de acceso, verificar su estado
+  if (token.value) {
+    try {
+      const payload = JSON.parse(atob(token.value.split('.')[1]));
+      const exp = payload.exp * 1000;
+      const now = Date.now();
+      const expiresIn = exp - now;
+      
+      // Intentar obtener la información del usuario para forzar la verificación del refresh token
+      const config = useRuntimeConfig();
+      try {
+        const userInfo = await $fetch('/auth/me', {
+          baseURL: config.public.apiBase,
+          headers: { 'Authorization': `Bearer ${token.value}` },
+          credentials: 'include',
+          retry: 0,
+          timeout: 10000
+        });
+        
+        
+        // Si el token es válido por al menos 5 minutos, está bien
+        if (expiresIn > 300000) {
+          return true;
+        }
+        
+      } catch (error) {
+        console.error('❌ Error al verificar el refresh token:', error);
+        const refreshed = await refreshToken();
+        if (refreshed) return true;
+      }
+      
+      // Si el token está por expirar (menos de 5 minutos), intentar renovarlo
+      if (expiresIn > 0) { 
+        const refreshed = await refreshToken();
+        if (refreshed) {
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error('❌ Error al verificar token:', e);
     }
-  } catch (e) {
-    console.error('❌ Error al parsear token:', e);
+  }
+  
+  // 2. Si no hay token o no se pudo renovar, intentar con refresh token 
+  const refreshed = await refreshToken();
+  
+  // 3. Si el refresh falló, limpiar todo el estado de autenticación
+  if (!refreshed) {
+    await logout();
     return false;
   }
+  
+  return true;
+};
 
-  // Confirmar token con backend
+// Función para obtener la fecha de expiración del refresh token
+const getRefreshTokenExpiration = async (): Promise<number | null> => {
   try {
     const config = useRuntimeConfig();
-    console.log('🔐 Validando token con el backend...');
-    
     const response = await $fetch('/auth/me', {
       baseURL: config.public.apiBase,
       headers: { 'Authorization': `Bearer ${token.value}` },
+      credentials: 'include',
+      // No lanzar error para manejar la respuesta manualmente
       retry: 0,
-      timeout: 10000,
-      credentials: 'include'
+      timeout: 10000
     }) as any;
 
-    console.log('🔍 Respuesta de /auth/me:', response);
-
-    if (response && (response.id_usuario || response.id)) {
-      // Normalizar datos del usuario
-      const userData = { ...response };
-      if (!userData.id_usuario && userData.id) {
-        userData.id_usuario = userData.id;
-      }
-      if (!userData.role && userData.id_rol) {
-        userData.role = roleMap[userData.id_rol] || 'usuario';
-      }
-      if (!userData.rol_nombre && userData.role) {
-        userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
-      }
-
-      setUser(userData);
-      console.log(`✅ Usuario autenticado: ${userData.nombre || userData.identidad}`);
-      return true;
+    // Si el backend devuelve la fecha de expiración del refresh token
+    if (response?.refreshTokenExpiration) {
+      return new Date(response.refreshTokenExpiration).getTime();
     }
-
-    console.warn('⚠️ /auth/me no devolvió un usuario válido');
-    return false;
-    
-  } catch (error: any) {
-    const status = error?.status || error?.statusCode;
-    console.error(`❌ Error al verificar token (${status}):`, error);
-    
-    // Si el error es 401, intentar refrescar el token
-    if (status === 401) {
-      console.log('🔄 Token inválido, intentando refresh...');
-      return await refreshToken();
-    }
-    
-    return false;
+  } catch (error) {
+    console.error('❌ Error al verificar expiración del refresh token:', error);
   }
+  return null;
 };
 
 // --- REFRESH TOKEN 
 const refreshToken = async (): Promise<boolean> => {
   // Si ya hay una operación de refresh en curso, devolvemos esa promesa
-  if (_refreshPromise) {
-    console.log('⏳ Operación de refresh ya en curso, esperando resultado...');
+  if (_refreshPromise) { 
     return _refreshPromise;
   }
-
-  console.log('🔄 Intentando renovar token de acceso...');
-
+  
   _refreshPromise = (async () => {
     try {
       const config = useRuntimeConfig();
+      
+      // No verificamos la existencia del refresh token ya que es HTTP Only
+      // Simplemente intentamos la petición y manejamos la respuesta
       
       const response = await $fetch('/auth/refresh-token', {
         method: 'POST',
@@ -323,12 +347,9 @@ const refreshToken = async (): Promise<boolean> => {
         timeout: 10000
       }) as any;
 
-      console.log('🔁 Respuesta de renovación de token:', response);
-
       // Si recibimos un nuevo token
       if (response?.token) {
         setToken(response.token);
-        console.log('✅ Token de acceso renovado exitosamente');
         
         // Si también recibimos datos del usuario, actualizarlos
         if (response.user) {
@@ -349,22 +370,20 @@ const refreshToken = async (): Promise<boolean> => {
           }
           
           setUser(userData);
-          console.log('👤 Datos de usuario actualizados');
         }
         
         return true;
       }
 
-      console.error('❌ No se recibió un token válido en la respuesta');
       return false;
       
     } catch (error: any) {
       console.error('❌ Error al renovar el token:', error);
       
-      // Si hay un error 401, el refresh token es inválido o ha expirado
+      // No hacer logout aquí, solo devolver false
+      // El logout se manejará en el flujo principal si es necesario
       if (error.statusCode === 401) {
-        console.log('⚠️ El refresh token es inválido o ha expirado');
-        await logout();
+      } else {
       }
       
       return false;

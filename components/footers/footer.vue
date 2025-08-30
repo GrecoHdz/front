@@ -77,7 +77,6 @@ const navigateTo = async (path) => {
             <span class="text-xs font-bold">Servicios</span>
           </button>
           <button 
-            v-if="auth.hasRole('Admin')"
             @click="navigateTo('/cliente/Perfil')" 
             class="flex flex-col items-center space-y-1 text-blue-600">
             <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">

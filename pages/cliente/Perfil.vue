@@ -204,23 +204,32 @@ const auth = useAuthStore()
 const router = useRouter() 
 const isLoading = ref(true) 
 
-// Datos del usuario
+// Obtener datos del usuario desde el store de autenticación
+const userData = computed(() => auth.user || {})
 const userCookie = useCookie('user')
-const userData = ref({
-  id: null,
-  identidad: '',
-  nombre: 'Invitado',
-  email: '',
-  role: '',
-  rol_nombre: 'Invitado',
-  // Mantener compatibilidad con el resto del código
-  name: 'Invitado',
-  ...(userCookie.value || {})
-})
 
 // Verificar autenticación al cargar el componente
-onMounted(async () => { 
-    isLoading.value = false 
+onMounted(async () => {
+  // Esperar a que el store de autenticación se inicialice
+  await auth.initAuth()
+  
+  if (!auth.isAuthenticated) {
+    await router.push('/acceso')
+    return
+  }
+  
+  // Si hay datos en la cookie, actualizar el store
+  if (userCookie.value) {
+    auth.setUser({
+      ...userCookie.value,
+      // Mantener compatibilidad con el código existente
+      name: userCookie.value.nombre || 'Invitado',
+      id_usuario: userCookie.value.id,
+      id_rol: userCookie.value.role === 'admin' ? 2 : 1
+    })
+  }
+  
+  isLoading.value = false
 })
 
 // List of major cities in Honduras
@@ -247,23 +256,25 @@ const hondurasCities = [
   'La Paz'
 ]
 
-// User data (this would typically come from your auth store/API)
-const user = ref({
-  id_usuario: 12345,
-  id_rol: 1, // 1 = cliente, 2 = admin, etc.
-  nombre: 'Juan Pérez',
-  email: 'juan.perez@example.com',
-  telefono: '+504 9999-9999',
-  ciudad: 'Tegucigalpa',
-  fecha_registro: '2023-01-15T00:00:00.000Z',
+// Datos del usuario reactivos
+const user = computed(() => ({
+  ...userData.value,
+  // Valores por defecto para compatibilidad
+  id_usuario: userData.value.id || null,
+  id_rol: userData.value.role === 'admin' ? 2 : 1,
+  nombre: userData.value.nombre || 'Invitado',
+  email: userData.value.email || '',
+  telefono: userData.value.telefono || '',
+  ciudad: userData.value.ciudad || '',
+  fecha_registro: userData.value.fecha_registro || new Date().toISOString(),
   membership: {
     status: 'activa',
     plan: 'Premium',
-    startDate: '2023-01-15',
-    endDate: '2023-12-31',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
     progress: 65
   }
-})
+}))
 
 // Password change fields
 const currentPassword = ref('')
@@ -272,12 +283,16 @@ const confirmPassword = ref('')
 
 // Get user role name
 const userRole = computed(() => {
+  if (!userData.value.role) return 'Invitado'
+  
   const roles = {
-    1: 'Cliente',
-    2: 'Administrador',
-    3: 'Técnico'
+    'admin': 'Administrador',
+    'cliente': 'Cliente',
+    'tecnico': 'Técnico',
+    'usuario': 'Usuario'
   }
-  return roles[user.value.id_rol] || 'Usuario'
+  
+  return roles[userData.value.role.toLowerCase()] || 'Usuario'
 })
 
 // Computed properties

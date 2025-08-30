@@ -35,7 +35,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Lista de rutas públicas (en minúsculas para comparación)
   const publicPaths = [
     '/acceso-denegado', 
-    '/auth'
+    '/auth',
+    '/' // Añadir ruta de login como pública
   ];
   
   // Normalizar la ruta actual para comparación
@@ -47,39 +48,46 @@ export default defineNuxtRouteMiddleware(async (to) => {
     normalizedPath.startsWith(publicPath.toLowerCase() + '/')
   );
   
-  // Si es una ruta pública, permitir acceso
-  if (isPublicPath) {
-    return;
-  }
+  // Inicializar la autenticación (esto ya no redirige automáticamente)
+  await auth.initAuth();
   
-  // Inicializar la autenticación
-  const isAuthenticated = await auth.initAuth();
+  // Verificar autenticación
+  const isAuthenticated = await auth.checkAuth();
   
   // Si es la ruta raíz (login)
   if (to.path === '/') {
     // Si el usuario está autenticado, redirigir al dashboard correspondiente
     if (isAuthenticated) {
-      return navigateTo(getDashboardPath(auth));
+      return navigateTo(getDashboardPath(auth), { replace: true });
     }
+    return; // Permitir acceso a la página de login
+  }
+  
+  // Si es una ruta pública, permitir acceso
+  if (isPublicPath) {
     return;
   }
   
   // Si la ruta no es pública y el usuario no está autenticado, redirigir al login
   if (!isAuthenticated) {
-    return navigateTo('/acceso-denegado', { replace: true, external: true });
+    console.log(' Acceso no autorizado, redirigiendo a login...');
+    return navigateTo('/', { replace: true });
   }
   
   // Verificar roles según la ruta
   if (to.path.startsWith('/admin') && !auth.hasRole('admin')) {
-    return navigateTo('/acceso-denegado', { replace: true, external: true });
+    console.log(' Usuario no tiene permiso de administrador');
+    return navigateTo('/acceso-denegado', { replace: true });
   }
   
   if (to.path.startsWith('/tecnico') && !(auth.hasRole('tecnico') || auth.hasRole('admin'))) {
-    return navigateTo('/acceso-denegado', { replace: true, external: true });
+    console.log(' Usuario no tiene permiso de técnico');
+    return navigateTo('/acceso-denegado', { replace: true });
   }
   
   if (to.path.startsWith('/cliente') && !auth.hasRole(['usuario', 'tecnico', 'admin'])) {
-    return navigateTo('/acceso-denegado', { replace: true, external: true });
+    console.log(' Usuario no tiene permiso de cliente');
+    return navigateTo('/acceso-denegado', { replace: true });
   }
   
   // Verificar roles personalizados en meta si existen
@@ -88,10 +96,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const hasPermission = auth.hasRole(requiredRoles);
     
     if (!hasPermission) {
-      return navigateTo('/acceso-denegado', { replace: true, external: true });
+      console.log(` Usuario no tiene los roles requeridos: ${requiredRoles.join(', ')}`);
+      return navigateTo('/acceso-denegado', { replace: true });
     }
   }
   
+  console.log(' Acceso autorizado a', to.path);
   // Si llegamos aquí, el usuario está autenticado y tiene los permisos necesarios
   // No hacer nada, permitir la navegación
 });
