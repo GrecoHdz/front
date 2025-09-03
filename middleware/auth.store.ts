@@ -10,7 +10,7 @@ interface User {
   email: string;
   telefono: string;
   fecha_registro?: string;
-  role: string; // Nombre del rol en minúsculas (ej: 'admin', 'usuario', 'tecnico')
+  role: string; // Nombre del rol en minúsculas (ej: 'admin', 'usuario', 'tecnico') 
   [key: string]: any;
 }
 
@@ -32,40 +32,45 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
   const isAuthenticated = computed(() => !!tokenCookie.value);
   const isInitialized = ref(false);
-  const isLoggingOut = ref(false); // Bandera para controlar si se está cerrando sesión
-
-  // Cookie para almacenar la información del usuario
-  const userCookie = useCookie<User | null>('user', {
+ 
+  // Cookie para almacenar los datos del usuario
+  const userCookie = useCookie<string | null>('user', {
     maxAge: 60 * 60 * 24 * 7, // 7 días
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
 
-  const setUser = (userData: User | null): User | null => {
-    // Si se está eliminando el usuario, limpiar el estado y las cookies
-    if (!userData) {
-      user.value = null;
-      tokenCookie.value = null;
-      userCookie.value = null;
-      return null;
-    }
+const setUser = (userData: User | null): User | null => {
+  // Update reactive state
+  user.value = userData;
+  
+  // If removing the user, clear cookies
+  if (!userData) {
+    tokenCookie.value = null;
+    userCookie.value = null;
+    return null;  // Explicitly return null
+  }
 
-    // Asegurarse de que los campos requeridos estén presentes
-    const updatedUser: User = { 
-      ...userData,
-      // Mapear id_rol a role si es necesario
-      role: userData.role || (userData.id_rol ? roleMap[userData.id_rol] : 'usuario'),
-    };
-    
-    // Actualizar el estado reactivo
-    user.value = updatedUser;
-    
-    // Guardar en la cookie solo los datos esenciales
-    const { id_usuario, nombre, role } = updatedUser;
-    userCookie.value = { id_usuario, nombre, role } as User;
-    
-    return updatedUser; 
+  // Ensure required fields are present
+  const updatedUser: User = { ...userData };
+  
+  if (!updatedUser.role && updatedUser.id_rol) {
+    updatedUser.role = roleMap[updatedUser.id_rol];
+  }
+  
+  // Guardar solo la información necesaria en la cookie
+  const minimalUserData = {
+    id_usuario: updatedUser.id_usuario,
+    nombre: updatedUser.nombre,
+    role: updatedUser.role
   };
+  
+  // Update user cookie with minimal data
+  userCookie.value = JSON.stringify(minimalUserData);
+  
+  // Return the updated user
+  return updatedUser;
+};
 
   // Cookie para el token de acceso 
 const tokenCookie = useCookie('token', {
@@ -90,38 +95,33 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      const config = useRuntimeConfig();
+      const config = useRuntimeConfig(); 
       
       // Hacer la petición con credentials: 'include' para manejar las cookies
       const response = await $fetch('/auth/login', {
         method: 'POST',
         baseURL: config.public.apiBase,
-        credentials: 'include',
+        credentials: 'include', // Importante para enviar/recibir cookies
         body: {
           identidad: credentials.identidad,
           password: credentials.password
         }
       }) as { token: string; user: any; message?: string };
       
-      console.log('Respuesta del login:', response);
-      
-      if (response?.token && response.user) {
-        // Establecer el token y el usuario
+      if (response?.token) {
         setToken(response.token);
         
-        // setUser manejará la lógica de roles y guardado
-        const userData = {
-          ...response.user,
-          id_usuario: response.user.id_usuario
-        };
-        
-        console.log('Datos del usuario para guardar:', userData);
-        setUser(userData);
-        
-        return { 
-          success: true, 
-          user: userData 
-        };
+        if (response.user) {
+          // Asegurarse de que el usuario tenga el campo role
+          const userData = response.user;
+          if (!userData.role && userData.id_rol) {
+            userData.role = roleMap[userData.id_rol] || 'usuario';
+          }
+          
+          setUser(userData);
+          
+          return { success: true, user: userData };
+        }
       }
       
       return { 
@@ -130,16 +130,8 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
       };
       
     } catch (error: any) {
-      // No mostrar el error en consola para errores 400 (credenciales incorrectas)
-      if (error.statusCode !== 400) {
-        console.error('Error en login:', error);
-      }
-      
-      // Mensaje más amigable para el usuario
-      const errorMessage = error.statusCode === 400 
-        ? 'Usuario o contraseña incorrectos'
-        : 'Error al intentar iniciar sesión. Por favor, inténtalo de nuevo.';
-        
+      console.error('Error en login:', error);
+      const errorMessage = error.data?.message || error.message || 'Error en la autenticación';
       return { 
         success: false, 
         error: errorMessage
@@ -148,43 +140,30 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
   };
 
   const logout = async () => {
-    // 1. Marcar que estamos cerrando sesión
-    isLoggingOut.value = true;
-    
-    // 2. Guardar el token actual antes de limpiarlo
-    const currentToken = token.value;
-    
-    // 3. Limpiar el estado local
-    setToken(null);
-    user.value = null;
-    
-    // 3. Limpiar cookies locales
-    useCookie('user').value = null;
-    
     try {
-      // 4. Si teníamos un token, intentar notificar al backend
-      if (currentToken) {
-        const config = useRuntimeConfig();
-        // Usar fetch directamente en lugar de $fetch para evitar interceptores
-        await fetch(`${config.public.apiBase}/auth/logout`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${currentToken}`
-          }
-        });
-      }
+      const config = useRuntimeConfig();
+      // Llamar al endpoint de logout en el backend
+      await $fetch('/auth/logout', {
+        method: 'POST',
+        baseURL: config.public.apiBase,
+        credentials: 'include' // Importante para manejar las cookies
+      });
     } catch (error) {
-      console.warn('Advertencia durante cierre de sesión (puede ignorarse):', error);
+      console.error('Error al cerrar sesión:', error);
     } finally {
-      // 5. Redirigir al inicio
+      // Limpiar el estado local independientemente del resultado
+      setToken(null);
+      user.value = null;
+      // Limpiar la cookie del usuario
+      useCookie('user').value = null;
+      // Redirigir al inicio
       navigateTo('/');
     }
-  }
+  };
+
 // --- INIT AUTH 
-const initAuth = async (isPublicRoute: boolean = false): Promise<boolean> => {
-  if (isInitialized.value) return isAuthenticated.value; 
+const initAuth = async (): Promise<void> => {
+  if (isInitialized.value) return;
   
   // 1. Restaurar usuario desde cookie si existe
   if (userCookie.value) {
@@ -193,143 +172,177 @@ const initAuth = async (isPublicRoute: boolean = false): Promise<boolean> => {
       const userData = typeof userCookie.value === 'string' 
         ? JSON.parse(userCookie.value) 
         : userCookie.value;
-        
-      setUser(userData); 
-    } catch (e) {
-      console.error('❌ Error al procesar usuario de la cookie:', e, 'Valor de la cookie:', userCookie.value);
+      
+      // Asegurar que el rol tenga el formato correcto
+      if (userData.role && !userData.rol_nombre) {
+        userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
+      }
+      
+      setUser(userData);
+    } catch (error) {
+      console.error('Error al analizar la cookie de usuario:', error);
       userCookie.value = null;
     }
   }
   
-  // 2. No intentar refrescar el token en rutas públicas
-  if (isPublicRoute) {
-    isInitialized.value = true;
-    return isAuthenticated.value; // Retornar el estado actual sin intentar refresh
-  }
-  
-  // 3. Solo intentar refresh token si hay un token
-  if (token.value) {
-    try {
-      const refreshSuccess = await refreshToken();
-      if (refreshSuccess) {
-        isInitialized.value = true;
-        return true;
-      }
-    } catch (error) {
-      console.error('❌ Error al intentar autenticar con refresh token:', error);
-    }
-  }
-  
-  
-  
-  // 3. Si el refresh token falla, intentar con el token de acceso (si existe)
-  if (token.value) {
-    try {
-      // Validar el token de acceso directamente sin intentar refresh
-      const config = useRuntimeConfig();
-      const response = await $fetch('/auth/me', {
-        baseURL: config.public.apiBase,
-        headers: { 'Authorization': `Bearer ${token.value}` },
-        retry: 0,
-        timeout: 10000,
-        credentials: 'include'
-      }) as any;
-
-      if (response && (response.id_usuario || response.id)) {
-        // Normalizar datos del usuario
-        const userData = { ...response };
-        if (!userData.id_usuario && userData.id) {
-          userData.id_usuario = userData.id;
-        }
-        if (!userData.role && userData.id_rol) {
-          userData.role = roleMap[userData.id_rol] || 'usuario';
-        }
-        if (!userData.rol_nombre && userData.role) {
-          userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
-        }
-
-        setUser(userData);
-        isInitialized.value = true;
-        return true;
-      }
-    } catch (error) {
-      console.error('❌ Error al verificar token de acceso:', error);
-    }
-  }
-  
-  // 4. Si ambos métodos fallan, limpiar la sesión
   isInitialized.value = true;
-  await logout();
-  return false;
 };
+
+// Interfaz para la respuesta de /auth/me
+interface AuthMeResponse {
+  id_usuario?: number;
+  id?: number;
+  id_rol?: number;
+  role?: string;
+  nombre?: string;
+  identidad?: string;
+  email?: string;
+  telefono?: string;
+  [key: string]: any; // Para propiedades adicionales
+}
 
 // --- CHECK AUTH 
 const checkAuth = async (): Promise<boolean> => {
-  
-  // 1. Si hay un token de acceso, verificar su estado
-  if (token.value) {
+  // 1. Si no hay token, intentar con refresh token
+  if (!token.value) {
     try {
-      const payload = JSON.parse(atob(token.value.split('.')[1]));
-      const exp = payload.exp * 1000;
-      const now = Date.now();
-      const expiresIn = exp - now;
-      
-      // Intentar obtener la información del usuario para forzar la verificación del refresh token
-      const config = useRuntimeConfig();
-      try {
-        const userInfo = await $fetch('/auth/me', {
-          baseURL: config.public.apiBase,
-          headers: { 'Authorization': `Bearer ${token.value}` },
-          credentials: 'include',
-          retry: 0,
-          timeout: 10000
-        });
-        
-        
-        // Si el token es válido por al menos 5 minutos, está bien
-        if (expiresIn > 300000) {
-          return true;
-        }
-        
-      } catch (error) {
-        console.error('❌ Error al verificar el refresh token:', error);
-        const refreshed = await refreshToken();
-        if (refreshed) return true;
-      }
-      
-      // Si el token está por expirar (menos de 5 minutos), intentar renovarlo
-      if (expiresIn > 0) { 
-        const refreshed = await refreshToken();
-        if (refreshed) {
-          return true;
-        }
-      }
-    } catch (e) {
-      console.error('❌ Error al verificar token:', e);
+      return await refreshToken();
+    } catch (error) {
+      console.error('Error al intentar autenticar con refresh token:', error);
+      await logout();
+      return false;
     }
   }
   
-  // 2. Si no hay token o no se pudo renovar, intentar con refresh token 
-  const refreshed = await refreshToken();
-  
-  // 3. Si el refresh falló, limpiar todo el estado de autenticación
-  if (!refreshed) {
-    await logout();
+  // 2. Verificar si el token está a punto de expirar o si no hay datos de usuario
+  try {
+    // Primero verificar si tenemos datos de usuario
+    const shouldRefreshDueToMissingUserData = !user.value || !user.value.id_usuario;
+    
+    // Luego verificar expiración del token
+    let shouldRefreshDueToTokenExpiry = false;
+    let tokenExpiresIn = Infinity;
+    
+    try {
+      const payload = JSON.parse(atob(token.value.split('.')[1]));
+      const exp = payload.exp * 1000; // Convertir a milisegundos
+      const now = Date.now();
+      tokenExpiresIn = exp - now;
+      
+      // Si el token expiró o está a punto de expirar (menos de 5 minutos)
+      shouldRefreshDueToTokenExpiry = tokenExpiresIn < 5 * 60 * 1000;
+      
+      // Si el token ya expiró, forzar renovación
+      if (tokenExpiresIn <= 0) {
+        console.log('Token expirado, intentando renovar...');
+        return await refreshToken();
+      }
+    } catch (e) {
+      console.error('Error al verificar expiración del token:', e);
+      shouldRefreshDueToTokenExpiry = true;
+    }
+    
+    // Si falta información del usuario o el token está por expirar, intentar renovar
+    if (shouldRefreshDueToMissingUserData || shouldRefreshDueToTokenExpiry) {
+      console.log('Faltan datos de usuario o el token está por expirar, intentando renovar...');
+      try {
+        // Si el token está por expirar pronto, forzar renovación
+        if (tokenExpiresIn < 5 * 60 * 1000) {
+          return await refreshToken();
+        }
+        
+        // Si faltan datos de usuario pero el token es válido, intentar obtener los datos
+        if (shouldRefreshDueToMissingUserData) {
+          console.log('Obteniendo datos del usuario...');
+          const config = useRuntimeConfig();
+          const response = await $fetch<AuthMeResponse>('/auth/me', {
+            baseURL: config.public.apiBase,
+            headers: { 'Authorization': `Bearer ${token.value}` },
+            credentials: 'include',
+            retry: 0,
+            timeout: 5000
+          });
+          
+          if (response && (response.id_usuario || response.id)) {
+            // Actualizar datos del usuario sin renovar el token
+            const userData: Partial<User> = { 
+              ...response,
+              id_usuario: response.id_usuario || response.id as number,
+              role: response.role || (response.id_rol ? (roleMap[response.id_rol] || 'usuario') : 'usuario'),
+              nombre: response.nombre || '',
+              identidad: response.identidad || '',
+              email: response.email || '',
+              telefono: response.telefono || '',
+              id_rol: response.id_rol || 1
+            };
+            
+            if (userData.role && !userData.rol_nombre) {
+              userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
+            }
+            
+            setUser(userData as User);
+            return true;
+          }
+        }
+      } catch (error) {
+        console.error('Error al renovar la sesión o obtener datos del usuario:', error);
+        // Si falla, intentar renovar con refresh token
+        return await refreshToken();
+      }
+    }
+    
+    // 3. Verificar el token con el servidor
+    try {
+      const config = useRuntimeConfig();
+      const response = await $fetch<AuthMeResponse>('/auth/me', {
+        baseURL: config.public.apiBase,
+        headers: { 'Authorization': `Bearer ${token.value}` },
+        credentials: 'include',
+        retry: 0,
+        timeout: 5000
+      });
+      
+      // Si la respuesta incluye datos de usuario, actualizarlos
+      if (response && (response.id_usuario || response.id)) {
+        const userData: Partial<User> = { 
+          ...response,
+          // Asegurar que id_usuario tenga valor
+          id_usuario: response.id_usuario || response.id as number,
+          // Asegurar que role tenga valor
+          role: response.role || (response.id_rol ? (roleMap[response.id_rol] || 'usuario') : 'usuario'),
+          // Incluir otros campos necesarios para el tipo User
+          nombre: response.nombre || '',
+          identidad: response.identidad || '',
+          email: response.email || '',
+          telefono: response.telefono || '',
+          // Si falta id_rol, usar un valor por defecto (1 para usuario normal)
+          id_rol: response.id_rol || 1
+        };
+        
+        // Asegurar que el rol tenga el formato correcto
+        if (userData.role && !userData.rol_nombre) {
+          userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
+        }
+        
+        setUser(userData as User);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error al verificar el token con el servidor:', error);
+      // Si falla la verificación, intentar con refresh token
+      try {
+        return await refreshToken();
+      } catch (e) {
+        console.error('Error al renovar el token después de fallo de verificación:', e);
+        return false;
+      }
+    }
+  } catch (error) {
+    console.error('Error en checkAuth:', error);
     return false;
   }
-  
-  return true;
-}; 
-
-// Definir un tipo personalizado para el error
-interface ApiError extends Error {
-  statusCode?: number;
-  response?: {
-    status?: number;
-    data?: any;
-  };
-  [key: string]: any;
-}
+};
 
 // --- REFRESH TOKEN 
 const refreshToken = async (): Promise<boolean> => {
@@ -338,39 +351,27 @@ const refreshToken = async (): Promise<boolean> => {
     return _refreshPromise;
   }
   
-  // Si se está cerrando sesión, no intentar renovar el token
-  if (isLoggingOut.value) {
-    return false;
-  }
-  
   _refreshPromise = (async () => {
     try {
       const config = useRuntimeConfig();
       
-      // No verificamos la existencia del refresh token ya que es HTTP Only
-      // Simplemente intentamos la petición y manejamos la respuesta
-      
-      // Usamos fetch directamente para tener más control sobre los errores
-      const response = await fetch(`${config.public.apiBase}/auth/refresh-token`, {
+      // No verificamos la existencia del refresh token ya que es HTTP Only  
+      const response = await $fetch('/auth/refresh-token', {
         method: 'POST',
+        baseURL: config.public.apiBase,
         credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Pragma': 'no-cache',
+          'X-Debug': 'true' // Para identificar peticiones de depuración
         },
-        // No mostrar errores en la consola para respuestas no exitosas
-        // El catch manejará la respuesta
-      }).then(async (res) => {
-        // Solo procesamos la respuesta si es exitosa
-        if (res.ok) {
-          return await res.json();
-        }
-        // Para respuestas no exitosas, devolvemos null
-        return null;
-      }).catch(() => null); // En caso de error de red, devolvemos null
+        retry: 0,
+        timeout: 10000
+      }) as any;
 
       // Si recibimos un nuevo token
       if (response?.token) {
+        
         setToken(response.token);
         
         // Si también recibimos datos del usuario, actualizarlos
@@ -397,21 +398,20 @@ const refreshToken = async (): Promise<boolean> => {
         return true;
       }
 
+      console.error('No se recibió un token válido en la respuesta');
       return false;
       
-    } catch (error: unknown) {
-      // Hacer type assertion al tipo ApiError
-      const apiError = error as ApiError;
-      
-      // No mostrar error en consola para códigos 401 (No autorizado) ya que es el comportamiento esperado
-      if (apiError.statusCode !== 401 && apiError.response?.status !== 401) {
-        console.error('❌ Error al renovar el token:', apiError);
+    } catch (error: any) {
+      console.error('Error al renovar el token:', error); 
+       
+      if (error.statusCode === 401) { 
+      } else {
+        const errorMsg = error.data?.message || error.message || 'Error desconocido';
+        console.error('Error al renovar el token:', errorMsg);
       }
-      // Limpiar el estado en caso de error
-      await logout();
+      
       return false;
     } finally {
-      // Limpiar la promesa para permitir futuros intentos de refresh
       _refreshPromise = null;
     }
   })();
@@ -419,12 +419,20 @@ const refreshToken = async (): Promise<boolean> => {
   return _refreshPromise;
 };
 
+
   // Mapeo de IDs de rol a nombres de rol (en minúsculas)
   const roleMap: Record<number, string> = {
     1: 'admin',
     2: 'tecnico',
     3: 'usuario'
-  }; 
+  };
+  
+  // Mapeo de nombres de rol a IDs (para referencia)
+  const roleToIdMap: Record<string, number> = {
+    'admin': 1,
+    'tecnico': 2,
+    'usuario': 3
+  };
 
   // Getters
   const userRole = computed(() => {
@@ -467,20 +475,20 @@ const refreshToken = async (): Promise<boolean> => {
     isAuthenticated,
     isInitialized: computed(() => isInitialized.value),
     
-    // Getters
-    userRole,
-    userName,
-    userId,
-    
     // Acciones
     setUser,
     setToken,
     login,
     logout,
-    checkAuth,
     initAuth,
+    checkAuth,
     refreshToken,
-    hasRole
+    hasRole,
+    
+    // Getters
+    userRole,
+    userName,
+    userId
   };
 
   // Inicializar el estado al cargar el store

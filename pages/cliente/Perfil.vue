@@ -451,8 +451,7 @@ const cargarDatosPerfil = async () => {
       cargarCiudades(),
       fetchUserData()
     ])
-    
-    console.log('Datos del perfil cargados correctamente')
+     
     return true
   } catch (error) {
     console.error('Error al cargar el perfil:', error)
@@ -605,9 +604,7 @@ const saveProfile = async () => {
       email: user.value.email,
       telefono: user.value.telefono,
       id_ciudad: user.value.id_ciudad
-    };
-    
-    console.log('Enviando datos al backend:', JSON.stringify(userData, null, 2));
+    }; 
     
     const response = await $fetch(`/usuarios/${user.value.id_usuario}`, {
       method: 'PUT',
@@ -622,8 +619,13 @@ const saveProfile = async () => {
     showToast({
       type: 'success',
       message: '¡Perfil actualizado correctamente!',
-      duration: 3000
+      duration: 1500
     });
+    
+    // Recargar la página después de un breve retraso para que se vea el mensaje
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
     
   } catch (error) {
     // Obtener el mensaje de error del servidor
@@ -653,27 +655,90 @@ const saveProfile = async () => {
 
 const updatePassword = async () => {
   if (newPassword.value !== confirmPassword.value) {
-    showError('Error', 'Las contraseñas no coinciden')
-    return
+    showToast({
+      type: 'error',
+      message: 'Las contraseñas no coinciden',
+      duration: 3000
+    });
+    return;
+  }
+  
+  if (!currentPassword.value || !newPassword.value) {
+    showToast({
+      type: 'error',
+      message: 'Por favor completa todos los campos',
+      duration: 3000
+    });
+    return;
   }
   
   try {
-    // In a real app, you would make an API call to update the password
-    // Example:
-    // await api.put(`/usuarios/${user.value.id_usuario}/password`, {
-    //   currentPassword: currentPassword.value,
-    //   newPassword: newPassword.value
-    // })
+    const config = useRuntimeConfig();
     
-    // Clear password fields after successful update
-    currentPassword.value = ''
-    newPassword.value = ''
-    confirmPassword.value = ''
+    console.log('Enviando solicitud de cambio de contraseña:', {
+      url: `${config.public.apiBase}/usuarios/cambio-clave/${user.value.id_usuario}`,
+      method: 'PUT',
+      body: {
+        currentPassword: currentPassword.value ? '***' : 'undefined',
+        newPassword: newPassword.value ? '***' : 'undefined'
+      }
+    });
     
-    showSuccess('¡Contraseña actualizada!', 'Tu contraseña ha sido cambiada exitosamente.')
+    const response = await $fetch(`/usuarios/cambio-clave/${user.value.id_usuario}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      body: JSON.stringify({
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }); 
+    
+    // Cerrar el modal de contraseña
+    isPasswordModalOpen.value = false;
+    
+    // Limpiar los campos
+    currentPassword.value = '';
+    newPassword.value = '';
+    confirmPassword.value = '';
+    
+    // Mostrar mensaje de éxito
+    showToast({
+      type: 'success',
+      message: '¡Contraseña actualizada correctamente!',
+      duration: 3000
+    });
+    
   } catch (error) {
-    console.error('Error al actualizar la contraseña:', error)
-    showError('Error', 'No se pudo actualizar la contraseña. Verifica tu contraseña actual e inténtalo de nuevo.')
+    // No mostrar el error en consola ya que es un flujo controlado
+    
+    // Mensaje de error por defecto
+    let errorMessage = 'Error al actualizar la contraseña. Verifica tu contraseña actual.';
+    
+    // Manejar diferentes tipos de errores
+    if (error.statusCode === 400) {
+      if (error.data?.error === 'Contraseña actual incorrecta') {
+        errorMessage = 'La contraseña actual es incorrecta. Por favor, inténtalo de nuevo.';
+      } else if (error.data?.message) {
+        errorMessage = error.data.message;
+      }
+    } else if (error.statusCode === 404) {
+      errorMessage = 'Usuario no encontrado. Por favor, recarga la página e intenta de nuevo.';
+    } else if (!navigator.onLine) {
+      errorMessage = 'No hay conexión a internet. Por favor, verifica tu conexión.';
+    }
+    
+    // Mostrar el mensaje de error
+    showToast({
+      type: 'error',
+      message: errorMessage,
+      duration: 5000
+    });
+    
+    // Limpiar solo la contraseña actual para que el usuario pueda intentar de nuevo
+    currentPassword.value = '';
   }
 }
 

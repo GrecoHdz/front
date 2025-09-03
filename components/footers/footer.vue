@@ -5,15 +5,7 @@ import { useAuthStore } from '~/middleware/auth.store';
 const auth = useAuthStore();
 
 // Depuración: Mostrar información del usuario y su rol
-onMounted(() => {
-  console.log('=== DEPURACIÓN DE AUTENTICACIÓN ===');
-  console.log('Usuario actual:', auth.user);
-  console.log('Rol del usuario (role):', auth.user?.role);
-  console.log('Nombre del rol (rol_nombre):', auth.user?.rol_nombre);
-  console.log('Es admin?', auth.hasRole('admin'));
-  console.log('Es técnico?', auth.hasRole('tecnico'));
-  console.log('Es usuario?', auth.hasRole('usuario'));
-  console.log('==================================');
+onMounted(() => { 
 });
 
 import { useRouter } from 'vue-router'
