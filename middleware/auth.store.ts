@@ -11,7 +11,6 @@ interface User {
   telefono: string;
   fecha_registro?: string;
   role: string; // Nombre del rol en minúsculas (ej: 'admin', 'usuario', 'tecnico')
-  rol_nombre?: string; // Nombre del rol con formato (ej: 'Admin', 'Usuario', 'Tecnico')
   [key: string]: any;
 }
 
@@ -33,43 +32,40 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
   const isAuthenticated = computed(() => !!tokenCookie.value);
   const isInitialized = ref(false);
+  const isLoggingOut = ref(false); // Bandera para controlar si se está cerrando sesión
 
-  // Acciones
-  // Cookie para almacenar los datos del usuario
-  const userCookie = useCookie<string | null>('user', {
+  // Cookie para almacenar la información del usuario
+  const userCookie = useCookie<User | null>('user', {
     maxAge: 60 * 60 * 24 * 7, // 7 días
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
 
-const setUser = (userData: User | null): User | null => {
-  // Update reactive state
-  user.value = userData;
-  
-  // If removing the user, clear cookies
-  if (!userData) {
-    tokenCookie.value = null;
-    userCookie.value = null;
-    return null;  // Explicitly return null
-  }
+  const setUser = (userData: User | null): User | null => {
+    // Si se está eliminando el usuario, limpiar el estado y las cookies
+    if (!userData) {
+      user.value = null;
+      tokenCookie.value = null;
+      userCookie.value = null;
+      return null;
+    }
 
-  // Ensure required fields are present
-  const updatedUser: User = { ...userData };
-  
-  if (!updatedUser.role && updatedUser.id_rol) {
-    updatedUser.role = roleMap[updatedUser.id_rol] || 'usuario';
-  }
-  
-  if (!updatedUser.rol_nombre && updatedUser.role) {
-    updatedUser.rol_nombre = updatedUser.role.charAt(0).toUpperCase() + updatedUser.role.slice(1);
-  }
-  
-  // Update user cookie (convert to JSON string)
-  userCookie.value = JSON.stringify(updatedUser);
-  
-  // Return the updated user
-  return updatedUser;
-};
+    // Asegurarse de que los campos requeridos estén presentes
+    const updatedUser: User = { 
+      ...userData,
+      // Mapear id_rol a role si es necesario
+      role: userData.role || (userData.id_rol ? roleMap[userData.id_rol] : 'usuario'),
+    };
+    
+    // Actualizar el estado reactivo
+    user.value = updatedUser;
+    
+    // Guardar en la cookie solo los datos esenciales
+    const { id_usuario, nombre, role } = updatedUser;
+    userCookie.value = { id_usuario, nombre, role } as User;
+    
+    return updatedUser; 
+  };
 
   // Cookie para el token de acceso 
 const tokenCookie = useCookie('token', {
@@ -100,32 +96,32 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
       const response = await $fetch('/auth/login', {
         method: 'POST',
         baseURL: config.public.apiBase,
-        credentials: 'include', // Importante para enviar/recibir cookies
+        credentials: 'include',
         body: {
           identidad: credentials.identidad,
           password: credentials.password
         }
       }) as { token: string; user: any; message?: string };
       
-      if (response?.token) {
+      console.log('Respuesta del login:', response);
+      
+      if (response?.token && response.user) {
+        // Establecer el token y el usuario
         setToken(response.token);
         
-        if (response.user) {
-          // Asegurarse de que el usuario tenga el campo role
-          const userData = response.user;
-          if (!userData.role && userData.id_rol) {
-            userData.role = roleMap[userData.id_rol] || 'usuario';
-          }
-          
-          // Asegurarse de que el rol_nombre esté definido
-          if (!userData.rol_nombre && userData.role) {
-            userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
-          }
-           
-          setUser(userData);
-          
-          return { success: true, user: userData };
-        }
+        // setUser manejará la lógica de roles y guardado
+        const userData = {
+          ...response.user,
+          id_usuario: response.user.id_usuario
+        };
+        
+        console.log('Datos del usuario para guardar:', userData);
+        setUser(userData);
+        
+        return { 
+          success: true, 
+          user: userData 
+        };
       }
       
       return { 
@@ -134,8 +130,16 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
       };
       
     } catch (error: any) {
-      console.error('Error en login:', error);
-      const errorMessage = error.data?.message || error.message || 'Error en la autenticación';
+      // No mostrar el error en consola para errores 400 (credenciales incorrectas)
+      if (error.statusCode !== 400) {
+        console.error('Error en login:', error);
+      }
+      
+      // Mensaje más amigable para el usuario
+      const errorMessage = error.statusCode === 400 
+        ? 'Usuario o contraseña incorrectos'
+        : 'Error al intentar iniciar sesión. Por favor, inténtalo de nuevo.';
+        
       return { 
         success: false, 
         error: errorMessage
@@ -144,29 +148,42 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
   };
 
   const logout = async () => {
+    // 1. Marcar que estamos cerrando sesión
+    isLoggingOut.value = true;
+    
+    // 2. Guardar el token actual antes de limpiarlo
+    const currentToken = token.value;
+    
+    // 3. Limpiar el estado local
+    setToken(null);
+    user.value = null;
+    
+    // 3. Limpiar cookies locales
+    useCookie('user').value = null;
+    
     try {
-      const config = useRuntimeConfig();
-      // Llamar al endpoint de logout en el backend
-      await $fetch('/auth/logout', {
-        method: 'POST',
-        baseURL: config.public.apiBase,
-        credentials: 'include' // Importante para manejar las cookies
-      });
+      // 4. Si teníamos un token, intentar notificar al backend
+      if (currentToken) {
+        const config = useRuntimeConfig();
+        // Usar fetch directamente en lugar de $fetch para evitar interceptores
+        await fetch(`${config.public.apiBase}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          }
+        });
+      }
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.warn('Advertencia durante cierre de sesión (puede ignorarse):', error);
     } finally {
-      // Limpiar el estado local independientemente del resultado
-      setToken(null);
-      user.value = null;
-      // Limpiar la cookie del usuario
-      useCookie('user').value = null;
-      // Redirigir al inicio
+      // 5. Redirigir al inicio
       navigateTo('/');
     }
-  };
-
+  }
 // --- INIT AUTH 
-const initAuth = async (): Promise<boolean> => {
+const initAuth = async (isPublicRoute: boolean = false): Promise<boolean> => {
   if (isInitialized.value) return isAuthenticated.value; 
   
   // 1. Restaurar usuario desde cookie si existe
@@ -177,7 +194,6 @@ const initAuth = async (): Promise<boolean> => {
         ? JSON.parse(userCookie.value) 
         : userCookie.value;
         
-      
       setUser(userData); 
     } catch (e) {
       console.error('❌ Error al procesar usuario de la cookie:', e, 'Valor de la cookie:', userCookie.value);
@@ -185,16 +201,23 @@ const initAuth = async (): Promise<boolean> => {
     }
   }
   
-  // 2. Siempre intentar con refresh token primero (no podemos verificar HTTP Only) 
-  try {
-    const refreshSuccess = await refreshToken();
-    if (refreshSuccess) {
-      isInitialized.value = true;
-      return true;
+  // 2. No intentar refrescar el token en rutas públicas
+  if (isPublicRoute) {
+    isInitialized.value = true;
+    return isAuthenticated.value; // Retornar el estado actual sin intentar refresh
+  }
+  
+  // 3. Solo intentar refresh token si hay un token
+  if (token.value) {
+    try {
+      const refreshSuccess = await refreshToken();
+      if (refreshSuccess) {
+        isInitialized.value = true;
+        return true;
+      }
+    } catch (error) {
+      console.error('❌ Error al intentar autenticar con refresh token:', error);
     }
-  } catch (error) {
-    console.error('❌ Error al intentar autenticar con refresh token:', error);
-    // Continuar con el flujo normal si falla
   }
   
   
@@ -296,36 +319,28 @@ const checkAuth = async (): Promise<boolean> => {
   }
   
   return true;
-};
+}; 
 
-// Función para obtener la fecha de expiración del refresh token
-const getRefreshTokenExpiration = async (): Promise<number | null> => {
-  try {
-    const config = useRuntimeConfig();
-    const response = await $fetch('/auth/me', {
-      baseURL: config.public.apiBase,
-      headers: { 'Authorization': `Bearer ${token.value}` },
-      credentials: 'include',
-      // No lanzar error para manejar la respuesta manualmente
-      retry: 0,
-      timeout: 10000
-    }) as any;
-
-    // Si el backend devuelve la fecha de expiración del refresh token
-    if (response?.refreshTokenExpiration) {
-      return new Date(response.refreshTokenExpiration).getTime();
-    }
-  } catch (error) {
-    console.error('❌ Error al verificar expiración del refresh token:', error);
-  }
-  return null;
-};
+// Definir un tipo personalizado para el error
+interface ApiError extends Error {
+  statusCode?: number;
+  response?: {
+    status?: number;
+    data?: any;
+  };
+  [key: string]: any;
+}
 
 // --- REFRESH TOKEN 
 const refreshToken = async (): Promise<boolean> => {
   // Si ya hay una operación de refresh en curso, devolvemos esa promesa
   if (_refreshPromise) { 
     return _refreshPromise;
+  }
+  
+  // Si se está cerrando sesión, no intentar renovar el token
+  if (isLoggingOut.value) {
+    return false;
   }
   
   _refreshPromise = (async () => {
@@ -335,17 +350,24 @@ const refreshToken = async (): Promise<boolean> => {
       // No verificamos la existencia del refresh token ya que es HTTP Only
       // Simplemente intentamos la petición y manejamos la respuesta
       
-      const response = await $fetch('/auth/refresh-token', {
+      // Usamos fetch directamente para tener más control sobre los errores
+      const response = await fetch(`${config.public.apiBase}/auth/refresh-token`, {
         method: 'POST',
-        baseURL: config.public.apiBase,
         credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache'
         },
-        retry: 0,
-        timeout: 10000
-      }) as any;
+        // No mostrar errores en la consola para respuestas no exitosas
+        // El catch manejará la respuesta
+      }).then(async (res) => {
+        // Solo procesamos la respuesta si es exitosa
+        if (res.ok) {
+          return await res.json();
+        }
+        // Para respuestas no exitosas, devolvemos null
+        return null;
+      }).catch(() => null); // En caso de error de red, devolvemos null
 
       // Si recibimos un nuevo token
       if (response?.token) {
@@ -377,15 +399,16 @@ const refreshToken = async (): Promise<boolean> => {
 
       return false;
       
-    } catch (error: any) {
-      console.error('❌ Error al renovar el token:', error);
+    } catch (error: unknown) {
+      // Hacer type assertion al tipo ApiError
+      const apiError = error as ApiError;
       
-      // No hacer logout aquí, solo devolver false
-      // El logout se manejará en el flujo principal si es necesario
-      if (error.statusCode === 401) {
-      } else {
+      // No mostrar error en consola para códigos 401 (No autorizado) ya que es el comportamiento esperado
+      if (apiError.statusCode !== 401 && apiError.response?.status !== 401) {
+        console.error('❌ Error al renovar el token:', apiError);
       }
-      
+      // Limpiar el estado en caso de error
+      await logout();
       return false;
     } finally {
       // Limpiar la promesa para permitir futuros intentos de refresh
@@ -396,20 +419,12 @@ const refreshToken = async (): Promise<boolean> => {
   return _refreshPromise;
 };
 
-
   // Mapeo de IDs de rol a nombres de rol (en minúsculas)
   const roleMap: Record<number, string> = {
     1: 'admin',
     2: 'tecnico',
     3: 'usuario'
-  };
-  
-  // Mapeo de nombres de rol a IDs (para referencia)
-  const roleToIdMap: Record<string, number> = {
-    'admin': 1,
-    'tecnico': 2,
-    'usuario': 3
-  };
+  }; 
 
   // Getters
   const userRole = computed(() => {

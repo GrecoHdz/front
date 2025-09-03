@@ -48,11 +48,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     normalizedPath.startsWith(publicPath.toLowerCase() + '/')
   );
   
-  // Inicializar la autenticación (esto ya no redirige automáticamente)
-  await auth.initAuth();
-  
-  // Verificar autenticación
-  const isAuthenticated = await auth.checkAuth();
+  // Inicializar la autenticación con la ruta actual
+  const isAuthenticated = await auth.initAuth(isPublicPath);
   
   // Si es la ruta raíz (login)
   if (to.path === '/') {
