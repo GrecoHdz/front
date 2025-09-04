@@ -12,7 +12,14 @@
     <HeadersHeaderSoporte/>
 
     <!-- Main Content -->
-    <div class="max-w-2xl mx-auto px-6 pb-6">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+      <Toast 
+        v-if="toast.show"
+        :message="toast.message" 
+        :type="toast.type"
+        @close="toast.show = false"
+      />
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Soporte Técnico</h1>
       <!-- Contact Card -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg mb-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Contáctanos</h2>
@@ -27,13 +34,37 @@
               required
             >
               <option value="" disabled selected>Selecciona un asunto</option>
-              <option value="technical">Problema técnico</option>
-              <option value="billing">Facturación</option>
-              <option value="service">Solicitud de servicio</option>
-              <option value="other">Otro</option>
+              <option value="falla">Problema con un Servicio Completado</option>
+              <option value="duda">Duda con Servicios Ofrecidos</option>
+              <option value="queja">Queja sobre Técnico</option> 
+              <option value="pago">Duda sobre Pagos</option>
+              <option value="otro">Otro</option>
             </select>
           </div>
           
+          <!-- Selector de servicio (solo visible cuando se selecciona 'Problema con un Servicio Completado') -->
+          <div v-if="form.subject === 'falla'">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Servicio con problema</label>
+            <select 
+              v-model="form.servicio_id"
+              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              required
+              :disabled="cargandoServicios"
+            >
+              <option value="" disabled selected>Selecciona un servicio</option>
+              <option 
+                v-for="servicio in serviciosFinalizados" 
+                :key="servicio.id_solicitud" 
+                :value="servicio.id_solicitud"
+              >
+                {{ limitarTexto(servicio.descripcion) }} - {{ servicio.colonia }} - {{ formatDate(servicio.fecha_solicitud) }}
+              </option>
+            </select>
+            <p v-if="cargandoServicios" class="text-sm text-blue-600 dark:text-blue-400 mt-1">Cargando servicios finalizados...</p>
+            <p v-if="errorCargaServicios" class="text-sm text-red-600 dark:text-red-400 mt-1">{{ errorCargaServicios }}</p>
+            <p v-if="!cargandoServicios && serviciosFinalizados.length === 0 && !errorCargaServicios" class="text-sm text-gray-500 dark:text-gray-400 mt-1">No tienes servicios finalizados</p>
+          </div>
+
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mensaje</label>
             <textarea 
@@ -140,12 +171,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import FootersFooter from '@/components/footers/footer.vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
-
+import Toast from '~/components/ui/Toast.vue'
+// Obtener la configuración
+const config = useRuntimeConfig()
 // SEO and Meta
 useHead({
   title: 'HogarSeguro - Dashboard',
@@ -184,7 +217,79 @@ const isSubmitting = ref(false)
 
 const form = ref({
   subject: '',
-  message: ''
+  message: '',
+  servicio_id: ''
+})
+
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+}
+
+const serviciosFinalizados = ref([])
+const cargandoServicios = ref(false)
+const errorCargaServicios = ref('')
+
+// Función para limitar el texto a un número máximo de palabras
+const limitarTexto = (texto, maxPalabras = 7) => {
+  if (!texto) return ''
+  const palabras = texto.trim().split(' ')
+  if (palabras.length <= maxPalabras) return texto
+  return palabras.slice(0, maxPalabras).join(' ') + '...'
+}
+
+// Función para formatear fechas en formato corto
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' }
+  return new Date(dateString).toLocaleDateString('es-HN', options)
+}
+
+// Cargar servicios finalizados del usuario
+const cargarServiciosFinalizados = async () => {
+  const userCookie = useCookie('user').value
+  if (!userCookie?.id_usuario) return
+  
+  cargandoServicios.value = true
+  errorCargaServicios.value = ''
+  
+  try {
+    const response = await $fetch(`/solicitudservicio/usuario/${userCookie.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${useCookie('token').value}`
+      }
+    })
+    
+    // Filtrar solo servicios finalizados
+    serviciosFinalizados.value = response.filter(servicio => servicio.estado === 'finalizado')
+  } catch (error) {
+    console.error('Error al cargar servicios:', error)
+    errorCargaServicios.value = 'No se pudieron cargar los servicios. Por favor, intente más tarde.'
+  } finally {
+    cargandoServicios.value = false
+  }
+}
+
+// Observar cambios en el select de asunto
+watch(() => form.value.subject, (newVal) => {
+  // Resetear el servicio seleccionado
+  form.value.servicio_id = ''
+  
+  // Si se selecciona "Problema con un Servicio Completado", cargar los servicios
+  if (newVal === 'falla') {
+    cargarServiciosFinalizados()
+  }
 })
 
 const faqs = [
@@ -214,15 +319,49 @@ const toggleFaq = (index) => {
   activeFaq.value = activeFaq.value === index ? null : index
 }
 
-const submitForm = () => {
+const submitForm = async () => {
   isSubmitting.value = true
   
-  // Simulate API call
-  setTimeout(() => {
-    alert('¡Gracias por contactarnos! Hemos recibido tu mensaje y nos pondremos en contacto contigo pronto.')
-    form.value = { subject: '', message: '' }
+  try {
+    const userCookie = useCookie('user').value
+    if (!userCookie?.id_usuario) {
+      throw new Error('No se pudo obtener la información del usuario')
+    }
+
+    const dataToSend = {
+      id_usuario: parseInt(userCookie.id_usuario),
+      asunto: form.value.subject,
+      mensaje: form.value.message,
+      ...(form.value.servicio_id && { id_solicitud: parseInt(form.value.servicio_id) })
+    }
+    
+
+    
+    const response = await $fetch('/soporte', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      body: dataToSend,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${useCookie('token').value}`
+      }
+    })
+    
+    showToast('Tu solicitud ha sido enviada. Nos pondremos en contacto contigo pronto.', 'success')
+    
+    // Resetear formulario
+    form.value = {
+      subject: '',
+      message: '',
+      servicio_id: ''
+    }
+    
+  } catch (error) {
+    const errorMessage = error.response?._data?.message || 'Ocurrió un error al enviar tu solicitud. Por favor, inténtalo de nuevo.'
+    showToast(errorMessage, 'error')
+  } finally {
     isSubmitting.value = false
-  }, 1500)
+  }
 }
 </script>
 

@@ -1,15 +1,25 @@
 import { defineStore } from 'pinia';
 import { ref, computed, useCookie } from '#imports';
+
+// Mapeo de IDs de rol a nombres de rol (en minúsculas)
+const roleMap: Record<number, string> = {
+  1: 'admin',
+  2: 'tecnico',
+  3: 'usuario',
+  4: 'cliente'
+};
+
 let _refreshPromise: Promise<boolean> | null = null;
 
 interface User {
   id_usuario: number;
   id_rol: number;
+  id_ciudad: number;  // Añadido id_ciudad
   nombre: string;
   identidad: string;
   email: string;
   telefono: string;
-  fecha_registro?: string;
+  fecha_registro: string;
   role: string; // Nombre del rol en minúsculas (ej: 'admin', 'usuario', 'tecnico') 
   [key: string]: any;
 }
@@ -52,18 +62,22 @@ const setUser = (userData: User | null): User | null => {
   }
 
   // Ensure required fields are present
-  const updatedUser: User = { ...userData };
-  
-  if (!updatedUser.role && updatedUser.id_rol) {
-    updatedUser.role = roleMap[updatedUser.id_rol];
-  }
+  const updatedUser: User = { 
+    ...userData,
+    // Asegurar que los campos requeridos tengan valores por defecto
+    id_ciudad: userData.id_ciudad || 1, // Valor por defecto de 1 si no está definido
+    role: userData.role || (userData.id_rol ? roleMap[userData.id_rol] : 'usuario')
+  };
   
   // Guardar solo la información necesaria en la cookie
   const minimalUserData = {
     id_usuario: updatedUser.id_usuario,
     nombre: updatedUser.nombre,
-    role: updatedUser.role
+    role: updatedUser.role,
+    id_ciudad: updatedUser.id_ciudad
   };
+  
+  console.log('Guardando datos del usuario en la cookie:', minimalUserData);
   
   // Update user cookie with minimal data
   userCookie.value = JSON.stringify(minimalUserData);
@@ -97,6 +111,8 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
     try {
       const config = useRuntimeConfig(); 
       
+      console.log('Iniciando proceso de login...');
+      
       // Hacer la petición con credentials: 'include' para manejar las cookies
       const response = await $fetch('/auth/login', {
         method: 'POST',
@@ -108,16 +124,26 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
         }
       }) as { token: string; user: any; message?: string };
       
+      console.log('Respuesta del servidor:', response);
+      
       if (response?.token) {
         setToken(response.token);
         
         if (response.user) {
-          // Asegurarse de que el usuario tenga el campo role
-          const userData = response.user;
-          if (!userData.role && userData.id_rol) {
-            userData.role = roleMap[userData.id_rol] || 'usuario';
-          }
+          console.log('Datos del usuario recibidos del servidor:', response.user);
           
+          // Asegurarse de que el usuario tenga los campos requeridos
+          const userData = {
+            ...response.user,
+            // Asegurar que id_ciudad tenga un valor por defecto si no está presente
+            id_ciudad: response.user.id_ciudad || 1,
+            // Asegurar que el rol esté correctamente establecido
+            role: response.user.role || (response.user.id_rol ? roleMap[response.user.id_rol] : 'usuario')
+          };
+          
+          console.log('Datos del usuario después de procesar:', userData);
+          
+          // Guardar el usuario en el estado y en las cookies
           setUser(userData);
           
           return { success: true, user: userData };

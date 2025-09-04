@@ -12,6 +12,13 @@
 
       <!-- Content Container with max-w-2xl -->
       <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative">
+        <!-- Toast Component -->
+        <Toast 
+          v-if="toast.show"
+          :message="toast.message" 
+          :type="toast.type"
+          @close="toast.show = false"
+        />
       <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
       <div class="pb-24">
         <!-- Main Content -->
@@ -179,8 +186,11 @@
             <form @submit.prevent="handleRequestService" class="space-y-4">
               <div>
                 <select v-model="serviceFormData.type" 
-                        class="w-full px-4 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
-                  <option value="" disabled class="text-gray-900">Selecciona un servicio</option>
+                        :disabled="isLoadingServices"
+                        class="w-full px-4 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-70 disabled:cursor-not-allowed">
+                  <option value="" disabled class="text-gray-900">
+                    {{ isLoadingServices ? 'Cargando servicios...' : 'Selecciona un servicio' }}
+                  </option>
                   <option v-for="service in servicesList" :key="`service-${service.id}`" :value="service.name" class="text-gray-900">
                     {{ service.icon }} {{ service.name }}
                   </option>
@@ -307,22 +317,7 @@
       </div> <!-- Close pb-24 div -->
       </div> <!-- Close max-w-2xl container -->
 
-      <FootersFooter />
-
-      <!-- Success Messages -->
-      <ClientOnly>
-        <div v-if="notification.show" class="fixed top-6 left-6 right-6 z-50">
-          <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 rounded-2xl shadow-2xl">
-            <div class="flex items-center space-x-3">
-              <div class="text-2xl">✅</div>
-              <div>
-                <p class="font-black text-lg">{{ notification.title }}</p>
-                <p class="text-green-100 text-sm">{{ notification.description }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </ClientOnly>
+      <FootersFooter /> 
     </div>
   </div>
 </template>
@@ -330,8 +325,12 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeMount } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
+import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+
+// Obtener la configuración
+const config = useRuntimeConfig()
 
 // SEO and Meta
 useHead({
@@ -392,10 +391,60 @@ const serviceFormData = ref({
   direccion: ''
 })
 
-const notification = ref({
+const toast = ref({
   show: false,
-  title: '',
-  description: ''
+  message: '',
+  type: 'success'
+})
+
+// Services data
+const servicesList = ref([])
+const isLoadingServices = ref(false)
+
+// Cargar servicios desde la API
+const fetchServices = async () => {
+  try {
+    isLoadingServices.value = true
+    const data = await $fetch('/servicios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+    
+    if (Array.isArray(data)) {
+      servicesList.value = data.map(service => ({
+        id: service.id_servicio,
+        name: service.nombre,
+        description: service.descripcion,
+        icon: getServiceIcon(service.nombre)
+      }))
+    }
+  } catch (error) {
+    console.error('Error al cargar servicios:', error)
+    showToast('No se pudieron cargar los servicios. Intente nuevamente.', 'error')
+  } finally {
+    isLoadingServices.value = false
+  }
+}
+
+// Get appropriate icon based on service name
+const getServiceIcon = (serviceName) => {
+  const name = serviceName.toLowerCase()
+  if (name.includes('plom')) return '🚰'
+  if (name.includes('electric') || name.includes('eléctric')) return '💡'
+  if (name.includes('pintur')) return '🎨'
+  if (name.includes('carpinter')) return '🔨'
+  if (name.includes('jardín') || name.includes('jardin')) return '🌱'
+  if (name.includes('limpiez')) return '🧹'
+  if (name.includes('aire') || name.includes('clima')) return '❄️'
+  return '🔧'
+}
+
+// Fetch services when component mounts
+onMounted(() => {
+  fetchServices()
 })
 
 // Static data arrays
@@ -404,15 +453,6 @@ const membershipBenefits = [
   { month: 2, title: 'Crédito acumulable activado' },
   { month: 3, title: 'Limpieza de aire gratuita' },
   { month: 6, title: 'Mano de obra 100% gratuita' }
-]
-
-const servicesList = [
-  { id: 1, name: 'Fontanería', icon: '🔧' },
-  { id: 2, name: 'Electricidad', icon: '💡' },
-  { id: 3, name: 'Aires A/C', icon: '❄️' },
-  { id: 4, name: 'Electrodomésticos', icon: '🧊' },
-  { id: 5, name: 'Pintura', icon: '🎨' },
-  { id: 6, name: 'Cámaras', icon: '🎥' }
 ]
 
 const recentServicesData = ref([
@@ -512,20 +552,65 @@ const getStatusColor = (status) => {
 }
 
 // Event handlers
-const handleRequestService = () => {
-  if (serviceFormData.value.type && serviceFormData.value.description && 
-      serviceFormData.value.colonia && serviceFormData.value.direccion) {
+const handleRequestService = async () => {
+  try {
+    if (!serviceFormData.value.type || !serviceFormData.value.description || 
+        !serviceFormData.value.colonia || !serviceFormData.value.direccion) {
+      throw new Error('Por favor completa todos los campos requeridos')
+    }
+
+    // Obtener datos del usuario de la cookie
+    const userCookie = useCookie('user')
+    const userData = userCookie.value
     
-    const serviceIcon = servicesList.find(s => s.name === serviceFormData.value.type)?.icon || '🔧'
+    if (!userData) {
+      throw new Error('No se pudo obtener la información del usuario. Por favor inicia sesión nuevamente.')
+    }
+     
     
+    // Verificar que id_ciudad esté presente
+    if (!userData.id_ciudad) {
+      throw new Error('No se pudo determinar la ciudad del usuario. Por favor contacte al soporte.')
+    }
+
+    // Encontrar el servicio seleccionado para obtener su ID
+    const selectedService = servicesList.value.find(s => s.name === serviceFormData.value.type)
+    if (!selectedService) {
+      throw new Error('No se pudo encontrar el servicio seleccionado')
+    }
+
+    // Preparar los datos para enviar al backend
+    const requestData = {
+      id_usuario: Number(userData.id_usuario),
+      id_servicio: Number(selectedService.id),
+      id_ciudad: Number(userData.id_ciudad),
+      colonia: serviceFormData.value.colonia,
+      direccion_precisa: serviceFormData.value.direccion,
+      descripcion: serviceFormData.value.description,
+      visita_pagada: 1,
+      estado: 'pendiente_asignacion'
+    }
+
+    // Hacer la petición al backend
+    const response = await $fetch('/solicitudservicio', {
+      method: 'POST',
+      baseURL: config.public.apiBase,
+      body: JSON.stringify(requestData),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+
+    // Agregar el servicio a la lista local
     const newService = {
-      id: Date.now(),
+      id: response.id_solicitud_servicio || Date.now(),
       title: serviceFormData.value.type,
       description: serviceFormData.value.description,
       date: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
-      status: 'Programado',
-      cost: Math.floor(Math.random() * 500) + 100,
-      icon: serviceIcon
+      status: 'Pendiente',
+      cost: 0, // El costo se determinará más adelante
+      icon: selectedService.icon
     }
     
     recentServicesData.value.unshift(newService)
@@ -538,23 +623,26 @@ const handleRequestService = () => {
       direccion: '' 
     }
     
-    showNotification('¡Servicio solicitado!', 'Te contactaremos pronto para confirmar los detalles')
+    showToast('¡Solicitud enviada! Te contactaremos pronto.', 'success')
+  } catch (error) {
+    console.error('Error al enviar la solicitud de servicio:', error)
+    showToast('No se pudo enviar la solicitud. Por favor, inténtalo mas tarde.', 'error')
   }
 }
 
 const handleRenovarMembresia = () => {
-  showNotification('¡Renovación iniciada!', 'Serás redirigido al portal de pagos')
+  showToast('¡Renovación iniciada!', 'success')
 }
 
-const showNotification = (title, description) => {
-  notification.value = { 
-    show: true, 
-    title, 
-    description 
+const showToast = (message, type = 'success') => {
+  toast.value = {
+    show: true,
+    message,
+    type
   }
   
   setTimeout(() => {
-    notification.value.show = false
+    toast.value.show = false
   }, 4000)
 }
 

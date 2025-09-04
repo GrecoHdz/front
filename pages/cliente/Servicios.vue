@@ -92,18 +92,17 @@
                   <p class="text-blue-800 dark:text-blue-200 text-sm font-semibold">{{ service.fullLocation.colonia }}</p>
                   <p class="text-blue-700 dark:text-blue-300 text-xs">{{ service.fullLocation.direccion }}</p>
                 </div>
-                
-                <!-- Scheduled Date and Time -->
-                <div v-if="service.scheduledDate" class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
-                  <p class="text-purple-600 dark:text-purple-400 text-xs font-bold mb-1">📅 FECHA PROGRAMADA</p>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-purple-800 dark:text-purple-200 text-sm font-semibold">{{ service.scheduledDate.date }}</p>
-                      <p class="text-purple-700 dark:text-purple-300 text-xs">{{ service.scheduledDate.time }}</p>
-                    </div>
-                    <div class="text-purple-600 dark:text-purple-400 text-xl">🕐</div>
-                  </div>
+
+                <!-- Acción Rápida - Pago Pendiente -->
+                <div v-if="!service.visita_pagada" 
+                     @click="openServiceModal(service.id)"
+                     class="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800 cursor-pointer hover:shadow-md transition-all duration-300 hover:shadow-purple-100 dark:hover:shadow-purple-900/30">
+                  <p class="text-purple-600 dark:text-purple-400 text-xs font-bold mb-1">💳 PAGAR VISITA</p>
+                  <p class="text-purple-800 dark:text-purple-200 text-sm">
+                    Sin membresía, la visita tiene un costo de L. 
+                  </p>
                 </div>
+
               </div>
 
               <!-- Action Buttons -->

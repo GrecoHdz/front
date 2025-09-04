@@ -312,7 +312,15 @@
  
 
     <!-- Login/Register Modal -->
-    <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+    <!-- Overlay de carga mientras se verifica la autenticación -->
+<LoadingSpinner 
+  v-if="isCheckingAuth"
+  :loading="true" 
+  class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center"
+/>
+
+<!-- Modal de Login/Registro -->
+<div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
       <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto">
         <div class="p-8">
           <div class="text-center mb-8">
@@ -503,7 +511,8 @@ const apiBase = config.public.apiBase
 const showLoginModal = ref(false)
 const showSuccess = ref(false)
 const isLogin = ref(true)
-const isLoading = ref(false)
+const isLoading = ref(true) // Iniciar en true para mostrar el spinner mientras se verifica la autenticación
+const isCheckingAuth = ref(true) // Nuevo estado para controlar la verificación de autenticación
 const authStatus = ref('') // '', 'success', 'error'
 const formErrors = ref({})
 
@@ -567,9 +576,31 @@ const cargarCiudades = async () => {
   }
 }
 
-// Cargar ciudades al montar el componente
-onMounted(() => {
-  cargarCiudades()
+// Verificar autenticación al cargar la página
+const checkAuthStatus = async () => {
+  try {
+    const authStore = useAuthStore()
+    const isAuthenticated = await authStore.checkAuth()
+    
+    if (isAuthenticated) {
+      // Si está autenticado, redirigir al dashboard correspondiente
+      const dashboardPath = '/cliente/DashboardCliente' // Ruta por defecto
+      navigateTo(dashboardPath, { replace: true })
+    }
+  } catch (error) {
+    console.error('Error al verificar autenticación:', error)
+  } finally {
+    isCheckingAuth.value = false
+    isLoading.value = false
+  }
+}
+
+// Cargar ciudades y verificar autenticación al montar el componente
+onMounted(async () => {
+  await Promise.all([
+    cargarCiudades(),
+    checkAuthStatus()
+  ])
   
   // Código existente para el modo oscuro
   if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {

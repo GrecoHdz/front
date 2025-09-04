@@ -675,14 +675,14 @@ const updatePassword = async () => {
   try {
     const config = useRuntimeConfig();
     
-    console.log('Enviando solicitud de cambio de contraseña:', {
+    {
       url: `${config.public.apiBase}/usuarios/cambio-clave/${user.value.id_usuario}`,
       method: 'PUT',
       body: {
         currentPassword: currentPassword.value ? '***' : 'undefined',
         newPassword: newPassword.value ? '***' : 'undefined'
       }
-    });
+    };
     
     const response = await $fetch(`/usuarios/cambio-clave/${user.value.id_usuario}`, {
       method: 'PUT',

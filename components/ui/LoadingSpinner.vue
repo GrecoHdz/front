@@ -11,8 +11,7 @@
             <div class="absolute inset-2 rounded-full border-t-4 border-r-4 border-teal-400 animate-spin-reverse"></div>
             <div class="absolute inset-4 rounded-full border-t-4 border-cyan-300 animate-pulse"></div>
           </div>
-          <p v-if="message" class="text-gray-700 dark:text-gray-200 font-medium text-lg">{{ message }}</p>
-          <p v-else-if="!hideDefaultMessage" class="text-gray-500 dark:text-gray-400">Procesando...</p>
+          <p v-if="message" class="text-gray-700 dark:text-gray-200 font-medium text-lg">{{ message }}</p> 
         </div>
         
         <!-- Success State -->
