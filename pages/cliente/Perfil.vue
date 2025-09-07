@@ -1,13 +1,16 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
-      <!-- Toast Notification -->
+      <!-- Toast Notifications -->
+    <div class="fixed top-4 right-4 space-y-2 z-50">
       <Toast
-        v-if="toast.show"
+        v-for="toast in toastMessages"
+        :key="toast.id"
         :message="toast.message"
         :type="toast.type"
         :duration="toast.duration"
-        @close="toast.show = false"
+        @close="removeToast(toast.id)"
       />
+    </div>  
       
       <!-- Loading Spinner -->
       <LoadingSpinner 
@@ -32,28 +35,92 @@
         </div>
 
         <!-- Membership Status -->
-        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-200 dark:border-blue-800">
-          <div class="flex items-start justify-between">
+        <div class="mt-4 p-4 rounded-2xl border transition-colors duration-300"
+          :class="{
+            'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': isMembershipActive,
+            'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800': isMembershipPending,
+            'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800': isMembershipExpired,
+            'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700': isMembershipInactive
+          }">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex-1">
               <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-800/30 rounded-xl flex items-center justify-center">
-                  <span class="text-blue-600 dark:text-blue-400">🏆</span>
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  :class="{
+                    'bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-400': isMembershipActive,
+                    'bg-amber-100 dark:bg-amber-800/30 text-amber-600 dark:text-amber-400': isMembershipPending,
+                    'bg-red-100 dark:bg-red-800/30 text-red-600 dark:text-red-400': isMembershipExpired,
+                    'bg-gray-100 dark:bg-gray-700/30 text-gray-600 dark:text-gray-400': isMembershipInactive
+                  }">
+                  <span v-if="isMembershipActive">🏆</span>
+                  <span v-else-if="isMembershipPending">⏳</span>
+                  <span v-else-if="isMembershipExpired">⚠️</span>
+                  <span v-else>🔒</span>
                 </div>
-                <div>
-                  <p class="text-sm font-medium text-blue-800 dark:text-blue-200">Membresía activa hasta</p>
-                  <p class="text-sm font-bold text-blue-900 dark:text-white">{{ membershipEndDate }}</p>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium"
+                    :class="{
+                      'text-blue-800 dark:text-blue-200': isMembershipActive,
+                      'text-amber-800 dark:text-amber-200': isMembershipPending,
+                      'text-red-800 dark:text-red-200': isMembershipExpired,
+                      'text-gray-800 dark:text-gray-200': isMembershipInactive
+                    }">
+                    {{ isMembershipActive ? 'Membresía activa hasta' : 
+                       isMembershipPending ? 'Membresía pendiente' :
+                       isMembershipExpired ? 'Membresía vencida' : 'Estado de la membresía' }}
+                  </p>
+                  <p class="text-sm font-bold truncate"
+                    :class="{
+                      'text-blue-900 dark:text-white': isMembershipActive,
+                      'text-amber-900 dark:text-amber-100': isMembershipPending,
+                      'text-red-900 dark:text-red-100': isMembershipExpired,
+                      'text-gray-900 dark:text-gray-100': isMembershipInactive
+                    }">
+                    {{ isMembershipActive ? membershipEndDate : membershipStatus }}
+                  </p>
                 </div>
               </div>
-              <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700 mb-3">
-                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full" :style="`width: ${membershipProgress}%`"></div>
+              
+              <!-- Barra de progreso -->
+              <div v-if="!isMembershipInactive" class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700 mb-1">
+                <div 
+                  class="h-2 rounded-full transition-all duration-500 ease-in-out"
+                  :class="{
+                    'bg-gradient-to-r from-green-500 to-emerald-600': membershipProgress < 80,
+                    'bg-gradient-to-r from-amber-400 to-orange-500': membershipProgress >= 80 && membershipProgress < 95,
+                    'bg-gradient-to-r from-red-500 to-pink-600': membershipProgress >= 95
+                  }"
+                  :style="`width: ${membershipProgress}%`"
+                ></div>
+              </div>
+              
+              <div v-if="!isMembershipInactive" class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                <span>Inicio: {{ membershipStartDate }}</span>
+                <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% completado</span>
+                <span v-else-if="membershipProgress >= 100">Expirada</span>
               </div>
             </div>
+            
             <button 
               @click="renovarMembresia"
-              class="ml-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap"
+              class="w-full sm:w-auto px-4 py-2 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap self-center sm:self-auto"
+              :class="{
+                'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700': isMembershipActive && membershipProgress < 80,
+                'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600': isMembershipActive && membershipProgress >= 80,
+                'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700': isMembershipPending,
+                'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700': isMembershipExpired || isMembershipInactive
+              }"
+              :disabled="isMembershipPending"
             >
-              Renovar Ahora
+              {{ isMembershipPending ? 'Pendiente' : 'Renovar Ahora' }}
             </button>
+          </div>
+          
+          <!-- Información adicional para debug -->
+          <div v-if="false" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500">
+            <p>ID: {{ membershipData.id }}</p>
+            <p>Estado: {{ membershipData.status }}</p>
+            <p>Progreso: {{ membershipProgress }}%</p>
           </div>
         </div>
 
@@ -275,6 +342,139 @@
     </div> 
     <FootersFooter />  
     </div>
+
+    <!-- Modal de Renovación de Membresía -->
+    <div v-if="showRenewalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md relative">
+        <button 
+          @click="showRenewalModal = false"
+          type="button"
+          class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
+        >
+          <span class="sr-only">Cerrar</span>
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
+            <span class="text-blue-600 dark:text-blue-400 text-xl">💳</span>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Renovar Membresía</h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-6">Selecciona una cuenta para realizar el pago</p>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Costo de la membresía -->
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+            <div class="flex justify-between items-center">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Costo de la membresía:</span>
+              <span v-if="isLoadingMembershipCost" class="h-6 w-24 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></span>
+              <span v-else class="text-lg font-bold text-blue-600 dark:text-blue-400">L. {{ Number(membershipCost).toFixed(2) }}</span>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Válido por 30 días a partir de hoy</p>
+          </div>
+
+          <!-- Selector de cuenta bancaria -->
+          <div>
+            <label for="bank-account" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Cuenta bancaria
+            </label>
+            <div v-if="isLoadingAccounts" class="py-4 flex justify-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+            <div v-else>
+              <select
+                id="bank-account"
+                v-model="selectedAccount"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                :disabled="bankAccounts.length === 0"
+              >
+                <option v-if="bankAccounts.length === 0" value="" disabled>No hay cuentas registradas</option>
+                <option value="" selected disabled>Selecciona una cuenta</option>
+                <option 
+                  v-for="account in bankAccounts" 
+                  :key="account.id_cuenta" 
+                  :value="account.id_cuenta"
+                >
+                  • {{ account.banco }}  
+                </option>
+              </select>
+              <!-- Mostrar detalles de la cuenta seleccionada -->
+              <div v-if="selectedAccount" class="space-y-4">
+                <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                  <div class="space-y-2">
+                    <div class="flex justify-between">
+                      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Banco:</span>
+                      <span class="text-sm text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.banco || 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Número de cuenta:</span>
+                      <span class="text-sm text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.num_cuenta || 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Beneficiario:</span>
+                      <span class="text-sm text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.beneficiario || 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Tipo de cuenta:</span>
+                      <span class="text-sm text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.tipo || 'N/A' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Input para el número de comprobante -->
+                <div class="space-y-2">
+                  <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Número de comprobante
+                  </label>
+                  <input
+                    id="comprobante"
+                    v-model="comprobante"
+                    type="text"
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                    placeholder="Ingresa el número de comprobante"
+                    required
+                  />
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Por favor ingresa el número de comprobante de tu transferencia o depósito
+                  </p>
+                </div>
+              </div>
+              <p v-if="bankAccounts.length === 0" class="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                No se encontraron cuentas bancarias
+              </p>
+            </div>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="flex flex-col space-y-3 pt-2">
+            <button
+              @click="confirmRenewal"
+              :disabled="isRenewing || !selectedAccount || !comprobante || bankAccounts.length === 0"
+              class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              :class="{'opacity-50 cursor-not-allowed': !selectedAccount || !comprobante}"
+            >
+              <span v-if="isRenewing" class="flex items-center justify-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Procesando...
+              </span>
+              <span v-else>Confirmar Pago</span>
+            </button>
+            <button
+              @click="showRenewalModal = false"
+              class="w-full py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   
 </template>
@@ -303,14 +503,21 @@ const router = useRouter()
 // Estados de carga
 const isLoading = ref(true)
 const isLoggingOut = ref(false)
-
-// Estados del formulario de contraseña
+const isLoadingMembershipData = ref(false)
+const isLoadingMembershipCost = ref(false)
+const isLoadingAccounts = ref(false) 
+const showRenewalModal = ref(false);
+const isRenewing = ref(false);
+const selectedAccount = ref('');
+const comprobante = ref('');
+const showComprobanteInput = ref(false);
+const membershipCost = ref(0);  
+const bankAccounts = ref([]); 
 const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const isPasswordModalOpen = ref(false)
-const isUpdatingPassword = ref(false)
-// Referencia reactiva para almacenar las ciudades
+const isUpdatingPassword = ref(false) 
 const ciudades = ref([])
 
 // Cargar ciudades desde la API
@@ -320,7 +527,8 @@ const cargarCiudades = async () => {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
       }
     })
     
@@ -431,27 +639,12 @@ const fetchUserData = async () => {
 // Cargar datos del perfil
 const cargarDatosPerfil = async () => {
   try {
-    // Verificar autenticación
-    if (!auth.isAuthenticated) {
-      const isAuthInitialized = await auth.initAuth()
-      if (!isAuthInitialized) {
-        await router.push('/acceso')
-        return false
-      }
-    }
-
-    // Verificar que el usuario esté autenticado
-    if (!auth.user?.id_usuario) {
-      console.error('No se pudo obtener el ID del usuario autenticado')
-      return false
-    }
-
     // Cargar ciudades y datos del usuario en paralelo
     await Promise.all([
       cargarCiudades(),
       fetchUserData()
     ])
-     
+    
     return true
   } catch (error) {
     console.error('Error al cargar el perfil:', error)
@@ -481,9 +674,7 @@ onMounted(async () => {
   if (user.value) {
     originalUserData.value = { ...user.value };
   }
-})
-
-
+}) 
 
 // Función para manejar el cierre de sesión
 const handleLogout = async () => {
@@ -508,45 +699,8 @@ const handleLogout = async () => {
 const passwordMismatch = computed(() => {
   return newPassword.value && confirmPassword.value && 
          newPassword.value !== confirmPassword.value;
-});
-
-// List of major cities in Honduras
-const hondurasCities = [
-  'Tegucigalpa',
-  'San Pedro Sula',
-  'Choloma',
-  'La Ceiba',
-  'El Progreso',
-  'Choluteca',
-  'Comayagua',
-  'Puerto Cortés',
-  'La Lima',
-  'Danlí',
-  'Siguatepeque',
-  'Juticalpa',
-  'Tocoa',
-  'Villanueva',
-  'Tela',
-  'Santa Rosa de Copán',
-  'Olanchito',
-  'San Lorenzo',
-  'Cofradía',
-  'La Paz'
-] 
-
-// Get user role name
-const userRole = computed(() => {
-  if (!userData.value.role) return 'Invitado'
-  
-  const roles = {
-    'admin': 'Administrador',
-    'cliente': 'Cliente',
-    'tecnico': 'Técnico',
-    'usuario': 'Usuario'
-  }
-  
-  return roles[userData.value.role.toLowerCase()] || 'Usuario'
-})
+}); 
+ 
 
 // Computed properties
 const userInitials = computed(() => {
@@ -577,21 +731,61 @@ const formatShortDate = (dateString) => {
 }
 
 // Save profile function
-// Estado para controlar la notificación
-const toast = ref({
-  show: false,
-  message: '',
-  type: 'info',
-  duration: 5000
-});
+// Estado para controlar las notificaciones
+const toastMessages = ref([]);
+let toastId = 0;
 
 const showToast = (options) => {
-  toast.value = {
-    show: true,
-    message: options.message,
-    type: options.type || 'info',
-    duration: options.duration || 5000
+  const id = toastId++;
+  const toast = {
+    id,
+    type: 'success',
+    duration: 5000,
+    ...options
   };
+  
+  toastMessages.value.push(toast);
+  
+  // Eliminar el toast después de la duración especificada
+  if (toast.duration > 0) {
+    setTimeout(() => {
+      removeToast(id);
+    }, toast.duration);
+  }
+  
+  return id;
+};
+
+const removeToast = (id) => {
+  const index = toastMessages.value.findIndex(t => t.id === id);
+  if (index !== -1) {
+    toastMessages.value.splice(index, 1);
+  }
+};
+
+// Funciones de conveniencia
+const showSuccess = (title, message) => {
+  showToast({
+    title,
+    message,
+    type: 'success'
+  });};
+
+const showError = (title, message) => {
+  showToast({
+    title,
+    message,
+    type: 'error',
+    duration: 7000 // Los errores duran un poco más
+  });
+};
+
+const showInfo = (message) => {
+  showToast({
+    message,
+    type: 'warning',
+    duration: 5000
+  });
 };
 
 const saveProfile = async () => {
@@ -609,7 +803,11 @@ const saveProfile = async () => {
     const response = await $fetch(`/usuarios/${user.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
-      body: userData
+      body: userData,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
     });
     
     // Actualizar los datos originales con los nuevos valores
@@ -673,16 +871,6 @@ const updatePassword = async () => {
   }
   
   try {
-    const config = useRuntimeConfig();
-    
-    {
-      url: `${config.public.apiBase}/usuarios/cambio-clave/${user.value.id_usuario}`,
-      method: 'PUT',
-      body: {
-        currentPassword: currentPassword.value ? '***' : 'undefined',
-        newPassword: newPassword.value ? '***' : 'undefined'
-      }
-    };
     
     const response = await $fetch(`/usuarios/cambio-clave/${user.value.id_usuario}`, {
       method: 'PUT',
@@ -692,7 +880,8 @@ const updatePassword = async () => {
         newPassword: newPassword.value
       }),
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
       }
     }); 
     
@@ -740,43 +929,365 @@ const updatePassword = async () => {
     // Limpiar solo la contraseña actual para que el usuario pueda intentar de nuevo
     currentPassword.value = '';
   }
-}
+} 
 
-// Helper functions for notifications
-const showSuccess = (title, message) => {
-  // In a real app, use a toast notification library
-  alert(`${title}: ${message}`)
-}
+// Membership data
+const membershipData = ref({
+  endDate: null,
+  progress: 0
+});
 
-const showError = (title, message) => {
-  // In a real app, use a toast notification library
-  alert(`❌ ${title}: ${message}`)
-}
+// Función para calcular la fecha de vencimiento (30 días después de la fecha de registro)
+const calcularFechaVencimiento = (fechaInicio) => {
+  const fecha = new Date(fechaInicio);
+  fecha.setDate(fecha.getDate() + 30); // Agregar 30 días
+  return fecha;
+};
 
-// Membership functions
-const renovarMembresia = () => {
-  // In a real app, this would open a payment modal or redirect to payment page
-  alert('Redirigiendo al proceso de renovación de membresía...')
-}
-const membershipEndDate = computed(() => {
-  if (!user.value?.membership?.endDate) return 'No disponible'
+// Función para calcular el progreso de la membresía (0-100%)
+const calcularProgreso = (fechaInicio) => {
+  const hoy = new Date();
+  const fechaInicioObj = new Date(fechaInicio);
+  const fechaFinObj = calcularFechaVencimiento(fechaInicio);
+  
+  // Si la fecha actual es posterior a la fecha de vencimiento, retornar 100%
+  if (hoy >= fechaFinObj) return 100;
+  
+  // Si la fecha actual es anterior a la fecha de inicio, retornar 0%
+  if (hoy <= fechaInicioObj) return 0;
+  
+  // Calcular el porcentaje transcurrido
+  const totalDias = (fechaFinObj - fechaInicioObj) / (1000 * 60 * 60 * 24);
+  const diasTranscurridos = (hoy - fechaInicioObj) / (1000 * 60 * 60 * 24);
+  
+  return Math.min(100, Math.max(0, Math.round((diasTranscurridos / totalDias) * 100)));
+};
+
+// Función para actualizar el estado de la membresía a vencida
+const updateMembershipToExpired = async (membresiaId) => {
+  try {
+    await $fetch(`/membresia/${membresiaId}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: {
+        estado: 'vencida'
+      }
+    }); 
+  } catch (error) {
+    console.error('Error al actualizar el estado de la membresía:', error);
+  }
+};
+
+// Obtener y procesar datos de la membresía
+const fetchMembershipData = async () => { 
+  isLoadingMembershipData.value = true;
+  const userId = user.value?.id_usuario;
+  if (!userId) {
+    // Si no hay usuario, establecer estado inactivo
+    membershipData.value = {
+      status: 'inactiva',
+      progress: 0
+    };
+    return;
+  } 
   
   try {
-    return new Date(user.value.membership.endDate).toLocaleDateString('es-ES', {
+    const data = await $fetch(`/membresia/${userId}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    // Verificar si hay datos y si la respuesta es exitosa
+    if (data && data.status === 'success' && data.data) {
+      const membresia = data.data;      
+      // Verificar que la fecha sea válida
+      if (!membresia.fecha) {
+        console.error('Fecha de membresía no válida:', membresia.fecha);
+        throw new Error('Fecha de membresía no válida');
+      }
+      
+      const fechaInicio = new Date(membresia.fecha);
+      const fechaVencimiento = calcularFechaVencimiento(membresia.fecha);
+      const progreso = calcularProgreso(membresia.fecha);
+      
+      // Si la membresía está vencida (progreso 100%) pero el estado es 'activa', actualizar estado
+      let estado = membresia.estado;
+      if (progreso >= 100 && membresia.estado === 'activa') {
+        estado = 'vencida';
+        // Hacer petición PUT para actualizar el estado en el backend
+        await updateMembershipToExpired(membresia.id_membresia);
+      }
+      
+      membershipData.value = {
+        id: membresia.id_membresia,
+        idCuenta: membresia.id_cuenta,
+        numComprobante: membresia.num_comprobante,
+        fechaInicio: fechaInicio,
+        fechaVencimiento: fechaVencimiento,
+        progress: progreso,
+        status: estado,
+        // Mantener compatibilidad con código existente
+        endDate: fechaVencimiento,
+        startDate: fechaInicio
+      };
+      
+    } else if (data?.status === 'not_found') {
+      // No se encontró membresía para este usuario
+      membershipData.value = {
+        status: 'inactiva',
+        progress: 0
+      };
+    } else {
+      throw new Error('Formato de respuesta inesperado');
+    }
+    
+    return data;
+  } catch (error) {
+    if (error.response?._data?.status === 'not_found') {
+      showInfo('No tienes una membresía activa');
+    } else {
+      showError('Ocurrió un error al cargar la información de la membresía');
+    }
+    membershipData.value = {
+      status: 'inactiva',
+      progress: 0,
+      error: error.response?._data?.message || error.message
+    };
+    
+    // Relanzar el error para que pueda ser manejado por el código que llamó a esta función
+    throw error;
+  } finally {
+    isLoadingMembershipData.value = false;
+  }
+};
+
+// Computed para obtener la cuenta seleccionada
+const getSelectedAccount = computed(() => {
+  if (!selectedAccount.value) return null;
+  return bankAccounts.value.find(acc => acc.id_cuenta === selectedAccount.value) || null;
+});
+
+// Obtener el costo de la membresía
+const fetchMembershipCost = async () => {
+  isLoadingMembershipCost.value = true;
+  try {
+    const data = await $fetch('/config/valor/membresia', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (data) {
+      membershipCost.value = data.valor;
+    }
+  } catch (error) {
+    console.error('Error al obtener el costo de la membresía:', error);
+  } finally {
+    isLoadingMembershipCost.value = false;
+  }
+};
+
+// Cargar el costo de la membresía al montar el componente
+onMounted(() => {
+  // Primero cargar el costo
+  fetchMembershipCost().then(() => {
+    // Luego cargar los datos de la membresía
+    return fetchMembershipData();
+  }).catch(error => {
+    console.error('Error al cargar datos:', error);
+  });
+});
+
+// Obtener cuentas bancarias
+const fetchBankAccounts = async () => {
+  isLoadingAccounts.value = true;
+  try {
+    const data = await $fetch('/cuentas', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (data) {
+      bankAccounts.value = data;
+      selectedAccount.value = '';
+    }
+  } catch (error) {
+    console.error('Error al obtener cuentas bancarias:', error);
+    showError('Error', 'No se pudieron cargar las cuentas bancarias');
+  } finally {
+    isLoadingAccounts.value = false;
+  }
+};
+
+// Membership functions
+const renovarMembresia = async () => {
+  // Mostrar el modal de renovación
+  showRenewalModal.value = true;
+  
+  // Reiniciar valores
+  selectedAccount.value = '';
+  comprobante.value = ''; 
+
+  await fetchBankAccounts();
+};
+
+const confirmRenewal = async () => {
+  if (!selectedAccount.value) {
+    showError('Error', 'Por favor selecciona una cuenta bancaria');
+    return;
+  }
+  
+  if (!comprobante.value?.trim()) {
+    showError('Error', 'Por favor ingresa el número de comprobante');
+    return;
+  }
+
+  isRenewing.value = true;
+  
+  try {
+    const userId = user.value?.id_usuario;
+    if (!userId) {
+      throw new Error('No se pudo identificar al usuario');
+    }
+
+    const requestData = {
+      id_usuario: userId,
+      id_cuenta: parseInt(selectedAccount.value),
+      num_comprobante: comprobante.value.trim()
+    };
+
+    const data = await $fetch('/membresia', {
+      method: 'POST',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: requestData
+    });
+
+    // Cerrar el modal y actualizar datos
+    showRenewalModal.value = false;
+    await fetchMembershipData();
+    
+    // Mostrar notificación de éxito
+    showSuccess(
+      '¡Pago enviado!', 
+      '¡Pago Enviado! Tu membresía se actualizará una vez lo verifiquemos.'
+    );
+    
+    // Limpiar formulario
+    selectedAccount.value = '';
+    comprobante.value = '';
+    
+  } catch (error) {
+    showError(
+      'Error al procesar la solicitud',
+      error.data?.error || error.response?._data?.error || error.message || 'No se pudo completar la operación. Por favor, inténtalo de nuevo.'
+    );
+  } finally {
+    isRenewing.value = false;
+  }
+}
+
+const membershipEndDate = computed(() => {
+  if (membershipData.value.status === 'inactiva') return 'Sin Membresía Activa';
+  
+  try {
+    const fecha = membershipData.value.fechaVencimiento || membershipData.value.endDate;
+    if (!fecha) return 'Fecha no disponible';
+    
+    return new Date(fecha).toLocaleDateString('es-ES', {
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
-    })
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   } catch (error) {
-    console.error('Error al formatear la fecha de membresía:', error)
-    return 'Fecha inválida'
+    return 'Fecha inválida';
   }
-})
+});
 
-const membershipProgress = computed(() => user.value.membership.progress)
+// Fecha de inicio formateada
+const membershipStartDate = computed(() => {
+  if (membershipData.value.status === 'inactiva') return 'N/A';
+  
+  try {
+    const fecha = membershipData.value.fechaInicio || membershipData.value.startDate;
+    if (!fecha) return 'N/A';
+    
+    return new Date(fecha).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    return 'N/A';
+  }
+});
+
+// Estado de la membresía
+const membershipStatus = computed(() => {
+  const status = membershipData.value.status || 'inactiva';
+  
+  const statusMap = {
+    'activa': 'Activa',
+    'pendiente': 'Pendiente de verificación',
+    'vencida': 'Vencida',
+    'inactiva': 'Inactiva'
+  };
+  
+  return statusMap[status] || 'Inactiva';
+});
+
+// Verificación de estado de membresía
+const isMembershipActive = computed(() => {
+  return membershipData.value.status === 'activa';
+});
+
+const isMembershipPending = computed(() => {
+  return membershipData.value.status === 'pendiente';
+});
+
+const isMembershipExpired = computed(() => {
+  return membershipData.value.status === 'vencida' || 
+         (membershipData.value.status === 'activa' && membershipData.value.progress >= 100);
+});
+
+const isMembershipInactive = computed(() => {
+  return !membershipData.value.status || membershipData.value.status === 'inactiva';
+});
+
+const membershipProgress = computed(() => membershipData.value.progress);
 
 // Dark mode toggle
 const darkMode = ref(false)
+
+// Cargar datos de membresía cuando el componente se monte
+onMounted(() => {
+  if (user.value?.id_usuario) {
+    fetchMembershipData();
+  }
+});
 
 // Watch for dark mode changes
 watch(darkMode, (newVal) => {

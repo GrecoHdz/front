@@ -409,7 +409,8 @@ const fetchServices = async () => {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
       }
     })
     
@@ -598,7 +599,8 @@ const handleRequestService = async () => {
       body: JSON.stringify(requestData),
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
       }
     })
 

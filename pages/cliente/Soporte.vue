@@ -343,7 +343,7 @@ const submitForm = async () => {
       body: dataToSend,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
+        'Authorization': `Bearer ${auth.token}`
       }
     })
     

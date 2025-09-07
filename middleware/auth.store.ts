@@ -75,9 +75,7 @@ const setUser = (userData: User | null): User | null => {
     nombre: updatedUser.nombre,
     role: updatedUser.role,
     id_ciudad: updatedUser.id_ciudad
-  };
-  
-  console.log('Guardando datos del usuario en la cookie:', minimalUserData);
+  }; 
   
   // Update user cookie with minimal data
   userCookie.value = JSON.stringify(minimalUserData);
@@ -109,9 +107,7 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      const config = useRuntimeConfig(); 
-      
-      console.log('Iniciando proceso de login...');
+      const config = useRuntimeConfig();  
       
       // Hacer la petición con credentials: 'include' para manejar las cookies
       const response = await $fetch('/auth/login', {
@@ -124,13 +120,10 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
         }
       }) as { token: string; user: any; message?: string };
       
-      console.log('Respuesta del servidor:', response);
-      
       if (response?.token) {
         setToken(response.token);
         
         if (response.user) {
-          console.log('Datos del usuario recibidos del servidor:', response.user);
           
           // Asegurarse de que el usuario tenga los campos requeridos
           const userData = {
@@ -140,8 +133,6 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
             // Asegurar que el rol esté correctamente establecido
             role: response.user.role || (response.user.id_rol ? roleMap[response.user.id_rol] : 'usuario')
           };
-          
-          console.log('Datos del usuario después de procesar:', userData);
           
           // Guardar el usuario en el estado y en las cookies
           setUser(userData);
@@ -260,7 +251,6 @@ const checkAuth = async (): Promise<boolean> => {
       
       // Si el token ya expiró, forzar renovación
       if (tokenExpiresIn <= 0) {
-        console.log('Token expirado, intentando renovar...');
         return await refreshToken();
       }
     } catch (e) {
@@ -270,7 +260,6 @@ const checkAuth = async (): Promise<boolean> => {
     
     // Si falta información del usuario o el token está por expirar, intentar renovar
     if (shouldRefreshDueToMissingUserData || shouldRefreshDueToTokenExpiry) {
-      console.log('Faltan datos de usuario o el token está por expirar, intentando renovar...');
       try {
         // Si el token está por expirar pronto, forzar renovación
         if (tokenExpiresIn < 5 * 60 * 1000) {
@@ -279,7 +268,6 @@ const checkAuth = async (): Promise<boolean> => {
         
         // Si faltan datos de usuario pero el token es válido, intentar obtener los datos
         if (shouldRefreshDueToMissingUserData) {
-          console.log('Obteniendo datos del usuario...');
           const config = useRuntimeConfig();
           const response = await $fetch<AuthMeResponse>('/auth/me', {
             baseURL: config.public.apiBase,
