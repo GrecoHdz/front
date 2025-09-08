@@ -124,7 +124,23 @@
 
           <!-- Benefits Cards -->
           <div class="p-6">
-            <div class="grid grid-cols-2 gap-3">
+            <div v-if="loadingBenefits" class="grid grid-cols-2 gap-3">
+              <div v-for="i in 4" :key="`skeleton-${i}`" 
+                   class="h-24 bg-gray-100 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
+            </div>
+            
+            <div v-else-if="benefitsError" class="text-center py-4 text-red-500">
+              {{ benefitsError }}
+              <button @click="fetchBeneficios" class="mt-2 text-sm text-blue-600 hover:underline">
+                Reintentar
+              </button>
+            </div>
+            
+            <div v-else-if="benefitsToShow.length === 0" class="text-center py-4 text-gray-500">
+              No hay beneficios disponibles en este momento.
+            </div>
+            
+            <div v-else class="grid grid-cols-2 gap-3">
               <div v-for="(benefit, index) in benefitsToShow" :key="`benefit-${benefit.month}`"
                    class="p-4 rounded-2xl border-2 transition-all duration-300"
                    :class="getBenefitStyle(benefit.month)">
@@ -375,8 +391,8 @@
                 <span class="text-white text-xl">💰</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-sm">Membresía</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">Gestionar plan</p>
+                <p class="font-bold text-gray-900 dark:text-white text-sm">Referir</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Ganá dinero</p>
               </div>
             </div>
           </button>
@@ -414,6 +430,9 @@ useHead({
 const auth = useAuthStore()
 const router = useRouter() 
 const isLoading = ref(true) 
+const beneficios = ref([])
+const loadingBenefits = ref(false)
+const benefitsError = ref(null) 
 const isLoadingProgress = ref(false)
 
 // Datos del usuario
@@ -465,8 +484,8 @@ const shortName = computed(() => {
 })
 
 const statsData = ref({
-  totalServices: 12,
-  credit: 500,
+  totalServices: 0,
+  credit: 0,
   membershipMonths: 0
 })
 
@@ -570,6 +589,24 @@ const fetchMembershipData = async () => {
     throw error
   }
 }
+
+// Computed para mapear los beneficios al formato esperado por la UI
+const benefitsToShow = computed(() => {
+  return beneficios.value.map(beneficio => ({
+    month: beneficio.mes_requerido,
+    title: beneficio.tipo_beneficio,
+    active: currentMonth.value >= beneficio.mes_requerido
+  }))
+})
+
+// Computed para obtener el mes actual relativo al inicio de la membresía
+const currentMonth = computed(() => {
+  if (!membershipData.value?.fecha_inicio) return 0
+  const startDate = new Date(membershipData.value.fecha_inicio)
+  const now = new Date()
+  const months = (now.getFullYear() - startDate.getFullYear()) * 12
+  return months + now.getMonth() - startDate.getMonth()
+})
 
 // Computed properties para la membresía
 const isMembershipActive = computed(() => {
@@ -687,9 +724,10 @@ const getServiceIcon = (serviceName) => {
   return '🔧'
 }
 
-// Fetch services when component mounts
-onMounted(() => {
-  fetchServices()
+// Fetch services and benefits when component mounts
+onMounted(async () => {
+  await fetchServices()
+  await fetchBeneficios()
 })
 
 // Static data arrays
@@ -748,14 +786,35 @@ const progressMessage = computed(() => {
   if (month >= 1) return 'Ya tienes descuentos disponibles'
   return 'Empieza a acumular beneficios con tu membresía'
 })
-
-const benefitsToShow = computed(() => {
-  return membershipBenefits.slice(0, 4)
-})
+ 
 
 const recentServicesDisplay = computed(() => {
   return recentServicesData.value.slice(0, 3)
 })
+
+// Fetch beneficios desde la API
+const fetchBeneficios = async () => {
+  loadingBenefits.value = true
+  benefitsError.value = null
+  
+  try {
+    const response = await $fetch('/membresiabeneficios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    beneficios.value = response
+  } catch (error) {
+    console.error('Error al cargar beneficios:', error)
+    benefitsError.value = 'No se pudieron cargar los beneficios. Intente más tarde.'
+  } finally {
+    loadingBenefits.value = false
+  }
+}
 
 // Methods for styling
 const getBenefitStyle = (month) => {
