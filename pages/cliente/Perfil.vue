@@ -1,16 +1,15 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
-      <!-- Toast Notifications -->
-    <div class="fixed top-4 right-4 space-y-2 z-50">
-      <Toast
-        v-for="toast in toastMessages"
-        :key="toast.id"
-        :message="toast.message"
-        :type="toast.type"
-        :duration="toast.duration"
-        @close="removeToast(toast.id)"
-      />
-    </div>  
+      <!-- Toast Notification -->
+    <!-- Toast Notification -->
+    <Toast 
+      v-if="toast.show"
+      :key="toast.message + Date.now()"
+      :message="toast.message" 
+      :type="toast.type"
+      :duration="toast.duration"
+      @close="toast.show = false"
+    />
       
       <!-- Loading Spinner -->
       <LoadingSpinner 
@@ -103,16 +102,19 @@
             
             <button 
               @click="renovarMembresia"
-              class="w-full sm:w-auto px-4 py-2 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap self-center sm:self-auto"
+              class="w-full sm:w-auto px-4 py-2 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
               :class="{
-                'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700': isMembershipActive && membershipProgress < 80,
-                'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600': isMembershipActive && membershipProgress >= 80,
-                'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700': isMembershipPending,
-                'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700': isMembershipExpired || isMembershipInactive
+                'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed': isMembershipActive,
+                'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5': isMembershipExpired || isMembershipInactive,
+                'bg-gradient-to-r from-gray-500 to-gray-600 cursor-not-allowed': isMembershipPending,
+                'opacity-80': !isMembershipExpired && !isMembershipInactive
               }"
-              :disabled="isMembershipPending"
+              :disabled="!isMembershipExpired && !isMembershipInactive"
             >
-              {{ isMembershipPending ? 'Pendiente' : 'Renovar Ahora' }}
+              <svg v-if="isMembershipExpired || isMembershipInactive" class="w-4 h-4 mr-2 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              {{ isMembershipActive ? 'Membresía Activa' : isMembershipPending ? 'Pendiente' : isMembershipInactive ? 'Activar ahora' : 'Renovar Ahora' }}
             </button>
           </div>
           
@@ -344,143 +346,205 @@
     </div>
 
     <!-- Modal de Renovación de Membresía -->
-    <div v-if="showRenewalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md relative">
-        <button 
-          @click="showRenewalModal = false"
-          type="button"
-          class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="showRenewalModal" class="fixed inset-0 z-50 p-4">
+        <!-- Backdrop con animación separada -->
+        <Transition
+          name="backdrop"
+          enter-active-class="backdrop-enter-active"
+          leave-active-class="backdrop-leave-active"
+          enter-from-class="backdrop-enter-from"
+          leave-to-class="backdrop-leave-to"
         >
-          <span class="sr-only">Cerrar</span>
-          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          <div 
+            v-if="showRenewalModal"
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            @click="showRenewalModal = false"
+          ></div>
+        </Transition>
 
-        <div class="text-center">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
-            <span class="text-blue-600 dark:text-blue-400 text-xl">💳</span>
-          </div>
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Renovar Membresía</h3>
-          <p class="text-gray-600 dark:text-gray-300 mb-6">Selecciona una cuenta para realizar el pago</p>
-        </div>
-
-        <div class="space-y-4">
-          <!-- Costo de la membresía -->
-          <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-            <div class="flex justify-between items-center">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Costo de la membresía:</span>
-              <span v-if="isLoadingMembershipCost" class="h-6 w-24 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></span>
-              <span v-else class="text-lg font-bold text-blue-600 dark:text-blue-400">L. {{ Number(membershipCost).toFixed(2) }}</span>
-            </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Válido por 30 días a partir de hoy</p>
-          </div>
-
-          <!-- Selector de cuenta bancaria -->
-          <div>
-            <label for="bank-account" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Cuenta bancaria
-            </label>
-            <div v-if="isLoadingAccounts" class="py-4 flex justify-center">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            </div>
-            <div v-else>
-              <select
-                id="bank-account"
-                v-model="selectedAccount"
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
-                :disabled="bankAccounts.length === 0"
+        <!-- Modal Content con animación separada -->
+        <div class="flex items-center justify-center min-h-full">
+          <Transition
+            name="modal-content"
+            enter-active-class="modal-content-enter-active"
+            leave-active-class="modal-content-leave-active"
+            enter-from-class="modal-content-enter-from"
+            leave-to-class="modal-content-leave-to"
+          >
+            <div 
+              v-if="showRenewalModal"
+              class="bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-md relative shadow-2xl border border-gray-200 dark:border-gray-700"
+              @click.stop
+            >
+              <!-- Botón de cerrar mejorado -->
+              <button 
+                @click="showRenewalModal = false"
+                type="button"
+                class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                aria-label="Cerrar modal"
               >
-                <option v-if="bankAccounts.length === 0" value="" disabled>No hay cuentas registradas</option>
-                <option value="" selected disabled>Selecciona una cuenta</option>
-                <option 
-                  v-for="account in bankAccounts" 
-                  :key="account.id_cuenta" 
-                  :value="account.id_cuenta"
-                >
-                  • {{ account.banco }}  
-                </option>
-              </select>
-              <!-- Mostrar detalles de la cuenta seleccionada -->
-              <div v-if="selectedAccount" class="space-y-4">
-                <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                  <div class="space-y-2">
-                    <div class="flex justify-between">
-                      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Banco:</span>
-                      <span class="text-sm text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.banco || 'N/A' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Número de cuenta:</span>
-                      <span class="text-sm text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.num_cuenta || 'N/A' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Beneficiario:</span>
-                      <span class="text-sm text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.beneficiario || 'N/A' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Tipo de cuenta:</span>
-                      <span class="text-sm text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.tipo || 'N/A' }}</span>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              <!-- Header del modal mejorado -->
+              <div class="text-center mb-6">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mb-4 shadow-lg">
+                  <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">Renovar Membresía</h3>
+                <p class="text-gray-600 dark:text-gray-300">Selecciona una cuenta para realizar el pago</p>
+              </div>
+
+              <div class="space-y-5">
+                <!-- Costo de la membresía mejorado -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-2xl border border-blue-200 dark:border-blue-800">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">Costo de la membresía:</span>
+                    <span v-if="isLoadingMembershipCost" class="h-6 w-24 bg-blue-200 dark:bg-blue-700 rounded animate-pulse"></span>
+                    <span v-else class="text-xl font-black text-blue-600 dark:text-blue-400">L. {{ Number(membershipCost).toFixed(2) }}</span>
+                  </div>
+                  <p class="text-xs text-blue-600 dark:text-blue-300 mt-1 font-medium"> Válido por 30 días a partir de hoy</p>
+                </div>
+
+                <!-- Selector de cuenta bancaria mejorado -->
+                <div class="space-y-3">
+                  <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Cuenta bancaria
+                  </label>
+                  <div v-if="isLoadingAccounts" class="py-8 flex flex-col items-center justify-center">
+                    <div class="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent"></div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
+                  </div>
+                  <div v-else class="space-y-4">
+                    <select
+                      id="bank-account"
+                      v-model="selectedAccount"
+                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200"
+                      :disabled="bankAccounts.length === 0"
+                    >
+                      <option v-if="bankAccounts.length === 0" value="" disabled>No hay cuentas registradas</option>
+                      <option value="" selected disabled>Selecciona una cuenta</option>
+                      <option 
+                        v-for="account in bankAccounts" 
+                        :key="account.id_cuenta" 
+                        :value="account.id_cuenta"
+                      >
+                        🏦 {{ account.banco }}
+                      </option>
+                    </select>
+                    
+                    <!-- Detalles de la cuenta seleccionada con animación -->
+                    <Transition
+                      name="slide-down"
+                      enter-active-class="slide-down-enter-active"
+                      leave-active-class="slide-down-leave-active"
+                      enter-from-class="slide-down-enter-from"
+                      leave-to-class="slide-down-leave-to"
+                    >
+                      <div v-if="selectedAccount" class="space-y-4">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+                          <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalles de la cuenta:</h4>
+                          <div class="space-y-2">
+                            <div class="flex justify-between items-center py-1">
+                              <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Banco:</span>
+                              <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.banco || 'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1">
+                              <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Cuenta:</span>
+                              <span class="text-sm font-mono font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.num_cuenta || 'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1">
+                              <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Beneficiario:</span>
+                              <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.beneficiario || 'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1">
+                              <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Tipo:</span>
+                              <span class="text-sm font-semibold text-gray-800 dark:text-gray-100 capitalize">{{ getSelectedAccount?.tipo || 'N/A' }}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Input para el número de comprobante mejorado -->
+                        <div class="space-y-2">
+                          <label for="comprobante" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Número de comprobante
+                          </label>
+                          <input
+                            id="comprobante"
+                            v-model="comprobante"
+                            type="text"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200"
+                            placeholder="Ej: 123456789"
+                            required
+                          />
+                          <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Ingresa el número de comprobante de tu transferencia o depósito
+                          </p>
+                        </div>
+                      </div>
+                    </Transition>
+                    
+                    <div v-if="bankAccounts.length === 0" class="text-center py-4">
+                      <p class="text-sm text-amber-600 dark:text-amber-400 font-medium">⚠️ No se encontraron cuentas bancarias</p>
                     </div>
                   </div>
                 </div>
 
-                <!-- Input para el número de comprobante -->
-                <div class="space-y-2">
-                  <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Número de comprobante
-                  </label>
-                  <input
-                    id="comprobante"
-                    v-model="comprobante"
-                    type="text"
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
-                    placeholder="Ingresa el número de comprobante"
-                    required
-                  />
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    Por favor ingresa el número de comprobante de tu transferencia o depósito
-                  </p>
+                <!-- Botones de acción mejorados -->
+                <div class="flex flex-col space-y-3 pt-4">
+                  <button
+                    @click="confirmRenewal"
+                    :disabled="isRenewing || !selectedAccount || !comprobante || bankAccounts.length === 0"
+                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                    :class="{'opacity-50 cursor-not-allowed': !selectedAccount || !comprobante}"
+                  >
+                    <span v-if="isRenewing" class="flex items-center justify-center">
+                      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Procesando...
+                    </span>
+                    <span v-else class="flex items-center justify-center">
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      Confirmar Pago
+                    </span>
+                  </button>
+                  <button
+                    @click="showRenewalModal = false"
+                    class="w-full py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99]"
+                  >
+                    Cancelar
+                  </button>
                 </div>
               </div>
-              <p v-if="bankAccounts.length === 0" class="mt-1 text-sm text-amber-600 dark:text-amber-400">
-                No se encontraron cuentas bancarias
-              </p>
             </div>
-          </div>
-
-          <!-- Botones de acción -->
-          <div class="flex flex-col space-y-3 pt-2">
-            <button
-              @click="confirmRenewal"
-              :disabled="isRenewing || !selectedAccount || !comprobante || bankAccounts.length === 0"
-              class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              :class="{'opacity-50 cursor-not-allowed': !selectedAccount || !comprobante}"
-            >
-              <span v-if="isRenewing" class="flex items-center justify-center">
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Procesando...
-              </span>
-              <span v-else>Confirmar Pago</span>
-            </button>
-            <button
-              @click="showRenewalModal = false"
-              class="w-full py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
-            >
-              Cancelar
-            </button>
-          </div>
+          </Transition>
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
   
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
@@ -497,8 +561,9 @@ useHead({
 })
 
 // Autenticación
-const auth = useAuthStore()
+const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 
 // Estados de carga
 const isLoading = ref(true)
@@ -732,58 +797,59 @@ const formatShortDate = (dateString) => {
 
 // Save profile function
 // Estado para controlar las notificaciones
-const toastMessages = ref([]);
-let toastId = 0;
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'info',
+  duration: 5000
+});
 
 const showToast = (options) => {
-  const id = toastId++;
-  const toast = {
-    id,
-    type: 'success',
-    duration: 5000,
-    ...options
-  };
+  // Primero ocultar el toast actual
+  toast.value.show = false;
   
-  toastMessages.value.push(toast);
-  
-  // Eliminar el toast después de la duración especificada
-  if (toast.duration > 0) {
-    setTimeout(() => {
-      removeToast(id);
-    }, toast.duration);
-  }
-  
-  return id;
-};
-
-const removeToast = (id) => {
-  const index = toastMessages.value.findIndex(t => t.id === id);
-  if (index !== -1) {
-    toastMessages.value.splice(index, 1);
-  }
+  // Usar nextTick para asegurar que la actualización del DOM se complete
+  nextTick(() => {
+    // Actualizar con los nuevos valores
+    toast.value = {
+      show: true,
+      message: options.message,
+      type: options.type || 'info',
+      duration: options.duration || 5000
+    };
+  });
 };
 
 // Funciones de conveniencia
-const showSuccess = (title, message) => {
+const showSuccess = (title, message) => { 
+  const toastMessage = message ? `${title} \n${message}` : title;
+  
   showToast({
-    title,
-    message,
-    type: 'success'
-  });};
+    message: toastMessage,
+    type: 'success',
+    duration: 5000
+  });  
+  
+  // Para depuración
+  console.log('Mostrando toast de éxito:', toastMessage);
+};
 
 const showError = (title, message) => {
+  const errorMessage = message || title;
+  console.error('Error:', errorMessage);
+  
   showToast({
-    title,
-    message,
+    message: errorMessage,
     type: 'error',
-    duration: 7000 // Los errores duran un poco más
+    duration: 8000 // Los errores duran más para que el usuario los pueda leer
   });
 };
 
 const showInfo = (message) => {
+  console.log('Info:', message);
   showToast({
     message,
-    type: 'warning',
+    type: 'info',
     duration: 5000
   });
 };
@@ -1103,11 +1169,42 @@ const fetchMembershipCost = async () => {
 onMounted(() => {
   // Primero cargar el costo
   fetchMembershipCost().then(() => {
-    // Luego cargar los datos de la membresía
-    return fetchMembershipData();
-  }).catch(error => {
-    console.error('Error al cargar datos:', error);
+    // Luego cargar las cuentas bancarias
+    fetchBankAccounts().finally(() => {
+      // Finalmente, cargar los datos del perfil
+      cargarDatosPerfil().finally(() => {
+        // Cargar datos de la membresía
+        fetchMembershipData().finally(() => {
+          // Verificar el hash de la URL después de cargar todo
+          if (process.client && window.location.hash === '#membresia' && (isMembershipExpired.value || isMembershipInactive.value)) {
+            // Usar nextTick para asegurar que el DOM esté listo
+            nextTick(() => {
+              renovarMembresia();
+              // Limpiar el hash sin recargar la página
+              window.history.replaceState({}, document.title, window.location.pathname);
+            });
+          }
+        });
+      });
+    });
   });
+
+  // Escuchar cambios en el hash
+  const handleHashChange = () => {
+    if (process.client && window.location.hash === '#membresia' && (isMembershipExpired.value || isMembershipInactive.value)) {
+      renovarMembresia();
+      // Limpiar el hash sin recargar la página
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  };
+
+  // Agregar el event listener
+  window.addEventListener('hashchange', handleHashChange);
+
+  // Limpiar event listener al desmontar el componente
+  return () => {
+    window.removeEventListener('hashchange', handleHashChange);
+  };
 });
 
 // Obtener cuentas bancarias
@@ -1188,8 +1285,8 @@ const confirmRenewal = async () => {
     
     // Mostrar notificación de éxito
     showSuccess(
-      '¡Pago enviado!', 
-      '¡Pago Enviado! Tu membresía se actualizará una vez lo verifiquemos.'
+      '¡Pago Enviado!',
+      'Tu membresía se actualizará una vez verifiquemos tu pago.'
     );
     
     // Limpiar formulario
@@ -1303,5 +1400,117 @@ watch(darkMode, (newVal) => {
 </script>
 
 <style scoped>
-/* Add any custom styles here if needed */
-</style>
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-pulse-icon {
+  animation: pulse 2s infinite;
+  display: inline-block;
+}
+
+/* Animaciones del Modal */
+.modal-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.modal-leave-active {
+  transition: all 0.25s ease-in;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+/* Animaciones del Backdrop */
+.backdrop-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.backdrop-leave-active {
+  transition: all 0.25s ease-in;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+/* Animaciones del Contenido del Modal */
+.modal-content-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-content-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.modal-content-enter-from {
+  opacity: 0;
+  transform: scale(0.8) translateY(-20px);
+}
+
+.modal-content-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+}
+
+/* Animaciones del Slide Down */
+.slide-down-enter-active {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.slide-down-leave-active {
+  transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+  max-height: 0;
+}
+
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+  max-height: 0;
+}
+
+/* Mejoras visuales adicionales */
+.border-3 {
+  border-width: 3px;
+}
+
+/* Efecto de glassmorphism sutil */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Animación de hover mejorada para botones */
+button:hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sombra mejorada para el modal */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Dark mode adjustments */
+.dark .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+</style> 

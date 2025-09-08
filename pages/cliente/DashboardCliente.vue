@@ -74,7 +74,7 @@
               </div>
               <div>
                 <p class="text-gray-600 dark:text-gray-400 text-sm">Crédito</p>
-                <p class="text-2xl font-black text-gray-900 dark:text-white">L. {{ statsData.credit }}</p>
+                <p class="text-2xl font-black text-gray-900 dark:text-white">L. {{ statsData.credit.toLocaleString('es-HN') }}</p>
               </div>
             </div>
           </div>
@@ -91,7 +91,8 @@
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-2xl font-black">Tu Progreso</h3>
                 <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
-                  <span class="text-sm font-bold">Mes {{ statsData.membershipMonths }}</span>
+                  <span v-if="isLoadingProgress" class="text-sm font-bold">Cargando...</span>
+                  <span v-else class="text-sm font-bold">Mes {{ statsData.membershipMonths }}</span>
                 </div>
               </div>
               
@@ -107,7 +108,8 @@
                   </svg>
                   <div class="absolute inset-0 flex items-center justify-center">
                     <div class="text-center">
-                      <div class="text-2xl font-black text-white">{{ progressCount }}/6</div>
+                      <div v-if="isLoadingProgress" class="text-2xl font-black text-white">--/6</div>
+                      <div v-else class="text-2xl font-black text-white">{{ progressCount }}/6</div>
                       <div class="text-xs text-white/80">Beneficios</div>
                     </div>
                   </div>
@@ -144,28 +146,95 @@
             </div>
             
             <!-- Membresía -->
-            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-200 dark:border-blue-800">
-              <div class="flex items-start justify-between">
+            <div class="mt-4 p-4 rounded-2xl border transition-colors duration-300"
+              :class="{
+                'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': isMembershipActive,
+                'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800': isMembershipPending,
+                'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800': isMembershipExpired,
+                'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700': isMembershipInactive
+              }">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex-1">
                   <div class="flex items-center space-x-3 mb-3">
-                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-800/30 rounded-xl flex items-center justify-center">
-                      <span class="text-blue-600 dark:text-blue-400">🏆</span>
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                      :class="{
+                        'bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-400': isMembershipActive,
+                        'bg-amber-100 dark:bg-amber-800/30 text-amber-600 dark:text-amber-400': isMembershipPending,
+                        'bg-red-100 dark:bg-red-800/30 text-red-600 dark:text-red-400': isMembershipExpired,
+                        'bg-gray-100 dark:bg-gray-700/30 text-gray-600 dark:text-gray-400': isMembershipInactive
+                      }">
+                      <span v-if="isMembershipActive">🏆</span>
+                      <span v-else-if="isMembershipPending">⏳</span>
+                      <span v-else-if="isMembershipExpired">⚠️</span>
+                      <span v-else>🔒</span>
                     </div>
-                    <div>
-                      <p class="text-sm font-medium text-blue-800 dark:text-blue-200">Membresía activa hasta</p>
-                      <p class="text-sm font-bold text-blue-900 dark:text-white">30 de Agosto, 2024</p>
+                    <div class="min-w-0">
+                      <p class="text-sm font-medium"
+                        :class="{
+                          'text-blue-800 dark:text-blue-200': isMembershipActive,
+                          'text-amber-800 dark:text-amber-200': isMembershipPending,
+                          'text-red-800 dark:text-red-200': isMembershipExpired,
+                          'text-gray-800 dark:text-gray-200': isMembershipInactive
+                        }">
+                        {{ isMembershipActive ? 'Membresía activa hasta' : 
+                           isMembershipPending ? 'Membresía pendiente' :
+                           isMembershipExpired ? 'Membresía vencida' : 'Estado de la membresía' }}
+                      </p>
+                      <p class="text-sm font-bold truncate"
+                        :class="{
+                          'text-blue-900 dark:text-white': isMembershipActive,
+                          'text-amber-900 dark:text-amber-100': isMembershipPending,
+                          'text-red-900 dark:text-red-100': isMembershipExpired,
+                          'text-gray-900 dark:text-gray-100': isMembershipInactive
+                        }">
+                        {{ isMembershipActive ? membershipEndDate : membershipStatus }}
+                      </p>
                     </div>
                   </div>
-                  <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700 mb-3">
-                    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full" style="width: 65%"></div>
+                  
+                  <!-- Barra de progreso -->
+                  <div v-if="!isMembershipInactive" class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700 mb-1">
+                    <div 
+                      class="h-2 rounded-full transition-all duration-500 ease-in-out"
+                      :class="{
+                        'bg-gradient-to-r from-green-500 to-emerald-600': membershipProgress < 80,
+                        'bg-gradient-to-r from-amber-400 to-orange-500': membershipProgress >= 80 && membershipProgress < 95,
+                        'bg-gradient-to-r from-red-500 to-pink-600': membershipProgress >= 95
+                      }"
+                      :style="`width: ${membershipProgress}%`"
+                    ></div>
+                  </div>
+                  
+                  <div v-if="!isMembershipInactive" class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Inicio: {{ membershipStartDate }}</span>
+                    <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% completado</span>
+                    <span v-else-if="membershipProgress >= 100">Expirada</span>
                   </div>
                 </div>
+                
                 <button 
-                  @click="handleRenovarMembresia"
-                  class="ml-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap"
+                  @click="renovarMembresia"
+                  class="w-full sm:w-auto px-4 py-2 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
+                  :class="{
+                    'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed': isMembershipActive,
+                    'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5': isMembershipExpired || isMembershipInactive,
+                    'bg-gradient-to-r from-gray-500 to-gray-600 cursor-not-allowed': isMembershipPending,
+                    'opacity-80': !isMembershipExpired && !isMembershipInactive
+                  }"
+                  :disabled="!isMembershipExpired && !isMembershipInactive"
                 >
-                  Renovar Ahora
+                  <svg v-if="isMembershipExpired || isMembershipInactive" class="w-4 h-4 mr-2 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  {{ isMembershipActive ? 'Membresía Activa' : isMembershipPending ? 'Pendiente' : isMembershipInactive ? 'Activar ahora' : 'Renovar Ahora' }}
                 </button>
+              </div>
+              
+              <!-- Información adicional para debug -->
+              <div v-if="false" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500">
+                <p>ID: {{ membershipData.id }}</p>
+                <p>Estado: {{ membershipData.status }}</p>
+                <p>Progreso: {{ membershipProgress }}%</p>
               </div>
             </div>
           </div>
@@ -221,7 +290,7 @@
 
               <button type="submit" 
                       class="w-full py-4 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-black text-lg rounded-xl hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
-                ✨ Solicitar Ahora
+                Solicitar Ahora
               </button>
             </form>
           </div>
@@ -345,6 +414,7 @@ useHead({
 const auth = useAuthStore()
 const router = useRouter() 
 const isLoading = ref(true) 
+const isLoadingProgress = ref(false)
 
 // Datos del usuario
 const userCookie = useCookie('user')
@@ -360,9 +430,28 @@ const userData = ref({
   ...(userCookie.value || {})
 })
 
+// Estados y datos de membresía
+const membershipData = ref({
+  id: null,
+  status: 'inactiva',
+  progress: 0,
+  startDate: null,
+  endDate: null
+})
+
 // Verificar autenticación al cargar el componente
 onMounted(async () => { 
-    isLoading.value = false 
+  try {
+    await fetchMembershipProgress()
+    await fetchMembershipData()
+  } catch (error) {
+    // Solo mostrar error si no es un error de "no encontrado"
+    if (error?.response?._data?.status !== 'not_found') {
+      console.error('Error al cargar datos de membresía:', error)
+    }
+  } finally {
+    isLoading.value = false
+  }
 })
 
 // Asegurar que name siempre tenga un valor
@@ -375,13 +464,168 @@ const shortName = computed(() => {
   return names.length > 2 ? `${names[0]} ${names[1]}` : userData.value.nombre
 })
 
-
-
-
 const statsData = ref({
   totalServices: 12,
   credit: 500,
-  membershipMonths: 4
+  membershipMonths: 0
+})
+
+// Función para obtener el progreso de la membresía
+const fetchMembershipProgress = async () => {
+  try {
+    isLoadingProgress.value = true
+    
+    // Obtener el id_usuario de la cookie
+    const userCookie = useCookie('user')
+    const userData = userCookie.value
+    
+    if (!userData || !userData.id_usuario) {
+      return // No mostrar error en consola
+    }
+
+    const response = await $fetch(`/membresia/progreso/${userData.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      // No lanzar excepción para códigos de estado 404
+      ignoreResponseError: true
+    }).catch(() => null) // Capturar cualquier error sin mostrarlo
+
+    if (response?.status === 'success') {
+      // Actualizar el progreso de la membresía
+      statsData.value.membershipMonths = response.mesesProgreso || 0
+      // Actualizar el crédito con el monto total de la respuesta
+      statsData.value.credit = response.montoTotal || 0
+    }
+  } catch (error) {
+    // No hacer nada con el error, solo asegurarse de que no se muestre en consola
+  } finally {
+    isLoadingProgress.value = false
+  }
+}
+
+// Función para obtener datos completos de la membresía
+const fetchMembershipData = async () => {
+  try {
+    const userCookie = useCookie('user')
+    const userData = userCookie.value
+    
+    if (!userData || !userData.id_usuario) {
+      membershipData.value = { status: 'inactiva', progress: 0 }
+      return
+    }
+
+    const response = await $fetch(`/membresia/${userData.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    if (response && response.status === 'success' && response.data) {
+      const membresia = response.data
+      const fechaInicio = new Date(membresia.fecha)
+      const fechaVencimiento = new Date(fechaInicio)
+      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30)
+      
+      // Calcular progreso
+      const hoy = new Date()
+      const totalDias = (fechaVencimiento - fechaInicio) / (1000 * 60 * 60 * 24)
+      const diasTranscurridos = (hoy - fechaInicio) / (1000 * 60 * 60 * 24)
+      const progreso = Math.min(100, Math.max(0, Math.round((diasTranscurridos / totalDias) * 100)))
+      
+      // Actualizar estado a 'vencida' si la membresía está expirada
+      if (progreso >= 100 && membresia.estado === 'activa') {
+        membresia.estado = 'vencida'
+      }
+      
+      membershipData.value = {
+        id: membresia.id_membresia,
+        status: membresia.estado,
+        progress: progreso,
+        startDate: fechaInicio,
+        endDate: fechaVencimiento
+      }
+      
+      return response
+    } else if (response?.status === 'not_found') {
+      membershipData.value = { status: 'inactiva', progress: 0 }
+      return { status: 'not_found' }
+    } else {
+      throw new Error('Formato de respuesta inesperado')
+    }
+  } catch (error) {
+    if (error.response?._data?.status === 'not_found') {
+      membershipData.value = { status: 'inactiva', progress: 0 }
+      return { status: 'not_found' }
+    }
+    
+    console.error('Error al obtener datos de la membresía:', error)
+    membershipData.value = { status: 'inactiva', progress: 0 }
+    throw error
+  }
+}
+
+// Computed properties para la membresía
+const isMembershipActive = computed(() => {
+  return membershipData.value.status === 'activa'
+})
+
+const isMembershipPending = computed(() => {
+  return membershipData.value.status === 'pendiente'
+})
+
+const isMembershipExpired = computed(() => {
+  return membershipData.value.status === 'vencida' || 
+         (membershipData.value.status === 'activa' && membershipData.value.progress >= 100)
+})
+
+const isMembershipInactive = computed(() => {
+  return !membershipData.value.status || membershipData.value.status === 'inactiva'
+})
+
+const membershipProgress = computed(() => membershipData.value.progress || 0)
+
+const membershipEndDate = computed(() => {
+  if (!membershipData.value.endDate) return 'Fecha no disponible'
+  
+  return new Date(membershipData.value.endDate).toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+})
+
+const membershipStartDate = computed(() => {
+  if (!membershipData.value.startDate) return 'N/A';
+  
+  return new Date(membershipData.value.startDate).toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+})
+
+const membershipStatus = computed(() => {
+  const status = membershipData.value.status || 'inactiva'
+  
+  const statusMap = {
+    'activa': 'Activa',
+    'pendiente': 'Pendiente de verificación',
+    'vencida': 'Vencida',
+    'inactiva': 'Sin membresía'
+  }
+  
+  return statusMap[status] || 'Sin membresía'
 })
 
 const serviceFormData = ref({
@@ -501,7 +745,8 @@ const progressMessage = computed(() => {
   if (month >= 6) return '¡Has desbloqueado todos los beneficios!'
   if (month >= 3) return 'Ya tienes limpieza de aire gratis'
   if (month >= 2) return 'Tu crédito ya se está acumulando'
-  return 'Sigue acumulando beneficios cada mes'
+  if (month >= 1) return 'Ya tienes descuentos disponibles'
+  return 'Empieza a acumular beneficios con tu membresía'
 })
 
 const benefitsToShow = computed(() => {
@@ -632,8 +877,13 @@ const handleRequestService = async () => {
   }
 }
 
+const renovarMembresia = () => {
+  // Redirigir a la página de perfil con el hash #membresia
+  navigateTo('/cliente/perfil#membresia')
+}
+
 const handleRenovarMembresia = () => {
-  showToast('¡Renovación iniciada!', 'success')
+  renovarMembresia()
 }
 
 const showToast = (message, type = 'success') => {
