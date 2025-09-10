@@ -305,7 +305,13 @@
               </div>
 
               <button type="submit" 
-                      class="w-full py-4 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-black text-lg rounded-xl hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
+                      :disabled="!isFormValid"
+                      :class="[
+                        'w-full py-4 backdrop-blur-sm border font-black text-lg rounded-xl transition-all duration-300',
+                        isFormValid 
+                          ? 'bg-white/20 border-white/30 text-white hover:bg-white/30 hover:scale-105 cursor-pointer' 
+                          : 'bg-white/10 border-white/10 text-white/50 cursor-not-allowed'
+                      ]">
                 Solicitar Ahora
               </button>
             </form>
@@ -563,15 +569,17 @@ const fetchMembershipData = async () => {
         membresia.estado = 'vencida'
       }
       
-      membershipData.value = {
+      const membershipInfo = {
         id: membresia.id_membresia,
         status: membresia.estado,
         progress: progreso,
         startDate: fechaInicio,
-        endDate: fechaVencimiento
+        endDate: fechaVencimiento,
+        estado: membresia.estado // Asegurarse de incluir el estado directamente
       }
       
-      return response
+      membershipData.value = membershipInfo
+      return membershipInfo
     } else if (response?.status === 'not_found') {
       membershipData.value = { status: 'inactiva', progress: 0 }
       return { status: 'not_found' }
@@ -672,6 +680,15 @@ const serviceFormData = ref({
   direccion: ''
 })
 
+const isFormValid = computed(() => {
+  return (
+    serviceFormData.value.type &&
+    serviceFormData.value.description.trim() !== '' &&
+    serviceFormData.value.colonia.trim() !== '' &&
+    serviceFormData.value.direccion.trim() !== ''
+  )
+})
+
 const toast = ref({
   show: false,
   message: '',
@@ -681,6 +698,29 @@ const toast = ref({
 // Services data
 const servicesList = ref([])
 const isLoadingServices = ref(false)
+
+// Función para obtener el total de solicitudes de servicio del usuario
+const fetchTotalSolicitudes = async () => {
+  try {
+    const user = useCookie('user').value
+    if (!user || !user.id_usuario) return
+
+    const response = await $fetch(`/solicitudservicio/usuario/${user.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    if (response && typeof response.total === 'number') {
+      statsData.value.totalServices = response.total
+    }
+  } catch (error) {
+    console.error('Error al obtener el total de solicitudes:', error)
+  }
+}
 
 // Cargar servicios desde la API
 const fetchServices = async () => {
@@ -726,8 +766,11 @@ const getServiceIcon = (serviceName) => {
 
 // Fetch services and benefits when component mounts
 onMounted(async () => {
-  await fetchServices()
-  await fetchBeneficios()
+  await Promise.all([
+    fetchServices(),
+    fetchBeneficios(),
+    fetchTotalSolicitudes()
+  ])
 })
 
 // Static data arrays
@@ -884,6 +927,14 @@ const handleRequestService = async () => {
       throw new Error('No se pudo encontrar el servicio seleccionado')
     }
 
+    // Verificar el estado de la membresía para determinar si se debe pagar la visita
+    const membershipStatus = await fetchMembershipData()
+    const tieneMembresiaActiva = membershipStatus?.estado === 'activa'
+    
+    // Determinar el estado inicial basado en si debe pagar o no
+    const estadoInicial = tieneMembresiaActiva ? 'pendiente_asignacion' : 'pendiente_pago'
+    const visitaPagada = tieneMembresiaActiva ? 0 : 1 
+
     // Preparar los datos para enviar al backend
     const requestData = {
       id_usuario: Number(userData.id_usuario),
@@ -892,8 +943,8 @@ const handleRequestService = async () => {
       colonia: serviceFormData.value.colonia,
       direccion_precisa: serviceFormData.value.direccion,
       descripcion: serviceFormData.value.description,
-      visita_pagada: 1,
-      estado: 'pendiente_asignacion'
+      pagar_visita: visitaPagada,
+      estado: estadoInicial
     }
 
     // Hacer la petición al backend
@@ -929,10 +980,11 @@ const handleRequestService = async () => {
       direccion: '' 
     }
     
-    showToast('¡Solicitud enviada! Te contactaremos pronto.', 'success')
+    showToast('¡Solicitud enviada!', 'Te contactaremos pronto.', 'success')
+    
   } catch (error) {
     console.error('Error al enviar la solicitud de servicio:', error)
-    showToast('No se pudo enviar la solicitud. Por favor, inténtalo mas tarde.', 'error')
+    showToast('Error', 'No se pudo enviar la solicitud. Por favor, inténtalo mas tarde.', 'error')
   }
 }
 
@@ -941,20 +993,52 @@ const renovarMembresia = () => {
   navigateTo('/cliente/perfil#membresia')
 }
 
+const clearServiceError = () => {
+  // Esta función se llama cuando el usuario selecciona un servicio
+  // Podemos usarla para limpiar cualquier mensaje de error relacionado
+  if (serviceFormData.value.type) {
+    // Aquí podrías limpiar mensajes de error específicos si los tuvieras
+    // Por ejemplo: formErrors.value.type = ''
+  }
+}
+
 const handleRenovarMembresia = () => {
   renovarMembresia()
 }
 
-const showToast = (message, type = 'success') => {
-  toast.value = {
-    show: true,
-    message,
-    type
+const showToast = (param1, param2, param3 = 'success') => { 
+  // Manejar diferentes firmas de la función:
+  // 1. showToast('Mensaje completo')
+  // 2. showToast('Mensaje completo', 'error')
+  // 3. showToast('Título', 'Mensaje detallado')
+  // 4. showToast('Título', 'Mensaje detallado', 'error')
+  
+  let message, type;
+  
+  if (param2 === 'success' || param2 === 'error' || param2 === 'warning' || param2 === 'info') {
+    // Formato antiguo: showToast(mensaje, tipo)
+    message = param1;
+    type = param2;
+  } else if (param2) {
+    // Formato nuevo: showToast(título, mensaje, tipo?)
+    message = `${param1}
+${param2}`;
+    type = param3;
+  } else {
+    // Solo mensaje
+    message = param1;
+    type = 'success';
   }
   
-  setTimeout(() => {
-    toast.value.show = false
-  }, 4000)
+  toast.value = {
+    show: true,
+    message: message,
+    type: type,
+    duration: 5000
+  };  
+  
+  // Para depuración
+  console.log(`Mostrando toast de ${type}:`, message);
 }
 
 // Dark mode support - wrapped in ClientOnly to avoid hydration issues

@@ -1,5 +1,14 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Toast Notification -->
+    <Toast 
+      v-if="toast.show"
+      :key="toast.message + Date.now()"
+      :message="toast.message" 
+      :type="toast.type"
+      :duration="toast.duration"
+      @close="toast.show = false"
+    />
     <!-- Loading Spinner -->
     <LoadingSpinner 
       :loading="isLoading" 
@@ -53,15 +62,10 @@
         <section class="px-4">
           <div class="space-y-3">
             <div v-for="service in filteredServices" :key="service.id"
-                 @click="openServiceModal(service.id)"
+                 @click="openServiceModal(service)"
                  class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer relative">
-              
-              <!-- Payment Pending Badge for Completed Services -->
-              <div v-if="service.status === 'Servicio Completado'" 
-                   class="absolute -top-2 -right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg animate-pulse">
-                💳 Pago Pendiente
-              </div>
 
+              
               <!-- Service Header -->
               <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center space-x-3">
@@ -70,19 +74,23 @@
                   </div>
                   <div>
                     <p class="font-black text-gray-900 dark:text-white text-base">{{ service.title }}</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ service.date }} • #{{ service.id }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ service.date }} • #{{ formatDateDDMMYY() }}{{ service.id }}</p>
                   </div>
                 </div>
-                <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold"
-                      :class="getStatusColor(service.status)">
-                  {{ service.status }}
-                </span>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full" :class="getStatusColor(service.status)">
+                      {{ service.status }}
+                    </span>
+                    <span v-if="service.rawStatus === 'pendiente_pago' && service.pagar_visita" class="inline-flex items-center px-3 py-1.5 rounded border border-amber-300 dark:border-amber-600 text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 shadow-sm hover:shadow transition-all duration-200 group">
+                      <svg class="w-4 h-4 mr-1.5 text-amber-500 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                      </svg>
+                      Pago Pendiente
+                    </span>
+                  </div>
+                </div>
               </div>
-
-              <!-- Service Description -->
-              <p class="text-gray-700 dark:text-gray-300 text-sm mb-3 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                {{ service.description }}
-              </p>
 
               <!-- Location and Schedule -->
               <div class="space-y-2 mb-3">
@@ -91,24 +99,18 @@
                   <p class="text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">📍 UBICACIÓN</p>
                   <p class="text-blue-800 dark:text-blue-200 text-sm font-semibold">{{ service.fullLocation.colonia }}</p>
                   <p class="text-blue-700 dark:text-blue-300 text-xs">{{ service.fullLocation.direccion }}</p>
-                </div>
-
-                <!-- Acción Rápida - Pago Pendiente -->
-                <div v-if="!service.visita_pagada" 
-                     @click="openServiceModal(service.id)"
-                     class="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800 cursor-pointer hover:shadow-md transition-all duration-300 hover:shadow-purple-100 dark:hover:shadow-purple-900/30">
-                  <p class="text-purple-600 dark:text-purple-400 text-xs font-bold mb-1">💳 PAGAR VISITA</p>
-                  <p class="text-purple-800 dark:text-purple-200 text-sm">
-                    Sin membresía, la visita tiene un costo de L. 
-                  </p>
-                </div>
-
+                </div> 
               </div>
+              
+              <!-- Service Description -->
+              <p class="text-gray-700 dark:text-gray-300 text-sm mb-3 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                {{ service.description }}
+              </p> 
 
               <!-- Action Buttons -->
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                  <span class="text-gray-500 dark:text-gray-400 text-xs">{{ getTimeAgo(service.date) }}</span>
+                  <span class="text-gray-500 dark:text-gray-400 text-xs">{{ getTimeAgo(service.rawDate) }}</span>
                 </div>
                 <div class="flex items-center space-x-2">
                   <span class="text-blue-600 dark:text-blue-400 text-xs font-bold">Ver detalles</span>
@@ -136,8 +138,10 @@
       </div> <!-- Close pb-24 div -->
     </div> <!-- Close max-w-2xl container -->
 
-    <FootersFooter />
-    
+    <FootersFooter /> 
+  </div>
+</div>
+
     <!-- Service Detail Modal -->
   <div v-if="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto">
@@ -149,7 +153,9 @@
             </div>
             <div>
               <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ selectedService.title }}</h3>
-              <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService.id }}</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400">
+                Número de referencia #{{ formatDateDDMMYY() }}{{ selectedService.id }}
+              </p>
             </div>
           </div>
           <button @click="closeServiceModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -162,7 +168,7 @@
 
       <div class="p-4">
         <!-- 1. Seguimiento del Servicio -->
-        <div class="mb-6">
+        <div v-if="selectedService.rawStatus !== 'cancelado'" class="mb-6">
           <h4 class="text-base font-black text-gray-900 dark:text-white mb-4">Seguimiento del Servicio</h4>
 
           <!-- Timeline Steps -->
@@ -223,7 +229,7 @@
         </div>
 
         <!-- 2. Técnico Asignado -->
-        <div v-if="selectedService.technician && getCurrentStepNumber(selectedService.status) >= 2" class="mb-6">
+        <div v-if="selectedService.technician && selectedService.rawStatus === 'asignado'" class="mb-6">
           <h4 class="text-base font-black text-gray-900 dark:text-white mb-3">Técnico Asignado</h4>
           <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800">
             <div class="flex items-center space-x-3 mb-2">
@@ -231,7 +237,7 @@
                 <span class="text-white text-lg">👨‍🔧</span>
               </div>
               <div class="flex-1">
-                <p class="font-black text-emerald-800 dark:text-emerald-200 text-base">{{ selectedService.technician.name }}</p>
+                <p class="font-black text-emerald-800 dark:text-emerald-200 text-base">Oswaldo Lopez</p>
                 <div class="flex items-center space-x-2">
                   <div class="flex items-center space-x-1">
                     <span v-for="i in 5" :key="i" class="text-yellow-400 text-sm">
@@ -253,19 +259,58 @@
         <div class="mb-4">
           <h4 class="text-base font-black text-gray-900 dark:text-white mb-3">Acciones</h4>
           <div class="space-y-2">
+            <!-- Estado de Servicio Cancelado -->
+            <div v-if="selectedService.rawStatus === 'cancelado'" class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg mb-3">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Servicio Cancelado</h3>
+                  <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+                    {{ selectedService.comentario || 'Este servicio ha sido cancelado.' }}
+                  </p>
+                </div>
+              </div>
+            </div>
             
-            <!-- Acciones para Solicitud Recibida -->
-            <div v-if="selectedService.status === 'Solicitud Recibida'">
-              <button class="w-full flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+            <!-- Botón de Cancelar - Visible en todos los estados excepto cancelado y completado -->
+            <div v-else-if="selectedService.rawStatus !== 'completado'" class="mb-3">
+              <button 
+                @click="confirmarCancelar"
+                class="w-full flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+              >
                 <div class="flex items-center space-x-2">
                   <span class="text-lg">❌</span>
-                  <span class="font-bold text-red-800 dark:text-red-200 text-sm">Cancelar solicitud</span>
+                  <span class="font-bold text-red-800 dark:text-red-200 text-sm">
+                    {{ getCancelButtonText }}
+                  </span>
                 </div>
                 <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
             </div>
+            
+            <!-- Acciones para Pendiente de Pago (aunque el estado muestre 'Solicitud Recibida') -->
+            <div v-if="selectedService.rawStatus === 'pendiente_pago' && selectedService.pagar_visita" class="space-y-2">
+              <button 
+                @click="openVisitPaymentModal(selectedService)"
+                class="w-full flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+              >
+                <div class="flex items-center space-x-2">
+                  <span class="text-lg">💳</span>
+                  <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">Pagar Visita</span>
+                </div>
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Acciones para Solicitud Recibida -->
 
             <!-- Acciones para Técnico Asignado -->
             <div v-if="selectedService.status === 'Técnico Asignado'">
@@ -275,15 +320,6 @@
                   <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Contactar técnico</span>
                 </div>
                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </button>
-              <button class="w-full flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
-                <div class="flex items-center space-x-2">
-                  <span class="text-lg">❌</span>
-                  <span class="font-bold text-red-800 dark:text-red-200 text-sm">Cancelar servicio</span>
-                </div>
-                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
@@ -322,6 +358,35 @@
 
             <!-- Acciones para Servicio Completado -->
             <div v-if="selectedService.status === 'Servicio Completado'">
+              <!-- Botón de Pagar Visita si está pendiente -->
+              <div v-if="selectedService.pagar_visita" class="mb-4">
+                <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-lg mb-3">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-amber-700 dark:text-amber-300">
+                        Tienes un pago pendiente por la visita del técnico.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  @click="openVisitPaymentModal(selectedService)" 
+                  class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    <span>Pagar Visita</span>
+                  </div>
+                  <span class="bg-white/20 px-2.5 py-0.5 rounded-full text-xs font-semibold">Pendiente</span>
+                </button>
+              </div>
+              
               <button class="w-full flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors mb-2">
                 <div class="flex items-center space-x-2">
                   <span class="text-lg">⭐</span>
@@ -347,7 +412,156 @@
     </div>
   </div>
 
-  <!-- Payment Modal -->
+<!-- Visit Payment Modal -->
+  <div v-if="showVisitPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto">
+      <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center text-lg">
+              💳
+            </div>
+            <div>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white">Pagar Visita</h3> 
+            <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService.id }}</p>
+            </div> 
+          </div>
+          <button @click="closeVisitPaymentModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4">
+        <!-- Service Summary -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl mb-4">
+          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Pago de la Visita</h4>
+          <div class="flex items-center space-x-3 mb-2">
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
+              {{ selectedService.icon }}
+            </div>
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ selectedService.title }}</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedService.date }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Breakdown -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl mb-4">
+          <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-3">💰 Desglose de Pago</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between items-center">
+              <span class="text-blue-700 dark:text-blue-300">Visita del Técnico:</span>
+              <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ visitCost }}</span>
+            </div> 
+            <hr class="border-blue-300 dark:border-blue-700">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
+              <span class="font-bold text-blue-800 dark:text-blue-200 text-lg">L. {{ visitCost }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cuenta Bancaria -->
+        <div class="space-y-3 mb-4">
+          <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Cuenta bancaria
+          </label>
+          <div v-if="isLoadingAccounts" class="py-8 flex flex-col items-center justify-center">
+            <div class="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent"></div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
+          </div>
+          <div v-else class="space-y-4">
+            <select
+              id="bank-account"
+              v-model="selectedAccount"
+              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200"
+              :disabled="bankAccounts.length === 0"
+            >
+              <option value="" disabled selected>Selecciona una cuenta</option>
+              <option 
+                v-for="account in bankAccounts" 
+                :key="account.id_cuenta" 
+                :value="account.id_cuenta"
+                class="py-2"
+              >
+                🏦 {{ account.banco }}
+              </option>
+            </select>
+
+            <!-- Detalles de la cuenta seleccionada -->
+            <div 
+              v-if="getSelectedAccount" 
+              class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
+            >
+              <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalles de la cuenta:</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Banco:</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.titular }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Número de cuenta:</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.numero_cuenta }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Tipo de cuenta:</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input para el número de comprobante -->
+            <div class="space-y-2">
+              <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Número de comprobante de transferencia
+              </label>
+              <input
+                id="comprobante"
+                v-model="comprobante"
+                type="text"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200"
+                placeholder="Ingresa el número de comprobante"
+              >
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Realiza la transferencia a la cuenta seleccionada e ingresa el número de comprobante.
+              </p>
+            </div>
+          </div>
+
+          <!-- Botón de pago -->
+          <div class="mt-6">
+            <button 
+              @click="processVisitPayment"
+              :disabled="!selectedAccount || !comprobante || isProcessingPayment"
+              class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              <span v-if="!isProcessingPayment">
+                 Procesar Pago - L. {{ visitCost }}
+              </span>
+              <span v-else class="flex items-center justify-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Procesando...
+              </span>
+            </button>
+          </div> 
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Payment Modal -->
   <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto">
       <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
@@ -408,62 +622,158 @@
           </div>
         </div>
 
-        <!-- Payment Methods -->
-        <div class="mb-4">
-          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-3">Método de Pago</h4>
-          <div class="space-y-2">
-            <label v-for="method in paymentMethods" :key="method.id" 
-                   class="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <input type="radio" v-model="selectedPaymentMethod" :value="method.id" class="mr-3">
-              <div class="flex items-center space-x-3">
-                <span class="text-xl">{{ method.icon }}</span>
-                <div>
-                  <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ method.name }}</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ method.description }}</p>
+        <!-- Cuenta Bancaria -->
+        <div class="space-y-3 mb-4">
+          <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Cuenta bancaria
+          </label>
+          <div v-if="isLoadingAccounts" class="py-8 flex flex-col items-center justify-center">
+            <div class="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent"></div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
+          </div>
+          <div v-else class="space-y-4">
+            <select
+              id="bank-account"
+              v-model="selectedAccount"
+              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200"
+              :disabled="bankAccounts.length === 0"
+            >
+              <option value="" disabled selected>Selecciona una cuenta</option>
+              <option 
+                v-for="account in bankAccounts" 
+                :key="account.id_cuenta" 
+                :value="account.id_cuenta"
+                class="py-2"
+              >
+                {{ account.banco }} - {{ account.numero_cuenta }} ({{ account.tipo_cuenta }})
+              </option>
+            </select>
+
+            <!-- Detalles de la cuenta seleccionada -->
+            <div 
+              v-if="getSelectedAccount" 
+              class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
+            >
+              <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalles de la cuenta:</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Banco:</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.titular }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Número de cuenta:</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.numero_cuenta }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Tipo de cuenta:</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
                 </div>
               </div>
-            </label>
+            </div>
+
+            <!-- Input para el número de comprobante -->
+            <div class="space-y-2">
+              <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Número de comprobante de transferencia
+              </label>
+              <input
+                id="comprobante"
+                v-model="comprobante"
+                type="text"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200"
+                placeholder="Ingresa el número de comprobante"
+              >
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Realiza la transferencia a la cuenta seleccionada e ingresa el número de comprobante.
+              </p>
+            </div>
+          </div>
+
+          <!-- Botón de pago -->
+          <div class="mt-6">
+            <button 
+              @click="processPayment"
+              :disabled="!selectedAccount || !comprobante || isProcessingPayment"
+              class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              <span v-if="!isProcessingPayment">
+                💳 Procesar Pago - L. {{ selectedService.finalTotal || 180 }}
+              </span>
+              <span v-else class="flex items-center justify-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Procesando...
+              </span>
+            </button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Payment Button -->
-        <button @click="processPayment" 
-                class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-          💳 Procesar Pago - L. {{ selectedService.finalTotal || 180 }}
+  <!-- Modal de Cancelación Simplificado -->
+  <div v-if="showCancelModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm">
+      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+          Cancelar Servicio
+        </h3>
+        <button @click="closeCancelModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
         </button>
+      </div>
 
-        <!-- Security Info -->
-        <div class="mt-3 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <p class="text-green-700 dark:text-green-300 text-xs text-center">
-            🔒 Tu pago está protegido con encriptación de nivel bancario
+      <div class="p-4">
+        <div class="space-y-3">
+          <p class="text-gray-600 dark:text-gray-300 text-sm">
+            Por favor, indícanos el motivo de la cancelación:
           </p>
+          <textarea 
+            v-model="cancelAdditionalInfo" 
+            rows="3" 
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            placeholder="Describe el motivo de la cancelación..."
+          ></textarea>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Success Messages -->
-  <div v-if="showSuccessMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 z-50">
-    <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4 rounded-xl shadow-2xl">
-      <div class="flex items-center space-x-2">
-        <div class="text-xl">✅</div>
-        <div>
-          <p class="font-black text-sm">{{ successMessage }}</p>
-        </div>
+      <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 rounded-b-xl flex justify-end space-x-3">
+        <button 
+          @click="closeCancelModal" 
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-600 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+        >
+          Cancelar
+        </button>
+        <button 
+          @click="cancelarSolicitud" 
+          :disabled="!cancelAdditionalInfo.trim()"
+          class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Confirmar cancelación
+        </button>
       </div>
-      
     </div>
-    </div>
-  </div>
-  </div>
+  </div> 
 
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import Toast from '~/components/ui/Toast.vue'
+
+// Obtener la configuración
+const config = useRuntimeConfig()
 
 // SEO and Meta
 useHead({
@@ -493,14 +803,193 @@ const userData = ref({
   ...(userCookie.value || {})
 })
 
+// Variables para datos de la API
+const servicesData = ref({
+  solicitudes: [],
+  total: 0,
+  finalizadas: 0,
+  pendientes: 0,
+  canceladas: 0
+})
+
+// Estado para controlar las notificaciones
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'info',
+  duration: 5000
+})
+
+// Función para cargar los servicios desde la API
+const loadServices = async () => {
+  try {
+    const userCookieValue = useCookie('user').value
+    if (!userCookieValue?.id_usuario) {
+      console.error('No se encontró ID de usuario')
+      return
+    }
+
+    const response = await $fetch(`/solicitudservicio/usuario/${userCookieValue.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${useCookie('token').value}`
+      }
+    })
+
+    servicesData.value = response
+
+    // Mapear los datos a la estructura que usa el componente
+    allServices.value = response.solicitudes.map(solicitud => mapApiServiceToLocal(solicitud))
+    
+  } catch (error) {
+    console.error('Error cargando servicios:', error)
+    showSuccess('Error al cargar los servicios')
+  }
+}
+
+// Función para mapear los datos de la API a la estructura local
+const mapApiServiceToLocal = (apiService) => {
+  console.log('Mapeando servicio:', {
+    id: apiService.id_solicitud,
+    estado: apiService.estado,
+    pagar_visita: apiService.pagar_visita,
+    tipo_pagar_visita: typeof apiService.pagar_visita
+  });
+  
+  return {
+    id: apiService.id_solicitud,
+    serviceId: apiService.id_servicio,
+    title: getServiceTitle(apiService.id_servicio),
+    icon: getServiceIcon(apiService.id_servicio),
+    status: mapApiStatusToLocal(apiService.estado),
+    rawStatus: apiService.estado, // Guardar el estado original de la API
+    rawDate: apiService.fecha_solicitud,
+    date: formatDate(apiService.fecha_solicitud),
+    fullLocation: {
+      colonia: apiService.colonia,
+      direccion: apiService.direccion_precisa
+    },
+    description: apiService.descripcion,
+    // Asegurarse de que pagar_visita sea booleano, manejando tanto '1' como 1
+    visita_pagada: !(apiService.pagar_visita == 1), // Usar == para comparación flexible
+    pagar_visita: apiService.pagar_visita == 1, // Usar == para comparación flexible
+    memberDiscount: 20,
+    finalTotal: 180,
+    laborCost: 120,
+    materialsCost: 60,
+    quotedPrice: 180,
+    serviceDescription: apiService.descripcion,
+    diagnosis: 'Diagnóstico pendiente...',
+    technician: apiService.estado === 'asignado' ? {
+      name: 'Técnico Asignado',
+      rating: 4.8,
+      reviews: 127
+    } : null
+  }
+}
+
+// Función para obtener el título del servicio basado en el ID
+const getServiceTitle = (serviceId) => {
+  const serviceTitles = {
+    1: 'Servicio de Fontanería',
+    2: 'Servicio de Electricidad',
+    3: 'Servicio de Aire Acondicionado',
+    4: 'Servicio de Electrodomésticos',
+    5: 'Servicio de Pintura',
+    6: 'Servicio de Cámaras de Seguridad'
+  }
+  return serviceTitles[serviceId] || 'Servicio General'
+}
+
+// Función para obtener el ícono del servicio basado en el ID
+const getServiceIcon = (serviceId) => {
+  const serviceIcons = {
+    1: '🔧',
+    2: '💡',
+    3: '❄️',
+    4: '🧊',
+    5: '🎨',
+    6: '🎥'
+  }
+  return serviceIcons[serviceId] || '🔧'
+}
+
+// Función para mapear el estado de la API al estado local
+const mapApiStatusToLocal = (apiStatus) => {
+  const statusMap = {
+    'pendiente': 'Solicitud Recibida',
+    'asignado': 'Técnico Asignado',
+    'en_proceso': 'Servicio en Curso',
+    'finalizado': 'Servicio Completado',
+    'cancelado': 'Cancelado',
+    'cotizacion_pendiente': 'Cotización Pendiente',
+    'pendiente_pago': 'Solicitud Recibida' // Mostrar como 'Solicitud Recibida' pero manteniendo la lógica de pendiente de pago
+  }
+  return statusMap[apiStatus] || 'Solicitud Recibida'
+}
+
+// Función para formatear la fecha
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  const options = { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  }
+  return date.toLocaleDateString('es-ES', options)
+}
+
+const formatDateDDMMYY = () => {
+  const now = new Date()
+  const day = String(now.getDate()).padStart(2, '0')
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const year = String(now.getFullYear()).slice(-2)
+  return `${day}${month}${year}`
+}
+
+// Obtener el costo de la visita
+const fetchVisitCost = async () => {
+  isLoadingVisitCost.value = true;
+  try {
+    const data = await $fetch('/config/valor/visita_tecnico', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (data) {
+      visitCost.value = data.valor;
+    }
+  } catch (error) {
+    console.error('Error al obtener el costo de la visita:', error);
+  } finally {
+    isLoadingVisitCost.value = false;
+  }
+};
+
 // Verificar autenticación al cargar el componente
 onMounted(async () => { 
-    isLoading.value = false 
+  try {
+    await loadServices()
+  } catch (error) {
+    console.error('Error al cargar datos iniciales:', error)
+    showError('Error al cargar los datos. Por favor, recargue la página.')
+  } finally {
+    isLoading.value = false
+  }
 })
 
 // Reactive data
-const showServiceModal = ref(false)
+const showServiceModal = ref(false) 
+const cancelReason = ref('')
+const cancelAdditionalInfo = ref('')
 const showPaymentModal = ref(false)
+const showVisitPaymentModal = ref(false)
 const selectedServiceId = ref(null)
 const showFilters = ref(false)
 const currentFilter = ref('all')
@@ -508,14 +997,18 @@ const currentDateFilter = ref('all')
 const selectedServiceTypes = ref([])
 const showSuccessMessage = ref(false)
 const successMessage = ref('')
-const selectedPaymentMethod = ref('card')
+const showCancelModal = ref(false)
 
-// Payment methods
-const paymentMethods = [
-  { id: 'card', name: 'Tarjeta de Crédito/Débito', description: 'Visa, Mastercard, American Express', icon: '💳' },
-  { id: 'transfer', name: 'Transferencia Bancaria', description: 'BAC, Banco Atlántida, Banpais', icon: '🏦' },
-  { id: 'mobile', name: 'Pago Móvil', description: 'Tigo Money, Claro Pay', icon: '📱' }
-]
+// Estado para el proceso de pago
+const isLoadingAccounts = ref(false)
+const bankAccounts = ref([])
+const selectedAccount = ref('')
+const comprobante = ref('')
+const isProcessingPayment = ref(false)
+
+// Costo de la visita
+const visitCost = ref(0)
+const isLoadingVisitCost = ref(false)
 
 // Service filters
 const serviceFilters = [
@@ -550,91 +1043,17 @@ const serviceSteps = [
   { id: 5, title: 'Servicio Completado', description: 'Servicio finalizado' }
 ]
 
-// Mock services data
-const allServices = ref([
-  {
-    id: 1001,
-    title: 'Reparación de aire acondicionado',
-    description: 'El aire acondicionado de la sala principal no enfría correctamente.',
-    date: '15 Dic 2024',
-    status: 'Servicio Completado',
-    icon: '❄️',
-    fullLocation: {
-      colonia: 'Col. Palmira, Tegucigalpa',
-      direccion: 'Casa #1234, Calle Principal, 2da entrada después del parque'
-    },
-    scheduledDate: {
-      date: '16 Dic 2024',
-      time: '2:00 PM - 4:00 PM'
-    },
-    finalLaborCost: 120,
-    finalMaterialsCost: 80,
-    memberDiscount: 20,
-    finalTotal: 180,
-    serviceDescription: 'Reparación completa del sistema de refrigeración.',
-    technician: {
-      name: 'Carlos Martínez',
-      rating: 4.8,
-      reviews: 127
-    }
-  },
-  {
-    id: 1002,
-    title: 'Instalación de lámpara LED',
-    description: 'Instalar nueva lámpara LED en el comedor principal.',
-    date: '12 Dic 2024',
-    status: 'Cotización Pendiente',
-    icon: '💡',
-    fullLocation: {
-      colonia: 'Col. Lomas del Guijarro, Tegucigalpa',
-      direccion: 'Residencial Los Robles, Casa B-15, frente al área verde'
-    },
-    scheduledDate: {
-      date: '14 Dic 2024',
-      time: '10:00 AM - 12:00 PM'
-    },
-    diagnosis: 'Se requiere instalación de nuevo cableado eléctrico desde el panel principal hasta el comedor.',
-    laborCost: 120,
-    materialsCost: 60,
-    quotedPrice: 180,
-    serviceDescription: 'Instalación de sistema de iluminación LED.',
-    technician: {
-      name: 'Ana Rodriguez',
-      rating: 4.9,
-      reviews: 89
-    }
-  },
-  {
-    id: 1003,
-    title: 'Reparación de fuga en cocina',
-    description: 'Pequeña fuga en el grifo de la cocina.',
-    date: '10 Dic 2024',
-    status: 'Servicio en Curso',
-    icon: '🔧',
-    fullLocation: {
-      colonia: 'Col. Kennedy, Tegucigalpa',
-      direccion: 'Bloque C, Apartamento 3B, Edificio Vista Hermosa'
-    },
-    scheduledDate: {
-      date: '11 Dic 2024',
-      time: '9:00 AM - 11:00 AM'
-    },
-    serviceDescription: 'Reparación de válvulas internas del grifo.',
-    technician: {
-      name: 'Miguel Santos',
-      rating: 4.7,
-      reviews: 156
-    }
-  }
-])
+// Services data (ahora se llena desde la API)
+const allServices = ref([])
 
-// Computed properties
-const totalServices = computed(() => allServices.value.length)
-const completedServices = computed(() => allServices.value.filter(s => s.status === 'Servicio Completado').length)
-const pendingServices = computed(() => allServices.value.filter(s => !['Servicio Completado', 'Cancelado'].includes(s.status)).length)
+// Computed properties actualizadas para usar los datos de la API
+const totalServices = computed(() => servicesData.value.total || allServices.value.length)
+const completedServices = computed(() => servicesData.value.finalizadas || allServices.value.filter(s => s.status === 'Servicio Completado').length)
+const pendingServices = computed(() => servicesData.value.pendientes || allServices.value.filter(s => !['Servicio Completado', 'Cancelado'].includes(s.status)).length)
 
 const selectedService = computed(() => {
-  return allServices.value.find(s => s.id === selectedServiceId.value) || allServices.value[0]
+  if (!selectedServiceId.value) return {}
+  return allServices.value.find(s => s.id === selectedServiceId.value) || {}
 })
 
 const filteredServices = computed(() => {
@@ -661,33 +1080,218 @@ const filteredServices = computed(() => {
 })
 
 // Methods
-const openServiceModal = (serviceId) => {
-  selectedServiceId.value = serviceId
+const openServiceModal = (service) => {
+  selectedServiceId.value = service.id
   showServiceModal.value = true
 }
 
 const closeServiceModal = () => {
   showServiceModal.value = false
-  selectedServiceId.value = null
 }
 
-const openPaymentModal = () => {
-  showPaymentModal.value = true
+const openVisitPaymentModal = async (service) => {
+  selectedServiceId.value = service.id
+  showVisitPaymentModal.value = true
+  await fetchBankAccounts()
+  await fetchVisitCost()
+}
+
+const closeVisitPaymentModal = () => {
+  showVisitPaymentModal.value = false
+  selectedAccount.value = ''
+  comprobante.value = ''
+  isProcessingPayment.value = false
+}
+
+const fetchBankAccounts = async () => {
+  isLoadingAccounts.value = true;
+  try {
+    const data = await $fetch('/cuentas', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (data) {
+      // Mapear los datos para que coincidan con la estructura esperada por el template
+      bankAccounts.value = data.map(account => ({
+        id_cuenta: account.id_cuenta,
+        banco: account.banco,
+        numero_cuenta: account.num_cuenta,
+        tipo_cuenta: account.tipo,
+        titular: account.beneficiario || 'Titular no especificado',
+        activo: account.activo === 1
+      }));
+      
+      // No seleccionar ninguna cuenta por defecto
+      selectedAccount.value = '';
+    }
+  } catch (error) {
+    console.error('Error al obtener cuentas bancarias:', error);
+    showError('Error', 'No se pudieron cargar las cuentas bancarias');
+  } finally {
+    isLoadingAccounts.value = false;
+  }
+};
+
+const openPaymentModal = async () => {
+  try {
+    showPaymentModal.value = true
+    await fetchBankAccounts()
+  } catch (error) {
+    console.error('Error al cargar cuentas bancarias:', error)
+    showError('No se pudieron cargar las cuentas bancarias. Intente nuevamente.')
+  }
 }
 
 const closePaymentModal = () => {
   showPaymentModal.value = false
+  selectedAccount.value = ''
+  comprobante.value = ''
+  isProcessingPayment.value = false
 }
 
-const processPayment = () => {
-  closePaymentModal()
-  closeServiceModal()
-  showSuccess('¡Pago procesado exitosamente! Tu servicio ha sido pagado.')
+// Obtener la cuenta seleccionada
+const getSelectedAccount = computed(() => {
+  if (!selectedAccount.value) return null;
+  return bankAccounts.value.find(acc => acc.id_cuenta === selectedAccount.value) || null;
+}) 
+
+const processVisitPayment = async () => {
+  if (!selectedAccount.value) {
+    showError('Error', 'Por favor selecciona una cuenta bancaria');
+    return;
+  }
   
-  // Update service status to paid
-  const service = allServices.value.find(s => s.id === selectedServiceId.value)
-  if (service) {
-    service.isPaid = true
+  if (!comprobante.value?.trim()) {
+    showError('Error', 'Por favor ingresa el número de comprobante');
+    return;
+  }
+
+  isProcessingPayment.value = true;
+  
+  try {
+    // Obtener el ID del usuario de la cookie 'user'
+    const userData = useCookie('user').value;
+    if (!userData?.id_usuario) {
+      throw new Error('No se pudo identificar al usuario');
+    }
+    
+    const requestData = {
+      id_usuario: userData.id_usuario,
+      id_solicitud: selectedService.value.id,
+      id_cuenta: selectedAccount.value,
+      monto: visitCost.value,
+      num_comprobante: comprobante.value.trim(),
+      fecha: new Date(Date.now() - (6 * 60 * 60 * 1000)).toISOString() // Ajuste a UTC-6
+    };
+
+    console.log('Enviando pago de visita al backend:', JSON.stringify(requestData, null, 2));
+    
+    // Obtener el token de autenticación
+    const authToken = useCookie('token').value;
+    
+    // Enviar pago de visita
+    await $fetch('/pagovisita', {
+      method: 'POST',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: requestData
+    });
+    
+    // Actualizar el estado de la solicitud a 'pendiente_asignacion'
+    console.log('Actualizando estado de la solicitud...');
+    console.log('ID de solicitud:', selectedService.value.id);
+    
+    const token = useCookie('token').value;
+    console.log('Token de autenticación:', token ? 'Presente' : 'Ausente');
+    
+    try {
+      const response = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+        method: 'PUT',
+        baseURL: config.public.apiBase,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ estado: 'pendiente_asignacion' })
+      });
+      console.log('Respuesta de actualización de estado:', response);
+    } catch (updateError) {
+      console.error('Error al actualizar el estado de la solicitud:', updateError);
+      // Lanzar el error para que sea manejado por el catch principal
+      throw new Error(`Error al actualizar el estado de la solicitud: ${updateError.message}`);
+    }
+    
+    // Cerrar el modal y actualizar datos
+    closeVisitPaymentModal();
+    await loadServices();
+    
+    // Mostrar notificación de éxito
+    showSuccess(
+      '¡Pago Enviado!',
+      'Una vez se verifique el pago, se le asignará un técnico.'
+    );
+    
+    // Limpiar formulario
+    selectedAccount.value = '';
+    comprobante.value = '';
+    
+  } catch (error) {
+    console.error('Error al procesar el pago de la visita:', error);
+    showError(
+      'Error al procesar la solicitud',
+      error.data?.message || error.response?._data?.message || error.message || 'No se pudo completar la operación. Por favor, inténtalo de nuevo.'
+    );
+  } finally {
+    isProcessingPayment.value = false;
+  }
+}
+
+const processPayment = async () => {
+  if (!selectedAccount.value || !comprobante.value) {
+    showError('Por favor complete todos los campos requeridos')
+    return
+  }
+  
+  try {
+    isProcessingPayment.value = true
+    
+    // Enviar pago
+    const response = await $fetch('/pagos/registrar', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${useCookie('token').value}`
+      },
+      body: JSON.stringify({
+        id_solicitud: selectedService.value.id,
+        id_cuenta: selectedAccount.value,
+        monto: selectedService.value.finalTotal || 180,
+        comprobante: comprobante.value,
+        metodo: 'transferencia'
+      })
+    })
+    
+    showSuccess('Pago registrado exitosamente. Se verificará el pago en breve.')
+    closePaymentModal()
+    
+    // Recargar servicios para actualizar el estado
+    await loadServices()
+    
+  } catch (error) {
+    console.error('Error al procesar el pago:', error)
+    showError(error.response?._data?.message || 'Error al procesar el pago. Intente de nuevo.')
+  } finally {
+    isProcessingPayment.value = false
   }
 }
 
@@ -749,21 +1353,148 @@ const acceptQuotation = () => {
   }
 }
 
+// Títulos y textos para el modal de cancelación
+const cancelModalTexts = {
+  pendiente_asignacion: {
+    title: 'Cancelar Servicio',
+    confirmButton: 'Sí, cancelar',
+  },
+  asignado: {
+    title: 'Solicitar Cancelación',
+    confirmButton: 'Solicitar cancelación',
+  },
+  en_proceso: {
+    title: 'Reportar Problema',
+    confirmButton: 'Enviar reporte',
+  },
+  default: {
+    title: 'Cancelar Servicio',
+    confirmButton: 'Confirmar cancelación',
+  }
+}
+
+const getCancelModalTitle = computed(() => {
+  const status = selectedService.value?.rawStatus || 'default'
+  return cancelModalTexts[status]?.title || cancelModalTexts.default.title
+})
+
+const getConfirmButtonText = computed(() => {
+  const status = selectedService.value?.rawStatus || 'default'
+  return cancelModalTexts[status]?.confirmButton || cancelModalTexts.default.confirmButton
+})
+
+const getCancelButtonText = computed(() => {
+  const status = selectedService.value?.rawStatus || 'default'
+  
+  if (status === 'cancelado') return 'Servicio Cancelado'
+  if (status === 'completado') return 'Servicio Completado'
+  if (status === 'en_proceso') return 'Reportar Problema'
+  if (status === 'asignado') return 'Solicitar Cancelación'
+  if (status === 'pendiente_pago') return 'Cancelar Servicio'
+  
+  return 'Cancelar Servicio'
+})
+
+const confirmarCancelar = () => {
+  // Resetear valores anteriores
+  cancelAdditionalInfo.value = ''
+  showCancelModal.value = true
+}
+
+const closeCancelModal = () => {
+  showCancelModal.value = false
+  // Pequeño retraso para la animación
+  setTimeout(() => {
+    cancelReason.value = ''
+    cancelAdditionalInfo.value = ''
+  }, 300)
+}
+
+const cancelarSolicitud = async () => {
+  if (!cancelAdditionalInfo.value.trim()) {
+    showError('Por favor, escribe el motivo de la cancelación')
+    return
+  }
+
+  try {
+    const token = useCookie('token').value
+    
+    // Realizar la petición para cancelar el servicio
+    await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        estado: 'cancelado',
+        comentario: cancelAdditionalInfo.value.trim()
+      })
+    })
+
+    // Cerrar el modal de cancelación
+    closeCancelModal()
+    
+    // Mostrar mensaje de éxito
+    showSuccess('El servicio ha sido cancelado correctamente')
+    
+    // Actualizar la lista de servicios
+    await loadServices()
+    
+  } catch (error) {
+    console.error('Error al cancelar el servicio:', error)
+    showError('Ocurrió un error al cancelar el servicio. Por favor, inténtalo de nuevo.')
+  }
+}
+
 const rejectQuotation = () => {
   const service = allServices.value.find(s => s.id === selectedServiceId.value)
   if (service) {
     service.status = 'Cancelado'
-    showSuccess('Cotización rechazada. El servicio ha sido cancelado.')
+    showToast({
+      message: 'Cotización rechazada. El servicio ha sido cancelado.',
+      type: 'warning',
+      duration: 6000
+    })
   }
 }
 
+const showToast = (options) => {
+  // Primero ocultar el toast actual
+  toast.value.show = false;
+  
+  // Usar nextTick para asegurar que la actualización del DOM se complete
+  nextTick(() => {
+    // Actualizar con los nuevos valores
+    toast.value = {
+      show: true,
+      message: options.message,
+      type: options.type || 'info',
+      duration: options.duration || 5000
+    };
+  });
+};
+
+// Funciones de conveniencia
 const showSuccess = (message) => {
-  successMessage.value = message
-  showSuccessMessage.value = true
-  setTimeout(() => {
-    showSuccessMessage.value = false
-  }, 4000)
-}
+  showToast({
+    message: message,
+    type: 'success',
+    duration: 5000
+  });
+};
+
+const showError = (message) => {
+  console.error('Error:', message);
+  
+  showToast({
+    message: message,
+    type: 'error',
+    duration: 8000 // Los errores duran más para que el usuario los pueda leer
+  });
+};
 
 const getStatusColor = (status) => {
   const colors = {
@@ -771,16 +1502,16 @@ const getStatusColor = (status) => {
     'Servicio en Curso': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     'Cotización Pendiente': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
     'Técnico Asignado': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    'Solicitud Recibida': 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400',
+    'Solicitud Recibida': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
     'Cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
   }
   return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
 }
 
-const getTimeAgo = (dateString) => {
-  const date = new Date(dateString)
+const getTimeAgo = (date) => {
   const now = new Date()
-  const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24))
+  const targetDate = new Date(date)
+  const diffInDays = Math.floor((now - targetDate) / (1000 * 60 * 60 * 24))
   
   if (diffInDays === 0) return 'Hoy'
   if (diffInDays === 1) return 'Ayer'
@@ -791,6 +1522,76 @@ const getTimeAgo = (dateString) => {
 </script>
 
 <style scoped>
+/* Transiciones del modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.backdrop-enter-active,
+.backdrop-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+}
+
+.modal-content-enter-active {
+  animation: modal-enter 0.3s ease-out;
+}
+
+.modal-content-leave-active {
+  animation: modal-leave 0.2s ease-in;
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modal-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+}
+
+.slide-down-enter-active {
+  animation: slide-down 0.3s ease-out;
+}
+
+.slide-down-leave-active {
+  animation: slide-down 0.2s ease-in reverse;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 * {

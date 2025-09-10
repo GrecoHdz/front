@@ -188,7 +188,7 @@
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none pr-10"
               >
                 <option :value="null" disabled>Selecciona una ciudad</option>
-                <option v-for="ciudad in ciudades" :key="ciudad.id_ciudad" :value="ciudad.id_ciudad">
+                <option v-for="ciudad in ciudades" :key="ciudad.id_ciudad" :value="ciudad.id_ciudad" :selected="user.id_ciudad === ciudad.id_ciudad">
                   {{ ciudad.nombre }}
                 </option>
               </select>
@@ -595,7 +595,7 @@ const cargarCiudades = async () => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       }
-    })
+    }) 
     
     if (Array.isArray(data)) {
       ciudades.value = data.map(ciudad => ({
@@ -732,6 +732,18 @@ const hasChanges = computed(() => {
   );
 });
 
+// Actualizar el nombre de la ciudad cuando cambie el id_ciudad
+watch(() => user.value.id_ciudad, (newId) => {
+  if (newId) {
+    const ciudadSeleccionada = ciudades.value.find(c => c.id_ciudad === newId);
+    if (ciudadSeleccionada) {
+      user.value.ciudad = ciudadSeleccionada.nombre;
+    }
+  } else {
+    user.value.ciudad = null;
+  }
+});
+
 // Cargar datos al montar el componente
 onMounted(async () => {
   await cargarDatosPerfil();
@@ -829,9 +841,6 @@ const showSuccess = (title, message) => {
     type: 'success',
     duration: 5000
   });  
-  
-  // Para depuración
-  console.log('Mostrando toast de éxito:', toastMessage);
 };
 
 const showError = (title, message) => {
@@ -846,7 +855,6 @@ const showError = (title, message) => {
 };
 
 const showInfo = (message) => {
-  console.log('Info:', message);
   showToast({
     message,
     type: 'info',
@@ -879,6 +887,14 @@ const saveProfile = async () => {
     // Actualizar los datos originales con los nuevos valores
     originalUserData.value = { ...user.value };
     
+    // Actualizar la cookie del usuario con los nuevos datos
+    const userCookie = useCookie('user')
+    userCookie.value = {
+      ...userCookie.value, // Mantener los datos existentes
+      nombre: user.value.nombre, 
+      id_ciudad: user.value.id_ciudad
+    } 
+    
     // Mostrar notificación de éxito
     showToast({
       type: 'success',
@@ -886,25 +902,26 @@ const saveProfile = async () => {
       duration: 1500
     });
     
-    // Recargar la página después de un breve retraso para que se vea el mensaje
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
-    
   } catch (error) {
+    console.error('❌ Error en saveProfile:', error)
+    
     // Obtener el mensaje de error del servidor
     const responseData = error.data || {};
     let errorMessage = 'Error al guardar el perfil';
+    
+    // Registrar detalles del error en consola
     
     // Determinar el mensaje de error a mostrar
     if (responseData.message) {
       errorMessage = responseData.message;
     } else if (responseData.error === 'Error de validación' && responseData.field) {
       errorMessage = responseData.message || `Error en el campo ${responseData.field}`;
+    } else if (error.statusCode === 500) {
+      errorMessage = 'Error interno del servidor. Por favor, intente nuevamente.';
     }
     
     // Mostrar el mismo mensaje en consola
-    console.error('Error al guardar el perfil:', errorMessage);
+    console.error('❌ Error al guardar el perfil:', errorMessage);
     
     // Mostrar el mensaje de error en el toast
     showToast({
@@ -1266,7 +1283,8 @@ const confirmRenewal = async () => {
     const requestData = {
       id_usuario: userId,
       id_cuenta: parseInt(selectedAccount.value),
-      num_comprobante: comprobante.value.trim()
+      num_comprobante: comprobante.value.trim(),
+      monto: membershipCost.value
     };
 
     const data = await $fetch('/membresia', {
