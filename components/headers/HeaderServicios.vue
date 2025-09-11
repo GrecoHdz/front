@@ -57,18 +57,26 @@
         <!-- Service Type Filter -->
         <div class="mb-3">
           <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">Tipo de servicio:</h4>
-          <div class="flex flex-wrap gap-1">
-            <button 
-              v-for="service in serviceTypes" 
-              :key="service.id"
-              @click="$emit('service-type-toggle', service.name)"
-              class="px-2 py-1 rounded-lg text-xs font-bold transition-all duration-300"
-              :class="selectedServiceTypes.includes(service.name) 
-                ? 'bg-emerald-500 text-white' 
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
-            >
-              {{ service.icon }} {{ service.name }}
-            </button>
+          <div v-if="isLoadingServiceTypes" class="flex flex-wrap gap-1">
+            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-20"></div>
+            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-16"></div>
+            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-24"></div>
+          </div>
+          <div v-else class="flex flex-wrap gap-1">
+            <template v-for="(service, index) in serviceTypes" :key="index">
+              <button 
+                v-if="service && service.active !== false"
+                @click="$emit('service-type-toggle', service.name)"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-all duration-300"
+                :class="selectedServiceTypes.includes(service.name) 
+                  ? 'bg-emerald-500 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
+                :title="service.description || ''"
+              >
+                <span v-if="service.icon">{{ service.icon }} </span>
+                {{ service.name || 'Servicio' }}
+              </button>
+            </template>
           </div>
         </div>
 
@@ -129,6 +137,10 @@ const props = defineProps({
   selectedServiceTypes: {
     type: Array,
     default: () => []
+  },
+  isLoadingServiceTypes: {
+    type: Boolean,
+    default: false
   }
 });
 

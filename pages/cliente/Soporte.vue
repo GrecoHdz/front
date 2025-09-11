@@ -12,7 +12,7 @@
     <HeadersHeaderSoporte/>
 
     <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
       <Toast 
         v-if="toast.show"
         :message="toast.message" 
@@ -45,21 +45,29 @@
           <!-- Selector de servicio (solo visible cuando se selecciona 'Problema con un Servicio Completado') -->
           <div v-if="form.subject === 'falla'">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Servicio con problema</label>
-            <select 
-              v-model="form.servicio_id"
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
-              required
-              :disabled="cargandoServicios"
-            >
-              <option value="" disabled selected>Selecciona un servicio</option>
-              <option 
-                v-for="servicio in serviciosFinalizados" 
-                :key="servicio.id_solicitud" 
-                :value="servicio.id_solicitud"
+            <div class="relative">
+              <select 
+                ref="servicioSelect"
+                v-model="form.servicio_id"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white relative z-10"
+                required
+                :disabled="cargandoServicios"
               >
-                {{ limitarTexto(servicio.descripcion) }} - {{ servicio.colonia }} - {{ formatDate(servicio.fecha_solicitud) }}
-              </option>
-            </select>
+                <option value="" disabled selected>Selecciona un servicio</option>
+                <option 
+                  v-for="servicio in serviciosFinalizados" 
+                  :key="servicio.id_solicitud" 
+                  :value="servicio.id_solicitud"
+                >
+                  {{ limitarTexto(servicio.descripcion) }} - {{ servicio.colonia }} - {{ formatDate(servicio.fecha_solicitud) }}
+                </option>
+              </select>
+              <!-- Indicador de pulso -->
+              <div 
+                v-if="showPulse" 
+                class="absolute -inset-1 bg-blue-500/20 rounded-xl animate-pulse z-0"
+              ></div>
+            </div>
             <p v-if="cargandoServicios" class="text-sm text-blue-600 dark:text-blue-400 mt-1">Cargando servicios finalizados...</p>
             <p v-if="errorCargaServicios" class="text-sm text-red-600 dark:text-red-400 mt-1">{{ errorCargaServicios }}</p>
             <p v-if="!cargandoServicios && serviciosFinalizados.length === 0 && !errorCargaServicios" class="text-sm text-gray-500 dark:text-gray-400 mt-1">No tienes servicios finalizados</p>
@@ -171,10 +179,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import FootersFooter from '@/components/footers/footer.vue'
-import { useHead, useCookie, useRouter } from '#imports'
+import { ref, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import { useHead, useCookie } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
+import FootersFooter from '@/components/footers/footer.vue'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 // Obtener la configuración
@@ -192,25 +201,76 @@ useHead({
 const auth = useAuthStore()
 const router = useRouter() 
 const isLoading = ref(true) 
+const user = useCookie('user')
+const token = useCookie('token')
 
-// Datos del usuario
-const userCookie = useCookie('user')
-const userData = ref({
-  id: null,
-  identidad: '',
-  nombre: 'Invitado',
-  email: '',
-  role: '',
-  rol_nombre: 'Invitado',
-  // Mantener compatibilidad con el resto del código
-  name: 'Invitado',
-  ...(userCookie.value || {})
+// Función para verificar autenticación
+const checkAuth = async () => {
+  try {
+    if (!token.value) {
+      router.push('/auth/login')
+      return false
+    }
+    return true
+  } catch (error) {
+    console.error('Error al verificar autenticación:', error)
+    router.push('/auth/login')
+    return false
+  }
+}
+
+// Verificar autenticación y manejar el hash #problemaServicio al cargar el componente
+onMounted(async () => {
+  const isAuthenticated = await checkAuth()
+  
+  if (isAuthenticated) {
+    // Verificar si hay un hash #problemaServicio
+    if (process.client && window.location.hash === '#problemaServicio') {
+      // Establecer el asunto como 'Problema con un Servicio Completado' de inmediato
+      form.value.subject = 'falla'
+      
+      // Usar nextTick para asegurar que el DOM esté listo
+      nextTick(async () => {
+        try {
+          // Cargar los servicios finalizados
+          await cargarServiciosFinalizados()
+          
+          // Esperar un momento para asegurar que el DOM se haya actualizado
+          await nextTick()
+          
+          // Desplazarse al formulario después de cargar los servicios
+          const formElement = document.querySelector('form')
+          if (formElement) {
+            // Usar requestAnimationFrame para asegurar que el scroll se ejecute en el siguiente ciclo de renderizado
+            requestAnimationFrame(() => {
+              formElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center'
+              })
+            })
+          }
+          
+          // Activar animación de pulso en el select
+          showPulse.value = true
+          
+          // Desactivar la animación después de 3 segundos
+          setTimeout(() => {
+            showPulse.value = false
+          }, 3000)
+          
+        } catch (error) {
+          console.error('Error al cargar servicios finalizados:', error)
+        } finally {
+          // Limpiar el hash sin recargar la página
+          window.history.replaceState({}, document.title, window.location.pathname)
+        }
+      })
+    }
+    
+    // Marcar como cargado
+    isLoading.value = false
+  }
 })
-
-// Verificar autenticación al cargar el componente
-onMounted(async () => { 
-    isLoading.value = false 
-}) 
 
 const activeFaq = ref(null)
 const isSubmitting = ref(false)
@@ -238,6 +298,10 @@ const showToast = (message, type = 'success') => {
 const serviciosFinalizados = ref([])
 const cargandoServicios = ref(false)
 const errorCargaServicios = ref('')
+const showPulse = ref(false)
+
+// Referencia al select de servicios
+const servicioSelect = ref(null)
 
 // Función para limitar el texto a un número máximo de palabras
 const limitarTexto = (texto, maxPalabras = 7) => {
@@ -256,7 +320,10 @@ const formatDate = (dateString) => {
 // Cargar servicios finalizados del usuario
 const cargarServiciosFinalizados = async () => {
   const userCookie = useCookie('user').value
-  if (!userCookie?.id_usuario) return
+  if (!userCookie?.id_usuario) {
+    console.error('No se pudo obtener el ID de usuario')
+    return
+  }
   
   cargandoServicios.value = true
   errorCargaServicios.value = ''
@@ -271,11 +338,25 @@ const cargarServiciosFinalizados = async () => {
       }
     })
     
-    // Filtrar solo servicios finalizados
-    serviciosFinalizados.value = response.filter(servicio => servicio.estado === 'finalizado')
+    // Verificar si la respuesta tiene la propiedad 'solicitudes'
+    const servicios = Array.isArray(response) ? response : response?.solicitudes || []
+    
+    if (!Array.isArray(servicios)) {
+      console.error('Formato de respuesta inesperado del servidor:', response)
+      serviciosFinalizados.value = []
+      return
+    }
+    
+    // Filtrar solo servicios finalizados o completados
+    serviciosFinalizados.value = servicios.filter(servicio => 
+      servicio && servicio.estado && 
+      (servicio.estado.toLowerCase() === 'finalizado' || servicio.estado.toLowerCase() === 'completado')
+    )
+     
   } catch (error) {
     console.error('Error al cargar servicios:', error)
     errorCargaServicios.value = 'No se pudieron cargar los servicios. Por favor, intente más tarde.'
+    showToast('Error al cargar los servicios', 'error')
   } finally {
     cargandoServicios.value = false
   }
@@ -366,5 +447,18 @@ const submitForm = async () => {
 </script>
 
 <style scoped>
-/* Add any custom styles here */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.02);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
 </style>
