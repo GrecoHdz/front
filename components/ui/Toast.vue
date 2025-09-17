@@ -12,7 +12,7 @@
       <div
         v-if="show"
         ref="toastElement"
-        class="fixed top-4 right-4 p-4 rounded-2xl shadow-lg z-50 max-w-sm w-[calc(100%-2rem)] sm:w-auto flex items-center gap-3 backdrop-blur-sm border border-white/20 overflow-hidden"
+        class="fixed top-4 right-4 p-4 rounded-2xl shadow-lg z-50 max-w-xs w-auto sm:max-w-sm flex items-center gap-3 backdrop-blur-sm border border-white/20 overflow-hidden mx-2 sm:mx-0"
         :class="toastClasses"
         @mouseenter="pauseTimer"
         @mouseleave="resumeTimer"

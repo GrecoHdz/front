@@ -932,7 +932,7 @@ const handleRequestService = async () => {
     const tieneMembresiaActiva = membershipStatus?.estado === 'activa'
     
     // Determinar el estado inicial basado en si debe pagar o no
-    const estadoInicial = tieneMembresiaActiva ? 'pendiente_asignacion' : 'pendiente_pago'
+    const estadoInicial = tieneMembresiaActiva ? 'pendiente_asignacion' : 'pendiente_pagovisita'
     const visitaPagada = tieneMembresiaActiva ? 0 : 1 
 
     // Preparar los datos para enviar al backend
@@ -1035,10 +1035,7 @@ ${param2}`;
     message: message,
     type: type,
     duration: 5000
-  };  
-  
-  // Para depuración
-  console.log(`Mostrando toast de ${type}:`, message);
+  };   
 }
 
 // Dark mode support - wrapped in ClientOnly to avoid hydration issues

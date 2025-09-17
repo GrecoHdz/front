@@ -75,7 +75,7 @@
                   </div>
                   <div>
                     <p class="font-black text-gray-900 dark:text-white text-base">{{ service.title }}</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ service.date }} • #{{ formatDateDDMMYY() }}{{ service.id }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ service.date }} • #{{ formatDateDDMMYY(service.rawDate) }}-{{ service.id }}</p>
                   </div>
                 </div>
                 <div class="flex items-center justify-between mb-3">
@@ -83,7 +83,7 @@
                     <span class="text-xs font-bold px-2.5 py-0.5 rounded-full" :class="getStatusColor(service.status)">
                       {{ service.status }}
                     </span>
-                    <span v-if="service.rawStatus === 'pendiente_pago' && service.pagar_visita" class="inline-flex items-center px-3 py-1.5 rounded border border-amber-300 dark:border-amber-600 text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 shadow-sm hover:shadow transition-all duration-200 group">
+                    <span v-if="service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita  || service.rawStatus === 'pendiente_pagoservicio'" class="inline-flex items-center px-3 py-1.5 rounded border border-amber-300 dark:border-amber-600 text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 shadow-sm hover:shadow transition-all duration-200 group">
                       <svg class="w-4 h-4 mr-1.5 text-amber-500 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                       </svg>
@@ -149,8 +149,7 @@
       enter-active-class="modal-enter-active"
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
-      leave-to-class="modal-leave-to"
-    >
+      leave-to-class="modal-leave-to">
       <div v-if="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <!-- Backdrop con animación -->
         <Transition
@@ -190,7 +189,7 @@
                   <div>
                     <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ selectedService.title }}</h3>
                     <p class="text-xs text-gray-600 dark:text-gray-400">
-                      Número de referencia #{{ formatDateDDMMYY() }}{{ selectedService.id }}
+                      Número de referencia #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}
                     </p>
                   </div>
                 </div>
@@ -205,61 +204,26 @@
             <!-- Contenido principal del modal -->
             <div class="p-4">
         <!-- 1. Seguimiento del Servicio -->
-        <div v-if="selectedService.rawStatus !== 'cancelado'" class="mb-6">
-          <h4 class="text-base font-black text-gray-900 dark:text-white mb-4">Seguimiento del Servicio</h4>
-
+        <div v-if="selectedService.rawStatus !== 'cancelado'" class="mb-6">  
+          <h4 class="text-base font-black text-gray-900 dark:text-white mb-4">Seguimiento del Servicio</h4> 
           <!-- Timeline Steps -->
           <div class="space-y-3">
             <div v-for="(step, index) in serviceSteps" :key="step.id"
                  class="flex items-start space-x-3">
               <div class="flex-shrink-0 relative">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center border-2"
-                     :class="getStepStatus(step.id, selectedService.status).class">
-                  <span class="text-xs font-bold" :class="getStepStatus(step.id, selectedService.status).textClass">
-                    {{ getStepStatus(step.id, selectedService.status).icon }}
+                     :class="getStepStatus(step.id, selectedService.rawStatus).class">
+                  <span class="text-xs font-bold" :class="getStepStatus(step.id, selectedService.rawStatus).textClass">
+                    {{ getStepStatus(step.id, selectedService.rawStatus).icon }}
                   </span>
                 </div>
                 <div v-if="index < serviceSteps.length - 1" 
                      class="absolute top-8 left-1/2 transform -translate-x-1/2 w-px h-4"
-                     :class="getCurrentStepNumber(selectedService.status) > step.id ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'"></div>
+                     :class="getCurrentStepNumber(selectedService.rawStatus) > step.id ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'"></div>
               </div>
               <div class="flex-1 pb-4">
                 <p class="font-bold text-gray-900 dark:text-white text-sm">{{ step.title }}</p>
                 <p class="text-gray-600 dark:text-gray-400 text-xs mt-1">{{ step.description }}</p>
-                
-                <!-- Cotización pendiente de aprobación -->
-                <div v-if="step.id === 3 && selectedService.status === 'Cotización Pendiente'" class="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                  <h5 class="text-yellow-800 dark:text-yellow-200 font-bold mb-2 text-sm">🔍 Diagnóstico del Técnico</h5>
-                  <p class="text-yellow-700 dark:text-yellow-300 text-xs mb-3 bg-white dark:bg-yellow-900/30 p-2 rounded">
-                    {{ selectedService.diagnosis }}
-                  </p>
-                  
-                  <div class="bg-white dark:bg-yellow-900/30 p-2 rounded mb-3">
-                    <h6 class="text-yellow-800 dark:text-yellow-200 font-bold text-xs mb-2">💰 Cotización de Mano de Obra</h6>
-                    <div class="flex justify-between items-center mb-1">
-                      <span class="text-yellow-700 dark:text-yellow-300 text-xs">Mano de obra:</span>
-                      <span class="text-yellow-800 dark:text-yellow-200 font-bold text-xs">L. {{ selectedService.laborCost }}</span>
-                    </div>
-                    <div class="flex justify-between items-center mb-1">
-                      <span class="text-yellow-700 dark:text-yellow-300 text-xs">Materiales (estimado):</span>
-                      <span class="text-yellow-800 dark:text-yellow-200 font-bold text-xs">L. {{ selectedService.materialsCost }}</span>
-                    </div>
-                    <hr class="border-yellow-300 dark:border-yellow-700 my-1">
-                    <div class="flex justify-between items-center">
-                      <span class="text-yellow-800 dark:text-yellow-200 font-bold text-xs">Total estimado:</span>
-                      <span class="text-yellow-800 dark:text-yellow-200 font-bold text-sm">L. {{ selectedService.quotedPrice }}</span>
-                    </div>
-                  </div>
-                  
-                  <div class="flex space-x-2">
-                    <button @click="acceptQuotation" class="flex-1 py-2 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 transition-colors">
-                      ✅ Aceptar
-                    </button>
-                    <button @click="rejectQuotation" class="flex-1 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-colors">
-                      ❌ Rechazar
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -303,21 +267,21 @@
               </div>
               <div class="ml-3">
                 <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Servicio Cancelado</h3>
-                <div class="mt-1 text-sm text-red-700 dark:text-red-300">
-                  <p v-if="selectedService.comentario">{{ selectedService.comentario }}</p>
-                  <p v-else>Este servicio ha sido cancelado.</p>
+                <div class="mt-1 text-sm text-red-700 dark:text-red-300"> 
+                  <p>Este servicio ha sido cancelado.</p> 
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </div> 
 
         <!-- 3. Acciones - Solo se muestra si hay acciones disponibles -->
         <div v-if="hasActions" class="mb-4">
-          <h4 class="text-base font-black text-gray-900 dark:text-white mb-3">Acciones</h4>
+          <h4 v-if="hasVisibleActions" class="text-base font-black text-gray-900 dark:text-white mb-3">Acciones</h4>
           <div class="space-y-2">
+
             <!-- Botón de Cancelar - Visible solo en estados específicos -->
-            <div v-if="['pendiente_asignacion', 'asignado', 'cotizacion_pendiente', 'cotizacion_aprobada', 'cotizacion_rechazada'].includes(selectedService.rawStatus)" class="mb-3">
+            <div v-if="['pendiente_pagovisita', 'pendiente_asignacion', 'asignado'].includes(selectedService.rawStatus)" class="mb-3">
               <button 
                 @click="confirmarCancelar"
                 class="w-full flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
@@ -332,23 +296,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
-            </div>
-            
-            <!-- Acciones para Pendiente de Pago (aunque el estado muestre 'Solicitud Recibida') -->
-            <div v-if="selectedService.rawStatus === 'pendiente_pago' && selectedService.pagar_visita" class="space-y-2">
-              <button 
-                @click="openVisitPaymentModal(selectedService)"
-                class="w-full flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
-              >
-                <div class="flex items-center space-x-2">
-                  <span class="text-lg">💳</span>
-                  <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">Pagar Visita</span>
-                </div>
-                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </button>
-            </div>
+            </div> 
 
             <!-- Acciones para Cotización Pendiente -->
             <div v-if="selectedService.status === 'Cotización Pendiente'">
@@ -368,43 +316,56 @@
               </button>
             </div> 
 
-            <!-- Acciones para Servicio Completado o Finalizado -->
-            <div v-if="selectedService.rawStatus === 'completado' || selectedService.rawStatus === 'finalizado'">
-              <!-- Botón de Pagar Visita si está pendiente -->
-              <div v-if="selectedService.pagar_visita" class="mb-4">
-                <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg mb-2">
-                  <p class="text-yellow-800 dark:text-yellow-200 text-xs font-bold text-center">
-                    ⏳ Tiene un pago pendiente por la visita del técnico
-                  </p>
-                </div>
-                <button 
-                  @click="openVisitPaymentModal(selectedService)"
-                  class="w-full flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mb-3"
-                >
-                  <div class="flex items-center space-x-2">
-                    <span class="text-lg">💳</span>
-                    <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">Pagar Visita</span>
-                  </div>
-                  <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </button>
-              </div>
-              
-              <!-- Botón de Pagar Servicio -->
+            <!-- Acciones para Servicio Con Pago Pendiente -->
+            <div v-if="selectedService.rawStatus === 'pendiente_pagovisita' && selectedService.pagar_visita" class="mb-4"> 
               <button 
-                @click="openPaymentModal"
-                class="w-full flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors mb-3"
+                @click="openVisitPaymentModal(selectedService)"
+                class="w-full flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mb-3"
               >
                 <div class="flex items-center space-x-2">
-                  <span class="text-lg">💰</span>
-                  <span class="font-bold text-green-800 dark:text-green-200 text-sm">Pagar Servicio</span>
+                  <span class="text-lg">💳</span>
+                  <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">Pagar Visita</span>
                 </div>
-                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
-              
+            </div>
+            
+            <!-- Acciones para Pago de Servicio Pendiente -->
+            <div v-if="selectedService.rawStatus === 'pendiente_pagoservicio'"> 
+              <button 
+                @click="openPaymentModal(selectedService)"
+                class="w-full flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors mb-3"
+              >
+                <div class="flex items-center space-x-2">
+                  <span class="text-lg">💰</span>
+                  <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Pagar Servicio</span>
+                </div>
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Acciones para Cotización Pendiente -->
+            <div v-if="selectedService.rawStatus === 'pendiente_cotizacion'">
+              <button 
+                @click="openQuotationModal"
+                class="w-full flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors mb-3"
+              >
+                <div class="flex items-center space-x-2">
+                  <span class="text-lg">📝</span>
+                  <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">Ver Cotización y Diagnóstico</span>
+                </div>
+                <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Acciones para Servicio Finalizado -->
+            <div v-if="selectedService.rawStatus === 'finalizado'">
               <!-- Botón de Reportar Problema -->
               <button 
                 @click="reportarProblema"
@@ -418,13 +379,12 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
-
             </div>
-          </div>
         </div>
-            </div>
-          </div>
-        </Transition>
+      </div>
+    </div>
+  </div>
+</Transition>
       </div>
     </Transition>
 
@@ -434,8 +394,7 @@
       enter-active-class="modal-enter-active"
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
-      leave-to-class="modal-leave-to"
-    >
+      leave-to-class="modal-leave-to">
       <div v-if="showVisitPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <!-- Backdrop con animación -->
         <Transition
@@ -458,8 +417,7 @@
           enter-active-class="modal-content-enter-active"
           leave-active-class="modal-content-leave-active"
           enter-from-class="modal-content-enter-from"
-          leave-to-class="modal-content-leave-to"
-        >
+          leave-to-class="modal-content-leave-to">
           <div 
             v-if="showVisitPaymentModal"
             class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
@@ -474,7 +432,7 @@
                   </div>
                   <div>
                     <h3 class="text-lg font-black text-gray-900 dark:text-white">Pagar Visita</h3> 
-                    <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService.id }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                   </div> 
                 </div>
                 <button @click="closeVisitPaymentModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -520,7 +478,7 @@
               <!-- Cuenta Bancaria -->
               <div class="space-y-3 mb-4">
                 <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Cuenta bancaria
+                  Transferencia
                 </label>
                 <div v-if="isLoadingAccounts" class="py-8 flex flex-col items-center justify-center">
                   <div class="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent"></div>
@@ -560,12 +518,26 @@
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.titular }}</span>
                       </div>
                       <div class="flex justify-between">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Número de cuenta:</span>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.numero_cuenta }}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Tipo de cuenta:</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Cuenta:</span>
+                        <div class="flex items-center space-x-2">
+                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
+                            {{ getSelectedAccount.numero_cuenta.length > 10 ? getSelectedAccount.numero_cuenta.slice(0, 10) + '...' : getSelectedAccount.numero_cuenta }}
+                          </span>
+                          <button 
+                            v-if="getSelectedAccount.numero_cuenta.length > 10"
+                            @click="copyToClipboard(getSelectedAccount.numero_cuenta)"
+                            class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                            title="Copiar número de cuenta"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -573,7 +545,7 @@
                   <!-- Input para el número de comprobante -->
                   <div class="space-y-2">
                     <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Número de comprobante de transferencia
+                      Número de comprobante
                     </label>
                     <input
                       id="comprobante"
@@ -621,17 +593,17 @@
     enter-active-class="modal-enter-active"
     leave-active-class="modal-leave-active"
     enter-from-class="modal-enter-from"
-    leave-to-class="modal-leave-to"
-  >
+    leave-to-class="modal-leave-to">
+
     <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+
       <!-- Backdrop con animación -->
       <Transition
         name="backdrop"
         enter-active-class="backdrop-enter-active"
         leave-active-class="backdrop-leave-active"
         enter-from-class="backdrop-enter-from"
-        leave-to-class="backdrop-leave-to"
-      >
+        leave-to-class="backdrop-leave-to">
         <div 
           v-if="showPaymentModal"
           class="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -645,8 +617,7 @@
         enter-active-class="modal-content-enter-active"
         leave-active-class="modal-content-leave-active"
         enter-from-class="modal-content-enter-from"
-        leave-to-class="modal-content-leave-to"
-      >
+        leave-to-class="modal-content-leave-to">
         <div 
           v-if="showPaymentModal"
           class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
@@ -661,7 +632,7 @@
                 </div>
                 <div>
                   <h3 class="text-lg font-black text-gray-900 dark:text-white">Pagar Servicio</h3>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService.id }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
               </div>
               <button @click="closePaymentModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -691,19 +662,31 @@
             <!-- Desglose de Pago -->
             <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl mb-4">
               <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-3">💰 Desglose de Pago</h4>
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between items-center">
-                  <span class="text-blue-700 dark:text-blue-300">Servicio de {{ selectedService.title }}:</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ selectedService.amount || '0.00' }}</span>
+              <div v-if="isLoadingQuotation" class="py-4 flex justify-center">
+                <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+              <div v-else class="space-y-2 text-sm">
+                <!-- Mano de obra -->
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-blue-700 dark:text-blue-300">Mano de obra:</span>
+                  <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ parseFloat(quotationData?.monto_manodeobra || 0).toFixed(2) }}</span>
                 </div>
-                <div v-if="selectedService.visit_cost" class="flex justify-between items-center">
-                  <span class="text-blue-700 dark:text-blue-300">Costo de visita:</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ selectedService.visit_cost }}</span>
-                </div>
-                <hr class="border-blue-300 dark:border-blue-700">
-                <div class="flex justify-between items-center">
+                <!-- Crédito de membresía -->
+                <template v-if="membresiaProgreso?.mesesProgreso > 1">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                      -L. {{ parseFloat(membresiaProgreso?.montoTotal || 0).toFixed(2) }}
+                    </span>
+                  </div>
+                </template>
+                
+                <!-- Total a pagar -->
+                <div class="flex justify-between items-center text-lg mt-2 pt-2 border-t border-blue-200 dark:border-blue-800">
                   <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200 text-lg">L. {{ (parseFloat(selectedService.amount || 0) + parseFloat(selectedService.visit_cost || 0)).toFixed(2) }}</span>
+                  <span class="font-bold text-blue-800 dark:text-blue-200">
+                    {{ calculateTotal() }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -711,7 +694,7 @@
             <!-- Sección de Cuenta Bancaria -->
             <div class="space-y-3 mb-4">
               <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Cuenta bancaria
+                Transferencia
               </label>
               <div v-if="isLoadingAccounts" class="py-8 flex flex-col items-center justify-center">
                 <div class="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent"></div>
@@ -731,40 +714,54 @@
                     :value="account.id_cuenta"
                     class="py-2"
                   >
-                    🏦 {{ account.banco }}
+                    {{ account.banco }}
                   </option>
                 </select>
 
-                <!-- Detalles de la cuenta seleccionada -->
-                <div 
-                  v-if="getSelectedAccount" 
-                  class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
-                >
-                  <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalles de la cuenta:</h4>
-                  <div class="space-y-2">
-                    <div class="flex justify-between">
-                      <span class="text-xs text-gray-500 dark:text-gray-400">Banco:</span>
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.titular }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-xs text-gray-500 dark:text-gray-400">Número de cuenta:</span>
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.numero_cuenta }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-xs text-gray-500 dark:text-gray-400">Tipo de cuenta:</span>
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
+                  <!-- Detalles de la cuenta seleccionada -->
+                  <div 
+                    v-if="getSelectedAccount" 
+                    class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
+                  >
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalles de la cuenta:</h4>
+                    <div class="space-y-2">
+                      <div class="flex justify-between">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Nombre:</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.titular }}</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Cuenta:</span>
+                        <div class="flex items-center space-x-2">
+                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
+                            {{ getSelectedAccount.numero_cuenta.length > 10 ? getSelectedAccount.numero_cuenta.slice(0, 10) + '...' : getSelectedAccount.numero_cuenta }}
+                          </span>
+                          <button 
+                            v-if="getSelectedAccount.numero_cuenta.length > 10"
+                            @click="copyToClipboard(getSelectedAccount.numero_cuenta)"
+                            class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                            title="Copiar número de cuenta"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
                 <!-- Input para el número de comprobante -->
                 <div class="space-y-2">
                   <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Número de comprobante de transferencia
+                    Número de comprobante
                   </label>
                   <input
                     id="comprobante"
@@ -787,7 +784,7 @@
                   class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   <span v-if="!isProcessingPayment">
-                    Procesar Pago - L. {{ (parseFloat(selectedService.amount || 0) + parseFloat(selectedService.visit_cost || 0)).toFixed(2) }}
+                    Procesar Pago {{ calculateTotal() }}
                   </span>
                   <span v-else class="flex items-center justify-center">
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -811,8 +808,7 @@
     enter-active-class="modal-enter-active"
     leave-active-class="modal-leave-active"
     enter-from-class="modal-enter-from"
-    leave-to-class="modal-leave-to"
-  >
+    leave-to-class="modal-leave-to">
     <div v-if="showCancelModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <!-- Backdrop con animación -->
       <Transition
@@ -820,8 +816,7 @@
         enter-active-class="backdrop-enter-active"
         leave-active-class="backdrop-leave-active"
         enter-from-class="backdrop-enter-from"
-        leave-to-class="backdrop-leave-to"
-      >
+        leave-to-class="backdrop-leave-to">
         <div 
           v-if="showCancelModal"
           class="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -835,8 +830,7 @@
         enter-active-class="modal-content-enter-active"
         leave-active-class="modal-content-leave-active"
         enter-from-class="modal-content-enter-from"
-        leave-to-class="modal-content-leave-to"
-      >
+        leave-to-class="modal-content-leave-to">
         <div 
           v-if="showCancelModal"
           class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
@@ -853,7 +847,7 @@
                   <h3 class="text-lg font-black text-gray-900 dark:text-white">
                     {{ cancelModalTexts[selectedService.rawStatus]?.title || 'Cancelar Servicio' }}
                   </h3>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService.id }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
               </div>
               <button @click="closeCancelModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -882,10 +876,7 @@
                   rows="4" 
                   class="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder-gray-400 transition-all duration-200"
                   placeholder="Describe el motivo de la cancelación..."
-                ></textarea>
-                <p v-if="!cancelAdditionalInfo.trim()" class="text-xs text-red-500 dark:text-red-400">
-                  Por favor, proporciona un motivo para la cancelación.
-                </p>
+                ></textarea> 
               </div>
             </div>
           </div>
@@ -920,6 +911,189 @@
     </div>
   </Transition> 
 
+  <!-- Modal de Cotización -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to">
+    <div v-if="showQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <!-- Backdrop con animación -->
+      <Transition
+        name="backdrop"
+        enter-active-class="backdrop-enter-active"
+        leave-active-class="backdrop-leave-active"
+        enter-from-class="backdrop-enter-from"
+        leave-to-class="backdrop-leave-to">
+        <div 
+          v-if="showQuotationModal"
+          class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          @click="showQuotationModal = false"
+        ></div>
+      </Transition>
+
+      <!-- Contenido del modal con animación -->
+      <Transition
+        name="modal-content"
+        enter-active-class="modal-content-enter-active"
+        leave-active-class="modal-content-leave-active"
+        enter-from-class="modal-content-enter-from"
+        leave-to-class="modal-content-leave-to">
+        <div 
+          v-if="showQuotationModal"
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+          @click.stop
+        >
+          <!-- Encabezado del modal -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-xl flex items-center justify-center text-lg">
+                  📝
+                </div>
+                <div>
+                  <h3 class="text-lg font-black text-gray-900 dark:text-white">Cotización del Servicio</h3>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
+                </div>
+              </div>
+              <button @click="showQuotationModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido principal del modal -->
+          <div class="p-4">
+            <!-- Cargando -->
+            <div v-if="isLoadingQuotation" class="flex justify-center items-center py-12">
+              <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+            
+            <!-- Contenido de la cotización -->
+            <template v-else>
+              <!-- Tarjeta de diagnóstico -->
+              <div class="bg-white dark:bg-gray-700/50 rounded-xl shadow-sm p-4 mb-4 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-start space-x-3 mb-3">
+                  <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Diagnóstico Técnico</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Análisis realizado por el técnico</p>
+                  </div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg">
+                  <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                    {{ quotationData?.comentario || 'No se proporcionó un diagnóstico detallado.' }}
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Tarjeta de costos -->
+              <div class="bg-white dark:bg-gray-700/50 rounded-xl shadow-sm p-4 mb-4 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-start space-x-3 mb-3">
+                  <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Detalle de Costos</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Desglose de la cotización</p>
+                  </div>
+                </div>
+                
+                <div class="space-y-3">
+                  <!-- Item de costo fijo -->
+                  <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <div>
+                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Mano de Obra</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Servicio técnico especializado</p>
+                    </div>
+                    <span class="text-sm font-bold text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) || '0.00' }}</span>
+                  </div>
+                  
+                  <!-- Estimación de materiales -->
+                  <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
+                    <div class="flex items-start space-x-2">
+                      <svg class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 100 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                      </svg>
+                      <div>
+                        <p class="text-xs font-medium text-amber-800 dark:text-amber-200">Estimación de Materiales (puede variar)</p>
+                        <p class="text-xs text-amber-700/80 dark:text-amber-300/80 mt-1">
+                          El costo de materiales es solo una estimación y podrá variar según disponibilidad y necesidades reales del servicio.
+                        </p>
+                      </div>
+                    </div>
+                    <div class="mt-2 flex justify-between items-center pt-2 border-t border-amber-100 dark:border-amber-900/30">
+                      <span class="text-xs font-medium text-amber-800 dark:text-amber-200">Monto estimado:</span>
+                      <span class="text-xs font-bold text-amber-900 dark:text-amber-100">L. {{ formatCurrency(quotationData?.monto_materiales) || '0.00' }}</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Total -->
+                  <div class="flex justify-between items-center pt-3">
+                    <div>
+                      <span class="text-sm font-bold text-gray-900 dark:text-white">Total a pagar</span>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Solo incluye mano de obra</p>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                        L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Información adicional -->
+              <div class="text-center mb-4">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  <span class="inline-flex items-center">
+                    <svg class="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Esta cotización tiene una validez de 7 días
+                  </span>
+                </p>
+              </div>
+            </template>
+          </div>
+
+          <!-- Pie del modal -->
+          <div v-if="!isLoadingQuotation" class="sticky bottom-0 bg-gray-50 dark:bg-gray-800/80 px-4 py-3 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl backdrop-blur-sm">
+            <div class="flex space-x-3">
+              <button 
+                @click="rejectQuotation"
+                class="flex-1 py-2.5 px-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg border border-gray-200 dark:border-gray-600 transition-colors flex items-center justify-center space-x-2 text-sm"
+              >
+                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>Rechazar</span>
+              </button>
+              <button 
+                @click="acceptQuotation"
+                class="flex-1 py-2.5 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg transition-all transform hover:shadow-lg flex items-center justify-center space-x-2 text-sm"
+              >
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Aceptar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
+
 </template>
 
 <script setup>
@@ -929,8 +1103,13 @@ import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 
-// Obtener la configuración
+// =========================
+// CONFIGURACIÓN Y SETUP
+// =========================
 const config = useRuntimeConfig()
+const auth = useAuthStore()
+const router = useRouter()
+const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
@@ -941,201 +1120,9 @@ useHead({
   ]
 })
 
-// Autenticación
-const auth = useAuthStore()
-const router = useRouter() 
-const isLoading = ref(true) 
-
-// Datos del usuario
-const userCookie = useCookie('user')
-const userData = ref({
-  id: null,
-  identidad: '',
-  nombre: 'Invitado',
-  email: '',
-  role: '',
-  rol_nombre: 'Invitado',
-  // Mantener compatibilidad con el resto del código
-  name: 'Invitado',
-  ...(userCookie.value || {})
-})
-
-// Variables para datos de la API
-const servicesData = ref({
-  solicitudes: [],
-  total: 0,
-  finalizadas: 0,
-  pendientes: 0,
-  canceladas: 0
-})
-
-// Estado para controlar las notificaciones
-const toast = ref({
-  show: false,
-  message: '',
-  type: 'info',
-  duration: 5000
-})
-
-// Función para cargar los servicios desde la API
-const loadServices = async () => {
-  try {
-    const userCookieValue = useCookie('user').value
-    if (!userCookieValue?.id_usuario) {
-      console.error('No se encontró ID de usuario')
-      return
-    }
-
-    const response = await $fetch(`/solicitudservicio/usuario/${userCookieValue.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
-      }
-    })
-
-    servicesData.value = response
-
-    // Mapear los datos a la estructura que usa el componente
-    allServices.value = response.solicitudes.map(solicitud => mapApiServiceToLocal(solicitud))
-    
-  } catch (error) {
-    console.error('Error cargando servicios:', error)
-    showSuccess('Error al cargar los servicios')
-  }
-}
-
-// Función para mapear los datos de la API a la estructura local
-const mapApiServiceToLocal = (apiService) => { 
-  
-  return {
-    id: apiService.id_solicitud,
-    serviceId: apiService.id_servicio,
-    title: apiService.servicio?.nombre || 'Servicio General',
-    icon: getServiceIcon(apiService.id_servicio),
-    status: mapApiStatusToLocal(apiService.estado),
-    rawStatus: apiService.estado, // Guardar el estado original de la API
-    rawDate: apiService.fecha_solicitud,
-    date: formatDate(apiService.fecha_solicitud),
-    fullLocation: {
-      colonia: apiService.colonia,
-      direccion: apiService.direccion_precisa
-    },
-    description: apiService.descripcion, 
-    pagar_visita: apiService.pagar_visita == 1,  
-    serviceDescription: apiService.descripcion,
-    diagnosis: 'Diagnóstico pendiente...',
-    technician: apiService.estado === 'asignado' ? {
-      name: 'Técnico Asignado',
-      rating: 4.8,
-      reviews: 127
-    } : null
-  }
-}
-
-// Función para obtener el ícono del servicio
-const getServiceIcon = () => {
-  return '🛠️' // Ícono de herramientas para todos los servicios
-}
-
-// Función para mapear el estado de la API al estado local
-const mapApiStatusToLocal = (apiStatus) => {
-  const statusMap = {
-    'pendiente_pago': 'Pendiente de Pago',
-    'pendiente_asignacion': 'En Espera de Técnico',
-    'asignado': 'Técnico Asignado',
-    'pendiente_pagocotizacion': 'Pendiente de Pago de Cotización',
-    'en_proceso': 'Servicio en Curso',
-    'finalizado': 'Servicio Completado',
-    'cancelado': 'Cancelado'
-  }
-  return statusMap[apiStatus] || 'Estado Desconocido'
-}
-
-// Función para formatear la fecha
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  const options = { 
-    day: 'numeric', 
-    month: 'short', 
-    year: 'numeric' 
-  }
-  return date.toLocaleDateString('es-ES', options)
-}
-
-const formatDateDDMMYY = () => {
-  const now = new Date()
-  const day = String(now.getDate()).padStart(2, '0')
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const year = String(now.getFullYear()).slice(-2)
-  return `${day}${month}${year}`
-}
-
-// Obtener el costo de la visita
-const fetchVisitCost = async () => {
-  isLoadingVisitCost.value = true;
-  try {
-    const data = await $fetch('/config/valor/visita_tecnico', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
-    });
-
-    if (data) {
-      visitCost.value = data.valor;
-    }
-  } catch (error) {
-    console.error('Error al obtener el costo de la visita:', error);
-  } finally {
-    isLoadingVisitCost.value = false;
-  }
-};
-
-// Verificar autenticación al cargar el componente
-onMounted(async () => { 
-  try {
-    // Cargar servicios y tipos de servicio en paralelo
-    await Promise.all([
-      loadServices(),
-      loadServiceTypes()
-    ])
-  } catch (error) {
-    console.error('Error al cargar datos iniciales:', error)
-    showError('Error al cargar los datos. Por favor, recargue la página.')
-  } finally {
-    isLoading.value = false
-  }
-})
-
-// Reactive data
-const showServiceModal = ref(false) 
-const cancelReason = ref('')
-const cancelAdditionalInfo = ref('')
-const showPaymentModal = ref(false)
-const showVisitPaymentModal = ref(false)
-const selectedServiceId = ref(null)
-const showFilters = ref(false)
-const currentFilter = ref('all')
-const currentDateFilter = ref('all')
-const selectedServiceTypes = ref([])
-const showSuccessMessage = ref(false)
-const successMessage = ref('')
-const showCancelModal = ref(false) 
-
-// Estado para el proceso de pago
-const isLoadingAccounts = ref(false)
-const bankAccounts = ref([])
-const selectedAccount = ref('')
-const comprobante = ref('')
-const isProcessingPayment = ref(false)
-
-// Costo de la visita
-const visitCost = ref(0)
-const isLoadingVisitCost = ref(false)
+// =========================
+// VARIABLES ESTÁTICAS
+// =========================
 
 // Service filters
 const serviceFilters = [
@@ -1144,38 +1131,6 @@ const serviceFilters = [
   { key: 'completed', label: 'Completados' },
   { key: 'cancelled', label: 'Cancelados' }
 ]
-
-// Tipos de servicio cargados desde la API
-const serviceTypes = ref([])
-const isLoadingServiceTypes = ref(false)
-
-// Función para cargar los tipos de servicio desde la API
-const loadServiceTypes = async () => {
-  try {
-    isLoadingServiceTypes.value = true
-    const data = await $fetch('/servicios/activos', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
-    })
-    
-    // Mapear la respuesta de la API al formato esperado por el componente
-    serviceTypes.value = data.map(service => ({
-      id: service.id_servicio,
-      name: service.nombre,
-      description: service.descripcion,
-      active: service.estado
-    }))
-  } catch (error) {
-    console.error('Error al cargar tipos de servicio:', error)
-    showError('No se pudieron cargar los tipos de servicio')
-  } finally {
-    isLoadingServiceTypes.value = false
-  }
-}
 
 const datePeriods = [
   { key: 'all', label: 'Todo' },
@@ -1193,10 +1148,101 @@ const serviceSteps = [
   { id: 5, title: 'Servicio Completado', description: 'Servicio finalizado' }
 ]
 
-// Services data (ahora se llena desde la API)
-const allServices = ref([])
+// Títulos y textos para el modal de cancelación
+const cancelModalTexts = {
+  pendiente_asignacion: {
+    title: 'Cancelar Servicio',
+    confirmButton: 'Sí, cancelar',
+  },
+  asignado: {
+    title: 'Solicitar Cancelación',
+    confirmButton: 'Solicitar cancelación',
+  },
+  en_proceso: {
+    title: 'Reportar Problema',
+    confirmButton: 'Enviar reporte',
+  },
+  default: {
+    title: 'Cancelar Servicio',
+    confirmButton: 'Confirmar cancelación',
+  }
+}
 
-// Computed properties actualizadas para usar los datos de la API
+// =========================
+// VARIABLES REACTIVAS
+// =========================
+
+// Estado de carga y datos principales
+const isLoading = ref(true)
+const userData = ref({
+  id: null,
+  identidad: '',
+  nombre: 'Invitado',
+  email: '',
+  role: '',
+  rol_nombre: 'Invitado',
+  name: 'Invitado',
+  ...(userCookie.value || {})
+})
+
+// Datos de servicios
+const servicesData = ref({
+  solicitudes: [],
+  total: 0,
+  finalizadas: 0,
+  pendientes: 0,
+  canceladas: 0
+})
+const allServices = ref([])
+const serviceTypes = ref([])
+const isLoadingServiceTypes = ref(false)
+
+// Estados de modales
+const showServiceModal = ref(false)
+const showPaymentModal = ref(false) 
+const showVisitPaymentModal = ref(false)
+const showCancelModal = ref(false)
+const showQuotationModal = ref(false)
+
+// Estados de cotización
+const quotationData = ref(null)
+const isLoadingQuotation = ref(false)
+
+// Estados de filtros
+const showFilters = ref(false)
+const currentFilter = ref('all')
+const currentDateFilter = ref('all')
+const selectedServiceTypes = ref([])
+
+// Estados de servicios
+const selectedServiceId = ref(null)
+
+// Estados de cancelación
+const cancelReason = ref('')
+const cancelAdditionalInfo = ref('')
+const isCancelling = ref(false)
+
+// Estados de pago
+const isLoadingAccounts = ref(false)
+const bankAccounts = ref([])
+const selectedAccount = ref('')
+const comprobante = ref('')
+const isProcessingPayment = ref(false)
+const membresiaProgreso = ref(null)
+const isLoadingMembresia = ref(false)
+const visitCost = ref(0)
+
+// Estados de notificaciones
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+
+// =========================
+// COMPUTED PROPERTIES
+// =========================
+
 const totalServices = computed(() => servicesData.value.total || allServices.value.length)
 const completedServices = computed(() => servicesData.value.finalizadas || allServices.value.filter(s => s.status === 'Servicio Completado').length)
 const pendingServices = computed(() => servicesData.value.pendientes || allServices.value.filter(s => !['Servicio Completado', 'Cancelado'].includes(s.status)).length)
@@ -1221,7 +1267,6 @@ const filteredServices = computed(() => {
   
   if (selectedServiceTypes.value.length > 0 && Array.isArray(serviceTypes.value)) {
     filtered = filtered.filter(s => {
-      // Buscar el tipo de servicio por nombre
       return selectedServiceTypes.value.some(typeName => 
         serviceTypes.value.some(st => st && st.name === typeName && st.name === s.title)
       )
@@ -1231,7 +1276,416 @@ const filteredServices = computed(() => {
   return filtered
 })
 
-// Methods
+const hasVisibleActions = computed(() => {
+  if (!selectedService.value) return false;
+  
+  const status = selectedService.value.rawStatus;
+  
+  if (['pendiente_asignacion', 'asignado', 'cotizacion_pendiente', 'cotizacion_aprobada', 'cotizacion_rechazada'].includes(status)) return true;
+  if (status === 'pendiente_pagovisita' && selectedService.value.pagar_visita) return true;
+  if (status === 'pendiente_pagoservicio') return true;
+  if (status === 'pendiente_cotizacion') return true;
+  if (status === 'finalizado') return true;
+  
+  return false;
+});
+
+const hasActions = computed(() => {
+  if (!selectedService.value) return false;
+  
+  const status = selectedService.value.rawStatus;
+  
+  if (['pendiente_pagoservicio', 'finalizado'].includes(status)) return true;
+  
+  if (status === 'en_proceso') return false;
+  
+  return true;
+});
+
+const getSelectedAccount = computed(() => {
+  if (!selectedAccount.value) return null;
+  return bankAccounts.value.find(acc => acc.id_cuenta === selectedAccount.value) || null;
+}) 
+
+const getCancelButtonText = computed(() => {
+  const status = selectedService.value?.rawStatus || 'default'
+  
+  if (status === 'cancelado') return 'Servicio Cancelado'
+  if (status === 'completado') return 'Servicio Completado'
+  if (status === 'en_proceso') return 'Reportar Problema'
+  if (status === 'asignado') return 'Solicitar Cancelación'
+  if (status === 'pendiente_pago') return 'Cancelar Servicio'
+  
+  return 'Cancelar Servicio'
+})
+
+// =========================
+// FUNCIONES UTILITARIAS
+// =========================
+
+const formatCurrency = (value) => {
+  if (!value) return '0.00'
+  return parseFloat(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  const options = { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  }
+  return date.toLocaleDateString('es-ES', options)
+}
+
+const formatDateDDMMYY = (dateString) => {
+  const date = dateString ? new Date(dateString) : new Date()
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = String(date.getFullYear()).slice(-2)
+  return `${day}${month}${year}`
+}
+
+const getServiceIcon = () => {
+  return '🛠️'
+}
+
+const getStatusColor = (status) => {
+  const colors = {
+    'Servicio Completado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    'Verificando Pago de la Visita': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'Pago Visita Rechazado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    'Pago del Servicio Rechazado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    'Verificando Pago del Servicio': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'Servicio en Curso': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    'Cotización Pendiente': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'Técnico Asignado': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    'Solicitud Recibida': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'Cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  }
+  return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+}
+
+const getTimeAgo = (date) => {
+  const now = new Date()
+  const targetDate = new Date(date)
+  const diffInDays = Math.floor((now - targetDate) / (1000 * 60 * 60 * 24))
+  
+  if (diffInDays === 0) return 'Hoy'
+  if (diffInDays === 1) return 'Ayer'
+  if (diffInDays < 7) return `Hace ${diffInDays} días`
+  return `Hace ${Math.floor(diffInDays / 7)} semanas`
+}
+
+const getCurrentStepNumber = (status) => {
+  const statusToStep = { 
+    'pendiente_pagovisita': 1,
+    'pendiente_asignacion': 1,
+    'verificando_pagovisita': 1, 
+    'asignado': 2,
+    'pendiente_cotizacion': 3,
+    'en_proceso': 4,
+    'pendiente_pagoservicio': 5,
+    'verificando_pagoservicio': 5,
+    'finalizado': 6,
+    'cancelado': 0
+  }
+  return statusToStep[status] || 1
+}
+
+const getStepStatus = (stepId, rawStatus) => {
+  const currentStep = getCurrentStepNumber(rawStatus)
+  
+  if (stepId < currentStep) {
+    return {
+      class: 'bg-blue-500 border-blue-200 dark:border-blue-800',
+      textClass: 'text-white',
+      icon: '✓'
+    }
+  } else if (stepId === currentStep) {
+    return {
+      class: 'bg-yellow-500 border-yellow-200 dark:border-yellow-800',
+      textClass: 'text-white',
+      icon: '●'
+    }
+  } else {
+    return {
+      class: 'bg-gray-300 dark:bg-gray-600 border-gray-200 dark:border-gray-700',
+      textClass: 'text-gray-500 dark:text-gray-400',
+      icon: stepId
+    }
+  }
+}
+
+// =========================
+// FUNCIONES DE MAPEO DE DATOS
+// =========================
+
+const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
+  
+  // Si el estado es 'pendiente_pagovisita' y el pago fue rechazado, mostramos 'Pago Visita Rechazado'
+  if (apiStatus === 'pendiente_pagovisita' && servicio.pagovisitaRechazado) {
+    return 'Pago Visita Rechazado';
+  }
+  
+  // Si el estado es 'pendiente_pagoservicio' y la cotización fue rechazada, mostramos 'Pago del Servicio Rechazado'
+  if (apiStatus === 'pendiente_pagoservicio' && servicio.cotizacion_estado === 'rechazado') {
+    return 'Pago del Servicio Rechazado';
+  }
+  
+  const statusMap = {
+    'pendiente_pagovisita': 'Pago de la Visita',
+    'verificando_pagovisita': 'Verificando Pago de la Visita',
+    'pendiente_asignacion': 'Asignando Técnico adecuado',
+    'asignado': 'Técnico Asignado',
+    'pendiente_cotizacion': 'Diagnóstico y Cotización Realizada',
+    'en_proceso': 'Servicio en Curso',
+    'pendiente_pagoservicio': 'Pago del Servicio',
+    'verificando_pagoservicio': 'Verificando Pago del Servicio',
+    'finalizado': 'Servicio Completado',
+    'cancelado': 'Cancelado'
+  }
+  return statusMap[apiStatus] || 'En Progreso'
+}
+
+const mapApiServiceToLocal = (apiService) => { 
+  
+  // Inicializar los estados de pago
+  const pagovisitaRechazado = apiService.pago_estado === 'rechazado';
+  const cotizacionRechazada = apiService.cotizacion_estado === 'rechazado';
+  
+  // Crear objeto con los datos del servicio
+  const servicioMapeado = {
+    id: apiService.id_solicitud,
+    serviceId: apiService.id_servicio,
+    pagovisitaRechazado: pagovisitaRechazado,
+    cotizacion_estado: apiService.cotizacion_estado || 'pendiente',
+    title: apiService.servicio?.nombre || 'Servicio General',
+    icon: getServiceIcon(apiService.id_servicio),
+    status: mapApiStatusToLocal(apiService.estado, { 
+      pagovisitaRechazado,
+      cotizacion_estado: apiService.cotizacion_estado 
+    }),
+    rawStatus: apiService.estado,
+    rawDate: apiService.fecha_solicitud,
+    date: formatDate(apiService.fecha_solicitud),
+    fullLocation: {
+      colonia: apiService.colonia,
+      direccion: apiService.direccion_precisa
+    },
+    description: apiService.descripcion, 
+    pagar_visita: apiService.pagar_visita == 1,  
+    serviceDescription: apiService.descripcion,
+    diagnosis: 'Diagnóstico pendiente...',
+    technician: apiService.estado === 'asignado' ? {
+      name: 'Técnico Asignado',
+      rating: 4.8,
+      reviews: 127
+    } : null
+  }; 
+  return servicioMapeado;
+}
+
+// =========================
+// FUNCIONES DE CARGA DE DATOS
+// =========================
+
+const loadServices = async () => {
+  try {
+    const userCookieValue = useCookie('user').value
+    if (!userCookieValue?.id_usuario) {
+      console.error('No se encontró ID de usuario')
+      return
+    }
+
+    const response = await $fetch(`/solicitudservicio/usuario/${userCookieValue.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${useCookie('token').value}`
+      }
+    })
+
+    servicesData.value = response;
+    
+    // Verificar el estado de los pagos para cada solicitud
+    const solicitudesConPago = await Promise.all(response.solicitudes.map(async (solicitud) => {
+      
+      // Verificar estado del pago de la visita si corresponde
+      if (solicitud.estado === 'pendiente_pagovisita') {
+        try {
+          const pagoResponse = await $fetch(`/pagovisita/solicitud/${solicitud.id_solicitud}`, {
+            baseURL: config.public.apiBase,
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${useCookie('token').value}`
+            }
+          });
+          
+          const solicitudActualizada = {
+            ...solicitud,
+            pago_estado: pagoResponse.estado || 'pendiente'
+          };
+          
+          return solicitudActualizada;
+          
+        } catch (error) {
+          return {
+            ...solicitud,
+            pago_estado: 'pendiente'
+          };
+        }
+      }
+      
+      // Verificar estado de la cotización si corresponde
+      if (solicitud.estado === 'pendiente_pagoservicio') {
+        try {
+          const cotizacionResponse = await $fetch(`/cotizacion/solicitud/${solicitud.id_solicitud}`, {
+            baseURL: config.public.apiBase,
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${useCookie('token').value}`
+            }
+          });
+          
+          const solicitudActualizada = {
+            ...solicitud,
+            cotizacion_estado: cotizacionResponse.estado || 'pendiente'
+          };
+          return solicitudActualizada;
+          
+        } catch (error) {
+          console.error('Error al verificar el estado de la cotización:', error);
+          return {
+            ...solicitud,
+            cotizacion_estado: 'pendiente'
+          };
+        }
+      }
+      
+      return solicitud;
+    }));
+    
+    // Mapear los servicios con la información de pago actualizada
+    allServices.value = solicitudesConPago.map(solicitud => mapApiServiceToLocal(solicitud));
+    
+  } catch (error) {
+    console.error('Error cargando servicios:', error)
+    showError('Error al cargar los servicios')
+  }
+}
+
+const loadServiceTypes = async () => {
+  try {
+    isLoadingServiceTypes.value = true
+    const data = await $fetch('/servicios/activos', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    serviceTypes.value = data.map(service => ({
+      id: service.id_servicio,
+      name: service.nombre,
+      description: service.descripcion,
+      active: service.estado
+    }))
+  } catch (error) {
+    console.error('Error al cargar tipos de servicio:', error)
+    showError('No se pudieron cargar los tipos de servicio')
+  } finally {
+    isLoadingServiceTypes.value = false
+  }
+}
+
+const fetchQuotationData = async (solicitudId) => {
+  try {
+    isLoadingQuotation.value = true
+    const token = useCookie('token').value
+    
+    const data = await $fetch(`/cotizacion/solicitud/${solicitudId}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    
+    quotationData.value = data
+    
+    // Si no hay datos de cotización, mostrar un mensaje
+    if (!data) {
+      console.warn('No se encontraron datos de cotización')
+      showError('No se encontró información de cotización para este servicio')
+    }
+  } catch (error) {
+    console.error('Error al cargar la cotización:', error)
+    showError('No se pudo cargar la información de la cotización')
+  } finally {
+    isLoadingQuotation.value = false
+  }
+}
+
+const fetchBankAccounts = async () => {
+  isLoadingAccounts.value = true;
+  try {
+    const data = await $fetch('/cuentas', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (data) {
+      bankAccounts.value = data.map(account => ({
+        id_cuenta: account.id_cuenta,
+        banco: account.banco,
+        numero_cuenta: account.num_cuenta,
+        tipo_cuenta: account.tipo,
+        titular: account.beneficiario || 'Titular no especificado',
+        activo: account.activo === 1
+      }));
+      
+      selectedAccount.value = '';
+    }
+  } catch (error) {
+    console.error('Error al obtener cuentas bancarias:', error);
+    showError('No se pudieron cargar las cuentas bancarias');
+  } finally {
+    isLoadingAccounts.value = false;
+  }
+};
+
+const fetchVisitCost = async () => {
+  try {
+    const data = await $fetch('/config/valor/visita_tecnico', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (data) {
+      visitCost.value = data.valor;
+    }
+  } catch (error) {
+    console.error('Error al obtener el costo de la visita:', error);
+  }
+};
+
+// =========================
+// FUNCIONES DE MODALES
+// =========================
+
 const openServiceModal = (service) => {
   selectedServiceId.value = service.id
   showServiceModal.value = true
@@ -1255,47 +1709,54 @@ const closeVisitPaymentModal = () => {
   isProcessingPayment.value = false
 }
 
-const fetchBankAccounts = async () => {
-  isLoadingAccounts.value = true;
+const fetchMembresiaProgreso = async (userId) => {
   try {
-    const data = await $fetch('/cuentas', {
+    isLoadingMembresia.value = true
+    const token = useCookie('token').value
+    const data = await $fetch(`/membresia/progreso/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
+        'Authorization': `Bearer ${token}`
       }
-    });
+    })
     
-    if (data) {
-      // Mapear los datos para que coincidan con la estructura esperada por el template
-      bankAccounts.value = data.map(account => ({
-        id_cuenta: account.id_cuenta,
-        banco: account.banco,
-        numero_cuenta: account.num_cuenta,
-        tipo_cuenta: account.tipo,
-        titular: account.beneficiario || 'Titular no especificado',
-        activo: account.activo === 1
-      }));
-      
-      // No seleccionar ninguna cuenta por defecto
-      selectedAccount.value = '';
+    if (data?.mesesProgreso > 1) {
+      membresiaProgreso.value = data
     }
   } catch (error) {
-    console.error('Error al obtener cuentas bancarias:', error);
-    showError('Error', 'No se pudieron cargar las cuentas bancarias');
+    console.error('Error al cargar progreso de membresía:', error)
+    // No mostramos error al usuario ya que no es crítico
   } finally {
-    isLoadingAccounts.value = false;
+    isLoadingMembresia.value = false
   }
-};
+}
 
-const openPaymentModal = async () => {
+const openPaymentModal = async (service) => {
   try {
+    // Actualizar el ID del servicio seleccionado en lugar de la propiedad computada
+    selectedServiceId.value = service?.id || null
     showPaymentModal.value = true
-    await fetchBankAccounts()
+    
+    // Resetear datos de membresía
+    membresiaProgreso.value = null
+    
+    // Cargar cuentas bancarias y progreso de membresía en paralelo
+    await Promise.all([
+      fetchBankAccounts(),
+      userData.value?.id_usuario ? fetchMembresiaProgreso(userData.value.id_usuario) : Promise.resolve()
+    ])
+    
+    // Cargar la cotización
+    if (service?.id) { 
+      await fetchQuotationData(service.id)
+    } else {
+      console.error('No se pudo obtener el ID del servicio')
+    }
   } catch (error) {
-    console.error('Error al cargar cuentas bancarias:', error)
-    showError('No se pudieron cargar las cuentas bancarias. Intente nuevamente.')
+    console.error('Error al cargar datos del pago:', error)
+    showError('No se pudieron cargar los datos del pago. Intente nuevamente.')
   }
 }
 
@@ -1306,58 +1767,58 @@ const closePaymentModal = () => {
   isProcessingPayment.value = false
 }
 
-// Determinar si hay acciones disponibles para el servicio actual
-const hasActions = computed(() => {
-  if (!selectedService.value) return false;
-  
-  const status = selectedService.value.rawStatus;
-  
-  // Estados donde hay acciones disponibles
-  const statesWithActions = [
-    'pendiente_asignacion',
-    'asignado',
-    'cotizacion_pendiente',
-    'cotizacion_aprobada',
-    'cotizacion_rechazada'
-  ];
-  
-  // Verificar si el estado actual tiene acciones
-  if (statesWithActions.includes(status)) return true;
-  
-  // Mostrar acciones si el servicio está completado o finalizado (con o sin pago pendiente)
-  if (status === 'completado' || status === 'finalizado') return true;
-  
-  // Verificar si hay que mostrar el botón de pago de visita para otros estados
-  if (status === 'pendiente_pago' && selectedService.value.pagar_visita) return true;
-  
-  return false;
-});
+const openQuotationModal = async () => {
+  showQuotationModal.value = true
+  if (selectedService.value?.id) {
+    await fetchQuotationData(selectedService.value.id)
+  }
+}
 
-// Obtener la cuenta seleccionada
-const getSelectedAccount = computed(() => {
-  if (!selectedAccount.value) return null;
-  return bankAccounts.value.find(acc => acc.id_cuenta === selectedAccount.value) || null;
-}) 
+const confirmarCancelar = () => {
+  cancelAdditionalInfo.value = ''
+  showCancelModal.value = true
+}
+
+const closeCancelModal = () => {
+  showCancelModal.value = false
+  setTimeout(() => {
+    cancelReason.value = ''
+    cancelAdditionalInfo.value = ''
+  }, 300)
+}
+
+// =========================
+// FUNCIONES DE PROCESAMIENTO
+// =========================
 
 const processVisitPayment = async () => {
   if (!selectedAccount.value) {
-    showError('Error', 'Por favor selecciona una cuenta bancaria');
+    showError('Por favor selecciona una cuenta bancaria');
     return;
   }
   
   if (!comprobante.value?.trim()) {
-    showError('Error', 'Por favor ingresa el número de comprobante');
+    showError('Por favor ingresa el número de comprobante');
     return;
   }
 
   isProcessingPayment.value = true;
   
   try {
-    // Obtener el ID del usuario de la cookie 'user'
     const userData = useCookie('user').value;
     if (!userData?.id_usuario) {
       throw new Error('No se pudo identificar al usuario');
     }
+    
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    const fechaISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     
     const requestData = {
       id_usuario: userData.id_usuario,
@@ -1365,13 +1826,11 @@ const processVisitPayment = async () => {
       id_cuenta: selectedAccount.value,
       monto: visitCost.value,
       num_comprobante: comprobante.value.trim(),
-      fecha: new Date(Date.now() - (6 * 60 * 60 * 1000)).toISOString() // Ajuste a UTC-6
+      fecha: fechaISO
     };
     
-    // Obtener el token de autenticación
     const authToken = useCookie('token').value;
     
-    // Enviar pago de visita
     await $fetch('/pagovisita', {
       method: 'POST',
       baseURL: config.public.apiBase,
@@ -1382,43 +1841,37 @@ const processVisitPayment = async () => {
       body: requestData
     });
     
-    // Actualizar el estado de la solicitud a 'pendiente_asignacion' 
     const token = useCookie('token').value;
     
     try {
-      const response = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+      await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
         method: 'PUT',
         baseURL: config.public.apiBase,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ estado: 'pendiente_asignacion' })
+        body: JSON.stringify({ estado: 'verificando_pagovisita' })
       }); 
     } catch (updateError) {
       console.error('Error al actualizar el estado de la solicitud:', updateError);
-      // Lanzar el error para que sea manejado por el catch principal
       throw new Error(`Error al actualizar el estado de la solicitud: ${updateError.message}`);
     }
     
-    // Cerrar el modal y actualizar datos
     closeVisitPaymentModal();
     await loadServices();
     
-    // Mostrar notificación de éxito
     showSuccess(
       '¡Pago Enviado!',
       'Una vez se verifique el pago, se le asignará un técnico.'
     );
     
-    // Limpiar formulario
     selectedAccount.value = '';
     comprobante.value = '';
     
   } catch (error) {
     console.error('Error al procesar el pago de la visita:', error);
     showError(
-      'Error al procesar la solicitud',
       error.data?.message || error.response?._data?.message || error.message || 'No se pudo completar la operación. Por favor, inténtalo de nuevo.'
     );
   } finally {
@@ -1432,40 +1885,201 @@ const processPayment = async () => {
     return
   }
   
+  isProcessingPayment.value = true
+  
   try {
-    isProcessingPayment.value = true
+    // Calcular el monto total basado en la cotización
+    const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
     
-    // Enviar pago
-    const response = await $fetch('/pagos/registrar', {
+    
+    // Actualizar el estado de la cotización a pagado
+    const response = await $fetch(`/cotizacion/${quotationData.value?.id_cotizacion}`, {
       baseURL: config.public.apiBase,
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${useCookie('token').value}`
       },
       body: JSON.stringify({
-        id_solicitud: selectedService.value.id,
-        id_cuenta: selectedAccount.value,
-        monto: selectedService.value.finalTotal || 180,
-        comprobante: comprobante.value,
-        metodo: 'transferencia'
+        id_cuenta: parseInt(selectedAccount.value),
+        num_comprobante: comprobante.value,
+        estado: 'pagado',
+        monto_manodeobra: montoManodeObra
       })
     })
     
-    showSuccess('Pago registrado exitosamente. Se verificará el pago en breve.')
-    closePaymentModal()
-    
-    // Recargar servicios para actualizar el estado
-    await loadServices()
-    
+    if (response) {
+      // Actualizar el estado de la solicitud a 'verificando_pagoservicio'
+      await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+        method: 'PUT',
+        baseURL: config.public.apiBase,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${useCookie('token').value}`
+        },
+        body: JSON.stringify({ 
+          estado: 'verificando_pagoservicio' 
+        })
+      });
+      
+      showSuccess('Pago procesado', 'El pago se ha registrado correctamente y está en proceso de verificación')
+      // Cerrar el modal y recargar los servicios
+      closePaymentModal()
+      await loadServices()
+    }
   } catch (error) {
     console.error('Error al procesar el pago:', error)
-    showError(error.response?._data?.message || 'Error al procesar el pago. Intente de nuevo.')
+    const errorMessage = error.response?._data?.errores?.[0]?.msg || 
+                        error.response?._data?.message || 
+                        'Error al procesar el pago. Por favor, intente nuevamente.'
+    showError(errorMessage)
   } finally {
     isProcessingPayment.value = false
   }
 }
+
+const cancelarSolicitud = async () => {
+  if (!cancelAdditionalInfo.value.trim()) {
+    showError('Por favor, escribe el motivo de la cancelación')
+    return
+  }
+
+  isCancelling.value = true
+  
+  try {
+    const token = useCookie('token').value
+    
+    await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        estado: 'cancelado',
+        comentario: cancelAdditionalInfo.value.trim()
+      })
+    })
+
+    closeCancelModal()
+    
+    showSuccess('Solicitud cancelada', 'El servicio ha sido cancelado correctamente')
+    
+    await loadServices()
+    
+  } catch (error) {
+    console.error('Error al cancelar el servicio:', error)
+    showError('Error al cancelar el servicio. Por favor, inténtalo de nuevo.')
+  } finally {
+    isCancelling.value = false
+  }
+}
+
+const acceptQuotation = async () => {
+  try {
+    const token = useCookie('token').value
+    
+    // 1. Actualizar estado de la cotización a 'aceptado'
+    await $fetch(`/cotizacion/${quotationData.value.id_cotizacion}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: {
+        estado: 'aceptado'
+      }
+    })
+    
+    // 2. Actualizar estado de la solicitud a 'en_proceso'
+    await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: {
+        estado: 'en_proceso'
+      }
+    })
+    
+    // Actualizar el estado local
+    const service = allServices.value.find(s => s.id === selectedServiceId.value)
+    if (service) {
+      service.status = 'Servicio en Curso'
+      service.rawStatus = 'en_proceso'
+    }
+    
+    showSuccess('Cotización aceptada', 'El servicio comenzará pronto.')
+    showQuotationModal.value = false
+    await loadServices()
+    
+  } catch (error) {
+    console.error('Error al aceptar la cotización:', error)
+    showError('No se pudo aceptar la cotización. Por favor, intente de nuevo.')
+  }
+}
+
+const rejectQuotation = async () => {
+  try {
+    const token = useCookie('token').value
+    
+    // 1. Actualizar estado de la cotización a 'rechazado'
+    await $fetch(`/cotizacion/${quotationData.value.id_cotizacion}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: {
+        estado: 'rechazado'
+      }
+    })
+    
+    // 2. Actualizar estado de la solicitud a 'pendiente_asignacion'
+    await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: {
+        estado: 'pendiente_asignacion'
+      }
+    })
+    
+    // Actualizar el estado local
+    const service = allServices.value.find(s => s.id === selectedServiceId.value)
+    if (service) {
+      service.status = 'Cotización Rechazada'
+      service.rawStatus = 'cotizacion_rechazada'
+    }
+    
+    showSuccess('Cotización rechazada', 'La cotización ha sido rechazada correctamente.')
+    showQuotationModal.value = false
+    await loadServices()
+    
+  } catch (error) {
+    console.error('Error al rechazar la cotización:', error)
+    showError('No se pudo rechazar la cotización. Por favor, intente de nuevo.')
+  }
+}
+
+const reportarProblema = () => {
+  navigateTo('/cliente/soporte#problemaServicio');
+  closeServiceModal();
+};
+
+// =========================
+// FUNCIONES DE FILTROS
+// =========================
 
 const toggleServiceTypeFilter = (serviceType) => {
   const index = selectedServiceTypes.value.indexOf(serviceType)
@@ -1482,187 +2096,54 @@ const resetFilters = () => {
   selectedServiceTypes.value = []
 }
 
-const getCurrentStepNumber = (status) => {
-  const statusToStep = {
-    'Solicitud Recibida': 1,
-    'Técnico Asignado': 2,
-    'Cotización Pendiente': 3,
-    'Servicio en Curso': 4,
-    'Servicio Completado': 5
-  }
-  return statusToStep[status] || 1
-}
+// =========================
+// FUNCIONES DE CÁLCULO
+// =========================
 
-const getStepStatus = (stepId, serviceStatus) => {
-  const currentStep = getCurrentStepNumber(serviceStatus)
+const calculateTotal = () => {
+  const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
+  const creditoMembresia = membresiaProgreso.value?.mesesProgreso > 1 
+    ? parseFloat(membresiaProgreso.value.montoTotal || 0) 
+    : 0
   
-  if (stepId < currentStep) {
-    return {
-      class: 'bg-blue-500 border-blue-200 dark:border-blue-800',
-      textClass: 'text-white',
-      icon: '✓'
-    }
-  } else if (stepId === currentStep) {
-    return {
-      class: 'bg-yellow-500 border-yellow-200 dark:border-yellow-800',
-      textClass: 'text-white',
-      icon: '●'
-    }
-  } else {
-    return {
-      class: 'bg-gray-300 dark:bg-gray-600 border-gray-200 dark:border-gray-700',
-      textClass: 'text-gray-500 dark:text-gray-400',
-      icon: stepId
-    }
-  }
+  const total = Math.max(0, montoManodeObra - creditoMembresia)
+  return `L. ${total.toFixed(2)}`
 }
 
-const acceptQuotation = () => {
-  const service = allServices.value.find(s => s.id === selectedServiceId.value)
-  if (service) {
-    service.status = 'Servicio en Curso'
-    showSuccess('Cotización aceptada. El servicio comenzará pronto.')
-  }
+// =========================
+// FUNCIONES DE UTILIDAD
+// =========================
+
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text).then(() => {
+    showSuccess('Número de cuenta copiado')
+  }).catch(err => {
+    console.error('Error al copiar al portapapeles:', err)
+    showError('No se pudo copiar al portapapeles')
+  })
 }
 
-// Títulos y textos para el modal de cancelación
-const cancelModalTexts = {
-  pendiente_asignacion: {
-    title: 'Cancelar Servicio',
-    confirmButton: 'Sí, cancelar',
-  },
-  asignado: {
-    title: 'Solicitar Cancelación',
-    confirmButton: 'Solicitar cancelación',
-  },
-  en_proceso: {
-    title: 'Reportar Problema',
-    confirmButton: 'Enviar reporte',
-  },
-  default: {
-    title: 'Cancelar Servicio',
-    confirmButton: 'Confirmar cancelación',
-  }
-}
-
-const getCancelModalTitle = computed(() => {
-  const status = selectedService.value?.rawStatus || 'default'
-  return cancelModalTexts[status]?.title || cancelModalTexts.default.title
-})
-
-const getConfirmButtonText = computed(() => {
-  const status = selectedService.value?.rawStatus || 'default'
-  return cancelModalTexts[status]?.confirmButton || cancelModalTexts.default.confirmButton
-})
-
-const getCancelButtonText = computed(() => {
-  const status = selectedService.value?.rawStatus || 'default'
-  
-  if (status === 'cancelado') return 'Servicio Cancelado'
-  if (status === 'completado') return 'Servicio Completado'
-  if (status === 'en_proceso') return 'Reportar Problema'
-  if (status === 'asignado') return 'Solicitar Cancelación'
-  if (status === 'pendiente_pago') return 'Cancelar Servicio'
-  
-  return 'Cancelar Servicio'
-})
-
-const confirmarCancelar = () => {
-  // Resetear valores anteriores
-  cancelAdditionalInfo.value = ''
-  showCancelModal.value = true
-}
-
-const closeCancelModal = () => {
-  showCancelModal.value = false
-  // Pequeño retraso para la animación
-  setTimeout(() => {
-    cancelReason.value = ''
-    cancelAdditionalInfo.value = ''
-  }, 300)
-}
-
-const cancelarSolicitud = async () => {
-  if (!cancelAdditionalInfo.value.trim()) {
-    showError('Por favor, escribe el motivo de la cancelación')
-    return
-  }
-
-  try {
-    const token = useCookie('token').value
-    
-    // Realizar la petición para cancelar el servicio
-    await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
-      method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        estado: 'cancelado',
-        comentario: cancelAdditionalInfo.value.trim()
-      })
-    })
-
-    // Cerrar el modal de cancelación
-    closeCancelModal()
-    
-    // Mostrar mensaje de éxito
-    showSuccess('El servicio ha sido cancelado correctamente')
-    
-    // Actualizar la lista de servicios
-    await loadServices()
-    
-  } catch (error) {
-    console.error('Error al cancelar el servicio:', error)
-    showError('Ocurrió un error al cancelar el servicio. Por favor, inténtalo de nuevo.')
-  }
-}
-
-// Función para reportar un problema con un servicio completado
-const reportarProblema = () => {
-  // Redirigir a la página de soporte con el hash #problemaServicio
-  navigateTo('/cliente/soporte#problemaServicio');
-  
-  // Cerrar el modal de servicio actual
-  closeServiceModal();
-};
-
-const rejectQuotation = () => {
-  const service = allServices.value.find(s => s.id === selectedServiceId.value)
-  if (service) {
-    service.status = 'Cancelado'
-    showToast({
-      message: 'Cotización rechazada. El servicio ha sido cancelado.',
-      type: 'warning',
-      duration: 6000
-    })
-  }
-}
+// =========================
+// FUNCIONES DE NOTIFICACIONES
+// =========================
 
 const showToast = (options) => {
-  // Primero ocultar el toast actual
   toast.value.show = false;
   
-  // Usar nextTick para asegurar que la actualización del DOM se complete
   nextTick(() => {
-    // Actualizar con los nuevos valores
     toast.value = {
       show: true,
-      message: options.message,
+      message: options.message || options.title,
       type: options.type || 'info',
       duration: options.duration || 5000
     };
   });
 };
 
-// Funciones de conveniencia
-const showSuccess = (message) => {
+const showSuccess = (title, message) => {
   showToast({
-    message: message,
     type: 'success',
+    message: message ? `${title}\n${message}` : title,
     duration: 5000
   });
 };
@@ -1671,40 +2152,33 @@ const showError = (message) => {
   console.error('Error:', message);
   
   showToast({
-    message: message,
+    message: typeof message === 'string' ? message : 'Ocurrió un error inesperado',
     type: 'error',
-    duration: 8000 // Los errores duran más para que el usuario los pueda leer
+    duration: 8000
   });
 };
 
-const getStatusColor = (status) => {
-  const colors = {
-    'Servicio Completado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    'Servicio en Curso': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    'Cotización Pendiente': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Técnico Asignado': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    'Solicitud Recibida': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-  }
-  return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-}
+// =========================
+// INICIALIZACIÓN
+// =========================
 
-const getTimeAgo = (date) => {
-  const now = new Date()
-  const targetDate = new Date(date)
-  const diffInDays = Math.floor((now - targetDate) / (1000 * 60 * 60 * 24))
-  
-  if (diffInDays === 0) return 'Hoy'
-  if (diffInDays === 1) return 'Ayer'
-  if (diffInDays < 7) return `Hace ${diffInDays} días`
-  return `Hace ${Math.floor(diffInDays / 7)} semanas`
-}
+onMounted(async () => { 
+  try {
+    await Promise.all([
+      loadServices(),
+      loadServiceTypes()
+    ])
+  } catch (error) {
+    console.error('Error al cargar datos iniciales:', error)
+    showError('Error al cargar los datos. Por favor, recargue la página.')
+  } finally {
+    isLoading.value = false
+  }
+})
 
 </script>
 
 <style scoped>
-/* Add any custom styles here */
-
 /* Animaciones para el backdrop */
 .backdrop-enter-active {
   transition: opacity 0.3s ease-out;
@@ -1910,4 +2384,4 @@ body {
   justify-content: center;
   align-items: center;
 }
-</style>
+</style> 
