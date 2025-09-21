@@ -561,7 +561,7 @@ const cargarCiudades = async () => {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json' 
       }
     })
     

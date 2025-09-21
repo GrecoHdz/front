@@ -1,20 +1,12 @@
 import { defineStore } from 'pinia';
-import { ref, computed, useCookie } from '#imports';
-
-// Mapeo de IDs de rol a nombres de rol (en minúsculas)
-const roleMap: Record<number, string> = {
-  1: 'admin',
-  2: 'tecnico',
-  3: 'usuario',
-  4: 'cliente'
-};
+import { ref, computed, useCookie } from '#imports'; 
 
 let _refreshPromise: Promise<boolean> | null = null;
 
 interface User {
   id_usuario: number;
   id_rol: number;
-  id_ciudad: number;  // Añadido id_ciudad
+  id_ciudad: number;  
   nombre: string;
   identidad: string;
   email: string;
@@ -67,7 +59,7 @@ const setUser = (userData: User | null): User | null => {
     // Asegurar que los campos requeridos tengan valores por defecto
     // Solo usar valor por defecto si id_ciudad es null o undefined
     id_ciudad: userData.id_ciudad,
-    role: userData.role || (userData.id_rol ? roleMap[userData.id_rol] : 'usuario')
+    role: userData.role
   }; 
   
   // Guardar solo la información necesaria en la cookie
@@ -128,11 +120,9 @@ const token = tokenCookie; // usar 'token' en el resto del store como antes
           
           // Asegurarse de que el usuario tenga los campos requeridos
           const userData = {
-            ...response.user,
-            // Asegurar que id_ciudad tenga un valor por defecto si no está presente
-            id_ciudad: response.user.id_ciudad || 1,
-            // Asegurar que el rol esté correctamente establecido
-            role: response.user.role || (response.user.id_rol ? roleMap[response.user.id_rol] : 'usuario')
+            ...response.user, 
+            id_ciudad: response.user.id_ciudad || 1, 
+            role: response.user.role
           };
           
           // Guardar el usuario en el estado y en las cookies
@@ -219,9 +209,10 @@ interface AuthMeResponse {
   [key: string]: any; // Para propiedades adicionales
 }
 
-// --- CHECK AUTH 
+// --- CHECK AUTH
 const checkAuth = async (): Promise<boolean> => {
   if (!token.value) {
+    // 🔹 Si no hay access token, intentar refrescar
     try {
       return await refreshToken();
     } catch {
@@ -236,19 +227,27 @@ const checkAuth = async (): Promise<boolean> => {
     let shouldRefreshDueToTokenExpiry = false;
     let tokenExpiresIn = Infinity;
 
+    // 🔹 Verificamos expiración del token
     try {
       const payload = JSON.parse(atob(token.value.split('.')[1]));
       const exp = payload.exp * 1000;
       tokenExpiresIn = exp - Date.now();
       shouldRefreshDueToTokenExpiry = tokenExpiresIn < 5 * 60 * 1000;
 
+      // 🔹 Si ya expiró, intentamos renovar
       if (tokenExpiresIn <= 0) {
-        return await refreshToken();
+        try {
+          return await refreshToken();
+        } catch {
+          await logout();
+          return false;
+        }
       }
     } catch {
       shouldRefreshDueToTokenExpiry = true;
     }
 
+    // 🔹 Si faltan datos del usuario o el token está por expirar
     if (shouldRefreshDueToMissingUserData || shouldRefreshDueToTokenExpiry) {
       try {
         if (tokenExpiresIn < 5 * 60 * 1000) {
@@ -257,10 +256,10 @@ const checkAuth = async (): Promise<boolean> => {
 
         if (shouldRefreshDueToMissingUserData) {
           const config = useRuntimeConfig();
-          const response = await $fetch<AuthMeResponse>('/auth/me', {
+          const response = await $fetch<AuthMeResponse>("/auth/me", {
             baseURL: config.public.apiBase,
             headers: { Authorization: `Bearer ${token.value}` },
-            credentials: 'include',
+            credentials: "include",
             retry: 0,
             timeout: 5000
           });
@@ -293,7 +292,11 @@ const checkAuth = async (): Promise<boolean> => {
               }
 
               const authToken = token.value;
-              if (!authToken || typeof authToken !== 'string' || !authToken.startsWith('eyJ')) {
+              if (
+                !authToken ||
+                typeof authToken !== "string" ||
+                !authToken.startsWith("eyJ")
+              ) {
                 return true;
               }
 
@@ -303,10 +306,10 @@ const checkAuth = async (): Promise<boolean> => {
                   baseURL: config.public.apiBase,
                   headers: {
                     Authorization: `Bearer ${authToken}`,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
+                    Accept: "application/json",
+                    "Content-Type": "application/json"
                   },
-                  credentials: 'include',
+                  credentials: "include",
                   retry: 0,
                   timeout: 5000
                 }
@@ -321,23 +324,29 @@ const checkAuth = async (): Promise<boolean> => {
                 } as User);
               }
             } catch {
-              // Ignorar errores al cargar datos completos del usuario
+              // Ignorar errores al cargar datos adicionales del usuario
             }
 
             return true;
           }
         }
       } catch {
-        return await refreshToken();
+        try {
+          return await refreshToken();
+        } catch {
+          await logout();
+          return false;
+        }
       }
     }
 
+    // 🔹 Verificación normal con /auth/me
     try {
       const config = useRuntimeConfig();
-      const response = await $fetch<AuthMeResponse>('/auth/me', {
+      const response = await $fetch<AuthMeResponse>("/auth/me", {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${token.value}` },
-        credentials: 'include',
+        credentials: "include",
         retry: 0,
         timeout: 5000
       });
@@ -367,11 +376,17 @@ const checkAuth = async (): Promise<boolean> => {
       try {
         return await refreshToken();
       } catch {
+        await logout();
         return false;
       }
     }
   } catch {
-    return false;
+    try {
+      return await refreshToken();
+    } catch {
+      await logout();
+      return false;
+    }
   }
 };
 
@@ -410,19 +425,21 @@ const refreshToken = async (): Promise<boolean> => {
         if (response.user) {
           const userData: any = { ...response.user };
           
-          // Normalizar ID de usuario
-          if (!userData.id_usuario && userData.id) {
-            userData.id_usuario = userData.id;
+          // Asegurar que los campos necesarios estén presentes
+          if (!userData.role) {
+            userData.role = 'usuario'; // Valor por defecto
+          } else {
+            // Asegurar que el rol esté en minúsculas
+            userData.role = userData.role.toLowerCase();
           }
           
-          // Asegurar que el rol esté correctamente asignado
-          if (!userData.role && userData.id_rol) {
-            userData.role = roleMap[userData.id_rol] || 'usuario';
+          // Asegurar que id_ciudad tenga un valor por defecto si no está definido
+          if (userData.id_ciudad === undefined || userData.id_ciudad === null) {
+            userData.id_ciudad = 1; // Valor por defecto
           }
           
-          if (!userData.rol_nombre && userData.role) {
-            userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
-          }
+          // Generar rol_nombre para compatibilidad
+          userData.rol_nombre = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
           
           setUser(userData);
         }
@@ -452,19 +469,7 @@ const refreshToken = async (): Promise<boolean> => {
 };
 
 
-  // Mapeo de IDs de rol a nombres de rol (en minúsculas)
-  const roleMap: Record<number, string> = {
-    1: 'admin',
-    2: 'tecnico',
-    3: 'usuario'
-  };
-  
-  // Mapeo de nombres de rol a IDs (para referencia)
-  const roleToIdMap: Record<string, number> = {
-    'admin': 1,
-    'tecnico': 2,
-    'usuario': 3
-  };
+  // El nombre del rol ahora viene directamente del backend en la propiedad 'role' del usuario 
 
   // Getters
   const userRole = computed(() => {
@@ -482,7 +487,7 @@ const refreshToken = async (): Promise<boolean> => {
     
     // 3. Si no, intentar mapear desde id_rol
     if (user.value.id_rol) {
-      return roleMap[user.value.id_rol] || null;
+      return user.value.id_rol || null;
     }
     
     return null;
@@ -493,11 +498,15 @@ const refreshToken = async (): Promise<boolean> => {
   
   // Verificar si el usuario tiene un rol específico
   const hasRole = (requiredRole: string | string[]): boolean => {
-    if (!userRole.value) return false;
-    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-    return roles.some(role => 
-      userRole.value?.toLowerCase() === role.toLowerCase()
-    );
+    if (!user.value || !user.value.role) return false;
+    
+    const userRole = user.value.role.toLowerCase();
+    
+    if (Array.isArray(requiredRole)) {
+      return requiredRole.some(role => role.toLowerCase() === userRole);
+    }
+    
+    return userRole === requiredRole.toLowerCase();
   };
 
   return {

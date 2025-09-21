@@ -177,37 +177,167 @@
     </div>
   </div>
 </template>
-
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import { useHead, useCookie } from '#imports'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
-import FootersFooter from '@/components/footers/footer.vue'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
-// Obtener la configuración
+
+// =========================
+// CONFIGURACIÓN Y SETUP
+// =========================
 const config = useRuntimeConfig()
+const auth = useAuthStore()
+const router = useRouter()
+const userCookie = useCookie('user')
+const tokenCookie = useCookie('token')
+
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Dashboard',
+  title: 'HogarSeguro - Soporte Técnico',
   meta: [
-    { name: 'description', content: 'Panel de control de HogarSeguro - Gestiona tus servicios y membresía' },
+    { name: 'description', content: 'Centro de soporte técnico de HogarSeguro - Contáctanos para resolver tus dudas' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
   ]
 })
 
-// Autenticación
-const auth = useAuthStore()
-const router = useRouter() 
-const isLoading = ref(true) 
-const user = useCookie('user')
-const token = useCookie('token')
+// =========================
+// VARIABLES ESTÁTICAS
+// =========================
 
-// Función para verificar autenticación
+// Opciones de asunto
+const subjectOptions = [
+  { value: 'falla', label: 'Problema con un Servicio Completado' },
+  { value: 'duda', label: 'Duda con Servicios Ofrecidos' },
+  { value: 'queja', label: 'Queja sobre Técnico' },
+  { value: 'pago', label: 'Duda sobre Pagos' },
+  { value: 'otro', label: 'Otro' }
+]
+
+// FAQs
+const faqs = [
+  {
+    question: '¿Cómo puedo solicitar un servicio?',
+    answer: 'Para solicitar un servicio, inicia sesión en tu cuenta, ve a la sección "Servicios" y selecciona el tipo de servicio que necesitas. Completa el formulario con los detalles y un técnico se pondrá en contacto contigo a la brevedad.'
+  },
+  {
+    question: '¿Cuáles son los métodos de pago aceptados?',
+    answer: 'Aceptamos pagos con tarjeta de crédito/débito (Visa, MasterCard, American Express), transferencia bancaria y efectivo al momento del servicio.'
+  },
+  {
+    question: '¿Cuál es el tiempo de respuesta para soporte?',
+    answer: 'Nuestro equipo de soporte atiende consultas por correo electrónico en un plazo máximo de 24 horas hábiles. Para emergencias, contamos con un número de atención telefónica de lunes a domingo.'
+  },
+  {
+    question: '¿Ofrecen garantía por los servicios?',
+    answer: 'Sí, todos nuestros servicios incluyen una garantía de 30 días. Si el problema persiste después de nuestra intervención, volveremos sin costo adicional.'
+  },
+  {
+    question: '¿Cómo puedo cancelar o reprogramar una cita?',
+    answer: 'Puedes cancelar o reprogramar tu cita con al menos 24 horas de anticipación llamando a nuestro centro de atención al cliente o a través de la sección "Mis Citas" en tu perfil.'
+  }
+]
+
+// Información de contacto
+const contactInfo = [
+  {
+    type: 'email',
+    title: 'Correo Electrónico',
+    value: 'soporte@prohogar.hn',
+    description: 'Respuesta en 24 horas',
+    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+    iconColor: 'text-blue-600 dark:text-blue-400',
+    iconPath: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
+  },
+  {
+    type: 'phone',
+    title: 'Teléfono',
+    value: '+504 2234-5678',
+    description: 'Lunes a Viernes, 8:00 AM - 5:00 PM',
+    iconBg: 'bg-green-100 dark:bg-green-900/30',
+    iconColor: 'text-green-600 dark:text-green-400',
+    iconPath: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'
+  },
+  {
+    type: 'address',
+    title: 'Oficina Principal',
+    value: 'Colonia Palmira, Avenida República de Panamá, Tegucigalpa, Honduras',
+    description: 'Visítanos de lunes a viernes',
+    iconBg: 'bg-purple-100 dark:bg-purple-900/30',
+    iconColor: 'text-purple-600 dark:text-purple-400',
+    iconPath: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z'
+  }
+]
+
+// =========================
+// VARIABLES REACTIVAS
+// =========================
+
+// Estados de carga
+const isLoading = ref(true)
+const isSubmitting = ref(false)
+const isLoadingServices = ref(false)
+
+// Estados de datos
+const serviciosFinalizados = ref([])
+const servicesError = ref('')
+const activeFaq = ref(null)
+
+// Estados de UI
+const showPulse = ref(false)
+
+// Formulario
+const form = ref({
+  subject: '',
+  message: '',
+  servicio_id: ''
+})
+
+// Referencia al select de servicios
+const servicioSelect = ref(null)
+
+// Estados de notificaciones
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success',
+  duration: 5000
+})
+
+// =========================
+// COMPUTED PROPERTIES
+// =========================
+
+// No hay computed properties específicas para esta página
+
+// =========================
+// FUNCIONES UTILITARIAS
+// =========================
+
+const limitarTexto = (texto, maxPalabras = 7) => {
+  if (!texto) return ''
+  const palabras = texto.trim().split(' ')
+  if (palabras.length <= maxPalabras) return texto
+  return palabras.slice(0, maxPalabras).join(' ') + '...'
+}
+
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' }
+  return new Date(dateString).toLocaleDateString('es-HN', options)
+}
+
+const toggleFaq = (index) => {
+  activeFaq.value = activeFaq.value === index ? null : index
+}
+
+// =========================
+// FUNCIONES DE CARGA DE DATOS
+// =========================
+
 const checkAuth = async () => {
   try {
-    if (!token.value) {
+    if (!tokenCookie.value) {
       router.push('/auth/login')
       return false
     }
@@ -219,7 +349,154 @@ const checkAuth = async () => {
   }
 }
 
-// Verificar autenticación y manejar el hash #problemaServicio al cargar el componente
+const cargarServiciosFinalizados = async () => {
+  const userCookie = useCookie('user').value
+  if (!userCookie?.id_usuario) {
+    console.error('No se pudo obtener el ID de usuario')
+    return
+  }
+  
+  isLoadingServices.value = true
+  servicesError.value = ''
+  
+  try {
+    const response = await $fetch(`/solicitudservicio/usuario/${userCookie.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tokenCookie.value}`
+      }
+    })
+    
+    const servicios = Array.isArray(response) ? response : response?.solicitudes || []
+    
+    if (!Array.isArray(servicios)) {
+      console.error('Formato de respuesta inesperado del servidor:', response)
+      serviciosFinalizados.value = []
+      return
+    }
+    
+    serviciosFinalizados.value = servicios.filter(servicio => 
+      servicio && servicio.estado && 
+      (servicio.estado.toLowerCase() === 'finalizado' || servicio.estado.toLowerCase() === 'completado')
+    )
+     
+  } catch (error) {
+    console.error('Error al cargar servicios:', error)
+    servicesError.value = 'No se pudieron cargar los servicios. Por favor, intente más tarde.'
+    showError('Error al cargar los servicios')
+  } finally {
+    isLoadingServices.value = false
+  }
+}
+
+// =========================
+// FUNCIONES DE PROCESAMIENTO
+// =========================
+
+const submitForm = async () => {
+  isSubmitting.value = true
+  
+  try {
+    const userCookie = useCookie('user').value
+    if (!userCookie?.id_usuario) {
+      throw new Error('No se pudo obtener la información del usuario')
+    }
+
+    const dataToSend = {
+      id_usuario: parseInt(userCookie.id_usuario),
+      asunto: form.value.subject,
+      mensaje: form.value.message,
+      ...(form.value.servicio_id && { id_solicitud: parseInt(form.value.servicio_id) })
+    }
+    
+    await $fetch('/soporte', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      body: dataToSend,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    showSuccess(
+      '¡Mensaje enviado!',
+      'Tu solicitud ha sido enviada. Nos pondremos en contacto contigo pronto.'
+    )
+    
+    // Resetear formulario
+    form.value = {
+      subject: '',
+      message: '',
+      servicio_id: ''
+    }
+    
+  } catch (error) {
+    const errorMessage = error.response?._data?.message || 'Ocurrió un error al enviar tu solicitud. Por favor, inténtalo de nuevo.'
+    showError(errorMessage)
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+// =========================
+// FUNCIONES DE NOTIFICACIONES
+// =========================
+
+const showToast = (options) => {
+  toast.value.show = false
+  
+  nextTick(() => {
+    toast.value = {
+      show: true,
+      message: options.message,
+      type: options.type || 'info',
+      duration: options.duration || 5000
+    }
+  })
+}
+
+const showSuccess = (title, message) => {
+  const toastMessage = message ? `${title}\n${message}` : title
+  
+  showToast({
+    message: toastMessage,
+    type: 'success',
+    duration: 5000
+  })
+}
+
+const showError = (message) => {
+  console.error('Error:', message)
+  
+  showToast({
+    message: typeof message === 'string' ? message : 'Ocurrió un error inesperado',
+    type: 'error',
+    duration: 8000
+  })
+}
+
+// =========================
+// WATCHERS
+// =========================
+
+// Observar cambios en el select de asunto
+watch(() => form.value.subject, (newVal) => {
+  // Resetear el servicio seleccionado
+  form.value.servicio_id = ''
+  
+  // Si se selecciona "Problema con un Servicio Completado", cargar los servicios
+  if (newVal === 'falla') {
+    cargarServiciosFinalizados()
+  }
+})
+
+// =========================
+// INICIALIZACIÓN
+// =========================
+
 onMounted(async () => {
   const isAuthenticated = await checkAuth()
   
@@ -271,179 +548,8 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+ 
 
-const activeFaq = ref(null)
-const isSubmitting = ref(false)
-
-const form = ref({
-  subject: '',
-  message: '',
-  servicio_id: ''
-})
-
-const toast = ref({
-  show: false,
-  message: '',
-  type: 'success'
-})
-
-const showToast = (message, type = 'success') => {
-  toast.value = {
-    show: true,
-    message,
-    type
-  }
-}
-
-const serviciosFinalizados = ref([])
-const cargandoServicios = ref(false)
-const errorCargaServicios = ref('')
-const showPulse = ref(false)
-
-// Referencia al select de servicios
-const servicioSelect = ref(null)
-
-// Función para limitar el texto a un número máximo de palabras
-const limitarTexto = (texto, maxPalabras = 7) => {
-  if (!texto) return ''
-  const palabras = texto.trim().split(' ')
-  if (palabras.length <= maxPalabras) return texto
-  return palabras.slice(0, maxPalabras).join(' ') + '...'
-}
-
-// Función para formatear fechas en formato corto
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit' }
-  return new Date(dateString).toLocaleDateString('es-HN', options)
-}
-
-// Cargar servicios finalizados del usuario
-const cargarServiciosFinalizados = async () => {
-  const userCookie = useCookie('user').value
-  if (!userCookie?.id_usuario) {
-    console.error('No se pudo obtener el ID de usuario')
-    return
-  }
-  
-  cargandoServicios.value = true
-  errorCargaServicios.value = ''
-  
-  try {
-    const response = await $fetch(`/solicitudservicio/usuario/${userCookie.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
-      }
-    })
-    
-    // Verificar si la respuesta tiene la propiedad 'solicitudes'
-    const servicios = Array.isArray(response) ? response : response?.solicitudes || []
-    
-    if (!Array.isArray(servicios)) {
-      console.error('Formato de respuesta inesperado del servidor:', response)
-      serviciosFinalizados.value = []
-      return
-    }
-    
-    // Filtrar solo servicios finalizados o completados
-    serviciosFinalizados.value = servicios.filter(servicio => 
-      servicio && servicio.estado && 
-      (servicio.estado.toLowerCase() === 'finalizado' || servicio.estado.toLowerCase() === 'completado')
-    )
-     
-  } catch (error) {
-    console.error('Error al cargar servicios:', error)
-    errorCargaServicios.value = 'No se pudieron cargar los servicios. Por favor, intente más tarde.'
-    showToast('Error al cargar los servicios', 'error')
-  } finally {
-    cargandoServicios.value = false
-  }
-}
-
-// Observar cambios en el select de asunto
-watch(() => form.value.subject, (newVal) => {
-  // Resetear el servicio seleccionado
-  form.value.servicio_id = ''
-  
-  // Si se selecciona "Problema con un Servicio Completado", cargar los servicios
-  if (newVal === 'falla') {
-    cargarServiciosFinalizados()
-  }
-})
-
-const faqs = [
-  {
-    question: '¿Cómo puedo solicitar un servicio?',
-    answer: 'Para solicitar un servicio, inicia sesión en tu cuenta, ve a la sección "Servicios" y selecciona el tipo de servicio que necesitas. Completa el formulario con los detalles y un técnico se pondrá en contacto contigo a la brevedad.'
-  },
-  {
-    question: '¿Cuáles son los métodos de pago aceptados?',
-    answer: 'Aceptamos pagos con tarjeta de crédito/débito (Visa, MasterCard, American Express), transferencia bancaria y efectivo al momento del servicio.'
-  },
-  {
-    question: '¿Cuál es el tiempo de respuesta para soporte?',
-    answer: 'Nuestro equipo de soporte atiende consultas por correo electrónico en un plazo máximo de 24 horas hábiles. Para emergencias, contamos con un número de atención telefónica de lunes a domingo.'
-  },
-  {
-    question: '¿Ofrecen garantía por los servicios?',
-    answer: 'Sí, todos nuestros servicios incluyen una garantía de 30 días. Si el problema persiste después de nuestra intervención, volveremos sin costo adicional.'
-  },
-  {
-    question: '¿Cómo puedo cancelar o reprogramar una cita?',
-    answer: 'Puedes cancelar o reprogramar tu cita con al menos 24 horas de anticipación llamando a nuestro centro de atención al cliente o a través de la sección "Mis Citas" en tu perfil.'
-  }
-]
-
-const toggleFaq = (index) => {
-  activeFaq.value = activeFaq.value === index ? null : index
-}
-
-const submitForm = async () => {
-  isSubmitting.value = true
-  
-  try {
-    const userCookie = useCookie('user').value
-    if (!userCookie?.id_usuario) {
-      throw new Error('No se pudo obtener la información del usuario')
-    }
-
-    const dataToSend = {
-      id_usuario: parseInt(userCookie.id_usuario),
-      asunto: form.value.subject,
-      mensaje: form.value.message,
-      ...(form.value.servicio_id && { id_solicitud: parseInt(form.value.servicio_id) })
-    }
-    
-
-    
-    const response = await $fetch('/soporte', {
-      baseURL: config.public.apiBase,
-      method: 'POST',
-      body: dataToSend,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
-    })
-    
-    showToast('Tu solicitud ha sido enviada. Nos pondremos en contacto contigo pronto.', 'success')
-    
-    // Resetear formulario
-    form.value = {
-      subject: '',
-      message: '',
-      servicio_id: ''
-    }
-    
-  } catch (error) {
-    const errorMessage = error.response?._data?.message || 'Ocurrió un error al enviar tu solicitud. Por favor, inténtalo de nuevo.'
-    showToast(errorMessage, 'error')
-  } finally {
-    isSubmitting.value = false
-  }
-}
 </script>
 
 <style scoped>

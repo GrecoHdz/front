@@ -351,7 +351,7 @@
             <!-- Acciones para Cotización Pendiente -->
             <div v-if="selectedService.rawStatus === 'pendiente_cotizacion'">
               <button 
-                @click="openQuotationModal"
+                @click="openQuotationModal(selectedService)"
                 class="w-full flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors mb-3"
               >
                 <div class="flex items-center space-x-2">
@@ -1070,8 +1070,9 @@
           <div v-if="!isLoadingQuotation" class="sticky bottom-0 bg-gray-50 dark:bg-gray-800/80 px-4 py-3 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl backdrop-blur-sm">
             <div class="flex space-x-3">
               <button 
-                @click="rejectQuotation"
-                class="flex-1 py-2.5 px-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg border border-gray-200 dark:border-gray-600 transition-colors flex items-center justify-center space-x-2 text-sm"
+                @click="confirmRejectQuotation"
+                :disabled="isProcessingQuotation"
+                class="flex-1 py-2.5 px-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg border border-gray-200 dark:border-gray-600 transition-colors flex items-center justify-center space-x-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -1080,12 +1081,13 @@
               </button>
               <button 
                 @click="acceptQuotation"
-                class="flex-1 py-2.5 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg transition-all transform hover:shadow-lg flex items-center justify-center space-x-2 text-sm"
+                :disabled="isProcessingQuotation"
+                class="flex-1 py-2.5 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg transition-all transform hover:shadow-lg flex items-center justify-center space-x-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
               >
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-if="!isProcessingQuotation" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span>Aceptar</span>
+                <span>{{ isProcessingQuotation ? 'Procesando...' : 'Aceptar' }}</span>
               </button>
             </div>
           </div>
@@ -1094,6 +1096,92 @@
     </div>
   </Transition>
 
+  <!-- Modal de Confirmación de Rechazo de Cotización -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to"
+  >
+    <div v-if="showRejectConfirmation" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <!-- Backdrop con animación -->
+      <Transition
+        name="backdrop"
+        enter-active-class="backdrop-enter-active"
+        leave-active-class="backdrop-leave-active"
+        enter-from-class="backdrop-enter-from"
+        leave-to-class="backdrop-leave-to"
+      >
+        <div 
+          class="fixed inset-0 bg-black/50 backdrop-blur-sm"
+          @click="showRejectConfirmation = false"
+        ></div>
+      </Transition>
+
+      <!-- Contenido del modal -->
+      <Transition
+        name="modal-content"
+        enter-active-class="modal-content-enter-active"
+        leave-active-class="modal-content-leave-active"
+        enter-from-class="modal-content-enter-from"
+        leave-to-class="modal-content-leave-to"
+      >
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+          <!-- Encabezado del modal -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                  <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">¿Estás seguro?</h3>
+              </div>
+              <button 
+                @click="showRejectConfirmation = false"
+                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cuerpo del modal -->
+          <div class="p-6">
+            <p class="text-gray-700 dark:text-gray-300 mb-6">
+              Al rechazar esta cotización, se asignará un nuevo técnico para que realice una nueva valoración. 
+              ¿Deseas continuar con el rechazo de la cotización actual?
+            </p>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+              <button
+                @click="showRejectConfirmation = false"
+                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors"
+                :disabled="isProcessingQuotation"
+              >
+                Cancelar
+              </button>
+              <button
+                @click="rejectQuotation"
+                class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 transition-colors flex items-center space-x-2"
+                :disabled="isProcessingQuotation"
+              >
+                <svg v-if="isProcessingQuotation" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ isProcessingQuotation ? 'Procesando...' : 'Sí, rechazar' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -1207,6 +1295,8 @@ const showQuotationModal = ref(false)
 // Estados de cotización
 const quotationData = ref(null)
 const isLoadingQuotation = ref(false)
+const isProcessingQuotation = ref(false)
+const showRejectConfirmation = ref(false)
 
 // Estados de filtros
 const showFilters = ref(false)
@@ -1436,7 +1526,7 @@ const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
   const statusMap = {
     'pendiente_pagovisita': 'Pago de la Visita',
     'verificando_pagovisita': 'Verificando Pago de la Visita',
-    'pendiente_asignacion': 'Asignando Técnico adecuado',
+    'pendiente_asignacion': 'Esperando Asignación de Técnico',
     'asignado': 'Técnico Asignado',
     'pendiente_cotizacion': 'Diagnóstico y Cotización Realizada',
     'en_proceso': 'Servicio en Curso',
@@ -1541,22 +1631,35 @@ const loadServices = async () => {
       // Verificar estado de la cotización si corresponde
       if (solicitud.estado === 'pendiente_pagoservicio') {
         try {
-          const cotizacionResponse = await $fetch(`/cotizacion/solicitud/${solicitud.id_solicitud}`, {
+          const response = await $fetch(`/cotizacion/solicitud/${solicitud.id_solicitud}`, {
             baseURL: config.public.apiBase,
             method: 'GET',
             headers: {
+              'Accept': 'application/json',
               'Authorization': `Bearer ${useCookie('token').value}`
             }
           });
           
-          const solicitudActualizada = {
+          // Verificar si la respuesta tiene el formato esperado
+          if (response && response.status === 'success' && response.data) {
+            const cotizacion = response.data;
+            return {
+              ...solicitud,
+              cotizacion_estado: cotizacion.estado
+            };
+          }
+          
+          return {
             ...solicitud,
-            cotizacion_estado: cotizacionResponse.estado || 'pendiente'
+            cotizacion_estado: 'pendiente'
           };
-          return solicitudActualizada;
           
         } catch (error) {
-          console.error('Error al verificar el estado de la cotización:', error);
+          console.error('Error al verificar el estado de la cotización:', {
+            message: error.message,
+            statusCode: error.statusCode,
+            response: error.data
+          });
           return {
             ...solicitud,
             cotizacion_estado: 'pendiente'
@@ -1607,7 +1710,9 @@ const fetchQuotationData = async (solicitudId) => {
     isLoadingQuotation.value = true
     const token = useCookie('token').value
     
-    const data = await $fetch(`/cotizacion/solicitud/${solicitudId}`, {
+    console.log('Cargando cotización para solicitud:', solicitudId)
+    
+    const response = await $fetch(`/cotizacion/solicitud/${solicitudId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1616,16 +1721,37 @@ const fetchQuotationData = async (solicitudId) => {
       }
     })
     
-    quotationData.value = data
+    console.log('Respuesta de la API de cotización:', response)
     
-    // Si no hay datos de cotización, mostrar un mensaje
-    if (!data) {
+    // Verificar si la respuesta tiene la estructura esperada
+    if (response && response.data) {
+      // Si la respuesta tiene un campo data, usarlo
+      quotationData.value = response.data
+    } else if (response) {
+      // Si la respuesta es directa, usarla como está
+      quotationData.value = response
+    } else {
       console.warn('No se encontraron datos de cotización')
       showError('No se encontró información de cotización para este servicio')
+      quotationData.value = null
+      return null
     }
+    
+    console.log('Datos de cotización cargados:', JSON.stringify(quotationData.value, null, 2))
+    
+    // Verificar que el ID de cotización esté presente
+    if (!quotationData.value?.id && !quotationData.value?.id_cotizacion) {
+      console.error('La cotización no tiene un ID válido:', quotationData.value)
+      showError('La cotización no tiene un ID válido')
+      return null
+    }
+    
+    return quotationData.value
   } catch (error) {
     console.error('Error al cargar la cotización:', error)
-    showError('No se pudo cargar la información de la cotización')
+    showError('No se pudo cargar la información de la cotización. Por favor, intente nuevamente.')
+    quotationData.value = null
+    throw error // Relanzar el error para que el llamador pueda manejarlo si es necesario
   } finally {
     isLoadingQuotation.value = false
   }
@@ -1767,10 +1893,19 @@ const closePaymentModal = () => {
   isProcessingPayment.value = false
 }
 
-const openQuotationModal = async () => {
-  showQuotationModal.value = true
-  if (selectedService.value?.id) {
-    await fetchQuotationData(selectedService.value.id)
+const openQuotationModal = async (service = null) => {
+  try {
+    showQuotationModal.value = true
+    const serviceId = service?.id || selectedService.value?.id
+    if (serviceId) {
+      await fetchQuotationData(serviceId)
+    } else {
+      console.error('No se pudo obtener el ID del servicio')
+      showError('No se pudo cargar la cotización. Por favor, intente nuevamente.')
+    }
+  } catch (error) {
+    console.error('Error al abrir el modal de cotización:', error)
+    showError('Ocurrió un error al cargar la cotización')
   }
 }
 
@@ -1785,6 +1920,185 @@ const closeCancelModal = () => {
     cancelReason.value = ''
     cancelAdditionalInfo.value = ''
   }, 300)
+}
+
+// =========================
+// FUNCIONES DE COTIZACIÓN
+// =========================
+
+const acceptQuotation = async () => {
+  try {
+    console.log('Datos de la cotización:', JSON.stringify(quotationData.value, null, 2))
+    
+    const cotizacionId = quotationData.value?.id || quotationData.value?.id_cotizacion
+    
+    if (!cotizacionId) {
+      console.error('ID de cotización no encontrado en quotationData:', quotationData.value)
+      showError('No se pudo encontrar el ID de la cotización')
+      return
+    }
+    
+    const token = useCookie('token').value
+    if (!token) {
+      console.error('Token de autenticación no encontrado')
+      showError('No se encontró el token de autenticación')
+      return
+    }
+    
+    // Deshabilitar botones mientras se procesa
+    isProcessingQuotation.value = true
+    
+    // 1. Aceptar la cotización
+    await $fetch(`/cotizacion/${cotizacionId}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        estado: 'aceptado'
+      })
+    });
+    
+    // 2. Actualizar el estado de la solicitud a 'en_curso'
+    if (selectedServiceId.value) {
+      try {
+        await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+          baseURL: config.public.apiBase,
+          method: 'PUT',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            estado: 'en_proceso'
+          })
+        });
+        console.log('Estado de la solicitud actualizado a "en_curso"');
+      } catch (updateError) {
+        console.error('Error al actualizar el estado de la solicitud:', updateError);
+        // No mostramos error al usuario para no confundirlo, ya que la cotización sí se aceptó
+      }
+    }
+    
+    // Cerrar el modal primero
+    showQuotationModal.value = false
+    
+    // Esperar a que la animación del modal termine
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Recargar los servicios
+    await loadServices()
+    
+    // Mostrar notificación de éxito después de actualizar todo
+    showSuccess('Cotización aceptada correctamente')
+    
+  } catch (error) {
+    console.error('Error al aceptar la cotización:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      statusMessage: error.statusMessage,
+      response: error.data,
+      stack: error.stack
+    })
+    showError(`Error al aceptar la cotización: ${error.message || 'Error desconocido'}`)
+  } finally {
+    isProcessingQuotation.value = false
+  }
+}
+
+const confirmRejectQuotation = () => {
+  showRejectConfirmation.value = true;
+}
+
+const rejectQuotation = async () => {
+  try {
+    console.log('Datos de la cotización para rechazar:', JSON.stringify(quotationData.value, null, 2))
+    
+    const cotizacionId = quotationData.value?.id || quotationData.value?.id_cotizacion
+    
+    if (!cotizacionId) {
+      console.error('ID de cotización no encontrado en quotationData:', quotationData.value)
+      showError('No se pudo encontrar el ID de la cotización para rechazar')
+      return
+    }
+    
+    const token = useCookie('token').value
+    if (!token) {
+      console.error('Token de autenticación no encontrado')
+      showError('No se encontró el token de autenticación')
+      return
+    }
+    
+    // Cerrar el modal de confirmación
+    showRejectConfirmation.value = false;
+    
+    // Deshabilitar botones mientras se procesa
+    isProcessingQuotation.value = true
+    
+    // 1. Rechazar la cotización
+    await $fetch(`/cotizacion/${cotizacionId}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        estado: 'rechazado'
+      })
+    });
+    
+    // 2. Actualizar el estado de la solicitud a 'pendiente_asignacion'
+    if (selectedServiceId.value) {
+      try {
+        await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+          baseURL: config.public.apiBase,
+          method: 'PUT',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            estado: 'pendiente_asignacion'
+          })
+        });
+        console.log('Estado de la solicitud actualizado a "pendiente_asignacion"');
+      } catch (updateError) {
+        console.error('Error al actualizar el estado de la solicitud:', updateError);
+        // No mostramos error al usuario para no confundirlo, ya que la cotización sí se rechazó
+      }
+    }
+    
+    // Cerrar el modal de cotización
+    showQuotationModal.value = false
+    
+    // Esperar a que la animación del modal termine
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Recargar los servicios
+    await loadServices()
+    
+    // Mostrar notificación de éxito después de actualizar todo
+    showSuccess('Cotización rechazada correctamente. Un nuevo técnico será asignado a tu solicitud.')
+    
+  } catch (error) {
+    console.error('Error al rechazar la cotización:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      statusMessage: error.statusMessage,
+      response: error.data,
+      stack: error.stack
+    })
+    showError(`Error al rechazar la cotización: ${error.message || 'Error desconocido'}`)
+  } finally {
+    isProcessingQuotation.value = false
+  }
 }
 
 // =========================
@@ -1938,7 +2252,7 @@ const processPayment = async () => {
     isProcessingPayment.value = false
   }
 }
-
+ 
 const cancelarSolicitud = async () => {
   if (!cancelAdditionalInfo.value.trim()) {
     showError('Por favor, escribe el motivo de la cancelación')
@@ -1976,101 +2290,7 @@ const cancelarSolicitud = async () => {
   } finally {
     isCancelling.value = false
   }
-}
-
-const acceptQuotation = async () => {
-  try {
-    const token = useCookie('token').value
-    
-    // 1. Actualizar estado de la cotización a 'aceptado'
-    await $fetch(`/cotizacion/${quotationData.value.id_cotizacion}`, {
-      method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: {
-        estado: 'aceptado'
-      }
-    })
-    
-    // 2. Actualizar estado de la solicitud a 'en_proceso'
-    await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
-      method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: {
-        estado: 'en_proceso'
-      }
-    })
-    
-    // Actualizar el estado local
-    const service = allServices.value.find(s => s.id === selectedServiceId.value)
-    if (service) {
-      service.status = 'Servicio en Curso'
-      service.rawStatus = 'en_proceso'
-    }
-    
-    showSuccess('Cotización aceptada', 'El servicio comenzará pronto.')
-    showQuotationModal.value = false
-    await loadServices()
-    
-  } catch (error) {
-    console.error('Error al aceptar la cotización:', error)
-    showError('No se pudo aceptar la cotización. Por favor, intente de nuevo.')
-  }
-}
-
-const rejectQuotation = async () => {
-  try {
-    const token = useCookie('token').value
-    
-    // 1. Actualizar estado de la cotización a 'rechazado'
-    await $fetch(`/cotizacion/${quotationData.value.id_cotizacion}`, {
-      method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: {
-        estado: 'rechazado'
-      }
-    })
-    
-    // 2. Actualizar estado de la solicitud a 'pendiente_asignacion'
-    await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
-      method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: {
-        estado: 'pendiente_asignacion'
-      }
-    })
-    
-    // Actualizar el estado local
-    const service = allServices.value.find(s => s.id === selectedServiceId.value)
-    if (service) {
-      service.status = 'Cotización Rechazada'
-      service.rawStatus = 'cotizacion_rechazada'
-    }
-    
-    showSuccess('Cotización rechazada', 'La cotización ha sido rechazada correctamente.')
-    showQuotationModal.value = false
-    await loadServices()
-    
-  } catch (error) {
-    console.error('Error al rechazar la cotización:', error)
-    showError('No se pudo rechazar la cotización. Por favor, intente de nuevo.')
-  }
-}
+} 
 
 const reportarProblema = () => {
   navigateTo('/cliente/soporte#problemaServicio');

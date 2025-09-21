@@ -323,12 +323,13 @@
       <section class="px-6 mb-6">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-xl font-black text-gray-900 dark:text-white">Servicios Recientes</h3>
-          <button class="text-emerald-600 dark:text-emerald-400 text-sm font-bold hover:underline">
+          <button @click="navigateTo('/cliente/Servicios')" class="text-emerald-600 dark:text-emerald-400 text-sm font-bold hover:underline">
             Ver todos
           </button>
         </div>
         <div class="space-y-3">
           <div v-for="service in recentServicesDisplay" :key="`recent-${service.id}`"
+               @click="navigateTo('/cliente/Servicios')"
                class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-3">
@@ -355,7 +356,7 @@
       <section class="px-6 mb-6">
         <h3 class="text-xl font-black text-gray-900 dark:text-white mb-4">Acciones Rápidas</h3>
         <div class="grid grid-cols-2 gap-4">
-          <button class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
+          <button @click="navigateTo('/cliente/Servicios')" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center">
                 <span class="text-white text-xl">🏠</span>
@@ -367,7 +368,7 @@
             </div>
           </button>
           
-          <button class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
+          <button @click="navigateTo('/cliente/Perfil')" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center">
                 <span class="text-white text-xl">👤</span>
@@ -379,7 +380,7 @@
             </div>
           </button>
           
-          <button class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
+          <button @click="navigateTo('/cliente/Soporte')" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl flex items-center justify-center">
                 <span class="text-white text-xl">💬</span>
@@ -391,7 +392,7 @@
             </div>
           </button>
           
-          <button class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
+          <button @click="navigateTo('/cliente/Referir')" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center">
                 <span class="text-white text-xl">💰</span>
@@ -414,14 +415,19 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeMount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
-// Obtener la configuración
+// =========================
+// CONFIGURACIÓN Y SETUP
+// =========================
 const config = useRuntimeConfig()
+const auth = useAuthStore()
+const router = useRouter()
+const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
@@ -432,17 +438,58 @@ useHead({
   ]
 })
 
-// Autenticación
-const auth = useAuthStore()
-const router = useRouter() 
-const isLoading = ref(true) 
-const beneficios = ref([])
-const loadingBenefits = ref(false)
-const benefitsError = ref(null) 
+// =========================
+// VARIABLES ESTÁTICAS
+// =========================
+
+// Static data arrays
+const membershipBenefits = [
+  { month: 1, title: 'Visita técnica gratis + 10% descuento' },
+  { month: 2, title: 'Crédito acumulable activado' },
+  { month: 3, title: 'Limpieza de aire gratuita' },
+  { month: 6, title: 'Mano de obra 100% gratuita' }
+]
+
+const recentServicesData = ref([
+  {
+    id: 1001,
+    title: 'Reparación de aire acondicionado',
+    description: 'El aire no enfría correctamente en la sala principal',
+    date: '15 Dic 2024',
+    status: 'Completado',
+    cost: 450,
+    icon: '❄️'
+  },
+  {
+    id: 1002,
+    title: 'Instalación de lámpara',
+    description: 'Instalar lámpara LED en comedor',
+    date: '12 Dic 2024',
+    status: 'En progreso',
+    cost: 150,
+    icon: '💡'
+  },
+  {
+    id: 1003,
+    title: 'Fuga en cocina',
+    description: 'Pequeña fuga en el grifo de la cocina',
+    date: '10 Dic 2024',
+    status: 'En camino',
+    cost: 200,
+    icon: '🔧'
+  }
+])
+
+// =========================
+// VARIABLES REACTIVAS
+// =========================
+
+// Estado de carga y datos principales
+const isLoading = ref(true)
 const isLoadingProgress = ref(false)
+const isLoadingServices = ref(false)
 
 // Datos del usuario
-const userCookie = useCookie('user')
 const userData = ref({
   id: null,
   identidad: '',
@@ -450,12 +497,18 @@ const userData = ref({
   email: '',
   role: '',
   rol_nombre: 'Invitado',
-  // Mantener compatibilidad con el resto del código
   name: 'Invitado',
   ...(userCookie.value || {})
 })
 
-// Estados y datos de membresía
+// Estados de datos
+const statsData = ref({
+  totalServices: 0,
+  credit: 0,
+  membershipMonths: 0
+})
+
+// Estados de membresía
 const membershipData = ref({
   id: null,
   status: 'inactiva',
@@ -464,156 +517,36 @@ const membershipData = ref({
   endDate: null
 })
 
-// Verificar autenticación al cargar el componente
-onMounted(async () => { 
-  try {
-    await fetchMembershipProgress()
-    await fetchMembershipData()
-  } catch (error) {
-    // Solo mostrar error si no es un error de "no encontrado"
-    if (error?.response?._data?.status !== 'not_found') {
-      console.error('Error al cargar datos de membresía:', error)
-    }
-  } finally {
-    isLoading.value = false
-  }
+// Estados de beneficios
+const beneficios = ref([])
+const loadingBenefits = ref(false)
+const benefitsError = ref(null)
+
+// Estados de servicios
+const servicesList = ref([])
+const serviceFormData = ref({
+  type: '',
+  description: '',
+  colonia: '',
+  direccion: ''
 })
 
-// Asegurar que name siempre tenga un valor
-userData.value.name = userData.value.nombre || userData.value.name
+// Estados de notificaciones
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+
+// =========================
+// COMPUTED PROPERTIES
+// =========================
 
 // Obtener solo los dos primeros nombres
 const shortName = computed(() => {
   if (!userData.value.nombre) return 'Invitado'
   const names = userData.value.nombre.split(' ')
   return names.length > 2 ? `${names[0]} ${names[1]}` : userData.value.nombre
-})
-
-const statsData = ref({
-  totalServices: 0,
-  credit: 0,
-  membershipMonths: 0
-})
-
-// Función para obtener el progreso de la membresía
-const fetchMembershipProgress = async () => {
-  try {
-    isLoadingProgress.value = true
-    
-    // Obtener el id_usuario de la cookie
-    const userCookie = useCookie('user')
-    const userData = userCookie.value
-    
-    if (!userData || !userData.id_usuario) {
-      return // No mostrar error en consola
-    }
-
-    const response = await $fetch(`/membresia/progreso/${userData.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      // No lanzar excepción para códigos de estado 404
-      ignoreResponseError: true
-    }).catch(() => null) // Capturar cualquier error sin mostrarlo
-
-    if (response?.status === 'success') {
-      // Actualizar el progreso de la membresía
-      statsData.value.membershipMonths = response.mesesProgreso || 0
-      // Actualizar el crédito con el monto total de la respuesta
-      statsData.value.credit = response.montoTotal || 0
-    }
-  } catch (error) {
-    // No hacer nada con el error, solo asegurarse de que no se muestre en consola
-  } finally {
-    isLoadingProgress.value = false
-  }
-}
-
-// Función para obtener datos completos de la membresía
-const fetchMembershipData = async () => {
-  try {
-    const userCookie = useCookie('user')
-    const userData = userCookie.value
-    
-    if (!userData || !userData.id_usuario) {
-      membershipData.value = { status: 'inactiva', progress: 0 }
-      return
-    }
-
-    const response = await $fetch(`/membresia/${userData.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
-    })
-
-    if (response && response.status === 'success' && response.data) {
-      const membresia = response.data
-      const fechaInicio = new Date(membresia.fecha)
-      const fechaVencimiento = new Date(fechaInicio)
-      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30)
-      
-      // Calcular progreso
-      const hoy = new Date()
-      const totalDias = (fechaVencimiento - fechaInicio) / (1000 * 60 * 60 * 24)
-      const diasTranscurridos = (hoy - fechaInicio) / (1000 * 60 * 60 * 24)
-      const progreso = Math.min(100, Math.max(0, Math.round((diasTranscurridos / totalDias) * 100)))
-      
-      // Actualizar estado a 'vencida' si la membresía está expirada
-      if (progreso >= 100 && membresia.estado === 'activa') {
-        membresia.estado = 'vencida'
-      }
-      
-      const membershipInfo = {
-        id: membresia.id_membresia,
-        status: membresia.estado,
-        progress: progreso,
-        startDate: fechaInicio,
-        endDate: fechaVencimiento,
-        estado: membresia.estado // Asegurarse de incluir el estado directamente
-      }
-      
-      membershipData.value = membershipInfo
-      return membershipInfo
-    } else if (response?.status === 'not_found') {
-      membershipData.value = { status: 'inactiva', progress: 0 }
-      return { status: 'not_found' }
-    } else {
-      throw new Error('Formato de respuesta inesperado')
-    }
-  } catch (error) {
-    if (error.response?._data?.status === 'not_found') {
-      membershipData.value = { status: 'inactiva', progress: 0 }
-      return { status: 'not_found' }
-    }
-    
-    console.error('Error al obtener datos de la membresía:', error)
-    membershipData.value = { status: 'inactiva', progress: 0 }
-    throw error
-  }
-}
-
-// Computed para mapear los beneficios al formato esperado por la UI
-const benefitsToShow = computed(() => {
-  return beneficios.value.map(beneficio => ({
-    month: beneficio.mes_requerido,
-    title: beneficio.tipo_beneficio,
-    active: currentMonth.value >= beneficio.mes_requerido
-  }))
-})
-
-// Computed para obtener el mes actual relativo al inicio de la membresía
-const currentMonth = computed(() => {
-  if (!membershipData.value?.fecha_inicio) return 0
-  const startDate = new Date(membershipData.value.fecha_inicio)
-  const now = new Date()
-  const months = (now.getFullYear() - startDate.getFullYear()) * 12
-  return months + now.getMonth() - startDate.getMonth()
 })
 
 // Computed properties para la membresía
@@ -673,11 +606,45 @@ const membershipStatus = computed(() => {
   return statusMap[status] || 'Sin membresía'
 })
 
-const serviceFormData = ref({
-  type: '',
-  description: '',
-  colonia: '',
-  direccion: ''
+// Computed para mapear los beneficios al formato esperado por la UI
+const benefitsToShow = computed(() => {
+  return beneficios.value.map(beneficio => ({
+    month: beneficio.mes_requerido,
+    title: beneficio.tipo_beneficio,
+    active: currentMonth.value >= beneficio.mes_requerido
+  }))
+})
+
+// Computed para obtener el mes actual relativo al inicio de la membresía
+const currentMonth = computed(() => {
+  if (!membershipData.value?.fecha_inicio) return 0
+  const startDate = new Date(membershipData.value.fecha_inicio)
+  const now = new Date()
+  const months = (now.getFullYear() - startDate.getFullYear()) * 12
+  return months + now.getMonth() - startDate.getMonth()
+})
+
+// Computed properties para el progreso
+const progressCircle = computed(() => {
+  const progress = Math.min(statsData.value.membershipMonths, 6) / 6 * 100
+  return `${progress}, 100`
+})
+
+const progressCount = computed(() => {
+  return Math.min(statsData.value.membershipMonths, 6)
+})
+
+const progressMessage = computed(() => {
+  const month = statsData.value.membershipMonths
+  if (month >= 6) return '¡Has desbloqueado todos los beneficios!'
+  if (month >= 3) return 'Ya tienes limpieza de aire gratis'
+  if (month >= 2) return 'Tu crédito ya se está acumulando'
+  if (month >= 1) return 'Ya tienes descuentos disponibles'
+  return 'Empieza a acumular beneficios con tu membresía'
+})
+
+const recentServicesDisplay = computed(() => {
+  return recentServicesData.value.slice(0, 3)
 })
 
 const isFormValid = computed(() => {
@@ -689,15 +656,166 @@ const isFormValid = computed(() => {
   )
 })
 
-const toast = ref({
-  show: false,
-  message: '',
-  type: 'success'
-})
+// =========================
+// FUNCIONES UTILITARIAS
+// =========================
 
-// Services data
-const servicesList = ref([])
-const isLoadingServices = ref(false)
+// Get appropriate icon based on service name
+const getServiceIcon = (serviceName) => {
+  const name = serviceName.toLowerCase()
+  if (name.includes('plom')) return '🚰'
+  if (name.includes('electric') || name.includes('eléctric')) return '💡'
+  if (name.includes('pintur')) return '🎨'
+  if (name.includes('carpinter')) return '🔨'
+  if (name.includes('jardín') || name.includes('jardin')) return '🌱'
+  if (name.includes('limpiez')) return '🧹'
+  if (name.includes('aire') || name.includes('clima')) return '❄️'
+  return '🔧'
+}
+
+const getStatusColor = (status) => {
+  const colors = {
+    'Completado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    'En progreso': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    'En camino': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'Programado': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    'Cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  }
+  return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+}
+
+// =========================
+// FUNCIONES DE ESTILO
+// =========================
+
+const getBenefitStyle = (month) => {
+  return statsData.value.membershipMonths >= month ? 
+    'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 
+    'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
+}
+
+const getBenefitIconStyle = (month) => {
+  return statsData.value.membershipMonths >= month ? 
+    'bg-green-500 text-white' : 
+    'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
+}
+
+const getBenefitIcon = (month) => {
+  return statsData.value.membershipMonths >= month ? '✓' : month.toString()
+}
+
+const getBenefitTextStyle = (month) => {
+  return statsData.value.membershipMonths >= month ? 
+    'text-green-700 dark:text-green-300' : 
+    'text-gray-600 dark:text-gray-400'
+}
+
+const getBenefitTitleStyle = (month) => {
+  return statsData.value.membershipMonths >= month ? 
+    'text-green-800 dark:text-green-200' : 
+    'text-gray-700 dark:text-gray-300'
+}
+
+// =========================
+// FUNCIONES DE CARGA DE DATOS
+// =========================
+
+// Función para obtener el progreso de la membresía
+const fetchMembershipProgress = async () => {
+  try {
+    isLoadingProgress.value = true
+    
+    const userCookie = useCookie('user')
+    const userData = userCookie.value
+    
+    if (!userData || !userData.id_usuario) {
+      return
+    }
+
+    const response = await $fetch(`/membresia/progreso/${userData.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      ignoreResponseError: true
+    }).catch(() => null)
+
+    if (response?.status === 'success') {
+      statsData.value.membershipMonths = response.mesesProgreso || 0
+      statsData.value.credit = response.montoTotal || 0
+    }
+  } catch (error) {
+    // Silenciar errores
+  } finally {
+    isLoadingProgress.value = false
+  }
+}
+
+// Función para obtener datos completos de la membresía
+const fetchMembershipData = async () => {
+  try {
+    const userCookie = useCookie('user')
+    const userData = userCookie.value
+    
+    if (!userData || !userData.id_usuario) {
+      membershipData.value = { status: 'inactiva', progress: 0 }
+      return
+    }
+
+    const response = await $fetch(`/membresia/${userData.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    if (response && response.status === 'success' && response.data) {
+      const membresia = response.data
+      const fechaInicio = new Date(membresia.fecha)
+      const fechaVencimiento = new Date(fechaInicio)
+      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30)
+      
+      const hoy = new Date()
+      const totalDias = (fechaVencimiento - fechaInicio) / (1000 * 60 * 60 * 24)
+      const diasTranscurridos = (hoy - fechaInicio) / (1000 * 60 * 60 * 24)
+      const progreso = Math.min(100, Math.max(0, Math.round((diasTranscurridos / totalDias) * 100)))
+      
+      if (progreso >= 100 && membresia.estado === 'activa') {
+        membresia.estado = 'vencida'
+      }
+      
+      const membershipInfo = {
+        id: membresia.id_membresia,
+        status: membresia.estado,
+        progress: progreso,
+        startDate: fechaInicio,
+        endDate: fechaVencimiento,
+        estado: membresia.estado
+      }
+      
+      membershipData.value = membershipInfo
+      return membershipInfo
+    } else if (response?.status === 'not_found') {
+      membershipData.value = { status: 'inactiva', progress: 0 }
+      return { status: 'not_found' }
+    } else {
+      throw new Error('Formato de respuesta inesperado')
+    }
+  } catch (error) {
+    if (error.response?._data?.status === 'not_found') {
+      membershipData.value = { status: 'inactiva', progress: 0 }
+      return { status: 'not_found' }
+    }
+    
+    console.error('Error al obtener datos de la membresía:', error)
+    membershipData.value = { status: 'inactiva', progress: 0 }
+    throw error
+  }
+}
 
 // Función para obtener el total de solicitudes de servicio del usuario
 const fetchTotalSolicitudes = async () => {
@@ -751,90 +869,6 @@ const fetchServices = async () => {
   }
 }
 
-// Get appropriate icon based on service name
-const getServiceIcon = (serviceName) => {
-  const name = serviceName.toLowerCase()
-  if (name.includes('plom')) return '🚰'
-  if (name.includes('electric') || name.includes('eléctric')) return '💡'
-  if (name.includes('pintur')) return '🎨'
-  if (name.includes('carpinter')) return '🔨'
-  if (name.includes('jardín') || name.includes('jardin')) return '🌱'
-  if (name.includes('limpiez')) return '🧹'
-  if (name.includes('aire') || name.includes('clima')) return '❄️'
-  return '🔧'
-}
-
-// Fetch services and benefits when component mounts
-onMounted(async () => {
-  await Promise.all([
-    fetchServices(),
-    fetchBeneficios(),
-    fetchTotalSolicitudes()
-  ])
-})
-
-// Static data arrays
-const membershipBenefits = [
-  { month: 1, title: 'Visita técnica gratis + 10% descuento' },
-  { month: 2, title: 'Crédito acumulable activado' },
-  { month: 3, title: 'Limpieza de aire gratuita' },
-  { month: 6, title: 'Mano de obra 100% gratuita' }
-]
-
-const recentServicesData = ref([
-  {
-    id: 1001,
-    title: 'Reparación de aire acondicionado',
-    description: 'El aire no enfría correctamente en la sala principal',
-    date: '15 Dic 2024',
-    status: 'Completado',
-    cost: 450,
-    icon: '❄️'
-  },
-  {
-    id: 1002,
-    title: 'Instalación de lámpara',
-    description: 'Instalar lámpara LED en comedor',
-    date: '12 Dic 2024',
-    status: 'En progreso',
-    cost: 150,
-    icon: '💡'
-  },
-  {
-    id: 1003,
-    title: 'Fuga en cocina',
-    description: 'Pequeña fuga en el grifo de la cocina',
-    date: '10 Dic 2024',
-    status: 'En camino',
-    cost: 200,
-    icon: '🔧'
-  }
-])
-
-// Computed properties to avoid hydration issues
-const progressCircle = computed(() => {
-  const progress = Math.min(statsData.value.membershipMonths, 6) / 6 * 100
-  return `${progress}, 100`
-})
-
-const progressCount = computed(() => {
-  return Math.min(statsData.value.membershipMonths, 6)
-})
-
-const progressMessage = computed(() => {
-  const month = statsData.value.membershipMonths
-  if (month >= 6) return '¡Has desbloqueado todos los beneficios!'
-  if (month >= 3) return 'Ya tienes limpieza de aire gratis'
-  if (month >= 2) return 'Tu crédito ya se está acumulando'
-  if (month >= 1) return 'Ya tienes descuentos disponibles'
-  return 'Empieza a acumular beneficios con tu membresía'
-})
- 
-
-const recentServicesDisplay = computed(() => {
-  return recentServicesData.value.slice(0, 3)
-})
-
 // Fetch beneficios desde la API
 const fetchBeneficios = async () => {
   loadingBenefits.value = true
@@ -859,45 +893,17 @@ const fetchBeneficios = async () => {
   }
 }
 
-// Methods for styling
-const getBenefitStyle = (month) => {
-  return statsData.value.membershipMonths >= month ? 
-    'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 
-    'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
+// =========================
+// FUNCIONES DE NAVEGACIÓN
+// =========================
+
+const renovarMembresia = () => {
+  navigateTo('/cliente/perfil#membresia')
 }
 
-const getBenefitIconStyle = (month) => {
-  return statsData.value.membershipMonths >= month ? 
-    'bg-green-500 text-white' : 
-    'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
-}
-
-const getBenefitIcon = (month) => {
-  return statsData.value.membershipMonths >= month ? '✓' : month.toString()
-}
-
-const getBenefitTextStyle = (month) => {
-  return statsData.value.membershipMonths >= month ? 
-    'text-green-700 dark:text-green-300' : 
-    'text-gray-600 dark:text-gray-400'
-}
-
-const getBenefitTitleStyle = (month) => {
-  return statsData.value.membershipMonths >= month ? 
-    'text-green-800 dark:text-green-200' : 
-    'text-gray-700 dark:text-gray-300'
-}
-
-const getStatusColor = (status) => {
-  const colors = {
-    'Completado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    'En progreso': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    'En camino': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Programado': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    'Cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-  }
-  return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-}
+// =========================
+// FUNCIONES DE PROCESAMIENTO
+// =========================
 
 // Event handlers
 const handleRequestService = async () => {
@@ -907,35 +913,28 @@ const handleRequestService = async () => {
       throw new Error('Por favor completa todos los campos requeridos')
     }
 
-    // Obtener datos del usuario de la cookie
     const userCookie = useCookie('user')
     const userData = userCookie.value
     
     if (!userData) {
       throw new Error('No se pudo obtener la información del usuario. Por favor inicia sesión nuevamente.')
     }
-     
     
-    // Verificar que id_ciudad esté presente
     if (!userData.id_ciudad) {
       throw new Error('No se pudo determinar la ciudad del usuario. Por favor contacte al soporte.')
     }
 
-    // Encontrar el servicio seleccionado para obtener su ID
     const selectedService = servicesList.value.find(s => s.name === serviceFormData.value.type)
     if (!selectedService) {
       throw new Error('No se pudo encontrar el servicio seleccionado')
     }
 
-    // Verificar el estado de la membresía para determinar si se debe pagar la visita
     const membershipStatus = await fetchMembershipData()
     const tieneMembresiaActiva = membershipStatus?.estado === 'activa'
     
-    // Determinar el estado inicial basado en si debe pagar o no
     const estadoInicial = tieneMembresiaActiva ? 'pendiente_asignacion' : 'pendiente_pagovisita'
     const visitaPagada = tieneMembresiaActiva ? 0 : 1 
 
-    // Preparar los datos para enviar al backend
     const requestData = {
       id_usuario: Number(userData.id_usuario),
       id_servicio: Number(selectedService.id),
@@ -947,7 +946,6 @@ const handleRequestService = async () => {
       estado: estadoInicial
     }
 
-    // Hacer la petición al backend
     const response = await $fetch('/solicitudservicio', {
       method: 'POST',
       baseURL: config.public.apiBase,
@@ -959,20 +957,18 @@ const handleRequestService = async () => {
       }
     })
 
-    // Agregar el servicio a la lista local
     const newService = {
       id: response.id_solicitud_servicio || Date.now(),
       title: serviceFormData.value.type,
       description: serviceFormData.value.description,
       date: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
       status: 'Pendiente',
-      cost: 0, // El costo se determinará más adelante
+      cost: 0,
       icon: selectedService.icon
     }
     
     recentServicesData.value.unshift(newService)
     
-    // Reset form
     serviceFormData.value = { 
       type: '', 
       description: '', 
@@ -988,44 +984,21 @@ const handleRequestService = async () => {
   }
 }
 
-const renovarMembresia = () => {
-  // Redirigir a la página de perfil con el hash #membresia
-  navigateTo('/cliente/perfil#membresia')
-}
-
-const clearServiceError = () => {
-  // Esta función se llama cuando el usuario selecciona un servicio
-  // Podemos usarla para limpiar cualquier mensaje de error relacionado
-  if (serviceFormData.value.type) {
-    // Aquí podrías limpiar mensajes de error específicos si los tuvieras
-    // Por ejemplo: formErrors.value.type = ''
-  }
-}
-
-const handleRenovarMembresia = () => {
-  renovarMembresia()
-}
+// =========================
+// FUNCIONES DE NOTIFICACIONES
+// =========================
 
 const showToast = (param1, param2, param3 = 'success') => { 
-  // Manejar diferentes firmas de la función:
-  // 1. showToast('Mensaje completo')
-  // 2. showToast('Mensaje completo', 'error')
-  // 3. showToast('Título', 'Mensaje detallado')
-  // 4. showToast('Título', 'Mensaje detallado', 'error')
-  
   let message, type;
   
   if (param2 === 'success' || param2 === 'error' || param2 === 'warning' || param2 === 'info') {
-    // Formato antiguo: showToast(mensaje, tipo)
     message = param1;
     type = param2;
   } else if (param2) {
-    // Formato nuevo: showToast(título, mensaje, tipo?)
     message = `${param1}
 ${param2}`;
     type = param3;
   } else {
-    // Solo mensaje
     message = param1;
     type = 'success';
   }
@@ -1038,9 +1011,34 @@ ${param2}`;
   };   
 }
 
+// =========================
+// INICIALIZACIÓN
+// =========================
+
+// Asegurar que name siempre tenga un valor
+userData.value.name = userData.value.nombre || userData.value.name
+
+// Verificar autenticación al cargar el componente
+onMounted(async () => { 
+  try {
+    await Promise.all([
+      fetchMembershipProgress(),
+      fetchMembershipData(),
+      fetchServices(),
+      fetchBeneficios(),
+      fetchTotalSolicitudes()
+    ])
+  } catch (error) {
+    if (error?.response?._data?.status !== 'not_found') {
+      console.error('Error al cargar datos de membresía:', error)
+    }
+  } finally {
+    isLoading.value = false
+  }
+})
+
 // Dark mode support - wrapped in ClientOnly to avoid hydration issues
 onMounted(() => {
-  // Only run on client side
   if (process.client) {
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.documentElement.classList.add('dark')
@@ -1054,6 +1052,7 @@ onMounted(() => {
     })
   }
 })
+
 </script>
 
 <style scoped>
@@ -1116,3 +1115,4 @@ html {
   transform: scale(1.05);
 }
 </style>
+ 
