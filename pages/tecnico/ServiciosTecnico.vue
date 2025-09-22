@@ -22,9 +22,7 @@
      <HeadersHeaderServiciosTecnico 
        :total-services="totalServices"
        :show-filters="showFilters"
-       :service-filters="serviceFilters"
        :service-types="serviceTypes"
-       :date-periods="datePeriods"
        :current-filter="currentFilter"
        :current-date-filter="currentDateFilter"
        :selected-service-types="selectedServiceTypes"
@@ -57,7 +55,7 @@
               </div>
               <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
                 <div class="text-xl font-black text-orange-600 dark:text-orange-400 mb-1">{{ stats.activas }}</div>
-                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Activas</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Asignados</p>
               </div>
             </div>
           </section> 
@@ -91,13 +89,7 @@
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-3">
                   <p class="text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">👤 CLIENTE</p>
                   <p class="text-blue-800 dark:text-blue-200 text-sm font-semibold">{{ service.customer.name }}</p>
-                  <p class="text-blue-700 dark:text-blue-300 text-xs">{{ service.customer.phone }}</p>
-                  <button @click.stop="callCustomer(service.customer.phone)" class="mt-1 text-blue-600 hover:text-blue-800">
-                    <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                    </svg>
-                    <span class="text-xs">Llamar</span>
-                  </button>
+                  <p class="text-blue-700 dark:text-blue-300 text-xs">{{ service.customer.phone }}</p> 
                 </div>
                 
                 <!-- Location -->
@@ -105,9 +97,6 @@
                   <p class="text-gray-600 dark:text-gray-400 text-xs font-bold mb-1">📍 UBICACIÓN</p>
                   <p class="text-gray-800 dark:text-gray-200 text-sm font-semibold">{{ service.location.neighborhood }}</p>
                   <p class="text-gray-700 dark:text-gray-300 text-xs">{{ service.location.address }}</p>
-                  <button @click.stop="openMaps(service.location)" class="mt-1 text-blue-600 text-xs font-medium hover:text-blue-800">
-                    Ver en mapa →
-                  </button>
                 </div>
                 
                 <!-- Service Description -->
@@ -122,7 +111,7 @@
                   </div>
                   <div class="flex items-center space-x-2">
                     <span v-if="service.rawStatus === 'asignado'" class="text-green-600 dark:text-green-400 text-xs font-bold">Crear cotización</span>
-                    <span v-else-if="service.rawStatus === 'en_proceso'" class="text-orange-600 dark:text-orange-400 text-xs font-bold">En progreso</span>
+                    <span v-else-if="service.rawStatus === 'en_proceso'" class="text-green-600 dark:text-green-400 text-xs font-bold">Completar Servicio</span>
                     <span v-else class="text-blue-600 dark:text-blue-400 text-xs font-bold">Ver detalles</span>
                     <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -260,7 +249,7 @@
 
                 <template v-else-if="selectedService.rawStatus === 'en_proceso'">
                   <button 
-                    @click="completeService" 
+                    @click="openCompleteConfirmation(selectedService, $event)" 
                     class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors">
                     ✅ Completar Servicio
                   </button>
@@ -519,6 +508,56 @@
       </div>
     </Transition>
 
+    <!-- Complete Service Confirmation Modal -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showCompleteConfirmation" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showCompleteConfirmation = false"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 relative z-10">
+          <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
+              <span class="text-green-600 dark:text-green-400 text-xl">✅</span>
+            </div>
+            <h3 class="text-lg font-black text-gray-900 dark:text-white mb-2">¿Completar servicio?</h3>
+            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+              ¿Deseas marcar este servicio como completado? Puedes agregar un comentario opcional.
+            </p>
+            
+            <!-- Comentario opcional -->
+            <div class="mb-4 text-left">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comentario (opcional)</label>
+              <textarea 
+                v-model="completeServiceComment"
+                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+                rows="3"></textarea>
+            </div>
+            
+            <div class="flex gap-3">
+              <button 
+                @click="showCompleteConfirmation = false"
+                class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Cancelar
+              </button>
+              <button 
+                @click="confirmCompleteService"
+                class="flex-1 px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center">
+                <span v-if="!isCompleting">Sí, completar</span>
+                <svg v-else class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Cancel Service Confirmation Modal -->
     <Transition
       name="modal"
@@ -583,22 +622,7 @@ useHead({
 // =========================
 // VARIABLES ESTÁTICAS
 // =========================
-
-// Service filters
-const serviceFilters = [
-  { key: 'all', label: 'Todos', icon: '📋' },
-  { key: 'verificando_pagovisita', label: 'Por verificar', icon: '🔄' },
-  { key: 'asignado', label: 'Asignados', icon: '👨‍🔧' },
-  { key: 'en_proceso', label: 'En Progreso', icon: '⚡' },
-  { key: 'finalizado', label: 'Finalizados', icon: '✅' }
-]
-
-const datePeriods = [
-  { key: 'all', label: 'Todo' },
-  { key: 'today', label: 'Hoy' },
-  { key: 'week', label: 'Semana' },
-  { key: 'month', label: 'Mes' }
-]
+// Nota: Los filtros se manejan ahora en el componente HeaderServiciosTecnico
 
 // =========================
 // VARIABLES REACTIVAS
@@ -613,6 +637,10 @@ const showServiceModal = ref(false)
 const showQuotationModal = ref(false)
 const showViewQuotationModal = ref(false)
 const showCancelConfirmation = ref(false)
+const showCompleteConfirmation = ref(false)
+const isCompleting = ref(false)
+const completeServiceComment = ref('')
+const currentServiceToComplete = ref(null)
 const currentFilter = ref('all')
 const currentDateFilter = ref('all')
 const selectedServiceTypes = ref([])
@@ -665,6 +693,17 @@ const currentQuotation = ref({
   fecha: new Date().toISOString()
 })
 
+// Inicializar currentQuotation con valores por defecto
+const resetCurrentQuotation = () => {
+  currentQuotation.value = {
+    id: null,
+    monto_manodeobra: 0,
+    monto_materiales: 0,
+    comentario: '',
+    fecha: new Date().toISOString()
+  }
+}
+
 const isUpdatingQuotation = ref(false)
 
 // =========================
@@ -680,15 +719,62 @@ const stats = computed(() => ({
 }))
 
 const filteredServices = computed(() => {
-  const solicitudes = apiResponse.value.solicitudes || []
+  let solicitudes = [...(apiResponse.value.solicitudes || [])]
   
-  if (currentFilter.value === 'all') {
-    return solicitudes.map(mapSolicitudToService)
+  // Aplicar filtro de estado
+  if (currentFilter.value === 'asignado') {
+    solicitudes = solicitudes.filter(s => 
+      s.estado !== 'cancelado' && 
+      s.estado !== 'finalizado' && 
+      s.estado !== 'pendiente_pagoservicio' && 
+      s.estado !== 'pendiente_asignacion'
+    )
+  } else if (currentFilter.value !== 'all') {
+    solicitudes = solicitudes.filter(s => s.estado === currentFilter.value)
   }
   
-  return solicitudes
-    .filter(s => s.estado === currentFilter.value)
-    .map(mapSolicitudToService)
+  // Aplicar filtro de tipos de servicio si hay alguno seleccionado
+  if (selectedServiceTypes.value.length > 0) {
+    solicitudes = solicitudes.filter(s => {
+      const servicioNombre = s.servicio?.nombre?.toLowerCase() || ''
+      return selectedServiceTypes.value.some(type => 
+        servicioNombre.includes(type.toLowerCase())
+      )
+    })
+  }
+  
+  // Aplicar filtro por fecha
+  if (currentDateFilter.value !== 'all') {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    solicitudes = solicitudes.filter(s => {
+      const fechaSolicitud = new Date(s.fecha_solicitud)
+      fechaSolicitud.setHours(0, 0, 0, 0)
+      
+      switch (currentDateFilter.value) {
+        case 'today':
+          return fechaSolicitud.getTime() === today.getTime()
+          
+        case 'week': {
+          const startOfWeek = new Date(today)
+          startOfWeek.setDate(today.getDate() - today.getDay())
+          return fechaSolicitud >= startOfWeek
+        }
+          
+        case 'month': {
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+          return fechaSolicitud >= startOfMonth
+        }
+          
+        default:
+          return true
+      }
+    })
+  }
+  
+  // Mapear a formato de servicio
+  return solicitudes.map(mapSolicitudToService)
 })
 
 // =========================
@@ -709,7 +795,7 @@ onMounted(() => {
 const mapSolicitudToService = (solicitud) => {
   return {
     id: solicitud.id_solicitud,
-    title: getServiceTitle(solicitud),
+    title: solicitud.servicio?.nombre || 'Servicio General',
     description: solicitud.descripcion || 'Sin descripción',
     status: mapApiStatusToLocal(solicitud.estado || 'pendiente'),
     rawStatus: solicitud.estado || 'pendiente',
@@ -887,6 +973,7 @@ const mapApiStatusToLocal = (apiStatus) => {
   const statusMap = {
     'pendiente_asignacion': 'Cotización Rechazada',
     'asignado': 'Asignado',
+    'pendiente_cotizacion': 'Cotización Enviada',
     'en_proceso': 'En Progreso',
     'pendiente_pagoservicio': 'Finalizado',
     'finalizado': 'Finalizado',
@@ -916,6 +1003,7 @@ const getStatusColor = (status) => {
   const colors = {
     'pendiente_asignacion': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     'asignado': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    'pendiente_cotizacion': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
     'en_proceso': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
     'pendiente_pagoservicio': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     'finalizado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -952,28 +1040,65 @@ const updateStatus = async () => {
     
     technician.value.status = newStatus === 'disponible' ? 'Disponible' : 'No Disponible'
     
-    showToast({
-      message: `Estado actualizado a: ${technician.value.status}`,
-      type: 'success'
-    })
+    showToast(`Estado actualizado a: ${technician.value.status}`, 'success')
   } catch (error) {
     console.error('Error al actualizar estado:', error)
-    showToast({
-      message: 'Error al actualizar el estado. Intente de nuevo.',
-      type: 'error'
-    })
+    showToast('Error al actualizar el estado. Intente de nuevo.', 'error')
   }
 }
 
 // Gestión de modales
 const openServiceModal = (service) => {
-  selectedService.value = { ...service }
+  selectedService.value = service
   showServiceModal.value = true
+}
+
+const openCompleteConfirmation = (service, event) => {
+  event.stopPropagation() // Evitar que se abra el modal de detalle
+  currentServiceToComplete.value = service
+  completeServiceComment.value = ''
+  showCompleteConfirmation.value = true
+}
+
+const confirmCompleteService = async () => {
+  if (!currentServiceToComplete.value) return
+  
+  isCompleting.value = true
+  
+  try {
+    const response = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: {
+        comentario: completeServiceComment.value || 'Completado'
+      }
+    })
+    
+    // Mostrar notificación de éxito
+    showToast('Servicio marcado como completado exitosamente', 'success')
+    
+    // Cerrar el modal de confirmación
+    showCompleteConfirmation.value = false
+    
+    // Recargar los servicios
+    await loadServices()
+    
+  } catch (error) {
+    console.error('Error al completar el servicio:', error)
+    showToast('Error al completar el servicio. Por favor, inténtalo de nuevo.', 'error')
+  } finally {
+    isCompleting.value = false
+  }
 }
 
 const closeServiceModal = () => {
   showServiceModal.value = false
-  selectedService.value = {}
+  selectedService.value = null
+  resetCurrentQuotation()
 }
 
 const openQuotationModal = async () => {
@@ -995,16 +1120,18 @@ const openQuotationModal = async () => {
       console.log('Quotation details loaded, showing modal:', showViewQuotationModal.value)
     } catch (error) {
       console.error('Error al cargar la cotización:', error)
-      showToast({
-        message: 'Error al cargar la cotización',
-        type: 'error'
-      })
+      showToast('Error al cargar la cotización', 'error')
     }
   }
 }
 
 const closeQuotationModal = () => {
   showQuotationModal.value = false
+}
+
+const closeViewQuotationModal = () => {
+  showViewQuotationModal.value = false
+  resetCurrentQuotation()
 }
 
 const confirmCancelService = () => {
@@ -1029,10 +1156,7 @@ const cancelService = async () => {
       }
     })
 
-    showToast({
-      message: 'Servicio cancelado correctamente',
-      type: 'success'
-    })
+    showToast('Servicio cancelado correctamente', 'success')
 
     // Actualizar el estado local
     const index = services.value.findIndex(s => s.id === selectedService.value.id)
@@ -1045,10 +1169,7 @@ const cancelService = async () => {
     loadServices() // Recargar servicios para actualizar las estadísticas
   } catch (error) {
     console.error('Error al cancelar el servicio:', error)
-    showToast({
-      message: 'Error al cancelar el servicio. Por favor, inténtalo de nuevo.',
-      type: 'error'
-    })
+    showToast('Error al cancelar el servicio. Por favor, inténtalo de nuevo.', 'error')
   } finally {
     isCanceling.value = false
   }
@@ -1056,10 +1177,7 @@ const cancelService = async () => {
 
 const submitQuotation = async () => {
   if (!quotationForm.value.comentario.trim() || quotationForm.value.monto_manodeobra <= 0) {
-    showToast({
-      message: 'Por favor completa todos los campos requeridos',
-      type: 'error'
-    })
+    showToast('Por favor completa todos los campos requeridos', 'error')
     return
   }
 
@@ -1097,12 +1215,7 @@ const submitQuotation = async () => {
     });
     
     // Si llegamos aquí, ambas operaciones fueron exitosas
-    return true;
-    
-    showToast({
-      message: 'Cotización enviada correctamente',
-      type: 'success'
-    })
+    showToast('Cotización enviada correctamente', 'success')
     
     closeQuotationModal()
     closeServiceModal()
@@ -1129,10 +1242,7 @@ const submitQuotation = async () => {
       }
     }
     
-    showToast({
-      message: 'Error al procesar la cotización. Por favor, intente de nuevo.',
-      type: 'error'
-    })
+    showToast('Error al procesar la cotización. Por favor, intente de nuevo.', 'error')
     return false;
   } finally {
     isSubmittingQuotation.value = false;
@@ -1142,6 +1252,8 @@ const submitQuotation = async () => {
 // Cargar detalles de la cotización
 const loadQuotationDetails = async () => {
   console.log('loadQuotationDetails called')
+  console.log('selectedService.value:', JSON.stringify(selectedService.value, null, 2))
+  
   if (!selectedService.value) {
     console.error('No hay servicio seleccionado')
     return
@@ -1163,25 +1275,32 @@ const loadQuotationDetails = async () => {
     console.log('API Response:', response)
 
     if (response && response.status === 'success' && response.data) {
-      const cotizacion = response.data
-      console.log('Cotización encontrada:', cotizacion)
+      const cotizacion = response.data 
       
+      // Verificar que el ID existe antes de asignarlo
+      const cotizacionId = cotizacion.id_cotizacion;
+      
+      if (!cotizacionId) {
+        console.error('La cotización no tiene un ID válido:', cotizacion)
+        showToast('Error: La cotización no tiene un ID válido', 'error')
+        return
+      }
+      
+      console.log('Asignando cotización con ID:', cotizacionId)
       currentQuotation.value = {
-        id: cotizacion.id,
+        id: cotizacionId,
         monto_manodeobra: parseFloat(cotizacion.monto_manodeobra) || 0,
         monto_materiales: parseFloat(cotizacion.monto_materiales) || 0,
         comentario: cotizacion.comentario || '',
-        fecha: cotizacion.fecha || new Date().toISOString()
+        fecha: cotizacion.fecha || new Date().toISOString(),
+        estado: cotizacion.estado
       }
       
-      console.log('Setting showViewQuotationModal to true')
       showViewQuotationModal.value = true
       
       // Forzar actualización del DOM
       await nextTick()
-      console.log('Modal should be visible now')
     } else {
-      console.log('No se encontraron cotizaciones para este servicio')
       showToast({
         message: 'No se encontró la cotización para este servicio',
         type: 'warning'
@@ -1200,7 +1319,19 @@ const loadQuotationDetails = async () => {
 
 // Actualizar cotización
 const updateQuotation = async () => {
-  if (!currentQuotation.value.monto_manodeobra || !currentQuotation.value.monto_materiales || !currentQuotation.value.comentario) {
+  console.log('updateQuotation called with currentQuotation:', JSON.stringify(currentQuotation.value, null, 2))
+  
+  if (!currentQuotation.value.id) {
+    console.error('ID de cotización no válido en updateQuotation')
+    console.error('currentQuotation.value:', JSON.stringify(currentQuotation.value, null, 2))
+    showToast({
+      message: 'Error: No se pudo identificar la cotización. Por favor, cierre y vuelva a abrir el formulario.',
+      type: 'error'
+    })
+    return
+  }
+
+  if (!currentQuotation.value.monto_manodeobra || !currentQuotation.value.comentario) {
     showToast({
       message: 'Por favor completa todos los campos requeridos',
       type: 'error'
@@ -1211,7 +1342,23 @@ const updateQuotation = async () => {
   try {
     isUpdatingQuotation.value = true
     
-    await $fetch(`/cotizacion/${currentQuotation.value.id}`, {
+    console.log('Enviando datos al servidor:', {
+      id: currentQuotation.value.id,
+      monto_manodeobra: currentQuotation.value.monto_manodeobra,
+      monto_materiales: currentQuotation.value.monto_materiales,
+      comentario: currentQuotation.value.comentario
+    })
+    
+    const requestData = {
+      monto_manodeobra: parseFloat(currentQuotation.value.monto_manodeobra),
+      monto_materiales: parseFloat(currentQuotation.value.monto_materiales),
+      comentario: currentQuotation.value.comentario,
+      estado: currentQuotation.value.estado || 'pendiente'
+    }
+    
+    console.log('Datos a enviar al servidor:', requestData)
+    
+    const response = await $fetch(`/cotizacion/${currentQuotation.value.id}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1219,26 +1366,44 @@ const updateQuotation = async () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       },
-      body: {
-        monto_manodeobra: Math.round(parseFloat(currentQuotation.value.monto_manodeobra)),
-        monto_materiales: Math.round(parseFloat(currentQuotation.value.monto_materiales)),
-        comentario: currentQuotation.value.comentario
-      }
+      body: JSON.stringify(requestData)
     })
 
-    showToast({
-      message: 'Cotización actualizada correctamente',
-      type: 'success'
-    })
+    console.log('Respuesta del servidor:', response)
     
-    closeViewQuotationModal()
-    closeServiceModal()
-    await loadServices()
+    // Aceptar tanto respuestas con status 'success' como arrays no vacíos
+    if ((response && response.status === 'success') || (Array.isArray(response) && response.length > 0)) {
+      showToast({
+        message: 'Cotización actualizada correctamente',
+        type: 'success'
+      })
+      
+      closeViewQuotationModal()
+      closeServiceModal()
+      await loadServices()
+    } else {
+      throw new Error(response?.message || 'Error desconocido al actualizar la cotización')
+    }
   } catch (error) {
     console.error('Error al actualizar la cotización:', error)
+    console.error('Detalles del error:', {
+      message: error.message,
+      response: error.response?._data,
+      status: error.response?.status
+    })
+    
+    let errorMessage = 'Error al actualizar la cotización. Por favor, intente de nuevo.'
+    
+    if (error.response?._data?.message) {
+      errorMessage = error.response._data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
     showToast({
-      message: 'Error al actualizar la cotización. Por favor, intente de nuevo.',
-      type: 'error'
+      message: errorMessage,
+      type: 'error',
+      duration: 5000
     })
   } finally {
     isUpdatingQuotation.value = false
@@ -1249,7 +1414,7 @@ const updateQuotation = async () => {
 const completeService = async () => {
   try {
     isLoading.value = true
-    const response = await $fetch(`/solicitudservicio/${selectedService.value.id}/completar`, {
+    const response = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       headers: {
@@ -1294,17 +1459,34 @@ const callCustomer = (phone) => {
   }
 }
 
-const showToast = (options) => {
-  toast.value = {
-    show: true,
-    message: options.message,
-    type: options.type || 'info',
-    duration: options.duration || 5000
+const showToast = (messageOrOptions, type = 'info', duration = 5000) => {
+  // Si el primer parámetro es un objeto, extraer las propiedades
+  if (typeof messageOrOptions === 'object' && messageOrOptions !== null) {
+    toast.value = {
+      show: true,
+      message: messageOrOptions.message || '',
+      type: messageOrOptions.type || 'info',
+      duration: messageOrOptions.duration || 5000
+    }
+  } else {
+    // Si se pasan parámetros individuales
+    toast.value = {
+      show: true,
+      message: messageOrOptions || '',
+      type: type,
+      duration: duration
+    }
   }
   
-  setTimeout(() => {
+  // Cerrar automáticamente después de la duración especificada
+  if (toast.value.message) { // Solo si hay un mensaje
+    setTimeout(() => {
+      toast.value.show = false
+    }, toast.value.duration)
+  } else {
+    // Si no hay mensaje, ocultar inmediatamente
     toast.value.show = false
-  }, toast.value.duration)
+  }
 }
 
 </script>
@@ -1326,11 +1508,13 @@ const showToast = (options) => {
 
 /* Animaciones para el contenido del modal */
 .modal-content-enter-active {
+  animation: modal-enter 0.3s ease-out;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transition-delay: 0.1s;
 }
 
 .modal-content-leave-active {
+  animation: modal-leave 0.2s ease-in;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

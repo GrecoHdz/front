@@ -24,25 +24,13 @@
               <div class="flex items-center space-x-2">
                 <p class="text-emerald-100 text-xs">{{ totalServices }} servicios</p>
                 <span class="w-1 h-1 bg-emerald-200 rounded-full"></span>
-                <div class="flex items-center space-x-1">
-                  <div class="w-2 h-2 rounded-full" :class="technicianStatus === 'available' ? 'bg-green-400' : 'bg-red-400'"></div>
-                  <span class="text-emerald-100 text-xs">{{ technicianStatus === 'available' ? 'Disponible' : 'Ocupado' }}</span>
+                <div class="flex items-center space-x-1"> 
+                  <span class="text-emerald-100 text-xs">Técnico {{ auth.user?.nombre || 'a' }}</span>
                 </div>
               </div>
             </div>
           </div>
-          <div class="flex items-center space-x-2">
-            <!-- Status Toggle Button -->
-            <button @click="toggleStatus" 
-                    class="p-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-lg hover:bg-white/30 transition-all duration-300"
-                    :title="technicianStatus === 'available' ? 'Marcar como ocupado' : 'Marcar como disponible'">
-              <svg v-if="technicianStatus === 'available'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </button>
+          <div class="flex items-center space-x-2"> 
             
             <!-- Filter Toggle Button -->
             <button @click="toggleFilters" 
@@ -76,9 +64,7 @@
             <span class="text-sm">{{ filter.icon }}</span>
             <span>{{ filter.label }}</span>
           </button>
-        </div>
-        
-
+        </div> 
         
         <!-- Service Type Filter -->
         <div class="mb-3">
@@ -94,7 +80,7 @@
                 v-if="service && service.active !== false"
                 @click="$emit('service-type-toggle', service.name)"
                 class="px-2 py-1 rounded-lg text-xs font-bold transition-all duration-300"
-                :class="selectedServiceTypes.includes(service.name) 
+                :class="selectedServiceTypesArray.includes(service.name) 
                   ? 'bg-teal-500 text-white' 
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
                 :title="service.description || ''"
@@ -129,7 +115,26 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
+import { useAuthStore } from '~/middleware/auth.store';
+
+// Filtros de servicio
+const serviceFilters = [
+  { key: 'all', label: 'Todos', icon: '📋' },
+  { key: 'asignado', label: 'Asignados', icon: '👨‍🔧' },
+  { key: 'finalizado', label: 'Finalizados', icon: '✅' }
+]
+
+// Asegurar que selectedServiceTypes siempre sea un array
+const selectedServiceTypesArray = computed(() => Array.isArray(props.selectedServiceTypes) ? props.selectedServiceTypes : [])
+
+// Períodos de fecha
+const datePeriods = [
+  { key: 'all', label: 'Todo' },
+  { key: 'today', label: 'Hoy' },
+  { key: 'week', label: 'Semana' },
+  { key: 'month', label: 'Mes' }
+]
 
 const props = defineProps({
   totalServices: {
@@ -140,69 +145,44 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  serviceFilters: {
-    type: Array,
-    default: () => [
-      { key: 'all', label: 'Todos', icon: '📋' },
-      { key: 'assigned', label: 'Asignados', icon: '📌' },
-      { key: 'inProgress', label: 'En Curso', icon: '⚡' },
-      { key: 'completed', label: 'Completados', icon: '✅' }
-    ]
-  },
-
   serviceTypes: {
     type: Array,
     default: () => []
-  },
-  datePeriods: {
-    type: Array,
-    default: () => [
-      { key: 'all', label: 'Todo' },
-      { key: 'today', label: 'Hoy' },
-      { key: 'week', label: 'Semana' },
-      { key: 'month', label: 'Mes' }
-    ]
   },
   currentFilter: {
     type: String,
     default: 'all'
   },
-
   currentDateFilter: {
     type: String,
     default: 'all'
-  },
-  selectedServiceTypes: {
-    type: Array,
-    default: () => []
   },
   isLoadingServiceTypes: {
     type: Boolean,
     default: false
   },
-  technicianStatus: {
-    type: String,
-    default: 'available',
-    validator: (value) => ['available', 'busy'].includes(value)
-  }
+  selectedServiceTypes: {
+    type: Array,
+    default: () => []
+  },
+
 });
 
+const auth = useAuthStore();
 const emit = defineEmits([
   'toggle-filters',
-  'filter-change',
-
-  'service-type-toggle',
-  'date-filter-change',
-  'status-toggle'
+  'update:currentFilter',
+  'search',
+  'refresh',
+  'service-type-toggle'
 ]);
 
+// Computed para el estado de disponibilidad
 const toggleFilters = () => {
   emit('toggle-filters');
 };
 
-const toggleStatus = () => {
-  emit('status-toggle');
-};
+
 </script>
 
 <style scoped>

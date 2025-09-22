@@ -21,7 +21,7 @@
             </div>
             <div>
               <h1 class="text-lg font-black text-white">Mis Servicios</h1>
-              <p class="text-blue-100 text-xs">{{ totalServices }} servicios realizados</p>
+              <p class="text-blue-100 text-xs">{{ totalServices }} servicios solicitados</p>
             </div>
           </div>
           <div class="flex items-center space-x-2">

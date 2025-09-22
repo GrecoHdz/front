@@ -12,7 +12,7 @@
       <div
         v-if="show"
         ref="toastElement"
-        class="fixed top-4 right-4 p-4 rounded-2xl shadow-lg z-50 max-w-xs w-auto sm:max-w-sm flex items-center gap-3 backdrop-blur-sm border border-white/20 overflow-hidden mx-2 sm:mx-0"
+        class="fixed top-4 right-4 p-4 rounded-2xl shadow-lg z-50 w-80 flex items-center gap-3 backdrop-blur-sm border border-white/20 overflow-hidden"
         :class="toastClasses"
         @mouseenter="pauseTimer"
         @mouseleave="resumeTimer"
@@ -255,22 +255,26 @@ onUnmounted(() => {
 
 <style scoped>
 /* Animaciones principales del toast - MEJORADAS */
-.toast-enter-active {
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
+.toast-enter-active,
 .toast-leave-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top right;
 }
 
 .toast-enter-from {
   opacity: 0;
-  transform: translateX(100%) scale(0.9);
+  transform: translateX(100%);
 }
 
 .toast-leave-to {
   opacity: 0;
   transform: translateX(100%) scale(0.9);
+}
+
+.toast-enter-to,
+.toast-leave-from {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* Estilos base del contenedor */
@@ -380,17 +384,9 @@ onUnmounted(() => {
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
-  .toast-container {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    left: 1rem;
-    max-width: none;
-  }
-  
   .toast-enter-from,
   .toast-leave-to {
-    transform: translateX(100%) scale(0.9);
+    transform: translateX(100%) scale(1);
   }
 }
 
