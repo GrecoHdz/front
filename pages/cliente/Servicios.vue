@@ -1933,29 +1933,25 @@ const closeCancelModal = () => {
 // =========================
 
 const acceptQuotation = async () => {
+  // Deshabilitar botones mientras se procesa
+  isProcessingQuotation.value = true
+  
   try {
-    console.log('Datos de la cotización:', JSON.stringify(quotationData.value, null, 2))
+    console.log('=== INICIO acceptQuotation ===');
+    const cotizacionId = quotationData.value?.id || quotationData.value?.id_cotizacion;
+    console.log('ID de cotización:', cotizacionId);
     
-    const cotizacionId = quotationData.value?.id || quotationData.value?.id_cotizacion
+    if (!cotizacionId) throw new Error('No se pudo encontrar el ID de la cotización');
     
-    if (!cotizacionId) {
-      console.error('ID de cotización no encontrado en quotationData:', quotationData.value)
-      showError('No se pudo encontrar el ID de la cotización')
-      return
-    }
-    
-    const token = useCookie('token').value
-    if (!token) {
-      console.error('Token de autenticación no encontrado')
-      showError('No se encontró el token de autenticación')
-      return
-    }
-    
-    // Deshabilitar botones mientras se procesa
-    isProcessingQuotation.value = true
+    const token = useCookie('token').value;
+    if (!token) throw new Error('No se encontró el token de autenticación');
     
     // 1. Aceptar la cotización
-    await $fetch(`/cotizacion/${cotizacionId}`, {
+    console.log('\n[1/3] Actualizando estado de la cotización a "aceptado"...');
+    const cotizacionUpdate = { estado: 'aceptado' };
+    console.log('Enviando a /cotizacion/' + cotizacionId + ':', cotizacionUpdate);
+    
+    const cotizacionResponse = await $fetch(`/cotizacion/${cotizacionId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1963,58 +1959,117 @@ const acceptQuotation = async () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({
-        estado: 'aceptado'
-      })
+      body: JSON.stringify(cotizacionUpdate)
+    });
+    console.log('Respuesta de actualización de cotización:', cotizacionResponse);
+    
+    // 2. Actualizar el estado de la solicitud
+    console.log('\n[2/3] Actualizando estado de la solicitud a "en_proceso"...');
+    if (!selectedServiceId.value) throw new Error('No se encontró el ID de la solicitud de servicio');
+    
+    const solicitudUpdate = { estado: 'en_proceso' };
+    console.log('Enviando a /solicitudservicio/' + selectedServiceId.value + ':', solicitudUpdate);
+    
+    const solicitudResponse = await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(solicitudUpdate)
+    });
+    console.log('Respuesta de actualización de solicitud:', solicitudResponse);
+    
+    // 3. Registrar movimiento
+    console.log('\n[3/3] Registrando movimiento...');
+    
+    // Obtener el ID del técnico de los datos del servicio
+    const servicioActual = servicesData.value.solicitudes.find(s => s.id_solicitud === selectedServiceId.value);
+    const idTecnico = servicioActual?.id_tecnico;
+    console.log('ID del técnico:', idTecnico);
+    
+    if (!idTecnico) throw new Error('No se encontró el ID del técnico en la solicitud de servicio');
+    
+    console.log('Obteniendo porcentaje de comisión...');
+    const configResponse = await $fetch('/config/valor/comision_por_servicio', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    console.log('Respuesta de configuración de comisión:', configResponse);
+    
+    if (!configResponse?.valor) throw new Error('No se pudo obtener el porcentaje de comisión');
+    
+    const porcentajeComision = parseFloat(configResponse.valor);
+    const factorComision = porcentajeComision / 100;
+    console.log('Porcentaje de comisión:', porcentajeComision + '%', 'Factor:', factorComision);
+    
+    // Obtener el monto de mano de obra del campo correcto
+    const montoManoObra = Number(quotationData.value.monto_manodeobra); 
+    console.log('Monto de mano de obra:', montoManoObra);
+    
+    if (isNaN(montoManoObra) || montoManoObra <= 0) {
+      throw new Error(`El monto de mano de obra no es válido: ${quotationData.value.monto_manodeobra}`);
+    } 
+    
+    const montoTecnico = montoManoObra * factorComision;
+    const fechaActual = new Date().toISOString().split('T')[0];
+    console.log('Monto para el técnico (comisión):', montoTecnico);
+
+    const movimientoData = {
+      id_usuario: idTecnico,
+      id_cotizacion: cotizacionId,
+      tipo: 'ingreso',
+      monto: Number(montoTecnico.toFixed(2)),
+      descripcion: null,
+      fecha: fechaActual,
+      estado: 'pendiente'
+    };
+    
+    console.log('Creando movimiento con datos:', movimientoData);
+    
+    const movimientoResponse = await $fetch('/movimientos', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(movimientoData)
     });
     
-    // 2. Actualizar el estado de la solicitud a 'en_curso'
-    if (selectedServiceId.value) {
-      try {
-        await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
-          baseURL: config.public.apiBase,
-          method: 'PUT',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            estado: 'en_proceso'
-          })
-        });
-        console.log('Estado de la solicitud actualizado a "en_curso"');
-      } catch (updateError) {
-        console.error('Error al actualizar el estado de la solicitud:', updateError);
-        // No mostramos error al usuario para no confundirlo, ya que la cotización sí se aceptó
-      }
-    }
+    console.log('Respuesta de creación de movimiento:', movimientoResponse);
     
-    // Cerrar el modal primero
-    showQuotationModal.value = false
+    // ✅ Cerrar modal y recargar datos
+    showQuotationModal.value = false;
+    console.log('Cerrando modal de cotización...');
     
-    // Esperar a que la animación del modal termine
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300)); // esperar animación
+    console.log('Recargando servicios...');
+    await loadServices();
     
-    // Recargar los servicios
-    await loadServices()
-    
-    // Mostrar notificación de éxito después de actualizar todo
-    showSuccess('Cotización aceptada correctamente')
+    console.log('=== FINALIZADO CON ÉXITO ===');
+    showSuccess('Cotización aceptada', 'El servicio ha sido iniciado correctamente');
     
   } catch (error) {
-    console.error('Error al aceptar la cotización:', {
-      message: error.message,
-      statusCode: error.statusCode,
-      statusMessage: error.statusMessage,
-      response: error.data,
-      stack: error.stack
-    })
-    showError(`Error al aceptar la cotización: ${error.message || 'Error desconocido'}`)
+    console.error('=== ERROR EN acceptQuotation ===');
+    console.error('Mensaje de error:', error.message);
+    console.error('Respuesta del servidor:', error.response?._data || 'No hay respuesta del servidor');
+    console.error('Estado de la respuesta:', error.response?.status, error.response?.statusText);
+    console.error('Datos enviados:', error.config?.data || 'No hay datos de solicitud');
+    
+    showError(error.message || 'Ocurrió un error al procesar la cotización');
   } finally {
-    isProcessingQuotation.value = false
+    isProcessingQuotation.value = false;
   }
 }
+
 
 const confirmRejectQuotation = () => {
   showRejectConfirmation.value = true;
@@ -2022,7 +2077,6 @@ const confirmRejectQuotation = () => {
 
 const rejectQuotation = async () => {
   try {
-    console.log('Datos de la cotización para rechazar:', JSON.stringify(quotationData.value, null, 2))
     
     const cotizacionId = quotationData.value?.id || quotationData.value?.id_cotizacion
     

@@ -230,6 +230,39 @@
                 </div>
               </div>
 
+              <!-- Calificación del Servicio -->
+              <div v-if="selectedService.rawStatus === 'finalizado'" class="mb-6">
+                <h4 class="text-base font-black text-gray-900 dark:text-white mb-3">Valoración del Cliente</h4>
+                <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                  <template v-if="selectedService.calificacion">
+                    <div class="flex items-center mb-2">
+                      <div class="flex space-x-1">
+                        <span v-for="i in 5" :key="i" class="text-yellow-400">
+                          <template v-if="i <= selectedService.calificacion.calificacion">
+                            ⭐
+                          </template>
+                          <template v-else>
+                            <span class="text-gray-300 dark:text-gray-600">☆</span>
+                          </template>
+                        </span>
+                      </div>
+                      <span class="text-sm text-gray-600 dark:text-gray-400 ml-2">
+                        {{ selectedService.calificacion.calificacion.toFixed(1) }}/5.0
+                      </span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                        {{ formatDate(selectedService.calificacion.fecha) }}
+                      </span>
+                    </div>
+                    <p v-if="selectedService.calificacion.comentario" class="text-gray-700 dark:text-gray-300 text-sm italic mt-2 pl-1 border-l-2 border-blue-200 dark:border-blue-800">
+                      "{{ selectedService.calificacion.comentario }}"
+                    </p>
+                  </template>
+                  <p v-else class="text-gray-500 dark:text-gray-400 text-sm">
+                    El cliente no ha dejado ninguna valoración.
+                  </p>
+                </div>
+              </div>
+
               <!-- Action Buttons -->
               <div class="space-y-3">
                 <!-- Action Buttons Based on Status -->
@@ -360,7 +393,9 @@
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                   <div class="flex justify-between items-center">
                     <span class="font-bold text-blue-800 dark:text-blue-200">Total Estimado:</span>
-                    <span class="text-lg font-bold text-blue-900 dark:text-blue-100">L. {{ (quotationForm.monto_manodeobra + quotationForm.monto_materiales).toFixed(2) }}</span>
+                    <span class="text-lg font-bold text-blue-900 dark:text-blue-100">
+                      L. {{ (Number(quotationForm.monto_manodeobra || 0) + Number(quotationForm.monto_materiales || 0)).toFixed(2) }}
+                    </span>
                   </div>
                 </div>
 
@@ -681,7 +716,16 @@ const quotationForm = ref({
 
 const quotationData = ref(null)
 const isSubmittingQuotation = ref(false)
-const selectedService = ref({})
+const selectedService = ref({
+  title: '',
+  serviceNumber: '',
+  icon: '',
+  customer: {},
+  location: {},
+  description: '',
+  rawStatus: '',
+  calificacion: null
+})
 
 const isCanceling = ref(false)
 
@@ -805,8 +849,8 @@ const mapSolicitudToService = (solicitud) => {
     date: formatDate(solicitud.fecha_solicitud),
     assignedDate: solicitud.fecha_solicitud,
     customer: {
-      name: solicitud.Usuario?.nombre || `Usuario ${solicitud.id_usuario || 'desconocido'}`,
-      phone: solicitud.Usuario?.telefono || 'N/A'
+      name: solicitud.cliente?.nombre || 'Desconocido',
+      phone: solicitud.cliente?.telefono || 'N/A'
     },
     location: {
       neighborhood: solicitud.colonia || 'Sin especificar',
@@ -976,6 +1020,7 @@ const mapApiStatusToLocal = (apiStatus) => {
     'pendiente_cotizacion': 'Cotización Enviada',
     'en_proceso': 'En Progreso',
     'pendiente_pagoservicio': 'Finalizado',
+    'verificando_pagoservicio': 'Finalizado',
     'finalizado': 'Finalizado',
     'cancelado': 'Cancelado'
   }
@@ -1006,6 +1051,7 @@ const getStatusColor = (status) => {
     'pendiente_cotizacion': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
     'en_proceso': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
     'pendiente_pagoservicio': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    'verificando_pagoservicio': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     'finalizado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     'cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
   }
@@ -1048,9 +1094,55 @@ const updateStatus = async () => {
 }
 
 // Gestión de modales
-const openServiceModal = (service) => {
-  selectedService.value = service
+const openServiceModal = async (service) => { 
+  selectedService.value = { ...service }
   showServiceModal.value = true
+  
+  // Usar el ID del servicio (puede estar en service.id o service.id_solicitud)
+  const servicioId = service.id || service.id_solicitud 
+  
+  // Si el servicio está finalizado, cargar la calificación
+  if (service.rawStatus === 'finalizado') {
+    if (servicioId) { 
+      await loadCalificacion(servicioId)
+    } else {
+      console.error('El servicio no tiene un ID de solicitud válido')
+      selectedService.value.calificacion = null
+    }
+  } else { 
+    selectedService.value.calificacion = null
+  }
+}
+
+// Cargar calificación del servicio
+const loadCalificacion = async (idSolicitud) => {
+  try {  
+    const response = await $fetch(`/calificaciones/solicitud/${idSolicitud}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    // Verificamos si la respuesta es un array y tiene elementos
+    if (Array.isArray(response) && response.length > 0) {
+      const calificacionData = response[0]
+      
+      // Aseguramos que los datos estén en el formato correcto
+      selectedService.value.calificacion = {
+        calificacion: Number(calificacionData.calificacion) || 0,
+        comentario: calificacionData.comentario || '',
+        fecha: calificacionData.fecha || new Date().toISOString()
+      }
+    } else {
+      selectedService.value.calificacion = null
+    }
+  } catch (error) {
+    console.error('Error al cargar la calificación:', error)
+    selectedService.value.calificacion = null
+  }
 }
 
 const openCompleteConfirmation = (service, event) => {
@@ -1074,6 +1166,7 @@ const confirmCompleteService = async () => {
         'Authorization': `Bearer ${auth.token}`
       },
       body: {
+        estado: 'pendiente_pagoservicio',
         comentario: completeServiceComment.value || 'Completado'
       }
     })
@@ -1101,8 +1194,7 @@ const closeServiceModal = () => {
   resetCurrentQuotation()
 }
 
-const openQuotationModal = async () => {
-  console.log('openQuotationModal called with status:', selectedService.value.rawStatus)
+const openQuotationModal = async () => { 
   
   if (selectedService.value.rawStatus === 'asignado') {
     // Para crear nueva cotización
@@ -1115,9 +1207,7 @@ const openQuotationModal = async () => {
   } else if (selectedService.value.rawStatus === 'pendiente_cotizacion') {
     // Para ver/editar cotización existente
     try {
-      console.log('Loading quotation details...')
       await loadQuotationDetails()
-      console.log('Quotation details loaded, showing modal:', showViewQuotationModal.value)
     } catch (error) {
       console.error('Error al cargar la cotización:', error)
       showToast('Error al cargar la cotización', 'error')
@@ -1181,8 +1271,21 @@ const submitQuotation = async () => {
     return
   }
 
+  let updateSuccessful = false;
+  
   try {
     isSubmittingQuotation.value = true
+    
+    // Preparar datos para la cotización
+    const cotizacionData = {
+      id_solicitud: selectedService.value.id,
+      comentario: quotationForm.value.comentario.trim(),
+      monto_manodeobra: parseFloat(quotationForm.value.monto_manodeobra),
+      monto_materiales: parseFloat(quotationForm.value.monto_materiales) || 0,
+      fecha: new Date().toISOString()
+    };
+    
+    console.log('Datos de la cotización a enviar:', JSON.stringify(cotizacionData, null, 2));
     
     // Primero actualizar el estado de la solicitud
     const updateResponse = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
@@ -1196,7 +1299,11 @@ const submitQuotation = async () => {
       body: { estado: 'pendiente_cotizacion' }
     });
     
+    updateSuccessful = true;
+    
     // Si la actualización del estado fue exitosa, crear la cotización
+    console.log('Actualización de estado exitosa, creando cotización...');
+    
     const cotizacionResponse = await $fetch('/cotizacion', {
       baseURL: config.public.apiBase,
       method: 'POST',
@@ -1205,14 +1312,10 @@ const submitQuotation = async () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       },
-      body: {
-        id_solicitud: selectedService.value.id,
-        comentario: quotationForm.value.comentario,
-        monto_manodeobra: Math.round(parseFloat(quotationForm.value.monto_manodeobra)),
-        monto_materiales: Math.round(parseFloat(quotationForm.value.monto_materiales)),
-        fecha: new Date().toISOString()
-      }
+      body: cotizacionData
     });
+    
+    console.log('Respuesta del servidor:', cotizacionResponse);
     
     // Si llegamos aquí, ambas operaciones fueron exitosas
     showToast('Cotización enviada correctamente', 'success')
@@ -1222,11 +1325,17 @@ const submitQuotation = async () => {
     await loadServices()
     return true
   } catch (error) {
-    console.error('Error en el proceso de cotización:', error)
+    console.error('Error en el proceso de cotización:', {
+      message: error.message,
+      response: error.response?._data || 'No hay respuesta del servidor',
+      status: error.response?.status,
+      statusText: error.response?.statusText
+    });
     
     // Si hubo un error después de actualizar el estado, intentar revertirlo
-    if (updateResponse) {
+    if (updateSuccessful) {
       try {
+        console.log('Intentando revertir el estado de la solicitud...');
         await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
@@ -1237,12 +1346,17 @@ const submitQuotation = async () => {
           },
           body: { estado: 'asignado' } // Revertir al estado anterior
         });
+        console.log('Estado de la solicitud revertido exitosamente');
       } catch (revertError) {
-        console.error('Error al revertir el estado de la solicitud:', revertError);
+        console.error('Error al revertir el estado de la solicitud:', {
+          message: revertError.message,
+          response: revertError.response?._data || 'No hay respuesta del servidor'
+        });
       }
     }
     
-    showToast('Error al procesar la cotización. Por favor, intente de nuevo.', 'error')
+    const errorMessage = error.response?._data?.message || 'Error al procesar la cotización. Por favor, intente de nuevo.';
+    showToast(errorMessage, 'error');
     return false;
   } finally {
     isSubmittingQuotation.value = false;
@@ -1251,8 +1365,6 @@ const submitQuotation = async () => {
 
 // Cargar detalles de la cotización
 const loadQuotationDetails = async () => {
-  console.log('loadQuotationDetails called')
-  console.log('selectedService.value:', JSON.stringify(selectedService.value, null, 2))
   
   if (!selectedService.value) {
     console.error('No hay servicio seleccionado')
@@ -1261,7 +1373,6 @@ const loadQuotationDetails = async () => {
 
   try {
     isLoading.value = true
-    console.log('Fetching quotation for service ID:', selectedService.value.id)
     
     const response = await $fetch(`cotizacion/solicitud/${selectedService.value.id}`, {
       baseURL: config.public.apiBase,
@@ -1271,8 +1382,6 @@ const loadQuotationDetails = async () => {
         'Authorization': `Bearer ${auth.token}`
       }
     })
-
-    console.log('API Response:', response)
 
     if (response && response.status === 'success' && response.data) {
       const cotizacion = response.data 
@@ -1286,7 +1395,6 @@ const loadQuotationDetails = async () => {
         return
       }
       
-      console.log('Asignando cotización con ID:', cotizacionId)
       currentQuotation.value = {
         id: cotizacionId,
         monto_manodeobra: parseFloat(cotizacion.monto_manodeobra) || 0,
@@ -1319,7 +1427,6 @@ const loadQuotationDetails = async () => {
 
 // Actualizar cotización
 const updateQuotation = async () => {
-  console.log('updateQuotation called with currentQuotation:', JSON.stringify(currentQuotation.value, null, 2))
   
   if (!currentQuotation.value.id) {
     console.error('ID de cotización no válido en updateQuotation')
@@ -1340,23 +1447,14 @@ const updateQuotation = async () => {
   }
 
   try {
-    isUpdatingQuotation.value = true
-    
-    console.log('Enviando datos al servidor:', {
-      id: currentQuotation.value.id,
-      monto_manodeobra: currentQuotation.value.monto_manodeobra,
-      monto_materiales: currentQuotation.value.monto_materiales,
-      comentario: currentQuotation.value.comentario
-    })
+    isUpdatingQuotation.value = true 
     
     const requestData = {
       monto_manodeobra: parseFloat(currentQuotation.value.monto_manodeobra),
       monto_materiales: parseFloat(currentQuotation.value.monto_materiales),
       comentario: currentQuotation.value.comentario,
       estado: currentQuotation.value.estado || 'pendiente'
-    }
-    
-    console.log('Datos a enviar al servidor:', requestData)
+    } 
     
     const response = await $fetch(`/cotizacion/${currentQuotation.value.id}`, {
       baseURL: config.public.apiBase,
@@ -1368,8 +1466,6 @@ const updateQuotation = async () => {
       },
       body: JSON.stringify(requestData)
     })
-
-    console.log('Respuesta del servidor:', response)
     
     // Aceptar tanto respuestas con status 'success' como arrays no vacíos
     if ((response && response.status === 'success') || (Array.isArray(response) && response.length > 0)) {
