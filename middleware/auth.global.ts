@@ -1,5 +1,4 @@
-// Middleware de autenticación global para Nuxt 3
-// Se ejecuta tanto en el servidor como en el cliente
+// auth.global.ts 
 import { useAuthStore } from './auth.store';
 
 // Función auxiliar para obtener la ruta del dashboard según el rol
@@ -16,19 +15,30 @@ function getDashboardPath(auth: any): string {
 export default defineNuxtRouteMiddleware(async (to) => {
   const auth = useAuthStore();
 
-  // Inicializar autenticación (en server y client)
-  await auth.initAuth();
+  // 🔹 Evitar bucles: no procesar si ya estamos en acceso-denegado o login
+  if (to.path === '/acceso-denegado' || to.path === '/') {
+    return;
+  }
+
+  // Inicializar autenticación (solo una vez)
+  if (!auth.isInitialized) {
+    await auth.initAuth();
+  }
+
+  // 🔹 VERIFICAR SI EL USUARIO ESTÁ DESHABILITADO
+  if (auth.user?.estado === 'deshabilitado') {
+    await auth.logout();
+    return navigateTo('/', { replace: true });
+  }
   
-  // Verificar autenticación inicial
-  let isAuthenticated = await auth.checkAuth();
+  // Verificar autenticación
+  let isAuthenticated = false;
   
-  // Si no hay token de acceso pero hay cookie de usuario, considerar autenticado
-  if (!isAuthenticated && auth.user) {
-    isAuthenticated = true;
-    // Intentar renovar el token en segundo plano
-    if (process.client) {
-      auth.refreshToken().catch(console.error);
-    }
+  try {
+    isAuthenticated = await auth.checkAuth();
+  } catch (error) {
+    console.error('Error en checkAuth:', error);
+    isAuthenticated = false;
   }
 
   // Rutas públicas
@@ -47,8 +57,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   );
 
   if (isPublicPath) {
-    // Si está logueado (o se pudo renovar el token) y trata de entrar a login o registro → al dashboard
-    if (isAuthenticated && (normalizedPath === '/')) {
+    // Si está autenticado y trata de entrar a login → redirigir al dashboard
+    if (isAuthenticated && normalizedPath === '/') {
       return navigateTo(getDashboardPath(auth), { replace: true });
     }
     return;
@@ -59,7 +69,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/', { replace: true });
   }
 
-  // --- 🔹 Verificación de roles ANTES de mostrar nada ---
+  // 🔹 Verificación de roles ANTES de mostrar contenido
   if (to.path.startsWith('/admin') && !auth.hasRole('admin')) {
     return navigateTo('/acceso-denegado', { replace: true });
   }
@@ -72,6 +82,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/acceso-denegado', { replace: true });
   }
 
+  // Verificar roles específicos en meta
   if (to.meta?.roles) {
     const requiredRoles = Array.isArray(to.meta.roles) ? to.meta.roles : [to.meta.roles];
     if (!auth.hasRole(requiredRoles)) {
@@ -81,4 +92,3 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // Si llega aquí → autenticado y con permisos
 });
-

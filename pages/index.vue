@@ -571,8 +571,7 @@ const cargarCiudades = async () => {
         nombre: ciudad.nombre_ciudad
       }))
     }
-  } catch (error) {
-    console.error('Error al cargar ciudades:', error)
+  } catch (error) { 
   }
 }
 
@@ -587,8 +586,7 @@ const checkAuthStatus = async () => {
       const dashboardPath = '/cliente/DashboardCliente' // Ruta por defecto
       navigateTo(dashboardPath, { replace: true })
     }
-  } catch (error) {
-    console.error('Error al verificar autenticación:', error)
+  } catch (error) { 
   } finally {
     isCheckingAuth.value = false
     isLoading.value = false
@@ -820,20 +818,15 @@ const handleAuth = async () => {
           throw new Error(loginResult?.error || 'Error en las credenciales');
         }
       } catch (loginError) {
-        // Set the error status with a user-friendly message
         authStatus.value = 'error';
-        // Set a clear error message for the loading spinner
-        const errorMessage = 'Usuario o contraseña incorrectos';
+        const errorMessage = loginError.response?._data?.message || loginError.message || 'Error de autenticación';
         loadingMessage.value = errorMessage;
-        
-        // Log a more helpful error message to the console
-        console.error('Error de autenticación:', errorMessage);
         
         setTimeout(() => {
           isLoading.value = false;
           authStatus.value = '';
           loadingMessage.value = '';
-        }, 2000);
+        }, 5000);
         return;
       }
     } else {
@@ -896,8 +889,7 @@ const handleAuth = async () => {
           identidad: '',
           password: ''
         };
-      } catch (error) {
-        console.error('Error en el registro:', error);
+      } catch (error) { 
         
         // Si hay una respuesta del servidor, extraer el mensaje de error
         if (error.response?.data) {
