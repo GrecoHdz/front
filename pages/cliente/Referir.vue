@@ -18,43 +18,43 @@
 
     <!-- Contenido principal -->
     <div v-if="!isLoading">
-      <HeadersHeaderReferir />
+      <HeadersHeaderDashboard />
 
       <!-- Content Container with max-w-2xl -->
       <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative">
         <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
-        <div class="pb-24">
+        <div class="pb-20">
           <!-- Main Content -->
           <main class="pb-4">
 
             <!-- Hero Section -->
-            <section class="px-6 py-6">
-              <div class="bg-gradient-to-br from-purple-600 via-pink-600 to-red-500 rounded-3xl p-6 text-white relative overflow-hidden">
+            <section class="px-4 py-4">
+              <div class="bg-gradient-to-br from-purple-600 via-pink-600 to-red-500 rounded-2xl p-5 text-white relative overflow-hidden">
                 <!-- Background decoration -->
-                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
                 
                 <div class="relative text-center">
-                  <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <span class="text-4xl">💰</span>
+                  <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <span class="text-3xl">💰</span>
                   </div>
-                  <h1 class="text-3xl font-black mb-3">¡Gana Dinero Refiriendo!</h1>
-                  <p class="text-white/90 font-medium mb-6">
+                  <h1 class="text-2xl font-black mb-2">¡Gana Dinero Refiriendo!</h1>
+                  <p class="text-white/90 font-medium mb-5 text-sm">
                     Invita a tus amigos y familiares a HogarSeguro y recibe <span class="font-black">L. {{ referralReward }}</span> por cada persona que se una
                   </p>
                   
                   <!-- Stats -->
-                  <div class="grid grid-cols-3 gap-4">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
-                      <div class="text-2xl font-black">{{ stats.totalReferrals }}</div>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                      <div class="text-xl font-black">{{ stats.totalReferrals }}</div>
                       <div class="text-xs text-white/80">Referidos</div>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
-                      <div class="text-2xl font-black">L. {{ stats.totalEarnings.toLocaleString('es-HN') }}</div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                      <div class="text-xl font-black">L. {{ stats.totalEarnings.toLocaleString('es-HN') }}</div>
                       <div class="text-xs text-white/80">Ganado</div>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
-                      <div class="text-2xl font-black">L. {{ stats.availableBalance.toLocaleString('es-HN') }}</div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                      <div class="text-xl font-black">L. {{ stats.availableBalance.toLocaleString('es-HN') }}</div>
                       <div class="text-xs text-white/80">Disponible</div>
                     </div>
                   </div>
@@ -63,28 +63,28 @@
             </section>
 
             <!-- Tu Código de Referido -->
-            <section class="px-6 mb-6">
-              <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700">
-                <div class="text-center mb-6">
-                  <div class="w-16 h-16 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <span class="text-white text-2xl">🔗</span>
+            <section class="px-4 mb-4">
+              <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+                <div class="text-center mb-4">
+                  <div class="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <span class="text-white text-xl">🔗</span>
                   </div>
-                  <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-2">Tu Código de Referido</h2>
-                  <p class="text-gray-600 dark:text-gray-400">Comparte tu código único y empieza a ganar</p>
+                  <h2 class="text-xl font-black text-gray-900 dark:text-white mb-2">Tu Código de Referido</h2>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">Comparte tu código único y empieza a ganar</p>
                 </div>
 
                 <!-- Código -->
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-2xl mb-4 border border-blue-200 dark:border-blue-800">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl mb-3 border border-blue-200 dark:border-blue-800">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">TU CÓDIGO</p>
-                      <p class="text-2xl font-black text-blue-800 dark:text-blue-200 font-mono">{{ userReferralCode }}</p>
+                      <p class="text-xl font-black text-blue-800 dark:text-blue-200 font-mono">{{ userReferralCode }}</p>
                     </div>
                     <button 
                       @click="copyReferralCode"
-                      class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-xl transition-all duration-300 hover:scale-105"
+                      class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-all duration-300 hover:scale-105"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                       </svg>
                     </button>
@@ -92,15 +92,15 @@
                 </div>
 
                 <!-- Enlace de referido -->
-                <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-2xl mb-6">
+                <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl mb-4">
                   <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">ENLACE DE INVITACIÓN</p>
-                  <div class="flex items-center space-x-3">
-                    <div class="flex-1 bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden">
+                  <div class="flex items-center space-x-2">
+                    <div class="flex-1 bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
                       <p class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ referralLink }}</p>
                     </div>
                     <button 
                       @click="copyReferralLink"
-                      class="bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-xl transition-all duration-300"
+                      class="bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-lg transition-all duration-300"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
@@ -110,64 +110,64 @@
                 </div>
 
                 <!-- Botones de compartir -->
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                   <button 
                     @click="shareWhatsApp"
-                    class="flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white p-4 rounded-xl transition-all duration-300 hover:scale-105"
+                    class="flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white p-3 rounded-xl transition-all duration-300 hover:scale-105"
                   >
-                    <span class="text-xl">📱</span>
-                    <span class="font-bold">WhatsApp</span>
+                    <span class="text-lg">📱</span>
+                    <span class="font-bold text-sm">WhatsApp</span>
                   </button>
                   <button 
                     @click="shareGeneral"
-                    class="flex items-center justify-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl transition-all duration-300 hover:scale-105"
+                    class="flex items-center justify-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-xl transition-all duration-300 hover:scale-105"
                   >
-                    <span class="text-xl">🔗</span>
-                    <span class="font-bold">Compartir</span>
+                    <span class="text-lg">🔗</span>
+                    <span class="font-bold text-sm">Compartir</span>
                   </button>
                 </div>
               </div>
             </section>
 
             <!-- Cómo Funciona -->
-            <section class="px-6 mb-6">
-              <h2 class="text-xl font-black text-gray-900 dark:text-white mb-4">¿Cómo Funciona?</h2>
-              <div class="space-y-3">
+            <section class="px-4 mb-4">
+              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">¿Cómo Funciona?</h2>
+              <div class="space-y-2">
                 <div v-for="(step, index) in howItWorksSteps" :key="`step-${index}`"
-                     class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-                  <div class="flex items-start space-x-4">
-                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span class="text-white font-black text-sm">{{ index + 1 }}</span>
+                     class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700">
+                  <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span class="text-white font-black text-xs">{{ index + 1 }}</span>
                     </div>
                     <div class="flex-1">
                       <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">{{ step.title }}</h3>
-                      <p class="text-gray-600 dark:text-gray-400 text-sm">{{ step.description }}</p>
+                      <p class="text-gray-600 dark:text-gray-400 text-xs">{{ step.description }}</p>
                     </div>
-                    <div class="text-2xl">{{ step.icon }}</div>
+                    <div class="text-xl">{{ step.icon }}</div>
                   </div>
                 </div>
               </div>
             </section>
 
             <!-- Retirar Ganancias -->
-            <section v-if="stats.availableBalance > 0" class="px-6 mb-6">
-              <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white relative overflow-hidden">
-                <div class="absolute -top-8 -right-8 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+            <section v-if="stats.availableBalance > 0" class="px-4 mb-4">
+              <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 text-white relative overflow-hidden">
+                <div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
                 <div class="relative">
-                  <div class="flex items-center space-x-4 mb-4">
-                    <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                      <span class="text-white text-2xl">💳</span>
+                  <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                      <span class="text-white text-xl">💳</span>
                     </div>
                     <div>
-                      <h2 class="text-2xl font-black">Retirar Ganancias</h2>
-                      <p class="text-white/90">Disponible: L. {{ stats.availableBalance.toLocaleString('es-HN') }}</p>
+                      <h2 class="text-xl font-black">Retirar Ganancias</h2>
+                      <p class="text-white/90 text-sm">Disponible: L. {{ stats.availableBalance.toLocaleString('es-HN') }}</p>
                     </div>
                   </div>
                   
                   <button 
                     @click="showWithdrawModal = true"
                     :disabled="stats.availableBalance < minWithdrawAmount"
-                    class="w-full py-4 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-black text-lg rounded-xl transition-all duration-300 hover:bg-white/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    class="w-full py-3 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-black text-base rounded-xl transition-all duration-300 hover:bg-white/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {{ stats.availableBalance >= minWithdrawAmount ? 'Retirar Ahora' : `Mínimo L. ${minWithdrawAmount.toLocaleString('es-HN')}` }}
                   </button>
@@ -176,40 +176,40 @@
             </section>
 
             <!-- Historial de Referidos -->
-            <section class="px-6 mb-6">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-black text-gray-900 dark:text-white">Tus Referidos</h2>
+            <section class="px-4 mb-4">
+              <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-black text-gray-900 dark:text-white">Tus Referidos</h2>
                 <span class="text-sm text-gray-500 dark:text-gray-400">{{ referralHistory.length }} personas</span>
               </div>
               
-              <div v-if="referralHistory.length === 0" class="text-center py-8">
-                <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                  <span class="text-3xl">👥</span>
+              <div v-if="referralHistory.length === 0" class="text-center py-6">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
+                  <span class="text-2xl">👥</span>
                 </div>
-                <h3 class="text-lg font-black text-gray-900 dark:text-white mb-2">Aún no tienes referidos</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">Comparte tu código y empieza a ganar dinero</p>
+                <h3 class="text-base font-black text-gray-900 dark:text-white mb-2">Aún no tienes referidos</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-3 text-sm">Comparte tu código y empieza a ganar dinero</p>
               </div>
 
-              <div v-else class="space-y-3">
+              <div v-else class="space-y-2">
                 <div v-for="referral in displayedReferrals" :key="`referral-${referral.id}`"
-                     class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+                     class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700">
                   <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                      <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center">
-                        <span class="text-white text-xl">👤</span>
+                    <div class="flex items-center space-x-2">
+                      <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                        <span class="text-white text-lg">👤</span>
                       </div>
                       <div>
-                        <p class="font-bold text-gray-900 dark:text-white">{{ referral.name }}</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatDate(referral.date) }}</p>
+                        <p class="font-bold text-gray-900 dark:text-white text-sm">{{ referral.name }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(referral.date) }}</p>
                       </div>
                     </div>
                     <div class="text-right">
                       <div class="flex items-center space-x-2">
-                        <span class="text-xs font-bold px-2.5 py-1 rounded-full"
+                        <span class="text-xs font-bold px-2 py-1 rounded-full"
                               :class="getReferralStatusColor(referral.status)">
                           {{ referral.status }}
                         </span>
-                        <span v-if="referral.status === 'Completado'" class="text-green-600 dark:text-green-400 font-bold text-sm">
+                        <span v-if="referral.status === 'Completado'" class="text-green-600 dark:text-green-400 font-bold text-xs">
                           +L. {{ referral.reward.toLocaleString('es-HN') }}
                         </span>
                       </div>
@@ -220,17 +220,17 @@
                 <!-- Ver más botón -->
                 <button v-if="referralHistory.length > 5 && !showAllReferrals" 
                         @click="showAllReferrals = true"
-                        class="w-full py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        class="w-full py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
                   Ver todos ({{ referralHistory.length - 5 }} más)
                 </button>
               </div>
             </section>
 
             <!-- Términos y Condiciones -->
-            <section class="px-6 mb-6">
-              <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-800">
-                <div class="flex items-start space-x-3">
-                  <div class="text-amber-500 text-xl flex-shrink-0">📋</div>
+            <section class="px-4 mb-4">
+              <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 border border-amber-200 dark:border-amber-800">
+                <div class="flex items-start space-x-2">
+                  <div class="text-amber-500 text-lg flex-shrink-0">📋</div>
                   <div>
                     <h3 class="text-sm font-bold text-amber-800 dark:text-amber-200 mb-2">Términos del Programa</h3>
                     <ul class="space-y-1 text-xs text-amber-700 dark:text-amber-300">
@@ -258,7 +258,7 @@
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to">
-      <div v-if="showWithdrawModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div v-if="showWithdrawModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
         <!-- Backdrop -->
         <Transition
           name="backdrop"
@@ -282,23 +282,23 @@
           leave-to-class="modal-content-leave-to">
           <div 
             v-if="showWithdrawModal"
-            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
             @click.stop
           >
             <!-- Header -->
-            <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+            <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
               <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-lg">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center text-base">
                     💳
                   </div>
                   <div>
-                    <h3 class="text-lg font-black text-gray-900 dark:text-white">Retirar Ganancias</h3>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white">Retirar Ganancias</h3>
                     <p class="text-xs text-gray-600 dark:text-gray-400">Disponible: L. {{ stats.availableBalance.toLocaleString('es-HN') }}</p>
                   </div>
                 </div>
                 <button @click="closeWithdrawModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
@@ -306,11 +306,11 @@
             </div>
 
             <!-- Content -->
-            <div class="p-4">
-              <form @submit.prevent="processWithdraw" class="space-y-4">
+            <div class="p-3">
+              <form @submit.prevent="processWithdraw" class="space-y-3">
                 <!-- Monto -->
                 <div>
-                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                     Monto a retirar
                   </label>
                   <div class="relative">
@@ -320,7 +320,7 @@
                       type="number"
                       :min="minWithdrawAmount"
                       :max="stats.availableBalance"
-                      class="w-full pl-8 pr-4 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                      class="w-full pl-8 pr-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
                       placeholder="0.00"
                     >
                   </div>
@@ -331,12 +331,12 @@
 
                 <!-- Método de pago -->
                 <div>
-                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                     Método de pago
                   </label>
                   <select 
                     v-model="withdrawForm.method"
-                    class="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                    class="w-full px-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
                   >
                     <option value="" disabled>Selecciona un método</option>
                     <option v-for="method in paymentMethods" :key="method.value" :value="method.value">
@@ -347,13 +347,13 @@
 
                 <!-- Detalles del método -->
                 <div v-if="withdrawForm.method">
-                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                     {{ getPaymentMethodLabel }}
                   </label>
                   <input
                     v-model="withdrawForm.details"
                     type="text"
-                    class="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                    class="w-full px-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
                     :placeholder="getPaymentMethodPlaceholder"
                   >
                 </div>
@@ -362,7 +362,7 @@
                 <button 
                   type="submit"
                   :disabled="!isWithdrawFormValid || isProcessingWithdraw"
-                  class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
                 >
                   <span v-if="!isProcessingWithdraw">
                     Solicitar Retiro
@@ -384,6 +384,113 @@
   </div>
 </template>
 
+<style scoped>
+/* Animaciones para modales */
+.backdrop-enter-active {
+  transition: opacity 0.3s ease-out;
+}
+
+.backdrop-leave-active {
+  transition: opacity 0.2s ease-in;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+}
+
+.modal-content-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0.1s;
+}
+
+.modal-content-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-content-enter-from,
+.modal-content-leave-to {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
+/* Transiciones del modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+/* Estilos generales */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+button, input, textarea, select {
+  min-height: 44px;
+}
+
+input, textarea, select {
+  font-size: 16px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animaciones adicionales */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+/* Force mobile layout */
+body {
+  overflow-x: hidden;
+}
+
+.fixed.inset-0 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
+ 
+
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
@@ -403,8 +510,7 @@ const userCookie = useCookie('user')
 useHead({
   title: 'HogarSeguro - Programa de Referidos',
   meta: [
-    { name: 'description', content: 'Gana dinero refiriendo amigos a HogarSeguro - Programa de referidos' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'description', content: 'Gana dinero refiriendo amigos a HogarSeguro - Programa de referidos' }
   ]
 })
 
@@ -844,111 +950,4 @@ onMounted(() => {
   }
 })
 
-</script>
-
-<style scoped>
-/* Animaciones para modales */
-.backdrop-enter-active {
-  transition: opacity 0.3s ease-out;
-}
-
-.backdrop-leave-active {
-  transition: opacity 0.2s ease-in;
-}
-
-.backdrop-enter-from,
-.backdrop-leave-to {
-  opacity: 0;
-}
-
-.modal-content-enter-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transition-delay: 0.1s;
-}
-
-.modal-content-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modal-content-enter-from,
-.modal-content-leave-to {
-  opacity: 0;
-  transform: translateY(20px) scale(0.98);
-}
-
-/* Transiciones del modal */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-/* Estilos generales */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-* {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.transition-all {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.backdrop-blur-lg {
-  backdrop-filter: blur(16px);
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.3);
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.5);
-}
-
-button, input, textarea, select {
-  min-height: 44px;
-}
-
-input, textarea, select {
-  font-size: 16px;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-/* Animaciones adicionales */
-.hover\:scale-105:hover {
-  transform: scale(1.05);
-}
-
-/* Force mobile layout */
-body {
-  overflow-x: hidden;
-}
-
-.fixed.inset-0 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>
- 
+</script> 

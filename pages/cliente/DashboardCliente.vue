@@ -20,32 +20,32 @@
           @close="toast.show = false"
         />
       <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
-      <div class="pb-24">
+      <div class="pb-20">
         <!-- Main Content -->
         <main class="pb-4">
       
       <!-- Welcome Section -->
-      <section class="px-6 py-6">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+      <section class="px-4 py-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 relative overflow-hidden">
           <!-- Background decoration -->
-          <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl"></div>
-          <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-xl"></div>
+          <div class="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-xl"></div>
+          <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-lg"></div>
           
           <div class="relative">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center">
-                <span class="text-white text-2xl">👋</span>
+            <div class="flex items-center space-x-3 mb-3">
+              <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-xl">👋</span>
               </div>
               <div>
-                <h2 class="text-2xl font-black text-gray-900 dark:text-white">
+                <h2 class="text-lg font-black text-gray-900 dark:text-white">
                   ¡Hola, {{ shortName }}!
                 </h2>
-                <p class="text-gray-600 dark:text-gray-400">Bienvenido de vuelta a HogarSeguro</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Bienvenido a HogarSeguro</p>
               </div>
             </div>
             
-            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-4 rounded-2xl">
-              <p class="text-emerald-800 dark:text-emerald-200 font-medium text-center">
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-3 rounded-xl">
+              <p class="text-emerald-800 dark:text-emerald-200 font-medium text-center text-sm">
                 🏠 Tu hogar está protegido con HogarSeguro
               </p>
             </div>
@@ -54,27 +54,27 @@
       </section>
 
       <!-- Stats Cards -->
-      <section class="px-6 mb-6">
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center">
-                <span class="text-white text-xl">📊</span>
+      <section class="px-4 mb-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-lg">📊</span>
               </div>
               <div>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Servicios</p>
-                <p class="text-2xl font-black text-gray-900 dark:text-white">{{ statsData.totalServices }}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">Servicios</p>
+                <p class="text-xl font-black text-gray-900 dark:text-white">{{ statsData.totalServices }}</p>
               </div>
             </div>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
-                <span class="text-white text-xl">💰</span>
+          <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-lg">💰</span>
               </div>
               <div>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Crédito</p>
-                <p class="text-2xl font-black text-gray-900 dark:text-white">L. {{ statsData.credit.toLocaleString('es-HN') }}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">Crédito</p>
+                <p class="text-xl font-black text-gray-900 dark:text-white">L. {{ (userCredit || 0).toLocaleString('es-HN') }}</p>
               </div>
             </div>
           </div>
@@ -82,24 +82,24 @@
       </section>
 
       <!-- Progress Section - New Design -->
-      <section class="px-6 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <section class="px-4 mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
           <!-- Header with gradient -->
-          <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 p-6 text-white relative">
-            <div class="absolute -top-8 -right-8 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+          <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 p-4 text-white relative">
+            <div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
             <div class="relative">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-2xl font-black">Tu Progreso</h3>
-                <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
-                  <span v-if="isLoadingProgress" class="text-sm font-bold">Cargando...</span>
-                  <span v-else class="text-sm font-bold">Mes {{ statsData.membershipMonths }}</span>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xl font-black">Tu Progreso</h3>
+                <div class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
+                  <span v-if="isLoadingProgress" class="text-xs font-bold">Cargando...</span>
+                  <span v-else class="text-xs font-bold">Mes {{ statsData.membershipMonths }}</span>
                 </div>
               </div>
               
               <!-- Progress Circle -->
-              <div class="flex items-center justify-center mb-4">
-                <div class="relative w-32 h-32">
-                  <svg class="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+              <div class="flex items-center justify-center mb-3">
+                <div class="relative w-24 h-24">
+                  <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
                     <path class="text-white/20" stroke="currentColor" stroke-width="3" fill="none"
                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                     <path class="text-yellow-300" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"
@@ -108,44 +108,44 @@
                   </svg>
                   <div class="absolute inset-0 flex items-center justify-center">
                     <div class="text-center">
-                      <div v-if="isLoadingProgress" class="text-2xl font-black text-white">--/6</div>
-                      <div v-else class="text-2xl font-black text-white">{{ progressCount }}/6</div>
+                      <div v-if="isLoadingProgress" class="text-lg font-black text-white">--/6</div>
+                      <div v-else class="text-lg font-black text-white">{{ progressCount }}/6</div>
                       <div class="text-xs text-white/80">Beneficios</div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <p class="text-center text-white/90 font-medium">
+              <p class="text-center text-white/90 font-medium text-sm">
                 {{ progressMessage }}
               </p>
             </div>
           </div>
 
           <!-- Benefits Cards -->
-          <div class="p-6">
-            <div v-if="loadingBenefits" class="grid grid-cols-2 gap-3">
+          <div class="p-4">
+            <div v-if="loadingBenefits" class="grid grid-cols-2 gap-2">
               <div v-for="i in 4" :key="`skeleton-${i}`" 
-                   class="h-24 bg-gray-100 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
+                   class="h-20 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"></div>
             </div>
             
-            <div v-else-if="benefitsError" class="text-center py-4 text-red-500">
+            <div v-else-if="benefitsError" class="text-center py-3 text-red-500 text-sm">
               {{ benefitsError }}
-              <button @click="fetchBeneficios" class="mt-2 text-sm text-blue-600 hover:underline">
+              <button @click="fetchBeneficios" class="mt-2 text-xs text-blue-600 hover:underline">
                 Reintentar
               </button>
             </div>
             
-            <div v-else-if="benefitsToShow.length === 0" class="text-center py-4 text-gray-500">
+            <div v-else-if="benefitsToShow.length === 0" class="text-center py-3 text-gray-500 text-sm">
               No hay beneficios disponibles en este momento.
             </div>
             
-            <div v-else class="grid grid-cols-2 gap-3">
+            <div v-else class="grid grid-cols-2 gap-2">
               <div v-for="(benefit, index) in benefitsToShow" :key="`benefit-${benefit.month}`"
-                   class="p-4 rounded-2xl border-2 transition-all duration-300"
+                   class="p-3 rounded-xl border-2 transition-all duration-300"
                    :class="getBenefitStyle(benefit.month)">
-                <div class="flex items-center space-x-2 mb-2">
-                  <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                <div class="flex items-center space-x-2 mb-1">
+                  <div class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
                        :class="getBenefitIconStyle(benefit.month)">
                     {{ getBenefitIcon(benefit.month) }}
                   </div>
@@ -154,7 +154,7 @@
                     Mes {{ benefit.month }}
                   </span>
                 </div>
-                <p class="text-sm font-semibold leading-tight"
+                <p class="text-xs font-semibold leading-tight"
                    :class="getBenefitTitleStyle(benefit.month)">
                   {{ benefit.title }}
                 </p>
@@ -162,17 +162,17 @@
             </div>
             
             <!-- Membresía -->
-            <div class="mt-4 p-4 rounded-2xl border transition-colors duration-300"
+            <div class="mt-3 p-3 rounded-xl border transition-colors duration-300"
               :class="{
                 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': isMembershipActive,
                 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800': isMembershipPending,
                 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800': isMembershipExpired,
                 'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700': isMembershipInactive
               }">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex-1">
-                  <div class="flex items-center space-x-3 mb-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  <div class="flex items-center space-x-2 mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       :class="{
                         'bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-400': isMembershipActive,
                         'bg-amber-100 dark:bg-amber-800/30 text-amber-600 dark:text-amber-400': isMembershipPending,
@@ -185,7 +185,7 @@
                       <span v-else>🔒</span>
                     </div>
                     <div class="min-w-0">
-                      <p class="text-sm font-medium"
+                      <p class="text-xs font-medium"
                         :class="{
                           'text-blue-800 dark:text-blue-200': isMembershipActive,
                           'text-amber-800 dark:text-amber-200': isMembershipPending,
@@ -196,7 +196,7 @@
                            isMembershipPending ? 'Membresía pendiente' :
                            isMembershipExpired ? 'Membresía vencida' : 'Estado de la membresía' }}
                       </p>
-                      <p class="text-sm font-bold truncate"
+                      <p class="text-xs font-bold truncate"
                         :class="{
                           'text-blue-900 dark:text-white': isMembershipActive,
                           'text-amber-900 dark:text-amber-100': isMembershipPending,
@@ -209,9 +209,9 @@
                   </div>
                   
                   <!-- Barra de progreso -->
-                  <div v-if="!isMembershipInactive" class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700 mb-1">
+                  <div v-if="!isMembershipInactive" class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mb-1">
                     <div 
-                      class="h-2 rounded-full transition-all duration-500 ease-in-out"
+                      class="h-1.5 rounded-full transition-all duration-500 ease-in-out"
                       :class="{
                         'bg-gradient-to-r from-green-500 to-emerald-600': membershipProgress < 80,
                         'bg-gradient-to-r from-amber-400 to-orange-500': membershipProgress >= 80 && membershipProgress < 95,
@@ -224,13 +224,26 @@
                   <div v-if="!isMembershipInactive" class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>Inicio: {{ membershipStartDate }}</span>
                     <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% completado</span>
-                    <span v-else-if="membershipProgress >= 100">Expirada</span>
+                    <span v-else-if="membershipProgress >= 100 && !diasRestantesCredito">Expirada</span>
+                  </div>
+                  
+                  <!-- Mensaje de días restantes para crédito -->
+                  <div v-if="diasRestantesCredito > 0" class="mt-2 text-xs font-medium px-2 py-1 rounded-md text-center"
+                    :class="{
+                      'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300': diasRestantesCredito <= 1,
+                      'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': diasRestantesCredito > 1 && diasRestantesCredito <= 3,
+                      'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300': diasRestantesCredito > 3
+                    }">
+                    <template v-if="diasRestantesCredito > 0">
+                      <span v-if="diasRestantesCredito === 1">⚠️ Tienes 1 día antes de perder tu crédito</span>
+                      <span v-else>⏳ Tienes {{ diasRestantesCredito }} días antes de perder tu crédito</span>
+                    </template>
                   </div>
                 </div>
                 
                 <button 
                   @click="renovarMembresia"
-                  class="w-full sm:w-auto px-4 py-2 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
+                  class="w-full sm:w-auto px-3 py-2 text-white text-xs font-bold rounded-lg transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
                   :class="{
                     'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed': isMembershipActive,
                     'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5': isMembershipExpired || isMembershipInactive,
@@ -239,7 +252,7 @@
                   }"
                   :disabled="!isMembershipExpired && !isMembershipInactive"
                 >
-                  <svg v-if="isMembershipExpired || isMembershipInactive" class="w-4 h-4 mr-2 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg v-if="isMembershipExpired || isMembershipInactive" class="w-3 h-3 mr-1 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                   </svg>
                   {{ isMembershipActive ? 'Membresía Activa' : isMembershipPending ? 'Pendiente' : isMembershipInactive ? 'Activar ahora' : 'Renovar Ahora' }}
@@ -258,21 +271,21 @@
       </section>
 
       <!-- Quick Service Request -->
-      <section class="px-6 mb-6">
-        <div class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 rounded-3xl p-6 text-white relative overflow-hidden">
-          <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-          <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+      <section class="px-4 mb-4">
+        <div class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 rounded-2xl p-4 text-white relative overflow-hidden">
+          <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           <div class="relative">
-            <h3 class="text-2xl font-black mb-4 flex items-center space-x-2">
+            <h3 class="text-xl font-black mb-3 flex items-center space-x-2">
               <span>🚀</span>
               <span>Solicitar Servicio</span>
             </h3>
             
-            <form @submit.prevent="handleRequestService" class="space-y-4">
+            <form @submit.prevent="handleRequestService" class="space-y-3">
               <div>
                 <select v-model="serviceFormData.type" 
                         :disabled="isLoadingServices"
-                        class="w-full px-4 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-70 disabled:cursor-not-allowed">
+                        class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-70 disabled:cursor-not-allowed">
                   <option value="" disabled class="text-gray-900">
                     {{ isLoadingServices ? 'Cargando servicios...' : 'Selecciona un servicio' }}
                   </option>
@@ -285,29 +298,29 @@
               <div>
                 <textarea v-model="serviceFormData.description" 
                          placeholder="Describe el problema o servicio que necesitas..."
-                         class="w-full px-4 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-24"
+                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
               </div>
               
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 gap-2">
                 <div>
                   <input v-model="serviceFormData.colonia" 
                          type="text"
                          placeholder="Colonia"
-                         class="w-full px-4 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
+                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
                 </div>
                 <div>
                   <input v-model="serviceFormData.direccion" 
                          type="text"
                          placeholder="Dirección precisa"
-                         class="w-full px-4 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
+                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
                 </div>
               </div>
 
               <button type="submit" 
                       :disabled="!isFormValid"
                       :class="[
-                        'w-full py-4 backdrop-blur-sm border font-black text-lg rounded-xl transition-all duration-300',
+                        'w-full py-3 backdrop-blur-sm border font-black text-base rounded-xl transition-all duration-300',
                         isFormValid 
                           ? 'bg-white/20 border-white/30 text-white hover:bg-white/30 hover:scale-105 cursor-pointer' 
                           : 'bg-white/10 border-white/10 text-white/50 cursor-not-allowed'
@@ -317,88 +330,55 @@
             </form>
           </div>
         </div>
-      </section>
-
-      <!-- Recent Services -->
-      <section class="px-6 mb-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-black text-gray-900 dark:text-white">Servicios Recientes</h3>
-          <button @click="navigateTo('/cliente/Servicios')" class="text-emerald-600 dark:text-emerald-400 text-sm font-bold hover:underline">
-            Ver todos
-          </button>
-        </div>
-        <div class="space-y-3">
-          <div v-for="service in recentServicesDisplay" :key="`recent-${service.id}`"
-               @click="navigateTo('/cliente/Servicios')"
-               class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-2xl">
-                  {{ service.icon }}
-                </div>
-                <div>
-                  <p class="font-bold text-gray-900 dark:text-white">{{ service.title }}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ service.date }}</p>
-                </div>
-              </div>
-              <div class="text-right">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold"
-                      :class="getStatusColor(service.status)">
-                  {{ service.status }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      </section> 
 
       <!-- Quick Actions -->
-      <section class="px-6 mb-6">
-        <h3 class="text-xl font-black text-gray-900 dark:text-white mb-4">Acciones Rápidas</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <button @click="navigateTo('/cliente/Servicios')" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center">
-                <span class="text-white text-xl">🏠</span>
+      <section class="px-4 mb-4">
+        <h3 class="text-lg font-black text-gray-900 dark:text-white mb-3">Acciones Rápidas</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <button @click="navigateTo('/cliente/Servicios')" class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
+            <div class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-lg">🏠</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-sm">Ver Servicios</p>
+                <p class="font-bold text-gray-900 dark:text-white text-xs">Ver Servicios</p>
                 <p class="text-xs text-gray-600 dark:text-gray-400">Historial completo</p>
               </div>
             </div>
           </button>
           
-          <button @click="navigateTo('/cliente/Perfil')" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center">
-                <span class="text-white text-xl">👤</span>
+          <button @click="navigateTo('/cliente/Perfil')" class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
+            <div class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-lg">👤</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-sm">Mi Perfil</p>
+                <p class="font-bold text-gray-900 dark:text-white text-xs">Mi Perfil</p>
                 <p class="text-xs text-gray-600 dark:text-gray-400">Configuración</p>
               </div>
             </div>
           </button>
           
-          <button @click="navigateTo('/cliente/Soporte')" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl flex items-center justify-center">
-                <span class="text-white text-xl">💬</span>
+          <button @click="navigateTo('/cliente/Soporte')" class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
+            <div class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-lg">💬</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-sm">Soporte</p>
+                <p class="font-bold text-gray-900 dark:text-white text-xs">Soporte</p>
                 <p class="text-xs text-gray-600 dark:text-gray-400">Ayuda 24/7</p>
               </div>
             </div>
           </button>
           
-          <button @click="navigateTo('/cliente/Referir')" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center">
-                <span class="text-white text-xl">💰</span>
+          <button @click="navigateTo('/cliente/Referir')" class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
+            <div class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-lg">💰</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-sm">Referir</p>
+                <p class="font-bold text-gray-900 dark:text-white text-xs">Referir</p>
                 <p class="text-xs text-gray-600 dark:text-gray-400">Ganá dinero</p>
               </div>
             </div>
@@ -414,12 +394,73 @@
   </div>
 </template>
 
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.6);
+}
+
+button, input, textarea, select {
+  min-height: 44px;
+}
+
+input, textarea, select {
+  font-size: 16px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+</style>
+
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
-import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue' 
 
 // =========================
 // CONFIGURACIÓN Y SETUP
@@ -434,7 +475,8 @@ useHead({
   title: 'HogarSeguro - Dashboard',
   meta: [
     { name: 'description', content: 'Panel de control de HogarSeguro - Gestiona tus servicios y membresía' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'keywords', content: 'dashboard, HogarSeguro, servicios, membresía, panel de control' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })
 
@@ -516,6 +558,9 @@ const membershipData = ref({
   startDate: null,
   endDate: null
 })
+
+// Estado para controlar si se ha realizado el reinicio de crédito
+const creditResetDone = ref(false)
 
 // Estados de beneficios
 const beneficios = ref([])
@@ -600,10 +645,26 @@ const membershipStatus = computed(() => {
     'activa': 'Activa',
     'pendiente': 'Pendiente de verificación',
     'vencida': 'Vencida',
-    'inactiva': 'Sin membresía'
+    'inactiva': 'Sin membresía',
+    'vencida_reiniciada': 'Crédito reiniciado'
   }
   
   return statusMap[status] || 'Sin membresía'
+})
+
+// Días restantes antes de perder el crédito (3 días después del vencimiento)
+const diasRestantesCredito = computed(() => {
+  if (!membershipData.value.endDate || !isMembershipExpired.value) return null
+  
+  const fechaVencimiento = new Date(membershipData.value.endDate)
+  const fechaLimite = new Date(fechaVencimiento)
+  fechaLimite.setDate(fechaLimite.getDate() + 3) // 3 días de gracia
+  
+  const hoy = new Date()
+  const diffTime = fechaLimite - hoy
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  return Math.max(0, diffDays) // No mostrar números negativos
 })
 
 // Computed para mapear los beneficios al formato esperado por la UI
@@ -720,6 +781,32 @@ const getBenefitTitleStyle = (month) => {
 // FUNCIONES DE CARGA DE DATOS
 // =========================
 
+// Función para obtener el crédito del usuario
+const fetchUserCredit = async () => {
+  try {
+    const user = useCookie('user').value
+    if (!user?.id_usuario) return
+    
+    const response = await $fetch(`/credito/usuario/${user.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    if (response?.success && response.data) {
+      userCredit.value = response.data.monto_credito
+    } else {
+      console.warn('La respuesta no contiene datos de crédito válidos:', response)
+    }
+  } catch (error) {
+    console.error('Error al obtener el crédito del usuario:', error)
+    userCredit.value = 0
+  }
+}
+
 // Función para obtener el progreso de la membresía
 const fetchMembershipProgress = async () => {
   try {
@@ -753,6 +840,15 @@ const fetchMembershipProgress = async () => {
   }
 }
 
+// Función para verificar si han pasado 3 días desde el vencimiento
+const haPasadoPeriodoDeGracia = (fechaVencimiento) => {
+  const hoy = new Date()
+  const fechaLimite = new Date(fechaVencimiento)
+  fechaLimite.setDate(fechaLimite.getDate() + 3) // Añadimos 3 días al vencimiento
+  
+  return hoy > fechaLimite
+}
+
 // Función para obtener datos completos de la membresía
 const fetchMembershipData = async () => {
   try {
@@ -784,8 +880,24 @@ const fetchMembershipData = async () => {
       const diasTranscurridos = (hoy - fechaInicio) / (1000 * 60 * 60 * 24)
       const progreso = Math.min(100, Math.max(0, Math.round((diasTranscurridos / totalDias) * 100)))
       
-      if (progreso >= 100 && membresia.estado === 'activa') {
+      // Verificar si la membresía está vencida
+      const estaVencida = progreso >= 100
+      
+      if (estaVencida && membresia.estado === 'activa') {
+        // Primero actualizamos el estado localmente
         membresia.estado = 'vencida'
+        
+        // Verificar si han pasado 3 días desde el vencimiento y si no se ha realizado el reinicio
+        if (haPasadoPeriodoDeGracia(fechaVencimiento) && !creditResetDone.value) {
+          try {
+            // Solo actualizamos el estado en el backend cuando ya pasaron los 3 días
+            await updateMembershipToExpired(membresia.id_membresia)
+            await resetCredito()
+            creditResetDone.value = true
+          } catch (error) {
+            console.error('Error al reiniciar crédito automáticamente:', error)
+          }
+        }
       }
       
       const membershipInfo = {
@@ -794,7 +906,8 @@ const fetchMembershipData = async () => {
         progress: progreso,
         startDate: fechaInicio,
         endDate: fechaVencimiento,
-        estado: membresia.estado
+        estado: membresia.estado,
+        puedeReiniciar: haPasadoPeriodoDeGracia(fechaVencimiento) && !creditResetDone.value
       }
       
       membershipData.value = membershipInfo
@@ -905,6 +1018,37 @@ const renovarMembresia = () => {
 // FUNCIONES DE PROCESAMIENTO
 // =========================
 
+// Función para reiniciar el crédito del usuario
+const resetCredito = async () => {
+  try {
+    const userCookie = useCookie('user')
+    const userData = userCookie.value
+    
+    if (!userData || !userData.id_usuario) {
+      showToast('Error', 'No se pudo identificar al usuario', 'error')
+      return
+    }
+
+    const response = await $fetch(`/credito/reset/${userData.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    if (response && response.success) {  
+      await fetchUserCredit()  
+      return response.data
+    } else {
+      throw new Error(response?.message || 'Error al reiniciar el crédito')
+    }
+  } catch (error) { 
+    throw error
+  }
+}
+
 // Event handlers
 const handleRequestService = async () => {
   try {
@@ -985,6 +1129,32 @@ const handleRequestService = async () => {
 }
 
 // =========================
+// FUNCIONES DE GESTIÓN DE MEMBRESÍA
+// =========================
+
+// Función para actualizar el estado de la membresía a vencida en el backend
+const updateMembershipToExpired = async (membresiaId) => {
+  try {
+    await $fetch(`/membresia/${membresiaId}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: {
+        estado: 'vencida'
+      }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error al actualizar el estado de la membresía:', error);
+    return { success: false, error };
+  }
+};
+
+// =========================
 // FUNCIONES DE NOTIFICACIONES
 // =========================
 
@@ -1018,15 +1188,22 @@ ${param2}`;
 // Asegurar que name siempre tenga un valor
 userData.value.name = userData.value.nombre || userData.value.name
 
+// Estado reactivo para el crédito del usuario
+const userCredit = ref(0)
+
 // Verificar autenticación al cargar el componente
 onMounted(async () => { 
   try {
+    // Primero cargar los datos de la membresía
+    await fetchMembershipData()
+    
+    // Luego cargar el resto de datos en paralelo
     await Promise.all([
       fetchMembershipProgress(),
-      fetchMembershipData(),
       fetchServices(),
       fetchBeneficios(),
-      fetchTotalSolicitudes()
+      fetchTotalSolicitudes(),
+      fetchUserCredit()
     ])
   } catch (error) {
     if (error?.response?._data?.status !== 'not_found') {
@@ -1053,66 +1230,4 @@ onMounted(() => {
   }
 })
 
-</script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-* {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.transition-all {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.backdrop-blur-lg {
-  backdrop-filter: blur(16px);
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.3);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.5);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.4);
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.6);
-}
-
-button, input, textarea, select {
-  min-height: 44px;
-}
-
-input, textarea, select {
-  font-size: 16px;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-.hover\:scale-105:hover {
-  transform: scale(1.05);
-}
-</style>
- 
+</script> 

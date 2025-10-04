@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
 
       <!-- Loading Spinner -->
     <LoadingSpinner 
@@ -12,25 +12,25 @@
     <HeadersHeaderSoporte/>
 
     <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="container mx-auto px-4 py-4 max-w-2xl">
       <Toast 
         v-if="toast.show"
         :message="toast.message" 
         :type="toast.type"
         @close="toast.show = false"
       />
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Soporte Técnico</h1>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-5">Soporte Técnico</h1>
       <!-- Contact Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg mb-6">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Contáctanos</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">¿Tienes alguna pregunta o necesitas ayuda? Estamos aquí para ayudarte.</p>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg mb-4">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Contáctanos</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">¿Tienes alguna pregunta o necesitas ayuda? Estamos aquí para ayudarte.</p>
         
-        <form @submit.prevent="submitForm" class="space-y-4">
+        <form @submit.prevent="submitForm" class="space-y-3">
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asunto</label>
             <select 
               v-model="form.subject" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
               required
             >
               <option value="" disabled selected>Selecciona un asunto</option>
@@ -49,7 +49,7 @@
               <select 
                 ref="servicioSelect"
                 v-model="form.servicio_id"
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white relative z-10"
+                class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white relative z-10 text-base"
                 required
                 :disabled="cargandoServicios"
               >
@@ -65,7 +65,7 @@
               <!-- Indicador de pulso -->
               <div 
                 v-if="showPulse" 
-                class="absolute -inset-1 bg-blue-500/20 rounded-xl animate-pulse z-0"
+                class="absolute -inset-1 bg-blue-500/20 rounded-lg animate-pulse z-0"
               ></div>
             </div>
             <p v-if="cargandoServicios" class="text-sm text-blue-600 dark:text-blue-400 mt-1">Cargando servicios finalizados...</p>
@@ -78,7 +78,7 @@
             <textarea 
               v-model="form.message" 
               rows="4" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
               placeholder="Describe tu consulta o problema..."
               required
             ></textarea>
@@ -86,7 +86,7 @@
           
           <button 
             type="submit" 
-            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-base"
             :disabled="isSubmitting"
           >
             <span v-if="!isSubmitting">Enviar Mensaje</span>
@@ -96,18 +96,18 @@
       </div>
 
       <!-- FAQ Section -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg mb-6">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Preguntas Frecuentes</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg mb-4">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Preguntas Frecuentes</h2>
         
-        <div class="space-y-4">
-          <div v-for="(faq, index) in faqs" :key="index" class="border-b border-gray-200 dark:border-gray-700 pb-4">
+        <div class="space-y-3">
+          <div v-for="(faq, index) in faqs" :key="index" class="border-b border-gray-200 dark:border-gray-700 pb-3">
             <button 
               @click="toggleFaq(index)"
               class="w-full flex justify-between items-center text-left focus:outline-none"
             >
-              <span class="font-medium text-gray-900 dark:text-white">{{ faq.question }}</span>
+              <span class="font-medium text-gray-900 dark:text-white text-sm">{{ faq.question }}</span>
               <svg 
-                class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200"
+                class="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2"
                 :class="{ 'transform rotate-180': activeFaq === index }"
                 fill="none" 
                 stroke="currentColor" 
@@ -126,47 +126,47 @@
       </div>
 
       <!-- Contact Information -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Información de Contacto</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Información de Contacto</h2>
         
-        <div class="space-y-4">
+        <div class="space-y-3">
           <div class="flex items-start">
-            <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mr-3">
-              <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
             <div>
-              <h3 class="font-medium text-gray-900 dark:text-white">Correo Electrónico</h3>
-              <p class="text-gray-600 dark:text-gray-300">soporte@prohogar.hn</p>
-              <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Respuesta en 24 horas</p>
+              <h3 class="font-medium text-gray-900 dark:text-white text-sm">Correo Electrónico</h3>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">soporte@prohogar.hn</p>
+              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Respuesta en 24 horas</p>
             </div>
           </div>
           
           <div class="flex items-start">
-            <div class="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mr-3">
-              <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </div>
             <div>
-              <h3 class="font-medium text-gray-900 dark:text-white">Teléfono</h3>
-              <p class="text-gray-600 dark:text-gray-300">+504 2234-5678</p>
-              <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Lunes a Viernes, 8:00 AM - 5:00 PM</p>
+              <h3 class="font-medium text-gray-900 dark:text-white text-sm">Teléfono</h3>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">+504 2234-5678</p>
+              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Lunes a Viernes, 8:00 AM - 5:00 PM</p>
             </div>
           </div>
           
           <div class="flex items-start">
-            <div class="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mr-3">
-              <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
             <div>
-              <h3 class="font-medium text-gray-900 dark:text-white">Oficina Principal</h3>
-              <p class="text-gray-600 dark:text-gray-300">Colonia Palmira, Avenida República de Panamá</p>
-              <p class="text-gray-600 dark:text-gray-300">Tegucigalpa, Honduras</p>
+              <h3 class="font-medium text-gray-900 dark:text-white text-sm">Oficina Principal</h3>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">Colonia Palmira, Avenida República de Panamá</p>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">Tegucigalpa, Honduras</p>
             </div>
           </div>
         </div>
@@ -177,6 +177,24 @@
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.02);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style>
+
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
@@ -198,7 +216,8 @@ useHead({
   title: 'HogarSeguro - Soporte Técnico',
   meta: [
     { name: 'description', content: 'Centro de soporte técnico de HogarSeguro - Contáctanos para resolver tus dudas' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'keywords', content: 'soporte técnico, HogarSeguro, servicios, soporte, soporte técnico' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
 
@@ -550,21 +569,4 @@ onMounted(async () => {
 })
  
 
-</script>
-
-<style scoped>
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.02);
-  }
-}
-
-.animate-pulse {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-</style>
+</script> 

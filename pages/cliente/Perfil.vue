@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <!-- Toast Notification -->
     <!-- Toast Notification -->
     <Toast 
@@ -22,29 +22,29 @@
     <HeadersHeaderPerfil/>
 
     <!-- Main Content -->
-    <div class="max-w-2xl mx-auto px-6 pb-6">
+    <div class="max-w-2xl mx-auto px-4 pb-4">
       <!-- Profile Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 mb-6">
-        <div class="flex flex-col items-center text-center mb-6">
-          <div class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-4xl text-white mb-4 shadow-lg">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4">
+        <div class="flex flex-col items-center text-center mb-4">
+          <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-3xl text-white mb-3 shadow-lg">
             {{ userInitials }}
           </div>
-          <h2 class="text-xl font-black text-gray-900 dark:text-white">{{ user.nombre }}</h2>
-          <p class="text-emerald-600 dark:text-emerald-400 font-medium">{{ user.email }}</p>
+          <h2 class="text-lg font-black text-gray-900 dark:text-white">{{ user.nombre }}</h2>
+          <p class="text-emerald-600 dark:text-emerald-400 font-medium text-sm">{{ user.email }}</p>
         </div>
 
         <!-- Membership Status -->
-        <div class="mt-4 p-4 rounded-2xl border transition-colors duration-300"
+        <div class="mt-3 p-3 rounded-xl border transition-colors duration-300"
           :class="{
             'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': isMembershipActive,
             'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800': isMembershipPending,
             'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800': isMembershipExpired,
             'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700': isMembershipInactive
           }">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex-1">
-              <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              <div class="flex items-center space-x-2 mb-2">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   :class="{
                     'bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-400': isMembershipActive,
                     'bg-amber-100 dark:bg-amber-800/30 text-amber-600 dark:text-amber-400': isMembershipPending,
@@ -57,7 +57,7 @@
                   <span v-else>🔒</span>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-sm font-medium"
+                  <p class="text-xs font-medium"
                     :class="{
                       'text-blue-800 dark:text-blue-200': isMembershipActive,
                       'text-amber-800 dark:text-amber-200': isMembershipPending,
@@ -68,7 +68,7 @@
                        isMembershipPending ? 'Membresía pendiente' :
                        isMembershipExpired ? 'Membresía vencida' : 'Estado de la membresía' }}
                   </p>
-                  <p class="text-sm font-bold truncate"
+                  <p class="text-xs font-bold truncate"
                     :class="{
                       'text-blue-900 dark:text-white': isMembershipActive,
                       'text-amber-900 dark:text-amber-100': isMembershipPending,
@@ -81,9 +81,9 @@
               </div>
               
               <!-- Barra de progreso -->
-              <div v-if="!isMembershipInactive" class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700 mb-1">
+              <div v-if="!isMembershipInactive" class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mb-1">
                 <div 
-                  class="h-2 rounded-full transition-all duration-500 ease-in-out"
+                  class="h-1.5 rounded-full transition-all duration-500 ease-in-out"
                   :class="{
                     'bg-gradient-to-r from-green-500 to-emerald-600': membershipProgress < 80,
                     'bg-gradient-to-r from-amber-400 to-orange-500': membershipProgress >= 80 && membershipProgress < 95,
@@ -102,7 +102,7 @@
             
             <button 
               @click="renovarMembresia"
-              class="w-full sm:w-auto px-4 py-2 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
+              class="w-full sm:w-auto px-3 py-2 text-white text-xs font-bold rounded-lg transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
               :class="{
                 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed': isMembershipActive,
                 'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5': isMembershipExpired || isMembershipInactive,
@@ -111,7 +111,7 @@
               }"
               :disabled="!isMembershipExpired && !isMembershipInactive"
             >
-              <svg v-if="isMembershipExpired || isMembershipInactive" class="w-4 h-4 mr-2 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg v-if="isMembershipExpired || isMembershipInactive" class="w-3 h-3 mr-1 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
               {{ isMembershipActive ? 'Membresía Activa' : isMembershipPending ? 'Pendiente' : isMembershipInactive ? 'Activar ahora' : 'Renovar Ahora' }}
@@ -127,65 +127,65 @@
         </div>
 
         <!-- User Stats -->
-        <div class="grid grid-cols-2 gap-3 mb-6 pt-3">
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
-            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-2">
-              <span class="text-blue-600 dark:text-blue-400">📅</span>
+        <div class="grid grid-cols-2 gap-2 mb-4 pt-2">
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <span class="text-blue-600 dark:text-blue-400 text-sm">📅</span>
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">Registrado el</p>
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ formatShortDate(user.fecha_registro) }}</p>
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ formatShortDate(user.fecha_registro) }}</p>
           </div>
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
-            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-2">
-              <span class="text-purple-600 dark:text-purple-400">🏙️</span>
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+            <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <span class="text-purple-600 dark:text-purple-400 text-sm">🏙️</span>
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">Ciudad</p>
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || 'No especificada' }}</p>
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || 'No especificada' }}</p>
           </div>
         </div>
       </div>
 
       <!-- User Information -->
-      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 mb-6">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Información Personal</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4">
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3">Información Personal</h3>
         
-        <div class="space-y-4">
-          <div class="space-y-2">
+        <div class="space-y-3">
+          <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
             <input 
               v-model="user.nombre"
               type="text" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
               placeholder="Tu nombre completo"
             >
           </div>
           
-          <div class="space-y-2">
+          <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
             <input 
               v-model="user.email"
               type="email" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
               placeholder="tu@email.com"
             >
           </div>
           
-          <div class="space-y-2">
+          <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
             <input 
               v-model="user.telefono"
               type="tel" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
               placeholder="+504 9999-9999"
             >
           </div>
           
-          <div class="space-y-2">
+          <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ciudad</label>
             <div class="relative">
               <select
                 v-model="user.id_ciudad"
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none pr-10"
+                class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none pr-8 text-base"
               >
                 <option :value="null" disabled>Selecciona una ciudad</option>
                 <option v-for="ciudad in ciudades" :key="ciudad.id_ciudad" :value="ciudad.id_ciudad" :selected="user.id_ciudad === ciudad.id_ciudad">
@@ -200,7 +200,7 @@
             </div>
           </div>
           
-          <div class="space-y-2">
+          <div class="space-y-1">
             <button 
               @click="isPasswordModalOpen = true"
               type="button"
@@ -211,22 +211,22 @@
           </div>
           
           <!-- Modal de Cambio de Contraseña -->
-          <div v-if="isPasswordModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md relative">
+          <div v-if="isPasswordModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-sm relative">
               <button 
                 @click="isPasswordModalOpen = false"
                 type="button"
-                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200"
                 aria-label="Cerrar modal"
               >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
               
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Cambiar Contraseña</h3>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Cambiar Contraseña</h3>
               
-              <form @submit.prevent="updatePassword" class="space-y-4">
+              <form @submit.prevent="updatePassword" class="space-y-3">
               <!-- Campo de usuario oculto para accesibilidad -->
               <div class="sr-only">
                 <label for="username">Nombre de usuario</label>
@@ -240,13 +240,13 @@
                   aria-hidden="true"
                 >
               </div>
-                <div class="space-y-2">
+                <div class="space-y-1">
                   <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña Actual</label>
                   <input 
                     id="currentPassword"
                     v-model="currentPassword"
                     type="password" 
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                    class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
                     placeholder="Ingresa tu contraseña actual"
                     autocomplete="current-password"
                     required
@@ -254,13 +254,13 @@
                   >
                 </div>
                 
-                <div class="space-y-2">
+                <div class="space-y-1">
                   <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
                   <input 
                     id="newPassword"
                     v-model="newPassword"
                     type="password" 
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                    class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
                     placeholder="Ingresa tu nueva contraseña"
                     autocomplete="new-password"
                     required
@@ -268,13 +268,13 @@
                   >
                 </div>
                 
-                <div class="space-y-2">
+                <div class="space-y-1">
                   <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nueva Contraseña</label>
                   <input 
                     id="confirmPassword"
                     v-model="confirmPassword"
                     type="password" 
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                    class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
                     placeholder="Confirma tu nueva contraseña"
                     autocomplete="new-password"
                     required
@@ -286,7 +286,7 @@
                 <button 
                   type="submit"
                   :disabled="isUpdatingPassword || passwordMismatch"
-                  class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   <span v-if="isUpdatingPassword">Actualizando...</span>
                   <span v-else>Actualizar Contraseña</span>
@@ -295,11 +295,11 @@
             </div>
           </div>
           
-          <div class="flex flex-col space-y-3 pt-2">
+          <div class="flex flex-col space-y-2 pt-2">
             <button 
               @click="saveProfile"
               :disabled="!hasChanges || isSaving"
-              class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-blue-400 disabled:to-indigo-400"
+              class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-blue-400 disabled:to-indigo-400 text-sm"
             >
               <span v-if="isSaving">Guardando...</span>
               <span v-else>Actualizar Perfil</span>
@@ -308,7 +308,7 @@
             <button 
               v-if="newPassword || currentPassword || confirmPassword"
               @click="updatePassword"
-              class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+              class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
             >
               Cambiar Contraseña
             </button>
@@ -317,10 +317,10 @@
       </div>
 
       <!-- Legal & About -->
-      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Legal y más</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3">Legal y más</h3>
         
-        <div class="space-y-3">
+        <div class="space-y-2">
           <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
           </button>
@@ -353,7 +353,7 @@
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to"
     >
-      <div v-if="showRenewalModal" class="fixed inset-0 z-50 p-4">
+      <div v-if="showRenewalModal" class="fixed inset-0 z-50 p-3">
         <!-- Backdrop con animación separada -->
         <Transition
           name="backdrop"
@@ -380,57 +380,57 @@
           >
             <div 
               v-if="showRenewalModal"
-              class="bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-md relative shadow-2xl border border-gray-200 dark:border-gray-700"
+              class="bg-white dark:bg-gray-800 rounded-2xl p-5 w-full max-w-sm relative shadow-2xl border border-gray-200 dark:border-gray-700"
               @click.stop
             >
               <!-- Botón de cerrar mejorado -->
               <button 
                 @click="showRenewalModal = false"
                 type="button"
-                class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
                 aria-label="Cerrar modal"
               >
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
 
               <!-- Header del modal mejorado -->
-              <div class="text-center mb-6">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mb-4 shadow-lg">
-                  <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="text-center mb-4">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mb-3 shadow-lg">
+                  <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
                 </div>
-                <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">Renovar Membresía</h3>
-                <p class="text-gray-600 dark:text-gray-300">Selecciona una cuenta para realizar el pago</p>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white mb-1">Renovar Membresía</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">Selecciona una cuenta para realizar el pago</p>
               </div>
 
-              <div class="space-y-5">
+              <div class="space-y-4">
                 <!-- Costo de la membresía mejorado -->
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-2xl border border-blue-200 dark:border-blue-800">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800">
                   <div class="flex justify-between items-center">
                     <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">Costo de la membresía:</span>
-                    <span v-if="isLoadingMembershipCost" class="h-6 w-24 bg-blue-200 dark:bg-blue-700 rounded animate-pulse"></span>
-                    <span v-else class="text-xl font-black text-blue-600 dark:text-blue-400">L. {{ Number(membershipCost).toFixed(2) }}</span>
+                    <span v-if="isLoadingMembershipCost" class="h-5 w-20 bg-blue-200 dark:bg-blue-700 rounded animate-pulse"></span>
+                    <span v-else class="text-lg font-black text-blue-600 dark:text-blue-400">L. {{ Number(membershipCost).toFixed(2) }}</span>
                   </div>
                   <p class="text-xs text-blue-600 dark:text-blue-300 mt-1 font-medium"> Válido por 30 días a partir de hoy</p>
                 </div>
 
                 <!-- Selector de cuenta bancaria mejorado -->
-                <div class="space-y-3">
+                <div class="space-y-2">
                   <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Cuenta bancaria
                   </label>
-                  <div v-if="isLoadingAccounts" class="py-8 flex flex-col items-center justify-center">
-                    <div class="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent"></div>
+                  <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
                   </div>
-                  <div v-else class="space-y-4">
+                  <div v-else class="space-y-3">
                     <select
                       id="bank-account"
                       v-model="selectedAccount"
-                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200"
+                      class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
                       :disabled="bankAccounts.length === 0"
                     >
                       <option v-if="bankAccounts.length === 0" value="" disabled>No hay cuentas registradas</option>
@@ -452,31 +452,31 @@
                       enter-from-class="slide-down-enter-from"
                       leave-to-class="slide-down-leave-to"
                     >
-                      <div v-if="selectedAccount" class="space-y-4">
-                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
-                          <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalles de la cuenta:</h4>
-                          <div class="space-y-2">
+                      <div v-if="selectedAccount" class="space-y-3">
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+                          <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de la cuenta:</h4>
+                          <div class="space-y-1">
                             <div class="flex justify-between items-center py-1">
-                              <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Banco:</span>
-                              <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.banco || 'N/A' }}</span>
+                              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Banco:</span>
+                              <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.banco || 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between items-center py-1">
-                              <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Cuenta:</span>
-                              <span class="text-sm font-mono font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.num_cuenta || 'N/A' }}</span>
+                              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Cuenta:</span>
+                              <span class="text-xs font-mono font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.num_cuenta || 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between items-center py-1">
-                              <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Beneficiario:</span>
-                              <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.beneficiario || 'N/A' }}</span>
+                              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Beneficiario:</span>
+                              <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.beneficiario || 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between items-center py-1">
-                              <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Tipo:</span>
-                              <span class="text-sm font-semibold text-gray-800 dark:text-gray-100 capitalize">{{ getSelectedAccount?.tipo || 'N/A' }}</span>
+                              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Tipo:</span>
+                              <span class="text-xs font-semibold text-gray-800 dark:text-gray-100 capitalize">{{ getSelectedAccount?.tipo || 'N/A' }}</span>
                             </div>
                           </div>
                         </div>
 
                         <!-- Input para el número de comprobante mejorado -->
-                        <div class="space-y-2">
+                        <div class="space-y-1">
                           <label for="comprobante" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                             Número de comprobante
                           </label>
@@ -484,12 +484,12 @@
                             id="comprobante"
                             v-model="comprobante"
                             type="text"
-                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200"
+                            class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
                             placeholder="Ej: 123456789"
                             required
                           />
                           <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             Ingresa el número de comprobante de tu transferencia o depósito
@@ -498,18 +498,18 @@
                       </div>
                     </Transition>
                     
-                    <div v-if="bankAccounts.length === 0" class="text-center py-4">
+                    <div v-if="bankAccounts.length === 0" class="text-center py-3">
                       <p class="text-sm text-amber-600 dark:text-amber-400 font-medium">⚠️ No se encontraron cuentas bancarias</p>
                     </div>
                   </div>
                 </div>
 
                 <!-- Botones de acción mejorados -->
-                <div class="flex flex-col space-y-3 pt-4">
+                <div class="flex flex-col space-y-2 pt-3">
                   <button
                     @click="confirmRenewal"
                     :disabled="isRenewing || !selectedAccount || !comprobante || bankAccounts.length === 0"
-                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] text-sm"
                     :class="{'opacity-50 cursor-not-allowed': !selectedAccount || !comprobante}"
                   >
                     <span v-if="isRenewing" class="flex items-center justify-center">
@@ -520,7 +520,7 @@
                       Procesando...
                     </span>
                     <span v-else class="flex items-center justify-center">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                       Confirmar Pago
@@ -528,7 +528,7 @@
                   </button>
                   <button
                     @click="showRenewalModal = false"
-                    class="w-full py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99]"
+                    class="w-full py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] text-sm"
                   >
                     Cancelar
                   </button>
@@ -539,9 +539,123 @@
         </div>
       </div>
     </Transition>
-  </div>
-  
+  </div> 
 </template>
+<style scoped>
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-pulse-icon {
+  animation: pulse 2s infinite;
+  display: inline-block;
+}
+
+/* Animaciones del Modal */
+.modal-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.modal-leave-active {
+  transition: all 0.25s ease-in;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+/* Animaciones del Backdrop */
+.backdrop-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.backdrop-leave-active {
+  transition: all 0.25s ease-in;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+/* Animaciones del Contenido del Modal */
+.modal-content-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-content-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.modal-content-enter-from {
+  opacity: 0;
+  transform: scale(0.8) translateY(-20px);
+}
+
+.modal-content-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+}
+
+/* Animaciones del Slide Down */
+.slide-down-enter-active {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.slide-down-leave-active {
+  transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+  max-height: 0;
+}
+
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+  max-height: 0;
+}
+
+/* Mejoras visuales adicionales */
+.border-3 {
+  border-width: 3px;
+}
+
+/* Efecto de glassmorphism sutil */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Animación de hover mejorada para botones */
+button:hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sombra mejorada para el modal */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Dark mode adjustments */
+.dark .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+</style>
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
@@ -556,7 +670,7 @@ useHead({
   title: 'HogarSeguro - Perfil',
   meta: [
     { name: 'description', content: 'Perfil de usuario de HogarSeguro - Gestiona tus servicios y membresía' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
 
@@ -1415,120 +1529,4 @@ watch(darkMode, (newVal) => {
   localStorage.setItem('darkMode', newVal)
 })
  
-</script>
-
-<style scoped>
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.animate-pulse-icon {
-  animation: pulse 2s infinite;
-  display: inline-block;
-}
-
-/* Animaciones del Modal */
-.modal-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.modal-leave-active {
-  transition: all 0.25s ease-in;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-/* Animaciones del Backdrop */
-.backdrop-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.backdrop-leave-active {
-  transition: all 0.25s ease-in;
-}
-
-.backdrop-enter-from,
-.backdrop-leave-to {
-  opacity: 0;
-  backdrop-filter: blur(0px);
-}
-
-/* Animaciones del Contenido del Modal */
-.modal-content-enter-active {
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.modal-content-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
-}
-
-.modal-content-enter-from {
-  opacity: 0;
-  transform: scale(0.8) translateY(-20px);
-}
-
-.modal-content-leave-to {
-  opacity: 0;
-  transform: scale(0.95) translateY(10px);
-}
-
-/* Animaciones del Slide Down */
-.slide-down-enter-active {
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.slide-down-leave-active {
-  transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53);
-}
-
-.slide-down-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-  max-height: 0;
-}
-
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-5px);
-  max-height: 0;
-}
-
-/* Mejoras visuales adicionales */
-.border-3 {
-  border-width: 3px;
-}
-
-/* Efecto de glassmorphism sutil */
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-/* Animación de hover mejorada para botones */
-button:hover {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Sombra mejorada para el modal */
-.shadow-2xl {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-/* Dark mode adjustments */
-.dark .shadow-2xl {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-</style> 
+</script> 

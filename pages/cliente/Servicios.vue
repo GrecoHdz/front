@@ -37,23 +37,23 @@
     <!-- Content Container with max-w-2xl -->
     <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative">
       <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
-      <div class="pb-24">
+      <div class="pb-20">
         <!-- Main Content -->
         <main class="pb-4">
           
           <!-- Stats Overview -->
-          <section class="px-4 py-4">
-            <div class="grid grid-cols-3 gap-2 mb-4">
-              <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-                <div class="text-xl font-black text-blue-600 dark:text-blue-400 mb-1">{{ totalServices }}</div>
+          <section class="px-4 py-3">
+            <div class="grid grid-cols-3 gap-2 mb-3">
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
+                <div class="text-lg font-black text-blue-600 dark:text-blue-400 mb-1">{{ totalServices }}</div>
               <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Total</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-              <div class="text-xl font-black text-green-600 dark:text-green-400 mb-1">{{ completedServices }}</div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
+              <div class="text-lg font-black text-green-600 dark:text-green-400 mb-1">{{ completedServices }}</div>
               <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Completados</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-              <div class="text-xl font-black text-orange-600 dark:text-orange-400 mb-1">{{ pendingServices }}</div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
+              <div class="text-lg font-black text-orange-600 dark:text-orange-400 mb-1">{{ pendingServices }}</div>
               <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Pendientes</p>
             </div>
           </div>
@@ -64,45 +64,47 @@
           <div class="space-y-3">
             <div v-for="service in filteredServices" :key="service.id"
                  @click="openServiceModal(service)"
-                 class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer relative">
+                 class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer relative">
 
               
               <!-- Service Header -->
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex items-center space-x-3">
-                  <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-xl">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
                     {{ service.icon }}
                   </div>
-                  <div>
-                    <p class="font-black text-gray-900 dark:text-white text-base">{{ service.title }}</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ service.date }} • #{{ formatDateDDMMYY(service.rawDate) }}-{{ service.id }}</p>
+                  <div class="min-w-0">
+                    <p class="font-bold text-gray-900 dark:text-white text-xs truncate max-w-[125px] sm:max-w-none">{{ service.title }}</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">#{{ formatDateDDMMYY(service.rawDate) }}-{{ service.id }}</p>
                   </div>
                 </div>
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full" :class="getStatusColor(service.status)">
-                      {{ service.status }}
-                    </span>
-                    <span v-if="service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita  || service.rawStatus === 'pendiente_pagoservicio'" class="inline-flex items-center px-3 py-1.5 rounded border border-amber-300 dark:border-amber-600 text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 shadow-sm hover:shadow transition-all duration-200 group">
-                      <svg class="w-4 h-4 mr-1.5 text-amber-500 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center space-x-1">
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" :class="getStatusColor(service.status)">
+                    {{ service.status }}
+                  </span>
+                  </div>
+                  <div class="flex flex-wrap justify-end gap-1">
+                    <span v-if="service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita || service.rawStatus === 'pendiente_pagoservicio'" class="inline-flex items-center px-1.5 py-0.5 rounded border border-amber-300 dark:border-amber-600 text-[10px] font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300">
+                      <svg class="w-2.5 h-2.5 mr-0.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                       </svg>
                       Pago Pendiente
                     </span>
-                    <span v-if="service.rawStatus === 'pendiente_cotizacion'" class="inline-flex items-center px-3 py-1.5 rounded border border-amber-300 dark:border-amber-600 text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 shadow-sm hover:shadow transition-all duration-200 group">
-                      <svg class="w-4 h-4 mr-1.5 text-amber-500 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <span v-if="service.rawStatus === 'pendiente_cotizacion'" class="inline-flex items-center px-1.5 py-0.5 rounded border border-amber-300 dark:border-amber-600 text-[10px] font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300">
+                      <svg class="w-2.5 h-2.5 mr-0.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                       </svg>
-                      Cotización Lista
+                      Cotización
                     </span>
                   </div>
                 </div>
               </div>
 
               <!-- Location and Schedule -->
-              <div class="space-y-2 mb-3">
+              <div class="space-y-2 mb-2">
                 <!-- Extended Location -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
                   <p class="text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">📍 UBICACIÓN</p>
                   <p class="text-blue-800 dark:text-blue-200 text-sm font-semibold">{{ service.fullLocation.colonia }}</p>
                   <p class="text-blue-700 dark:text-blue-300 text-xs">{{ service.fullLocation.direccion }}</p>
@@ -110,17 +112,19 @@
               </div>
               
               <!-- Service Description -->
-              <p class="text-gray-700 dark:text-gray-300 text-sm mb-3 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+              <p class="text-gray-700 dark:text-gray-300 text-sm mb-2 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
                 {{ service.description }}
               </p> 
 
               <!-- Action Buttons -->
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                  <span class="text-gray-500 dark:text-gray-400 text-xs">{{ getTimeAgo(service.rawDate) }}</span>
+                  <span class="text-gray-500 dark:text-gray-400 text-xs">{{ service.date }}</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <span class="text-blue-600 dark:text-blue-400 text-xs font-bold">Ver detalles</span>
+                  <span class="text-blue-600 dark:text-blue-400 text-xs font-bold">
+                    {{ service.rawStatus === 'finalizado' ? 'Calificar Servicio' : 'Ver detalles' }}
+                  </span>
                   <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                   </svg>
@@ -130,13 +134,13 @@
           </div>
 
           <!-- Empty State -->
-          <div v-if="filteredServices.length === 0" class="text-center py-8">
-            <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
-              <span class="text-3xl">🔍</span>
+          <div v-if="filteredServices.length === 0" class="text-center py-6">
+            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
+              <span class="text-2xl">🔍</span>
             </div>
-            <h3 class="text-lg font-black text-gray-900 dark:text-white mb-2">No hay servicios</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">No se encontraron servicios con los filtros seleccionados</p>
-            <button @click="resetFilters" class="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors text-sm">
+            <h3 class="text-base font-black text-gray-900 dark:text-white mb-2">No hay servicios</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-3 text-sm">No se encontraron servicios con los filtros seleccionados</p>
+            <button @click="resetFilters" class="px-3 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors text-sm">
               Limpiar filtros
             </button>
           </div>
@@ -147,7 +151,7 @@
 
     <FootersFooter /> 
   </div>
-</div>
+  </div>
 
     <!-- Service Detail Modal with Transitions -->
     <Transition
@@ -156,7 +160,7 @@
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to">
-      <div v-if="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div v-if="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
         <!-- Backdrop con animación -->
         <Transition
           name="backdrop"
@@ -182,25 +186,25 @@
         >
           <div 
             v-if="showServiceModal"
-            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
             @click.stop
           >
             <!-- Encabezado del modal -->
-            <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+            <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
               <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-lg">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-base">
                     {{ selectedService.icon }}
                   </div>
                   <div>
-                    <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ selectedService.title }}</h3>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white">{{ selectedService.title }}</h3>
                     <p class="text-xs text-gray-600 dark:text-gray-400">
                       Número de referencia #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}
                     </p>
                   </div>
                 </div>
-                <button @click="closeServiceModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button @click="closeAllModals" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
@@ -208,26 +212,26 @@
             </div>
 
             <!-- Contenido principal del modal -->
-            <div class="p-4">
+            <div class="p-3">
         <!-- 1. Seguimiento del Servicio -->
-        <div v-if="selectedService.rawStatus !== 'cancelado'" class="mb-6">  
-          <h4 class="text-base font-black text-gray-900 dark:text-white mb-4">Seguimiento del Servicio</h4> 
+        <div v-if="selectedService.rawStatus !== 'cancelado'" class="mb-4">  
+          <h4 class="text-sm font-black text-gray-900 dark:text-white mb-3">Seguimiento del Servicio</h4> 
           <!-- Timeline Steps -->
-          <div class="space-y-3">
+          <div class="space-y-2">
             <div v-for="(step, index) in serviceSteps" :key="step.id"
-                 class="flex items-start space-x-3">
+                 class="flex items-start space-x-2">
               <div class="flex-shrink-0 relative">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center border-2"
+                <div class="w-6 h-6 rounded-full flex items-center justify-center border-2"
                      :class="getStepStatus(step.id, selectedService.rawStatus).class">
                   <span class="text-xs font-bold" :class="getStepStatus(step.id, selectedService.rawStatus).textClass">
                     {{ getStepStatus(step.id, selectedService.rawStatus).icon }}
                   </span>
                 </div>
                 <div v-if="index < serviceSteps.length - 1" 
-                     class="absolute top-8 left-1/2 transform -translate-x-1/2 w-px h-4"
+                     class="absolute top-6 left-1/2 transform -translate-x-1/2 w-px h-3"
                      :class="getCurrentStepNumber(selectedService.rawStatus) > step.id ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'"></div>
               </div>
-              <div class="flex-1 pb-4">
+              <div class="flex-1 pb-3">
                 <p class="font-bold text-gray-900 dark:text-white text-sm">{{ step.title }}</p>
                 <p class="text-gray-600 dark:text-gray-400 text-xs mt-1">{{ step.description }}</p>
               </div>
@@ -236,22 +240,26 @@
         </div>
 
         <!-- 2. Técnico Asignado -->
-        <div v-if="selectedService.technician && selectedService.rawStatus === 'asignado'" class="mb-6">
-          <h4 class="text-base font-black text-gray-900 dark:text-white mb-3">Técnico Asignado</h4>
-          <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800">
-            <div class="flex items-center space-x-3 mb-2">
-              <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-                <span class="text-white text-xl">👨‍🔧</span>
+        <div v-if="selectedService.technician && selectedService.rawStatus === 'asignado'" class="mb-4">
+          <h4 class="text-sm font-black text-gray-900 dark:text-white mb-2">Técnico Asignado</h4>
+          <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
+            <div class="flex items-center space-x-2 mb-2">
+              <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
+                <span class="text-white text-lg">👨‍🔧</span>
               </div>
               <div>
-                <h5 class="font-bold text-emerald-800 dark:text-emerald-200">{{ selectedService.technician.name }}</h5>
-                <div class="flex items-center space-x-1">
-                  <span class="text-yellow-400">
-                    <svg v-for="i in 5" :key="i" class="w-4 h-4 fill-current" :class="{ 'text-yellow-400': i <= selectedService.technician.rating, 'text-gray-300 dark:text-gray-600': i > selectedService.technician.rating }" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  </span>
-                  <span class="text-emerald-600 dark:text-emerald-400 text-xs font-bold">({{ selectedService.technician.reviews }})</span>
+                <div class="flex flex-col">
+                  <h5 class="font-bold text-emerald-800 dark:text-emerald-200 text-sm">
+                    {{ selectedService.technicianName || 'Técnico' }}
+                  </h5>
+                  <div class="flex items-center space-x-1">
+                    <span class="flex">
+                      <svg v-for="i in 5" :key="i" class="w-3 h-3 fill-current" :class="{ 'text-yellow-400': i <= Math.round(tecnicoRating), 'text-gray-300 dark:text-gray-600': i > Math.round(tecnicoRating) }" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </span>
+                    <span class="text-emerald-600 dark:text-emerald-400 text-xs font-bold">({{ tecnicoRating.toFixed(1) }})</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -263,15 +271,15 @@
         </div>
 
         <!-- Mensaje de Servicio Cancelado -->
-        <div v-if="selectedService.rawStatus === 'cancelado'" class="mb-6">
-          <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border-l-4 border-red-500">
+        <div v-if="selectedService.rawStatus === 'cancelado'" class="mb-4">
+          <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border-l-4 border-red-500">
             <div class="flex">
               <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <svg class="h-4 w-4 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
                 </svg>
               </div>
-              <div class="ml-3">
+              <div class="ml-2">
                 <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Servicio Cancelado</h3>
                 <div class="mt-1 text-sm text-red-700 dark:text-red-300"> 
                   <p>Este servicio ha sido cancelado.</p> 
@@ -282,23 +290,23 @@
         </div> 
 
         <!-- 3. Acciones - Solo se muestra si hay acciones disponibles -->
-        <div v-if="hasActions" class="mb-4">
-          <h4 v-if="hasVisibleActions" class="text-base font-black text-gray-900 dark:text-white mb-3">Acciones</h4>
+        <div v-if="hasActions" class="mb-3">
+          <h4 v-if="hasVisibleActions" class="text-sm font-black text-gray-900 dark:text-white mb-2">Acciones</h4>
           <div class="space-y-2">
 
             <!-- Botón de Cancelar - Visible solo en estados específicos -->
-            <div v-if="['pendiente_pagovisita', 'pendiente_asignacion', 'asignado'].includes(selectedService.rawStatus)" class="mb-3">
+            <div v-if="['pendiente_pagovisita', 'pendiente_asignacion', 'asignado'].includes(selectedService.rawStatus)" class="mb-2">
               <button 
                 @click="confirmarCancelar"
-                class="w-full flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                class="w-full flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
               >
                 <div class="flex items-center space-x-2">
-                  <span class="text-lg">❌</span>
+                  <span class="text-base">❌</span>
                   <span class="font-bold text-red-800 dark:text-red-200 text-sm">
                     {{ getCancelButtonText }}
                   </span>
                 </div>
-                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
@@ -306,33 +314,33 @@
 
             <!-- Acciones para Cotización Pendiente -->
             <div v-if="selectedService.status === 'Cotización Pendiente'">
-              <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg mb-2">
+              <div class="bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg mb-2">
                 <p class="text-yellow-800 dark:text-yellow-200 text-xs font-bold text-center">
                   ⏳ Esperando tu decisión sobre la cotización
                 </p>
               </div>
-              <button class="w-full flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+              <button class="w-full flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
                 <div class="flex items-center space-x-2">
-                  <span class="text-lg">💬</span>
+                  <span class="text-base">💬</span>
                   <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Contactar técnico</span>
                 </div>
-                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
             </div> 
 
             <!-- Acciones para Servicio Con Pago Pendiente -->
-            <div v-if="selectedService.rawStatus === 'pendiente_pagovisita' && selectedService.pagar_visita" class="mb-4"> 
+            <div v-if="selectedService.rawStatus === 'pendiente_pagovisita' && selectedService.pagar_visita" class="mb-3"> 
               <button 
                 @click="openVisitPaymentModal(selectedService)"
-                class="w-full flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mb-3"
+                class="w-full flex items-center justify-between p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mb-2"
               >
                 <div class="flex items-center space-x-2">
-                  <span class="text-lg">💳</span>
+                  <span class="text-base">💳</span>
                   <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">Pagar Visita</span>
                 </div>
-                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
@@ -342,13 +350,13 @@
             <div v-if="selectedService.rawStatus === 'pendiente_pagoservicio'"> 
               <button 
                 @click="openPaymentModal(selectedService)"
-                class="w-full flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors mb-3"
+                class="w-full flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors mb-2"
               >
                 <div class="flex items-center space-x-2">
-                  <span class="text-lg">💰</span>
+                  <span class="text-base">💰</span>
                   <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Pagar Servicio</span>
                 </div>
-                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
@@ -358,30 +366,46 @@
             <div v-if="selectedService.rawStatus === 'pendiente_cotizacion'">
               <button 
                 @click="openQuotationModal(selectedService)"
-                class="w-full flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors mb-3"
+                class="w-full flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors mb-2"
               >
                 <div class="flex items-center space-x-2">
-                  <span class="text-lg">📝</span>
+                  <span class="text-base">📝</span>
                   <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">Ver Cotización y Diagnóstico</span>
                 </div>
-                <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
             </div>
             
             <!-- Acciones para Servicio Finalizado -->
-            <div v-if="selectedService.rawStatus === 'finalizado'">
+            <div v-if="selectedService.rawStatus === 'finalizado'" class="space-y-2">
+              <!-- Botón de Calificar -->
+              <button 
+                @click="openRatingModal(selectedService)"
+                class="w-full flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors"
+              >
+                <div class="flex items-center space-x-2">
+                  <span class="text-base">⭐</span>
+                  <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">Calificar Servicio</span>
+                </div>
+                <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+
+            <div v-if="selectedService.rawStatus === 'calificado' || selectedService.rawStatus === 'finalizado'" class="space-y-2">
               <!-- Botón de Reportar Problema -->
               <button 
                 @click="reportarProblema"
-                class="w-full flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                class="w-full flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
               >
                 <div class="flex items-center space-x-2">
-                  <span class="text-lg">⚠️</span>
+                  <span class="text-base">⚠️</span>
                   <span class="font-bold text-red-800 dark:text-red-200 text-sm">Reportar Problema</span>
                 </div>
-                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
@@ -390,7 +414,7 @@
       </div>
     </div>
   </div>
-</Transition>
+  </Transition>
       </div>
     </Transition>
 
@@ -401,7 +425,7 @@
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to">
-      <div v-if="showVisitPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div v-if="showVisitPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
         <!-- Backdrop con animación -->
         <Transition
           name="backdrop"
@@ -426,23 +450,23 @@
           leave-to-class="modal-content-leave-to">
           <div 
             v-if="showVisitPaymentModal"
-            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
             @click.stop
           >
             <!-- Encabezado del modal -->
-            <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+            <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
               <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center text-lg">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-base">
                     💳
                   </div>
                   <div>
-                    <h3 class="text-lg font-black text-gray-900 dark:text-white">Pagar Visita</h3> 
+                    <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Visita</h3> 
                     <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                   </div> 
                 </div>
                 <button @click="closeVisitPaymentModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
@@ -450,12 +474,12 @@
             </div>
 
             <!-- Contenido principal del modal -->
-            <div class="p-4">
+            <div class="p-3">
               <!-- Service Summary -->
-              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl mb-4">
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
                 <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Pago de la Visita</h4>
-                <div class="flex items-center space-x-3 mb-2">
-                  <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
+                <div class="flex items-center space-x-2 mb-2">
+                  <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
                     {{ selectedService.icon }}
                   </div>
                   <div>
@@ -466,8 +490,8 @@
               </div>
 
               <!-- Payment Breakdown -->
-              <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl mb-4">
-                <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-3">💰 Desglose de Pago</h4>
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg mb-3">
+                <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
                 <div class="space-y-2 text-sm">
                   <div class="flex justify-between items-center">
                     <span class="text-blue-700 dark:text-blue-300">Visita del Técnico:</span>
@@ -476,25 +500,25 @@
                   <hr class="border-blue-300 dark:border-blue-700">
                   <div class="flex justify-between items-center">
                     <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
-                    <span class="font-bold text-blue-800 dark:text-blue-200 text-lg">L. {{ visitCost }}</span>
+                    <span class="font-bold text-blue-800 dark:text-blue-200 text-base">L. {{ visitCost }}</span>
                   </div>
                 </div>
               </div>
 
               <!-- Cuenta Bancaria -->
-              <div class="space-y-3 mb-4">
+              <div class="space-y-2 mb-3">
                 <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                   Transferencia
                 </label>
-                <div v-if="isLoadingAccounts" class="py-8 flex flex-col items-center justify-center">
-                  <div class="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent"></div>
+                <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
+                  <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
                 </div>
-                <div v-else class="space-y-4">
+                <div v-else class="space-y-3">
                   <select
                     id="bank-account"
                     v-model="selectedAccount"
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200"
+                    class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
                     :disabled="bankAccounts.length === 0"
                   >
                     <option value="" disabled selected>Selecciona una cuenta</option>
@@ -511,10 +535,10 @@
                   <!-- Detalles de la cuenta seleccionada -->
                   <div 
                     v-if="getSelectedAccount" 
-                    class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
+                    class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
                   >
-                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalles de la cuenta:</h4>
-                    <div class="space-y-2">
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de la cuenta:</h4>
+                    <div class="space-y-1">
                       <div class="flex justify-between">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Banco:</span>
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
@@ -539,7 +563,7 @@
                             class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                             title="Copiar número de cuenta"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                             </svg>
                           </button>
@@ -549,7 +573,7 @@
                   </div>
 
                   <!-- Input para el número de comprobante -->
-                  <div class="space-y-2">
+                  <div class="space-y-1">
                     <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Número de comprobante
                     </label>
@@ -557,7 +581,7 @@
                       id="comprobante"
                       v-model="comprobante"
                       type="text"
-                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200"
+                      class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200 text-base"
                       placeholder="Ingresa el número de comprobante"
                     >
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -567,11 +591,11 @@
                 </div>
 
                 <!-- Botón de pago -->
-                <div class="mt-6">
+                <div class="mt-4">
                   <button 
                     @click="processVisitPayment"
                     :disabled="!selectedAccount || !comprobante || isProcessingPayment"
-                    class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
                   >
                     <span v-if="!isProcessingPayment">
                       Procesar Pago - L. {{ visitCost }}
@@ -591,8 +615,7 @@
         </Transition>
       </div>
     </Transition>
-
-<!-- Payment Modal with Transitions -->
+ 
   <!-- Payment Modal with Transitions -->
   <Transition
     name="modal"
@@ -601,7 +624,7 @@
     enter-from-class="modal-enter-from"
     leave-to-class="modal-leave-to">
 
-    <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
 
       <!-- Backdrop con animación -->
       <Transition
@@ -626,23 +649,23 @@
         leave-to-class="modal-content-leave-to">
         <div 
           v-if="showPaymentModal"
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
           @click.stop
         >
           <!-- Encabezado del modal -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center text-lg">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-base">
                   💳
                 </div>
                 <div>
-                  <h3 class="text-lg font-black text-gray-900 dark:text-white">Pagar Servicio</h3>
+                  <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Servicio</h3>
                   <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
               </div>
               <button @click="closePaymentModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
@@ -650,12 +673,12 @@
           </div>
 
           <!-- Contenido principal del modal -->
-          <div class="p-4">
+          <div class="p-3">
             <!-- Resumen del Servicio -->
-            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl mb-4">
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
               <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Resumen del Servicio</h4>
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
+              <div class="flex items-center space-x-2 mb-2">
+                <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
                   {{ selectedService.icon }}
                 </div>
                 <div>
@@ -666,51 +689,59 @@
             </div>
 
             <!-- Desglose de Pago -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl mb-4">
-              <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-3">💰 Desglose de Pago</h4>
-              <div v-if="isLoadingQuotation" class="py-4 flex justify-center">
-                <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg mb-3">
+              <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
+              <div v-if="isLoadingQuotation" class="py-3 flex justify-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
               </div>
-              <div v-else class="space-y-2 text-sm">
+              <div v-else class="space-y-1 text-sm">
                 <!-- Mano de obra -->
-                <div class="flex justify-between items-center mb-2">
+                <div class="flex justify-between items-center mb-1">
                   <span class="text-blue-700 dark:text-blue-300">Mano de obra:</span>
                   <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ parseFloat(quotationData?.monto_manodeobra || 0).toFixed(2) }}</span>
                 </div>
+                
+                <!-- Descuento por membresía -->
+                <template v-if="membresiaProgreso?.monto_credito > 0">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="text-blue-700 dark:text-blue-300">Descuento por membresía:</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                      -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * discountPercentage).toFixed(2) }}
+                    </span>
+                  </div>
                 <!-- Crédito de membresía -->
-                <template v-if="membresiaProgreso?.mesesProgreso > 1">
-                  <div class="flex justify-between items-center mb-2">
+                  <div class="flex justify-between items-center mb-1">
                     <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
                     <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                      -L. {{ parseFloat(membresiaProgreso?.montoTotal || 0).toFixed(2) }}
+                      -L. {{ parseFloat(membresiaProgreso?.monto_credito || 0).toFixed(2) }}
                     </span>
                   </div>
                 </template>
                 
                 <!-- Total a pagar -->
-                <div class="flex justify-between items-center text-lg mt-2 pt-2 border-t border-blue-200 dark:border-blue-800">
+                <div class="flex justify-between items-center text-base mt-1 pt-1 border-t border-blue-200 dark:border-blue-800">
                   <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
                   <span class="font-bold text-blue-800 dark:text-blue-200">
-                    {{ calculateTotal() }}
+                    L. {{ totalAPagar.toFixed(2) }}
                   </span>
                 </div>
               </div>
             </div>
 
             <!-- Sección de Cuenta Bancaria -->
-            <div class="space-y-3 mb-4">
+            <div class="space-y-2 mb-3">
               <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Transferencia
               </label>
-              <div v-if="isLoadingAccounts" class="py-8 flex flex-col items-center justify-center">
-                <div class="animate-spin rounded-full h-10 w-10 border-3 border-blue-500 border-t-transparent"></div>
+              <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
               </div>
-              <div v-else class="space-y-4">
+              <div v-else class="space-y-3">
                 <select
                   id="bank-account"
                   v-model="selectedAccount"
-                  class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200"
+                  class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
                   :disabled="bankAccounts.length === 0"
                 >
                   <option value="" disabled selected>Selecciona una cuenta</option>
@@ -727,10 +758,10 @@
                   <!-- Detalles de la cuenta seleccionada -->
                   <div 
                     v-if="getSelectedAccount" 
-                    class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
+                    class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
                   >
-                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalles de la cuenta:</h4>
-                    <div class="space-y-2">
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de la cuenta:</h4>
+                    <div class="space-y-1">
                       <div class="flex justify-between">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Nombre:</span>
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
@@ -755,7 +786,7 @@
                             class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                             title="Copiar número de cuenta"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                             </svg>
                           </button>
@@ -765,7 +796,7 @@
                   </div>
 
                 <!-- Input para el número de comprobante -->
-                <div class="space-y-2">
+                <div class="space-y-1">
                   <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Número de comprobante
                   </label>
@@ -773,7 +804,7 @@
                     id="comprobante"
                     v-model="comprobante"
                     type="text"
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200"
+                    class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200 text-base"
                     placeholder="Ingresa el número de comprobante"
                   >
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -783,14 +814,14 @@
               </div>
 
               <!-- Botón de pago -->
-              <div class="mt-6">
+              <div class="mt-4">
                 <button 
                   @click="processPayment"
                   :disabled="!selectedAccount || !comprobante || isProcessingPayment"
-                  class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
                 >
                   <span v-if="!isProcessingPayment">
-                    Procesar Pago {{ calculateTotal() }}
+                    Procesar Pago L. {{ totalAPagar.toFixed(2) }}
                   </span>
                   <span v-else class="flex items-center justify-center">
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -815,7 +846,7 @@
     leave-active-class="modal-leave-active"
     enter-from-class="modal-enter-from"
     leave-to-class="modal-leave-to">
-    <div v-if="showCancelModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div v-if="showCancelModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
       <!-- Backdrop con animación -->
       <Transition
         name="backdrop"
@@ -839,25 +870,25 @@
         leave-to-class="modal-content-leave-to">
         <div 
           v-if="showCancelModal"
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
           @click.stop
         >
           <!-- Encabezado del modal -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-rose-500 rounded-xl flex items-center justify-center text-lg">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-red-500 to-rose-500 rounded-lg flex items-center justify-center text-base">
                   ✖
                 </div>
                 <div>
-                  <h3 class="text-lg font-black text-gray-900 dark:text-white">
+                  <h3 class="text-base font-black text-gray-900 dark:text-white">
                     {{ cancelModalTexts[selectedService.rawStatus]?.title || 'Cancelar Servicio' }}
                   </h3>
                   <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
               </div>
               <button @click="closeCancelModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
@@ -865,22 +896,22 @@
           </div>
 
           <!-- Contenido principal del modal -->
-          <div class="p-4">
-            <div class="space-y-4">
-              <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-xl mb-4">
+          <div class="p-3">
+            <div class="space-y-3">
+              <div class="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-lg mb-3">
                 <p class="text-amber-800 dark:text-amber-200 text-sm font-medium">
                   {{ cancelModalTexts[selectedService.rawStatus]?.message || '¿Estás seguro de que deseas cancelar este servicio?' }}
                 </p>
               </div>
 
-              <div class="space-y-3">
+              <div class="space-y-2">
                 <p class="text-gray-600 dark:text-gray-300 text-sm">
                   Por favor, indícanos el motivo de la cancelación:
                 </p>
                 <textarea 
                   v-model="cancelAdditionalInfo" 
-                  rows="4" 
-                  class="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder-gray-400 transition-all duration-200"
+                  rows="3" 
+                  class="w-full px-3 py-3 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder-gray-400 transition-all duration-200"
                   placeholder="Describe el motivo de la cancelación..."
                 ></textarea> 
               </div>
@@ -888,23 +919,23 @@
           </div>
 
           <!-- Pie del modal -->
-          <div class="sticky bottom-0 bg-gray-50 dark:bg-gray-800/80 px-4 py-3 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl flex justify-end space-x-3 backdrop-blur-sm">
+          <div class="sticky bottom-0 bg-gray-50 dark:bg-gray-800/80 px-3 py-2 border-t border-gray-200 dark:border-gray-700 rounded-b-xl flex justify-end space-x-2 backdrop-blur-sm">
             <button 
               @click="closeCancelModal" 
-              class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+              class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
             >
               Volver atrás
             </button>
             <button 
               @click="cancelarSolicitud" 
               :disabled="!cancelAdditionalInfo.trim() || isCancelling"
-              class="px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-rose-500 rounded-xl hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:transform-none"
+              class="px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-rose-500 rounded-lg hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="!isCancelling">
                 Confirmar cancelación
               </span>
               <span v-else class="flex items-center justify-center">
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -924,7 +955,7 @@
     leave-active-class="modal-leave-active"
     enter-from-class="modal-enter-from"
     leave-to-class="modal-leave-to">
-    <div v-if="showQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div v-if="showQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
       <!-- Backdrop con animación -->
       <Transition
         name="backdrop"
@@ -948,23 +979,23 @@
         leave-to-class="modal-content-leave-to">
         <div 
           v-if="showQuotationModal"
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
           @click.stop
         >
           <!-- Encabezado del modal -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-xl flex items-center justify-center text-lg">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-lg flex items-center justify-center text-base">
                   📝
                 </div>
                 <div>
-                  <h3 class="text-lg font-black text-gray-900 dark:text-white">Cotización del Servicio</h3>
+                  <h3 class="text-base font-black text-gray-900 dark:text-white">Cotización del Servicio</h3>
                   <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
               </div>
               <button @click="showQuotationModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
@@ -972,19 +1003,19 @@
           </div>
 
           <!-- Contenido principal del modal -->
-          <div class="p-4">
+          <div class="p-3">
             <!-- Cargando -->
-            <div v-if="isLoadingQuotation" class="flex justify-center items-center py-12">
-              <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div v-if="isLoadingQuotation" class="flex justify-center items-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
             </div>
             
             <!-- Contenido de la cotización -->
             <template v-else>
               <!-- Tarjeta de diagnóstico -->
-              <div class="bg-white dark:bg-gray-700/50 rounded-xl shadow-sm p-4 mb-4 border border-gray-100 dark:border-gray-700">
-                <div class="flex items-start space-x-3 mb-3">
-                  <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="bg-white dark:bg-gray-700/50 rounded-lg shadow-sm p-3 mb-3 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-start space-x-2 mb-2">
+                  <div class="p-1 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                   </div>
@@ -993,7 +1024,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Análisis realizado por el técnico</p>
                   </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg">
+                <div class="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
                   <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
                     {{ quotationData?.comentario || 'No se proporcionó un diagnóstico detallado.' }}
                   </p>
@@ -1001,10 +1032,10 @@
               </div>
               
               <!-- Tarjeta de costos -->
-              <div class="bg-white dark:bg-gray-700/50 rounded-xl shadow-sm p-4 mb-4 border border-gray-100 dark:border-gray-700">
-                <div class="flex items-start space-x-3 mb-3">
-                  <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="bg-white dark:bg-gray-700/50 rounded-lg shadow-sm p-3 mb-3 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-start space-x-2 mb-2">
+                  <div class="p-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                    <svg class="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   </div>
@@ -1014,7 +1045,7 @@
                   </div>
                 </div>
                 
-                <div class="space-y-3">
+                <div class="space-y-2">
                   <!-- Item de costo fijo -->
                   <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
                     <div>
@@ -1025,9 +1056,9 @@
                   </div>
                   
                   <!-- Estimación de materiales -->
-                  <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
-                    <div class="flex items-start space-x-2">
-                      <svg class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <div class="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
+                    <div class="flex items-start space-x-1">
+                      <svg class="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 100 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                       </svg>
                       <div>
@@ -1037,20 +1068,20 @@
                         </p>
                       </div>
                     </div>
-                    <div class="mt-2 flex justify-between items-center pt-2 border-t border-amber-100 dark:border-amber-900/30">
+                    <div class="mt-2 flex justify-between items-center pt-1 border-t border-amber-100 dark:border-amber-900/30">
                       <span class="text-xs font-medium text-amber-800 dark:text-amber-200">Monto estimado:</span>
                       <span class="text-xs font-bold text-amber-900 dark:text-amber-100">L. {{ formatCurrency(quotationData?.monto_materiales) || '0.00' }}</span>
                     </div>
                   </div>
                   
                   <!-- Total -->
-                  <div class="flex justify-between items-center pt-3">
+                  <div class="flex justify-between items-center pt-2">
                     <div>
                       <span class="text-sm font-bold text-gray-900 dark:text-white">Total a pagar</span>
                       <p class="text-xs text-gray-500 dark:text-gray-400">Solo incluye mano de obra</p>
                     </div>
                     <div class="text-right">
-                      <p class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      <p class="text-base font-bold text-blue-600 dark:text-blue-400">
                         L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
                       </p>
                     </div>
@@ -1059,7 +1090,7 @@
               </div>
               
               <!-- Información adicional -->
-              <div class="text-center mb-4">
+              <div class="text-center mb-3">
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                   <span class="inline-flex items-center">
                     <svg class="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
@@ -1073,14 +1104,14 @@
           </div>
 
           <!-- Pie del modal -->
-          <div v-if="!isLoadingQuotation" class="sticky bottom-0 bg-gray-50 dark:bg-gray-800/80 px-4 py-3 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl backdrop-blur-sm">
-            <div class="flex space-x-3">
+          <div v-if="!isLoadingQuotation" class="sticky bottom-0 bg-gray-50 dark:bg-gray-800/80 px-3 py-2 border-t border-gray-200 dark:border-gray-700 rounded-b-xl backdrop-blur-sm">
+            <div class="flex space-x-2">
               <button 
                 @click="confirmRejectQuotation"
                 :disabled="isProcessingQuotation"
-                class="flex-1 py-2.5 px-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg border border-gray-200 dark:border-gray-600 transition-colors flex items-center justify-center space-x-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                class="flex-1 py-2 px-3 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg border border-gray-200 dark:border-gray-600 transition-colors flex items-center justify-center space-x-1 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
                 <span>Rechazar</span>
@@ -1088,9 +1119,9 @@
               <button 
                 @click="acceptQuotation"
                 :disabled="isProcessingQuotation"
-                class="flex-1 py-2.5 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg transition-all transform hover:shadow-lg flex items-center justify-center space-x-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+                class="flex-1 py-2 px-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg transition-all transform hover:shadow-lg flex items-center justify-center space-x-1 text-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
               >
-                <svg v-if="!isProcessingQuotation" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-if="!isProcessingQuotation" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
                 <span>{{ isProcessingQuotation ? 'Procesando...' : 'Aceptar' }}</span>
@@ -1110,7 +1141,7 @@
     enter-from-class="modal-enter-from"
     leave-to-class="modal-leave-to"
   >
-    <div v-if="showRejectConfirmation" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div v-if="showRejectConfirmation" class="fixed inset-0 z-50 flex items-center justify-center p-3">
       <!-- Backdrop con animación -->
       <Transition
         name="backdrop"
@@ -1133,23 +1164,23 @@
         enter-from-class="modal-content-enter-from"
         leave-to-class="modal-content-leave-to"
       >
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
           <!-- Encabezado del modal -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                  <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-center space-x-2">
+                <div class="p-1 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                  <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">¿Estás seguro?</h3>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">¿Estás seguro?</h3>
               </div>
               <button 
                 @click="showRejectConfirmation = false"
                 class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -1157,26 +1188,26 @@
           </div>
 
           <!-- Cuerpo del modal -->
-          <div class="p-6">
-            <p class="text-gray-700 dark:text-gray-300 mb-6">
+          <div class="p-4">
+            <p class="text-gray-700 dark:text-gray-300 mb-4 text-sm">
               Al rechazar esta cotización, se asignará un nuevo técnico para que realice una nueva valoración. 
               ¿Deseas continuar con el rechazo de la cotización actual?
             </p>
             
-            <div class="flex justify-end space-x-3 mt-6">
+            <div class="flex justify-end space-x-2 mt-4">
               <button
                 @click="showRejectConfirmation = false"
-                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors"
+                class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors"
                 :disabled="isProcessingQuotation"
               >
                 Cancelar
               </button>
               <button
                 @click="rejectQuotation"
-                class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 transition-colors flex items-center space-x-2"
+                class="px-3 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 transition-colors flex items-center space-x-1"
                 :disabled="isProcessingQuotation"
               >
-                <svg v-if="isProcessingQuotation" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg v-if="isProcessingQuotation" class="animate-spin -ml-1 mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -1188,7 +1219,336 @@
       </Transition>
     </div>
   </Transition>
+
+  <!-- Modal de Calificación -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to"
+  >
+    <div v-if="showRatingModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+      <!-- Backdrop con animación -->
+      <Transition
+        name="backdrop"
+        enter-active-class="backdrop-enter-active"
+        leave-active-class="backdrop-leave-active"
+        enter-from-class="backdrop-enter-from"
+        leave-to-class="backdrop-leave-to"
+      >
+        <div 
+          class="fixed inset-0 bg-black/50 backdrop-blur-sm"
+          @click="closeAllModals"
+        ></div>
+      </Transition>
+
+      <!-- Contenido del modal -->
+      <Transition
+        name="modal-content"
+        enter-active-class="modal-content-enter-active"
+        leave-active-class="modal-content-leave-active"
+        enter-from-class="modal-content-enter-from"
+        leave-to-class="modal-content-leave-to"
+      >
+        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+          <!-- Encabezado del modal -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="p-1 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                  <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </div>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">Calificar Servicio</h3>
+              </div>
+              <button 
+                @click="closeAllModals"
+                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cuerpo del modal -->
+          <div class="p-4">
+            <p class="text-gray-700 dark:text-gray-300 mb-4 text-sm">
+              Por favor califica el servicio recibido. Tu opinión nos ayuda a mejorar.
+            </p>
+            
+            <!-- Estrellas de calificación -->
+            <div class="flex justify-center mb-4">
+              <div class="flex space-x-1">
+                <button 
+                  v-for="i in 5" 
+                  :key="i"
+                  @click="rating = i"
+                  class="focus:outline-none"
+                >
+                  <svg 
+                    class="w-8 h-8" 
+                    :class="i <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'"
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Comentario opcional -->
+            <div class="mb-4">
+              <label for="comment" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Comentario (opcional)
+              </label>
+              <textarea
+                id="comment"
+                v-model="comment"
+                rows="3"
+                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white transition-all duration-200 text-sm"
+                placeholder="¿Cómo fue tu experiencia con el servicio?"
+              ></textarea>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex justify-end space-x-2 mt-4">
+              <button
+                @click="closeAllModals"
+                class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors"
+                :disabled="isSubmittingRating"
+              >
+                Cancelar
+              </button>
+              <button
+                @click="submitRating"
+                class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors flex items-center space-x-1"
+                :disabled="rating === 0 || isSubmittingRating"
+              >
+                <svg v-if="isSubmittingRating" class="animate-spin -ml-1 mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ isSubmittingRating ? 'Enviando...' : 'Enviar calificación' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
 </template>
+<style scoped>
+/* Animaciones para el backdrop */
+.backdrop-enter-active {
+  transition: opacity 0.3s ease-out;
+}
+
+.backdrop-leave-active {
+  transition: opacity 0.2s ease-in;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+}
+
+/* Animaciones para el contenido del modal */
+.modal-content-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0.1s;
+}
+
+.modal-content-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-content-enter-from,
+.modal-content-leave-to {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
+/* Animación de slide down para contenido adicional */
+.slide-down-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-down-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Estilos para el scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Estilos para modo oscuro */
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Transiciones del modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.backdrop-enter-active,
+.backdrop-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+}
+
+.modal-content-enter-active {
+  animation: modal-enter 0.3s ease-out;
+}
+
+.modal-content-leave-active {
+  animation: modal-leave 0.2s ease-in;
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modal-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+}
+
+.slide-down-enter-active {
+  animation: slide-down 0.3s ease-out;
+}
+
+.slide-down-leave-active {
+  animation: slide-down 0.2s ease-in reverse;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+button, input, textarea, select {
+  min-height: 44px;
+}
+
+input, textarea, select {
+  font-size: 16px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Force mobile layout on all screen sizes */
+body {
+  overflow-x: hidden;
+}
+
+/* Ensure modals also respect mobile constraints */
+.fixed.inset-0 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
@@ -1210,7 +1570,8 @@ useHead({
   title: 'HogarSeguro - Dashboard',
   meta: [
     { name: 'description', content: 'Panel de Servicios - Gestiona tus servicios y membresía' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'keywords', content: 'dashboard, HogarSeguro, servicios, membresía, panel de control' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })
 
@@ -1268,6 +1629,7 @@ const cancelModalTexts = {
 
 // Estado de carga y datos principales
 const isLoading = ref(true)
+const discountPercentage = ref(0) // Porcentaje de descuento obtenido del backend
 const userData = ref({
   id: null,
   identidad: '',
@@ -1297,12 +1659,22 @@ const showPaymentModal = ref(false)
 const showVisitPaymentModal = ref(false)
 const showCancelModal = ref(false)
 const showQuotationModal = ref(false)
+const showRatingModal = ref(false)
+
+// Estados para calificación
+const rating = ref(0)
+const comment = ref('')
+const isSubmittingRating = ref(false)
+const tecnicoRating = ref(0)
+const isLoadingTecnicoRating = ref(false)
 
 // Estados de cotización
 const quotationData = ref(null)
 const isLoadingQuotation = ref(false)
 const isProcessingQuotation = ref(false)
+const isRejectingQuotation = ref(false)
 const showRejectConfirmation = ref(false)
+const rejectReason = ref('') 
 
 // Estados de filtros
 const showFilters = ref(false)
@@ -1324,6 +1696,7 @@ const bankAccounts = ref([])
 const selectedAccount = ref('')
 const comprobante = ref('')
 const isProcessingPayment = ref(false)
+const isProcessingVisitPayment = ref(false) // Estado para el procesamiento del pago de visita
 const membresiaProgreso = ref(null)
 const isLoadingMembresia = ref(false)
 const visitCost = ref(0)
@@ -1343,9 +1716,14 @@ const totalServices = computed(() => servicesData.value.total || allServices.val
 const completedServices = computed(() => servicesData.value.finalizadas || allServices.value.filter(s => s.status === 'Servicio Completado').length)
 const pendingServices = computed(() => servicesData.value.pendientes || allServices.value.filter(s => !['Servicio Completado', 'Cancelado'].includes(s.status)).length)
 
+// Referencia reactiva para almacenar el servicio seleccionado
+const selectedServiceRef = ref({})
+
+// Propiedad computada para acceder al servicio seleccionado
 const selectedService = computed(() => {
   if (!selectedServiceId.value) return {}
-  return allServices.value.find(s => s.id === selectedServiceId.value) || {}
+  const service = allServices.value.find(s => s.id === selectedServiceId.value)
+  return service || {}
 })
 
 const filteredServices = computed(() => {
@@ -1483,6 +1861,7 @@ const getCurrentStepNumber = (status) => {
     'en_proceso': 4,
     'pendiente_pagoservicio': 5,
     'verificando_pagoservicio': 5,
+    'calificado': 6,
     'finalizado': 6,
     'cancelado': 0
   }
@@ -1539,6 +1918,7 @@ const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
     'pendiente_pagoservicio': 'Pago del Servicio',
     'verificando_pagoservicio': 'Verificando Pago del Servicio',
     'finalizado': 'Servicio Completado',
+    'calificado': 'Servicio Completado',
     'cancelado': 'Cancelado'
   }
   return statusMap[apiStatus] || 'En Progreso'
@@ -1573,11 +1953,7 @@ const mapApiServiceToLocal = (apiService) => {
     pagar_visita: apiService.pagar_visita == 1,  
     serviceDescription: apiService.descripcion,
     diagnosis: 'Diagnóstico pendiente...',
-    technician: apiService.estado === 'asignado' ? {
-      name: 'Técnico Asignado',
-      rating: 4.8,
-      reviews: 127
-    } : null
+    technician: apiService.id_tecnico
   }; 
   return servicioMapeado;
 }
@@ -1585,6 +1961,28 @@ const mapApiServiceToLocal = (apiService) => {
 // =========================
 // FUNCIONES DE CARGA DE DATOS
 // =========================
+
+// Obtener el porcentaje de descuento del backend
+const fetchDiscountPercentage = async () => {
+  try {
+    const response = await $fetch('/config/valor/porcentaje_descuento', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response && response.valor) {
+      discountPercentage.value = parseFloat(response.valor) / 100 // Convertir de porcentaje a decimal
+    }
+  } catch (error) {
+    console.error('Error al obtener el porcentaje de descuento:', error)
+    // Usar un valor por defecto en caso de error
+    discountPercentage.value = 0.10 // 10% por defecto
+  }
+}
 
 const loadServices = async () => {
   try {
@@ -1677,7 +2075,14 @@ const loadServices = async () => {
     }));
     
     // Mapear los servicios con la información de pago actualizada
-    allServices.value = solicitudesConPago.map(solicitud => mapApiServiceToLocal(solicitud));
+    allServices.value = solicitudesConPago.map(solicitud => {
+      const servicioMapeado = mapApiServiceToLocal(solicitud);
+      // Agregar el nombre del técnico si está disponible
+      if (solicitud.tecnico?.nombre) {
+        servicioMapeado.technicianName = solicitud.tecnico.nombre;
+      }
+      return servicioMapeado;
+    });
     
   } catch (error) {
     console.error('Error cargando servicios:', error)
@@ -1716,8 +2121,6 @@ const fetchQuotationData = async (solicitudId) => {
     isLoadingQuotation.value = true
     const token = useCookie('token').value
     
-    console.log('Cargando cotización para solicitud:', solicitudId)
-    
     const response = await $fetch(`/cotizacion/solicitud/${solicitudId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -1726,8 +2129,6 @@ const fetchQuotationData = async (solicitudId) => {
         'Authorization': `Bearer ${token}`
       }
     })
-    
-    console.log('Respuesta de la API de cotización:', response)
     
     // Verificar si la respuesta tiene la estructura esperada
     if (response && response.data) {
@@ -1742,8 +2143,6 @@ const fetchQuotationData = async (solicitudId) => {
       quotationData.value = null
       return null
     }
-    
-    console.log('Datos de cotización cargados:', JSON.stringify(quotationData.value, null, 2))
     
     // Verificar que el ID de cotización esté presente
     if (!quotationData.value?.id && !quotationData.value?.id_cotizacion) {
@@ -1818,9 +2217,30 @@ const fetchVisitCost = async () => {
 // FUNCIONES DE MODALES
 // =========================
 
-const openServiceModal = (service) => {
-  selectedServiceId.value = service.id
-  showServiceModal.value = true
+const openServiceModal = async (service) => {
+  console.log('Datos completos del servicio:', JSON.parse(JSON.stringify(service)));
+  
+  // Crear una copia del servicio para no modificar el original
+  const serviceCopy = { ...service };
+  
+  // Si hay un técnico asignado, cargar su calificación
+  if (service.technician) {
+    // Usar el nombre del técnico si ya está disponible
+    if (service.technicianName) {
+      serviceCopy.technicianName = service.technicianName;
+    } else if (service.tecnico?.nombre) {
+      serviceCopy.technicianName = service.tecnico.nombre;
+    } else {
+      serviceCopy.technicianName = `Técnico #${service.technician}`;
+    }
+    
+    // Cargar la calificación del técnico
+    await fetchTecnicoRating(service.technician);
+  }
+
+  selectedServiceId.value = service.id;
+  selectedServiceRef.value = serviceCopy;
+  showServiceModal.value = true;
 }
 
 const closeServiceModal = () => {
@@ -1841,30 +2261,6 @@ const closeVisitPaymentModal = () => {
   isProcessingPayment.value = false
 }
 
-const fetchMembresiaProgreso = async (userId) => {
-  try {
-    isLoadingMembresia.value = true
-    const token = useCookie('token').value
-    const data = await $fetch(`/membresia/progreso/${userId}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    
-    if (data?.mesesProgreso > 1) {
-      membresiaProgreso.value = data
-    }
-  } catch (error) {
-    console.error('Error al cargar progreso de membresía:', error)
-    // No mostramos error al usuario ya que no es crítico
-  } finally {
-    isLoadingMembresia.value = false
-  }
-}
-
 const openPaymentModal = async (service) => {
   try {
     // Actualizar el ID del servicio seleccionado en lugar de la propiedad computada
@@ -1877,12 +2273,14 @@ const openPaymentModal = async (service) => {
     // Cargar cuentas bancarias y progreso de membresía en paralelo
     await Promise.all([
       fetchBankAccounts(),
-      userData.value?.id_usuario ? fetchMembresiaProgreso(userData.value.id_usuario) : Promise.resolve()
+      userData.value?.id_usuario ? fetchCreditoUsuario(userData.value.id_usuario) : Promise.resolve()
     ])
     
     // Cargar la cotización
     if (service?.id) { 
       await fetchQuotationData(service.id)
+      // Calcular el total una vez que tenemos todos los datos
+      totalAPagar.value = calcularTotal()
     } else {
       console.error('No se pudo obtener el ID del servicio')
     }
@@ -1899,19 +2297,28 @@ const closePaymentModal = () => {
   isProcessingPayment.value = false
 }
 
-const openQuotationModal = async (service = null) => {
+const openQuotationModal = async (service) => {
   try {
-    showQuotationModal.value = true
-    const serviceId = service?.id || selectedService.value?.id
-    if (serviceId) {
-      await fetchQuotationData(serviceId)
-    } else {
-      console.error('No se pudo obtener el ID del servicio')
-      showError('No se pudo cargar la cotización. Por favor, intente nuevamente.')
-    }
+    // Mostrar indicador de carga
+    isLoadingQuotation.value = true;
+    
+    // Cerrar el modal de servicio si está abierto
+    showServiceModal.value = false;
+    
+    // Establecer el servicio seleccionado
+    selectedServiceId.value = service.id;
+    selectedServiceRef.value = service;
+    
+    // Cargar los datos de la cotización
+    await fetchQuotationData(service.id);
+    
+    // Mostrar el modal de cotización
+    showQuotationModal.value = true;
   } catch (error) {
-    console.error('Error al abrir el modal de cotización:', error)
-    showError('Ocurrió un error al cargar la cotización')
+    console.error('Error al abrir el modal de cotización:', error);
+    showError('No se pudo cargar la cotización. Por favor, inténtalo de nuevo.');
+  } finally {
+    isLoadingQuotation.value = false;
   }
 }
 
@@ -1926,6 +2333,192 @@ const closeCancelModal = () => {
     cancelReason.value = ''
     cancelAdditionalInfo.value = ''
   }, 300)
+}
+
+const closeAllModals = () => {
+  // Cerrar todos los modales
+  showServiceModal.value = false
+  showPaymentModal.value = false
+  showVisitPaymentModal.value = false
+  showCancelModal.value = false
+  showQuotationModal.value = false
+  showRejectConfirmation.value = false
+  showRatingModal.value = false
+  
+  // Limpiar el servicio seleccionado
+  selectedServiceId.value = null
+  selectedServiceRef.value = {}
+  
+  // Limpiar el formulario de pago
+  selectedAccount.value = null
+  comprobante.value = ''
+  
+  // Restablecer estados de carga
+  isProcessingPayment.value = false
+  isProcessingVisitPayment.value = false
+  isProcessingQuotation.value = false
+  isRejectingQuotation.value = false
+  
+  // Limpiar formularios
+  cancelReason.value = ''
+  cancelAdditionalInfo.value = ''
+  rejectReason.value = ''
+  
+  // Limpiar formulario de calificación
+  rating.value = 0
+  comment.value = ''
+  isSubmittingRating.value = false
+}  
+
+const fetchCreditoUsuario = async (userId) => {
+  try {
+    isLoadingMembresia.value = true;
+    const token = useCookie('token').value;
+    
+    if (!token) {
+      console.error('[fetchCreditoUsuario] No se encontró token de autenticación');
+      return;
+    }
+    
+    const url = `/credito/usuario/${userId}`;
+    const options = {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    };
+    
+    const response = await $fetch(url, options);
+    const data = response?.data; 
+    
+    if (data?.monto_credito > 0) {
+      const creditData = {
+        montoTotal: data.monto_credito,
+        monto_credito: data.monto_credito,
+        ...data
+      };
+      membresiaProgreso.value = creditData;
+    } else {
+      membresiaProgreso.value = null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('[fetchCreditoUsuario] Error en la petición:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      response: error.data,
+      stack: error.stack
+    });
+    membresiaProgreso.value = null;
+  } finally {
+    isLoadingMembresia.value = false;
+  }
+}
+
+const openRatingModal = (service) => {
+  // Cerrar el modal de servicio si está abierto
+  if (showServiceModal.value) {
+    showServiceModal.value = false
+  }
+  
+  // Actualizar el servicio seleccionado
+  selectedServiceId.value = service.id
+  selectedServiceRef.value = { ...service }
+  
+  // Reiniciar el formulario de calificación
+  rating.value = 0
+  comment.value = ''
+  isSubmittingRating.value = false
+  
+  // Mostrar el modal de calificación
+  showRatingModal.value = true
+  
+  // Forzar actualización del DOM si es necesario
+  nextTick(() => {
+    // Código que necesite esperar a que el modal esté en el DOM
+  })
+}
+
+const submitRating = async () => {
+  const currentService = selectedService.value.id ? selectedService.value : selectedServiceRef.value
+  
+  if (!currentService || !currentService.id || !rating.value) {
+    showError('Por favor, selecciona una calificación')
+    return
+  }
+
+  try {
+    isSubmittingRating.value = true
+    
+    const token = useCookie('token').value
+    const user = useCookie('user').value
+    
+    if (!token || !user) {
+      showError('No se pudo autenticar. Por favor, inicia sesión nuevamente.')
+      return
+    }
+
+    const ratingData = {
+      id_solicitud: currentService.id,
+      id_usuario_calificado: currentService.technician,
+      id_usuario_calificador: user.id_usuario,
+      calificacion: rating.value,
+      comentario: comment.value.trim() || 'Sin Comentarios',
+      fecha: new Date().toISOString().split('T')[0]
+    }
+
+    // 1. Enviar la calificación
+    const response = await $fetch('/calificaciones', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(ratingData)
+    })
+    
+    try {
+      // Actualizar el estado del servicio a 'calificado' directamente
+      const updateResponse = await $fetch(`/solicitudservicio/${currentService.id}`, {
+        baseURL: config.public.apiBase,
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          estado: 'calificado'
+        })
+      }) 
+
+      // Actualizar el estado local
+      const serviceIndex = allServices.value.findIndex(s => s.id === currentService.id)
+      if (serviceIndex !== -1) {
+        allServices.value[serviceIndex].estatus = 'calificado'
+        allServices.value[serviceIndex].status = 'Calificado'
+      }
+
+      showSuccess('¡Calificación Enviada!', 'Gracias por tu Calificación.')
+      showRatingModal.value = false
+      
+      // Recargar los servicios para actualizar la lista
+      await loadServices()
+    } catch (updateError) {
+      console.error('Error al actualizar el estado del servicio:', updateError) 
+      showError('Ocurrió un error. Por favor, inténtalo de nuevo.')
+      showRatingModal.value = false
+      await loadServices()
+    }
+  } catch (error) {
+    console.error('Error al enviar la calificación:', error)
+    showError('Ocurrió un error al enviar la calificación. Por favor, inténtalo de nuevo.')
+  } finally {
+    isSubmittingRating.value = false
+  }
 }
 
 // =========================
@@ -2025,8 +2618,7 @@ const acceptQuotation = async () => {
       id_usuario: idTecnico,
       id_cotizacion: cotizacionId,
       tipo: 'ingreso',
-      monto: Number(montoTecnico.toFixed(2)),
-      descripcion: null,
+      monto: Number(montoTecnico.toFixed(2)), 
       fecha: fechaActual,
       estado: 'pendiente'
     };
@@ -2069,7 +2661,6 @@ const acceptQuotation = async () => {
     isProcessingQuotation.value = false;
   }
 }
-
 
 const confirmRejectQuotation = () => {
   showRejectConfirmation.value = true;
@@ -2283,7 +2874,7 @@ const processPayment = async () => {
       })
     })
     
-    if (response) {
+    if (response && response.success !== false) {
       // Actualizar el estado de la solicitud a 'verificando_pagoservicio'
       await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
         method: 'PUT',
@@ -2296,8 +2887,114 @@ const processPayment = async () => {
           estado: 'verificando_pagoservicio' 
         })
       });
+
+      // Verificar si el usuario tiene un referidor
+      try {
+        const userCookieValue = useCookie('user').value
+        console.log(`[DEBUG] Consultando referido para usuario: ${userCookieValue.id_usuario}`);
+        const referidoResponse = await $fetch(`/referidos/referidor/${userCookieValue.id_usuario}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${useCookie('token').value}`
+          }
+        });
+        console.log('[DEBUG] Respuesta de referido:', JSON.stringify(referidoResponse, null, 2));
+
+        // Si se encontró un referidor, obtener el porcentaje de comisión del backend
+        const referidor = referidoResponse?.id_referidor;
+        if (referidoResponse.success && referidor) {
+          const montoReferencia = parseFloat(totalAPagar.value || 0);
+          console.log(`[DEBUG] Monto de referencia para comisión (totalAPagar): ${montoReferencia}`);
+          
+          // Obtener el porcentaje de comisión del backend
+          console.log('[DEBUG] Solicitando porcentaje de comisión...');
+          const configResponse = await $fetch('/config/valor/porcentaje_referido', {
+            baseURL: config.public.apiBase,
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${useCookie('token').value}`
+            }
+          });
+          console.log('[DEBUG] Respuesta de porcentaje de comisión:', JSON.stringify(configResponse, null, 2));
+          
+          // El valor ya viene como número entero (ej: 10 para 10%, 100 para 100%)
+          const porcentaje = parseFloat(configResponse?.valor || 0) / 100; // Convertir a decimal (ej: 100 -> 1.0)
+          const comision = Math.round(montoReferencia * porcentaje); // Calcular comisión directa y redondear
+          console.log(`[DEBUG] Cálculo de comisión: ${montoReferencia} * ${porcentaje} = ${comision.toFixed(2)}`);
+          console.log(`[DEBUG] Comisión: ${comision} (sin conversión a centavos)`);
+          
+          const movimientoData = {
+            id_usuario: referidor, 
+            id_referido: userCookieValue.id_usuario, 
+            tipo: 'ingreso',
+            monto: comision, 
+            descripcion: `Comisión por referido - ${userCookieValue.nombre}`,
+            estado: 'completado'
+          };
+          
+          console.log('[DEBUG] Creando movimiento con datos:', JSON.stringify(movimientoData, null, 2));
+          
+          try {
+            const movimientoResponse = await $fetch('/movimientos', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${useCookie('token').value}`
+              },
+              body: JSON.stringify(movimientoData)
+            });
+            
+            console.log('[DEBUG] Respuesta del movimiento creado:', JSON.stringify(movimientoResponse, null, 2));
+            
+            // Actualizar el crédito del referidor
+            console.log(`[DEBUG] Actualizando crédito para el referidor ${referidor} con monto: ${comision}`);
+            try {
+              const creditoResponse = await $fetch('/credito', {
+                baseURL: config.public.apiBase,
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${useCookie('token').value}`
+                },
+                body: JSON.stringify({
+                  id_usuario: referidor,
+                  monto_credito: comision
+                })
+              });
+              console.log('[DEBUG] Crédito actualizado exitosamente:', JSON.stringify(creditoResponse, null, 2));
+            } catch (creditoError) {
+              console.error('[ERROR] Error al actualizar el crédito:', creditoError);
+              if (creditoError.response) {
+                console.error('[ERROR] Detalles del error de crédito:', {
+                  status: creditoError.response.status,
+                  statusText: creditoError.response.statusText,
+                  data: creditoError.response._data
+                });
+              }
+              // No lanzamos el error para no interrumpir el flujo principal
+            }
+          } catch (error) {
+            console.error('[ERROR] Error al crear el movimiento:', error);
+            if (error.response) {
+              console.error('[ERROR] Detalles del error:', {
+                status: error.response.status,
+                statusText: error.response.statusText,
+                data: error.response._data
+              });
+            }
+            throw error; // Re-lanzar el error para que sea manejado por el catch externo
+          }
+        }
+      } catch (error) {
+        console.error('Error al procesar comisión de referido:', error);
+        // No mostramos error al usuario para no interrumpir el flujo principal
+      }
       
-      showSuccess('Pago procesado', 'El pago se ha registrado correctamente y está en proceso de verificación')
+      showSuccess('Pago Enviado', 'Su pago se ha registrado y verificará pronto.')
       // Cerrar el modal y recargar los servicios
       closePaymentModal()
       await loadServices()
@@ -2380,6 +3077,26 @@ const resetFilters = () => {
 // FUNCIONES DE CÁLCULO
 // =========================
 
+const totalAPagar = ref(0)
+
+// Función para calcular el total
+const calcularTotal = () => {
+  const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
+  let total = montoManodeObra
+  
+  // Aplicar descuento por membresía si hay crédito
+  if (membresiaProgreso.value?.monto_credito > 0) {
+    const descuento = montoManodeObra * discountPercentage.value
+    total = Math.max(0, total - descuento)
+    
+    // Aplicar crédito de membresía
+    const creditoMembresia = parseFloat(membresiaProgreso.value.monto_credito || 0)
+    total = Math.max(0, total - creditoMembresia)
+  }
+  
+  return total
+}
+
 const calculateTotal = () => {
   const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
   const creditoMembresia = membresiaProgreso.value?.mesesProgreso > 1 
@@ -2388,6 +3105,38 @@ const calculateTotal = () => {
   
   const total = Math.max(0, montoManodeObra - creditoMembresia)
   return `L. ${total.toFixed(2)}`
+}
+
+// Obtener calificación del técnico
+const fetchTecnicoRating = async (idTecnico) => {
+  if (!idTecnico) return
+  
+  try {
+    isLoadingTecnicoRating.value = true
+    const token = useCookie('token').value
+    
+    const response = await $fetch(`/calificaciones/usuario/${idTecnico}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    
+    // Asumimos que el endpoint devuelve un objeto con la calificación promedio
+    if (response && response.promedio) {
+      tecnicoRating.value = response.promedio
+    } else if (response && response.data?.length > 0) {
+      // Si el endpoint devuelve un array de calificaciones, calcular el promedio
+      const suma = response.data.reduce((acc, cal) => acc + cal.calificacion, 0)
+      tecnicoRating.value = suma / response.data.length
+    }
+  } catch (error) {
+    console.error('Error al obtener calificación del técnico:', error)
+    tecnicoRating.value = 0
+  } finally {
+    isLoadingTecnicoRating.value = false
+  }
 }
 
 // =========================
@@ -2441,9 +3190,11 @@ const showError = (message) => {
 // =========================
 // INICIALIZACIÓN
 // =========================
-
-onMounted(async () => { 
+// Cargar datos iniciales
+onMounted(async () => {
   try {
+    // Obtener el porcentaje de descuento al cargar el componente
+    await fetchDiscountPercentage()
     await Promise.all([
       loadServices(),
       loadServiceTypes()
@@ -2456,212 +3207,4 @@ onMounted(async () => {
   }
 })
 
-</script>
-
-<style scoped>
-/* Animaciones para el backdrop */
-.backdrop-enter-active {
-  transition: opacity 0.3s ease-out;
-}
-
-.backdrop-leave-active {
-  transition: opacity 0.2s ease-in;
-}
-
-.backdrop-enter-from,
-.backdrop-leave-to {
-  opacity: 0;
-}
-
-/* Animaciones para el contenido del modal */
-.modal-content-enter-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transition-delay: 0.1s;
-}
-
-.modal-content-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modal-content-enter-from,
-.modal-content-leave-to {
-  opacity: 0;
-  transform: translateY(20px) scale(0.98);
-}
-
-/* Animación de slide down para contenido adicional */
-.slide-down-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-down-leave-active {
-  transition: all 0.2s ease-in;
-}
-
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-/* Estilos para el scrollbar personalizado */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
-}
-
-/* Estilos para modo oscuro */
-.dark ::-webkit-scrollbar-track {
-  background: #374151;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-/* Transiciones del modal */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.backdrop-enter-active,
-.backdrop-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.backdrop-enter-from,
-.backdrop-leave-to {
-  opacity: 0;
-}
-
-.modal-content-enter-active {
-  animation: modal-enter 0.3s ease-out;
-}
-
-.modal-content-leave-active {
-  animation: modal-leave 0.2s ease-in;
-}
-
-@keyframes modal-enter {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes modal-leave {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-}
-
-.slide-down-enter-active {
-  animation: slide-down 0.3s ease-out;
-}
-
-.slide-down-leave-active {
-  animation: slide-down 0.2s ease-in reverse;
-}
-
-@keyframes slide-down {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-* {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.transition-all {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.backdrop-blur-lg {
-  backdrop-filter: blur(16px);
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.3);
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.5);
-}
-
-button, input, textarea, select {
-  min-height: 44px;
-}
-
-input, textarea, select {
-  font-size: 16px;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-/* Force mobile layout on all screen sizes */
-body {
-  overflow-x: hidden;
-}
-
-/* Ensure modals also respect mobile constraints */
-.fixed.inset-0 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style> 
+</script> 

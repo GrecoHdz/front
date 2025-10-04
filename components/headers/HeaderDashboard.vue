@@ -10,20 +10,20 @@
         </svg>
       </div>
       
-      <div class="relative px-6 py-4">
+      <div class="relative px-4 py-3">
         <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/30">
-              <div class="w-6 h-6 bg-white rounded-lg flex items-center justify-center">
-                <span class="text-emerald-600 font-bold text-sm">🏠</span>
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+              <div class="w-5 h-5 bg-white rounded-lg flex items-center justify-center">
+                <span class="text-emerald-600 font-bold text-xs">🏠</span>
               </div>
             </div>
             <div>
-              <h1 class="text-xl font-black text-white">Dashboard</h1>
-              <p class="text-emerald-100 text-sm">Panel de control</p>
+              <h1 class="text-lg font-black text-white">Dashboard</h1>
+              <p class="text-emerald-100 text-xs">Panel de control</p>
             </div>
           </div>
-          <button @click="toggleNotifications" class="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-semibold rounded-xl hover:bg-white/30 transition-all duration-300">
+          <button @click="toggleNotifications" class="px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-semibold rounded-lg hover:bg-white/30 transition-all duration-300">
             Notificaciones
           </button>
         </div>
