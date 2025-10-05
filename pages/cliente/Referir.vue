@@ -40,18 +40,18 @@
                   </div>
                   <h1 class="text-2xl font-black mb-2">¡Gana Dinero Refiriendo!</h1>
                   <p class="text-white/90 font-medium mb-5 text-sm">
-                    Invita a tus amigos y familiares a HogarSeguro y recibe <span class="font-black">L. {{ referralReward }}</span> por cada persona que se una
+                    Invita a tus amigos y familiares a HogarSeguro y recibe el <span class="font-black">{{ referralReward }}%</span> de cada servicio que paguen 
                   </p>
                   
                   <!-- Stats -->
-                  <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                      <div class="text-xl font-black">{{ stats.totalReferrals }}</div>
-                      <div class="text-xs text-white/80">Referidos</div>
-                    </div>
+                  <div class="grid grid-cols-3 gap-3"> 
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
                       <div class="text-xl font-black">L. {{ stats.totalEarnings.toLocaleString('es-HN') }}</div>
-                      <div class="text-xs text-white/80">Ganado</div>
+                      <div class="text-xs text-white/80">Total Ganado</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                      <div class="text-xl font-black">L. {{ stats.retirado.toLocaleString('es-HN') }}</div>
+                      <div class="text-xs text-white/80">Total Retirado</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
                       <div class="text-xl font-black">L. {{ stats.availableBalance.toLocaleString('es-HN') }}</div>
@@ -71,25 +71,7 @@
                   </div>
                   <h2 class="text-xl font-black text-gray-900 dark:text-white mb-2">Tu Código de Referido</h2>
                   <p class="text-gray-600 dark:text-gray-400 text-sm">Comparte tu código único y empieza a ganar</p>
-                </div>
-
-                <!-- Código -->
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl mb-3 border border-blue-200 dark:border-blue-800">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">TU CÓDIGO</p>
-                      <p class="text-xl font-black text-blue-800 dark:text-blue-200 font-mono">{{ userReferralCode }}</p>
-                    </div>
-                    <button 
-                      @click="copyReferralCode"
-                      class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-all duration-300 hover:scale-105"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+                </div> 
 
                 <!-- Enlace de referido -->
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl mb-4">
@@ -150,7 +132,7 @@
             </section>
 
             <!-- Retirar Ganancias -->
-            <section v-if="stats.availableBalance > 0" class="px-4 mb-4">
+            <section v-if="stats.availableBalance > 0" class="px-4 mb-4"> 
               <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 text-white relative overflow-hidden">
                 <div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
                 <div class="relative">
@@ -160,18 +142,235 @@
                     </div>
                     <div>
                       <h2 class="text-xl font-black">Retirar Ganancias</h2>
-                      <p class="text-white/90 text-sm">Disponible: L. {{ stats.availableBalance.toLocaleString('es-HN') }}</p>
+                      <p class="text-white/90 text-sm">
+                        Disponible: L. {{ (stats?.availableBalance || 0).toLocaleString('es-HN') }}
+                        <span v-if="withdrawalPercentage > 0" class="block text-xs opacity-80">
+                          Puedes retirar hasta el {{ withdrawalPercentage }}%: L. {{ (maxWithdrawableAmount || 0).toLocaleString('es-HN') }}
+                        </span>
+                      </p>
                     </div>
                   </div>
                   
                   <button 
                     @click="showWithdrawModal = true"
-                    :disabled="stats.availableBalance < minWithdrawAmount"
+                    :disabled="!maxWithdrawableAmount || maxWithdrawableAmount <= 0"
                     class="w-full py-3 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-black text-base rounded-xl transition-all duration-300 hover:bg-white/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    {{ stats.availableBalance >= minWithdrawAmount ? 'Retirar Ahora' : `Mínimo L. ${minWithdrawAmount.toLocaleString('es-HN')}` }}
+                    {{ maxWithdrawableAmount > 0 ? 'Retirar Ahora' : 'Sin saldo disponible' }}
                   </button>
                 </div>
+              </div>
+            </section>
+
+            <!-- Historial de Ingresos/Retiros con pestañas -->
+            <section class="px-4 mb-6">
+              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">Historial</h2>
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex space-x-2">
+                  <button 
+                    @click="setActiveTab('ingresos')"
+                    :class="{
+                      'bg-blue-600 text-white': activeTab === 'ingresos',
+                      'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300': activeTab !== 'ingresos'
+                    }"
+                    class="px-4 py-2 rounded-l-lg font-medium text-sm transition-colors"
+                  >
+                    Ingresos
+                  </button>
+                  <button 
+                    @click="setActiveTab('retiros')"
+                    :class="{
+                      'bg-blue-600 text-white': activeTab === 'retiros',
+                      'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300': activeTab !== 'retiros'
+                    }"
+                    class="px-4 py-2 rounded-r-lg font-medium text-sm transition-colors"
+                  >
+                    Retiros
+                  </button>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                  <!-- Selector de fecha tipo mes -->
+                  <div class="relative">
+                    <div class="relative">
+                      <input 
+                        type="month"
+                        :value="activeTab === 'ingresos' ? selectedMonth : selectedWithdrawMonth"
+                        @change="(e) => handleMonthChange(e, activeTab)"
+                        class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-1.5"
+                      />
+                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <!-- Sección de Ingresos -->
+                <template v-if="activeTab === 'ingresos'">
+                  <!-- Loading -->
+                  <div v-if="isLoadingMovements" class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando ingresos...</p>
+                  </div>
+                  
+                  <!-- Mostrar mensaje cuando no hay ingresos -->
+                  <div v-else-if="filteredEarnings.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
+                      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin ingresos registrados</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      {{ getNoEarningsMessage() }}
+                    </p>
+                  </div>
+
+                  <!-- Lista de ingresos -->
+                  <template v-else>
+                    <div v-for="earning in filteredEarnings" :key="earning.fecha + earning.monto"
+                         class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2 hover:shadow-md transition-shadow">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p class="font-bold text-gray-900 dark:text-white text-sm">
+                              {{ earning.descripcion ? (earning.descripcion.includes(' - ') ? earning.descripcion.split(' - ')[1] : earning.descripcion) : 'Ingreso por referido' }}
+                            </p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                              {{ formatDate(earning.fecha) }}
+                            </p>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <p class="font-bold text-green-600 dark:text-green-400">+L. {{ formatCurrency(earning.monto) }}</p>
+                          <p class="text-xs" :class="getStatusColor(earning.estado)">
+                            {{ earning.estado }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Botón Ver más ingresos -->
+                    <div v-if="hasMoreMovements" class="text-center mt-4">
+                      <button 
+                        @click="loadMoreEarnings" 
+                        class="w-full py-2 text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        :disabled="isLoadingMovements"
+                      >
+                        <span v-if="isLoadingMovements">
+                          Cargando...
+                        </span>
+                        <span v-else>
+                          Ver más ingresos ({{ totalMovements - filteredEarnings.length }} restantes)
+                        </span>
+                      </button>
+                    </div>
+
+                    <!-- Resumen del período seleccionado -->
+                    <div v-if="movementSummary" class="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/10 p-4 rounded-xl border border-green-100 dark:border-green-800/30">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2"> 
+                          <span class="text-sm font-medium text-green-700 dark:text-green-300">
+                            Total {{ movementSummary.mes.toLowerCase() }}
+                          </span>
+                        </div>
+                        <span class="text-lg font-bold text-green-800 dark:text-green-200">
+                          L. {{ formatCurrency(movementSummary.totalIngresosReferido) }}
+                        </span>
+                      </div> 
+                    </div>
+                  </template>
+                </template>
+
+                <!-- Sección de Retiros -->
+                <template v-else>
+                  <!-- Loading -->
+                  <div v-if="isLoadingMovements" class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando retiros...</p>
+                  </div>
+                  
+                  <!-- Mostrar mensaje cuando no hay retiros -->
+                  <div v-else-if="filteredWithdrawals.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
+                      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin retiros registrados</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      {{ getNoWithdrawalsMessage() }}
+                    </p>
+                  </div>
+
+                  <!-- Lista de retiros -->
+                  <template v-else>
+                    <div v-for="withdrawal in filteredWithdrawals" :key="withdrawal.fecha + withdrawal.monto"
+                         class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                          <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                              {{ `Retiro de fondos #${withdrawalCounter - filteredWithdrawals.findIndex(w => w.id === withdrawal.id)}` }}
+                            </p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                              {{ formatDate(withdrawal.fecha) }}
+                            </p>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <p class="font-bold text-red-600 dark:text-red-400">L. {{ formatCurrency(withdrawal.monto) }}</p>
+                          <p class="text-xs" :class="getStatusWithDrawalColor(withdrawal.estado)">
+                            {{ withdrawal.estado }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Botón Ver más retiros -->
+                    <div v-if="hasMoreMovements" class="text-center mt-4">
+                      <button 
+                        @click="loadMoreWithdrawals" 
+                        class="w-full py-2 text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        :disabled="isLoadingMovements"
+                      >
+                        <span v-if="isLoadingMovements">
+                          Cargando...
+                        </span>
+                        <span v-else>
+                          Ver más retiros ({{ totalMovements - filteredWithdrawals.length }} restantes)
+                        </span>
+                      </button>
+                    </div>
+
+                    <!-- Resumen del período seleccionado usando datos de la API -->
+                    <div v-if="movementSummary" class="mt-4 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-red-700 dark:text-red-300">
+                          Total {{ movementSummary.mes }}
+                        </span>
+                        <span class="text-lg font-bold text-red-800 dark:text-red-200">
+                          L. {{ formatCurrency(movementSummary.totalRetiros) }}
+                        </span>
+                      </div> 
+                    </div>
+                  </template>
+                </template>
               </div>
             </section>
 
@@ -179,10 +378,17 @@
             <section class="px-4 mb-4">
               <div class="flex items-center justify-between mb-3">
                 <h2 class="text-lg font-black text-gray-900 dark:text-white">Tus Referidos</h2>
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ referralHistory.length }} personas</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ stats.totalReferrals || 0 }} personas</span>
               </div>
               
-              <div v-if="referralHistory.length === 0" class="text-center py-6">
+              <!-- Loading -->
+              <div v-if="isLoadingReferrals" class="text-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando referidos...</p>
+              </div>
+              
+              <!-- Mostrar mensaje cuando no hay referidos -->
+              <div v-else-if="!referralHistory || referralHistory.length === 0" class="text-center py-6">
                 <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
                   <span class="text-2xl">👥</span>
                 </div>
@@ -190,8 +396,9 @@
                 <p class="text-gray-600 dark:text-gray-400 mb-3 text-sm">Comparte tu código y empieza a ganar dinero</p>
               </div>
 
+              <!-- Lista de referidos -->
               <div v-else class="space-y-2">
-                <div v-for="referral in displayedReferrals" :key="`referral-${referral.id}`"
+                <div v-for="(referral, index) in referralHistory" :key="index"
                      class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-2">
@@ -199,30 +406,28 @@
                         <span class="text-white text-lg">👤</span>
                       </div>
                       <div>
-                        <p class="font-bold text-gray-900 dark:text-white text-sm">{{ referral.name }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(referral.date) }}</p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs font-bold px-2 py-1 rounded-full"
-                              :class="getReferralStatusColor(referral.status)">
-                          {{ referral.status }}
-                        </span>
-                        <span v-if="referral.status === 'Completado'" class="text-green-600 dark:text-green-400 font-bold text-xs">
-                          +L. {{ referral.reward.toLocaleString('es-HN') }}
-                        </span>
+                        <p class="font-bold text-gray-900 dark:text-white text-sm">{{ referral.nombre }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(referral.fecha) }}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Ver más botón -->
-                <button v-if="referralHistory.length > 5 && !showAllReferrals" 
-                        @click="showAllReferrals = true"
-                        class="w-full py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
-                  Ver todos ({{ referralHistory.length - 5 }} más)
-                </button>
+                <!-- Botón Ver más referidos -->
+                <div v-if="hasMoreReferrals" class="text-center mt-4">
+                  <button 
+                    @click="loadMoreReferrals" 
+                    class="w-full py-2 text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                    :disabled="isLoadingReferrals"
+                  >
+                    <span v-if="isLoadingReferrals">
+                      Cargando...
+                    </span>
+                    <span v-else>
+                      Ver más referidos ({{ totalReferrals - referralHistory.length }} restantes)
+                    </span>
+                  </button>
+                </div>
               </div>
             </section>
 
@@ -307,55 +512,53 @@
 
             <!-- Content -->
             <div class="p-3">
-              <form @submit.prevent="processWithdraw" class="space-y-3">
-                <!-- Monto -->
+              <form @submit.prevent="processWithdraw" class="space-y-4">
+                <!-- Monto a Retirar -->
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                    Monto a retirar
+                    Monto a Retirar ({{ withdrawalPercentage }}%)
                   </label>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-bold">L.</span>
                     <input
-                      v-model="withdrawForm.amount"
-                      type="number"
-                      :min="minWithdrawAmount"
-                      :max="stats.availableBalance"
-                      class="w-full pl-8 pr-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
-                      placeholder="0.00"
+                      type="text"
+                      :value="(maxWithdrawableAmount).toFixed(2)"
+                      class="w-full pl-8 pr-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
+                      readonly
+                      disabled
                     >
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Mínimo: L. {{ minWithdrawAmount.toLocaleString('es-HN') }}
-                  </p>
                 </div>
 
-                <!-- Método de pago -->
+                <!-- Monto a Crédito -->
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                    Método de pago
+                    Monto a Crédito ({{ 100 - withdrawalPercentage }}%)
                   </label>
-                  <select 
-                    v-model="withdrawForm.method"
-                    class="w-full px-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="" disabled>Selecciona un método</option>
-                    <option v-for="method in paymentMethods" :key="method.value" :value="method.value">
-                      {{ method.label }}
-                    </option>
-                  </select>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-bold">L.</span>
+                    <input
+                      type="text"
+                      :value="(stats.availableBalance - maxWithdrawableAmount).toFixed(2)"
+                      class="w-full pl-8 pr-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
+                      readonly
+                      disabled
+                    >
+                  </div>
                 </div>
 
-                <!-- Detalles del método -->
-                <div v-if="withdrawForm.method">
+                <!-- Datos Bancarios -->
+                <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                    {{ getPaymentMethodLabel }}
+                    Datos Bancarios
                   </label>
-                  <input
-                    v-model="withdrawForm.details"
-                    type="text"
+                  <textarea
+                    v-model="withdrawForm.bankDetails"
+                    rows="3"
                     class="w-full px-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
-                    :placeholder="getPaymentMethodPlaceholder"
-                  >
+                    placeholder="Ingrese los datos de su cuenta bancaria (Banco, # de cuenta, nombre del titular, identidad, tipo)"
+                    required
+                  ></textarea>
                 </div>
 
                 <!-- Botón de envío -->
@@ -384,115 +587,8 @@
   </div>
 </template>
 
-<style scoped>
-/* Animaciones para modales */
-.backdrop-enter-active {
-  transition: opacity 0.3s ease-out;
-}
-
-.backdrop-leave-active {
-  transition: opacity 0.2s ease-in;
-}
-
-.backdrop-enter-from,
-.backdrop-leave-to {
-  opacity: 0;
-}
-
-.modal-content-enter-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transition-delay: 0.1s;
-}
-
-.modal-content-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modal-content-enter-from,
-.modal-content-leave-to {
-  opacity: 0;
-  transform: translateY(20px) scale(0.98);
-}
-
-/* Transiciones del modal */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-/* Estilos generales */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-* {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.transition-all {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.backdrop-blur-lg {
-  backdrop-filter: blur(16px);
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.3);
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.5);
-}
-
-button, input, textarea, select {
-  min-height: 44px;
-}
-
-input, textarea, select {
-  font-size: 16px;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-/* Animaciones adicionales */
-.hover\:scale-105:hover {
-  transform: scale(1.05);
-}
-
-/* Force mobile layout */
-body {
-  overflow-x: hidden;
-}
-
-.fixed.inset-0 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>
- 
-
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
@@ -522,17 +618,17 @@ useHead({
 const howItWorksSteps = [
   {
     title: 'Comparte tu código',
-    description: 'Envía tu código único a amigos y familiares',
+    description: 'Envía tu enlace a amigos y familiares',
     icon: '📱'
   },
   {
     title: 'Ellos se registran',
-    description: 'Tus contactos se registran usando tu código de referido',
+    description: 'Tus contactos se registran usando tu enlace',
     icon: '✍️'
   },
   {
     title: 'Contratan un servicio',
-    description: 'Cuando soliciten su primer servicio, ambos ganan',
+    description: 'Por cada servicio que contraten tu ganas un porcentaje',
     icon: '🏠'
   },
   {
@@ -544,19 +640,12 @@ const howItWorksSteps = [
 
 // Términos del programa
 const referralTerms = [
-  'Recibes L. 50 por cada persona que se registre con tu código',
-  'El pago se realiza cuando tu referido complete su primer servicio',
-  'Puedes retirar tus ganancias con un mínimo de L. 100',
-  'Los retiros se procesan en 24-48 horas hábiles',
-  'No hay límite en la cantidad de personas que puedes referir'
-]
-
-// Métodos de pago
-const paymentMethods = [
-  { value: 'bank_transfer', label: 'Transferencia Bancaria' },
-  { value: 'mobile_money', label: 'Billetera Móvil' },
-  { value: 'cash_pickup', label: 'Retiro en Efectivo' }
-]
+  '¡Gana un porcentaje cada vez que tu referido complete un servicio con éxito!',
+  'Tus ganancias se acumulan automáticamente y puedes retirarlas cuando quieras.',
+  'Al retirar tus ganancias un porcentaje lo recibirás como crédito', 
+  'No hay límite en la cantidad de personas que puedes referir',
+  'Los retiros se procesan en 24-72 horas hábiles'
+] 
 
 // =========================
 // VARIABLES REACTIVAS
@@ -564,25 +653,19 @@ const paymentMethods = [
 
 // Estado de carga
 const isLoading = ref(true)
-
-// Datos del usuario
-const userData = ref({
-  id: null,
-  identidad: '',
-  nombre: 'Invitado',
-  email: '',
-  ...(userCookie.value || {})
-})
+const isLoadingMovements = ref(false)
+const isLoadingReferrals = ref(false)
 
 // Configuración del programa
 const referralReward = ref(50)
-const minWithdrawAmount = ref(100)
+const withdrawalPercentage = ref(0)
 
-// Estadísticas
+// Estado reactivo para las estadísticas
 const stats = ref({
-  totalReferrals: 5,
-  totalEarnings: 250,
-  availableBalance: 150
+  totalEarnings: 0,
+  availableBalance: 0,
+  retirado: 0,
+  totalReferrals: 0
 })
 
 // Código de referido del usuario
@@ -590,63 +673,44 @@ const userReferralCode = ref('')
 
 // Estados de modales
 const showWithdrawModal = ref(false)
-
-// Estados de formularios
-const withdrawForm = ref({
-  amount: '',
-  method: '',
-  details: ''
-})
 const isProcessingWithdraw = ref(false)
 
-// Estados de vista
-const showAllReferrals = ref(false)
+// Estado para el formulario de retiro
+const withdrawForm = ref({
+  amount: 0,
+  creditAmount: 0,
+  bankDetails: ''
+})
 
-// Historial de referidos (datos de ejemplo)
-const referralHistory = ref([
-  {
-    id: 1,
-    name: 'María González',
-    date: '2024-12-15',
-    status: 'Completado',
-    reward: 50
-  },
-  {
-    id: 2,
-    name: 'Carlos Rodríguez',
-    date: '2024-12-12',
-    status: 'Pendiente',
-    reward: 50
-  },
-  {
-    id: 3,
-    name: 'Ana López',
-    date: '2024-12-10',
-    status: 'Completado',
-    reward: 50
-  },
-  {
-    id: 4,
-    name: 'Luis Martínez',
-    date: '2024-12-08',
-    status: 'Completado',
-    reward: 50
-  },
-  {
-    id: 5,
-    name: 'Carmen Flores',
-    date: '2024-12-05',
-    status: 'Completado',
-    reward: 50
-  },
-  {
-    id: 6,
-    name: 'Roberto Silva',
-    date: '2024-12-01',
-    status: 'Completado',
-    reward: 50
-  }
-])
+// Historial de datos
+const referralHistory = ref([])
+const movementsHistory = ref([])
+const withdrawalsHistory = ref([])
+
+// Estados de vista y paginación
+const activeTab = ref('ingresos')
+const withdrawalCounter = ref(0)
+
+// Estados de paginación para movimientos
+const currentMovementsPage = ref(1)
+const totalMovements = ref(0)
+const hasMoreMovements = ref(false)
+
+// Estados de paginación para referidos
+const currentReferralsPage = ref(1)
+const totalReferrals = ref(0)
+const hasMoreReferrals = ref(false)
+
+// Configuración de paginación
+const itemsPerPage = 3
+
+// Mes actual para filtros
+const currentDate = new Date()
+const selectedMonth = ref(`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`)
+const selectedWithdrawMonth = ref(`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`)
+
+// Resumen de movimientos
+const movementSummary = ref(null)
 
 // Estados de notificaciones
 const toast = ref({
@@ -663,43 +727,23 @@ const referralLink = computed(() => {
   return `https://hogarseguro.hn/registro?ref=${userReferralCode.value}`
 })
 
-const displayedReferrals = computed(() => {
-  return showAllReferrals.value ? referralHistory.value : referralHistory.value.slice(0, 5)
+const maxWithdrawableAmount = computed(() => {
+  const percentage = withdrawalPercentage.value / 100
+  return Math.floor(stats.value.availableBalance * percentage * 100) / 100 
 })
 
 const isWithdrawFormValid = computed(() => {
-  return withdrawForm.value.amount && 
-         withdrawForm.value.method && 
-         withdrawForm.value.details &&
-         parseFloat(withdrawForm.value.amount) >= minWithdrawAmount.value &&
-         parseFloat(withdrawForm.value.amount) <= stats.value.availableBalance
+  return withdrawForm.value.bankDetails?.trim().length >= 4
 })
 
-const getPaymentMethodLabel = computed(() => {
-  const method = paymentMethods.find(m => m.value === withdrawForm.value.method)
-  switch (withdrawForm.value.method) {
-    case 'bank_transfer':
-      return 'Número de cuenta bancaria'
-    case 'mobile_money':
-      return 'Número de teléfono'
-    case 'cash_pickup':
-      return 'Número de identidad'
-    default:
-      return 'Detalles'
-  }
+const filteredEarnings = computed(() => {
+  return movementsHistory.value || []
 })
 
-const getPaymentMethodPlaceholder = computed(() => {
-  switch (withdrawForm.value.method) {
-    case 'bank_transfer':
-      return 'Ej: 1234567890'
-    case 'mobile_money':
-      return 'Ej: +504 9999-9999'
-    case 'cash_pickup':
-      return 'Ej: 0801-1990-12345'
-    default:
-      return 'Ingresa los detalles'
-  }
+const filteredWithdrawals = computed(() => {
+  const withdrawals = withdrawalsHistory.value.filter(w => w.tipo === 'retiro');
+  withdrawalCounter.value = withdrawals.length;
+  return withdrawals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 })
 
 // =========================
@@ -715,13 +759,58 @@ const formatDate = (dateString) => {
   })
 }
 
-const getReferralStatusColor = (status) => {
+const formatCurrency = (amount) => {
+  return parseFloat(amount).toLocaleString('es-HN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+const getStatusColor = (status) => {
   const colors = {
-    'Completado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    'Pendiente': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    'completado': 'text-green-600 dark:text-green-400',
+    'pendiente': 'text-yellow-600 dark:text-yellow-400',
+    'cancelado': 'text-red-600 dark:text-red-400'
   }
-  return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+  return colors[status?.toLowerCase()] || 'text-gray-600 dark:text-gray-400'
+}
+
+const getStatusWithDrawalColor = (status) => {
+  const colors = {
+    'completado': 'text-green-600 dark:text-green-400',
+    'pendiente': 'text-yellow-600 dark:text-yellow-400',
+    'procesando': 'text-blue-600 dark:text-blue-400',
+    'cancelado': 'text-red-600 dark:text-red-400'
+  }
+  return colors[status?.toLowerCase()] || 'text-gray-600 dark:text-gray-400'
+}
+
+const getNoEarningsMessage = () => {
+  const currentYear = new Date().getFullYear()
+  const selectedYear = selectedMonth.value.split('-')[0]
+  const selectedMonthNum = selectedMonth.value.split('-')[1]
+  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+  const monthName = monthNames[parseInt(selectedMonthNum) - 1]
+  
+  if (selectedYear === currentYear.toString()) {
+    return `No hay ingresos registrados para ${monthName} ${selectedYear}`
+  } else {
+    return `No hay ingresos registrados para el período seleccionado`
+  }
+}
+
+const getNoWithdrawalsMessage = () => {
+  const currentYear = new Date().getFullYear()
+  const selectedYear = selectedWithdrawMonth.value.split('-')[0]
+  const selectedMonthNum = selectedWithdrawMonth.value.split('-')[1]
+  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+  const monthName = monthNames[parseInt(selectedMonthNum) - 1]
+  
+  if (selectedYear === currentYear.toString()) {
+    return `No hay retiros registrados para ${monthName} ${selectedYear}`
+  } else {
+    return `No hay retiros registrados para el período seleccionado`
+  }
 }
 
 // =========================
@@ -731,46 +820,260 @@ const getReferralStatusColor = (status) => {
 const loadReferralData = async () => {
   try {
     const user = useCookie('user').value
-    if (!user?.id_usuario) return
+    if (!user?.id_usuario) return 
 
-    // Cargar datos del programa de referidos del usuario
-    // const response = await $fetch(`/referidos/usuario/${user.id_usuario}`, {
-    //   baseURL: config.public.apiBase,
-    //   headers: {
-    //     'Authorization': `Bearer ${auth.token}`
-    //   }
-    // })
+    const [configData, porcentajeRetiroData, ingresosData] = await Promise.all([
+      $fetch('/config/valor/porcentaje_referido', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      }),
+      $fetch('/config/valor/porcentaje_retiro', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      }),
+      $fetch(`/movimientos/ingresos/referidos/${user.id_usuario}`, {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      })
+    ]) 
 
-    // Simular datos mientras no tengamos la API
+    // Configurar porcentaje de recompensa por referido
+    if (configData?.valor) {
+      referralReward.value = parseInt(configData.valor) 
+    }
+
+    // Configurar porcentaje de retiro desde la respuesta del backend
+    if (porcentajeRetiroData?.valor) {
+      const porcentaje = parseInt(porcentajeRetiroData.valor)
+      withdrawalPercentage.value = Math.min(100, Math.max(0, porcentaje))
+      
+      if (showWithdrawModal.value) {
+        const halfAmount = (maxWithdrawableAmount.value * (withdrawalPercentage.value / 100)).toFixed(2)
+        const creditAmount = (maxWithdrawableAmount.value * ((100 - withdrawalPercentage.value) / 100)).toFixed(2)
+        
+        withdrawForm.value = {
+          ...withdrawForm.value,
+          amount: parseFloat(halfAmount),
+          creditAmount: parseFloat(creditAmount)
+        }
+      }
+    }
+
+    if (ingresosData?.success) {
+      stats.value = {
+        totalEarnings: ingresosData.total || 0,
+        availableBalance: ingresosData.saldoDisponible || 0,
+        retirado: ingresosData.retirado || 0,
+        totalReferrals: 0
+      } 
+    }
+
+    // Cargar los referidos inicialmente
+    await loadReferrals()
+
+    // Generar código de referido
     userReferralCode.value = `HR${user.id_usuario.toString().padStart(6, '0')}`
     
   } catch (error) {
     console.error('Error al cargar datos de referidos:', error)
+    
     // Generar código de respaldo
     const user = useCookie('user').value
     userReferralCode.value = user?.id_usuario ? `HR${user.id_usuario.toString().padStart(6, '0')}` : 'HR000001'
+    
+    showError('No se pudo cargar la información de recompensas. Mostrando valor por defecto.')
+  }
+}
+
+const loadReferrals = async (loadMore = false) => {
+  const user = useCookie('user').value
+  if (!user?.id_usuario) return
+
+  if (!loadMore) {
+    currentReferralsPage.value = 1
+    hasMoreReferrals.value = false
+    referralHistory.value = []
+  } else {
+    currentReferralsPage.value++
+  }
+
+  isLoadingReferrals.value = true
+
+  try {
+    const response = await $fetch(`/referidos/${user.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      query: {
+        page: currentReferralsPage.value,
+        limit: itemsPerPage
+      }
+    })
+
+    if (response?.success) {
+      referralHistory.value = loadMore 
+        ? [...referralHistory.value, ...(response.data || [])] 
+        : (response.data || [])
+      
+      // Actualizar información de paginación
+      totalReferrals.value = response.pagination?.total || 0
+      stats.value.totalReferrals = totalReferrals.value
+      hasMoreReferrals.value = response.pagination ? 
+        (response.pagination.page * response.pagination.limit) < response.pagination.total : 
+        false
+    }
+  } catch (error) {
+    console.error('Error al cargar referidos:', error)
+    showError('Error al cargar los referidos')
+    referralHistory.value = []
+  } finally {
+    isLoadingReferrals.value = false
+  }
+}
+
+const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore = false) => {
+  const user = useCookie('user').value
+  if (!user?.id_usuario) return
+
+  if (!loadMore) {
+    currentMovementsPage.value = 1
+    hasMoreMovements.value = true
+    if (tipo === 'ingreso_referido') {
+      movementsHistory.value = []
+    } else {
+      withdrawalsHistory.value = []
+    }
+  } else {
+    currentMovementsPage.value++
+  }
+
+  isLoadingMovements.value = true
+
+  try {
+    const selectedMonthValue = month || (tipo === 'ingreso_referido' ? selectedMonth.value : selectedWithdrawMonth.value)
+    const monthNumber = selectedMonthValue.split('-')[1]
+    
+    const response = await $fetch(`/movimientos/historial/referidos/${user.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      query: {
+        mes: parseInt(monthNumber),
+        tipo: tipo,
+        page: currentMovementsPage.value,
+        limit: itemsPerPage
+      }
+    })
+
+    if (response?.success) {
+      if (tipo === 'ingreso_referido') {
+        movementsHistory.value = loadMore 
+          ? [...movementsHistory.value, ...(response.data || [])] 
+          : (response.data || [])
+      } else if (tipo === 'retiro') {
+        withdrawalsHistory.value = loadMore 
+          ? [...withdrawalsHistory.value, ...(response.data || [])] 
+          : (response.data || [])
+      }
+      
+      if (response.summary) {
+        if (loadMore && movementSummary.value) {
+          // Si estamos cargando más, sumamos los totales
+          movementSummary.value = {
+            mes: response.summary.mes || movementSummary.value.mes,
+            totalIngresosReferido: parseFloat(movementSummary.value.totalIngresosReferido || 0) + parseFloat(response.summary.totalIngresosReferido || 0),
+            totalRetiros: parseFloat(movementSummary.value.totalRetiros || 0) + parseFloat(response.summary.totalRetiros || 0)
+          }
+        } else {
+          // Primera carga, establecemos los valores iniciales
+          movementSummary.value = {
+            mes: response.summary.mes || '',
+            totalIngresosReferido: parseFloat(response.summary.totalIngresosReferido || 0),
+            totalRetiros: parseFloat(response.summary.totalRetiros || 0)
+          }
+        }
+      }
+      
+      totalMovements.value = response.pagination?.total || 0
+      hasMoreMovements.value = response.pagination ? 
+        (response.pagination.page * response.pagination.limit) < response.pagination.total : 
+        false
+    }
+  } catch (error) {
+    console.error(`Error al cargar ${tipo}:`, error)
+    showError(`Error al cargar los ${tipo === 'ingreso_referido' ? 'ingresos' : 'retiros'}`)
+    if (tipo === 'ingreso_referido') {
+      movementsHistory.value = []
+    } else {
+      withdrawalsHistory.value = []
+    }
+  } finally {
+    isLoadingMovements.value = false
+  }
+}
+
+// =========================
+// FUNCIONES DE MANEJO DE PESTAÑAS Y FILTROS
+// =========================
+
+const setActiveTab = async (tab) => {
+  activeTab.value = tab
+  const tipo = tab === 'ingresos' ? 'ingreso_referido' : 'retiro'
+  await loadMovements(tipo)
+}
+
+const handleMonthChange = async (event, tab) => {
+  const newMonth = event.target.value
+  
+  if (tab === 'ingresos') {
+    selectedMonth.value = newMonth
+    await loadMovements('ingreso_referido', newMonth)
+  } else {
+    selectedWithdrawMonth.value = newMonth
+    await loadMovements('retiro', newMonth)
+  }
+}
+
+// Funciones para cargar más elementos
+const loadMoreEarnings = async () => {
+  if (hasMoreMovements.value) {
+    await loadMovements('ingreso_referido', selectedMonth.value, true)
+  }
+}
+
+const loadMoreWithdrawals = async () => {
+  if (hasMoreMovements.value) {
+    await loadMovements('retiro', selectedWithdrawMonth.value, true)
+  }
+}
+
+const loadMoreReferrals = async () => {
+  if (hasMoreReferrals.value) {
+    await loadReferrals(true)
   }
 }
 
 // =========================
 // FUNCIONES DE COMPARTIR
 // =========================
-
-const copyReferralCode = async () => {
-  try {
-    await navigator.clipboard.writeText(userReferralCode.value)
-    showSuccess('¡Código copiado!', 'El código se copió al portapapeles')
-  } catch (error) {
-    // Fallback para navegadores que no soportan clipboard API
-    const textArea = document.createElement('textarea')
-    textArea.value = userReferralCode.value
-    document.body.appendChild(textArea)
-    textArea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textArea)
-    showSuccess('¡Código copiado!', 'El código se copió al portapapeles')
-  }
-}
 
 const copyReferralLink = async () => {
   try {
@@ -830,8 +1133,8 @@ const closeWithdrawModal = () => {
   showWithdrawModal.value = false
   withdrawForm.value = {
     amount: '',
-    method: '',
-    details: ''
+    creditAmount: '',
+    bankDetails: ''
   }
 }
 
@@ -840,45 +1143,79 @@ const closeWithdrawModal = () => {
 // =========================
 
 const processWithdraw = async () => {
-  try {
-    isProcessingWithdraw.value = true
-    
-    const amount = parseFloat(withdrawForm.value.amount)
-    
-    if (amount < minWithdrawAmount.value) {
-      throw new Error(`El monto mínimo es L. ${minWithdrawAmount.value}`)
-    }
-    
-    if (amount > stats.value.availableBalance) {
-      throw new Error('Monto superior al saldo disponible')
+  if (isProcessingWithdraw.value) return
+  isProcessingWithdraw.value = true
+  
+  try {  
+    const userCookie = useCookie('user');
+    if (!userCookie.value || !userCookie.value.id_usuario) {
+      showError('No se pudo obtener la información del usuario. Por favor, inicia sesión nuevamente.');
+      return;
     }
 
-    // Simular procesamiento
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const montoRetiro = parseFloat(stats.value.availableBalance) || 0; 
+    const montoMaximoRetiro = parseFloat(maxWithdrawableAmount.value) || 0;
+    const montoCredito = parseFloat((montoRetiro - montoMaximoRetiro).toFixed(2));
     
-    // Aquí iría la llamada real a la API
-    // const response = await $fetch('/referidos/retirar', {
-    //   method: 'POST',
-    //   baseURL: config.public.apiBase,
-    //   headers: {
-    //     'Authorization': `Bearer ${auth.token}`
-    //   },
-    //   body: {
-    //     amount: amount,
-    //     method: withdrawForm.value.method,
-    //     details: withdrawForm.value.details
-    //   }
-    // })
+    const requestBody = {
+      id_usuario: userCookie.value.id_usuario,
+      tipo: 'retiro',
+      monto: montoRetiro,
+      descripcion: `Retiro de ${montoMaximoRetiro} a: ${withdrawForm.value.bankDetails}`
+    }  
+    
+    let response;
+    try {
+      response = await $fetch('/movimientos', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: requestBody
+      });
+    } catch (error) {
+      showError('Error al procesar el retiro. Por favor, inténtalo de nuevo.')
+    }
 
-    // Actualizar balance localmente
-    stats.value.availableBalance -= amount
+    if (response && response.success === true) {
+      if (stats.value) {
+        stats.value.availableBalance -= parseFloat(withdrawForm.value.amount);
+      }
+      
+      if (montoCredito > 0) {
+        try { 
+          const requestBody = {
+            id_usuario: userCookie.value.id_usuario,
+            monto_credito: montoCredito
+          }; 
+          
+          const creditResponse = await $fetch('/credito', {
+            baseURL: config.public.apiBase,
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${auth.token}`
+            },
+            body: requestBody
+          })  
+          
+          showSuccess('¡Retiro Solicitado!', 'El pago puede tardar hasta 72 horas en procesarse.')
+        } catch (creditError) {
+          showError('Error al procesar el retiro. Por favor, inténtalo de nuevo.')
+        }
+      }
+    } else {
+      showError('Retiro Fallido!, Intente de nuevo más tarde')
+    }
     
-    showSuccess('¡Retiro solicitado!', 'Tu solicitud se procesará en 24-48 horas')
     closeWithdrawModal()
+    await loadReferralData()
     
   } catch (error) {
-    console.error('Error al procesar retiro:', error)
-    showError(error.message || 'Error al procesar el retiro')
+    showError(error.data?.message || 'Error al procesar el retiro. Por favor, inténtalo de nuevo.')
   } finally {
     isProcessingWithdraw.value = false
   }
@@ -920,12 +1257,50 @@ const showError = (message) => {
 }
 
 // =========================
+// WATCHERS
+// =========================
+
+watch(() => showWithdrawModal.value, (newVal) => {
+  if (newVal) {
+    const halfAmount = (maxWithdrawableAmount.value / 2).toFixed(2)
+    
+    withdrawForm.value = {
+      amount: parseFloat(halfAmount),
+      creditAmount: parseFloat(halfAmount),
+      bankDetails: ''
+    } 
+  }
+})
+
+watch([maxWithdrawableAmount, withdrawalPercentage], ([newMaxAmount, newPercentage]) => {
+  if (showWithdrawModal.value) {
+    const withdrawAmount = (newMaxAmount * (newPercentage / 100)).toFixed(2)
+    const creditAmount = (newMaxAmount * ((100 - newPercentage) / 100)).toFixed(2)
+    
+    withdrawForm.value = {
+      ...withdrawForm.value,
+      amount: parseFloat(withdrawAmount),
+      creditAmount: parseFloat(creditAmount)
+    }
+  }
+})
+
+watch([selectedMonth, selectedWithdrawMonth], async ([newMonth, newWithdrawMonth], [oldMonth, oldWithdrawMonth]) => {
+  if (newMonth !== oldMonth && activeTab.value === 'ingresos') {
+    await loadMovements('ingreso_referido', newMonth)
+  } else if (newWithdrawMonth !== oldWithdrawMonth && activeTab.value === 'retiros') {
+    await loadMovements('retiro', newWithdrawMonth)
+  }
+})
+
+// =========================
 // INICIALIZACIÓN
 // =========================
 
 onMounted(async () => {
   try {
     await loadReferralData()
+    await loadMovements('ingreso_referido')
   } catch (error) {
     console.error('Error al cargar datos iniciales:', error)
     showError('Error al cargar los datos. Por favor, recargue la página.')
@@ -948,6 +1323,5 @@ onMounted(() => {
       }
     })
   }
-})
-
-</script> 
+}) 
+</script>

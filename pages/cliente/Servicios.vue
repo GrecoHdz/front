@@ -2929,7 +2929,7 @@ const processPayment = async () => {
           const movimientoData = {
             id_usuario: referidor, 
             id_referido: userCookieValue.id_usuario, 
-            tipo: 'ingreso',
+            tipo: 'ingreso_referido',
             monto: comision, 
             descripcion: `Comisión por referido - ${userCookieValue.nombre}`,
             estado: 'completado'

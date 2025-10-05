@@ -141,194 +141,191 @@
       </section>
 
       <!-- Historial de Ingresos/Retiros con pestañas -->
-      <section class="px-4 mb-6">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex space-x-2">
-            <button 
-              @click="setActiveTab('ingresos')"
-              :class="{
-                'bg-blue-600 text-white': activeTab === 'ingresos',
-                'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300': activeTab !== 'ingresos'
-              }"
-              class="px-4 py-2 rounded-l-lg font-medium text-sm transition-colors"
-            >
-              Ingresos
-            </button>
-            <button 
-              @click="setActiveTab('retiros')"
-              :class="{
-                'bg-blue-600 text-white': activeTab === 'retiros',
-                'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300': activeTab !== 'retiros'
-              }"
-              class="px-4 py-2 rounded-r-lg font-medium text-sm transition-colors"
-            >
-              Retiros
-            </button>
-          </div>
-          
-          <div class="flex items-center space-x-2">
-            <!-- Selector de fecha tipo mes -->
-            <div class="relative">
-              <input 
-                type="month"
-                :value="activeTab === 'ingresos' ? selectedMonth : selectedWithdrawMonth"
-                @input="handleMonthChange($event)"
-                class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-1.5 appearance-none"
-              >
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+<section class="px-4 mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex space-x-2">
+      <button 
+        @click="setActiveTab('ingresos')"
+        :class="{
+          'bg-blue-600 text-white': activeTab === 'ingresos',
+          'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300': activeTab !== 'ingresos'
+        }"
+        class="px-4 py-2 rounded-l-lg font-medium text-sm transition-colors"
+      >
+        Ingresos
+      </button>
+      <button 
+        @click="setActiveTab('retiros')"
+        :class="{
+          'bg-blue-600 text-white': activeTab === 'retiros',
+          'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300': activeTab !== 'retiros'
+        }"
+        class="px-4 py-2 rounded-r-lg font-medium text-sm transition-colors"
+      >
+        Retiros
+      </button>
+    </div>
+
+    <!-- Selector de fecha tipo mes -->
+    <div class="flex items-center space-x-2">
+      <div class="relative">
+        <input 
+          type="date"
+          :value="(activeTab === 'ingresos' ? selectedMonth : selectedWithdrawMonth) + '-01'"
+          @change="(e) => handleMonthChange(e, activeTab)"
+          class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-1.5"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-2">
+    <!-- ==================== INGRESOS ==================== -->
+    <template v-if="activeTab === 'ingresos'">
+      <div v-if="isLoadingMovements" class="text-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando ingresos...</p>
+      </div>
+
+      <div v-else-if="earnings.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin ingresos registrados</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">{{ getNoEarningsMessage() }}</p>
+      </div>
+
+      <template v-else>
+        <template v-for="(earning, index) in visibleEarnings" :key="earning.id_movimiento">
+          <div
+            class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2 hover:shadow-md transition-shadow"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-bold text-gray-900 dark:text-white text-sm">{{ earning.servicio || 'Servicio no especificado' }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    {{ formatDate(earning.fecha) }} • {{ earning.colonia || 'Sin ubicación' }}
+                  </p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-green-600 dark:text-green-400">+L. {{ formatCurrency(earning.monto) }}</p>
+                <p class="text-xs" :class="getStatusColor(earning.estado)">
+                  {{ earning.estado }}
+                </p>
               </div>
             </div>
           </div>
-        </div>
+        </template>
         
-        <div class="space-y-2">
-          <!-- Sección de Ingresos -->
-          <template v-if="activeTab === 'ingresos'">
-            <!-- Loading -->
-            <div v-if="isLoadingMovements" class="text-center py-8">
-              <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando ingresos...</p>
-            </div>
-            
-            <!-- Mostrar mensaje cuando no hay ingresos -->
-            <div v-else-if="filteredEarnings.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-              </div>
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin ingresos registrados</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ getNoEarningsMessage() }}
-              </p>
-            </div>
-
-            <!-- Lista de ingresos -->
-            <template v-else>
-              <div v-for="earning in (showAllEarnings ? filteredEarnings : filteredEarnings.slice(0, 4))" :key="earning.id_movimiento"
-                   class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2 hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
-                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="font-bold text-gray-900 dark:text-white text-sm">{{ earning.servicio || 'Servicio no especificado' }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">
-                        {{ formatDate(earning.fecha) }} • {{ earning.colonia || 'Sin ubicación' }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-bold text-green-600 dark:text-green-400">+L. {{ formatCurrency(earning.monto) }}</p>
-                    <p class="text-xs" :class="getStatusColor(earning.estado)">
-                      {{ earning.estado }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <button v-if="filteredEarnings.length > 4"
-                      @click="showAllEarnings = !showAllEarnings" 
-                      class="w-full mt-3 py-2.5 text-blue-600 dark:text-blue-400 text-sm font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 flex items-center justify-center space-x-1">
-                <span>{{ showAllEarnings ? 'Mostrar menos' : `Ver todos los ingresos (${filteredEarnings.length})` }}</span>
-                <svg :class="{'rotate-180': showAllEarnings}" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <!-- Resumen del período seleccionado -->
-              <div v-if="movementSummary" class="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/10 p-4 rounded-xl border border-green-100 dark:border-green-800/30">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center space-x-2"> 
-                    <span class="text-sm font-medium text-green-700 dark:text-green-300">
-                      Total {{ movementSummary.mes.toLowerCase() }}
-                    </span>
-                  </div>
-                  <span class="text-lg font-bold text-green-800 dark:text-green-200">
-                    L. {{ formatCurrency(movementSummary.totalIngresos) }}
-                  </span>
-                </div> 
-              </div>
-            </template>
-          </template>
-
-          <!-- Sección de Retiros -->
-          <template v-else>
-            <!-- Loading -->
-            <div v-if="isLoadingMovements" class="text-center py-8">
-              <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando retiros...</p>
-            </div>
-            
-            <!-- Mostrar mensaje cuando no hay retiros -->
-            <div v-else-if="filteredWithdrawals.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin retiros registrados</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ getNoWithdrawalsMessage() }}
-              </p>
-            </div>
-
-            <!-- Lista de retiros -->
-            <template v-else>
-              <div v-for="withdrawal in (showAllWithdrawals ? filteredWithdrawals : filteredWithdrawals.slice(0, 4))" :key="withdrawal.id_movimiento"
-                   class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white">
-                        Retiro #{{ getWithdrawalNumber(withdrawal) }}
-                      </p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">
-                        {{ formatDate(withdrawal.fecha) }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-bold text-red-600 dark:text-red-400">L. {{ formatCurrency(withdrawal.monto) }}</p>
-                    <p class="text-xs" :class="getStatusWithDrawalColor(withdrawal.estado)">
-                      {{ withdrawal.estado }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <button v-if="filteredWithdrawals.length > 4"
-                      @click="showAllWithdrawals = !showAllWithdrawals" 
-                      class="w-full mt-3 py-2 text-blue-600 dark:text-blue-400 text-sm font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-                {{ showAllWithdrawals ? 'Ver menos' : `Ver todo (${filteredWithdrawals.length})` }}
-              </button>
-
-              <!-- Resumen del período seleccionado usando datos de la API -->
-              <div v-if="movementSummary" class="mt-4 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">
-                <div class="flex items-center justify-between">
-                  <span class="text-sm font-medium text-red-700 dark:text-red-300">
-                    Total {{ movementSummary.mes }}
-                  </span>
-                  <span class="text-lg font-bold text-red-800 dark:text-red-200">
-                    L. {{ formatCurrency(movementSummary.totalRetiros) }}
-                  </span>
-                </div> 
-              </div>
-            </template>
-          </template>
+        <!-- Botón Ver más -->
+        <div v-if="earnings.length > 0 && hasMoreItems && activeTab === 'ingresos'" class="text-center mt-4">
+          <button 
+            @click="loadMoreEarnings" 
+            class="w-full py-2 text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+            :disabled="isLoadingMovements"
+          >
+            <span v-if="isLoadingMovements">
+              Cargando...
+            </span>
+            <span v-else>
+              Ver más ingresos ({{ totalItems - earnings.length }} restantes)
+            </span>
+          </button>
         </div>
-      </section>
+
+        <!-- Resumen -->
+        <div v-if="movementSummary" class="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/10 p-4 rounded-xl border border-green-100 dark:border-green-800/30">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-green-700 dark:text-green-300">
+              Total {{ movementSummary.mes.toLowerCase() }}
+            </span>
+            <span class="text-lg font-bold text-green-800 dark:text-green-200">
+              L. {{ formatCurrency(movementSummary.totalIngresos) }}
+            </span>
+          </div>
+        </div>
+      </template>
+    </template>
+
+    <!-- ==================== RETIROS ==================== -->
+    <template v-else>
+      <div v-if="isLoadingMovements" class="text-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando retiros...</p>
+      </div>
+
+      <div v-else-if="withdrawals.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin retiros registrados</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">{{ getNoWithdrawalsMessage() }}</p>
+      </div>
+
+      <template v-else>
+        <template v-for="(withdrawal, index) in visibleWithdrawals" :key="withdrawal.id_movimiento">
+          <div
+            class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2 hover:shadow-md transition-shadow"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900 dark:text-white">
+                    Retiro #{{ getWithdrawalNumber(withdrawal) }}
+                  </p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    {{ formatDate(withdrawal.fecha) }}
+                  </p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-red-600 dark:text-red-400">L. {{ formatCurrency(withdrawal.monto) }}</p>
+                <p class="text-xs" :class="getStatusWithDrawalColor(withdrawal.estado)">
+                  {{ withdrawal.estado }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </template>
+        
+        <!-- Botón Ver más -->
+        <div v-if="withdrawals.length > 0 && hasMoreItems && activeTab === 'retiros'" class="text-center mt-4">
+          <button 
+            @click="loadMoreWithdrawals" 
+            class="w-full py-2 text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+            :disabled="isLoadingMovements"
+          >
+            <span v-if="isLoadingMovements">
+              Cargando...
+            </span>
+            <span v-else>
+              Ver más retiros ({{ totalItems - withdrawals.length }} restantes)
+            </span>
+          </button>
+        </div>
+
+        <!-- Resumen -->
+        <div v-if="movementSummary" class="mt-4 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-red-700 dark:text-red-300">
+              Total {{ movementSummary.mes }}
+            </span>
+            <span class="text-lg font-bold text-red-800 dark:text-red-200">
+              L. {{ formatCurrency(movementSummary.totalRetiros) }}
+            </span>
+          </div>
+        </div>
+      </template>
+    </template>
+  </div>
+</section>
+
 
       <!-- Calificaciones Recientes -->
       <section class="px-4 mb-6">
@@ -511,21 +508,48 @@ const showAllEarnings = ref(false)
 const showAllWithdrawals = ref(false)
 const selectedChart = ref('earnings')
 const reviews = ref([])
-const showAllReviews = ref(false)
-const pagination = ref({
-  currentPage: 1,
-  itemsPerPage: 3,
-  totalItems: 0,
-  totalPages: 1,
-  hasMore: false
-})
+const showAllReviews = ref(false) 
+const visibleReviewsCount = ref(3)
+
+// Visible items for earnings and withdrawals
+const visibleEarningsCount = ref(3)
+const visibleWithdrawalsCount = ref(3)
 
 // Datos
 const earnings = ref([])
 const withdrawals = ref([])
 const filteredEarnings = ref([])
-const filteredWithdrawals = ref([])
 const movementSummary = ref(null) 
+
+// Paginación
+const pageEarnings = ref(1)
+const pageWithdrawals = ref(1)
+const paginationEarnings = ref({
+  currentPage: 1,
+  itemsPerPage: 10,
+  totalItems: 0,
+  totalPages: 1,
+  hasMore: false
+})
+
+const paginationWithdrawals = ref({
+  currentPage: 1,
+  itemsPerPage: 10,
+  totalItems: 0,
+  totalPages: 1,
+  hasMore: false
+})
+
+// Paginación para reseñas
+const pagination = ref({
+  currentPage: 1,
+  itemsPerPage: 5,
+  totalItems: 0,
+  totalPages: 1,
+  hasMore: false
+})
+
+const filteredWithdrawals = ref([])
 
 // Variables de notificaciones
 const toast = ref({
@@ -611,11 +635,18 @@ const canProcessWithdraw = computed(() => {
 
 // Calcular calificación promedio
 const averageRating = computed(() => {
-  if (reviews.value.length === 0) return '0.0'
-  
-  const totalRating = reviews.value.reduce((sum, review) => sum + review.calificacion, 0)
-  const average = totalRating / reviews.value.length
-  return average.toFixed(1)
+  if (!reviews.value.length) return 0
+  const sum = reviews.value.reduce((acc, review) => acc + review.calificacion, 0)
+  return (sum / reviews.value.length).toFixed(1)
+})
+
+// Computed properties for visible items
+const visibleEarnings = computed(() => {
+  return earnings.value.slice(0, visibleEarningsCount.value)
+})
+
+const visibleWithdrawals = computed(() => {
+  return withdrawals.value.slice(0, visibleWithdrawalsCount.value)
 })
 
 // Obtener número secuencial de retiro (total, sin reiniciar por mes)
@@ -734,21 +765,64 @@ const showError = (message) => {
     duration: 8000
   })
 }
-
+ 
 // ===== FUNCIONES DE CARGA DE DATOS =====
-const loadMovements = async (month = null) => {
+// Funciones para cargar más elementos
+const loadMoreEarnings = async () => {
+  if (earnings.value.length < totalItems.value) {
+    await loadMovements(true)
+  } else {
+    visibleEarningsCount.value = Math.min(visibleEarningsCount.value + 3, earnings.value.length)
+  }
+}
+
+const loadMoreWithdrawals = async () => {
+  if (withdrawals.value.length < totalItems.value) {
+    await loadMovements(true)
+  } else {
+    visibleWithdrawalsCount.value = Math.min(visibleWithdrawalsCount.value + 3, withdrawals.value.length)
+  }
+}
+
+// Resetear contadores al cambiar de pestaña
+watch(activeTab, (newTab) => {
+  currentPage.value = 1
+  hasMoreItems.value = true
+  if (newTab === 'ingresos') {
+    visibleEarningsCount.value = 3
+  } else {
+    visibleWithdrawalsCount.value = 3
+  }
+  // Cargar los movimientos cuando se cambia de pestaña
+  loadMovements()
+})
+
+// Estado de paginación
+const currentPage = ref(1)
+const itemsPerPage = 2
+const totalItems = ref(0)
+const hasMoreItems = ref(true)
+
+const loadMovements = async (loadMore = false) => {
   try {
-    isLoadingMovements.value = true
-    const userId = auth.user?.id_usuario
-    
-    if (!userId) {
-      throw new Error('No se pudo obtener el ID del usuario')
+    if (!loadMore) {
+      currentPage.value = 1
+      activeTab.value === 'ingresos' ? earnings.value = [] : withdrawals.value = []
+      hasMoreItems.value = true
+    } else {
+      currentPage.value++
     }
 
+    isLoadingMovements.value = true
+    const userId = auth.user?.id_usuario
+    if (!userId) throw new Error('No se pudo obtener el ID del usuario')
+
+    // Determinar mes basado en la pestaña activa
+    const selectedMonthValue = activeTab.value === 'ingresos' ? selectedMonth.value : selectedWithdrawMonth.value
     let year, monthNum
     
-    if (month) {
-      const [y, m] = month.split('-')
+    if (selectedMonthValue) {
+      const [y, m] = selectedMonthValue.split('-')
       year = parseInt(y)
       monthNum = parseInt(m)
     } else {
@@ -756,8 +830,8 @@ const loadMovements = async (month = null) => {
       year = now.getFullYear()
       monthNum = now.getMonth() + 1
     }
-    
-    const tipoMovimiento = activeTab.value === 'ingresos' ? 'ingresos' : 'retiros'
+
+    const tipoMovimiento = activeTab.value === 'ingresos' ? 'ingreso' : 'retiro'
     
     const response = await $fetch(`/movimientos/${userId}`, {
       baseURL: config.public.apiBase,
@@ -766,51 +840,56 @@ const loadMovements = async (month = null) => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       },
-      params: {
-        mes: monthNum,
-        tipo: tipoMovimiento
+      params: { 
+        mes: monthNum, 
+        tipo: tipoMovimiento,
+        page: currentPage.value,
+        limit: itemsPerPage
       }
     })
 
     if (response.success) {
-      // Guardar el summary de la respuesta
-      movementSummary.value = response.summary
+      // Actualizar el resumen acumulando los valores cuando se cargan más movimientos
+      if (loadMore && movementSummary.value && response.summary) {
+        movementSummary.value = {
+          mes: response.summary.mes || movementSummary.value.mes,
+          totalIngresos: parseFloat(movementSummary.value.totalIngresos || 0) + parseFloat(response.summary.totalIngresos || 0),
+          totalRetiros: parseFloat(movementSummary.value.totalRetiros || 0) + parseFloat(response.summary.totalRetiros || 0)
+        }
+      } else if (response.summary) {
+        // Primera carga o recarga, establecer los valores iniciales
+        movementSummary.value = response.summary
+      }
       
+      totalItems.value = response.pagination?.total || 0
+      
+      // Verificar si hay más páginas disponibles
+      hasMoreItems.value = response.pagination ? 
+        (response.pagination.page * response.pagination.limit) < response.pagination.total : 
+        false
+      
+      const items = response.data.map(item => ({
+        id_movimiento: item.id_movimiento,
+        monto: parseFloat(item.monto) || 0,
+        fecha: item.fecha,
+        estado: activeTab.value === 'ingresos' ? (item.estado || 'Pendiente') : (item.estado || 'pendiente').toLowerCase(),
+        ...(activeTab.value === 'ingresos' ? {
+          servicio: item.servicio || 'Servicio no especificado',
+          colonia: item.colonia || 'Sin ubicación'
+        } : {})
+      }))
+
       if (activeTab.value === 'ingresos') {
-        earnings.value = response.data.map(ingreso => ({
-          id_movimiento: ingreso.id_movimiento,
-          monto: parseFloat(ingreso.monto) || 0,
-          fecha: ingreso.fecha,
-          estado: ingreso.estado || 'Pendiente',
-          tipo: 'ingreso',
-          servicio: ingreso.servicio || 'Servicio no especificado',
-          colonia: ingreso.colonia || 'Sin ubicación',
-          estado_cotizacion: ingreso.estado_cotizacion || 'Pendiente'
-        }))
-        filteredEarnings.value = [...earnings.value]
+        earnings.value = loadMore ? [...earnings.value, ...items] : items
+        visibleEarningsCount.value = Math.min(earnings.value.length, currentPage.value * itemsPerPage)
       } else {
-        withdrawals.value = response.data.map(retiro => ({
-          id_movimiento: retiro.id_movimiento,
-          monto: parseFloat(retiro.monto) || 0,
-          fecha: retiro.fecha,
-          estado: (retiro.estado || 'pendiente').toLowerCase(),
-          tipo: 'retiro'
-        }))
-        filteredWithdrawals.value = [...withdrawals.value]
+        withdrawals.value = loadMore ? [...withdrawals.value, ...items] : items
+        visibleWithdrawalsCount.value = Math.min(withdrawals.value.length, currentPage.value * itemsPerPage)
       }
     }
-
   } catch (error) {
     console.error('Error al cargar movimientos:', error)
     showError('No se pudieron cargar los movimientos. Por favor, inténtalo de nuevo.')
-    
-    if (activeTab.value === 'ingresos') {
-      earnings.value = []
-      filteredEarnings.value = []
-    } else {
-      withdrawals.value = []
-      filteredWithdrawals.value = []
-    }
   } finally {
     isLoadingMovements.value = false
   }
@@ -1209,8 +1288,7 @@ const processWithdraw = async () => {
       id_usuario: currentUser.value.id_usuario,
       tipo: 'retiro',
       monto: parseFloat(withdrawForm.amount),
-      descripcion: `Retiro a cuenta bancaria: ${withdrawForm.bankDetails}`,
-      fecha: new Date().toISOString()
+      descripcion: `Retiro a cuenta bancaria: ${withdrawForm.bankDetails}`
     }
     
     console.log('Enviando al backend:', JSON.stringify(requestBody, null, 2))
@@ -1250,47 +1328,50 @@ const processWithdraw = async () => {
 }
 
 // ===== FUNCIONES DE NAVEGACIÓN =====
-const handleMonthChange = async (event) => {
-  const newDate = event.target.value
+const handleMonthChange = async (event, tabType) => {
+  const selectedDate = event.target.value;
   
-  if (activeTab.value === 'ingresos') {
-    selectedMonth.value = newDate
+  if (!selectedDate) return;
+  
+  // Extraer solo el año y mes del valor seleccionado (formato: YYYY-MM)
+  const [year, month] = selectedDate.split('-');
+  const formattedDate = `${year}-${month}`;
+  
+  if (tabType === 'ingresos') {
+    selectedMonth.value = formattedDate;
   } else {
-    selectedWithdrawMonth.value = newDate
+    selectedWithdrawMonth.value = formattedDate;
   }
   
-  await loadMovements(newDate)
+  try {
+    await loadMovements(formattedDate);
+  } catch (error) {
+    console.error('Error al cargar movimientos:', error);
+    showError('No se pudieron cargar los movimientos');
+  }
 }
 
 const setActiveTab = async (tab) => {
-  if (activeTab.value === tab) return
+  if (activeTab.value === tab) return;
   
-  activeTab.value = tab
-  const currentMonth = tab === 'ingresos' ? selectedMonth.value : selectedWithdrawMonth.value
+  activeTab.value = tab;
+  showAllEarnings.value = false;
+  showAllWithdrawals.value = false;
   
   try {
-    isLoadingMovements.value = true
+    isLoadingMovements.value = true;
     
-    if (!currentMonth) {
-      const now = new Date()
-      const defaultMonth = now.toISOString().slice(0, 7)
-      
-      if (tab === 'ingresos') {
-        selectedMonth.value = defaultMonth
-      } else {
-        selectedWithdrawMonth.value = defaultMonth
-      }
-      
-      await loadMovements(defaultMonth)
-    } else {
-      await loadMovements(currentMonth)
+    // Cargar los datos correspondientes a la pestaña seleccionada
+    if (tab === 'ingresos') {
+      await loadMovements(selectedMonth.value);
+    } else if (tab === 'retiros') {
+      await loadMovements(selectedWithdrawMonth.value);
     }
-    
   } catch (error) {
-    console.error('Error al cambiar de pestaña:', error)
-    showError('No se pudo cargar la información de ' + (tab === 'ingresos' ? 'ingresos' : 'retiros'))
+    console.error('Error al cambiar de pestaña:', error);
+    showError('No se pudo cargar la información de ' + (tab === 'ingresos' ? 'ingresos' : 'retiros'));
   } finally {
-    isLoadingMovements.value = false
+    isLoadingMovements.value = false;
   }
 }
 
