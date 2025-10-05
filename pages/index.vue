@@ -86,7 +86,7 @@
           
           <div class="relative text-center">
             <div class="text-4xl mb-3">🎁</div>
-            <h3 class="text-xl font-black mb-2">¿Qué recibís como miembro?</h3>
+            <h3 class="text-xl font-black mb-2">¿Qué recibes como miembro?</h3>
             <div class="flex items-center justify-center space-x-2 mb-4">
               <span class="text-base opacity-90">Por solo</span>
               <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/30">
@@ -180,7 +180,7 @@
 
       <!-- No Emergencies Section -->
       <section class="px-4 py-4 mb-5">
-        <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-4 text-white">
+        <div class="bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl p-4 text-white">
           <div class="text-center mb-3">
             <h3 class="text-lg font-bold mb-2">🧠 ¿Y si no tengo emergencias?</h3>
             <p class="text-base font-semibold">¡Mucho mejor!</p>
@@ -188,11 +188,11 @@
           <div class="space-y-2 text-sm">
             <div class="flex items-start space-x-2">
               <span>✨</span>
-              <span>Tu membresía no se pierde. Cada mes acumula como crédito.</span>
+              <span>Tu membresía no se pierde. Cada mes acumula como crédito si no dejas de pagar</span>
             </div>
             <div class="flex items-start space-x-2">
               <span>💰</span>
-              <span>Si después de 3 meses querés hacer una reparación de L. 750, podés cubrirla con tus créditos acumulados.</span>
+              <span>Si después de 3 meses quieres hacer una reparación de L. 750, podés cubrirla con tus créditos acumulados.</span>
             </div>
             <div class="flex items-start space-x-2">
               <span>🏦</span>
@@ -240,9 +240,9 @@
           <div class="relative">
             <h3 class="text-lg font-black mb-3 flex items-center space-x-2">
               <span>💬</span>
-              <span>¿Y si no quiero pagar membresía?</span>
+              <span>¿Y si opto por no pagar membresía?</span>
             </h3>
-            <p class="text-pink-100 mb-3 text-sm">Podés usar la app sin membresía, pero:</p>
+            <p class="text-pink-100 mb-3 text-sm">Podrás usar la app sin membresía, pero:</p>
             <div class="space-y-2">
               <div v-for="limitation in noMembershipLimitations" :key="limitation.id" 
                    class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
@@ -275,39 +275,40 @@
         </div>
       </section>
 
-      <!-- Final CTA -->
-      <section class="px-4 mb-5">
-        <div class="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 rounded-2xl p-6 text-white relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
-          <div class="relative text-center">
-            <div class="text-4xl mb-3">🔐</div>
-            <h3 class="text-xl font-black mb-3">En resumen...</h3>
-            <div class="text-lg font-bold mb-4 text-yellow-300">
-              HogarSeguro = Tranquilidad + Ahorro + Comodidad
-            </div>
-            <div class="space-y-2 mb-5 text-sm">
-              <div class="flex items-center space-x-2 justify-center">
-                <span class="text-green-400 text-base">✔️</span>
-                <span>Nunca más busqués técnicos por Facebook sin saber si son buenos</span>
-              </div>
-              <div class="flex items-center space-x-2 justify-center">
-                <span class="text-green-400 text-base">✔️</span>
-                <span>No esperés días por una cita</span>
-              </div>
-              <div class="flex items-center space-x-2 justify-center">
-                <span class="text-green-400 text-base">✔️</span>
-                <span>Protegé tu casa como se merece</span>
-              </div>
-            </div>
-            <button 
-              @click="showLoginModal = true"
-              class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              🚀 Unirme a HogarSeguro
-            </button>
-          </div>
+      <!-- Final CTA (versión más amigable) -->
+<section class="px-4 mb-5">
+  <div class="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 rounded-2xl p-6 text-white relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
+    <div class="relative text-center">
+      <div class="text-4xl mb-3">🔐</div>
+      <h3 class="text-xl font-black mb-3">En pocas palabras...</h3>
+      <div class="text-lg font-bold mb-4 text-yellow-300">
+        HogarSeguro = Más tranquilidad, más ahorro y cero estrés ✨
+      </div>
+      <div class="space-y-2 mb-5 text-sm">
+        <div class="flex items-center space-x-2 justify-center">
+          <span class="text-green-400 text-base">✔️</span>
+          <span>Olvidate de buscar técnicos al azar en Facebook</span>
         </div>
-      </section>
+        <div class="flex items-center space-x-2 justify-center">
+          <span class="text-green-400 text-base">✔️</span>
+          <span>Recibe atención rápida, sin esperas ni complicaciones</span>
+        </div>
+        <div class="flex items-center space-x-2 justify-center">
+          <span class="text-green-400 text-base">✔️</span>
+          <span>Mantén tu hogar protegido y funcionando al 100%</span>
+        </div>
+      </div>
+      <button 
+        @click="showLoginModal = true"
+        class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+      >
+        🌟 Quiero ser parte de HogarSeguro
+      </button>
+    </div>
+  </div>
+</section>
+
     </main>
    <!-- Login/Register Modal -->
     <!-- Overlay de carga mientras se verifica la autenticación -->
@@ -319,14 +320,22 @@
 
 <!-- Modal de Login/Registro -->
 <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto relative">
+        <button 
+          @click="showLoginModal = false" 
+          class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 z-10"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
         <div class="p-6">
-          <div class="text-center mb-6">
+          <div class="text-center mb-6 pt-4">
             <div class="w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl mx-auto mb-3 flex items-center justify-center">
-              <span class="text-white text-xl">🏠</span>
+              <span class="text-white text-xl">🔐</span>
             </div>
             <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">
-              {{ isLogin ? 'Bienvenido de vuelta' : 'Únete a HogarSeguro' }}
+              {{ isLogin ? 'Bienvenido' : 'Únete a HogarSeguro' }}
             </h3>
             <p class="text-gray-600 dark:text-gray-400 text-sm">
               {{ isLogin ? 'Ingresa a tu cuenta' : 'Crea tu cuenta gratuita' }}
@@ -375,11 +384,12 @@
                 type="tel" 
                 class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 :class="{'border-red-500': formErrors.telefono, 'border-gray-200 dark:border-gray-600': !formErrors.telefono}"
-                placeholder="Ej: +504 9999-9999"
+                placeholder="Ej: +504 9999 9999"
                 :required="!isLogin"
                 autocomplete="tel"
-                @input="form.telefono = form.telefono.replace(/[^0-9+\s-]/g, ''); formErrors.telefono = ''"
+                @input="handlePhoneInput"
                 @keydown="preventLetterInput"
+                @paste.prevent="handlePhonePaste"
               />
             </div>
 
@@ -444,7 +454,7 @@
               type="submit"
               class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
-              {{ isLogin ? '🚀 Ingresar' : '✨ Crear Cuenta' }}
+              {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
             </button>
           </form>
 
@@ -457,17 +467,7 @@
             </button>
           </div>
 
-          <div class="mt-4 text-center">
-            <button 
-              @click="showLoginModal = false" 
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
-            >
-              <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
- 
+
         </div>
       </div>
     </div>
@@ -754,6 +754,7 @@ onMounted(async () => {
   await Promise.all([
     cargarCiudades(),
     fetchMembershipCost(),
+    loadServices(),
     fetchVisitCost(),
     checkAuthStatus()
   ])
@@ -785,9 +786,42 @@ const mockUsers = [
 const problems = [
   { id: 1, icon: '💧', text: 'Una fuga de agua' },
   { id: 2, icon: '❄️', text: 'El aire deja de enfriar' },
-  { id: 3, icon: '⚡', text: 'Se va la luz' },
-  { id: 4, icon: '🧺', text: 'Se daña la lavadora' }
+  { id: 3, icon: '⚡', text: 'Fallo Eléctrico' },
+  { id: 4, icon: '🔧', text: 'Se daña la lavadora' }
 ]
+
+// Estado para el porcentaje de descuento
+const discountPercentage = ref()
+
+// Función para obtener el porcentaje de descuento del backend
+const fetchDiscountPercentage = async () => {
+  try {
+    const config = useRuntimeConfig()
+    const auth = useAuthStore()
+    
+    const response = await $fetch('/config/valor/porcentaje_descuento', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response && response.valor) {
+      discountPercentage.value = response.valor
+    }
+  } catch (error) {
+    console.error('Error al obtener el porcentaje de descuento:', error)
+    // Mantener el valor por defecto en caso de error
+    discountPercentage.value = '10'
+  }
+}
+
+// Cargar el porcentaje de descuento al montar el componente
+onMounted(() => {
+  fetchDiscountPercentage()
+})
 
 // Beneficios de membresía como propiedad computada
 const membershipBenefits = computed(() => [
@@ -799,7 +833,7 @@ const membershipBenefits = computed(() => [
   },
   {
     id: 2,
-    title: '10% de descuento en todos los servicios',
+    title: `${discountPercentage.value}% de descuento en todos los servicios`,
     description: 'Descuento aplicado automáticamente en cualquier trabajo.',
     savings: ''
   },
@@ -823,73 +857,96 @@ const membershipBenefits = computed(() => [
   },
   {
     id: 6,
-    title: 'Atención prioritaria',
-    description: '¿Emergencia en casa? ¡Te atendemos antes que a los demás!',
+    title: 'Soporte VIP',
+    description: 'Acceso prioritario a nuestro equipo para que tus problemas se resuelvan más rápido y sin esperas.',
     savings: ''
   }
 ])
 
-// Complete services data
-const services = [
-  { 
-    id: 1, 
-    name: 'Fontanería', 
-    description: 'fugas, grifos, tuberías', 
-    icon: '🔧' 
-  },
-  { 
-    id: 2, 
-    name: 'Electricidad residencial', 
-    description: 'apagones, instalación de lámparas, breakers', 
-    icon: '💡' 
-  },
-  { 
-    id: 3, 
-    name: 'Cámaras de seguridad', 
-    description: 'instalación y mantenimiento', 
-    icon: '🎥' 
-  },
-  { 
-    id: 4, 
-    name: 'Aires acondicionados', 
-    description: 'limpieza, reparación, instalación', 
-    icon: '❄️' 
-  },
-  { 
-    id: 5, 
-    name: 'Electrodomésticos', 
-    description: 'lavadoras, refris, estufas, secadoras', 
-    icon: '🧊' 
-  },
-  { 
-    id: 6, 
-    name: 'Pintura', 
-    description: 'mantenimiento de interiores y exteriores', 
-    icon: '🎨' 
+// Servicios cargados dinámicamente
+const services = ref([])
+const isLoadingServices = ref(false)
+
+// Función para cargar los servicios desde la API
+const loadServices = async () => {
+  try {
+    isLoadingServices.value = true
+    const data = await $fetch('/servicios/activos', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+    
+    // Mapear los datos de la API al formato esperado por el componente
+    services.value = data.map(service => ({
+      id: service.id_servicio,
+      name: service.nombre,
+      description: service.descripcion,
+      icon: getServiceIcon(service.nombre)
+    }))
+  } catch (error) {
+    console.error('Error al cargar los servicios:', error)
+    // Valores por defecto en caso de error
+    services.value = [
+      { id: 1, name: 'Fontanería', description: 'fugas, grifos, tuberías', icon: '🔧' },
+      { id: 2, name: 'Electricidad', description: 'instalación y reparación', icon: '💡' },
+      { id: 3, name: 'Cámaras', description: 'instalación y mantenimiento', icon: '🎥' },
+      { id: 4, name: 'Aires A/C', description: 'limpieza y reparación', icon: '❄️' },
+      { id: 5, name: 'Electrodomésticos', description: 'reparación y mantenimiento', icon: '🧊' },
+      { id: 6, name: 'Pintura', description: 'interiores y exteriores', icon: '🎨' }
+    ]
+  } finally {
+    isLoadingServices.value = false
   }
-]
+}
+
+// Función auxiliar para asignar iconos según el nombre del servicio
+const getServiceIcon = (serviceName) => {
+  const icons = {
+    'fontanería': '🔧',
+    'electricidad': '💡',
+    'cámaras': '🎥',
+    'aire': '❄️', 
+    'pintura': '🎨', 
+    'cerrajería': '🔑',
+    'jardinería': '🌿',
+    'limpieza': '🧹',
+    'mudanza': '🚚'
+  }
+  
+  const lowerName = serviceName.toLowerCase()
+  for (const [key, icon] of Object.entries(icons)) {
+    if (lowerName.includes(key)) {
+      return icon
+    }
+  }
+  
+  return '🛠️' // Icono por defecto
+}
 
 // How it works data
 const howItWorks = [
-  { id: 1, title: 'Registrate en la plataforma (gratis)', description: 'Crea tu cuenta sin costo alguno' },
-  { id: 2, title: 'Elegí si querés pagar la membresía mensual', description: 'Decide si quieres los beneficios de membresía' },
-  { id: 3, title: 'Accedé a todos los beneficios desde el primer día', description: 'Disfruta inmediatamente de las ventajas' },
-  { id: 4, title: 'Solicitá servicios cuando los necesités', description: 'Pide ayuda cuando tu hogar lo requiera' },
-  { id: 5, title: 'Acumulá crédito mes a mes si no lo usás', description: 'Tu dinero se convierte en ahorro real' }
+  { id: 1, title: 'Regístrate en la plataforma (gratis)', description: 'Crea tu cuenta sin costo alguno' },
+  { id: 2, title: 'Elege si deseas pagar la membresía mensual', description: 'Decide si quieres los beneficios de membresía' },
+  { id: 3, title: 'Accede a todos los beneficios desde el primer día', description: 'Disfruta inmediatamente de las ventajas' },
+  { id: 4, title: 'Solicita servicios cuando los necesites', description: 'Pide ayuda cuando tu hogar lo requiera' },
+  { id: 5, title: 'Acumula crédito mes a mes si no lo usás', description: 'Tu dinero se convierte en ahorro real' }
 ]
 
 // No membership limitations
 const noMembershipLimitations = [
-  { id: 1, icon: '❌', text: 'Los precios serán más altos' },
-  { id: 2, icon: '❌', text: 'No tenés limpieza gratis' },
-  { id: 3, icon: '❌', text: 'Pagás por cada visita técnica, incluso si no se hace el trabajo' }
+  { id: 1, icon: '💢', text: 'No obtendrás descuentos a la hora de pagar' },
+  { id: 2, icon: '💢', text: 'Perderás la limpieza gratiuta de tu aire acondicionado' },
+  { id: 3, icon: '💢', text: 'Pagarás por cada visita técnica, incluso si no se hace el trabajo' }
 ]
 
 // Trust features data
 const trustFeatures = [
   { id: 1, title: 'Técnicos verificados y capacitados', icon: '✅' },
   { id: 2, title: 'Garantía de servicio en todos los trabajos', icon: '🛡️' },
-  { id: 3, title: 'Fotos y calificaciones de cada técnico antes de agendar', icon: '⭐' },
+  { id: 3, title: 'Calificaciones de cada uno de los técnicos', icon: '⭐' },
   { id: 4, title: 'Registro de todo tu historial de servicios', icon: '📋' },
   { id: 5, title: 'Soporte directo desde la app o WhatsApp', icon: '📞' }
 ]
@@ -996,7 +1053,7 @@ const handleAuth = async () => {
           telefono: form.value.telefono,
           identidad: form.value.identidad,
           password_hash: form.value.password, // Cambiado de password a password_hash
-          id_ciudad: ciudades.value.find(c => c.nombre === form.value.ciudad)?.id || 1
+          id_ciudad: ciudades.value.find(c => c.nombre === form.value.ciudad)?.id 
         }; 
         
         // Realizar la petición de registro directamente en el componente
@@ -1030,7 +1087,50 @@ const handleAuth = async () => {
           throw error;
         }
         
-        // Si el registro fue exitoso
+        // Verificar si hay un código de referido en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralCode = urlParams.get('ref');
+        
+        // Si hay un código de referido, crear el registro de referido
+        if (referralCode) {
+          try {
+            // Intentar obtener el ID del usuario de diferentes campos posibles en la respuesta
+            const userId = data.id_usuario || data.id || data.userId || data.user_id;
+            
+            if (!userId) {
+              console.error('No se pudo obtener el ID del usuario de la respuesta:', data);
+              throw new Error('No se pudo obtener el ID del usuario');
+            }
+            
+            const referralData = {
+              id_referidor: referralCode,
+              id_referido_usuario: userId
+            }; 
+            
+            const referralResponse = await fetch(`${apiBase}/referidos`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(referralData)
+            });
+            
+            const responseData = await referralResponse.json();
+            
+            if (!referralResponse.ok) {
+              console.warn('No se pudo registrar el referido:', responseData);
+              // No mostramos error al usuario para no afectar su experiencia
+            }
+          } catch (error) {
+            console.error('Error al registrar referido:', {
+              error: error.message,
+              stack: error.stack
+            });
+            // No mostramos error al usuario para no afectar su experiencia
+          }
+        }
+        
+        // Mostrar mensaje de éxito
         showToast('¡Registro exitoso! Por favor inicia sesión.', 'success');
         
         // Cambiar a pestaña de login
@@ -1151,21 +1251,58 @@ const preventNumberInput = (e) => {
 
 const preventLetterInput = (e) => {
   // Permitir teclas de control (backspace, delete, tab, etc.)
-  if ([8, 9, 13, 27, 46].includes(e.keyCode) || 
+  if ([8, 9, 13, 27, 46, 37, 38, 39, 40, 32].includes(e.keyCode) || 
       // Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
       (e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode))) {
     return;
   }
   
-  // Permitir números y teclas especiales para teléfono
-  if (e.target.name === 'telefono' && ['+', '-', ' '].includes(e.key)) {
-    return;
+  // Si estamos en el campo de teléfono
+  if (e.target.name === 'telefono' || e.target.getAttribute('type') === 'tel') {
+    // Permitir números, +, -
+    if (/^[0-9+-]$/.test(e.key)) {
+      return;
+    }
+    // Prevenir cualquier otra tecla que no sea espacio
+    if (e.key !== ' ') {
+      e.preventDefault();
+    }
   }
+}
+
+// Manejar la entrada en el campo de teléfono
+const handlePhoneInput = (e) => {
+  // Obtener el valor actual
+  let value = e.target.value;
   
-  // Solo permitir números
-  if ((e.key < '0' || e.key > '9') && e.keyCode !== 8) {
-    e.preventDefault();
-  }
+  // Filtrar solo caracteres permitidos y limpiar espacios múltiples
+  value = value
+    .replace(/[^0-9+\s-]/g, '')
+    .replace(/\s{2,}/g, ' ');
+  
+  // Actualizar el valor del campo
+  form.telefono = value;
+  
+  // Limpiar errores
+  formErrors.telefono = '';
+};
+
+// Manejar pegado en el campo de teléfono
+const handlePhonePaste = (e) => {
+  // Obtener el texto pegado
+  const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+  
+  // Filtrar solo caracteres permitidos (números, +, -, espacios)
+  const filteredText = pastedText.replace(/[^0-9+\s-]/g, '');
+  
+  // Actualizar el valor del campo
+  form.telefono = form.telefono + filteredText;
+  
+  // Limpiar errores
+  formErrors.telefono = '';
+  
+  // Prevenir el comportamiento por defecto
+  e.preventDefault();
 }
 
 // Forzar modo oscuro

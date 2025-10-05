@@ -606,7 +606,8 @@ const userCookie = useCookie('user')
 useHead({
   title: 'HogarSeguro - Programa de Referidos',
   meta: [
-    { name: 'description', content: 'Gana dinero refiriendo amigos a HogarSeguro - Programa de referidos' }
+    { name: 'description', content: 'Gana dinero refiriendo amigos a HogarSeguro - Programa de referidos' },
+    { name: 'keywords', content: 'HogarSeguro, Programa de Referidos, Referir, Referidos' }, 
   ]
 })
 
@@ -724,7 +725,8 @@ const toast = ref({
 // =========================
 
 const referralLink = computed(() => {
-  return `https://hogarseguro.hn/registro?ref=${userReferralCode.value}`
+  const userId = userCookie.value?.id_usuario || ''
+  return `https://hogarseguro.hn/registro?ref=${userId}`
 })
 
 const maxWithdrawableAmount = computed(() => {

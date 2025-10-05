@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
       <!-- Toast Notification -->
-    <!-- Toast Notification -->
     <Toast 
       v-if="toast.show"
       :key="toast.message + Date.now()"
@@ -13,86 +12,85 @@
       
       <!-- Loading Spinner -->
       <LoadingSpinner 
-        :loading="isLoading || isLoggingOut" 
-        :message="isLoggingOut ? 'Cerrando sesión...' : 'Cargando Perfil...'"
+        :loading="isLoading || isLoggingOut"
       />
 
-    <!-- Contenido principal (oculto hasta completar autenticación) -->
+    <!-- Contenido principal -->
     <div v-if="!isLoading">
     <HeadersHeaderPerfil/>
 
     <!-- Main Content -->
-    <div class="max-w-2xl mx-auto px-6 pb-6">
+    <div class="max-w-xl mx-auto px-3 sm:px-6 pb-4 sm:pb-6">
       <!-- Profile Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 mb-6">
-        <div class="flex flex-col items-center text-center mb-6">
-          <div class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-4xl text-white mb-4 shadow-lg">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 dark:border-gray-700 mb-4 sm:mb-6">
+        <div class="flex flex-col items-center text-center mb-4 sm:mb-6">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-3xl sm:text-4xl text-white mb-3 sm:mb-4 shadow-lg">
             {{ userInitials }}
           </div>
-          <h2 class="text-xl font-black text-gray-900 dark:text-white">{{ user.nombre }}</h2>
-          <p class="text-emerald-600 dark:text-emerald-400 font-medium">{{ user.email }}</p>
+          <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white">{{ user.nombre }}</h2>
+          <p class="text-emerald-600 dark:text-emerald-400 font-medium text-sm sm:text-base">{{ user.email }}</p>
         </div>
 
         <!-- User Stats -->
-        <div class="grid grid-cols-2 gap-3 mb-6 pt-3">
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
-            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-2">
-              <span class="text-blue-600 dark:text-blue-400">📅</span>
+        <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6 pt-2 sm:pt-3">
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-1 sm:mb-2">
+              <span class="text-blue-600 dark:text-blue-400 text-sm sm:text-base">📅</span>
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">Registrado el</p>
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ formatShortDate(user.fecha_registro) }}</p>
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ formatShortDate(user.fecha_registro) }}</p>
           </div>
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
-            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-2">
-              <span class="text-purple-600 dark:text-purple-400">🏙️</span>
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-1 sm:mb-2">
+              <span class="text-purple-600 dark:text-purple-400 text-sm sm:text-base">🏙️</span>
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">Ciudad</p>
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || 'No especificada' }}</p>
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || 'No especificada' }}</p>
           </div>
         </div>
       </div>
 
       <!-- User Information -->
-      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 mb-6">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Información Personal</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 dark:border-gray-700 mb-4 sm:mb-6">
+        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Información Personal</h3>
         
-        <div class="space-y-4">
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
+        <div class="space-y-3 sm:space-y-4">
+          <div class="space-y-1.5 sm:space-y-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
             <input 
               v-model="user.nombre"
               type="text" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
               placeholder="Tu nombre completo"
             >
           </div>
           
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
+          <div class="space-y-1.5 sm:space-y-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
             <input 
               v-model="user.email"
               type="email" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
               placeholder="tu@email.com"
             >
           </div>
           
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+          <div class="space-y-1.5 sm:space-y-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
             <input 
               v-model="user.telefono"
               type="tel" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+              class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
               placeholder="+504 9999-9999"
             >
           </div>
           
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ciudad</label>
+          <div class="space-y-1.5 sm:space-y-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Ciudad</label>
             <div class="relative">
               <select
                 v-model="user.id_ciudad"
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none pr-10"
+                class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none pr-8 sm:pr-10"
               >
                 <option :value="null" disabled>Selecciona una ciudad</option>
                 <option v-for="ciudad in ciudades" :key="ciudad.id_ciudad" :value="ciudad.id_ciudad" :selected="user.id_ciudad === ciudad.id_ciudad">
@@ -100,40 +98,40 @@
                 </option>
               </select>
               <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <svg class="fill-current h-3.5 w-3.5 sm:h-4 sm:w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                 </svg>
               </div>
             </div>
           </div>
           
-          <div class="space-y-2">
+          <div class="space-y-1.5 sm:space-y-2">
             <button 
               @click="isPasswordModalOpen = true"
               type="button"
-              class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl transition-colors duration-200 text-gray-700 dark:text-gray-300"
+              class="w-full text-left p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg sm:rounded-xl transition-colors duration-200 text-gray-700 dark:text-gray-300"
             >
-              <p class="text-sm font-medium">Cambiar Contraseña</p>
+              <p class="text-xs sm:text-sm font-medium">Cambiar Contraseña</p>
             </button>
           </div>
           
           <!-- Modal de Cambio de Contraseña -->
-          <div v-if="isPasswordModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md relative">
+          <div v-if="isPasswordModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full max-w-md relative">
               <button 
                 @click="isPasswordModalOpen = false"
                 type="button"
-                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200"
+                class="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200"
                 aria-label="Cerrar modal"
               >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
               
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Cambiar Contraseña</h3>
+              <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Cambiar Contraseña</h3>
               
-              <form @submit.prevent="updatePassword" class="space-y-4">
+              <form @submit.prevent="updatePassword" class="space-y-3 sm:space-y-4">
               <!-- Campo de usuario oculto para accesibilidad -->
               <div class="sr-only">
                 <label for="username">Nombre de usuario</label>
@@ -147,13 +145,13 @@
                   aria-hidden="true"
                 >
               </div>
-                <div class="space-y-2">
-                  <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña Actual</label>
+                <div class="space-y-1.5 sm:space-y-2">
+                  <label for="currentPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña Actual</label>
                   <input 
                     id="currentPassword"
                     v-model="currentPassword"
                     type="password" 
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
                     placeholder="Ingresa tu contraseña actual"
                     autocomplete="current-password"
                     required
@@ -161,13 +159,13 @@
                   >
                 </div>
                 
-                <div class="space-y-2">
-                  <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
+                <div class="space-y-1.5 sm:space-y-2">
+                  <label for="newPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
                   <input 
                     id="newPassword"
                     v-model="newPassword"
                     type="password" 
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
                     placeholder="Ingresa tu nueva contraseña"
                     autocomplete="new-password"
                     required
@@ -175,25 +173,25 @@
                   >
                 </div>
                 
-                <div class="space-y-2">
-                  <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nueva Contraseña</label>
+                <div class="space-y-1.5 sm:space-y-2">
+                  <label for="confirmPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nueva Contraseña</label>
                   <input 
                     id="confirmPassword"
                     v-model="confirmPassword"
                     type="password" 
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
                     placeholder="Confirma tu nueva contraseña"
                     autocomplete="new-password"
                     required
                     :class="{'border-red-500 dark:border-red-400': passwordMismatch}"
                   >
-                  <p v-if="passwordMismatch" class="text-sm text-red-600 dark:text-red-400">Las contraseñas no coinciden</p>
+                  <p v-if="passwordMismatch" class="text-xs sm:text-sm text-red-600 dark:text-red-400">Las contraseñas no coinciden</p>
                 </div>
                 
                 <button 
                   type="submit"
                   :disabled="isUpdatingPassword || passwordMismatch"
-                  class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   <span v-if="isUpdatingPassword">Actualizando...</span>
                   <span v-else>Actualizar Contraseña</span>
@@ -202,49 +200,41 @@
             </div>
           </div>
           
-          <div class="flex flex-col space-y-3 pt-2">
+          <div class="flex flex-col space-y-2 sm:space-y-3 pt-2">
             <button 
               @click="saveProfile"
               :disabled="!hasChanges || isSaving"
-              class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-blue-400 disabled:to-indigo-400"
+              class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-blue-400 disabled:to-indigo-400 text-sm sm:text-base"
             >
               <span v-if="isSaving">Guardando...</span>
               <span v-else>Actualizar Perfil</span>
-            </button>
-            
-            <button 
-              v-if="newPassword || currentPassword || confirmPassword"
-              @click="updatePassword"
-              class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
-            >
-              Cambiar Contraseña
             </button>
           </div>
         </div>
       </div>
 
       <!-- Legal & About -->
-      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Legal y más</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 dark:border-gray-700">
+        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Legal y más</h3>
         
-        <div class="space-y-3">
-          <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
+        <div class="space-y-2 sm:space-y-3">
+          <button class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
           </button>
-          <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Política de privacidad</p>
+          <button class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Política de privacidad</p>
           </button>
-          <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de HogarSeguro</p>
+          <button class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de HogarSeguro</p>
           </button>
           <button 
             @click="handleLogout"
             :disabled="isLoggingOut"
-            class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200 flex items-center justify-between"
+            class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200 flex items-center justify-between"
             :class="{'opacity-70 cursor-not-allowed': isLoggingOut}"
           >
-            <span class="text-sm font-medium text-red-600 dark:text-red-400">Cerrar sesión</span>
-            <LoadingSpinner v-if="isLoggingOut" class="w-4 h-4 text-red-500" />
+            <span class="text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">Cerrar sesión</span>
+            <LoadingSpinner v-if="isLoggingOut" class="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
           </button>
         </div>
       </div>
@@ -256,38 +246,139 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+
+// ===== VARIABLES DE CONFIGURACIÓN =====
 const config = useRuntimeConfig()
+const router = useRouter()
+const auth = useAuthStore()
+const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
   title: 'HogarSeguro - Perfil',
   meta: [
     { name: 'description', content: 'Perfil de usuario de HogarSeguro - Gestiona tus servicios y membresía' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'keywords', content: 'Perfil, usuario, servicios, membresía' },
   ]
 })
 
-// Autenticación
-const route = useRoute()
-const router = useRouter()
-const auth = useAuthStore()
-
-// Estados de carga
+// ===== VARIABLES DE ESTADO =====
 const isLoading = ref(true)
 const isLoggingOut = ref(false)
+const isSaving = ref(false)
+const isUpdatingPassword = ref(false)
+const isPasswordModalOpen = ref(false)
+
+// Campos de contraseña
 const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
-const isPasswordModalOpen = ref(false)
-const isUpdatingPassword = ref(false) 
-const ciudades = ref([])
 
-// Cargar ciudades desde la API
+// Datos
+const ciudades = ref([])
+const originalUserData = ref(null)
+
+// Datos del usuario con valores por defecto seguros
+const user = ref({
+  id_usuario: null,
+  nombre: '',
+  email: '',
+  telefono: '',
+  id_ciudad: null,
+  ciudad: '',
+  fecha_registro: new Date().toISOString(),
+  id_rol: null,
+  role: 'usuario',
+  rol_nombre: 'Usuario',
+})
+
+// Toast notification
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'info',
+  duration: 5000
+})
+
+// ===== COMPUTED PROPERTIES =====
+const userInitials = computed(() => {
+  if (!user.value?.nombre) return '?'
+  try {
+    return user.value.nombre
+      .split(' ')
+      .filter(Boolean)
+      .map(n => n[0]?.toUpperCase() || '')
+      .join('')
+      .substring(0, 2)
+  } catch (error) {
+    console.error('Error al generar las iniciales:', error)
+    return '?'
+  }
+})
+
+const hasChanges = computed(() => {
+  if (!originalUserData.value) return false;
+  
+  return (
+    user.value.nombre !== originalUserData.value.nombre ||
+    user.value.email !== originalUserData.value.email ||
+    user.value.telefono !== originalUserData.value.telefono ||
+    user.value.id_ciudad !== originalUserData.value.id_ciudad
+  );
+})
+
+const passwordMismatch = computed(() => {
+  return newPassword.value && confirmPassword.value && 
+         newPassword.value !== confirmPassword.value;
+})
+
+// ===== FUNCIONES DE UTILIDAD =====
+const formatShortDate = (dateString) => {
+  if (!dateString) return '--/--/----'
+  const options = { day: '2-digit', month: '2-digit', year: 'numeric' }
+  return new Date(dateString).toLocaleDateString('es-ES', options)
+}
+
+const showToast = (options) => {
+  toast.value.show = false;
+  
+  nextTick(() => {
+    toast.value = {
+      show: true,
+      message: options.message,
+      type: options.type || 'info',
+      duration: options.duration || 5000
+    };
+  });
+}
+
+const showSuccess = (title, message) => { 
+  const toastMessage = message ? `${title} \n${message}` : title;
+  
+  showToast({
+    message: toastMessage,
+    type: 'success',
+    duration: 5000
+  });  
+}
+
+const showError = (title, message) => {
+  const errorMessage = message || title;
+  console.error('Error:', errorMessage);
+  
+  showToast({
+    message: errorMessage,
+    type: 'error',
+    duration: 8000
+  });
+}
+
+// ===== FUNCIONES DE CARGA DE DATOS =====
 const cargarCiudades = async () => {
   try {
     const data = await $fetch('/ciudad', {
@@ -311,30 +402,6 @@ const cargarCiudades = async () => {
   }
 }
 
-// Datos originales del usuario para comparar cambios
-const originalUserData = ref(null);
-
-// Estado para controlar la carga
-const isSaving = ref(false);
-
-// Datos del usuario con valores por defecto seguros
-const user = ref({
-  id_usuario: null,
-  nombre: '',
-  email: '',
-  telefono: '',
-  id_ciudad: null,
-  ciudad: '',
-  fecha_registro: new Date().toISOString(),
-  id_rol: null,
-  role: 'usuario',
-  rol_nombre: 'Usuario',
-})
-
-const userData = computed(() => auth.user || {})
-const userCookie = useCookie('user')
-
-// Obtener datos del usuario desde la API
 const fetchUserData = async () => {
   try {
     const userId = auth.user?.id_usuario
@@ -342,7 +409,6 @@ const fetchUserData = async () => {
       console.error('No se pudo obtener el ID del usuario')
       return false
     }
-     
     
     const data = await $fetch(`/usuarios/id/${userId}`, {
       baseURL: config.public.apiBase,
@@ -357,7 +423,6 @@ const fetchUserData = async () => {
       throw new Error('No se recibieron datos del usuario')
     }
     
-    // Crear un objeto seguro para actualizar el store
     const safeUserData = {
       ...data,
       nombre: data.nombre || 'Invitado',
@@ -369,9 +434,6 @@ const fetchUserData = async () => {
       role: data.role || 'usuario'
     }
     
-    
-    
-    // Actualizar el estado local del usuario
     user.value = {
       ...user.value,
       ...safeUserData,
@@ -379,9 +441,6 @@ const fetchUserData = async () => {
       rol_nombre: safeUserData.rol_nombre || 'Usuario'
     }
     
-    
-    
-    // Actualizar el store de autenticación
     if (auth) {
       await auth.setUser(safeUserData)
     }
@@ -395,10 +454,8 @@ const fetchUserData = async () => {
   }
 }
 
-// Cargar datos del perfil
 const cargarDatosPerfil = async () => {
   try {
-    // Cargar ciudades y datos del usuario en paralelo
     await Promise.all([
       cargarCiudades(),
       fetchUserData()
@@ -414,153 +471,9 @@ const cargarDatosPerfil = async () => {
   }
 }
 
-// Verificar si hay cambios en los campos del perfil
-const hasChanges = computed(() => {
-  if (!originalUserData.value) return false;
-  
-  return (
-    user.value.nombre !== originalUserData.value.nombre ||
-    user.value.email !== originalUserData.value.email ||
-    user.value.telefono !== originalUserData.value.telefono ||
-    user.value.id_ciudad !== originalUserData.value.id_ciudad
-  );
-});
-
-// Actualizar el nombre de la ciudad cuando cambie el id_ciudad
-watch(() => user.value.id_ciudad, (newId) => {
-  if (newId) {
-    const ciudadSeleccionada = ciudades.value.find(c => c.id_ciudad === newId);
-    if (ciudadSeleccionada) {
-      user.value.ciudad = ciudadSeleccionada.nombre;
-    }
-  } else {
-    user.value.ciudad = null;
-  }
-});
-
-// Cargar datos al montar el componente
-onMounted(async () => {
-  await cargarDatosPerfil();
-  // Guardar una copia de los datos originales
-  if (user.value) {
-    originalUserData.value = { ...user.value };
-  }
-}) 
-
-// Función para manejar el cierre de sesión
-const handleLogout = async () => {
-  try {
-    isLoggingOut.value = true;
-    await auth.logout();
-    // La redirección se manejará en el watch de auth.user
-  } catch (error) {
-    console.error('Error al cerrar sesión:', error);
-    toast.value = {
-      show: true,
-      message: 'Error al cerrar sesión. Por favor, inténtalo de nuevo.',
-      type: 'error',
-      duration: 3000
-    };
-  } finally {
-    isLoggingOut.value = false;
-  }
-}
-
-// Computed property para verificar si las contraseñas coinciden
-const passwordMismatch = computed(() => {
-  return newPassword.value && confirmPassword.value && 
-         newPassword.value !== confirmPassword.value;
-}); 
- 
-
-// Computed properties
-const userInitials = computed(() => {
-  if (!user.value?.nombre) return '?'
-  try {
-    return user.value.nombre
-      .split(' ')
-      .filter(Boolean) // Eliminar cadenas vacías
-      .map(n => n[0]?.toUpperCase() || '')
-      .join('')
-      .substring(0, 2)
-  } catch (error) {
-    console.error('Error al generar las iniciales:', error)
-    return '?'
-  }
-})
-
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' }
-  return new Date(dateString).toLocaleDateString('es-ES', options)
-}
-
-// Format date to short version (DD/MM/YYYY)
-const formatShortDate = (dateString) => {
-  if (!dateString) return '--/--/----'
-  const options = { day: '2-digit', month: '2-digit', year: 'numeric' }
-  return new Date(dateString).toLocaleDateString('es-ES', options)
-}
-
-// Save profile function
-// Estado para controlar las notificaciones
-const toast = ref({
-  show: false,
-  message: '',
-  type: 'info',
-  duration: 5000
-});
-
-const showToast = (options) => {
-  // Primero ocultar el toast actual
-  toast.value.show = false;
-  
-  // Usar nextTick para asegurar que la actualización del DOM se complete
-  nextTick(() => {
-    // Actualizar con los nuevos valores
-    toast.value = {
-      show: true,
-      message: options.message,
-      type: options.type || 'info',
-      duration: options.duration || 5000
-    };
-  });
-};
-
-// Funciones de conveniencia
-const showSuccess = (title, message) => { 
-  const toastMessage = message ? `${title} \n${message}` : title;
-  
-  showToast({
-    message: toastMessage,
-    type: 'success',
-    duration: 5000
-  });  
-};
-
-const showError = (title, message) => {
-  const errorMessage = message || title;
-  console.error('Error:', errorMessage);
-  
-  showToast({
-    message: errorMessage,
-    type: 'error',
-    duration: 8000 // Los errores duran más para que el usuario los pueda leer
-  });
-};
-
-const showInfo = (message) => {
-  showToast({
-    message,
-    type: 'info',
-    duration: 5000
-  });
-};
-
+// ===== FUNCIONES DE ACCIONES =====
 const saveProfile = async () => {
   try {
-    const config = useRuntimeConfig();
-    
-    // Datos que se enviarán al backend
     const userData = {
       nombre: user.value.nombre,
       email: user.value.email,
@@ -578,18 +491,14 @@ const saveProfile = async () => {
       }
     });
     
-    // Actualizar los datos originales con los nuevos valores
     originalUserData.value = { ...user.value };
     
-    // Actualizar la cookie del usuario con los nuevos datos
-    const userCookie = useCookie('user')
     userCookie.value = {
-      ...userCookie.value, // Mantener los datos existentes
+      ...userCookie.value,
       nombre: user.value.nombre, 
       id_ciudad: user.value.id_ciudad
     } 
     
-    // Mostrar notificación de éxito
     showToast({
       type: 'success',
       message: '¡Perfil actualizado correctamente!',
@@ -599,13 +508,9 @@ const saveProfile = async () => {
   } catch (error) {
     console.error('❌ Error en saveProfile:', error)
     
-    // Obtener el mensaje de error del servidor
     const responseData = error.data || {};
     let errorMessage = 'Error al guardar el perfil';
     
-    // Registrar detalles del error en consola
-    
-    // Determinar el mensaje de error a mostrar
     if (responseData.message) {
       errorMessage = responseData.message;
     } else if (responseData.error === 'Error de validación' && responseData.field) {
@@ -614,10 +519,8 @@ const saveProfile = async () => {
       errorMessage = 'Error interno del servidor. Por favor, intente nuevamente.';
     }
     
-    // Mostrar el mismo mensaje en consola
     console.error('❌ Error al guardar el perfil:', errorMessage);
     
-    // Mostrar el mensaje de error en el toast
     showToast({
       type: 'error',
       message: errorMessage,
@@ -648,7 +551,6 @@ const updatePassword = async () => {
   }
   
   try {
-    
     const response = await $fetch(`/usuarios/cambio-clave/${user.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
@@ -662,15 +564,12 @@ const updatePassword = async () => {
       }
     }); 
     
-    // Cerrar el modal de contraseña
     isPasswordModalOpen.value = false;
     
-    // Limpiar los campos
     currentPassword.value = '';
     newPassword.value = '';
     confirmPassword.value = '';
     
-    // Mostrar mensaje de éxito
     showToast({
       type: 'success',
       message: '¡Contraseña actualizada correctamente!',
@@ -678,12 +577,8 @@ const updatePassword = async () => {
     });
     
   } catch (error) {
-    // No mostrar el error en consola ya que es un flujo controlado
-    
-    // Mensaje de error por defecto
     let errorMessage = 'Error al actualizar la contraseña. Verifica tu contraseña actual.';
     
-    // Manejar diferentes tipos de errores
     if (error.statusCode === 400) {
       if (error.data?.error === 'Contraseña actual incorrecta') {
         errorMessage = 'La contraseña actual es incorrecta. Por favor, inténtalo de nuevo.';
@@ -696,41 +591,53 @@ const updatePassword = async () => {
       errorMessage = 'No hay conexión a internet. Por favor, verifica tu conexión.';
     }
     
-    // Mostrar el mensaje de error
     showToast({
       type: 'error',
       message: errorMessage,
       duration: 5000
     });
     
-    // Limpiar solo la contraseña actual para que el usuario pueda intentar de nuevo
     currentPassword.value = '';
   }
-} 
+}
 
-const membershipProgress = computed(() => membershipData.value.progress);
+const handleLogout = async () => {
+  try {
+    isLoggingOut.value = true;
+    await auth.logout();
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
+    toast.value = {
+      show: true,
+      message: 'Error al cerrar sesión. Por favor, inténtalo de nuevo.',
+      type: 'error',
+      duration: 3000
+    };
+  } finally {
+    isLoggingOut.value = false;
+  }
+}
 
-// Dark mode toggle
-const darkMode = ref(false)
-
-// Cargar datos de membresía cuando el componente se monte
-onMounted(() => {
-  if (user.value?.id_usuario) {
-    fetchMembershipData();
+// ===== WATCHERS =====
+watch(() => user.value.id_ciudad, (newId) => {
+  if (newId) {
+    const ciudadSeleccionada = ciudades.value.find(c => c.id_ciudad === newId);
+    if (ciudadSeleccionada) {
+      user.value.ciudad = ciudadSeleccionada.nombre;
+    }
+  } else {
+    user.value.ciudad = null;
   }
 });
 
-// Watch for dark mode changes
-watch(darkMode, (newVal) => {
-  if (newVal) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
+// ===== INICIALIZACIÓN =====
+onMounted(async () => {
+  await cargarDatosPerfil();
+  if (user.value) {
+    originalUserData.value = { ...user.value };
   }
-  // Save preference to localStorage
-  localStorage.setItem('darkMode', newVal)
 })
- 
+
 </script>
 
 <style scoped>
@@ -847,4 +754,4 @@ button:hover {
 .dark .shadow-2xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
-</style> 
+</style>

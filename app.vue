@@ -1,63 +1,99 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white">
+    <!-- LoadingSpinner con fondo oscuro -->
+    <LoadingSpinner 
+      :loading="isLoading"
+      class="fixed inset-0 z-50"
+    /> 
     <NuxtLayout>
       <NuxtPage/>
     </NuxtLayout>
   </div>
 </template>
 
-<script setup>
-import { useHead } from '#imports'
+<style>
+/* Estilos críticos para modo oscuro */
+:root {
+  color-scheme: dark;
+  background-color: #111827;
+  color: white;
+}
 
-// Forzar modo oscuro en el servidor y cliente
+html, body, #__nuxt {
+  background-color: #111827;
+  color: white;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Asegurar que el spinner tenga fondo oscuro */
+:deep(.bg-white) {
+  background-color: #111827 !important;
+}
+
+:deep(.bg-gray-800) {
+  background-color: #111827 !important;
+}
+</style>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
+
+const isLoading = ref(true);
+
+// Configuración del tema oscuro
 useHead({
-  html: {
+  html: { 
     class: 'dark',
     'data-theme': 'dark',
-    style: 'color-scheme: dark; background-color: #111827;'
+    style: 'color-scheme: dark; background-color: #111827;',
+    'data-n-head': 'ssr'
   },
   body: {
     class: 'bg-gray-900 text-white',
     style: 'background-color: #111827; color: white;',
-    'data-theme': 'dark'
+    'data-theme': 'dark',
+    'data-n-head': 'ssr'
   },
   meta: [
     { name: 'theme-color', content: '#111827' },
     { name: 'color-scheme', content: 'dark' },
     { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }
   ]
-})
+});
 
-// Asegurar que el modo oscuro se aplique en el cliente
-if (process.client) {
-  // Forzar modo oscuro en el elemento html
-  document.documentElement.classList.add('dark')
-  document.documentElement.style.colorScheme = 'dark'
-  document.documentElement.style.backgroundColor = '#111827'
-  document.documentElement.setAttribute('data-theme', 'dark')
-  
-  // Aplicar estilos al body
-  document.body.classList.add('bg-gray-900', 'text-white')
-  document.body.style.backgroundColor = '#111827'
-  
-  // Forzar tema oscuro en localStorage para consistencia
-  localStorage.setItem('theme', 'dark')
-  
-  // Asegurar que los estilos se mantengan incluso si hay cambios dinámicos
-  const observer = new MutationObserver((mutations) => {
-    if (!document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.add('dark')
+onMounted(() => {
+  if (process.client) {
+    // Asegurar que el modo oscuro esté aplicado
+    const applyDarkMode = () => {
+      const html = document.documentElement;
+      html.classList.add('dark');
+      html.setAttribute('data-theme', 'dark');
+      document.body.style.backgroundColor = '#111827';
+    };
+
+    // Ocultar el spinner después de que todo esté cargado
+    const hideSpinner = () => {
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 300);
+    };
+
+    // Aplicar modo oscuro inmediatamente
+    applyDarkMode();
+
+    if (document.readyState === 'complete') {
+      hideSpinner();
+    } else {
+      window.addEventListener('load', () => {
+        applyDarkMode();
+        hideSpinner();
+      }, { once: true });
     }
-    if (document.documentElement.getAttribute('data-theme') !== 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark')
-    }
-  })
-  
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class', 'data-theme'],
-    childList: false,
-    subtree: false
-  })
-}
+  }
+});
 </script>
