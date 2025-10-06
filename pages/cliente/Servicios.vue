@@ -95,7 +95,7 @@
                       <svg class="w-2.5 h-2.5 mr-0.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                       </svg>
-                      Cotización
+                      Cotización Lista
                     </span>
                   </div>
                 </div>
@@ -709,19 +709,22 @@
                       -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * discountPercentage).toFixed(2) }}
                     </span>
                   </div>
+                  </template>
+
                 <!-- Crédito de membresía -->
+                <template v-if="membresiaProgreso?.mesesProgreso > 1 && membresiaProgreso?.monto_credito_mostrado > 0">
                   <div class="flex justify-between items-center mb-1">
                     <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
                     <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                      -L. {{ parseFloat(membresiaProgreso?.monto_credito || 0).toFixed(2) }}
+                      -L. {{ parseFloat(membresiaProgreso?.monto_credito_mostrado || 0).toFixed(2) }} 
                     </span>
                   </div>
                 </template>
                 
                 <!-- Total a pagar -->
-                <div class="flex justify-between items-center text-base mt-1 pt-1 border-t border-blue-200 dark:border-blue-800">
-                  <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200">
+                <div class="flex justify-between items-center pt-2 mt-2 border-t border-blue-200 dark:border-blue-700">
+                  <span class="font-bold text-blue-800 dark:text-blue-100">Total a pagar:</span>
+                  <span class="font-bold text-lg text-blue-800 dark:text-blue-100">
                     L. {{ totalAPagar.toFixed(2) }}
                   </span>
                 </div>
@@ -1980,7 +1983,7 @@ const fetchDiscountPercentage = async () => {
   } catch (error) {
     console.error('Error al obtener el porcentaje de descuento:', error)
     // Usar un valor por defecto en caso de error
-    discountPercentage.value = 0.10 // 10% por defecto
+    discountPercentage.value = 0 // 0% por defecto
   }
 }
 
@@ -2370,53 +2373,81 @@ const closeAllModals = () => {
   isSubmittingRating.value = false
 }  
 
-const fetchCreditoUsuario = async (userId) => {
+const fetchMembresiaProgreso = async (userId) => {
   try {
     isLoadingMembresia.value = true;
     const token = useCookie('token').value;
     
     if (!token) {
-      console.error('[fetchCreditoUsuario] No se encontró token de autenticación');
+      console.error('[fetchMembresiaProgreso] No se encontró token de autenticación');
       return;
     }
     
-    const url = `/credito/usuario/${userId}`;
-    const options = {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+    const headers = {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
     };
     
-    const response = await $fetch(url, options);
-    const data = response?.data; 
+    // Obtener progreso de membresía
+    const [membresiaResponse, creditoResponse] = await Promise.all([
+      $fetch(`/membresia/progreso/${userId}`, {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers
+      }),
+      // Obtener crédito del usuario
+      $fetch(`/credito/usuario/${userId}`, {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers
+      }).catch(error => {
+        console.error('[fetchMembresiaProgreso] Error al obtener crédito del usuario:', error);
+        return { success: false, data: { monto_credito: 0 } };
+      })
+    ]);
     
-    if (data?.monto_credito > 0) {
-      const creditData = {
-        montoTotal: data.monto_credito,
-        monto_credito: data.monto_credito,
-        ...data
+    // Procesar respuesta de crédito del usuario
+    const creditoUsuario = creditoResponse?.success ? creditoResponse.data : { monto_credito: 0 };
+    
+    // Verificar si la respuesta de membresía tiene el formato esperado
+    if (membresiaResponse?.status === 'success') {
+      membresiaProgreso.value = {
+        monto_credito: parseFloat(creditoUsuario.monto_credito || 0), // Usar el crédito del usuario
+        mesesProgreso: parseInt(membresiaResponse.mesesProgreso || 0),
+        montoTotal: parseFloat(membresiaResponse.montoTotal || 0),
+        valorMembresia: parseFloat(membresiaResponse.valorMembresia || 0),
+        id_credito_usuario: creditoUsuario.id_credito_usuario,
+        fecha_credito: creditoUsuario.fecha
       };
-      membresiaProgreso.value = creditData;
     } else {
-      membresiaProgreso.value = null;
+      // Si no hay datos de membresía, usar solo el crédito del usuario
+      membresiaProgreso.value = {
+        monto_credito: parseFloat(creditoUsuario.monto_credito || 0),
+        mesesProgreso: 0,
+        montoTotal: 0,
+        valorMembresia: 0,
+        id_credito_usuario: creditoUsuario.id_credito_usuario,
+        fecha_credito: creditoUsuario.fecha
+      };
     }
     
-    return data;
+    return membresiaProgreso.value;
   } catch (error) {
-    console.error('[fetchCreditoUsuario] Error en la petición:', {
+    console.error('[fetchMembresiaProgreso] Error en la petición:', {
       message: error.message,
       statusCode: error.statusCode,
       response: error.data,
       stack: error.stack
     });
     membresiaProgreso.value = null;
+    return null;
   } finally {
     isLoadingMembresia.value = false;
   }
 }
+
+// Función obsoleta, mantener por compatibilidad
+const fetchCreditoUsuario = fetchMembresiaProgreso;
 
 const openRatingModal = (service) => {
   // Cerrar el modal de servicio si está abierto
@@ -2844,172 +2875,71 @@ const processVisitPayment = async () => {
   }
 }
 
-const processPayment = async () => {
-  if (!selectedAccount.value || !comprobante.value) {
-    showError('Por favor complete todos los campos requeridos')
-    return
-  }
-  
-  isProcessingPayment.value = true
-  
+
+// =========================
+// FUNCIONES DE PAGO
+// =========================
+const processPayment = async () => { 
+  const payload = {
+    id_cotizacion: Number(quotationData.value.id_cotizacion),
+    id_solicitud: Number(selectedService.value.id),
+    id_cuenta: Number(selectedAccount.value),
+    monto_credito: Number(parseFloat(membresiaProgreso.value?.monto_credito_mostrado || 0)),
+    num_comprobante: comprobante.value,
+    monto_manodeobra: totalAPagar.value,
+    descuento_membresia: Math.round(parseFloat(quotationData.value?.monto_manodeobra || 0) * (discountPercentage.value || 0) * 100) / 100,
+    id_usuario: auth.user.id_usuario,
+    nombre: auth.user.nombre
+  };
+
+  console.log('🛰️ Enviando al backend /pagoservicio:', payload);
+
   try {
-    // Calcular el monto total basado en la cotización
-    const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
-    
-    
-    // Actualizar el estado de la cotización a pagado
-    const response = await $fetch(`/cotizacion/${quotationData.value?.id_cotizacion}`, {
+    const response = await $fetch('/pagoservicio', {
       baseURL: config.public.apiBase,
-      method: 'PUT',
+      method: 'POST',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${useCookie('token').value}`
       },
-      body: JSON.stringify({
-        id_cuenta: parseInt(selectedAccount.value),
-        num_comprobante: comprobante.value,
-        estado: 'pagado',
-        monto_manodeobra: montoManodeObra
-      })
-    })
+      body: JSON.stringify(payload)
+    });
+
+    console.log('✅ Respuesta del backend /pagoservicio:', response);
     
-    if (response && response.success !== false) {
-      // Actualizar el estado de la solicitud a 'verificando_pagoservicio'
-      await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
-        method: 'PUT',
-        baseURL: config.public.apiBase,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${useCookie('token').value}`
-        },
-        body: JSON.stringify({ 
-          estado: 'verificando_pagoservicio' 
-        })
-      });
-
-      // Verificar si el usuario tiene un referidor
-      try {
-        const userCookieValue = useCookie('user').value
-        console.log(`[DEBUG] Consultando referido para usuario: ${userCookieValue.id_usuario}`);
-        const referidoResponse = await $fetch(`/referidos/referidor/${userCookieValue.id_usuario}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${useCookie('token').value}`
-          }
-        });
-        console.log('[DEBUG] Respuesta de referido:', JSON.stringify(referidoResponse, null, 2));
-
-        // Si se encontró un referidor, obtener el porcentaje de comisión del backend
-        const referidor = referidoResponse?.id_referidor;
-        if (referidoResponse.success && referidor) {
-          const montoReferencia = parseFloat(totalAPagar.value || 0);
-          console.log(`[DEBUG] Monto de referencia para comisión (totalAPagar): ${montoReferencia}`);
-          
-          // Obtener el porcentaje de comisión del backend
-          console.log('[DEBUG] Solicitando porcentaje de comisión...');
-          const configResponse = await $fetch('/config/valor/porcentaje_referido', {
-            baseURL: config.public.apiBase,
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${useCookie('token').value}`
-            }
-          });
-          console.log('[DEBUG] Respuesta de porcentaje de comisión:', JSON.stringify(configResponse, null, 2));
-          
-          // El valor ya viene como número entero (ej: 10 para 10%, 100 para 100%)
-          const porcentaje = parseFloat(configResponse?.valor || 0) / 100; // Convertir a decimal (ej: 100 -> 1.0)
-          const comision = Math.round(montoReferencia * porcentaje); // Calcular comisión directa y redondear
-          console.log(`[DEBUG] Cálculo de comisión: ${montoReferencia} * ${porcentaje} = ${comision.toFixed(2)}`);
-          console.log(`[DEBUG] Comisión: ${comision} (sin conversión a centavos)`);
-          
-          const movimientoData = {
-            id_usuario: referidor, 
-            id_referido: userCookieValue.id_usuario, 
-            tipo: 'ingreso_referido',
-            monto: comision, 
-            descripcion: `Comisión por referido - ${userCookieValue.nombre}`,
-            estado: 'completado'
-          };
-          
-          console.log('[DEBUG] Creando movimiento con datos:', JSON.stringify(movimientoData, null, 2));
-          
-          try {
-            const movimientoResponse = await $fetch('/movimientos', {
-              baseURL: config.public.apiBase,
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${useCookie('token').value}`
-              },
-              body: JSON.stringify(movimientoData)
-            });
-            
-            console.log('[DEBUG] Respuesta del movimiento creado:', JSON.stringify(movimientoResponse, null, 2));
-            
-            // Actualizar el crédito del referidor
-            console.log(`[DEBUG] Actualizando crédito para el referidor ${referidor} con monto: ${comision}`);
-            try {
-              const creditoResponse = await $fetch('/credito', {
-                baseURL: config.public.apiBase,
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${useCookie('token').value}`
-                },
-                body: JSON.stringify({
-                  id_usuario: referidor,
-                  monto_credito: comision
-                })
-              });
-              console.log('[DEBUG] Crédito actualizado exitosamente:', JSON.stringify(creditoResponse, null, 2));
-            } catch (creditoError) {
-              console.error('[ERROR] Error al actualizar el crédito:', creditoError);
-              if (creditoError.response) {
-                console.error('[ERROR] Detalles del error de crédito:', {
-                  status: creditoError.response.status,
-                  statusText: creditoError.response.statusText,
-                  data: creditoError.response._data
-                });
-              }
-              // No lanzamos el error para no interrumpir el flujo principal
-            }
-          } catch (error) {
-            console.error('[ERROR] Error al crear el movimiento:', error);
-            if (error.response) {
-              console.error('[ERROR] Detalles del error:', {
-                status: error.response.status,
-                statusText: error.response.statusText,
-                data: error.response._data
-              });
-            }
-            throw error; // Re-lanzar el error para que sea manejado por el catch externo
-          }
-        }
-      } catch (error) {
-        console.error('Error al procesar comisión de referido:', error);
-        // No mostramos error al usuario para no interrumpir el flujo principal
-      }
-      
-      showSuccess('Pago Enviado', 'Su pago se ha registrado y verificará pronto.')
-      // Cerrar el modal y recargar los servicios
-      closePaymentModal()
-      await loadServices()
-    }
+    // Cerrar el modal de pago
+    showPaymentModal.value = false;
+    
+    // Limpiar datos temporales
+    comprobante.value = '';
+    selectedAccount.value = null;
+    
+    // Actualizar la lista de servicios
+    await loadServices();
+    
+    // Mostrar mensaje de éxito
+    showSuccess('Pago procesado correctamente');
+    
+    // Cerrar cualquier otro modal abierto
+    showQuotationModal.value = false;
   } catch (error) {
-    console.error('Error al procesar el pago:', error)
-    const errorMessage = error.response?._data?.errores?.[0]?.msg || 
-                        error.response?._data?.message || 
-                        'Error al procesar el pago. Por favor, intente nuevamente.'
-    showError(errorMessage)
-  } finally {
-    isProcessingPayment.value = false
+    console.error('❌ Error al procesar pago:', {
+      status: error.response?.status,
+      data: error.response?._data,
+      message: error.message
+    });
+
+    const msg = error.response?._data?.message || 'Error al procesar el pago';
+    
+    // Cerrar el modal de pago en caso de error
+    showPaymentModal.value = false;
+    
+    // Mostrar mensaje de error
+    showError(msg);
   }
-}
+};
  
+
 const cancelarSolicitud = async () => {
   if (!cancelAdditionalInfo.value.trim()) {
     showError('Por favor, escribe el motivo de la cancelación')
@@ -3079,33 +3009,41 @@ const resetFilters = () => {
 
 const totalAPagar = ref(0)
 
-// Función para calcular el total
+// Función para calcular el total basado en los valores mostrados en la UI
 const calcularTotal = () => {
   const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
-  let total = montoManodeObra
   
-  // Aplicar descuento por membresía si hay crédito
-  if (membresiaProgreso.value?.monto_credito > 0) {
-    const descuento = montoManodeObra * discountPercentage.value
-    total = Math.max(0, total - descuento)
+  // Solo aplicar descuento si hay crédito disponible
+  const montoDescuento = membresiaProgreso.value?.monto_credito > 0 
+    ? montoManodeObra * discountPercentage.value 
+    : 0
     
-    // Aplicar crédito de membresía
-    const creditoMembresia = parseFloat(membresiaProgreso.value.monto_credito || 0)
-    total = Math.max(0, total - creditoMembresia)
-  }
+  // Calcular el monto después del descuento
+  const montoDespuesDescuento = montoManodeObra - montoDescuento
+    
+  // Solo aplicar crédito si se cumple la condición de meses de progreso
+  const creditoDisponible = membresiaProgreso.value?.mesesProgreso > 1 
+    ? parseFloat(membresiaProgreso.value?.monto_credito || 0)
+    : 0
+    
+  // El crédito aplicado no puede ser mayor al monto después del descuento
+  const montoCreditoAplicado = Math.min(creditoDisponible, montoDespuesDescuento)
   
-  return total
+  // Actualizar el monto de crédito mostrado
+  if (membresiaProgreso.value) {
+    membresiaProgreso.value.monto_credito_mostrado = montoCreditoAplicado
+  }
+    
+  return Math.max(0, montoDespuesDescuento - montoCreditoAplicado)
 }
 
-const calculateTotal = () => {
-  const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
-  const creditoMembresia = membresiaProgreso.value?.mesesProgreso > 1 
-    ? parseFloat(membresiaProgreso.value.montoTotal || 0) 
-    : 0
-  
-  const total = Math.max(0, montoManodeObra - creditoMembresia)
-  return `L. ${total.toFixed(2)}`
-}
+// Actualizar el total cuando cambien los datos relevantes
+watch([() => quotationData.value?.monto_manodeobra, 
+      () => membresiaProgreso.value?.monto_credito,
+      () => membresiaProgreso.value?.mesesProgreso,
+      () => discountPercentage.value], () => {
+  totalAPagar.value = calcularTotal()
+}, { immediate: true })
 
 // Obtener calificación del técnico
 const fetchTecnicoRating = async (idTecnico) => {
@@ -3190,21 +3128,33 @@ const showError = (message) => {
 // =========================
 // INICIALIZACIÓN
 // =========================
-// Cargar datos iniciales
+// Cargar datos iniciales al montar el componente
 onMounted(async () => {
+  // Obtener el porcentaje de descuento
+  await fetchDiscountPercentage();
   try {
-    // Obtener el porcentaje de descuento al cargar el componente
-    await fetchDiscountPercentage()
+    // Cargar datos iniciales
     await Promise.all([
       loadServices(),
-      loadServiceTypes()
-    ])
+      loadServiceTypes(),
+      fetchBankAccounts(),
+      fetchVisitCost()
+    ]);
+    
+    // Si hay un usuario autenticado, cargar su progreso de membresía
+    if (auth.user?.id) {
+      await fetchMembresiaProgreso(auth.user.id);
+    }
   } catch (error) {
-    console.error('Error al cargar datos iniciales:', error)
-    showError('Error al cargar los datos. Por favor, recargue la página.')
+    console.error('Error al cargar datos iniciales:', error);
+    showToast({
+      message: 'Error al cargar los datos. Por favor, recarga la página.',
+      type: 'error',
+      duration: 5000
+    });
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-})
+});
 
-</script> 
+</script>

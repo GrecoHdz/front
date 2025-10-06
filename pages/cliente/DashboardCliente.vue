@@ -141,23 +141,31 @@
             </div>
             
             <div v-else class="grid grid-cols-2 gap-2">
-              <div v-for="(benefit, index) in benefitsToShow" :key="`benefit-${benefit.month}`"
+              <div v-for="(benefit, index) in benefitsToShow" :key="`benefit-${benefit.mes_requerido}`"
                    class="p-3 rounded-xl border-2 transition-all duration-300"
-                   :class="getBenefitStyle(benefit.month)">
+                   :class="getBenefitStyle(benefit.mes_requerido)">
                 <div class="flex items-center space-x-2 mb-1">
                   <div class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
-                       :class="getBenefitIconStyle(benefit.month)">
-                    {{ getBenefitIcon(benefit.month) }}
+                       :class="getBenefitIconStyle(benefit.mes_requerido)">
+                    {{ getBenefitIcon(benefit.mes_requerido) }}
                   </div>
                   <span class="text-xs font-bold"
-                        :class="getBenefitTextStyle(benefit.month)">
-                    Mes {{ benefit.month }}
+                        :class="getBenefitTextStyle(benefit.mes_requerido)">
+                    Mes {{ benefit.mes_requerido }}
                   </span>
                 </div>
-                <p class="text-xs font-semibold leading-tight"
-                   :class="getBenefitTitleStyle(benefit.month)">
-                  {{ benefit.title }}
+                <p class="text-xs font-semibold leading-tight mb-1"
+                   :class="getBenefitTitleStyle(benefit.mes_requerido)">
+                  {{ benefit.tipo_beneficio }}
                 </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ benefit.descripcion }}
+                </p>
+                <div v-if="benefit.savings" class="mt-1">
+                  <span class="text-xs font-medium text-green-600 dark:text-green-400">
+                    {{ benefit.savings }}
+                  </span>
+                </div>
               </div>
             </div>
             
@@ -563,9 +571,9 @@ const membershipData = ref({
 const creditResetDone = ref(false)
 
 // Estados de beneficios
-const beneficios = ref([])
-const loadingBenefits = ref(false)
-const benefitsError = ref(null)
+const beneficios = ref([]);
+const loadingBenefits = ref(false);
+const benefitsError = ref(null);
 
 // Estados de servicios
 const servicesList = ref([])
@@ -669,11 +677,17 @@ const diasRestantesCredito = computed(() => {
 
 // Computed para mapear los beneficios al formato esperado por la UI
 const benefitsToShow = computed(() => {
-  return beneficios.value.map(beneficio => ({
-    month: beneficio.mes_requerido,
-    title: beneficio.tipo_beneficio,
-    active: currentMonth.value >= beneficio.mes_requerido
-  }))
+  if (!beneficios.value || !Array.isArray(beneficios.value)) return [];
+  
+  return [...beneficios.value]
+    .sort((a, b) => (a.mes_requerido || 0) - (b.mes_requerido || 0))
+    .map(benefit => ({
+      ...benefit,
+      mes_requerido: benefit.mes_requerido || 0,
+      tipo_beneficio: benefit.tipo_beneficio || 'Beneficio',
+      descripcion: benefit.descripcion || '',
+      savings: benefit.savings || ''
+    }));
 })
 
 // Computed para obtener el mes actual relativo al inicio de la membresía
@@ -984,8 +998,8 @@ const fetchServices = async () => {
 
 // Fetch beneficios desde la API
 const fetchBeneficios = async () => {
-  loadingBenefits.value = true
-  benefitsError.value = null
+  loadingBenefits.value = true;
+  benefitsError.value = null;
   
   try {
     const response = await $fetch('/membresiabeneficios', {
@@ -995,14 +1009,35 @@ const fetchBeneficios = async () => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       }
-    })
+    });
     
-    beneficios.value = response
+    // Asegurarse de que la respuesta tenga la estructura esperada
+    if (response && Array.isArray(response.beneficios)) {
+      beneficios.value = response.beneficios.map(benefit => ({
+        ...benefit,
+        mes_requerido: benefit.mes_requerido || 0,
+        tipo_beneficio: benefit.tipo_beneficio || 'Beneficio',
+        descripcion: benefit.descripcion || '',
+        savings: benefit.savings || ''
+      }));
+    } else if (Array.isArray(response)) {
+      // Para compatibilidad con versiones anteriores de la API
+      beneficios.value = response;
+    } else {
+      throw new Error('Formato de respuesta inesperado');
+    }
+    
+    // Si no hay beneficios, establecer un array vacío
+    if (!beneficios.value || beneficios.value.length === 0) {
+      console.warn('No se encontraron beneficios');
+      beneficios.value = [];
+    }
   } catch (error) {
-    console.error('Error al cargar beneficios:', error)
-    benefitsError.value = 'No se pudieron cargar los beneficios. Intente más tarde.'
+    console.error('Error al cargar beneficios:', error);
+    benefitsError.value = 'No se pudieron cargar los beneficios. Intente más tarde.';
+    beneficios.value = []; // Asegurar que sea un array vacío en caso de error
   } finally {
-    loadingBenefits.value = false
+    loadingBenefits.value = false;
   }
 }
 

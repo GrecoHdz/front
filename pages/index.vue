@@ -107,9 +107,10 @@
                :class="getCardColor(index)">
             <div class="flex items-start space-x-3">
               <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-base" 
+                <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center text-white font-bold" 
                      :class="getIconBg(index)">
-                  {{ index + 1 }}
+                  <span class="text-base leading-none">{{ benefit.mes_requerido }}</span>
+                  <span class="text-[9px] leading-none opacity-80">mes</span>
                 </div>
               </div>
               <div class="flex-1">
@@ -139,7 +140,7 @@
             </div>
             <p class="text-blue-100 leading-relaxed text-sm">
               Solicitá cualquier servicio con solo <span class="font-bold text-yellow-300">3 clics</span>. 
-              Recibí confirmación, técnico asignado y seguimiento en tiempo real.
+              Recibes confirmación, técnico asignado y seguimiento en tiempo real.
             </p>
           </div>
         </div>
@@ -188,11 +189,11 @@
           <div class="space-y-2 text-sm">
             <div class="flex items-start space-x-2">
               <span>✨</span>
-              <span>Tu membresía no se pierde. Cada mes acumula como crédito si no dejas de pagar</span>
+              <span>Tu membresía no se pierde. Cada mes se acumula como crédito si no dejas de pagar.</span>
             </div>
             <div class="flex items-start space-x-2">
               <span>💰</span>
-              <span>Si después de 3 meses quieres hacer una reparación de L. 750, podés cubrirla con tus créditos acumulados.</span>
+              <span>Si después de 3 meses quieres hacer una reparación de L. 750, puedes cubrirla con tus créditos acumulados.</span>
             </div>
             <div class="flex items-start space-x-2">
               <span>🏦</span>
@@ -242,7 +243,7 @@
               <span>💬</span>
               <span>¿Y si opto por no pagar membresía?</span>
             </h3>
-            <p class="text-pink-100 mb-3 text-sm">Podrás usar la app sin membresía, pero:</p>
+            <p class="text-pink-100 mb-3 text-sm">Siempre podrás usar la app sin membresía, pero:</p>
             <div class="space-y-2">
               <div v-for="limitation in noMembershipLimitations" :key="limitation.id" 
                    class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
@@ -258,9 +259,8 @@
       <section class="px-4 mb-5">
         <div class="text-center mb-4">
           <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
-            ¿Por qué confiar en nosotros?
-          </h3>
-          <div class="text-3xl">🛡️</div>
+            ¿Por qué confiar en nosotros? 🛡️
+          </h3> 
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700">
           <div class="grid grid-cols-1 gap-3">
@@ -426,11 +426,12 @@
                 placeholder="Ej: 0801199912345"
                 required
                 autocomplete="username"
-                @input="form.identidad = form.identidad.replace(/\D/g, ''); formErrors.identidad = ''"
+                @input="handleIdentityInput"
+                @blur="validateIdentity"
                 @keydown="preventLetterInput"
                 maxlength="15"
-                minlength="13"
               />
+              <p v-if="formErrors.identidad" class="mt-1 text-sm text-red-500">{{ formErrors.identidad }}</p>
             </div>
 
             <div>
@@ -639,7 +640,7 @@ const validateForm = () => {
     // Validar número de identidad (13 dígitos)
     const identidadRegex = /^\d{13}$/
     if (!identidadRegex.test(form.value.identidad)) {
-      errors.identidad = 'El número de identidad debe tener 13 dígitos'
+      errors.identidad = 'El número de identidad debe tener al menos 13 dígitos'
     }
   }
   
@@ -821,47 +822,90 @@ const fetchDiscountPercentage = async () => {
 // Cargar el porcentaje de descuento al montar el componente
 onMounted(() => {
   fetchDiscountPercentage()
+  loadMembershipBenefits()
+})
+
+// Estado para los beneficios de membresía
+const membershipBenefitsList = ref([])
+const isLoadingBenefits = ref(false)
+
+// Función para cargar los beneficios desde la API
+const loadMembershipBenefits = async () => {
+  try {
+    isLoadingBenefits.value = true
+    // Asegurarse de que tenemos el porcentaje de descuento actualizado
+    if (!discountPercentage.value) {
+      await fetchDiscountPercentage()
+    }
+    
+    const data = await $fetch('/membresiabeneficios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+    
+    // Actualizar los valores de configuración si vienen en la respuesta
+    if (data.valores) {
+      visitCost.value = parseFloat(data.valores.visita_tecnico) || 0;
+      discountPercentage.value = data.valores.porcentaje_descuento || '0';
+    }
+    
+    // Obtener beneficios de la respuesta o usar valores por defecto
+    let beneficios = data.beneficios;
+    
+    if (!beneficios || beneficios.length === 0) {
+      // Usar beneficios por defecto si no hay datos
+      const costoVisita = visitCost.value || 0;
+      const porcentaje = discountPercentage.value || '0';
+      
+      beneficios = [
+        {
+          mes_requerido: 1,
+          tipo_beneficio: 'Visita técnica gratis',
+          descripcion: `Olvídate de pagar L. ${costoVisita.toLocaleString('es-HN')} cada vez: te enviamos al técnico sin costo.`
+        },
+        {
+          mes_requerido: 2,
+          tipo_beneficio: `${porcentaje}% porciento de descuento`,
+          descripcion: 'Descuento aplicado automáticamente en cualquier trabajo.'
+        }
+      ];
+    }
+    
+    // Ordenar por mes_requerido y mapear los datos
+    membershipBenefitsList.value = beneficios
+      .sort((a, b) => a.mes_requerido - b.mes_requerido)
+      .map((benefit, index) => ({
+        id: index + 1,
+        mes_requerido: benefit.mes_requerido,
+        title: benefit.tipo_beneficio,
+        description: benefit.descripcion,
+        savings: benefit.tipo_beneficio.includes('Visita técnica') ? 
+          `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita` : 
+          benefit.tipo_beneficio.includes('Descuento en todos los servicios') ?
+          `Ahorro: ${discountPercentage.value}% en cada servicio` :
+          ''
+      }))
+  } catch (error) {
+    console.error('Error al cargar los beneficios de membresía:', error)
+    // En caso de error, se manejará en el bloque try principal
+  } finally {
+    isLoadingBenefits.value = false
+  }
+}
+
+// Cargar beneficios al montar el componente
+onMounted(async () => {
+  // Primero cargar el porcentaje de descuento
+  await fetchDiscountPercentage()
+  // Luego cargar los beneficios
+  await loadMembershipBenefits()
 })
 
 // Beneficios de membresía como propiedad computada
-const membershipBenefits = computed(() => [
-  {
-    id: 1,
-    title: 'Visita técnica gratis',
-    description: `Olvídate de pagar L. ${visitCost.value.toLocaleString('es-HN')} cada vez: te enviamos al técnico sin costo.`,
-    savings: `Ahorro: L. ${visitCost.value.toLocaleString('es-HN')} por visita`
-  },
-  {
-    id: 2,
-    title: `${discountPercentage.value}% de descuento en todos los servicios`,
-    description: 'Descuento aplicado automáticamente en cualquier trabajo.',
-    savings: ''
-  },
-  {
-    id: 3,
-    title: 'Crédito acumulable',
-    description: 'A los 2 meses, lo abonado en membresía se convierte en saldo a tu favor para tu próximo servicio.',
-    savings: ''
-  },
-  {
-    id: 4,
-    title: 'Limpieza de aire gratis',
-    description: 'Al 3er mes, disfruta de una limpieza profesional de tu aire acondicionado sin pagar mano de obra. Tu aire funcionará mejor, consumirá menos energía y te evitará reparaciones costosas.',
-    savings: ''
-  },
-  {
-    id: 5,
-    title: 'Mano de obra 100% gratuita',
-    description: 'Al 6to mes, tu mano de obra no cuesta nada: solo cubres materiales si los hay.',
-    savings: ''
-  },
-  {
-    id: 6,
-    title: 'Soporte VIP',
-    description: 'Acceso prioritario a nuestro equipo para que tus problemas se resuelvan más rápido y sin esperas.',
-    savings: ''
-  }
-])
+const membershipBenefits = computed(() => membershipBenefitsList.value)
 
 // Servicios cargados dinámicamente
 const services = ref([])
@@ -965,15 +1009,27 @@ const getCardColor = (index) => {
 }
 
 const getIconBg = (index) => {
-  const bgs = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-orange-500',
-    'bg-pink-500',
-    'bg-teal-500'
-  ]
-  return bgs[index % bgs.length]
+  const benefit = membershipBenefitsList.value[index];
+  if (!benefit) return 'bg-gray-500'; // Fallback color
+  
+  const month = benefit.mes_requerido;
+  const colorMap = {
+    1: 'bg-blue-500',
+    2: 'bg-green-500',
+    3: 'bg-purple-500',
+    4: 'bg-orange-500',
+    5: 'bg-pink-500',
+    6: 'bg-teal-500',
+    7: 'bg-red-500',
+    8: 'bg-yellow-500',
+    9: 'bg-indigo-500',
+    10: 'bg-rose-500',
+    11: 'bg-emerald-500',
+    12: 'bg-amber-500'
+  };
+  
+  // Use modulo to handle months beyond 12
+  return colorMap[month] || colorMap[(month % 12) + 1] || 'bg-gray-500';
 }
 
 // Methods
@@ -981,6 +1037,11 @@ const getIconBg = (index) => {
 const authStore = useAuthStore()
 
 const handleAuth = async () => {
+  // Validar identidad antes de continuar
+  if (!validateIdentity()) {
+    return
+  }
+  
   // Resetear estado
   authStatus.value = ''
   formErrors.value = {}
@@ -1240,6 +1301,25 @@ const showToast = (message, type = 'error', duration = 5000) => {
 // Alias para compatibilidad con el código existente
 const showCustomAlert = (message) => {
   showToast(message, 'error')
+}
+
+// Validación del campo de identidad
+const handleIdentityInput = (e) => {
+  // Solo permite números
+  form.identidad = form.identidad.replace(/\D/g, '')
+  // Limpia el mensaje de error al escribir
+  if (form.identidad.length >= 13) {
+    formErrors.identidad = ''
+  }
+}
+
+const validateIdentity = () => {
+  if (form.identidad && form.identidad.length < 13) {
+    formErrors.identidad = 'La identidad debe tener al menos 13 dígitos'
+    return false
+  }
+  formErrors.identidad = ''
+  return true
 }
 
 // Funciones de validación de teclado
