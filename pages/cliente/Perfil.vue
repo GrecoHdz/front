@@ -104,7 +104,7 @@
               @click="renovarMembresia"
               class="w-full sm:w-auto px-3 py-2 text-white text-xs font-bold rounded-lg transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
               :class="{
-                'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed': isMembershipActive,
+                'bg-gradient-to-r from-green-400 to-green-500 cursor-not-allowed': isMembershipActive,
                 'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5': isMembershipExpired || isMembershipInactive,
                 'bg-gradient-to-r from-gray-500 to-gray-600 cursor-not-allowed': isMembershipPending,
                 'opacity-80': !isMembershipExpired && !isMembershipInactive

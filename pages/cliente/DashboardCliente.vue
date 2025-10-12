@@ -253,7 +253,7 @@
                   @click="renovarMembresia"
                   class="w-full sm:w-auto px-3 py-2 text-white text-xs font-bold rounded-lg transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
                   :class="{
-                    'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed': isMembershipActive,
+                    'bg-gradient-to-r from-green-400 to-green-500 cursor-not-allowed': isMembershipActive,
                     'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5': isMembershipExpired || isMembershipInactive,
                     'bg-gradient-to-r from-gray-500 to-gray-600 cursor-not-allowed': isMembershipPending,
                     'opacity-80': !isMembershipExpired && !isMembershipInactive
@@ -863,17 +863,17 @@ const haPasadoPeriodoDeGracia = (fechaVencimiento) => {
   return hoy > fechaLimite
 }
 
-// Función para obtener datos completos de la membresía
-const fetchMembershipData = async () => {
-  try {
-    const userCookie = useCookie('user')
-    const userData = userCookie.value
-    
-    if (!userData || !userData.id_usuario) {
-      membershipData.value = { status: 'inactiva', progress: 0 }
-      return
-    }
+const fetchMembershipData = async () => { 
 
+  const userCookie = useCookie('user');
+  const userData = userCookie.value;
+
+  if (!userData || !userData.id_usuario) {
+    membershipData.value = { status: 'inactiva', progress: 0 };
+    return { status: 'not_found' };
+  }
+
+  try {
     const response = await $fetch(`/membresia/${userData.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -881,68 +881,76 @@ const fetchMembershipData = async () => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       }
-    })
+    });
 
-    if (response && response.status === 'success' && response.data) {
-      const membresia = response.data
-      const fechaInicio = new Date(membresia.fecha)
-      const fechaVencimiento = new Date(fechaInicio)
-      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30)
-      
-      const hoy = new Date()
-      const totalDias = (fechaVencimiento - fechaInicio) / (1000 * 60 * 60 * 24)
-      const diasTranscurridos = (hoy - fechaInicio) / (1000 * 60 * 60 * 24)
-      const progreso = Math.min(100, Math.max(0, Math.round((diasTranscurridos / totalDias) * 100)))
-      
-      // Verificar si la membresía está vencida
-      const estaVencida = progreso >= 100
-      
+    // Caso: no hay membresía activa
+    if (response.status === 'not_found' || (response.status === 'success' && !response.data)) {
+      membershipData.value = { status: 'inactiva', progress: 0 };
+      return { status: 'not_found' };
+    }
+
+    // Caso: membresía válida
+    if (response.status === 'success' && response.data) {
+      const membresia = response.data;
+
+      if (!membresia.fecha) {
+        console.warn('⚠️ Fecha de membresía no válida:', membresia);
+        membershipData.value = { status: 'inactiva', progress: 0 };
+        return { status: 'not_found' };
+      }
+
+      const fechaInicio = new Date(membresia.fecha);
+      const fechaVencimiento = new Date(fechaInicio);
+      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
+
+      const hoy = new Date();
+      const totalDias = (fechaVencimiento - fechaInicio) / (1000 * 60 * 60 * 24);
+      const diasTranscurridos = (hoy - fechaInicio) / (1000 * 60 * 60 * 24);
+      const progreso = Math.min(100, Math.max(0, Math.round((diasTranscurridos / totalDias) * 100)));
+
+      let estado = membresia.estado;
+      const estaVencida = progreso >= 100;
       if (estaVencida && membresia.estado === 'activa') {
-        // Primero actualizamos el estado localmente
-        membresia.estado = 'vencida'
-        
-        // Verificar si han pasado 3 días desde el vencimiento y si no se ha realizado el reinicio
+        estado = 'vencida';
+
         if (haPasadoPeriodoDeGracia(fechaVencimiento) && !creditResetDone.value) {
           try {
-            // Solo actualizamos el estado en el backend cuando ya pasaron los 3 días
-            await updateMembershipToExpired(membresia.id_membresia)
-            await resetCredito()
-            creditResetDone.value = true
+            await updateMembershipToExpired(membresia.id_membresia);
+            await resetCredito();
+            creditResetDone.value = true;
           } catch (error) {
-            console.error('Error al reiniciar crédito automáticamente:', error)
+            console.error('Error al reiniciar crédito automáticamente:', error);
           }
         }
       }
-      
+
       const membershipInfo = {
         id: membresia.id_membresia,
-        status: membresia.estado,
+        status: estado,
         progress: progreso,
         startDate: fechaInicio,
         endDate: fechaVencimiento,
-        estado: membresia.estado,
+        estado,
         puedeReiniciar: haPasadoPeriodoDeGracia(fechaVencimiento) && !creditResetDone.value
-      }
-      
-      membershipData.value = membershipInfo
-      return membershipInfo
-    } else if (response?.status === 'not_found') {
-      membershipData.value = { status: 'inactiva', progress: 0 }
-      return { status: 'not_found' }
-    } else {
-      throw new Error('Formato de respuesta inesperado')
+      };
+
+      membershipData.value = membershipInfo;
+      return membershipInfo;
     }
+
+    // Cualquier otro caso inesperado
+    console.warn('⚠️ Respuesta inesperada de membresía:', response);
+    membershipData.value = { status: 'inactiva', progress: 0 };
+    return { status: 'not_found' };
+
   } catch (error) {
-    if (error.response?._data?.status === 'not_found') {
-      membershipData.value = { status: 'inactiva', progress: 0 }
-      return { status: 'not_found' }
-    }
-    
-    console.error('Error al obtener datos de la membresía:', error)
-    membershipData.value = { status: 'inactiva', progress: 0 }
-    throw error
+    console.error('❌ Error al obtener datos de la membresía:', error);
+    membershipData.value = { status: 'inactiva', progress: 0 };
+    return { status: 'not_found' };
   }
-}
+};
+
+
 
 // Función para obtener el total de solicitudes de servicio del usuario
 const fetchTotalSolicitudes = async () => {
