@@ -604,6 +604,7 @@ html {
 <script setup>
 import { ref, onMounted } from 'vue'
 import { navigateTo } from '#imports'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
@@ -619,7 +620,9 @@ const isLogin = ref(true)
 const isLoading = ref(true) // Iniciar en true para mostrar el spinner mientras se verifica la autenticación
 const isCheckingAuth = ref(true) // Nuevo estado para controlar la verificación de autenticación
 const authStatus = ref('') // '', 'success', 'error'
+const auth = useAuthStore()
 const formErrors = ref({})
+const router = useRouter()
 
 // Validation functions
 const validateForm = () => {
@@ -684,7 +687,7 @@ const cargarCiudades = async () => {
     }
   } catch (error) { 
   }
-}
+} 
 
 // Verificar autenticación al cargar la página
 const checkAuthStatus = async () => {
@@ -1077,19 +1080,26 @@ const handleAuth = async () => {
           // Esperar para mostrar el estado de éxito
           await new Promise(resolve => setTimeout(resolve, 1500));
           
-          // Cerrar modal y redirigir
+          // Cerrar modal
           showLoginModal.value = false;
           showSuccess.value = true;
           
-          // Redirigir al dashboard según el rol
-          const userRole = authStore.userRole;
-          if (userRole === 'admin') {
-            navigateTo('/admin/DashboardAdmin');
-          } else if (userRole === 'tecnico') {
-            navigateTo('/tecnico/DashboardTecnico');
-          } else {
-            navigateTo('/cliente/DashboardCliente');
-          }
+           const role = auth.user?.role?.toLowerCase()
+
+  switch (role) {
+    case 'admin':
+      router.push('/admin/DashboardAdmin')
+      break
+    case 'tecnico':
+      router.push('/tecnico/DashboardTecnico')
+      break
+    case 'usuario':
+      router.push('/cliente/DashboardCliente')
+      break
+    default:
+      router.push('/') // si no hay rol, volver al login
+      break
+  }
         } else {
           throw new Error(loginResult?.error || 'Error en las credenciales');
         }

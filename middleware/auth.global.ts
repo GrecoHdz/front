@@ -1,94 +1,87 @@
 // auth.global.ts 
 import { useAuthStore } from './auth.store';
 
-// Función auxiliar para obtener la ruta del dashboard según el rol
-function getDashboardPath(auth: any): string {
-  if (auth.hasRole('admin')) {
-    return '/admin/DashboardAdmin';
-  } else if (auth.hasRole('tecnico')) {
-    return '/tecnico/DashboardTecnico';
-  } else {
-    return '/cliente/DashboardCliente';
-  }
+// Definir tipos para la respuesta del usuario
+type UserRole = 'admin' | 'tecnico' | 'usuario';
+
+interface UserResponse {
+  id_usuario: number;
+  id_ciudad: number;
+  nombre: string;
+  rol?: {
+    nombre_rol: string;
+  };
+  estado?: string;
+  [key: string]: any; // Para propiedades adicionales
 }
 
 export default defineNuxtRouteMiddleware(async (to) => {
+  console.log('🔍 [auth.global] Verificando acceso para ruta:', to.path);
+  
+  // 1. Definir rutas públicas
+  const publicPaths = ['/', '/registro', '/auth', '/acceso-denegado', '/usuario-deshabilitado'];
+  
+  // 2. Permitir acceso a rutas públicas
+  if (publicPaths.includes(to.path)) {
+    console.log('✅ [auth.global] Ruta pública, acceso permitido');
+    return;
+  }
+  
+  // 3. Obtener store de autenticación
   const auth = useAuthStore();
-
-  // 🔹 Evitar bucles: no procesar si ya estamos en acceso-denegado o login
-  if (to.path === '/acceso-denegado' || to.path === '/') {
-    return;
-  }
-
-  // Inicializar autenticación (solo una vez)
-  if (!auth.isInitialized) {
-    await auth.initAuth();
-  }
-
-  // 🔹 VERIFICAR SI EL USUARIO ESTÁ DESHABILITADO
-  if (auth.user?.estado === 'deshabilitado') {
-    await auth.logout();
-    return navigateTo('/', { replace: true });
+  
+  // 4. Verificar autenticación básica
+  if (!auth.token) {
+    console.log('🔒 [auth.global] No hay token, redirigiendo a login');
+    return navigateTo('', { replace: true });
   }
   
-  // Verificar autenticación
-  let isAuthenticated = false;
-  
+  // 5. Obtener datos del usuario
   try {
-    isAuthenticated = await auth.checkAuth();
-  } catch (error) {
-    console.error('Error en checkAuth:', error);
-    isAuthenticated = false;
-  }
+    const config = useRuntimeConfig();
+    console.log('🔍 [auth.global] Obteniendo datos del usuario...');
+    
+    const userData = await $fetch<UserResponse>('/auth/me', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    console.log('✅ [auth.global] Datos del usuario:', userData);
 
-  // Rutas públicas
-  const publicPaths = [
-    '/acceso-denegado', 
-    '/auth',
-    '/',
-    '/login',
-    '/registro'
-  ];
-
-  const normalizedPath = to.path.toLowerCase();
-  const isPublicPath = publicPaths.some(publicPath =>
-    normalizedPath === publicPath.toLowerCase() ||
-    normalizedPath.startsWith(publicPath.toLowerCase() + '/')
-  );
-
-  if (isPublicPath) {
-    // Si está autenticado y trata de entrar a login → redirigir al dashboard
-    if (isAuthenticated && normalizedPath === '/') {
-      return navigateTo(getDashboardPath(auth), { replace: true });
+    //verificar si el usuario esta deshabilitado
+    if (userData.estado === 'deshabilitado') {
+      console.log('🚫 [auth.global] Usuario deshabilitado, redirigiendo a usuario deshabilitado');
+      return navigateTo('/usuario-deshabilitado', { replace: true });
     }
-    return;
-  }
-
-  // Para rutas protegidas: si no está autenticado → login
-  if (!isAuthenticated) {
-    return navigateTo('/', { replace: true });
-  }
-
-  // 🔹 Verificación de roles ANTES de mostrar contenido
-  if (to.path.startsWith('/admin') && !auth.hasRole('admin')) {
-    return navigateTo('/acceso-denegado', { replace: true });
-  }
-
-  if (to.path.startsWith('/tecnico') && !auth.hasRole('tecnico')) {
-    return navigateTo('/acceso-denegado', { replace: true });
-  }
-
-  if (to.path.startsWith('/cliente') && !auth.hasRole('usuario')) {
-    return navigateTo('/acceso-denegado', { replace: true });
-  }
-
-  // Verificar roles específicos en meta
-  if (to.meta?.roles) {
-    const requiredRoles = Array.isArray(to.meta.roles) ? to.meta.roles : [to.meta.roles];
-    if (!auth.hasRole(requiredRoles)) {
+    
+    // 6. Verificar rol y ruta
+    const userRole = (userData.rol?.nombre_rol?.toLowerCase() as UserRole) || 'usuario';
+    console.log('🔍 [auth.global] Rol del usuario:', userRole);
+    
+    const rolePaths: Record<UserRole, string> = {
+      'admin': '/admin',
+      'tecnico': '/tecnico',
+      'usuario': '/cliente'
+    };
+    
+    const rolePath = rolePaths[userRole as UserRole] || '/acceso-denegado';
+    
+    console.log('🔍 [auth.global] Ruta esperada para el rol:', rolePath);
+    
+    // 7. Verificar si la ruta comienza con el prefijo del rol
+    if (!to.path.startsWith(rolePath)) {
+      console.log(`⛔ [auth.global] Ruta no permitida para el rol ${userRole}`);
       return navigateTo('/acceso-denegado', { replace: true });
     }
+    
+    console.log('✅ [auth.global] Acceso permitido a', to.path);
+    
+  } catch (error) {
+    console.error('❌ [auth.global] Error al verificar autenticación:', error);
+    return navigateTo('/', { replace: true });
   }
-
-  // Si llega aquí → autenticado y con permisos
 });
