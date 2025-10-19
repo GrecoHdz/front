@@ -52,7 +52,7 @@ const navigateTo = async (path, tabName) => {
 
         <!-- Usuarios -->
         <button 
-          @click="navigateTo('/admin/usuarios', 'usuarios')" 
+          @click="navigateTo('/admin/UsuariosAdmin', 'usuarios')" 
           class="flex flex-col items-center space-y-1 group"
           :class="{ 'text-indigo-600 dark:text-indigo-400': activeTab === 'usuarios', 'text-gray-500 dark:text-gray-400': activeTab !== 'usuarios' }"
         >
@@ -67,7 +67,7 @@ const navigateTo = async (path, tabName) => {
 
         <!-- Servicios -->
         <button 
-          @click="navigateTo('/admin/servicios', 'servicios')" 
+          @click="navigateTo('/admin/ServiciosAdmin', 'servicios')" 
           class="flex flex-col items-center space-y-1 group"
           :class="{ 'text-indigo-600 dark:text-indigo-400': activeTab === 'servicios', 'text-gray-500 dark:text-gray-400': activeTab !== 'servicios' }"
         >
@@ -82,7 +82,7 @@ const navigateTo = async (path, tabName) => {
 
         <!-- Reportes -->
         <button 
-          @click="navigateTo('/admin/reportes', 'reportes')" 
+          @click="navigateTo('/admin/ReportesAdmin', 'reportes')" 
           class="flex flex-col items-center space-y-1 group"
           :class="{ 'text-indigo-600 dark:text-indigo-400': activeTab === 'reportes', 'text-gray-500 dark:text-gray-400': activeTab !== 'reportes' }"
         >
@@ -97,7 +97,7 @@ const navigateTo = async (path, tabName) => {
 
         <!-- Configuración -->
         <button 
-          @click="navigateTo('/admin/configuracion', 'configuracion')" 
+          @click="navigateTo('/admin/ConfigAdmin', 'configuracion')" 
           class="flex flex-col items-center space-y-1 group"
           :class="{ 'text-indigo-600 dark:text-indigo-400': activeTab === 'configuracion', 'text-gray-500 dark:text-gray-400': activeTab !== 'configuracion' }"
         >
