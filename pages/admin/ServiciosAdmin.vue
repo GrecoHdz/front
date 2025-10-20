@@ -118,7 +118,7 @@
                           </div>
                           <div class="min-w-0">
                             <p class="font-bold text-gray-900 dark:text-white text-[10px] sm:text-xs leading-tight line-clamp-2">{{ service.servicio.nombre }}</p>
-                            <p class="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">#{{ service.id_solicitud }}</p>
+                            <p class="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">#{{ formatDateDDMMYY(service.fecha_solicitud) }}-{{ service.id_solicitud }}</p>
                           </div>
                         </div> 
                       </div>
@@ -251,12 +251,20 @@
                         <input
                           v-model="searchQuery"
                           type="text"
-                          placeholder="Buscar..."
-                          class="w-full px-3 py-2.5 text-[9px] sm:text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white pl-9 h-10"
+                          placeholder="Cliente o ID Servicio..."
+                          class="w-full px-3 py-2.5 placeholder:text-[12px] text-[9px] sm:text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white pl-9 pr-9 h-10"
                         >
+                        <!-- Icono de búsqueda -->
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                          </svg>
+                        </div>
+                        <!-- Spinner de carga -->
+                        <div v-if="isSearching" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                          <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
                         </div>
                       </div>
@@ -294,8 +302,8 @@
                         class="w-full px-3 py-2.5 text-[9px] sm:text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none h-10"
                       >
                         <option value="">Todos los tipos</option>
-                        <option v-for="tipo in availableServiceTypes" :key="tipo" :value="tipo">
-                          {{ tipo }}
+                        <option v-for="servicio in catalogoServicios" :key="servicio.id_servicio" :value="servicio.id_servicio">
+                          {{ servicio.nombre }}
                         </option>
                       </select>
                     </div>
@@ -354,7 +362,7 @@
                           </div>
                           <div class="min-w-0">
                             <p class="text-[10px] font-bold text-gray-900 dark:text-white sm:text-xs leading-tight line-clamp-2">{{ service.servicio.nombre }}</p>
-                            <p class="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">#{{ service.id_solicitud }}</p>
+                            <p class="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">#{{ formatDateDDMMYY(service.fecha_solicitud) }}-{{ service.id_solicitud }}</p>
                           </div>
                         </div> 
                       </div>
@@ -583,27 +591,26 @@
             <div class="space-y-2">
               <div 
                 v-for="tech in paginatedTechnicians" 
-                :key="tech.id"
+                :key="tech.id_usuario"
                 @click="selectTechnician(tech)"
                 class="group p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer transition-colors"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1 min-w-0">
-                    <p class="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{{ tech.name }}</p>
-                    <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{{ tech.city }}</p>
+                    <p class="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{{ tech.nombre }}</p>
+                    <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{{ tech.ciudad?.nombre_ciudad }}</p>
                   </div>
                   <div class="flex items-center space-x-2 ml-2">
                     <span 
-                      class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap"
-                      :class="tech.available ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'"
+                      class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                     >
-                      {{ tech.available ? 'Disponible' : 'Ocupado' }}
+                      Disponible
                     </span>
                     <span class="text-[10px] sm:text-xs text-gray-500 flex items-center whitespace-nowrap">
                       <svg class="w-3 h-3 text-yellow-400 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                       </svg>
-                      {{ tech.rating }}
+                      {{ tech.promedio_calificacion?.toFixed(1) || '0.0' }}
                     </span>
                   </div>
                 </div>
@@ -872,7 +879,7 @@
 
               <div class="pt-4 space-y-2">
                 <button 
-                  @click="verifyPayment(true)"
+                  @click="showPaymentConfirmation('approve')"
                   :disabled="!paymentDetails.verified"
                   :class="{
                     'opacity-50 cursor-not-allowed': !paymentDetails.verified,
@@ -891,7 +898,7 @@
                 </button>
                 
                 <button 
-                  @click="verifyPayment(false)"
+                  @click="showPaymentConfirmation('reject')"
                   class="w-full flex items-center justify-center px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 text-[10px] sm:text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 transition-colors mt-2"
                 >
                   <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1052,6 +1059,99 @@
         </div>
       </div>
     </Transition>
+    
+    <!-- Modal de Confirmación de Pago -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showPaymentConfirmationModal" class="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-3">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="cancelPaymentAction"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-md max-h-[90vh] overflow-y-auto relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                {{ pendingPaymentAction === 'approve' ? 'Confirmar Aprobación' : 'Confirmar Rechazo' }}
+              </h3>
+              <button @click="cancelPaymentAction" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4">
+            <div class="mb-4">
+              <div class="flex items-center mb-3">
+                <div :class="pendingPaymentAction === 'approve' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'" class="p-2 rounded-full mr-3">
+                  <svg v-if="pendingPaymentAction === 'approve'" class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <svg v-else class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
+                    {{ pendingPaymentAction === 'approve' ? '¿Estás seguro de aprobar este pago?' : '¿Estás seguro de rechazar este pago?' }}
+                  </h4>
+                  <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {{ pendingPaymentAction === 'approve' 
+                      ? 'Esta acción finalizará el servicio y confirmará el pago.' 
+                      : 'Esta acción rechazará el pago y permitirá al cliente intentarlo nuevamente.' 
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Información adicional para aprobación -->
+              <div v-if="pendingPaymentAction === 'approve'" class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-4">
+                <p class="text-xs text-blue-800 dark:text-blue-200 font-medium mb-1">Verificación requerida:</p>
+                <p class="text-xs text-blue-700 dark:text-blue-300">
+                  Asegúrate de haber verificado el pago en tu banca móvil antes de proceder.
+                </p>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-2">
+              <button 
+                @click="confirmPaymentAction"
+                :disabled="isVerifying"
+                :class="{
+                  'bg-green-600 hover:bg-green-700 disabled:bg-green-400': pendingPaymentAction === 'approve',
+                  'bg-red-600 hover:bg-red-700 disabled:bg-red-400': pendingPaymentAction === 'reject'
+                }"
+                class="flex-1 flex items-center justify-center px-4 py-2.5 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors disabled:cursor-not-allowed"
+                :style="{
+                  focusRing: pendingPaymentAction === 'approve' ? 'focus:ring-green-500' : 'focus:ring-red-500'
+                }"
+              >
+                <svg v-if="isVerifying" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ isVerifying ? 'Procesando...' : (pendingPaymentAction === 'approve' ? 'Sí, Aprobar' : 'Sí, Rechazar') }}
+              </button>
+              
+              <button 
+                @click="cancelPaymentAction"
+                :disabled="isVerifying"
+                class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -1112,9 +1212,11 @@ const showAssignmentModal = ref(false)
 const showPaymentModal = ref(false)
 const showAmountDetailsModal = ref(false)
 const showBankDetailsModal = ref(false)
+const showPaymentConfirmationModal = ref(false)
 
-// Filtros
+// Filtros y búsqueda
 const searchQuery = ref('')
+const isSearching = ref(false)
 const selectedStatus = ref('')
 const selectedServiceType = ref('')
 const selectedCity = ref('')
@@ -1141,6 +1243,9 @@ const serviceToAssign = ref(null)
 const serviceToPayment = ref(null)
 const paymentType = ref('') // 'visit' or 'service'
 
+// Estado para la confirmación de pago
+const pendingPaymentAction = ref(null) // 'approve' or 'reject'
+
 // Detalles de pago
 const paymentDetails = reactive({
   verified: false,
@@ -1159,37 +1264,13 @@ const stats = ref({
 const pendingServices = ref([])
 const historyServices = ref([])
 
-// Técnicos disponibles - mantenermos esto como mock por ahora
-const availableTechnicians = ref([
-  {
-    id: 1,
-    name: 'Carlos Rodríguez',
-    city: 'Tegucigalpa',
-    available: true,
-    rating: 4.8
-  },
-  {
-    id: 2,
-    name: 'Ana López',
-    city: 'San Pedro Sula',
-    available: true,
-    rating: 4.9
-  },
-  {
-    id: 3,
-    name: 'Miguel Torres',
-    city: 'Tegucigalpa',
-    available: false,
-    rating: 4.7
-  },
-  {
-    id: 4,
-    name: 'Sofia Hernández',
-    city: 'La Ceiba',
-    available: true,
-    rating: 4.6
-  }
-])
+// Catálogo de servicios disponibles
+const catalogoServicios = ref([])
+
+// Técnicos disponibles - ahora se obtiene de la API
+const availableTechnicians = ref([])
+const techniciansTotal = ref(0)
+
 
 // Toast notification
 const toast = ref({
@@ -1200,6 +1281,75 @@ const toast = ref({
 })
 
 // ===== API FUNCTIONS =====
+// Función para obtener técnicos desde la API
+const fetchTechnicians = async (cityId = null, limit = 6, offset = 0) => {
+  try {
+    let url = `/usuarios/tecnicos?limit=${limit}&offset=${offset}`
+    if (cityId) {
+      url += `&id_ciudad=${cityId}`
+    }
+
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    // La respuesta ya tiene la estructura correcta
+    availableTechnicians.value = response.tecnicos
+    techniciansTotal.value = response.total
+
+    return response
+  } catch (error) {
+    console.error('Error al obtener técnicos:', error)
+    showError('No se pudieron cargar los técnicos')
+    return { tecnicos: [], total: 0 }
+  }
+}
+
+// Función para obtener el catálogo de servicios
+const fetchCatalogoServicios = async () => {
+  try {
+    const response = await $fetch('/servicios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      }
+    })
+    
+    // Manejar diferentes estructuras de respuesta
+    let servicios = []
+    
+    if (Array.isArray(response)) {
+      // Si la respuesta es directamente un array
+      servicios = response
+    } else if (response && response.data) {
+      // Si la respuesta tiene una propiedad data
+      servicios = response.data
+    } else if (response && response.servicios) {
+      // Si la respuesta tiene una propiedad servicios
+      servicios = response.servicios
+    } else {
+      console.warn('Estructura de respuesta no reconocida:', response)
+      servicios = []
+    }
+    
+    // Almacenar todos los servicios sin importar su estado
+    catalogoServicios.value = servicios
+    
+    return servicios
+  } catch (error) {
+    console.error('Error al obtener catálogo de servicios:', error)
+    // No lanzar el error para que no bloquee la carga de la página
+    catalogoServicios.value = []
+    return []
+  }
+}
+
 const fetchServices = async (page = 1, limit = 10, section = 'all', filters = {}) => {
   try {
     // Calcular el offset basado en la página solicitada
@@ -1391,33 +1541,41 @@ const loadStats = async () => {
 
 // ===== COMPUTED PROPERTIES =====
 
-// Lista de ciudades disponibles de técnicos
-const availableCities = computed(() => {
-  const cities = new Set()
-  availableTechnicians.value.forEach(tech => {
-    if (tech.city) cities.add(tech.city)
-  })
-  return Array.from(cities).sort()
-})
+// Lista de ciudades disponibles
+const cities = ref([])
 
-// Lista de tipos de servicios disponibles
-const availableServiceTypes = computed(() => {
-  const types = new Set()
-  // Combinar tipos de ambas listas
-  pendingServices.value.forEach(service => {
-    if (service.servicio?.nombre) types.add(service.servicio.nombre)
-  })
-  historyServices.value.forEach(service => {
-    if (service.servicio?.nombre) types.add(service.servicio.nombre)
-  })
-  return Array.from(types).sort()
+// Obtener ciudades desde la API
+const fetchCities = async () => {
+  try {
+    const data = await $fetch('/ciudad', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+    cities.value = data.map(city => city.nombre_ciudad).sort()
+  } catch (error) {
+    console.error('Error al obtener las ciudades:', error)
+    showError('No se pudieron cargar las ciudades')
+  }
+}
+
+// Lista de ciudades disponibles
+const availableCities = computed(() => cities.value)
+
+// Computed para obtener el nombre del servicio seleccionado (para mostrar en UI si es necesario)
+const selectedServiceName = computed(() => {
+  if (!selectedServiceType.value) return ''
+  const servicio = catalogoServicios.value.find(s => s.id_servicio === selectedServiceType.value)
+  return servicio ? servicio.nombre : ''
 })
 
 // Técnicos filtrados por ciudad
 const filteredTechnicians = computed(() => {
   let filtered = availableTechnicians.value
   if (selectedTechCity.value) {
-    filtered = filtered.filter(tech => tech.city === selectedTechCity.value)
+    filtered = filtered.filter(tech => tech.ciudad?.nombre_ciudad === selectedTechCity.value)
   }
   return filtered
 })
@@ -1431,7 +1589,7 @@ const paginatedTechnicians = computed(() => {
 
 // Total de páginas de técnicos
 const totalTechPages = computed(() => {
-  return Math.ceil(filteredTechnicians.value.length / techsPerPage)
+  return Math.ceil(techniciansTotal.value / techsPerPage)
 })
 
 const hasActiveFilters = computed(() => {
@@ -1439,6 +1597,15 @@ const hasActiveFilters = computed(() => {
 })
 
 // ===== FUNCIONES DE UTILIDAD =====
+// Formatear fecha a DDMMYY
+const formatDateDDMMYY = (dateString) => {
+  const date = dateString ? new Date(dateString) : new Date()
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = String(date.getFullYear()).slice(-2)
+  return `${day}${month}${year}`
+}
+
 const getServiceTypeIcon = (serviceName) => {
   if (!serviceName) return '🔧'
   
@@ -1549,17 +1716,7 @@ const formatDate = (dateString, time = false) => {
   
   const date = new Date(dateString)
   return date.toLocaleDateString('es-MX', options)
-}
-
-// Formatea la fecha en formato DD/MM/YY
-const formatDateDDMMYY = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = String(date.getFullYear()).slice(-2)
-  return `${day}/${month}/${year}`
-}
+} 
 
 const showToast = (options) => {
   toast.value.show = false
@@ -1646,17 +1803,29 @@ const selectTechnician = (technician) => {
 // Función para confirmar la asignación del técnico
 const confirmTechnicianAssignment = async () => {
   try {
+    // Actualizar el servicio en el backend primero
+    const updateResponse = await $fetch(`/solicitudservicio/${serviceToAssign.value.id_solicitud}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        estado: 'asignado',
+        id_tecnico: selectedTechnician.value.id_usuario
+      })
+    })
+
     // Buscar en servicios pendientes
     const pendingIndex = pendingServices.value.findIndex(s => s.id_solicitud === serviceToAssign.value.id_solicitud)
     if (pendingIndex > -1) {
-      pendingServices.value[pendingIndex].tecnico = {
-        id_tecnico: selectedTechnician.value.id,
-        nombre: selectedTechnician.value.name
-      }
-      pendingServices.value[pendingIndex].estado = 'asignado'
+      // Remover el servicio de la lista de pendientes inmediatamente
+      pendingServices.value.splice(pendingIndex, 1)
       
-      showSuccess(`Técnico ${selectedTechnician.value.name} asignado al servicio exitosamente`)
+      showSuccess(`${selectedTechnician.value.nombre} asignado al servicio exitosamente`)
       await loadStats()
+      await loadPendingServices(1, true) 
     }
     
     showConfirmModal.value = false
@@ -1669,62 +1838,190 @@ const confirmTechnicianAssignment = async () => {
 }
 
 const verifyPayment = async (isApproved) => {
+  // Validar que se haya marcado el checkbox de verificación si se está aprobando
   if (isApproved && !paymentDetails.verified) {
     showError('Debes verificar el pago en tu banca móvil antes de aprobarlo')
     return
   }
   
   try {
-    isVerifying.value = true
+    // Log para debugging: ver estructura completa del servicio
+    console.log('🔍 Estructura completa de serviceToPayment:', JSON.stringify(serviceToPayment.value, null, 2))
+    console.log('🔍 Tipo de pago:', paymentType.value)
+    console.log('🔍 Propiedades disponibles en serviceToPayment:', Object.keys(serviceToPayment.value || {}))
     
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Obtener el ID de la cotización del servicio - intentar múltiples ubicaciones posibles
+    const cotizacionId = serviceToPayment.value?.cotizacion?.id || 
+                        serviceToPayment.value?.cotizacion?.id_cotizacion ||
+                        serviceToPayment.value?.id_cotizacion ||
+                        serviceToPayment.value?.cotizaciones?.[0]?.id ||
+                        serviceToPayment.value?.cotizaciones?.[0]?.id_cotizacion ||
+                        serviceToPayment.value?.id_cotizacion ||
+                        serviceToPayment.value?.cotizacion_id ||
+                        serviceToPayment.value?.id ||
+                        serviceToPayment.value?.cotizacionId
     
-    // Buscar en servicios pendientes
-    const pendingIndex = pendingServices.value.findIndex(s => s.id_solicitud === serviceToPayment.value.id_solicitud)
-    if (pendingIndex > -1) {
-      if (isApproved) {
-        pendingServices.value[pendingIndex].estado = paymentType.value === 'visit' ? 'asignado' : 'finalizado'
-        pendingServices.value[pendingIndex].paymentVerified = true
-        pendingServices.value[pendingIndex].paymentAdminNotes = paymentDetails.adminNotes
-        
-        showSuccess(`Pago ${paymentType.value === 'visit' ? 'de visita' : 'de servicio'} verificado y aprobado`)
-      } else {
-        pendingServices.value[pendingIndex].estado = paymentType.value === 'visit' ? 'rechazado_visita' : 'rechazado_servicio'
-        pendingServices.value[pendingIndex].paymentVerified = false
-        pendingServices.value[pendingIndex].paymentAdminNotes = paymentDetails.adminNotes
-        
-        showSuccess('Pago rechazado. Se ha notificado al cliente.')
-      }
-      
-      await loadStats()
+    console.log('🔍 ID de cotización encontrado:', cotizacionId)
+    console.log('🔍 Ubicación encontrada:', cotizacionId ? 'Encontrado' : 'No encontrado')
+    
+    // Obtener el ID de la solicitud - intentar múltiples ubicaciones posibles
+    const solicitudId = serviceToPayment.value?.id_solicitud || 
+                        serviceToPayment.value?.id ||
+                        serviceToPayment.value?.idSolicitud ||
+                        serviceToPayment.value?.solicitud_id
+    
+    console.log('🔍 ID de solicitud encontrado:', solicitudId)
+    console.log('🔍 Ubicación encontrada:', solicitudId ? 'Encontrado' : 'No encontrado')
+    
+    if (!solicitudId) {
+      console.error('ID de solicitud no encontrado en serviceToPayment:', serviceToPayment.value)
+      showError('No se pudo encontrar el ID de la solicitud')
+      return
     }
     
+    // Obtener el ID del usuario - intentar múltiples ubicaciones posibles
+    const idUsuario = serviceToPayment.value?.cliente?.id_cliente ||
+                      
+    
+    console.log('🔍 ID de usuario encontrado:', idUsuario)
+    console.log('🔍 Ubicación encontrada:', idUsuario ? 'Encontrado' : 'No encontrado')
+    
+    if (!idUsuario && !isApproved) {
+      console.error('❌ ID de usuario no encontrado en serviceToPayment:', serviceToPayment.value)
+      showError('No se pudo encontrar el ID del usuario')
+      return
+    }
+    
+    const token = useCookie('token').value
+    if (!token) {
+      console.error('❌ Token de autenticación no encontrado')
+      showError('No se encontró el token de autenticación')
+      return
+    }
+    
+    // Deshabilitar botones mientras se procesa
+    isVerifying.value = true
+    
+    if (isApproved) {
+      // APROBAR PAGO: Usar endpoint unificado que actualiza cotización, solicitud y movimiento
+      
+      const paymentPayload = {
+        id_cotizacion: cotizacionId,
+        id_solicitud: solicitudId
+      }
+      
+      console.log('📤 Enviando aprobación de pago:', {
+        endpoint: '/pagoservicio/aceptar',
+        method: 'POST',
+        payload: paymentPayload
+      })
+      
+      const response = await $fetch('/pagoservicio/aceptar', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentPayload)
+      });
+      
+      console.log('📥 Respuesta de aprobación de pago:', response)
+      console.log('✅ Pago aprobado: cotización confirmada, solicitud finalizada y movimiento completado')
+      
+    } else {
+      // RECHAZAR PAGO: Usar endpoint unificado que revierte cotización, solicitud, crédito y comisiones
+      
+      const denyPayload = {
+        id_cotizacion: cotizacionId,
+        id_solicitud: solicitudId,
+        id_usuario: idUsuario
+      }
+      
+      console.log('📤 Enviando rechazo de pago:', {
+        endpoint: '/pagoservicio/denegar',
+        method: 'POST',
+        payload: denyPayload
+      })
+      
+      const response = await $fetch('/pagoservicio/denegar', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(denyPayload)
+      });
+      
+      console.log('📥 Respuesta de rechazo de pago:', response)
+      console.log('✅ Pago rechazado: cotización rechazada, solicitud revertida, crédito devuelto y comisiones revertidas')
+    }
+    
+    // Cerrar el modal de pago
     showPaymentModal.value = false
+    
+    // Esperar a que la animación del modal termine
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Recargar los servicios pendientes e historial
+    await loadPendingServices(1, true)
+    await loadHistoryServices(1, true)
+    await loadStats()
+    
+    // Resetear los detalles del pago
     resetPaymentDetails()
     
+    // Mostrar mensaje de éxito DESPUÉS de recargar todo
+    if (isApproved) {
+      showSuccess('Pago del servicio aprobado correctamente. El servicio ha sido finalizado.')
+    } else {
+      showSuccess('Pago rechazado. El cliente deberá realizar el pago nuevamente.')
+    }
+    
   } catch (error) {
-    console.error('Error al verificar el pago:', error)
-    showError('Ocurrió un error al procesar la verificación del pago')
+    console.error('Error al verificar el pago:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      statusMessage: error.statusMessage,
+      response: error.data,
+      stack: error.stack
+    })
+    showError(`Error al procesar el pago: ${error.message || 'Error desconocido'}`)
   } finally {
     isVerifying.value = false
   }
+}
+
+const showPaymentConfirmation = (action) => {
+  pendingPaymentAction.value = action
+  showPaymentConfirmationModal.value = true
+}
+
+const confirmPaymentAction = async () => {
+  if (pendingPaymentAction.value === 'approve') {
+    await verifyPayment(true)
+  } else if (pendingPaymentAction.value === 'reject') {
+    await verifyPayment(false)
+  }
+  showPaymentConfirmationModal.value = false
+  pendingPaymentAction.value = null
 }
 
 const resetPaymentDetails = () => {
   paymentDetails.verified = false
   paymentDetails.adminNotes = ''
   isVerifying.value = false
+  showPaymentConfirmationModal.value = false
+  pendingPaymentAction.value = null
 }
 
-const refreshServices = async () => {
-  try {
-    await loadPendingServices(1, true)
-    await loadHistoryServices(1, true)
-    await loadStats()
-    showSuccess('Lista de servicios actualizada')
-  } catch (error) {
-    showError('Error al actualizar la lista')
-  }
+const cancelPaymentAction = () => {
+  showPaymentConfirmationModal.value = false
+  pendingPaymentAction.value = null
+  isVerifying.value = false
 }
 
 // ===== FUNCIONES DE PAGINACIÓN =====
@@ -1755,21 +2052,63 @@ const changeHistoryPage = async (page) => {
 }
 
 // ===== WATCHERS =====
-// Watch para recargar el historial cuando cambien los filtros
-watch([searchQuery, selectedStatus, selectedServiceType, selectedMonth], () => {
+// Variables para almacenar los timeouts del debounce
+let searchDebounceTimeout = null
+let spinnerDebounceTimeout = null
+
+// Watch con debounce para el campo de búsqueda
+watch(searchQuery, () => {
+  // Limpiar los timeouts anteriores si existen
+  if (searchDebounceTimeout) {
+    clearTimeout(searchDebounceTimeout)
+  }
+  if (spinnerDebounceTimeout) {
+    clearTimeout(spinnerDebounceTimeout)
+  }
+  
+  // Ocultar spinner al escribir
+  isSearching.value = false
+  
+  // Si el campo está vacío, ejecutar inmediatamente sin spinner
+  if (!searchQuery.value.trim()) {
+    currentHistoryPage.value = 1
+    loadHistoryServices(1, true)
+    return
+  }
+  
+  // Mostrar spinner después de 1 segundo de inactividad
+  spinnerDebounceTimeout = setTimeout(() => {
+    isSearching.value = true
+  }, 1000)
+  
+  // Ejecutar búsqueda después de 2 segundos de inactividad
+  searchDebounceTimeout = setTimeout(async () => {
+    currentHistoryPage.value = 1
+    await loadHistoryServices(1, true)
+    // Desactivar spinner después de cargar
+    isSearching.value = false
+  }, 2000)
+})
+
+// Watch para los demás filtros (sin debounce, se ejecutan inmediatamente)
+watch([selectedStatus, selectedServiceType, selectedMonth], () => {
   currentHistoryPage.value = 1
   loadHistoryServices(1, true)
-}, { debounce: 500 })
+})
 
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
-    isLoading.value = true
+    // Cargar datos iniciales
     await Promise.all([
-      loadPendingServices(1, true),
-      loadHistoryServices(1, true),
-      loadStats()
+      loadStats(),
+      fetchCatalogoServicios(),
+      fetchCities(),
+      fetchTechnicians(),
+      loadPendingServices(),
+      loadHistoryServices()
     ])
+    isLoading.value = false
   } catch (error) {
     console.error('Error al inicializar:', error)
     showError('Error al cargar la página')

@@ -702,7 +702,7 @@
                 </div>
                 
                 <!-- Descuento por membresía -->
-                <template v-if="membresiaProgreso?.monto_credito > 0">
+                <template v-if="shouldShowDiscountBenefit">
                   <div class="flex justify-between items-center mb-1">
                     <span class="text-blue-700 dark:text-blue-300">Descuento por membresía:</span>
                     <span class="font-bold text-emerald-600 dark:text-emerald-400">
@@ -712,7 +712,7 @@
                   </template>
 
                 <!-- Crédito de membresía -->
-                <template v-if="membresiaProgreso?.mesesProgreso > 1 && membresiaProgreso?.monto_credito_mostrado > 0">
+                <template v-if="shouldShowCreditBenefit && membresiaProgreso?.monto_credito_mostrado > 0">
                   <div class="flex justify-between items-center mb-1">
                     <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
                     <span class="font-bold text-emerald-600 dark:text-emerald-400">
@@ -1554,7 +1554,7 @@ body {
 </style>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
@@ -1688,6 +1688,10 @@ const selectedServiceTypes = ref([])
 // Estados de servicios
 const selectedServiceId = ref(null)
 
+// Estados de beneficios de membresía
+const membresiaBeneficios = ref([])
+const isLoadingBeneficios = ref(false)
+
 // Estados de cancelación
 const cancelReason = ref('')
 const cancelAdditionalInfo = ref('')
@@ -1795,6 +1799,31 @@ const getCancelButtonText = computed(() => {
   
   return 'Cancelar Servicio'
 })
+
+// Computed properties para determinar si mostrar los beneficios
+const shouldShowDiscountBenefit = computed(() => {
+  if (!membresiaBeneficios.value.length || !membresiaProgreso.value) return false;
+  
+  const discountBenefit = membresiaBeneficios.value.find(
+    beneficio => beneficio.tipo_beneficio === 'Descuento en todos los servicios'
+  );
+  
+  if (!discountBenefit) return false;
+  
+  return membresiaProgreso.value.mesesProgreso >= discountBenefit.mes_requerido;
+});
+
+const shouldShowCreditBenefit = computed(() => {
+  if (!membresiaBeneficios.value.length || !membresiaProgreso.value) return false;
+  
+  const creditBenefit = membresiaBeneficios.value.find(
+    beneficio => beneficio.tipo_beneficio === 'Crédito acumulativo'
+  );
+  
+  if (!creditBenefit) return false;
+  
+  return membresiaProgreso.value.mesesProgreso >= creditBenefit.mes_requerido;
+});
 
 // =========================
 // FUNCIONES UTILITARIAS
@@ -1964,6 +1993,30 @@ const mapApiServiceToLocal = (apiService) => {
 // =========================
 // FUNCIONES DE CARGA DE DATOS
 // =========================
+
+// Función para obtener los beneficios de membresía
+const fetchMembresiaBeneficios = async () => {
+  try {
+    isLoadingBeneficios.value = true;
+    
+    const response = await $fetch('/membresiabeneficios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (response && response.beneficios) {
+      membresiaBeneficios.value = response.beneficios;
+    }
+  } catch (error) {
+    console.error('Error al obtener beneficios de membresía:', error);
+    membresiaBeneficios.value = [];
+  } finally {
+    isLoadingBeneficios.value = false;
+  }
+};
 
 // Obtener el porcentaje de descuento del backend
 const fetchDiscountPercentage = async () => {
@@ -2226,8 +2279,8 @@ const openServiceModal = async (service) => {
   // Crear una copia del servicio para no modificar el original
   const serviceCopy = { ...service };
   
-  // Si hay un técnico asignado, cargar su calificación
-  if (service.technician) {
+  // Si hay un técnico asignado y el estado es 'calificado', cargar su calificación
+  if (service.technician && service.rawStatus === 'calificado') {
     // Usar el nombre del técnico si ya está disponible
     if (service.technicianName) {
       serviceCopy.technicianName = service.technicianName;
@@ -2237,7 +2290,7 @@ const openServiceModal = async (service) => {
       serviceCopy.technicianName = `Técnico #${service.technician}`;
     }
     
-    // Cargar la calificación del técnico
+    // Cargar la calificación del técnico solo si el estado es 'calificado'
     await fetchTecnicoRating(service.technician);
   }
 
@@ -2892,10 +2945,10 @@ const processPayment = async () => {
     nombre: auth.user.nombre
   };
 
-  console.log('🛰️ Enviando al backend /pagoservicio:', payload);
+  console.log('🛰️ Enviando al backend /pagoservicio/procesar:', payload);
 
   try {
-    const response = await $fetch('/pagoservicio', {
+    const response = await $fetch('/pagoservicio/procesar', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -2905,7 +2958,7 @@ const processPayment = async () => {
       body: JSON.stringify(payload)
     });
 
-    console.log('✅ Respuesta del backend /pagoservicio:', response);
+    console.log('✅ Respuesta del backend /pagoservicio/procesar:', response);
     
     // Cerrar el modal de pago
     showPaymentModal.value = false;
@@ -3009,20 +3062,20 @@ const resetFilters = () => {
 
 const totalAPagar = ref(0)
 
-// Función para calcular el total basado en los valores mostrados en la UI
+// Función para calcular el total basado en los beneficios dinámicos
 const calcularTotal = () => {
   const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
   
-  // Solo aplicar descuento si hay crédito disponible
-  const montoDescuento = membresiaProgreso.value?.monto_credito > 0 
+  // Solo aplicar descuento si se cumple el beneficio
+  const montoDescuento = shouldShowDiscountBenefit.value 
     ? montoManodeObra * discountPercentage.value 
     : 0
     
   // Calcular el monto después del descuento
   const montoDespuesDescuento = montoManodeObra - montoDescuento
     
-  // Solo aplicar crédito si se cumple la condición de meses de progreso
-  const creditoDisponible = membresiaProgreso.value?.mesesProgreso > 1 
+  // Solo aplicar crédito si se cumple el beneficio
+  const creditoDisponible = shouldShowCreditBenefit.value 
     ? parseFloat(membresiaProgreso.value?.monto_credito || 0)
     : 0
     
@@ -3041,11 +3094,12 @@ const calcularTotal = () => {
 watch([() => quotationData.value?.monto_manodeobra, 
       () => membresiaProgreso.value?.monto_credito,
       () => membresiaProgreso.value?.mesesProgreso,
-      () => discountPercentage.value], () => {
+      () => discountPercentage.value,
+      () => membresiaBeneficios.value], () => {
   totalAPagar.value = calcularTotal()
 }, { immediate: true })
 
-// Obtener calificación del técnico
+// Obtener calificación del técnico - solo para servicios calificados
 const fetchTecnicoRating = async (idTecnico) => {
   if (!idTecnico) return
   
@@ -3130,10 +3184,14 @@ const showError = (message) => {
 // =========================
 // Cargar datos iniciales al montar el componente
 onMounted(async () => {
-  // Obtener el porcentaje de descuento
-  await fetchDiscountPercentage();
   try {
-    // Cargar datos iniciales
+    // Cargar datos de configuración primero
+    await Promise.all([
+      fetchDiscountPercentage(),
+      fetchMembresiaBeneficios()
+    ]);
+    
+    // Luego cargar datos principales
     await Promise.all([
       loadServices(),
       loadServiceTypes(),
@@ -3157,4 +3215,4 @@ onMounted(async () => {
   }
 });
 
-</script>
+</script> 
