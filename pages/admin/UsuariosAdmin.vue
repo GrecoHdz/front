@@ -81,8 +81,12 @@
                         v-model="searchQuery"
                         type="text"
                         placeholder="Buscar por nombre..."
-                        class="w-full pl-8 pr-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                        class="w-full pl-8 pr-8 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white"
+                        :disabled="isSearching"
                       >
+                      <div v-if="isSearching" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <div class="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
                     </div>
                   </div>
                   
@@ -121,7 +125,7 @@
                     <div class="flex-1">
                       <multiselect
                         v-model="selectedCity"
-                        :options="availableCities.map(city => ({ value: city, label: city }))"
+                        :options="availableCities.map(city => ({ value: city.nombre_ciudad, label: city.nombre_ciudad }))"
                         :searchable="false"
                         :close-on-select="true"
                         :show-labels="false"
@@ -167,7 +171,7 @@
               <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-3">
                   <h2 class="text-sm sm:text-xl font-black text-gray-900 dark:text-white flex items-center">
-                    👤 Usuarios ({{ filteredUsers.length }})
+                    👤 Usuarios ({{ totalUsers }})
                   </h2>
                   <div class="flex space-x-1">
                     <button 
@@ -185,8 +189,14 @@
                   </div>
                 </div>
 
+                <!-- Loading State for Users -->
+                <div v-if="loadingUsers" class="text-center py-8">
+                  <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                  <p class="text-gray-600 dark:text-gray-400 text-xs">Cargando usuarios...</p>
+                </div>
+
                 <!-- Empty State -->
-                <div v-if="paginatedUsers.length === 0" class="text-center py-6">
+                <div v-else-if="users.length === 0" class="text-center py-6">
                   <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg mx-auto mb-2 flex items-center justify-center">
                     <span class="text-lg">👤</span>
                   </div>
@@ -200,32 +210,32 @@
                 <div v-else>
                   <div class="grid grid-cols-2 gap-1.5 sm:gap-2">
                     <div 
-                      v-for="user in paginatedUsers" 
-                      :key="user.id"
+                      v-for="user in users" 
+                      :key="user.id_usuario"
                       @click="editUser(user)"
                       class="group rounded-lg p-2 transition-all duration-200 cursor-pointer border"
                       :class="{
-                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50': user.status === 'deshabilitado',
-                        'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-md': user.status === 'activo'
+                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50': user.estado === 'deshabilitado',
+                        'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-md': user.estado === 'activo'
                       }"
                     >
                       <!-- User Header -->
                       <div class="flex items-start justify-between w-full">
                         <div class="flex items-center space-x-2">
                           <div class="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-sm"
-                               :class="user.status === 'deshabilitado' ? 'bg-red-500' : 'bg-green-500'">
-                            {{ getUserInitial(user.name) }}
+                               :class="user.estado === 'deshabilitado' ? 'bg-red-500' : 'bg-green-500'">
+                            {{ getUserInitial(user.nombre) }}
                           </div>
                           <div class="min-w-0">
                             <h3 class="text-[10px] sm:text-xs font-bold text-gray-900 dark:text-white truncate max-w-[90px] sm:max-w-[120px] mb-0.5">
-                              {{ truncateName(user.name) }}
+                              {{ truncateName(user.nombre) }}
                             </h3>
                             <div class="flex">
                               <span class="text-[7px] px-1.5 py-0.5 rounded-full font-medium"
-                                    :class="user.status === 'deshabilitado' 
+                                    :class="user.estado === 'deshabilitado' 
                                       ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' 
                                       : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'">
-                                {{ getStatusText(user.status) }}
+                                {{ getStatusText(user.estado) }}
                               </span>
                             </div>
                           </div>
@@ -235,8 +245,8 @@
                             @click.stop="showServiceHistory(user)"
                             class="text-gray-400 hover:text-blue-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :class="{
-                              'text-red-400 hover:text-red-500': user.status === 'deshabilitado',
-                              'text-gray-400 hover:text-blue-500': user.status === 'activo'
+                              'text-red-400 hover:text-red-500': user.estado === 'deshabilitado',
+                              'text-gray-400 hover:text-blue-500': user.estado === 'activo'
                             }"
                             title="Historial"
                           >
@@ -248,8 +258,8 @@
                             @click.stop="editUser(user)"
                             class="text-gray-400 hover:text-blue-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :class="{
-                              'text-red-400 hover:text-red-500': user.status === 'deshabilitado',
-                              'text-gray-400 hover:text-blue-500': user.status === 'activo'
+                              'text-red-400 hover:text-red-500': user.estado === 'deshabilitado',
+                              'text-gray-400 hover:text-blue-500': user.estado === 'activo'
                             }"
                             title="Editar"
                           >
@@ -265,11 +275,11 @@
                         <div class="grid grid-cols-2 gap-2">
                           <!-- Referidos -->
                           <div 
-                            @click.stop="user.referrals > 0 ? showReferrals(user) : null"
+                            @click.stop="user.total_referidos > 0 ? showReferrals(user) : null"
                             :class="{
-                              'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': user.referrals > 0,
-                              'bg-red-50 dark:bg-red-900/20': user.status === 'deshabilitado',
-                              'bg-gray-50 dark:bg-gray-700/50': user.status === 'activo'
+                              'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': user.total_referidos > 0,
+                              'bg-red-50 dark:bg-red-900/20': user.estado === 'deshabilitado',
+                              'bg-gray-50 dark:bg-gray-700/50': user.estado === 'activo'
                             }"
                             class="rounded-lg p-1 text-center transition-colors"
                           >
@@ -277,28 +287,28 @@
                             <div class="flex items-center justify-center space-x-1">
                               <span 
                                 class="text-xs font-medium"
-                                :class="user.status === 'deshabilitado' ? 'text-red-500 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'"
+                                :class="user.estado === 'deshabilitado' ? 'text-red-500 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'"
                               >
-                                {{ user.referrals || 0 }}
+                                {{ user.total_referidos || 0 }}
                               </span>
                             </div>
                           </div>
                           
                           <!-- Créditos -->
                           <div 
-                            @click.stop="user.credits > 0 ? showCredits(user) : null"
+                            @click.stop="(user.credito?.monto || 0) > 0 ? showCredits(user) : null"
                             :class="{
-                              'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': user.credits > 0,
-                              'bg-red-50 dark:bg-red-900/20': user.status === 'deshabilitado',
-                              'bg-gray-50 dark:bg-gray-700/50': user.status === 'activo'
+                              'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': (user.credito?.monto || 0) > 0,
+                              'bg-red-50 dark:bg-red-900/20': user.estado === 'deshabilitado',
+                              'bg-gray-50 dark:bg-gray-700/50': user.estado === 'activo'
                             }"
                             class="rounded-lg p-1 text-center transition-colors"
                           >
                             <div class="text-[9px] text-gray-500 dark:text-gray-400">Ver Créditos</div>
                             <div class="flex items-center justify-center space-x-1">
                               <span class="text-xs font-medium"
-                                    :class="user.status === 'deshabilitado' ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
-                                L {{ formatCompactCurrency(user.credits || 0) }}
+                                    :class="user.estado === 'deshabilitado' ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
+                                L {{ formatCompactCurrency(user.credito?.monto || 0) }}
                               </span>
                             </div>
                           </div>
@@ -308,32 +318,36 @@
                   </div>
                   
                   <!-- Paginación Usuarios -->
-                  <div v-if="usersTotalPages > 1" class="mt-3 flex items-center justify-between px-1">
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ usersStartItem }}-{{ usersEndItem }} de {{ filteredUsers.length }}
-                    </div>
-                    <div class="flex space-x-1">
-                      <button 
-                        @click="usersCurrentPage--" 
-                        :disabled="usersCurrentPage === 1"
-                        class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                      >
-                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <span class="px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
-                        {{ usersCurrentPage }} / {{ usersTotalPages }}
-                      </span>
-                      <button 
-                        @click="usersCurrentPage++" 
-                        :disabled="usersCurrentPage >= usersTotalPages"
-                        class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                      >
-                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
+                  <div v-if="totalUsers > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                    <div class="flex items-center justify-between">
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        Página {{ usersCurrentPage }} de {{ usersTotalPages }}
+                      </div>
+                      <div class="flex items-center space-x-1">
+                        <button 
+                          @click="loadUsers(usersCurrentPage - 1)" 
+                          :disabled="usersCurrentPage === 1 || loadingMoreUsers"
+                          class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                          :class="{ 'cursor-not-allowed': usersCurrentPage === 1 }"
+                        >
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                          {{ usersCurrentPage }} / {{ usersTotalPages }}
+                        </span>
+                        <button 
+                          @click="loadUsers(usersCurrentPage + 1)" 
+                          :disabled="!hasMoreUsers || loadingMoreUsers"
+                          class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                          :class="{ 'cursor-not-allowed': !hasMoreUsers }"
+                        >
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -345,7 +359,7 @@
               <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-3">
                   <h2 class="text-sm sm:text-xl font-black text-gray-900 dark:text-white flex items-center">
-                    🔧 Técnicos ({{ filteredTechnicians.length }})
+                    🔧 Técnicos ({{ totalTechnicians }})
                   </h2>
                   <div class="flex space-x-1">
                     <button 
@@ -363,35 +377,43 @@
                   </div>
                 </div>
 
+                <!-- Loading State -->
+                <div v-if="loadingTechnicians" class="text-center py-8">
+                  <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                  <p class="text-gray-600 dark:text-gray-400 text-xs">Cargando técnicos...</p>
+                </div>
+
                 <!-- Technicians Grid -->
-                <div v-if="paginatedTechnicians.length > 0">
-                  <div class="grid grid-cols-2 gap-1.5 sm:gap-2">
+                <div v-else>
+                  <div v-if="technicians.length > 0" class="grid grid-cols-2 gap-1.5 sm:gap-2">
                     <div 
-                      v-for="technician in paginatedTechnicians" 
-                      :key="technician.id"
+                      v-for="technician in technicians" 
+                      :key="technician.id_usuario"
                       @click="editUser(technician)"
                       class="group rounded-lg p-2 transition-all duration-200 cursor-pointer border"
                       :class="{
-                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50': technician.status === 'deshabilitado',
-                        'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-md': technician.status === 'activo',
-                        'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800/50': technician.status === 'inactivo'
+                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50': technician.estado === 'inactivo' || technician.estado === 'deshabilitado',
+                        'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-md': technician.estado === 'activo',
+                        'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800/50': !technician.estado
                       }"
                     >
                       <!-- Header -->
                       <div class="flex items-start justify-between">
                         <div class="flex items-center space-x-2">
                           <div class="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs shadow-sm"
-                               :class="technician.status === 'deshabilitado' ? 'bg-red-500' : 'bg-blue-500'">
+                               :class="technician.estado === 'inactivo' || technician.estado === 'deshabilitado' ? 'bg-red-500' : 'bg-blue-500'">
                             <span>🔧</span>
                           </div>
                           <div class="min-w-0">
-                            <h3 class="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[120px]">{{ technician.name }}</h3>
+                            <h3 class="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[120px]">
+                              {{ technician.nombre || 'Técnico sin nombre' }}
+                            </h3>
                             <div class="flex items-center space-x-1">
-                              <span class="text-[10px] px-1 py-0.5 rounded-full font-medium"
-                                    :class="technician.status === 'deshabilitado' 
-                                      ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' 
-                                      : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'">
-                                {{ getStatusText(technician.status) }}
+                              <span 
+                                class="px-1.5 py-0.5 rounded-full text-[10px] font-medium"
+                                :class="getStatusColor(technician.estado || 'activo')"
+                              >
+                                {{ getStatusText(technician.estado || 'activo') }}
                               </span>
                             </div>
                           </div>
@@ -401,8 +423,8 @@
                             @click.stop="editUser(technician)"
                             class="p-1 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :class="{
-                              'text-red-400 hover:text-red-500': technician.status === 'deshabilitado',
-                              'text-gray-400 hover:text-blue-500': technician.status === 'activo'
+                              'text-red-400 hover:text-red-500': technician.estado === 'inactivo',
+                              'text-gray-400 hover:text-blue-500': technician.estado === 'activo' || !technician.estado
                             }"
                             title="Editar"
                           >
@@ -420,17 +442,17 @@
                           <div 
                             @click.stop="showCredits(technician)"
                             :class="{
-                              'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': technician.credits > 0,
-                              'bg-red-50 dark:bg-red-900/20': technician.status === 'deshabilitado',
-                              'bg-gray-50 dark:bg-gray-700/50': technician.status === 'activo'
+                              'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': true,
+                              'bg-red-50 dark:bg-red-900/20': technician.estado === 'inactivo',
+                              'bg-gray-50 dark:bg-gray-700/50': technician.estado === 'activo' || !technician.estado
                             }"
                             class="rounded-lg p-1 text-center transition-colors"
                           >
                             <div class="text-[10px] text-gray-500 dark:text-gray-400">Ver Saldo</div>
                             <div class="flex items-center justify-center space-x-1">
                               <span class="text-xs font-medium"
-                                    :class="technician.status === 'deshabilitado' ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
-                                L {{ formatCompactCurrency(technician.credits || 0) }}
+                                    :class="technician.estado === 'inactivo' ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
+                                L {{ formatCompactCurrency(technician.saldo || 0) }}
                               </span>
                             </div>
                           </div>
@@ -440,16 +462,16 @@
                             @click.stop="showTechnicianServices(technician)"
                             :class="{
                               'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': true,
-                              'bg-red-50 dark:bg-red-900/20': technician.status === 'deshabilitado',
-                              'bg-gray-50 dark:bg-gray-700/50': technician.status === 'activo'
+                              'bg-red-50 dark:bg-red-900/20': technician.estado === 'inactivo',
+                              'bg-gray-50 dark:bg-gray-700/50': technician.estado === 'activo' || !technician.estado
                             }"
                             class="rounded-lg p-1 text-center transition-colors"
                           >
                             <div class="text-[9px] text-gray-500 dark:text-gray-400">Ver Servicios</div>
                             <div class="flex items-center justify-center space-x-1">
                               <span class="text-xs font-medium"
-                                    :class="technician.status === 'deshabilitado' ? 'text-red-500 dark:text-red-400' : 'text-yellow-500 dark:text-yellow-400'">
-                                ⭐ {{ technician.rating || '5.0' }}
+                                    :class="technician.estado === 'inactivo' ? 'text-red-500 dark:text-red-400' : 'text-yellow-500 dark:text-yellow-400'">
+                                ⭐ {{ (technician.promedio_calificacion || 0).toFixed(1) }}
                               </span>
                             </div>
                           </div>
@@ -459,42 +481,47 @@
                   </div>
                 
                   <!-- Paginación Técnicos -->
-                  <div v-if="techniciansTotalPages > 1" class="mt-3 flex items-center justify-between px-1">
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ techniciansStartItem }}-{{ techniciansEndItem }} de {{ filteredTechnicians.length }}
-                    </div>
-                    <div class="flex space-x-1">
-                      <button 
-                        @click="techniciansCurrentPage--" 
-                        :disabled="techniciansCurrentPage === 1"
-                        class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                      >
-                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <span class="px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
-                        {{ techniciansCurrentPage }} / {{ techniciansTotalPages }}
-                      </span>
-                      <button 
-                        @click="techniciansCurrentPage++" 
-                        :disabled="techniciansCurrentPage >= techniciansTotalPages"
-                        class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                      >
-                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
+                  <div v-if="totalTechnicians > 0" class="mt-3">
+                    <div v-if="techniciansTotalPages > 1" class="flex items-center justify-between px-1">
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ (techniciansCurrentPage - 1) * techniciansPerPage + 1 }}-{{ Math.min(techniciansCurrentPage * techniciansPerPage, totalTechnicians) }} de {{ totalTechnicians }}
+                      </div>
+                      <div class="flex space-x-1">
+                        <button 
+                          @click="changeTechniciansPage(techniciansCurrentPage - 1)" 
+                          :disabled="techniciansCurrentPage === 1"
+                          class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <span class="px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
+                          {{ techniciansCurrentPage }} / {{ techniciansTotalPages }}
+                        </span>
+                        <button 
+                          @click="changeTechniciansPage(techniciansCurrentPage + 1)" 
+                          :disabled="techniciansCurrentPage >= techniciansTotalPages"
+                          class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Empty State -->
-                <div v-else class="text-center py-6">
-                  <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                    <span class="text-lg">🔧</span>
+                  <!-- Empty State -->
+                  <div v-else class="text-center py-6">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                      <span class="text-lg">🔧</span>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">No se encontraron técnicos</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-xs">
+                      {{ searchQuery ? 'Intenta ajustar tus filtros de búsqueda' : 'No hay técnicos registrados' }}
+                    </p>
                   </div>
-                  <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">No se encontraron técnicos</h3>
                 </div>
               </div>
             </section>
@@ -510,12 +537,12 @@
 
                 <!-- Admins Grid -->
                 <div v-if="paginatedAdmins.length > 0" class="grid grid-cols-2 gap-1">
-                  <div v-for="admin in paginatedAdmins" :key="admin.id"
+                  <div v-for="admin in paginatedAdmins" :key="admin.id_usuario"
                        class="bg-purple-50 dark:bg-purple-900/20 rounded-md p-1.5 border border-purple-200 dark:border-purple-700">
                     <div>
-                      <p class="text-[10px] font-medium text-gray-900 dark:text-white truncate">{{ admin.name }}</p>
+                      <p class="text-[10px] font-medium text-gray-900 dark:text-white truncate">{{ admin.nombre }}</p>
                       <p class="text-[9px] text-gray-600 dark:text-gray-400 truncate">{{ admin.email || 'Sin correo' }}</p>
-                      <p class="text-[9px] text-gray-600 dark:text-gray-400 truncate">{{ admin.phone || 'Sin teléfono' }}</p>
+                      <p class="text-[9px] text-gray-600 dark:text-gray-400 truncate">{{ admin.telefono || 'Sin teléfono' }}</p>
                     </div>
                   </div>
                   
@@ -642,7 +669,7 @@
                     Ciudad
                   </label>
                   <div class="text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 py-2 rounded border border-gray-200 dark:border-gray-600">
-                    {{ getCityName(userForm.id_ciudad) || 'No especificada' }}
+                    {{ userForm.ciudad?.nombre_ciudad || 'No especificada' }}
                   </div>
                 </div>
               </div> 
@@ -655,25 +682,24 @@
                       Rol
                     </label>
                     <multiselect
-                      v-model="userForm.id_rol"
-                      :options="[
-                        { value: '1', label: 'Administrador' },
-                        { value: '2', label: 'Técnico' },
-                        { value: '3', label: 'Usuario' }
-                      ]"
+                      v-model="userForm.rol"
+                      :options="roles"
                       :searchable="false"
                       :close-on-select="true"
                       :show-labels="false"
                       placeholder="Seleccionar rol"
-                      label="label"
-                      track-by="value"
+                      label="nombre_rol"
+                      track-by="id_rol"
                       class="multiselect-custom"
-                      :class="{ 'multiselect--active': userForm.id_rol }"
+                      :class="{ 'multiselect--active': userForm.rol }"
                       :select-label="''"
                       :deselect-label="''"
                       :selected-label="''"
-                      :no-options="'No hay opciones'"
+                      :no-options="loadingRoles ? 'Cargando roles...' : 'No hay roles disponibles'"
                       :no-result="'No se encontraron resultados'"
+                      :loading="loadingRoles"
+                      :disabled="loadingRoles || !roles.length"
+                      :custom-label="getRoleLabel"
                       @search-change="$event && $event.stopPropagation()"
                       @search-focus="(e) => e && e.target && e.target.blur()"
                       @touchstart.native.stop
@@ -681,7 +707,7 @@
                       :options-limit="100"
                     >
                       <template #singleLabel="{ option }">
-                        <span class="text-xs truncate">{{ option ? option.label : 'Seleccionar rol' }}</span>
+                        <span class="text-xs truncate">{{ getRoleLabel(option) }}</span>
                       </template>
                     </multiselect>
                   </div>
@@ -695,6 +721,7 @@
                       v-model="userForm.estado"
                       :options="[
                         { value: 'activo', label: 'Activo' },
+                        { value: 'inactivo', label: 'Inactivo' },
                         { value: 'deshabilitado', label: 'Deshabilitado' }
                       ]"
                       :searchable="false"
@@ -710,6 +737,7 @@
                       :selected-label="''"
                       :no-options="'No hay opciones'"
                       :no-result="'No se encontraron resultados'"
+                      :custom-label="getStatusLabel"
                       @search-change="$event && $event.stopPropagation()"
                       @search-focus="(e) => e && e.target && e.target.blur()"
                       @touchstart.native.stop
@@ -717,7 +745,7 @@
                       :options-limit="100"
                     >
                       <template #singleLabel="{ option }">
-                        <span class="text-xs truncate">{{ option ? option.label : 'Estado' }}</span>
+                        <span class="text-xs truncate">{{ getStatusLabel(option) }}</span>
                       </template>
                     </multiselect>
                   </div>
@@ -781,7 +809,7 @@
               </button>
             </div>
             <div class="space-y-2">
-              <div v-for="(user, index) in topCreditUsers" :key="user.id" class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+              <div v-for="(user, index) in topBalances" :key="index" class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-2">
                     <span class="w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{{ index + 1 }}</span>
@@ -790,7 +818,7 @@
                       <p class="text-xs text-gray-600 dark:text-gray-400">{{ user.city }}</p>
                     </div>
                   </div>
-                  <p class="text-sm font-bold text-green-600 dark:text-green-400">L. {{ formatCurrency(user.credits) }}</p>
+                  <p class="text-sm font-bold text-green-600 dark:text-green-400">L. {{ formatCurrency(user.balance) }}</p>
                 </div>
               </div>
             </div>
@@ -819,7 +847,7 @@
               </button>
             </div>
             <div class="space-y-2">
-              <div v-for="(user, index) in topReferralUsers" :key="user.id" class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+              <div v-for="(user, index) in topReferrals" :key="index" class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-2">
                     <span class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{{ index + 1 }}</span>
@@ -828,7 +856,7 @@
                       <p class="text-xs text-gray-600 dark:text-gray-400">{{ user.city }}</p>
                     </div>
                   </div>
-                  <p class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ user.referrals }}</p>
+                  <p class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ user.total }}</p>
                 </div>
               </div>
             </div>
@@ -849,7 +877,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
           <div class="p-3">
             <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-black text-gray-900 dark:text-white">👥 Referidos de {{ selectedUser?.name }}</h3>
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">👥 Referidos de {{ selectedUser?.nombre }}</h3>
               <button @click="showReferralsModal = false" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -967,7 +995,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
           <div class="p-3">
             <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-black text-gray-900 dark:text-white">💰 Créditos de {{ selectedUser?.name }}</h3>
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">💰 Créditos de {{ selectedUser?.nombre }}</h3>
               <button @click="showCreditsModal = false" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -996,7 +1024,7 @@
               
               <!-- Saldo actual -->
               <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700 flex-1">
-                <p class="text-sm font-bold text-green-600 dark:text-green-400">L. {{ formatCurrency(selectedUser?.credits || 0) }}</p>
+                <p class="text-sm font-bold text-green-600 dark:text-green-400">L. {{ formatCurrency(selectedUser?.credito?.monto || 0) }}</p>
                 <p class="text-xs text-green-600 dark:text-green-400">Saldo disponible</p>
               </div>
             </div>
@@ -1098,7 +1126,7 @@
               <h3 class="text-sm font-black text-gray-900 dark:text-white">
                 {{ selectedUser?.role === 'technician' ? '🔧' : '📋' }} 
                 {{ selectedUser?.role === 'technician' ? 'Servicios de ' : 'Historial de ' }}
-                {{ selectedUser?.name }}
+                {{ selectedUser?.nombre }}
               </h3>
               <button @click="showServiceHistoryModal = false" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1446,21 +1474,33 @@
           <div v-if="showTopBalancesModal" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
             <div class="p-3">
               <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-black text-gray-900 dark:text-white">🏆 Top 5 Técnicos con Mejores Saldos</h3>
+                <h3 class="text-sm font-black text-gray-900 dark:text-white">🏆 Top 5 Técnicos con Más Crédito</h3>
                 <button @click="showTopBalancesModal = false" class="text-gray-400 hover:text-gray-600">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
               </div>
-              <div class="space-y-2">
+              
+              <!-- Loading State -->
+              <div v-if="isLoadingTopBalances" class="flex justify-center items-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500"></div>
+              </div>
+              
+              <!-- Empty State -->
+              <div v-else-if="topBalances.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">
+                No hay técnicos con crédito disponible
+              </div>
+              
+              <!-- Data -->
+              <div v-else class="space-y-2">
                 <div v-for="(tech, index) in topBalances" :key="tech.id" class="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-2">
                       <span class="w-5 h-5 bg-yellow-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{{ index + 1 }}</span>
                       <div>
                         <p class="font-medium text-gray-900 dark:text-white text-xs">{{ tech.name }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ getCityName(tech.city) }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ tech.city || 'Sin ciudad' }}</p>
                       </div>
                     </div>
                     <p class="text-sm font-bold text-yellow-600 dark:text-yellow-400">L. {{ formatCurrency(tech.balance) }}</p>
@@ -1492,14 +1532,20 @@
                 </svg>
               </button>
             </div>
-            <div class="space-y-2">
+            <div v-if="isLoadingTopRatings" class="flex justify-center items-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+            <div v-else-if="topRatings.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">
+              No hay técnicos calificados aún
+            </div>
+            <div v-else class="space-y-2">
               <div v-for="(tech, index) in topRatings" :key="tech.id" class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-2">
                     <span class="w-5 h-5 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{{ index + 1 }}</span>
                     <div>
                       <p class="font-medium text-gray-900 dark:text-white text-xs">{{ tech.name }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ getCityName(tech.city) }}</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ tech.city }}</p>
                     </div>
                   </div>
                   <div class="flex items-center space-x-1">
@@ -1733,23 +1779,23 @@ input, textarea, select {
 </style>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { debounce } from 'lodash'
 import Multiselect from 'vue-multiselect'
 import { useHead, useCookie } from '#imports'
-import { useRouter, useRoute } from 'vue-router';
-
-const router = useRouter();
-const route = useRoute();
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 
-// ===== VARIABLES DE CONFIGURACIÓN =====
+// ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const userCookie = useCookie('user')
+const router = useRouter()
+const route = useRoute()
 
-// SEO and Meta
+// SEO y Meta
 useHead({
   title: 'HogarSeguro - Gestión de Usuarios',
   meta: [
@@ -1760,251 +1806,133 @@ useHead({
 
 // ===== VARIABLES DE ESTADO =====
 const isLoading = ref(true)
+const loadingUsers = ref(false)
+const loadingMoreUsers = ref(false)
+const loadingTechnicians = ref(false)
+const loadingRoles = ref(false)
+const loadingCities = ref(false)
 const isSaving = ref(false)
+
+// Datos
+const users = ref([])
+const technicians = ref([])
+const roles = ref([])
+const availableCities = ref([])
+const cities = ref([])
+const hasMoreUsers = ref(false) 
+
+
+// Modales
 const showEditModal = ref(false)
+const showPasswordModal = ref(false)
 const showReferralsModal = ref(false)
 const showCreditsModal = ref(false)
 const showServiceHistoryModal = ref(false)
+const showCommentModal = ref(false)
 const showTopCreditsModal = ref(false)
 const showTopReferralsModal = ref(false)
 const showTopBalancesModal = ref(false)
 const showTopRatingsModal = ref(false)
 
-// Ciudades locales (temporal)
-const localCities = [
-  { id: 1, nombre: 'Tegucigalpa' },
-  { id: 2, nombre: 'San Pedro Sula' },
-  { id: 3, nombre: 'La Ceiba' },
-  { id: 4, nombre: 'Choloma' },
-  { id: 5, nombre: 'El Progreso' },
-  { id: 6, nombre: 'Choluteca' },
-  { id: 7, nombre: 'Comayagua' },
-  { id: 8, nombre: 'Puerto Cortés' },
-  { id: 9, nombre: 'La Lima' },
-  { id: 10, nombre: 'Siguatepeque' }
-]
+// ===== VARIABLES DE PAGINACIÓN =====
+const itemsPerPage = 6
+const techniciansPerPage = ref(6)
+const adminsItemsPerPage = 6
+const modalItemsPerPage = 5
 
-// Top balances y ratings
-const topBalances = ref([
-  { id: 1, name: 'Técnico Ejemplo 1', city: 1, balance: 12500 },
-  { id: 2, name: 'Técnico Ejemplo 2', city: 2, balance: 9800 },
-  { id: 3, name: 'Técnico Ejemplo 3', city: 3, balance: 7500 },
-  { id: 4, name: 'Técnico Ejemplo 4', city: 1, balance: 6200 },
-  { id: 5, name: 'Técnico Ejemplo 5', city: 2, balance: 5100 }
-])
-
-const topRatings = ref([
-  { id: 1, name: 'Técnico Ejemplo 1', city: 1, rating: 4.9, reviews: 128 },
-  { id: 2, name: 'Técnico Ejemplo 2', city: 2, rating: 4.8, reviews: 95 },
-  { id: 3, name: 'Técnico Ejemplo 3', city: 3, rating: 4.7, reviews: 87 },
-  { id: 4, name: 'Técnico Ejemplo 4', city: 1, rating: 4.6, reviews: 76 },
-  { id: 5, name: 'Técnico Ejemplo 5', city: 2, rating: 4.5, reviews: 64 }
-])
-
-// Filtros
-const searchQuery = ref('')
-const selectedStatus = ref('')
-const selectedCity = ref('')
+// Cache para almacenar páginas ya cargadas (incluye filtros en la clave)
+const usersCache = {}
 
 // Paginación principal
-const itemsPerPage = 6 // Mostrar 6 usuarios por página
-const techniciansItemsPerPage = 6 // Cambiado a 6
-const adminsItemsPerPage = 6 // Cambiado a 6
 const usersCurrentPage = ref(1)
 const techniciansCurrentPage = ref(1)
 const adminsCurrentPage = ref(1)
+const totalUsers = ref(0)
+const totalTechnicians = ref(0)
 
 // Paginación modales
-const modalItemsPerPage = 5
 const referralsCurrentPage = ref(1)
 const creditsCurrentPage = ref(1)
 const servicesCurrentPage = ref(1)
 
-// Función para obtener la fecha actual en zona horaria de Honduras
-const getCurrentDateInHonduras = () => {
-  // Crear fecha actual en UTC
-  const now = new Date()
-  // Ajustar a zona horaria de Honduras (UTC-6)
-  const offset = -6 * 60 // Honduras está en UTC-6
-  const hondurasTime = new Date(now.getTime() + (offset * 60 * 1000))
-  return hondurasTime
-}
+// ===== VARIABLES DE FILTROS =====
+const searchQuery = ref('')
+const debouncedSearchQuery = ref('')
+const selectedStatus = ref('')
+const selectedCity = ref('')
+const isSearching = ref(false)
+
+
+// Configurar el watch para searchQuery con debounce
+const debouncedSearch = debounce(async (newVal) => {
+  isSearching.value = true
+  try {
+    debouncedSearchQuery.value = newVal
+    // Reiniciar a la primera página al buscar
+    usersCurrentPage.value = 1
+    // Limpiar caché para forzar recarga
+    Object.keys(usersCache).forEach(key => delete usersCache[key])
+    // Cargar usuarios con el nuevo término de búsqueda
+    await loadUsers(1)
+  } finally {
+    isSearching.value = false
+  }
+}, 1000) // 1 segundo de debounce
 
 // Opciones de filtros
 const statusOptions = [
   { value: '', label: 'Todos los estados' },
-  { value: 'activo', label: 'Activos' },
-  { value: 'inactivo', label: 'Inactivos' },
-  { value: 'suspendido', label: 'Suspendidos' }
+  { value: 'activo', label: 'Activo' },
+  { value: 'inactivo', label: 'Inactivo' },
+  { value: 'deshabilitado', label: 'Deshabilitado' }
 ]
 
-// Filtros modales
-const todayHonduras = getCurrentDateInHonduras()
-const currentDate = todayHonduras.toISOString().split('T')[0]
-const currentMonth = `${todayHonduras.getFullYear()}-${String(todayHonduras.getMonth() + 1).padStart(2, '0')}`
-
-const referralsFilterMonth = ref('')
-const creditsFilterMonth = ref('')
-const servicesFilterDate = ref('')
-
-// Usuario seleccionado y datos
+// ===== VARIABLES DE DATOS TEMPORALES =====
 const selectedUser = ref(null)
 const userReferrals = ref([])
 const userCreditHistory = ref([])
 const userServiceHistory = ref([])
 
-// Reset pagination when filters change
-watch([searchQuery, selectedStatus, selectedCity], () => {
-  usersCurrentPage.value = 1
-  techniciansCurrentPage.value = 1
-  adminsCurrentPage.value = 1
+// Variables para tops
+const topBalances = ref([])
+const topReferrals = ref([])
+const topRatings = ref([])
+const isLoadingTopBalances = ref(false)
+const isLoadingTopReferrals = ref(false)
+const isLoadingTopRatings = ref(false)
+
+// Variables para el formulario de usuario
+const userForm = ref({
+  id_usuario: null,
+  id_ciudad: null,
+  id_rol: null,
+  rol: null,
+  nombre: '',
+  identidad: '',
+  email: '',
+  telefono: '',
+  estado: 'activo',
+  ciudad: null
 })
 
-// ===== MÉTODOS DE UTILIDAD =====
-const getCityName = (cityId) => {
-  if (!cityId) return ''
-  const city = localCities.find(c => c.id == cityId)
-  return city ? city.nombre : 'Ciudad no encontrada'
-}
-
-const getUserInitial = (name) => {
-  if (!name) return 'U';
-  return name.charAt(0).toUpperCase();
-};
-
-const formatCompactCurrency = (value) => {
-  if (!value) return '0';
-  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-  return value;
-};
-
-const getRoleBadgeColor = (role) => {
-  switch (role) {
-    case 'admin':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
-    case 'technician':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-  }
-};
-
-// ===== VARIABLES DE DATOS =====
-// Variables para el cambio de contraseña
-const showPasswordModal = ref(false)
-const currentPassword = ref('')
+// Variables para cambio de contraseña
 const newPassword = ref('')
 const confirmPassword = ref('')
-const isUpdatingPassword = ref(false)
 
-// Estadísticas
+// Variables para filtros de modales
+const referralsFilterMonth = ref('')
+const creditsFilterMonth = ref('')
+const servicesFilterDate = ref('')
+
+// Variables para comentarios
+const currentComment = ref('')
+const currentRating = ref('')
+const currentClient = ref('')
+
+// Variables para estadísticas
 const stats = ref({
-  totalCredits: 125460,
-  totalReferrals: 89
-})
-
-// Lista de usuarios (expandida para demostrar paginación)
-const users = ref([
-  {
-    id: 1,
-    name: 'Juan Pérez',
-    email: 'juan.perez@email.com',
-    phone: '+504 9999-1111',
-    role: 'usuario',
-    status: 'activo',
-    city: 'Tegucigalpa',
-    referrals: 5,
-    credits: 1250.50,
-    createdAt: '2024-01-15T10:30:00Z',
-    lastLogin: '2024-12-18T08:45:00Z'
-  },
-  {
-    id: 2,
-    name: 'María García',
-    email: 'maria.garcia@email.com',
-    phone: '+504 9999-2222',
-    role: 'tecnico',
-    status: 'activo',
-    city: 'San Pedro Sula',
-    rating: 4.8,
-    createdAt: '2024-02-20T14:20:00Z',
-    lastLogin: '2024-12-18T07:30:00Z'
-  },
-  {
-    id: 3,
-    name: 'Carlos López',
-    email: 'carlos.lopez@email.com',
-    phone: '+504 9999-3333',
-    role: 'admin',
-    status: 'activo',
-    city: 'Tegucigalpa',
-    createdAt: '2024-01-10T09:15:00Z',
-    lastLogin: '2024-12-18T09:00:00Z'
-  },
-  {
-    id: 4,
-    name: 'Ana Rodríguez',
-    email: 'ana.rodriguez@email.com',
-    phone: '+504 9999-4444',
-    role: 'usuario',
-    status: 'deshabilitado',
-    city: 'La Ceiba',
-    referrals: 2,
-    credits: 450.00,
-    createdAt: '2024-03-05T16:45:00Z',
-    lastLogin: '2024-12-15T10:20:00Z'
-  },
-  {
-    id: 5,
-    name: 'Luis Martínez',
-    email: 'luis.martinez@email.com',
-    phone: '+504 9999-5555',
-    role: 'tecnico',
-    status: 'deshabilitado',
-    city: 'Tegucigalpa',
-    rating: 4.2,
-    createdAt: '2024-02-28T11:30:00Z',
-    lastLogin: '2024-12-14T15:10:00Z'
-  },
-  {
-    id: 6,
-    name: 'Sofia Hernández',
-    email: 'sofia.hernandez@email.com',
-    phone: '+504 9999-6666',
-    role: 'usuario',
-    status: 'activo',
-    city: 'San Pedro Sula',
-    referrals: 8,
-    credits: 2150.75,
-    createdAt: '2024-04-12T13:25:00Z',
-    lastLogin: '2024-12-18T06:50:00Z'
-  },
-  // Agregar más usuarios para demostrar paginación
-  ...Array.from({ length: 20 }, (_, i) => ({
-    id: i + 7,
-    name: `Usuario ${i + 7}`,
-    email: `usuario${i + 7}@email.com`,
-    phone: `+504 9999-${String(i + 7).padStart(4, '0')}`,
-    role: ['usuario', 'tecnico', 'admin'][Math.floor(Math.random() * 3)],
-    status: ['activo', 'deshabilitado'][Math.floor(Math.random() * 2)],
-    city: ['Tegucigalpa', 'San Pedro Sula', 'La Ceiba'][Math.floor(Math.random() * 3)],
-    referrals: Math.floor(Math.random() * 10),
-    credits: Math.floor(Math.random() * 3000) + 100,
-    rating: 4 + Math.random(),
-    createdAt: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString(),
-    lastLogin: new Date().toISOString()
-  }))
-])
-
-// Formulario de usuario
-const userForm = ref({
-  id: null,
-  name: '',
-  email: '',
-  phone: '',
-  role: '',
-  status: ''
+  totalCredits: 0,
+  totalReferrals: 0
 })
 
 // Toast notification
@@ -2015,92 +1943,60 @@ const toast = ref({
   duration: 5000
 })
 
+// ===== WATCHER PARA REINICIAR PAGINACIÓN AL CAMBIAR FILTROS =====
+watch([selectedStatus, selectedCity], () => {
+  usersCurrentPage.value = 1
+  techniciansCurrentPage.value = 1
+  adminsCurrentPage.value = 1
+  
+  // Limpiar cache cuando cambien los filtros
+  Object.keys(usersCache).forEach(key => delete usersCache[key])
+  
+  // Recargar datos cuando cambien los filtros
+  loadUsers(1)
+  loadTechnicians(1)
+})
+
+// Watch para searchQuery que activa el debounce
+watch(searchQuery, (newVal) => {
+  if (newVal !== undefined && newVal !== null) {
+    debouncedSearch(newVal)
+  }
+})
+
 // ===== COMPUTED PROPERTIES =====
-const totalUsers = computed(() => users.value.length)
-
-// Filtros por tipo de usuario
-const filteredUsers = computed(() => {
-  return users.value.filter(user => {
-    const matchesSearch = searchQuery.value === '' || 
-                         user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesStatus = !selectedStatus.value || user.status === selectedStatus.value
-    const matchesCity = !selectedCity.value || user.city === selectedCity.value
-    const isUser = user.role === 'usuario'
-    
-    return matchesSearch && matchesStatus && matchesCity && isUser
-  })
-})
-
-const filteredTechnicians = computed(() => {
-  return users.value.filter(user => {
-    const matchesSearch = searchQuery.value === '' || 
-                         user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesStatus = !selectedStatus.value || user.status === selectedStatus.value
-    const matchesCity = !selectedCity.value || user.city === selectedCity.value
-    const isTechnician = user.role === 'tecnico'
-    
-    return matchesSearch && matchesStatus && matchesCity && isTechnician
-  })
-})
-
+// Para administradores seguimos filtrando en frontend
 const filteredAdmins = computed(() => {
   return users.value.filter(user => {
     const matchesSearch = searchQuery.value === '' || 
-                         user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesStatus = !selectedStatus.value || user.status === selectedStatus.value
-    const isAdmin = user.role === 'admin'
+                         user.nombre.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesStatus = !selectedStatus.value || !selectedStatus.value.value || user.estado === selectedStatus.value.value
+    const isAdmin = user.rol?.nombre_rol?.toLowerCase() === 'admin'
     
     return matchesSearch && matchesStatus && isAdmin
   })
 })
 
-// Paginación principal
-const paginatedUsers = computed(() => {
-  const start = (usersCurrentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredUsers.value.slice(start, end)
-})
-
-const paginatedTechnicians = computed(() => {
-  const start = (techniciansCurrentPage.value - 1) * techniciansItemsPerPage
-  const end = start + techniciansItemsPerPage
-  return filteredTechnicians.value.slice(start, end)
-})
-
+// Paginación principal - Los usuarios y técnicos ahora muestran lo que viene del backend
 const paginatedAdmins = computed(() => {
   const start = (adminsCurrentPage.value - 1) * adminsItemsPerPage
   const end = start + adminsItemsPerPage
   return filteredAdmins.value.slice(start, end)
 })
 
-// Stats paginación principal
-const usersTotalPages = computed(() => Math.ceil(filteredUsers.value.length / itemsPerPage))
-const techniciansTotalPages = computed(() => Math.ceil(filteredTechnicians.value.length / techniciansItemsPerPage))
+// Calcular el total de páginas
+const usersTotalPages = computed(() => {
+  if (hasMoreUsers.value) {
+    return usersCurrentPage.value + 1
+  }
+  return Math.max(usersCurrentPage.value, 1)
+})
+
+const techniciansTotalPages = computed(() => Math.ceil(totalTechnicians.value / techniciansPerPage.value))
 const adminsTotalPages = computed(() => Math.ceil(filteredAdmins.value.length / adminsItemsPerPage))
-
-const usersStartItem = computed(() => (usersCurrentPage.value - 1) * itemsPerPage + 1)
-const usersEndItem = computed(() => Math.min(usersCurrentPage.value * itemsPerPage, filteredUsers.value.length))
-
-const techniciansStartItem = computed(() => (techniciansCurrentPage.value - 1) * techniciansItemsPerPage + 1)
-const techniciansEndItem = computed(() => Math.min(techniciansCurrentPage.value * techniciansItemsPerPage, filteredTechnicians.value.length))
 
 const adminsStartItem = computed(() => (adminsCurrentPage.value - 1) * adminsItemsPerPage + 1)
 const adminsEndItem = computed(() => Math.min(adminsCurrentPage.value * adminsItemsPerPage, filteredAdmins.value.length))
-
-// Top users
-const topCreditUsers = computed(() => {
-  return users.value
-    .filter(user => user.role === 'usuario' && user.credits > 0)
-    .sort((a, b) => b.credits - a.credits)
-    .slice(0, 5)
-})
-
-const topReferralUsers = computed(() => {
-  return users.value
-    .filter(user => user.role === 'usuario' && user.referrals > 0)
-    .sort((a, b) => b.referrals - a.referrals)
-    .slice(0, 5)
-})
 
 // Filtros modales
 const filteredReferrals = computed(() => {
@@ -2159,67 +2055,24 @@ const hasActiveFilters = computed(() => {
   return searchQuery.value !== '' || selectedStatus.value !== '' || selectedCity.value !== ''
 })
 
-const availableCities = computed(() => {
-  const cities = new Set()
-  users.value.forEach(user => {
-    if (user.city) cities.add(user.city)
-  })
-  return Array.from(cities).sort()
-})
-
-// ===== FUNCIONES DE UTILIDAD =====
 // Validar si las contraseñas coinciden
 const passwordMismatch = computed(() => {
   return newPassword.value && confirmPassword.value && 
-         newPassword.value !== confirmPassword.value;
-});
+         newPassword.value !== confirmPassword.value
+})
 
-// Actualizar la contraseña del usuario
-const updateUserPassword = async () => {
-  try {
-    isUpdatingPassword.value = true;
-    
-    // Validar que las contraseñas coincidan
-    if (newPassword.value !== confirmPassword.value) {
-      showError('Las contraseñas no coinciden');
-      return;
-    }
-    
-    // Validar longitud mínima de la contraseña
-    if (newPassword.value.length < 6) {
-      showError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    
-    // Llamar a la API para actualizar la contraseña
-    await $fetch(`/api/usuarios/${userForm.id_usuario}/cambiar-clave`, {
-      baseURL: config.public.apiBase,
-      method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: {
-        nuevaClave: newPassword.value
-      }
-    });
-    
-    // Mostrar mensaje de éxito
-    showSuccess('Contraseña actualizada correctamente');
-    
-    // Cerrar el modal y limpiar los campos
-    showPasswordModal.value = false;
-    newPassword.value = '';
-    confirmPassword.value = '';
-    
-  } catch (error) {
-    console.error('Error al actualizar la contraseña:', error);
-    const errorMessage = error.data?.message || 'Error al actualizar la contraseña';
-    showError(errorMessage);
-  } finally {
-    isUpdatingPassword.value = false;
-  }
-};
+// ===== FUNCIONES DE UTILIDAD =====
+const getUserInitial = (name) => {
+  if (!name) return 'U'
+  return name.charAt(0).toUpperCase()
+}
+
+const formatCompactCurrency = (value) => {
+  if (!value) return '0'
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}K`
+  return value.toString()
+}
 
 const formatCurrency = (value) => {
   if (value === undefined || value === null) return '0.00'
@@ -2236,39 +2089,45 @@ const formatDate = (dateString) => {
   })
 }
 
-const formatLastLogin = (dateString) => {
-  if (!dateString) return 'Nunca'
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffTime = Math.abs(now - date)
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  
-  if (diffDays === 1) return 'Hoy'
-  if (diffDays === 2) return 'Ayer'
-  if (diffDays <= 7) return `${diffDays}d`
-  
-  return formatDate(dateString)
-}
-
 const getStatusColor = (status) => {
   const colors = {
     activo: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    inactivo: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
     deshabilitado: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
   }
   return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
 }
 
 const getStatusText = (status) => {
-  const texts = {
-    activo: 'Activo',
-    deshabilitado: 'Deshabilitado'
+  const statusMap = {
+    'activo': 'Activo',
+    'inactivo': 'Inactivo',
+    'deshabilitado': 'Deshabilitado'
   }
-  return texts[status] || 'Desconocido'
+  return statusMap[status] || status
+}
+
+const getStatusLabel = (status) => {
+  if (!status) return 'Estado'
+  if (typeof status === 'string') {
+    return getStatusText(status)
+  }
+  return status.label || getStatusText(status.value)
+}
+
+const getRoleLabel = (role) => {
+  if (!role) return 'Seleccionar rol'
+  if (typeof role === 'string') {
+    return role.charAt(0).toUpperCase() + role.slice(1)
+  }
+  return role.nombre_rol ? 
+    role.nombre_rol.charAt(0).toUpperCase() + role.nombre_rol.slice(1) : 
+    'Seleccionar rol'
 }
 
 const truncateName = (name) => {
-  if (!name) return '';
-  return name.length > 12 ? name.substring(0, 12) + '...' : name;
+  if (!name) return ''
+  return name.length > 12 ? name.substring(0, 12) + '...' : name
 }
 
 const showToast = (options) => {
@@ -2330,15 +2189,21 @@ const changeServicesPage = (page) => {
   servicesCurrentPage.value = page
 }
 
+const changeTechniciansPage = (page) => {
+  if (page < 1 || page > techniciansTotalPages.value) return
+  techniciansCurrentPage.value = page
+  loadTechnicians(page)
+}
+
 // Métodos para manejar los filtros
 const clearFilters = () => {
   searchQuery.value = ''
   selectedStatus.value = ''
   selectedCity.value = ''
-  currentPage.value = 1
+  usersCurrentPage.value = 1
+  techniciansCurrentPage.value = 1
+  adminsCurrentPage.value = 1
 }
-
-
 
 const filterReferrals = () => {
   referralsCurrentPage.value = 1
@@ -2351,18 +2216,18 @@ const filterCredits = () => {
 // ===== FUNCIONES DE MODALES =====
 const closeModal = () => {
   showEditModal.value = false
+  showPasswordModal.value = false
   resetUserForm()
+  newPassword.value = ''
+  confirmPassword.value = ''
 }
 
 const showReferrals = (user) => {
   selectedUser.value = user
   referralsCurrentPage.value = 1
-  // No establecer un mes por defecto
-  // Mock data for referrals - generamos más datos para probar la paginación
-  const referralsCount = user.referrals || 0
-  const totalItems = referralsCount > 0 ? Math.max(12, referralsCount) : 0 // Mínimo 12 ítems para probar paginación
   
-  userReferrals.value = Array.from({ length: totalItems }, (_, i) => ({
+  // Mock data temporal - después conectar con API
+  userReferrals.value = Array.from({ length: 12 }, (_, i) => ({
     id: i + 1,
     name: `Referido ${i + 1}`,
     email: `referido${i + 1}@ejemplo.com`,
@@ -2375,8 +2240,8 @@ const showReferrals = (user) => {
 const showCredits = (user) => {
   selectedUser.value = user
   creditsCurrentPage.value = 1
-  // No establecer un mes por defecto
-  // Mock data for credit history - generamos más datos para probar la paginación
+  
+  // Mock data temporal - después conectar con API
   userCreditHistory.value = Array.from({ length: 20 }, (_, i) => ({
     id: i + 1,
     description: `Transacción ${i + 1}`,
@@ -2392,8 +2257,8 @@ const showCredits = (user) => {
 const showServiceHistory = (user) => {
   selectedUser.value = user
   servicesCurrentPage.value = 1
-  // Ya no es necesario actualizar servicesFilterDate aquí porque se inicializa con la fecha actual
-  // Mock data for service history - generamos más datos para probar la paginación
+  
+  // Mock data temporal - después conectar con API
   const serviceTypes = ['Limpieza', 'Mantenimiento', 'Reparación', 'Instalación', 'Revisión']
   userServiceHistory.value = Array.from({ length: 18 }, (_, i) => ({
     id: i + 1,
@@ -2406,24 +2271,11 @@ const showServiceHistory = (user) => {
   showServiceHistoryModal.value = true
 }
 
-// Variables para el modal de comentario
-const showCommentModal = ref(false)
-const currentComment = ref('')
-const currentRating = ref('')
-const currentClient = ref('')
-
-// Mostrar modal de comentario
-const showComment = (comment, rating, client) => {
-  currentComment.value = comment
-  currentRating.value = rating
-  currentClient.value = client
-  showCommentModal.value = true
-}
-
 const showTechnicianServices = (technician) => {
   selectedUser.value = technician
   servicesCurrentPage.value = 1
-  // Mock data for service history - generamos más datos para probar la paginación
+  
+  // Mock data temporal para servicios de técnico
   const serviceTypes = ['Limpieza', 'Mantenimiento', 'Reparación', 'Instalación', 'Revisión']
   const comments = [
     'Excelente servicio, muy profesional',
@@ -2432,6 +2284,7 @@ const showTechnicianServices = (technician) => {
     'Muy satisfecho con el resultado',
     'El técnico fue muy amable y eficiente'
   ]
+  
   userServiceHistory.value = Array.from({ length: 18 }, (_, i) => {
     const status = Math.random() > 0.3 ? 'Completado' : 'Pendiente'
     const isCompleted = status === 'Completado'
@@ -2443,35 +2296,195 @@ const showTechnicianServices = (technician) => {
       name: `${serviceTypes[Math.floor(Math.random() * serviceTypes.length)]} ${i + 1}`,
       status: status,
       amount: Math.floor(Math.random() * 800) + 100,
-      // Mostrar el nombre del técnico
-      technician: technician.name || 'Técnico no especificado',
-      // Solo agregar calificación si el servicio está completado
+      technician: technician.nombre || 'Técnico no especificado',
       ...(isCompleted && { 
-        rating: (Math.random() * 2 + 3).toFixed(1), // Calificación entre 3.0 y 5.0
+        rating: (Math.random() * 2 + 3).toFixed(1),
         ...(hasComment && { comment: comments[Math.floor(Math.random() * comments.length)] })
       }),
       date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString(),
-      // Mostrar el nombre del cliente como usuario del servicio
       user: clientName
     }
   })
   showServiceHistoryModal.value = true
 }
 
-const showTopCredits = () => {
-  showTopCreditsModal.value = true
+const showComment = (comment, rating, client) => {
+  currentComment.value = comment
+  currentRating.value = rating
+  currentClient.value = client
+  showCommentModal.value = true
 }
 
-const showTopReferrals = () => {
-  showTopReferralsModal.value = true
+// ===== FUNCIONES PARA TOPS =====
+const showTopCredits = async () => {
+  try {
+    isLoadingTopBalances.value = true
+    showTopCreditsModal.value = true
+    
+    // Obtener el ID del rol de Usuario
+    const rolesResponse = await $fetch('/roles', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    const rolUsuario = Array.isArray(rolesResponse) 
+      ? rolesResponse.find(r => r.nombre_rol.toLowerCase() === 'usuario')
+      : null
+    
+    if (!rolUsuario) {
+      throw new Error('No se encontró el rol de Usuario')
+    }
+    
+    const response = await $fetch('/credito/tops', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      params: {
+        id_rol: rolUsuario.id_rol
+      },
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response && response.success) {
+      topBalances.value = response.data.map(usuario => ({ 
+        name: usuario.nombre || 'Usuario sin nombre',
+        email: '', 
+        city: usuario.ciudad || 'Sin ciudad',
+        balance: parseFloat(usuario.monto_credito) || 0
+      }))
+    } else {
+      showError(response?.error || 'No se pudieron cargar los usuarios con más crédito')
+    }
+  } catch (error) {
+    console.error('Error al cargar los usuarios con más crédito:', error)
+    showError(`Error: ${error.message || 'No se pudieron cargar los usuarios con más crédito'}`)
+  } finally {
+    isLoadingTopBalances.value = false
+  }
 }
 
-const showTopBalances = () => {
-  showTopBalancesModal.value = true
+const showTopReferrals = async () => {
+  try {
+    isLoadingTopReferrals.value = true
+    showTopReferralsModal.value = true
+    
+    const response = await $fetch('/referidos/top/usuarios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    if (response && response.success) {
+      topReferrals.value = response.data.map(item => ({
+        name: item.nombre,
+        city: item.ciudad,
+        total: item.cantidad_referidos,
+        date: new Date(item.fecha).toLocaleDateString()
+      }))
+    } else {
+      showError(response?.error || 'No se pudieron cargar los usuarios con más referidos')
+    }
+  } catch (error) {
+    console.error('Error al cargar los usuarios con más referidos:', error)
+    showError(`Error: ${error.message || 'No se pudieron cargar los usuarios con más referidos'}`)
+  } finally {
+    isLoadingTopReferrals.value = false
+  }
 }
 
-const showTopRatings = () => {
-  showTopRatingsModal.value = true
+const showTopBalances = async () => {
+  try {
+    isLoadingTopBalances.value = true
+    showTopBalancesModal.value = true
+    
+    // Obtener el ID del rol de Técnico
+    const rolesResponse = await $fetch('/roles', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    const rolTecnico = Array.isArray(rolesResponse) 
+      ? rolesResponse.find(r => r.nombre_rol.toLowerCase() === 'tecnico')
+      : null
+    
+    if (!rolTecnico) {
+      throw new Error('No se encontró el rol de Técnico')
+    }
+    
+    const response = await $fetch('/credito/tops', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      params: {
+        id_rol: rolTecnico.id_rol
+      },
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response && response.success) {
+      topBalances.value = response.data.map(tecnico => ({
+        id: tecnico.nombre,
+        name: tecnico.nombre,
+        city: tecnico.ciudad,
+        balance: parseFloat(tecnico.monto_credito) || 0
+      }))
+    } else {
+      showError(response?.error || 'No se pudieron cargar los técnicos con más crédito')
+    }
+  } catch (error) {
+    console.error('Error al cargar los técnicos con más crédito:', error)
+    showError(`Error: ${error.message || 'No se pudieron cargar los técnicos con más crédito'}`)
+  } finally {
+    isLoadingTopBalances.value = false
+  }
+}
+
+const showTopRatings = async () => {
+  try {
+    isLoadingTopRatings.value = true
+    showTopRatingsModal.value = true
+    
+    const response = await $fetch('/calificaciones/top-tecnicos', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    if (response.success) {
+      topRatings.value = response.data.map(tecnico => ({
+        id: tecnico.id_usuario,
+        name: tecnico.nombre,
+        city: tecnico.ciudad,
+        rating: parseFloat(tecnico.promedio_calificacion),
+        reviews: tecnico.total_calificaciones
+      }))
+    } else {
+      showError('No se pudieron cargar los técnicos mejor calificados')
+    }
+  } catch (error) {
+    console.error('Error al obtener los técnicos mejor calificados:', error)
+    showError('Error al cargar los técnicos mejor calificados')
+  } finally {
+    isLoadingTopRatings.value = false
+  }
 }
 
 // ===== FUNCIONES DE ACCIONES =====
@@ -2479,21 +2492,36 @@ const editUser = (user) => {
   // Mapear los campos del usuario al formulario
   userForm.value = {
     id_usuario: user.id_usuario || user.id,
-    id_ciudad: user.id_ciudad || '',
-    id_rol: user.id_rol || (user.role === 'admin' ? '1' : user.role === 'tecnico' ? '2' : '3'),
+    id_ciudad: user.id_ciudad || null,
+    id_rol: user.id_rol || (user.rol ? user.rol.id_rol : null),
+    rol: user.rol || roles.value.find(r => r.id_rol === (user.id_rol || user.rol?.id_rol)) || null,
     nombre: user.nombre || user.name || '',
     identidad: user.identidad || '',
     email: user.email || '',
     telefono: user.telefono || user.phone || '',
-    estado: user.estado || user.status || 'activo'
+    estado: user.estado || user.status || 'activo',
+    ciudad: user.ciudad || null
   }
+  
   showEditModal.value = true
 }
 
 const saveUser = async () => {
   // Validar campos requeridos
-  if (!userForm.value.nombre || !userForm.value.email || !userForm.value.id_rol || !userForm.value.estado) {
+  if (!userForm.value.nombre || !userForm.value.email) {
     showError('Por favor completa todos los campos requeridos')
+    return
+  }
+
+  // Validar que se haya seleccionado un rol
+  if (!userForm.value.rol || !userForm.value.rol.id_rol) {
+    showError('Por favor selecciona un rol')
+    return
+  }
+
+  // Validar que se haya seleccionado un estado
+  if (!userForm.value.estado) {
+    showError('Por favor selecciona un estado')
     return
   }
 
@@ -2501,28 +2529,15 @@ const saveUser = async () => {
     isSaving.value = true
     
     // Preparar los datos para la API
-    const userData = {
-      id_usuario: userForm.value.id_usuario,
-      id_ciudad: parseInt(userForm.value.id_ciudad),
-      id_rol: parseInt(userForm.value.id_rol),
-      nombre: userForm.value.nombre.trim(),
-      identidad: userForm.value.identidad.trim(),
-      email: userForm.value.email.trim().toLowerCase(),
-      telefono: userForm.value.telefono.trim(),
-      estado: userForm.value.estado
+    const userData = { 
+      id_rol: parseInt(userForm.value.rol.id_rol), 
+      estado: typeof userForm.value.estado === 'object' ? userForm.value.estado.value : userForm.value.estado
     }
 
-    // Determinar si es creación o actualización
-    const isNewUser = !userData.id_usuario
-    const url = isNewUser 
-      ? '/api/usuarios'
-      : `/api/usuarios/${userData.id_usuario}`
-    const method = isNewUser ? 'POST' : 'PUT'
-
-    // Llamada a la API
-    const response = await $fetch(url, {
+    // Llamada a la API para actualizar el usuario
+    const response = await $fetch(`usuarios/${userForm.value.id_usuario}`, {
       baseURL: config.public.apiBase,
-      method,
+      method: 'PUT',
       headers: {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
@@ -2530,83 +2545,293 @@ const saveUser = async () => {
       body: userData
     })
 
-    // Actualizar la lista de usuarios
-    await refreshUsers()
+    // Recargar datos
+    await Promise.all([
+      loadUsers(),
+      loadTechnicians()
+    ])
     
-    showSuccess(`Usuario ${userData.nombre} ${isNewUser ? 'creado' : 'actualizado'} correctamente`)
+    showSuccess(`Usuario actualizado correctamente`)
     closeModal()
     
   } catch (error) {
-    console.error('Error al guardar el usuario:', error)
-    const errorMessage = error.data?.message || 'Error al guardar el usuario'
+    console.error('Error al actualizar el usuario:', error)
+    const errorMessage = error.data?.message || 'Error al actualizar el usuario'
     showError(errorMessage)
   } finally {
     isSaving.value = false
   }
 }
 
-const refreshUsers = async () => {
+// Actualizar la contraseña del usuario
+const updateUserPassword = async () => {
   try {
-    // Simular recarga de datos
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    showSuccess('Lista de usuarios actualizada')
+    isSaving.value = true
+    
+    // Validar que las contraseñas coincidan
+    if (newPassword.value !== confirmPassword.value) {
+      showError('Las contraseñas no coinciden')
+      return
+    }
+    
+    // Validar longitud mínima de la contraseña
+    if (newPassword.value.length < 6) {
+      showError('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+    
+    // Llamar a la API para actualizar la contraseña
+    await $fetch(`usuarios/${userForm.value.id_usuario}/cambiar-clave`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: {
+        nuevaClave: newPassword.value
+      }
+    })
+    
+    // Mostrar mensaje de éxito
+    showSuccess('Contraseña actualizada correctamente')
+    
+    // Cerrar el modal y limpiar los campos
+    showPasswordModal.value = false
+    newPassword.value = ''
+    confirmPassword.value = ''
+    
   } catch (error) {
-    showError('Error al actualizar la lista')
+    console.error('Error al actualizar la contraseña:', error)
+    const errorMessage = error.data?.message || 'Error al actualizar la contraseña'
+    showError(errorMessage)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+// ===== FUNCIONES PARA CARGAR DATOS DE APIS =====
+// Función para cargar roles desde la API
+const loadRoles = async () => {
+  try {
+    loadingRoles.value = true
+    const response = await $fetch('/roles', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    roles.value = Array.isArray(response) ? response : []
+    return roles.value
+  } catch (error) {
+    console.error('Error al cargar roles:', error)
+    showError('No se pudieron cargar los roles')
+    roles.value = []
+    return []
+  } finally {
+    loadingRoles.value = false
+  }
+}
+
+// Función para cargar usuarios desde la API con filtros aplicados en backend
+const loadUsers = async (page = 1) => {
+  try {
+    loadingUsers.value = true
+    
+    // Generar clave de caché que incluya filtros
+    const filtersKey = JSON.stringify({
+      search: debouncedSearchQuery.value,
+      status: selectedStatus.value?.value || '',
+      city: selectedCity.value?.value || ''
+    })
+    const cacheKey = `${page}_${filtersKey}`
+    
+    // Verificar si ya tenemos la página con estos filtros en caché
+    if (usersCache[cacheKey]) {
+      const cachedData = usersCache[cacheKey]
+      users.value = cachedData.usuarios
+      hasMoreUsers.value = cachedData.hasMore
+      totalUsers.value = cachedData.total
+      usersCurrentPage.value = page
+      return cachedData
+    }
+    
+    // Pedir un elemento extra para ver si hay más páginas
+    const limit = itemsPerPage + 1
+    const offset = (page - 1) * itemsPerPage
+    
+    // Construir parámetros de consulta con filtros
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      offset: offset.toString()
+    })
+    
+    // Agregar filtros si están definidos
+    if (debouncedSearchQuery.value) {
+      params.append('nombre', debouncedSearchQuery.value)
+    }
+    
+    if (selectedStatus.value?.value) {
+      params.append('estado', selectedStatus.value.value)
+    }
+    
+    if (selectedCity.value?.value) {
+      // Buscar el ID de la ciudad por nombre
+      const ciudad = availableCities.value.find(c => c.nombre_ciudad === selectedCity.value.value)
+      if (ciudad) {
+        params.append('id_ciudad', ciudad.id_ciudad.toString())
+      }
+    }
+    
+    const response = await $fetch(`/usuarios/usuarios?${params.toString()}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response && response.usuarios) {
+      // Verificar si hay más páginas disponibles
+      const hasMore = response.usuarios.length > itemsPerPage
+      
+      // Tomar solo los elementos necesarios (el último es solo para verificar)
+      const usuariosAMostrar = hasMore 
+        ? response.usuarios.slice(0, -1) 
+        : response.usuarios
+      
+      // Actualizar la lista de usuarios
+      users.value = usuariosAMostrar
+      hasMoreUsers.value = hasMore
+      totalUsers.value = response.total || 0
+      usersCurrentPage.value = page
+      
+      // Guardar en caché con la clave que incluye filtros
+      usersCache[cacheKey] = {
+        usuarios: usuariosAMostrar,
+        hasMore,
+        total: response.total || 0
+      }
+      
+      // Calcular estadísticas con los usuarios actuales
+      const usuariosActivos = usuariosAMostrar.filter(u => u.rol?.nombre_rol?.toLowerCase() === 'usuario')
+      stats.value.totalReferrals = usuariosActivos.reduce((sum, u) => sum + (u.total_referidos || 0), 0)
+      stats.value.totalCredits = usuariosActivos.reduce((sum, u) => sum + ((u.credito?.monto || 0)), 0)
+    }
+    
+    return response
+  } catch (error) {
+    console.error('Error al cargar usuarios:', error)
+    showError('No se pudieron cargar los usuarios')
+    return { usuarios: [], total: 0 }
+  } finally {
+    loadingUsers.value = false
+    loadingMoreUsers.value = false
+  }
+}
+
+// Función para cargar técnicos desde la API con filtros
+const loadTechnicians = async (page = 1) => {
+  try {
+    loadingTechnicians.value = true
+    const offset = (page - 1) * techniciansPerPage.value
+    
+    // Construir parámetros con filtros
+    const params = new URLSearchParams({
+      limit: techniciansPerPage.value.toString(),
+      offset: offset.toString()
+    })
+    
+    // Agregar filtros si están definidos
+    if (searchQuery.value) {
+      params.append('nombre', searchQuery.value)
+    }
+    
+    if (selectedStatus.value?.value) {
+      params.append('estado', selectedStatus.value.value)
+    }
+    
+    if (selectedCity.value?.value) {
+      // Buscar el ID de la ciudad por nombre
+      const ciudad = availableCities.value.find(c => c.nombre_ciudad === selectedCity.value.value)
+      if (ciudad) {
+        params.append('id_ciudad', ciudad.id_ciudad.toString())
+      }
+    }
+
+    const response = await $fetch(`/usuarios/tecnicos?${params.toString()}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    technicians.value = response.tecnicos || []
+    totalTechnicians.value = response.total || 0
+    techniciansCurrentPage.value = page
+    return response
+  } catch (error) {
+    console.error('Error al cargar técnicos:', error)
+    showError('No se pudieron cargar los técnicos')
+    return { tecnicos: [], total: 0 }
+  } finally {
+    loadingTechnicians.value = false
+  }
+}
+
+// Función para cargar ciudades
+const loadCities = async () => {
+  try {
+    loadingCities.value = true
+    const response = await $fetch('/ciudad', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    availableCities.value = Array.isArray(response) 
+      ? response.map(ciudad => ({
+          id_ciudad: ciudad.id_ciudad,
+          nombre_ciudad: ciudad.nombre_ciudad
+        }))
+      : []
+      
+    return availableCities.value
+  } catch (error) {
+    console.error('Error al cargar ciudades:', error)
+    showError('No se pudieron cargar las ciudades')
+    return []
+  } finally {
+    loadingCities.value = false
   }
 }
 
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
-    // Simular carga de datos
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    isLoading.value = true
+    // Cargar datos iniciales en paralelo
+    await Promise.all([
+      loadCities(),
+      loadRoles(),
+      loadUsers(),
+      loadTechnicians()
+    ])
     
   } catch (error) {
-    console.error('Error al cargar usuarios:', error)
-    showError('Error al cargar la lista de usuarios')
+    console.error('Error al cargar datos iniciales:', error)
+    showError('Error al cargar los datos iniciales')
   } finally {
     isLoading.value = false
   }
 })
-
 </script>
-
-<style scoped>
-/* Transiciones del modal */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-/* Estilos generales */
-.transition-all {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-button, input, textarea, select {
-  min-height: 36px;
-}
-
-input, textarea, select {
-  font-size: 14px;
-}
-
-@media (min-width: 640px) {
-  button, input, textarea, select {
-    min-height: 44px;
-  }
-
-  input, textarea, select {
-    font-size: 16px;
-  }
-}
-</style> 

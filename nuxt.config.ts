@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt'
   ],
   
+  // Configuración de impresión
   app: {
     head: {
       title: 'TecniServ - Servicios Técnicos a Domicilio',
@@ -19,6 +20,7 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' }
       ],
+
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'apple-touch-icon', href: '/favicon.ico' },
@@ -39,7 +41,7 @@ export default defineNuxtConfig({
     public: {
       appName: 'TecniServ',
       appVersion: '1.0.0',
-      apiBase: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:4000' //process.env.NUXT_PUBLIC_API_URL ||  
+      apiBase: 'http://localhost:4000' //process.env.NUXT_PUBLIC_API_URL ||  
     }
   }
 })
