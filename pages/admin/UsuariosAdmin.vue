@@ -49,15 +49,24 @@
                   <!-- Quick Stats -->
                   <div class="grid grid-cols-3 gap-2">
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 text-center">
-                      <div class="text-[12px] sm:text-base font-black">{{ totalUsers }}</div>
+                      <div v-if="loadingStats" class="h-5 flex items-center justify-center">
+                        <div class="w-3 h-3 border-2 border-white/50 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                      <div v-else class="text-[12px] sm:text-base font-black">{{ stats.totalUsuarios }}</div>
                       <div class="text-[11px] text-white/80">Usuarios</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 text-center">
-                      <div class="text-[12px] sm:text-base font-black">{{ stats.totalReferrals }}</div>
+                      <div v-if="loadingStats" class="h-5 flex items-center justify-center">
+                        <div class="w-3 h-3 border-2 border-white/50 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                      <div v-else class="text-[12px] sm:text-base font-black">{{ stats.totalReferidos }}</div>
                       <div class="text-[11px] text-white/80">Referidos</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 text-center">
-                      <div class="text-[11px] sm:text-base font-black">L. {{ formatCurrency(stats.totalCredits) }}</div>
+                      <div v-if="loadingStats" class="h-5 flex items-center justify-center">
+                        <div class="w-3 h-3 border-2 border-white/50 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                      <div v-else class="text-[11px] sm:text-base font-black">L. {{ formatCurrency(stats.totalCreditos) }}</div>
                       <div class="text-[11px] text-white/80">Créditos</div>
                     </div>
                   </div>
@@ -125,13 +134,13 @@
                     <div class="flex-1">
                       <multiselect
                         v-model="selectedCity"
-                        :options="availableCities.map(city => ({ value: city.nombre_ciudad, label: city.nombre_ciudad }))"
+                        :options="availableCities.map(city => ({ id: city.id_ciudad, value: city.nombre_ciudad, label: city.nombre_ciudad }))"
                         :searchable="false"
                         :close-on-select="true"
                         :show-labels="false"
                         placeholder="Todas las ciudades"
                         label="label"
-                        track-by="value"
+                        track-by="id"
                         class="multiselect-custom"
                         :class="{ 'multiselect--active': selectedCity }"
                         :select-label="''"
@@ -275,7 +284,7 @@
                         <div class="grid grid-cols-2 gap-2">
                           <!-- Referidos -->
                           <div 
-                            @click.stop="user.total_referidos > 0 ? showReferrals(user) : null"
+                            @click.stop="user.total_referidos >= 0 ? showReferrals(user) : null"
                             :class="{
                               'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': user.total_referidos > 0,
                               'bg-red-50 dark:bg-red-900/20': user.estado === 'deshabilitado',
@@ -452,7 +461,7 @@
                             <div class="flex items-center justify-center space-x-1">
                               <span class="text-xs font-medium"
                                     :class="technician.estado === 'inactivo' ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
-                                L {{ formatCompactCurrency(technician.saldo || 0) }}
+                                L. {{ formatCurrency(technician.saldo_total || 0) }}
                               </span>
                             </div>
                           </div>
@@ -481,30 +490,32 @@
                   </div>
                 
                   <!-- Paginación Técnicos -->
-                  <div v-if="totalTechnicians > 0" class="mt-3">
-                    <div v-if="techniciansTotalPages > 1" class="flex items-center justify-between px-1">
+                  <div v-if="totalTechnicians > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                    <div class="flex items-center justify-between">
                       <div class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ (techniciansCurrentPage - 1) * techniciansPerPage + 1 }}-{{ Math.min(techniciansCurrentPage * techniciansPerPage, totalTechnicians) }} de {{ totalTechnicians }}
+                        Página {{ techniciansCurrentPage }} de {{ techniciansTotalPages }}
                       </div>
-                      <div class="flex space-x-1">
+                      <div class="flex items-center space-x-1">
                         <button 
                           @click="changeTechniciansPage(techniciansCurrentPage - 1)" 
-                          :disabled="techniciansCurrentPage === 1"
-                          class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                          :disabled="techniciansCurrentPage === 1 || loadingTechnicians"
+                          class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                          :class="{ 'cursor-not-allowed': techniciansCurrentPage === 1 }"
                         >
-                          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                           </svg>
                         </button>
-                        <span class="px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
+                        <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
                           {{ techniciansCurrentPage }} / {{ techniciansTotalPages }}
                         </span>
                         <button 
                           @click="changeTechniciansPage(techniciansCurrentPage + 1)" 
-                          :disabled="techniciansCurrentPage >= techniciansTotalPages"
-                          class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                          :disabled="techniciansCurrentPage >= techniciansTotalPages || loadingTechnicians"
+                          class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                          :class="{ 'cursor-not-allowed': techniciansCurrentPage >= techniciansTotalPages }"
                         >
-                          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                           </svg>
                         </button>
@@ -531,56 +542,136 @@
               <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-3">
                   <h2 class="text-sm sm:text-xl font-black text-gray-900 dark:text-white flex items-center">
-                    👑 Administradores ({{ filteredAdmins.length }})
+                    👑 Administradores ({{ totalAdmins }})
                   </h2>
                 </div>
 
-                <!-- Admins Grid -->
-                <div v-if="paginatedAdmins.length > 0" class="grid grid-cols-2 gap-1">
-                  <div v-for="admin in paginatedAdmins" :key="admin.id_usuario"
-                       class="bg-purple-50 dark:bg-purple-900/20 rounded-md p-1.5 border border-purple-200 dark:border-purple-700">
-                    <div>
-                      <p class="text-[10px] font-medium text-gray-900 dark:text-white truncate">{{ admin.nombre }}</p>
-                      <p class="text-[9px] text-gray-600 dark:text-gray-400 truncate">{{ admin.email || 'Sin correo' }}</p>
-                      <p class="text-[9px] text-gray-600 dark:text-gray-400 truncate">{{ admin.telefono || 'Sin teléfono' }}</p>
+                <!-- Loading State -->
+                <div v-if="loadingUsers && administrators.length === 0" class="text-center py-8">
+                  <div class="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Cargando administradores...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div v-else-if="administrators.length === 0" class="text-center py-8">
+                  <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
+                    <span class="text-2xl">👥</span>
+                  </div>
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white">No hay administradores</h3>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No se encontraron administradores registrados.</p>
+                </div>
+
+                <!-- Administrators List -->
+                <div v-else>
+                  <div v-if="administrators.length > 0" class="grid grid-cols-2 gap-1.5 sm:gap-2">
+                    <div 
+                      v-for="admin in administrators" 
+                      :key="admin.id_usuario"
+                      @click="editUser(admin)"
+                      class="group rounded-lg p-2 transition-all duration-200 cursor-pointer border"
+                      :class="{
+                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50': admin.estado === 'inactivo' || admin.estado === 'deshabilitado',
+                        'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-md': admin.estado === 'activo',
+                        'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800/50': !admin.estado
+                      }"
+                    >
+                      <!-- Header -->
+                      <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-2">
+                          <div class="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs shadow-sm"
+                               :class="admin.estado === 'inactivo' || admin.estado === 'deshabilitado' ? 'bg-red-500' : 'bg-blue-500'">
+                            <span>👑</span>
+                          </div>
+                          <div class="min-w-0">
+                            <h3 class="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[120px]">
+                              {{ admin.nombre || 'Administrador' }}
+                            </h3>
+                            <div class="flex items-center space-x-1">
+                              <span 
+                                class="px-1.5 py-0.5 rounded-full text-[10px] font-medium"
+                                :class="getStatusColor(admin.estado || 'activo')"
+                              >
+                                {{ getStatusText(admin.estado || 'activo') }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                          <button 
+                            @click.stop="editUser(admin)"
+                            class="p-1 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            :class="{
+                              'text-red-400 hover:text-red-500': admin.estado === 'inactivo',
+                              'text-gray-400 hover:text-blue-500': admin.estado === 'activo' || !admin.estado
+                            }"
+                            title="Editar"
+                          >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button> 
+                        </div>
+                      </div>
+                      
+                      <!-- Admin Info -->
+                      <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <div class="space-y-1"> 
+                          
+                          <!-- Phone -->
+                          <div class="flex items-center text-xs text-gray-600 dark:text-gray-300">
+                            <svg class="w-3 h-3 mr-1.5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <span>{{ admin.telefono || 'Sin teléfono' }}</span>
+                          </div>
+                          
+                          <!-- City -->
+                          <div v-if="admin.ciudad?.nombre_ciudad" class="flex items-center text-xs text-gray-600 dark:text-gray-300">
+                            <svg class="w-3 h-3 mr-1.5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>{{ admin.ciudad.nombre_ciudad }}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <!-- Paginación Admins -->
-                  <div v-if="adminsTotalPages > 1" class="mt-3 flex items-center justify-between px-1">
+                </div>
+
+                <!-- Paginación -->
+                <div v-if="totalAdmins > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                  <div class="flex items-center justify-between">
                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ adminsStartItem }}-{{ adminsEndItem }} de {{ filteredAdmins.length }}
+                      Página {{ adminsCurrentPage }} de {{ Math.ceil(totalAdmins / adminsItemsPerPage) }}
                     </div>
-                    <div class="flex space-x-1">
+                    <div class="flex items-center space-x-1">
                       <button 
-                        @click="adminsCurrentPage--" 
-                        :disabled="adminsCurrentPage === 1"
-                        class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                        @click="changeAdminsPage(adminsCurrentPage - 1)" 
+                        :disabled="adminsCurrentPage === 1 || loadingUsers"
+                        class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                        :class="{ 'cursor-not-allowed': adminsCurrentPage === 1 }"
                       >
-                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                       </button>
-                      <span class="px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
-                        {{ adminsCurrentPage }} / {{ adminsTotalPages }}
+                      <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                        {{ adminsCurrentPage }} / {{ Math.ceil(totalAdmins / adminsItemsPerPage) }}
                       </span>
                       <button 
-                        @click="adminsCurrentPage++" 
-                        :disabled="adminsCurrentPage >= adminsTotalPages"
-                        class="p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                        @click="changeAdminsPage(adminsCurrentPage + 1)" 
+                        :disabled="adminsCurrentPage * adminsItemsPerPage >= totalAdmins || loadingUsers"
+                        class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                        :class="{ 'cursor-not-allowed': adminsCurrentPage * adminsItemsPerPage >= totalAdmins }"
                       >
-                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
                     </div>
                   </div>
-                </div>
-
-                <!-- Empty State -->
-                <div v-else class="text-center py-4">
-                  <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400">No hay administradores registrados</h3>
-                </div>
+                </div>  
               </div>
             </section>
 
@@ -865,7 +956,7 @@
       </div>
     </Transition>
 
-    <!-- Referrals Modal -->
+    <!-- Top Referrals Modal -->
     <Transition
       enter-active-class="backdrop-enter-active"
       leave-active-class="backdrop-leave-active"
@@ -885,45 +976,18 @@
               </button>
             </div>
             
-            <!-- Filtro y Contador en una línea -->
-            <div class="flex items-center justify-between mb-3 gap-2">
-              <!-- Filtro de fecha -->
-              <div class="flex-1 relative">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Filtrar por mes</label>
-                <div class="relative">
-                  <input 
-                    type="month"
-                    v-model="referralsFilterMonth"
-                    @change="filterReferrals"
-                    class="w-full px-2 py-1.5 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white appearance-none"
-                    :class="{ 'text-transparent': !referralsFilterMonth }"
-                  />
-                  <div v-if="!referralsFilterMonth" class="absolute inset-0 flex items-center px-2 pointer-events-none text-gray-400 dark:text-gray-500">
-                    <span class="text-xs">Todos los meses</span>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Contador de referidos -->
-              <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700 flex-1">
-                <p class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ filteredReferrals.length }}</p>
-                <p class="text-xs text-blue-600 dark:text-blue-400">Referidos</p>
-              </div>
-            </div>
-            
+            <!-- Contenido simplificado -->
             <div class="space-y-2 mb-3">
-              <div v-if="filteredReferrals.length === 0" class="text-center py-4">
+              <div v-if="userReferrals.length === 0" class="text-center py-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">No se encontraron referidos</p>
               </div>
               <div v-else>
-                <div v-for="referral in paginatedReferrals" :key="referral.id" class="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg mb-1 hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors">
+                <div v-for="referral in userReferrals" :key="referral.id" class="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg mb-1">
                   <div class="flex items-center justify-between">
                     <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-xs">{{ referral.name }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ referral.email }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white text-xs">{{ referral.name }}</p> 
                     </div>
-                    <span :class="referral.status === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" 
-                          class="text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                    <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-green-100 text-green-800">
                       {{ referral.status }}
                     </span>
                   </div>
@@ -932,11 +996,11 @@
               </div>
             </div>
             
-            <!-- Paginación referidos -->
-            <div v-if="referralsTotalPages > 1" class="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
+            <!-- Paginación -->
+            <div v-if="referralsTotalPages > 1" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
               <div class="flex items-center justify-between">
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ referralsStartItem }}-{{ referralsEndItem }} de {{ filteredReferrals.length }}
+                  {{ Math.min(referralsCurrentPage * 5, totalReferrals) }} de {{ totalReferrals }}
                 </div>
                 <div class="flex items-center space-x-1">
                   <button 
@@ -950,20 +1014,9 @@
                     </svg>
                   </button>
                   
-                  <div class="flex items-center space-x-0.5">
-                    <button 
-                      v-for="page in referralsTotalPages" 
-                      :key="page"
-                      @click="changeReferralsPage(page)"
-                      class="w-6 h-6 text-xs rounded-full flex items-center justify-center"
-                      :class="{
-                        'bg-blue-600 text-white': referralsCurrentPage === page,
-                        'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700': referralsCurrentPage !== page
-                      }"
-                    >
-                      {{ page }}
-                    </button>
-                  </div>
+                  <span class="text-xs text-gray-700 dark:text-gray-300 px-2">
+                    {{ referralsCurrentPage }} / {{ referralsTotalPages }}
+                  </span>
                   
                   <button 
                     @click="changeReferralsPage(referralsCurrentPage + 1)" 
@@ -1005,6 +1058,7 @@
             
             <!-- Filtro y Saldo en una línea -->
             <div class="flex items-center justify-between mb-3 gap-2">
+
               <!-- Filtro de fecha -->
               <div class="flex-1 relative">
                 <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Filtrar por mes</label>
@@ -1016,16 +1070,17 @@
                     class="w-full px-2 py-1.5 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white appearance-none"
                     :class="{ 'text-transparent': !creditsFilterMonth }"
                   />
-                  <div v-if="!creditsFilterMonth" class="absolute inset-0 flex items-center px-2 pointer-events-none text-gray-400 dark:text-gray-500">
-                    <span class="text-xs">Todos los meses</span>
-                  </div>
                 </div>
               </div>
               
-              <!-- Saldo actual -->
+              <!-- Saldo -->
               <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700 flex-1">
-                <p class="text-sm font-bold text-green-600 dark:text-green-400">L. {{ formatCurrency(selectedUser?.credito?.monto || 0) }}</p>
-                <p class="text-xs text-green-600 dark:text-green-400">Saldo disponible</p>
+                <p class="text-sm font-bold text-green-600 dark:text-green-400">
+                  L. {{ formatCurrency(creditsResponse?.saldoRangoFechas !== undefined ? creditsResponse.saldoRangoFechas : creditsResponse?.saldoDisponible || 0) }}
+                </p>
+                <p class="text-xs text-green-600 dark:text-green-400">
+                  {{ creditsFilterMonth ? 'Saldo del período' : 'Saldo disponible' }}
+                </p>
               </div>
             </div>
             
@@ -1036,10 +1091,38 @@
               <div v-else>
                 <div v-for="transaction in paginatedCredits" :key="transaction.id" class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg mb-1.5 hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors">
                   <div class="flex items-start justify-between">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-xs">{{ transaction.description }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(transaction.date) }}</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ transaction.reference }}</p>
+                    <div class="flex-1">
+                      <div class="flex items-center">
+                        <p class="font-medium text-gray-900 dark:text-white text-xs">
+                          {{ transaction.description.includes('Retiro a cuenta bancaria') ? 'Retiro' : transaction.description }}
+                        </p>
+                        <div class="flex items-center space-x-1">
+                          <template v-if="transaction.reference && transaction.reference.startsWith('COT-')">
+                            <button 
+                              @click.stop="openQuoteModal(transaction)"
+                              class="flex-shrink-0 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                              title="Ver detalles de la cotización"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </button>
+                          </template>
+                          <template v-if="transaction.originalDescription && transaction.originalDescription.includes('Retiro a cuenta bancaria')">
+                            <button 
+                              @click.stop="openWithdrawalModal(transaction)"
+                              class="flex-shrink-0 text-purple-500 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
+                              title="Ver detalles del retiro"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </button>
+                          </template>
+                        </div>
+                      </div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(transaction.date) }}</p> 
                     </div>
                     <div class="text-right">
                       <p :class="transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'" class="font-bold text-sm">
@@ -1062,44 +1145,35 @@
             <div v-if="creditsTotalPages > 1" class="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ creditsStartItem }}-{{ creditsEndItem }} de {{ filteredCredits.length }}
+                  Mostrando {{ userCreditHistory.length }} de {{ totalCreditsCount || 'varias' }}
                 </div>
-                <div class="flex items-center space-x-1">
+                <div class="flex items-center space-x-2">
                   <button 
+                    type="button"
                     @click="changeCreditsPage(creditsCurrentPage - 1)" 
                     :disabled="creditsCurrentPage === 1"
-                    class="p-1.5 rounded-full disabled:opacity-40 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                    class="p-2 rounded-full disabled:opacity-40 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     :class="{ 'cursor-not-allowed': creditsCurrentPage === 1 }"
+                    aria-label="Página anterior"
                   >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
                   
-                  <div class="flex items-center space-x-0.5">
-                    <button 
-                      v-for="page in Math.min(5, creditsTotalPages)" 
-                      :key="page"
-                      @click="changeCreditsPage(page)"
-                      class="w-6 h-6 text-xs rounded-full flex items-center justify-center"
-                      :class="{
-                        'bg-blue-600 text-white': creditsCurrentPage === page,
-                        'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700': creditsCurrentPage !== page
-                      }"
-                    >
-                      {{ page }}
-                    </button>
-                    
-                    <span v-if="creditsTotalPages > 5" class="px-1 text-gray-500">...</span>
-                  </div>
+                  <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Página {{ creditsCurrentPage }} de {{ creditsTotalPages }}
+                  </span>
                   
                   <button 
+                    type="button"
                     @click="changeCreditsPage(creditsCurrentPage + 1)" 
                     :disabled="creditsCurrentPage >= creditsTotalPages"
-                    class="p-1.5 rounded-full disabled:opacity-40 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                    class="p-2 rounded-full disabled:opacity-40 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     :class="{ 'cursor-not-allowed': creditsCurrentPage >= creditsTotalPages }"
+                    aria-label="Siguiente página"
                   >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
@@ -1137,19 +1211,18 @@
             
             <!-- Filtro y Contador en una línea -->
             <div class="flex items-center justify-between mb-3 gap-2">
+            
               <!-- Filtro de fecha -->
               <div class="flex-1 relative">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Filtrar por fecha</label>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Filtrar por mes</label>
                 <div class="relative">
                   <input 
-                    type="date"
+                    type="month"
                     v-model="servicesFilterDate"
+                    @change="filterServices"
                     class="w-full px-2 py-1.5 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white appearance-none"
                     :class="{ 'text-transparent': !servicesFilterDate }"
                   />
-                  <div v-if="!servicesFilterDate" class="absolute inset-0 flex items-center px-2 pointer-events-none text-gray-400 dark:text-gray-500">
-                    <span class="text-xs">Todas las fechas</span>
-                  </div>
                 </div>
               </div>
               
@@ -1165,28 +1238,41 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">No se encontraron servicios</p>
               </div>
               <div v-else>
-                <div v-for="service in paginatedServices" :key="service.id" class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg mb-1.5 hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors">
+                <div v-for="(service, index) in paginatedServices" :key="`${service.id}-${index}`" class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg mb-1.5 hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors">
                   <div class="flex items-start justify-between">
                     <div class="w-full">
-                      <div class="flex justify-between items-center">
-                        <p class="font-medium text-gray-900 dark:text-white text-xs">{{ service.name }}</p>
-                        <span :class="service.status === 'Completado' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'" 
-                              class="text-[10px] px-1.5 py-0.5 rounded-full font-medium">
-                          {{ service.status }}
-                        </span>
-                      </div>
-                      <div class="flex justify-between items-center mt-1">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(service.date) }}</p>
-                        <div class="flex items-center space-x-2">
-                          <p v-if="selectedUser?.role !== 'technician'" class="text-xs text-gray-600 dark:text-gray-400">{{ service.technician }}</p>
-                          <button v-if="service.status === 'Completado' && service.comment" 
-                                  @click.stop="showComment(service.comment, service.rating, service.user)" 
-                                  class="flex items-center text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                            <span class="mr-0.5">Ver</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div class="grid grid-cols-2 gap-1">
+                        <!-- Top Left: Service Name -->
+                        <div class="font-medium text-gray-900 dark:text-white text-xs">
+                          {{ service.name }}
+                        </div>
+                        
+                        <!-- Top Right: Service ID -->
+                        <div class="text-right text-xs text-gray-500 dark:text-gray-400">
+                          #{{ service.id }}
+                        </div>
+                        
+                        <!-- Bottom Left: Colonia -->
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                          {{ service.colonia }}
+                        </div>
+                        
+                        <!-- Bottom Right: Icono de comentario y Fecha en la misma línea -->
+                        <div class="flex items-center justify-end space-x-2">
+                          <!-- Icono de comentario si existe -->
+                          <span v-if="service.comentario && service.comentario.trim() !== ''" 
+                                class="flex items-center text-blue-500 hover:text-blue-600 cursor-pointer text-xs font-medium"
+                                @click.stop="showComment(service.comentario, service.calificacion, service.user)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                             </svg>
-                          </button>
+                            Ver
+                          </span>
+                          
+                          <!-- Fecha -->
+                          <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ formatDate(service.date) }}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1317,7 +1403,7 @@
       <div v-if="showPasswordModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showPasswordModal = false"></div>
         
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
           <!-- Header -->
           <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
             <div class="flex items-center justify-between">
@@ -1500,7 +1586,7 @@
                       <span class="w-5 h-5 bg-yellow-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{{ index + 1 }}</span>
                       <div>
                         <p class="font-medium text-gray-900 dark:text-white text-xs">{{ tech.name }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ tech.city || 'Sin ciudad' }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ tech.city }}</p>
                       </div>
                     </div>
                     <p class="text-sm font-bold text-yellow-600 dark:text-yellow-400">L. {{ formatCurrency(tech.balance) }}</p>
@@ -1562,6 +1648,258 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Modal de Detalles del Monto -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showAmountDetailsModal" class="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-3">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showAmountDetailsModal = false"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-[300px] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Detalles del Monto</h3>
+              <button @click="showAmountDetailsModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-3">
+            <div v-if="currentQuote" class="space-y-3">
+              <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                <h4 class="font-medium text-green-800 dark:text-green-200 text-xs sm:text-sm mb-2">Detalles de la Cotización</h4>
+                <div class="text-xs sm:text-sm space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Solicitud:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ currentQuote.id_solicitud }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">L. {{ currentQuote.monto_manodeobra || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ currentQuote.descuento_membresia || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Crédito usado:</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ currentQuote.credito_usado || 0 }}</span>
+                  </div>
+                  <hr class="border-gray-200 dark:border-gray-600">
+                  <div class="flex justify-between font-bold">
+                    <span class="text-gray-900 dark:text-white">Total a pagar:</span>
+                    <span class="text-gray-900 dark:text-white">L. {{ (currentQuote.monto_manodeobra - (currentQuote.descuento_membresia || 0) - (currentQuote.credito_usado || 0)).toFixed(2) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Modal de detalles de cotización -->
+    <div v-if="showQuoteModal" class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+          <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                <div class="flex justify-between items-center">
+                  <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                    Detalles de la cotización
+                  </h3>
+                  <button 
+                    @click="showQuoteModal = false"
+                    class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-white"
+                  >
+                    <span class="sr-only">Cerrar</span>
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div v-if="quoteLoading" class="mt-4 py-8 flex justify-center">
+                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                </div>
+                
+                <div v-else-if="currentQuote" class="mt-4 space-y-4">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Número de cotización</p>
+                      <p class="mt-1 text-sm text-gray-900 dark:text-white">COT-{{ currentQuote.id_cotizacion }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha</p>
+                      <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatDate(currentQuote.fecha_creacion) }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</p>
+                      <span :class="{
+                        'bg-green-100 text-green-800': currentQuote.estado === 'aprobada',
+                        'bg-yellow-100 text-yellow-800': currentQuote.estado === 'pendiente',
+                        'bg-red-100 text-red-800': currentQuote.estado === 'rechazada' || currentQuote.estado === 'cancelada',
+                        'bg-blue-100 text-blue-800': currentQuote.estado === 'completada'
+                      }" class="px-2 py-1 text-xs font-medium rounded-full">
+                        {{ currentQuote.estado }}
+                      </span>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Monto total</p>
+                      <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">L. {{ formatCurrency(currentQuote.monto_total || 0) }}</p>
+                    </div>
+                  </div>
+                  
+                  <div v-if="currentQuote.descripcion">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Descripción</p>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white whitespace-pre-line">{{ currentQuote.descripcion }}</p>
+                  </div>
+                  
+                  <div v-if="currentQuote.servicios && currentQuote.servicios.length > 0">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Servicios</p>
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                          <tr>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Servicio</th>
+                            <th scope="col" class="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cantidad</th>
+                            <th scope="col" class="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Precio</th>
+                            <th scope="col" class="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                          <tr v-for="(item, index) in currentQuote.servicios" :key="index">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ item.nombre_servicio || 'Servicio' }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-right">{{ item.cantidad || 1 }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-right">L. {{ formatCurrency(item.precio_unitario || 0) }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white text-right">L. {{ formatCurrency((item.cantidad || 1) * (item.precio_unitario || 0)) }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button 
+              type="button" 
+              @click="showQuoteModal = false"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ver detalles de retiro -->
+  <div v-if="showWithdrawalModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showWithdrawalModal = false"></div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[85vw] max-w-sm max-h-[85vh] overflow-y-auto relative z-10">
+      <!-- Modal Header -->
+      <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg sm:rounded-t-xl">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center text-base sm:text-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+              💸
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate">
+                {{ currentWithdrawal?.status === 'Pendiente' ? 'Solicitud de Retiro' : 'Detalles del Retiro' }}
+              </h3>
+              <p class="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">
+                {{ formatDate(currentWithdrawal?.date) }}
+              </p>
+            </div>
+          </div>
+          <button @click="showWithdrawalModal = false" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-4 text-sm">
+        <div class="space-y-4">
+          <div class="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-lg relative h-32">
+            <!-- Fila superior -->
+            <div class="absolute top-4 left-0 right-0 flex justify-between px-4">
+              <!-- ID -->
+              <div class="w-1/2 text-center">
+                <p class="text-xs text-gray-500 dark:text-gray-400">ID</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">#{{ currentWithdrawal?.id || 'N/A' }}</p>
+              </div>
+              
+              <!-- Cantidad -->
+              <div class="w-1/2 text-center">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Cantidad</p>
+                <p class="text-sm font-medium text-red-600">L. {{ formatCurrency(currentWithdrawal?.amount || 0) }}</p>
+              </div>
+            </div>
+            
+            <!-- Fila inferior -->
+            <div class="absolute bottom-4 left-0 right-0 flex justify-between px-4">
+              <!-- Estado -->
+              <div class="w-1/2 text-center">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Estado</p>
+                <span 
+                  :class="{
+                    'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': currentWithdrawal?.status === 'Completado',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400': currentWithdrawal?.status === 'Pendiente',
+                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': currentWithdrawal?.status === 'Rechazado'
+                  }" 
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                >
+                  {{ currentWithdrawal?.status || 'Pendiente' }}
+                </span>
+              </div>
+              
+              <!-- Fecha -->
+              <div class="w-1/2 text-center">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Fecha</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ formatDate(currentWithdrawal?.date) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-lg">
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Detalles del Retiro</h4>
+            <div class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+              {{ currentWithdrawal?.description || 'Sin detalles adicionales' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <button 
+            @click="showWithdrawalModal = false"
+            class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1643,10 +1981,6 @@
   @apply hover:bg-blue-600 text-white;
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
-}
-
-:deep(.multiselect-custom .multiselect__tag-icon:after) {
-  @apply text-white text-sm;
 }
 
 :deep(.multiselect__tag) {
@@ -1811,22 +2145,31 @@ const loadingMoreUsers = ref(false)
 const loadingTechnicians = ref(false)
 const loadingRoles = ref(false)
 const loadingCities = ref(false)
+const loadingStats = ref(false)
 const isSaving = ref(false)
+const isEditing = ref(false)
+
+// Estadísticas
+const stats = ref({
+  totalUsuarios: 0,
+  totalReferidos: 0,
+  totalCreditos: 0
+})
 
 // Datos
 const users = ref([])
 const technicians = ref([])
+const administrators = ref([])
 const roles = ref([])
 const availableCities = ref([])
 const cities = ref([])
-const hasMoreUsers = ref(false) 
-
+const hasMoreUsers = ref(false)
+const totalAdmins = ref(0)
 
 // Modales
 const showEditModal = ref(false)
 const showPasswordModal = ref(false)
-const showReferralsModal = ref(false)
-const showCreditsModal = ref(false)
+const showReferralsModal = ref(false) 
 const showServiceHistoryModal = ref(false)
 const showCommentModal = ref(false)
 const showTopCreditsModal = ref(false)
@@ -1853,31 +2196,52 @@ const totalTechnicians = ref(0)
 // Paginación modales
 const referralsCurrentPage = ref(1)
 const creditsCurrentPage = ref(1)
+const creditsTotalPages = ref(1)
 const servicesCurrentPage = ref(1)
 
 // ===== VARIABLES DE FILTROS =====
-const searchQuery = ref('')
-const debouncedSearchQuery = ref('')
+const searchQuery = ref('') 
 const selectedStatus = ref('')
 const selectedCity = ref('')
 const isSearching = ref(false)
 
+// Watchers para los filtros
+watch([selectedStatus, selectedCity], () => {
+  // Reiniciar a la primera página cuando cambian los filtros
+  adminsCurrentPage.value = 1
+  techniciansCurrentPage.value = 1
+  usersCurrentPage.value = 1
+  
+  // Cargar datos con los nuevos filtros
+  loadAdministrators(1)
+  loadTechnicians(1)
+  loadUsers(1)
+}, { deep: true })
 
-// Configurar el watch para searchQuery con debounce
-const debouncedSearch = debounce(async (newVal) => {
+// Función para cargar datos con debounce
+const debouncedLoadData = debounce(async () => {
   isSearching.value = true
   try {
-    debouncedSearchQuery.value = newVal
     // Reiniciar a la primera página al buscar
+    adminsCurrentPage.value = 1
+    techniciansCurrentPage.value = 1
     usersCurrentPage.value = 1
-    // Limpiar caché para forzar recarga
-    Object.keys(usersCache).forEach(key => delete usersCache[key])
-    // Cargar usuarios con el nuevo término de búsqueda
-    await loadUsers(1)
+    
+    // Cargar datos con el nuevo término de búsqueda
+    await Promise.all([
+      loadAdministrators(1),
+      loadTechnicians(1),
+      loadUsers(1)
+    ])
   } finally {
     isSearching.value = false
   }
-}, 1000) // 1 segundo de debounce
+}, 1500)
+
+// Watcher para el buscador con debounce
+watch(searchQuery, () => {
+  debouncedLoadData()
+}) 
 
 // Opciones de filtros
 const statusOptions = [
@@ -1921,19 +2285,104 @@ const confirmPassword = ref('')
 
 // Variables para filtros de modales
 const referralsFilterMonth = ref('')
-const creditsFilterMonth = ref('')
-const servicesFilterDate = ref('')
+const creditsFilterMonth = ref('') 
+
+// Variables de paginación para referidos
+const totalReferrals = ref(0)
+const referralsTotalPages = ref(1)
+
+// Cache para almacenar referidos por usuario y página
+const referralsCache = ref({})
 
 // Variables para comentarios
 const currentComment = ref('')
 const currentRating = ref('')
-const currentClient = ref('')
+const currentClient = ref('') 
 
-// Variables para estadísticas
-const stats = ref({
-  totalCredits: 0,
-  totalReferrals: 0
-})
+// Variables para el modal de créditos 
+const showCreditsModal = ref(false)
+const creditsLoading = ref(false)  
+const totalCreditsCount = ref(0)
+
+// Variables para el modal de cotización
+const showQuoteModal = ref(false)
+const currentQuote = ref(null)
+const quoteLoading = ref(false)
+
+// Cargar detalles de la cotización
+const loadQuoteDetails = async (quoteId) => {
+  try {
+    quoteLoading.value = true
+    const response = await $fetch(`/cotizaciones/${quoteId}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response && response.success) {
+      currentQuote.value = response.data
+      showQuoteModal.value = true
+    } else {
+      showError(response?.message || 'No se pudieron cargar los detalles de la cotización')
+    }
+  } catch (error) {
+    console.error('Error al cargar la cotización:', error)
+    showError('Error al cargar la cotización. Por favor, intente nuevamente.')
+  } finally {
+    quoteLoading.value = false
+  }
+}
+
+// Abrir modal de cotización
+const openQuoteModal = (transaction) => {
+  if (transaction.cotizacionData) {
+    currentQuote.value = transaction.cotizacionData
+    showAmountDetailsModal.value = true
+  } else if (transaction.reference && transaction.reference.startsWith('COT-')) {
+    const quoteId = transaction.reference.replace('COT-', '')
+    loadQuoteDetails(quoteId)
+  }
+}
+
+// Cache para créditos
+const creditsCache = ref({})
+
+// Variables para el modal de retiro
+const showWithdrawalModal = ref(false)
+const currentWithdrawal = ref(null)
+
+// Abrir modal de retiro
+const openWithdrawalModal = (transaction) => {
+  // Extraer los detalles del retiro de la descripción original
+  const description = transaction.originalDescription || transaction.description;
+  const match = description.match(/Retiro a cuenta bancaria: (.+?), (?:numero|numeor) de cuenta[>: ]+([^,]+), mi id (.+)/i);
+  
+  currentWithdrawal.value = {
+    id: transaction.id,
+    bank: match ? match[1].trim() : 'No especificado',
+    accountNumber: match ? match[2].trim() : 'No especificado',
+    userId: match ? match[3].trim() : 'No especificado',
+    amount: transaction.amount,
+    date: transaction.date,
+    status: transaction.status,
+    description: description
+  }
+  showWithdrawalModal.value = true
+}
+
+// Respuesta de la API de créditos
+const creditsResponse = ref(null)
+
+// Variables para el modal de detalles de monto
+const showAmountDetailsModal = ref(false) 
+
+// Generar clave única para el cache
+const getCacheKey = (userId, page, month) => {
+  return `${userId}-${page}-${month || 'all'}`
+}
 
 // Toast notification
 const toast = ref({
@@ -1955,14 +2404,7 @@ watch([selectedStatus, selectedCity], () => {
   // Recargar datos cuando cambien los filtros
   loadUsers(1)
   loadTechnicians(1)
-})
-
-// Watch para searchQuery que activa el debounce
-watch(searchQuery, (newVal) => {
-  if (newVal !== undefined && newVal !== null) {
-    debouncedSearch(newVal)
-  }
-})
+}) 
 
 // ===== COMPUTED PROPERTIES =====
 // Para administradores seguimos filtrando en frontend
@@ -2024,32 +2466,74 @@ const paginatedReferrals = computed(() => {
   const end = start + modalItemsPerPage
   return filteredReferrals.value.slice(start, end)
 })
-
+ 
 const paginatedCredits = computed(() => {
-  const start = (creditsCurrentPage.value - 1) * modalItemsPerPage
-  const end = start + modalItemsPerPage
-  return filteredCredits.value.slice(start, end)
+  return userCreditHistory.value
 })
+
+// Filtro de mes para servicios
+const servicesFilterDate = ref('')
+
+// Filtrar servicios por mes
+const filterServices = async () => {
+  try {
+    if (!selectedUser.value) return
+    
+    const params = new URLSearchParams({
+      id_tecnico: selectedUser.value.id_usuario
+    })
+    
+    if (servicesFilterDate.value) {
+      params.append('month', servicesFilterDate.value)
+    }
+    
+    const url = `/solicitudservicio?${params.toString()}`
+    console.log('Solicitando servicios con parámetros:', params.toString())
+    
+    const data = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    console.log('Respuesta del servidor:', data)
+    
+    // Mapear la respuesta al formato esperado por la interfaz
+    userServiceHistory.value = data.data.map(solicitud => ({
+      id: solicitud.id_solicitud,
+      name: solicitud.servicio?.nombre || 'Servicio sin nombre',
+      date: solicitud.fecha_solicitud,
+      status: solicitud.estado,
+      descripcion: solicitud.descripcion || 'Sin descripción',
+      estado: solicitud.estado,
+      comentario: solicitud.calificacion?.comentario || '',
+      calificacion: solicitud.calificacion?.calificacion || 0,
+      colonia: solicitud.colonia || '',
+      cotizacion: solicitud.cotizacion || null,
+      pagoVisita: solicitud.pagoVisita || null
+    }))
+    
+  } catch (error) {
+    console.error('Error al filtrar servicios:', error)
+    showError('No se pudieron cargar los servicios filtrados')
+  }
+}
+
+const filteredServices = computed(() => userServiceHistory.value)
 
 const paginatedServices = computed(() => {
   const start = (servicesCurrentPage.value - 1) * modalItemsPerPage
   const end = start + modalItemsPerPage
-  return userServiceHistory.value.slice(start, end)
+  return filteredServices.value.slice(start, end)
 })
 
-// Stats paginación modales
-const referralsTotalPages = computed(() => Math.ceil(filteredReferrals.value.length / modalItemsPerPage))
-const creditsTotalPages = computed(() => Math.ceil(filteredCredits.value.length / modalItemsPerPage))
-const servicesTotalPages = computed(() => Math.ceil(userServiceHistory.value.length / modalItemsPerPage))
-
-const referralsStartItem = computed(() => (referralsCurrentPage.value - 1) * modalItemsPerPage + 1)
-const referralsEndItem = computed(() => Math.min(referralsCurrentPage.value * modalItemsPerPage, filteredReferrals.value.length))
-
-const creditsStartItem = computed(() => (creditsCurrentPage.value - 1) * modalItemsPerPage + 1)
-const creditsEndItem = computed(() => Math.min(creditsCurrentPage.value * modalItemsPerPage, filteredCredits.value.length))
+const servicesTotalPages = computed(() => Math.ceil(filteredServices.value.length / modalItemsPerPage))
 
 const servicesStartItem = computed(() => (servicesCurrentPage.value - 1) * modalItemsPerPage + 1)
-const servicesEndItem = computed(() => Math.min(servicesCurrentPage.value * modalItemsPerPage, userServiceHistory.value.length))
+const servicesEndItem = computed(() => Math.min(servicesCurrentPage.value * modalItemsPerPage, filteredServices.value.length))
 
 const hasActiveFilters = computed(() => {
   return searchQuery.value !== '' || selectedStatus.value !== '' || selectedCity.value !== ''
@@ -2059,6 +2543,11 @@ const hasActiveFilters = computed(() => {
 const passwordMismatch = computed(() => {
   return newPassword.value && confirmPassword.value && 
          newPassword.value !== confirmPassword.value
+})
+
+// Verificar si el usuario seleccionado es un técnico
+const isTechnician = computed(() => {
+  return selectedUser.value?.role === 'technician'
 })
 
 // ===== FUNCIONES DE UTILIDAD =====
@@ -2075,8 +2564,8 @@ const formatCompactCurrency = (value) => {
 }
 
 const formatCurrency = (value) => {
-  if (value === undefined || value === null) return '0.00'
-  return parseFloat(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  if (value === null || value === undefined) return 'L. 0'
+  return new Intl.NumberFormat('es-HN', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value)
 }
 
 const formatDate = (dateString) => {
@@ -2165,23 +2654,29 @@ const resetUserForm = () => {
     id_usuario: null,
     id_ciudad: '',
     id_rol: '',
+    rol: null,
     nombre: '',
     identidad: '',
     email: '',
     telefono: '',
-    estado: 'activo'
+    estado: 'activo',
+    ciudad: null
   }
 }
 
 // ===== FUNCIONES DE PAGINACIÓN =====
 const changeReferralsPage = (page) => {
   if (page < 1 || page > referralsTotalPages.value) return
-  referralsCurrentPage.value = page
+  showReferrals(selectedUser.value, page)
 }
 
-const changeCreditsPage = (page) => {
+const changeCreditsPage = async (page) => {
   if (page < 1 || page > creditsTotalPages.value) return
-  creditsCurrentPage.value = page
+  
+  // Hacer nueva petición para la página solicitada
+  if (selectedUser.value) {
+    await showCredits(selectedUser.value, page)
+  }
 }
 
 const changeServicesPage = (page) => {
@@ -2195,63 +2690,421 @@ const changeTechniciansPage = (page) => {
   loadTechnicians(page)
 }
 
+const changeAdminsPage = (page) => {
+  adminsCurrentPage.value = page
+  loadAdministrators(page)
+}
+
 // Métodos para manejar los filtros
 const clearFilters = () => {
   searchQuery.value = ''
   selectedStatus.value = ''
-  selectedCity.value = ''
+  selectedCity.value = null
+  
+  // Reiniciar a la primera página
   usersCurrentPage.value = 1
-  techniciansCurrentPage.value = 1
   adminsCurrentPage.value = 1
+  
+  // Limpiar caché
+  Object.keys(usersCache).forEach(key => delete usersCache[key])
+  
+  // Recargar usuarios y administradores
+  loadUsers(1)
+  loadAdministrators(1)
 }
 
 const filterReferrals = () => {
   referralsCurrentPage.value = 1
 }
 
-const filterCredits = () => {
+const updateServicesFilterDate = (dateString) => {
+  if (!dateString) {
+    servicesFilterDate.value = ''
+    return
+  }
+  
+  // Parse the date string and format it as YYYY-MM-DD
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) {
+    servicesFilterDate.value = ''
+    return
+  }
+  
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  servicesFilterDate.value = `${year}-${month}-${day}`
+}
+
+const filterCredits = async () => {
+  // Reset to first page and reload credits with the new filter
   creditsCurrentPage.value = 1
+  
+  // If no month filter is selected, clear any date range and reload with full balance
+  if (!creditsFilterMonth.value) {
+    if (selectedUser.value) {
+      // Clear the credits response to force a full reload
+      creditsResponse.value = null
+      // Clear any cached data for this user
+      Object.keys(creditsCache.value).forEach(key => {
+        if (key.startsWith(`user-${selectedUser.value.id_usuario}`)) {
+          delete creditsCache.value[key]
+        }
+      })
+      
+      // Make a fresh API call to get the latest balance
+      try {
+        const response = await $fetch(`/movimientos/creditos/${selectedUser.value.id_usuario}?page=1&limit=${modalItemsPerPage}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        })
+        
+        if (response && response.success) {
+          // Update the creditsResponse with the latest data
+          creditsResponse.value = response
+          
+          // Update the transactions list
+          userCreditHistory.value = response.data.map(tx => ({
+            id: tx.id_movimiento,
+            description: tx.descripcion,
+            amount: parseFloat(tx.monto),
+            type: tx.tipo === 'ingreso' || tx.tipo === 'ingreso_referido' ? 'credit' : 'debit',
+            status: tx.estado === 'completado' ? 'Completado' : 
+                    tx.estado === 'pendiente' ? 'Pendiente' : 'Rechazado',
+            reference: 'SIN-REF',
+            date: tx.fecha,
+            cotizacionData: tx.cotizacion
+          }))
+          
+          // Update pagination
+          creditsTotalPages.value = response.pagination?.totalPages || 1
+          totalCreditsCount.value = response.pagination?.total || 0
+        }
+      } catch (error) {
+        console.error('Error al cargar el saldo actualizado:', error)
+        showError('No se pudo actualizar el saldo')
+      }
+    }
+    return
+  }
+  
+  // Get current date
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() // 0-11
+  
+  // Parse the selected month and year
+  const [year, month] = creditsFilterMonth.value.split('-')
+  
+  // Ensure we have a valid year (in case of invalid input)
+  const validYear = year || currentYear
+  const validMonth = month || currentMonth + 1 // Convert to 1-12
+  
+  // Create date range for the selected month
+  const startDate = new Date(validYear, validMonth - 1, 1)
+  const endDate = new Date(validYear, validMonth, 0) // Last day of the month
+  
+  // Format dates as YYYY-MM-DD
+  const formatDate = (date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  
+  // Call showCredits with the user and page number
+  if (selectedUser.value) {
+    showCredits(selectedUser.value, 1, {
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate)
+    })
+  }
 }
 
 // ===== FUNCIONES DE MODALES =====
 const closeModal = () => {
   showEditModal.value = false
   showPasswordModal.value = false
+  showCreditsModal.value = false
   resetUserForm()
-  newPassword.value = ''
-  confirmPassword.value = ''
+  selectedUser.value = null
+  creditsResponse.value = null
+  isEditing.value = false
+  isDeleting.value = false
+} 
+
+const showCredits = async (user, page = 1, dateRange = null) => {
+  try {
+    // Reset creditsResponse when showing credits for a new user
+    if (selectedUser.value?.id_usuario !== user.id_usuario) {
+      creditsResponse.value = null
+    }
+    
+    selectedUser.value = user
+    creditsCurrentPage.value = page
+    
+    // Generate cache key including date range
+    const cacheKey = dateRange 
+      ? `user-${user.id_usuario}-page-${page}-${dateRange.startDate || ''}-${dateRange.endDate || ''}`
+      : getCacheKey(user.id_usuario, page, creditsFilterMonth.value)
+    
+    // Check cache only if not using custom date range
+    if (!dateRange && creditsCache.value[cacheKey]) {
+      const cachedData = creditsCache.value[cacheKey]
+      userCreditHistory.value = cachedData.data
+      creditsTotalPages.value = cachedData.pagination?.totalPages || 1
+      totalCreditsCount.value = cachedData.pagination?.total || 0
+      showCreditsModal.value = true
+      return
+    }
+    
+    // Show loading state
+    creditsLoading.value = true
+    
+    // Build query params
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: modalItemsPerPage.toString()
+    })
+    
+    // Handle date range
+    if (dateRange?.startDate && dateRange?.endDate) {
+      params.append('startDate', dateRange.startDate)
+      params.append('endDate', dateRange.endDate)
+    } 
+    // Fall back to month filter if no date range is provided
+    else if (creditsFilterMonth.value) {
+      const [year, month] = creditsFilterMonth.value.split('-').map(Number)
+      const startDate = new Date(year, month - 1, 1)
+      const endDate = new Date(year, month, 0) // Last day of the month
+      
+      params.append('startDate', startDate.toISOString().split('T')[0])
+      params.append('endDate', endDate.toISOString().split('T')[0])
+    }
+    
+    const url = `/movimientos/creditos/${user.id_usuario}?${params.toString()}`
+    
+    // Make the API request
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response && response.success) {
+      // Store the full response for balance display
+      creditsResponse.value = response
+      
+      // Depuración: Mostrar la respuesta de la API
+      console.log('Respuesta de la API de créditos:', response.data)
+      
+      // Mapear la respuesta de la API al formato del frontend
+      const transactions = response.data.map(tx => {
+        // Formatear la descripción según el tipo de transacción
+        let description = tx.descripcion;
+        let showQuoteButton = false;
+        
+        // Verificar si es una transacción con cotización
+        if (tx.cotizacion) {
+          // Si la transacción tiene un monto de mano de obra, asumimos que es una cotización
+          if (tx.cotizacion.monto_manodeobra !== undefined) {
+            showQuoteButton = true;
+          }
+        }
+        
+        // Si es una comisión por referido
+        if (tx.descripcion.includes('Comisión por referido')) {
+          const nombre = tx.descripcion.split('- ')[1] || '';
+          description = `Comisión - ${nombre.trim()}`;
+        } 
+        // Si es un retiro a cuenta bancaria
+        const isWithdrawal = tx.descripcion.includes('Retiro a cuenta bancaria');
+        if (isWithdrawal) {
+          description = 'Retiro a cuenta';
+        }
+        
+        return {
+          id: tx.id_movimiento,
+          description: description,
+          originalDescription: tx.descripcion, // Guardar la descripción original
+          amount: parseFloat(tx.monto),
+          type: tx.tipo === 'ingreso' || tx.tipo === 'ingreso_referido' ? 'credit' : 'debit',
+          status: tx.estado === 'completado' ? 'Completado' : 
+                  tx.estado === 'pendiente' ? 'Pendiente' : 'Rechazado',
+          reference: showQuoteButton ? `COT-${tx.id_movimiento}` : 'SIN-REF',
+          date: tx.fecha,
+          cotizacionData: tx.cotizacion // Guardamos la información de la cotización
+        };
+      });
+      
+      // Actualizar la vista
+      userCreditHistory.value = transactions;
+      
+      // Actualizar información de paginación
+      creditsTotalPages.value = response.pagination?.totalPages || 1;
+      totalCreditsCount.value = response.pagination?.total || 0;
+      
+      // Save to cache only if not using custom date range
+      if (!dateRange) {
+        creditsCache.value[cacheKey] = {
+          data: [...transactions],
+          pagination: {
+            totalPages: creditsTotalPages.value,
+            total: totalCreditsCount.value
+          },
+          timestamp: Date.now()
+        }
+      }
+      
+      // Limpiar caché antiguo (más de 1 hora)
+      const oneHourAgo = Date.now() - (60 * 60 * 1000);
+      Object.keys(creditsCache.value).forEach(key => {
+        if (creditsCache.value[key].timestamp < oneHourAgo) {
+          delete creditsCache.value[key];
+        }
+      });
+      
+      // Ensure current page doesn't exceed total pages
+      if (creditsCurrentPage.value > creditsTotalPages.value) {
+        creditsCurrentPage.value = creditsTotalPages.value
+      }
+      
+      // Mostrar el modal después de cargar los datos
+      showCreditsModal.value = true
+      
+      // Desplazarse al inicio del modal
+      nextTick(() => {
+        const modalContent = document.querySelector('.credits-modal-content')
+        if (modalContent) {
+          modalContent.scrollTop = 0
+        }
+      })
+      
+      // Debug: Mostrar información de caché
+      console.log('Datos de paginación:', {
+        currentPage: creditsCurrentPage.value,
+        totalPages: creditsTotalPages.value,
+        totalItems: totalCreditsCount.value,
+        cacheSize: Object.keys(creditsCache.value).length,
+        cachedKeys: Object.keys(creditsCache.value)
+      })
+      
+    } else {
+      const errorMessage = response?.error || 'No se pudieron cargar las transacciones de crédito'
+      console.error('Error loading credits:', errorMessage)
+      showError(errorMessage)
+      userCreditHistory.value = []
+      creditsTotalPages.value = 1
+      totalCreditsCount.value = 0
+    }
+  } catch (error) {
+    console.error('Error al cargar el historial de créditos:', error)
+    showError('Error al cargar el historial de créditos. Por favor, intente nuevamente.')
+    userCreditHistory.value = []
+    creditsTotalPages.value = 1
+    totalCreditsCount.value = 0
+  } finally {
+    creditsLoading.value = false
+  }
 }
 
-const showReferrals = (user) => {
-  selectedUser.value = user
-  referralsCurrentPage.value = 1
-  
-  // Mock data temporal - después conectar con API
-  userReferrals.value = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    name: `Referido ${i + 1}`,
-    email: `referido${i + 1}@ejemplo.com`,
-    status: Math.random() > 0.3 ? 'Activo' : 'Inactivo',
-    createdAt: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString()
-  }))
-  showReferralsModal.value = true
-}
-
-const showCredits = (user) => {
-  selectedUser.value = user
-  creditsCurrentPage.value = 1
-  
-  // Mock data temporal - después conectar con API
-  userCreditHistory.value = Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    description: `Transacción ${i + 1}`,
-    amount: Math.floor(Math.random() * 500) + 50,
-    type: Math.random() > 0.5 ? 'credit' : 'debit',
-    status: ['Completado', 'Pendiente', 'Rechazado'][Math.floor(Math.random() * 3)],
-    reference: `REF-${Math.floor(100000 + Math.random() * 900000)}`,
-    date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString()
-  }))
-  showCreditsModal.value = true
+const showReferrals = async (user, page = 1) => {
+  try {
+    console.log('Mostrando referidos para el usuario:', user, 'Página:', page)
+    selectedUser.value = user
+    
+    // Establecer la página actual
+    referralsCurrentPage.value = page
+    
+    // Limpiar referidos anteriores
+    userReferrals.value = []
+    
+    // Mostrar el modal inmediatamente para feedback visual
+    showReferralsModal.value = true
+    
+    // Crear una clave única para el cache (usuario + página)
+    const cacheKey = `${user.id_usuario}_${page}`
+    
+    // Verificar si los datos ya están en caché
+    if (referralsCache.value[cacheKey]) {
+      console.log('Usando datos de caché para la clave:', cacheKey)
+      const cachedData = referralsCache.value[cacheKey]
+      userReferrals.value = cachedData.referrals
+      totalReferrals.value = cachedData.total
+      referralsTotalPages.value = cachedData.totalPages
+      return
+    }
+    
+    // Hacer la petición a la API con paginación
+    const response = await $fetch(`/referidos/${user.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      params: {
+        page: page,
+        limit: 5
+      }
+    })
+    
+    console.log('Respuesta de la API de referidos:', response)
+    
+    if (response && response.success && Array.isArray(response.data)) {
+      // Mapear la respuesta al formato esperado
+      userReferrals.value = response.data.map((referral, index) => ({
+        id: index + 1,
+        name: referral.nombre || `Referido ${index + 1}`,
+        email: referral.email || '',
+        status: referral.estado,
+        createdAt: referral.fecha || new Date().toISOString()
+      }))
+      
+      // Actualizar la información de paginación desde el objeto pagination
+      let total = 0
+      let totalPages = 1
+      
+      if (response.pagination) {
+        total = response.pagination.total || 0
+        totalPages = response.pagination.totalPages || 1
+        referralsCurrentPage.value = response.pagination.page || 1
+      } else {
+        // Fallback en caso de que no venga el objeto pagination
+        total = response.data.length
+        totalPages = 1
+      }
+      
+      // Almacenar en caché
+      const cacheKey = `${user.id_usuario}_${page}`
+      referralsCache.value[cacheKey] = {
+        referrals: userReferrals.value,
+        total: total,
+        totalPages: totalPages
+      }
+      
+      // Actualizar los valores reactivos
+      totalReferrals.value = total
+      referralsTotalPages.value = totalPages
+      
+      console.log('Referidos cargados:', userReferrals.value)
+      console.log('Total de referidos:', totalReferrals.value)
+      console.log('Total de páginas:', referralsTotalPages.value)
+    } else {
+      console.error('Formato de respuesta inesperado:', response)
+      showError('Error al cargar los referidos: Formato de respuesta inesperado')
+    }
+  } catch (error) {
+    console.error('Error al cargar referidos:', error)
+    showError('Error al cargar los referidos. Por favor, intente nuevamente.')
+  }
 }
 
 const showServiceHistory = (user) => {
@@ -2271,41 +3124,18 @@ const showServiceHistory = (user) => {
   showServiceHistoryModal.value = true
 }
 
-const showTechnicianServices = (technician) => {
-  selectedUser.value = technician
-  servicesCurrentPage.value = 1
-  
-  // Mock data temporal para servicios de técnico
-  const serviceTypes = ['Limpieza', 'Mantenimiento', 'Reparación', 'Instalación', 'Revisión']
-  const comments = [
-    'Excelente servicio, muy profesional',
-    'Buen trabajo, cumplió con lo acordado',
-    'Podría mejorar la puntualidad',
-    'Muy satisfecho con el resultado',
-    'El técnico fue muy amable y eficiente'
-  ]
-  
-  userServiceHistory.value = Array.from({ length: 18 }, (_, i) => {
-    const status = Math.random() > 0.3 ? 'Completado' : 'Pendiente'
-    const isCompleted = status === 'Completado'
-    const clientName = `Cliente ${String.fromCharCode(65 + Math.floor(Math.random() * 5))}`
-    const hasComment = isCompleted && Math.random() > 0.5
+const showTechnicianServices = async (technician) => {
+  try {
+    selectedUser.value = technician
+    servicesCurrentPage.value = 1 
+    servicesFilterDate.value = '' // Reset filter when opening modal
     
-    return {
-      id: i + 1,
-      name: `${serviceTypes[Math.floor(Math.random() * serviceTypes.length)]} ${i + 1}`,
-      status: status,
-      amount: Math.floor(Math.random() * 800) + 100,
-      technician: technician.nombre || 'Técnico no especificado',
-      ...(isCompleted && { 
-        rating: (Math.random() * 2 + 3).toFixed(1),
-        ...(hasComment && { comment: comments[Math.floor(Math.random() * comments.length)] })
-      }),
-      date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString(),
-      user: clientName
-    }
-  })
-  showServiceHistoryModal.value = true
+    await filterServices()
+    showServiceHistoryModal.value = true
+  } catch (error) {
+    console.error('Error al cargar los servicios del técnico:', error)
+    showError('No se pudieron cargar los servicios del técnico. Intente de nuevo.')
+  } 
 }
 
 const showComment = (comment, rating, client) => {
@@ -2642,8 +3472,7 @@ const loadUsers = async (page = 1) => {
     loadingUsers.value = true
     
     // Generar clave de caché que incluya filtros
-    const filtersKey = JSON.stringify({
-      search: debouncedSearchQuery.value,
+    const filtersKey = JSON.stringify({ 
       status: selectedStatus.value?.value || '',
       city: selectedCity.value?.value || ''
     })
@@ -2667,12 +3496,7 @@ const loadUsers = async (page = 1) => {
     const params = new URLSearchParams({
       limit: limit.toString(),
       offset: offset.toString()
-    })
-    
-    // Agregar filtros si están definidos
-    if (debouncedSearchQuery.value) {
-      params.append('nombre', debouncedSearchQuery.value)
-    }
+    }) 
     
     if (selectedStatus.value?.value) {
       params.append('estado', selectedStatus.value.value)
@@ -2751,15 +3575,27 @@ const loadTechnicians = async (page = 1) => {
       params.append('nombre', searchQuery.value)
     }
     
-    if (selectedStatus.value?.value) {
-      params.append('estado', selectedStatus.value.value)
+    // Manejar el filtro de estado
+    if (selectedStatus.value) {
+      if (typeof selectedStatus.value === 'object' && selectedStatus.value.value) {
+        params.append('estado', selectedStatus.value.value)
+      } else if (typeof selectedStatus.value === 'string') {
+        params.append('estado', selectedStatus.value)
+      }
     }
     
-    if (selectedCity.value?.value) {
-      // Buscar el ID de la ciudad por nombre
-      const ciudad = availableCities.value.find(c => c.nombre_ciudad === selectedCity.value.value)
-      if (ciudad) {
-        params.append('id_ciudad', ciudad.id_ciudad.toString())
+    // Manejar el filtro de ciudad
+    if (selectedCity.value) {
+      if (typeof selectedCity.value === 'object' && selectedCity.value.id) {
+        params.append('id_ciudad', selectedCity.value.id.toString())
+      } else if (selectedCity.value?.value) {
+        // Buscar el ID de la ciudad por nombre
+        const ciudad = availableCities.value.find(c => c.nombre_ciudad === selectedCity.value.value)
+        if (ciudad) {
+          params.append('id_ciudad', ciudad.id_ciudad.toString())
+        }
+      } else if (typeof selectedCity.value === 'string' || typeof selectedCity.value === 'number') {
+        params.append('id_ciudad', selectedCity.value.toString())
       }
     }
 
@@ -2785,7 +3621,81 @@ const loadTechnicians = async (page = 1) => {
   }
 }
 
-// Función para cargar ciudades
+// Función para cargar administradores con filtros
+const loadAdministrators = async (page = 1) => {
+  try {
+    loadingUsers.value = true
+    const limit = adminsItemsPerPage
+    const offset = (page - 1) * limit
+
+    // Construir objeto de consulta con los filtros actuales
+    const query = {
+      limit,
+      offset,
+      ...(searchQuery.value && { nombre: searchQuery.value })
+    }
+    
+    // Manejar el filtro de estado
+    if (selectedStatus.value) {
+      if (typeof selectedStatus.value === 'object' && selectedStatus.value.value) {
+        query.estado = selectedStatus.value.value
+      } else if (typeof selectedStatus.value === 'string') {
+        query.estado = selectedStatus.value
+      }
+    }
+    
+    // Manejar el filtro de ciudad
+    if (selectedCity.value) {
+      if (typeof selectedCity.value === 'object' && selectedCity.value.id) {
+        query.id_ciudad = selectedCity.value.id
+      } else if (typeof selectedCity.value === 'string' || typeof selectedCity.value === 'number') {
+        query.id_ciudad = selectedCity.value
+      }
+    }
+    
+    console.log('Parámetros de búsqueda:', query)
+
+    // Eliminar propiedades vacías del query
+    Object.keys(query).forEach(key => {
+      if (query[key] === '' || query[key] === null || query[key] === undefined) {
+        delete query[key]
+      }
+    })
+
+    const queryString = new URLSearchParams(query).toString()
+    const url = `/usuarios/administradores?${queryString}`
+    
+    console.log('📤 Cargando administradores con filtros:', { query, url })
+
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    // Log the response
+    console.log('📥 Received response:', response)
+
+    if (response.success) {
+      console.log(`✅ Successfully loaded ${response.administradores?.length || 0} administrators`)
+      administrators.value = response.administradores || []
+      totalAdmins.value = response.total || 0
+      adminsCurrentPage.value = page
+    } else {
+      console.error('❌ Error in response:', response.error || 'Unknown error')
+      showError('Error al cargar los administradores')
+    }
+  } catch (error) {
+    console.error('Error al cargar administradores:', error)
+    showError('No se pudieron cargar los administradores')
+  } finally {
+    loadingUsers.value = false
+  }
+}
+
 const loadCities = async () => {
   try {
     loadingCities.value = true
@@ -2815,21 +3725,47 @@ const loadCities = async () => {
   }
 }
 
+const fetchStatistics = async () => {
+  try {
+    loadingStats.value = true
+    const response = await $fetch('/usuarios/estadisticas', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    if (response.success && response.data) {
+      stats.value = {
+        totalUsuarios: response.data.totalUsuarios || 0,
+        totalReferidos: response.data.totalReferidos || 0,
+        totalCreditos: response.data.totalCreditos || 0
+      }
+    }
+  } catch (error) {
+    console.error('Error al cargar estadísticas:', error)
+    showError('No se pudieron cargar las estadísticas')
+  } finally {
+    loadingStats.value = false
+  }
+}
+
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
-    isLoading.value = true
-    // Cargar datos iniciales en paralelo
     await Promise.all([
-      loadCities(),
       loadRoles(),
       loadUsers(),
-      loadTechnicians()
+      loadTechnicians(),
+      loadAdministrators(),
+      loadCities(),
+      fetchStatistics()
     ])
-    
   } catch (error) {
     console.error('Error al cargar datos iniciales:', error)
-    showError('Error al cargar los datos iniciales')
+    showError('Error al cargar los datos iniciales. Por favor, recarga la página.')
   } finally {
     isLoading.value = false
   }
