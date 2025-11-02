@@ -1,6 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Toast Notification -->
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <!-- Header -->
+    <HeadersHeaderConfigAdmin />
+
+   <!-- Toast Notification -->
     <Toast 
       v-if="toast.show"
       :key="toast.message + Date.now()"
@@ -9,1032 +12,525 @@
       :duration="toast.duration"
       @close="toast.show = false"
     />
-    
+
     <!-- Loading Spinner -->
     <LoadingSpinner 
       :loading="isLoading" 
-      :message="'Cargando configuración...'"
+      :message="'Cargando configuraciones...'"
     />
 
-    <!-- Contenido principal -->
-    <div v-if="!isLoading">
-      <HeadersHeaderConfigAdmin />
-
-      <!-- Content Container -->
-      <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative">
-        <div class="pb-24">
-          <!-- Main Content -->
-          <main class="pb-4">
-
-            <!-- Page Header -->
-            <section class="px-3 sm:px-6 py-3 sm:py-6">
-              <div class="bg-gradient-to-br from-gray-700 via-gray-800 to-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white relative overflow-hidden">
-                <!-- Background decoration -->
-                <div class="absolute -top-8 -right-8 w-24 h-24 sm:w-32 sm:h-32 bg-white/10 rounded-full blur-xl"></div>
-                <div class="absolute -bottom-6 -left-6 w-20 h-20 sm:w-24 sm:h-24 bg-white/10 rounded-full blur-lg"></div>
-                
-                <div class="relative">
-                  <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                      <div class="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center">
-                        <span class="text-2xl sm:text-4xl">⚙️</span>
-                      </div>
-                      <div>
-                        <h1 class="text-xl sm:text-3xl font-black">Configuración</h1>
-                        <p class="text-white/90 font-medium text-sm sm:text-base">Administra la configuración del sistema</p>
-                      </div>
-                    </div>
-                    <button 
-                      @click="saveAllSettings"
-                      :disabled="isSaving"
-                      class="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl border border-white/30 transition-colors disabled:opacity-50"
-                    >
-                      <span class="text-xs sm:text-sm font-bold">
-                        {{ isSaving ? '💾 Guardando...' : '💾 Guardar Todo' }}
-                      </span>
-                    </button>
-                  </div>
-                  
-                  <!-- Quick Status -->
-                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-4 border border-white/20">
-                      <div class="text-base sm:text-xl font-black">{{ systemStatus.uptime }}d</div>
-                      <div class="text-xs text-white/80">Tiempo Activo</div>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-4 border border-white/20">
-                      <div class="text-base sm:text-xl font-black">{{ systemStatus.version }}</div>
-                      <div class="text-xs text-white/80">Versión</div>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-4 border border-white/20">
-                      <div class="text-base sm:text-xl font-black">{{ systemStatus.storage }}%</div>
-                      <div class="text-xs text-white/80">Almacenamiento</div>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-4 border border-white/20">
-                      <div class="text-base sm:text-xl font-black flex items-center">
-                        <span class="w-2 h-2 rounded-full mr-1" :class="systemStatus.healthy ? 'bg-green-400' : 'bg-red-400'"></span>
-                        {{ systemStatus.healthy ? 'OK' : 'Error' }}
-                      </div>
-                      <div class="text-xs text-white/80">Estado</div>
-                    </div>
-                  </div>
-                </div>
+    <!-- Main Content -->
+    <div v-if="!isLoading" class="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 pb-10 sm:pb-32">
+      
+      <!-- Header Section -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 lg:mb-8">
+        <div class="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-start sm:items-center space-x-3 sm:space-x-4">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 dark:bg-blue-900 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0">
+              <span class="text-2xl sm:text-3xl">⚙️</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h1 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                Configuración del Sistema
+              </h1>
+              <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                Administra las configuraciones principales de HogarSeguro
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <button 
+              @click="guardarConfiguraciones"
+              :disabled="isSaving || !hayChanges"
+              class="w-full sm:w-auto px-4 sm:px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              <div class="flex items-center justify-center">
+                <div v-if="!isSaving" class="mr-2"></div>
+                <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
               </div>
-            </section>
-
-            <!-- General Settings -->
-            <section class="px-3 sm:px-6 mb-4 sm:mb-6">
-              <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center">
-                  <span class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mr-2 sm:mr-3">
-                    <span class="text-sm sm:text-base">🏢</span>
-                  </span>
-                  Configuración General
-                </h2>
-
-                <div class="space-y-4">
-                  <!-- Company Info -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre de la Empresa</label>
-                    <input
-                      v-model="settings.general.companyName"
-                      type="text"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="HogarSeguro"
-                    >
-                  </div>
-
-                  <!-- Company Email -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email de la Empresa</label>
-                    <input
-                      v-model="settings.general.companyEmail"
-                      type="email"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="info@hogarseguro.com"
-                    >
-                  </div>
-
-                  <!-- Company Phone -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono de la Empresa</label>
-                    <input
-                      v-model="settings.general.companyPhone"
-                      type="tel"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="+504 0000-0000"
-                    >
-                  </div>
-
-                  <!-- Timezone -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Zona Horaria</label>
-                    <select
-                      v-model="settings.general.timezone"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white appearance-none"
-                    >
-                      <option value="America/Tegucigalpa">Honduras (GMT-6)</option>
-                      <option value="America/Guatemala">Guatemala (GMT-6)</option>
-                      <option value="America/El_Salvador">El Salvador (GMT-6)</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- Global System Settings -->
-            <section class="px-3 sm:px-6 mb-4 sm:mb-6">
-              <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center">
-                  <span class="w-6 h-6 sm:w-8 sm:h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mr-2 sm:mr-3">
-                    <span class="text-sm sm:text-base">💰</span>
-                  </span>
-                  Configuraciones Globales
-                </h2>
-
-                <div class="space-y-4">
-                  <!-- Membership Fee -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Precio de Membresía (L.)</label>
-                    <input
-                      v-model.number="settings.global.membershipPrice"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="250.00"
-                    >
-                  </div>
-
-                  <!-- Technical Visit Fee -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Precio de Visita Técnica (L.)</label>
-                    <input
-                      v-model.number="settings.global.technicalVisitPrice"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="150.00"
-                    >
-                  </div>
-
-                  <!-- Service Commission -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comisión por Servicio (L.)</label>
-                    <input
-                      v-model.number="settings.global.serviceCommission"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="70.00"
-                    >
-                  </div>
-
-                  <!-- Company Phone Number -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Empresa</label>
-                    <input
-                      v-model="settings.global.companyNumber"
-                      type="text"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="99866626"
-                    >
-                  </div>
-
-                  <!-- Company Email -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo de Empresa</label>
-                    <input
-                      v-model="settings.global.companyEmail"
-                      type="email"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="hogarseguro@gmail.com"
-                    >
-                  </div>
-
-                  <!-- Discount Percentage -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Porcentaje de Descuento (%)</label>
-                    <input
-                      v-model.number="settings.global.discountPercentage"
-                      type="number"
-                      min="0"
-                      max="100"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="10"
-                    >
-                  </div>
-
-                  <!-- Referral Percentage -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Porcentaje de Referido (%)</label>
-                    <input
-                      v-model.number="settings.global.referralPercentage"
-                      type="number"
-                      min="0"
-                      max="100"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="10"
-                    >
-                  </div>
-
-                  <!-- Withdrawal Percentage -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Porcentaje de Retiro (%)</label>
-                    <input
-                      v-model.number="settings.global.withdrawalPercentage"
-                      type="number"
-                      min="0"
-                      max="100"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="99"
-                    >
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- Notifications Settings -->
-            <section class="px-3 sm:px-6 mb-4 sm:mb-6">
-              <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center">
-                  <span class="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mr-2 sm:mr-3">
-                    <span class="text-sm sm:text-base">🔔</span>
-                  </span>
-                  Notificaciones
-                </h2>
-
-                <div class="space-y-4">
-                  <!-- Email Notifications -->
-                  <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-sm">Notificaciones por Email</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">Recibir alertas importantes por correo</p>
-                    </div>
-                    <button
-                      @click="settings.notifications.email = !settings.notifications.email"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      :class="settings.notifications.email ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'"
-                    >
-                      <span
-                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                        :class="settings.notifications.email ? 'translate-x-6' : 'translate-x-1'"
-                      ></span>
-                    </button>
-                  </div>
-
-                  <!-- SMS Notifications -->
-                  <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-sm">Notificaciones SMS</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">Alertas urgentes por mensaje de texto</p>
-                    </div>
-                    <button
-                      @click="settings.notifications.sms = !settings.notifications.sms"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      :class="settings.notifications.sms ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'"
-                    >
-                      <span
-                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                        :class="settings.notifications.sms ? 'translate-x-6' : 'translate-x-1'"
-                      ></span>
-                    </button>
-                  </div>
-
-                  <!-- Push Notifications -->
-                  <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-sm">Notificaciones Push</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">Notificaciones en tiempo real en la app</p>
-                    </div>
-                    <button
-                      @click="settings.notifications.push = !settings.notifications.push"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      :class="settings.notifications.push ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'"
-                    >
-                      <span
-                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                        :class="settings.notifications.push ? 'translate-x-6' : 'translate-x-1'"
-                      ></span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- Security Settings -->
-            <section class="px-3 sm:px-6 mb-4 sm:mb-6">
-              <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center">
-                  <span class="w-6 h-6 sm:w-8 sm:h-8 bg-red-100 dark:bg-red-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mr-2 sm:mr-3">
-                    <span class="text-sm sm:text-base">🔐</span>
-                  </span>
-                  Seguridad
-                </h2>
-
-                <div class="space-y-4">
-                  <!-- Two Factor Authentication -->
-                  <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-sm">Autenticación de Dos Factores</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">Requiere código adicional para iniciar sesión</p>
-                    </div>
-                    <button
-                      @click="settings.security.twoFactor = !settings.security.twoFactor"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      :class="settings.security.twoFactor ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'"
-                    >
-                      <span
-                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                        :class="settings.security.twoFactor ? 'translate-x-6' : 'translate-x-1'"
-                      ></span>
-                    </button>
-                  </div>
-
-                  <!-- Session Timeout -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tiempo de Sesión (minutos)</label>
-                    <select
-                      v-model="settings.security.sessionTimeout"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white appearance-none"
-                    >
-                      <option value="15">15 minutos</option>
-                      <option value="30">30 minutos</option>
-                      <option value="60">1 hora</option>
-                      <option value="120">2 horas</option>
-                      <option value="480">8 horas</option>
-                    </select>
-                  </div>
-
-                  <!-- Password Policy -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Longitud Mínima de Contraseña</label>
-                    <select
-                      v-model="settings.security.passwordLength"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white appearance-none"
-                    >
-                      <option value="6">6 caracteres</option>
-                      <option value="8">8 caracteres</option>
-                      <option value="10">10 caracteres</option>
-                      <option value="12">12 caracteres</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- Service Settings -->
-            <section class="px-3 sm:px-6 mb-4 sm:mb-6">
-              <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center">
-                  <span class="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 dark:bg-green-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mr-2 sm:mr-3">
-                    <span class="text-sm sm:text-base">🔧</span>
-                  </span>
-                  Configuración de Servicios
-                </h2>
-
-                <div class="space-y-4">
-                  <!-- Auto Assignment -->
-                  <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-sm">Asignación Automática</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">Asignar técnicos automáticamente</p>
-                    </div>
-                    <button
-                      @click="settings.services.autoAssignment = !settings.services.autoAssignment"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      :class="settings.services.autoAssignment ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'"
-                    >
-                      <span
-                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                        :class="settings.services.autoAssignment ? 'translate-x-6' : 'translate-x-1'"
-                      ></span>
-                    </button>
-                  </div>
-
-                  <!-- Service Price -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Precio Base de Visita (L.)</label>
-                    <input
-                      v-model.number="settings.services.basePrice"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="150.00"
-                    >
-                  </div>
-
-                  <!-- Max Technicians -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Máximo de Técnicos por Servicio</label>
-                    <select
-                      v-model="settings.services.maxTechnicians"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white appearance-none"
-                    >
-                      <option value="1">1 técnico</option>
-                      <option value="2">2 técnicos</option>
-                      <option value="3">3 técnicos</option>
-                      <option value="5">5 técnicos</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- Backup & Maintenance -->
-            <section class="px-3 sm:px-6 mb-4 sm:mb-6">
-              <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center">
-                  <span class="w-6 h-6 sm:w-8 sm:h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mr-2 sm:mr-3">
-                    <span class="text-sm sm:text-base">💾</span>
-                  </span>
-                  Respaldos y Mantenimiento
-                </h2>
-
-                <div class="space-y-4">
-                  <!-- Auto Backup -->
-                  <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-sm">Respaldo Automático</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">Crear respaldos automáticamente</p>
-                    </div>
-                    <button
-                      @click="settings.backup.autoBackup = !settings.backup.autoBackup"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      :class="settings.backup.autoBackup ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'"
-                    >
-                      <span
-                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                        :class="settings.backup.autoBackup ? 'translate-x-6' : 'translate-x-1'"
-                      ></span>
-                    </button>
-                  </div>
-
-                  <!-- Backup Frequency -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Frecuencia de Respaldo</label>
-                    <select
-                      v-model="settings.backup.frequency"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white appearance-none"
-                    >
-                      <option value="daily">Diario</option>
-                      <option value="weekly">Semanal</option>
-                      <option value="monthly">Mensual</option>
-                    </select>
-                  </div>
-
-                  <!-- Backup Actions -->
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button 
-                      @click="createBackup"
-                      :disabled="isCreatingBackup"
-                      class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 text-sm"
-                    >
-                      {{ isCreatingBackup ? '⏳ Creando...' : '💾 Crear Respaldo' }}
-                    </button>
-                    <button 
-                      @click="showMaintenanceModal = true"
-                      class="px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg transition-colors text-sm"
-                    >
-                      🔧 Modo Mantenimiento
-                    </button>
-                  </div>
-
-                  <!-- Last Backup Info -->
-                  <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Último respaldo:</p>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ lastBackupDate }}</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- Advanced Settings -->
-            <section class="px-3 sm:px-6 mb-4 sm:mb-6">
-              <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center">
-                  <span class="w-6 h-6 sm:w-8 sm:h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mr-2 sm:mr-3">
-                    <span class="text-sm sm:text-base">🔬</span>
-                  </span>
-                  Configuración Avanzada
-                </h2>
-
-                <div class="space-y-4">
-                  <!-- Debug Mode -->
-                  <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-sm">Modo Debug</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">Activar logs detallados para desarrollo</p>
-                    </div>
-                    <button
-                      @click="settings.advanced.debugMode = !settings.advanced.debugMode"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      :class="settings.advanced.debugMode ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'"
-                    >
-                      <span
-                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                        :class="settings.advanced.debugMode ? 'translate-x-6' : 'translate-x-1'"
-                      ></span>
-                    </button>
-                  </div>
-
-                  <!-- API Rate Limit -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Límite de API (requests/min)</label>
-                    <input
-                      v-model.number="settings.advanced.rateLimit"
-                      type="number"
-                      min="10"
-                      max="1000"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                      placeholder="100"
-                    >
-                  </div>
-
-                  <!-- Cache Duration -->
-                  <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Duración de Cache (minutos)</label>
-                    <select
-                      v-model="settings.advanced.cacheDuration"
-                      class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white appearance-none"
-                    >
-                      <option value="5">5 minutos</option>
-                      <option value="15">15 minutos</option>
-                      <option value="30">30 minutos</option>
-                      <option value="60">1 hora</option>
-                    </select>
-                  </div>
-
-                  <!-- Dangerous Actions -->
-                  <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
-                    <h4 class="text-sm font-bold text-red-600 dark:text-red-400 mb-3">⚠️ Acciones Peligrosas</h4>
-                    <div class="grid grid-cols-1 gap-2">
-                      <button 
-                        @click="showResetModal = true"
-                        class="px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors text-sm"
-                      >
-                        🗑️ Restablecer Configuración
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-          </main>
-        </div>
+            </button>
+          </div>
+        </div> 
       </div>
 
-      <FootersFooterAdmin />
+      <!-- Configuration Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-16 sm:mb-20 lg:mb-24">
+        
+        <!-- Card 1: Precios y Tarifas -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+          <div class="flex items-center mb-4 sm:mb-6">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 dark:bg-green-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+              <span class="text-lg sm:text-2xl">💰</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                Precios y Tarifas
+              </h3>
+              <p class="text-[11px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                Configuración de precios del sistema
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4 sm:space-y-5">
+            <!-- Membresía -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Precio de Membresía
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">L.</span>
+                <input
+                  v-model.number="configuracionMembresia"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full pl-8 pr-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="250.00">
+              </div>
+            </div>
+
+            <!-- Visita Técnica -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Precio de Visita Técnica
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">L.</span>
+                <input
+                  v-model.number="configuracionVisita"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full pl-8 pr-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="150.00">
+              </div>
+            </div>
+
+            <!-- Comisión -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Comisión por Servicio
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">L.</span>
+                <input
+                  v-model.number="configuracionComision"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full pl-8 pr-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="70.00">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Información de Empresa -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+          <div class="flex items-center mb-4 sm:mb-6">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+              <span class="text-lg sm:text-2xl">🏢</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                Información de Empresa
+              </h3>
+              <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                Datos de contacto empresarial
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4 sm:space-y-5">
+            <!-- Teléfono -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Número de Empresa
+              </label>
+              <input
+                v-model="configuracionTelefono"
+                type="text"
+                class="w-full px-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                placeholder="99866626">
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Correo de Empresa
+              </label>
+              <input
+                v-model="configuracionEmail"
+                type="email"
+                class="w-full px-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                placeholder="hogarseguro@gmail.com">
+            </div>
+
+            <!-- Info adicional -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 sm:p-4">
+              <h4 class="text-[12px] sm:text-xs md:text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">Información</h4>
+              <p class="text-[12px] sm:text-xs md:text-sm text-blue-600 dark:text-blue-300 leading-relaxed">
+                Esta información se utiliza para el contacto oficial de la empresa y aparece en documentos y comunicaciones.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Porcentajes del Sistema -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-1">
+          <div class="flex items-center mb-4 sm:mb-6">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 dark:bg-purple-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+              <span class="text-lg sm:text-2xl">📊</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                Porcentajes del Sistema
+              </h3>
+              <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                Configuración de comisiones
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4 sm:space-y-5">
+            <!-- Descuento -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Porcentaje de Descuento
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionDescuento"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-full pl-4 pr-8 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="10">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+
+            <!-- Referido -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Porcentaje de Referido
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionReferido"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-full pl-4 pr-8 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="10">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+
+            <!-- Retiro -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Porcentaje de Retiro
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionRetiro"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-full pl-4 pr-8 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="99">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> 
     </div>
-
-    <!-- Maintenance Mode Modal -->
-    <Transition
-      name="modal"
-      enter-active-class="modal-enter-active"
-      leave-active-class="modal-leave-active"
-      enter-from-class="modal-enter-from"
-      leave-to-class="modal-leave-to">
-      <div v-if="showMaintenanceModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showMaintenanceModal = false"></div>
-        
-        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-sm p-4 sm:p-6 relative z-10">
-          <div class="text-center">
-            <div class="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-orange-100 dark:bg-orange-900/30 mb-3 sm:mb-4">
-              <span class="text-orange-600 dark:text-orange-400 text-lg sm:text-xl">🔧</span>
-            </div>
-            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">Modo Mantenimiento</h3>
-            <p class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-4 sm:mb-6">
-              Activar el modo mantenimiento deshabilitará temporalmente el acceso a la aplicación para todos los usuarios.
-            </p>
-            
-            <div class="flex gap-2 sm:gap-3">
-              <button 
-                @click="showMaintenanceModal = false"
-                class="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
-              >
-                Cancelar
-              </button>
-              <button 
-                @click="toggleMaintenanceMode"
-                :disabled="isTogglingMaintenance"
-                class="flex-1 px-3 sm:px-4 py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center text-sm disabled:opacity-50"
-              >
-                <span v-if="!isTogglingMaintenance">
-                  {{ settings.system.maintenanceMode ? 'Desactivar' : 'Activar' }}
-                </span>
-                <svg v-else class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Transition>
-
-    <!-- Reset Configuration Modal -->
-    <Transition
-      name="modal"
-      enter-active-class="modal-enter-active"
-      leave-active-class="modal-leave-active"
-      enter-from-class="modal-enter-from"
-      leave-to-class="modal-leave-to">
-      <div v-if="showResetModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showResetModal = false"></div>
-        
-        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-sm p-4 sm:p-6 relative z-10">
-          <div class="text-center">
-            <div class="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-3 sm:mb-4">
-              <span class="text-red-600 dark:text-red-400 text-lg sm:text-xl">⚠️</span>
-            </div>
-            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">¿Restablecer configuración?</h3>
-            <p class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-4 sm:mb-6">
-              <strong>¡ADVERTENCIA!</strong> Esta acción restaurará toda la configuración a los valores predeterminados. Esta acción no se puede deshacer.
-            </p>
-            
-            <div class="flex gap-2 sm:gap-3">
-              <button 
-                @click="showResetModal = false"
-                class="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
-              >
-                Cancelar
-              </button>
-              <button 
-                @click="resetConfiguration"
-                :disabled="isResetting"
-                class="flex-1 px-3 sm:px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center text-sm disabled:opacity-50"
-              >
-                <span v-if="!isResetting">Restablecer</span>
-                <svg v-else class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Transition>
+    
+    <!-- Footer -->
+    <FootersFooterAdmin />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { useHead, useCookie } from '#imports'
+import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store'
-import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
-import Toast from '~/components/ui/Toast.vue'
 
-// ===== VARIABLES DE CONFIGURACIÓN =====
+// ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
-const userCookie = useCookie('user')
 
-// SEO and Meta
+// Componentes 
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import Toast from '~/components/ui/Toast.vue' 
+
+// SEO y Meta
 useHead({
-  title: 'HogarSeguro - Configuración del Sistema',
+  title: 'HogarSeguro - Configuraciones',
   meta: [
-    { name: 'description', content: 'Configuración del sistema HogarSeguro - Ajustes generales, seguridad y mantenimiento' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'description', content: 'Configuraciones del sistema HogarSeguro - Administrar configuraciones' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' }
   ]
 })
 
 // ===== VARIABLES DE ESTADO =====
 const isLoading = ref(true)
 const isSaving = ref(false)
-const isCreatingBackup = ref(false)
-const isTogglingMaintenance = ref(false)
-const isResetting = ref(false)
-const showMaintenanceModal = ref(false)
-const showResetModal = ref(false)
 
-// ===== VARIABLES DE DATOS =====
-// Estado del sistema
-const systemStatus = ref({
-  uptime: 45,
-  version: 'v2.1.3',
-  storage: 68,
-  healthy: true
+// ===== CONFIGURACIONES INDIVIDUALES =====
+const configuracionMembresia = ref(0)
+const configuracionVisita = ref(0)
+const configuracionComision = ref(0)
+const configuracionTelefono = ref('')
+const configuracionEmail = ref('')
+const configuracionDescuento = ref(0)
+const configuracionReferido = ref(0)
+const configuracionRetiro = ref(0)
+
+// ===== VALORES ORIGINALES PARA DETECTAR CAMBIOS =====
+const valoresOriginales = ref({})
+const configuraciones = ref([])
+
+// ===== COMPUTED PARA DETECTAR CAMBIOS =====
+const hayChanges = computed(() => {
+  return configuracionMembresia.value !== valoresOriginales.value.membresia ||
+         configuracionVisita.value !== valoresOriginales.value.visita_tecnico ||
+         configuracionComision.value !== valoresOriginales.value.comision_por_servicio ||
+         configuracionTelefono.value !== valoresOriginales.value.numero_empresa ||
+         configuracionEmail.value !== valoresOriginales.value.correo_empresa ||
+         configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento ||
+         configuracionReferido.value !== valoresOriginales.value.porcentaje_referido ||
+         configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro
 })
 
-// Configuraciones del sistema
-const settings = ref({
-  general: {
-    companyName: 'HogarSeguro',
-    companyEmail: 'info@hogarseguro.com',
-    companyPhone: '+504 2234-5678',
-    timezone: 'America/Tegucigalpa'
-  },
-  global: {
-    membershipPrice: 250,
-    technicalVisitPrice: 150,
-    serviceCommission: 70,
-    companyNumber: '99866626',
-    companyEmail: 'hogarseguro@gmail.com',
-    discountPercentage: 10,
-    referralPercentage: 10,
-    withdrawalPercentage: 99
-  },
-  notifications: {
-    email: true,
-    sms: false,
-    push: true
-  },
-  security: {
-    twoFactor: false,
-    sessionTimeout: 30,
-    passwordLength: 8
-  },
-  services: {
-    autoAssignment: true,
-    basePrice: 150.00,
-    maxTechnicians: 2
-  },
-  backup: {
-    autoBackup: true,
-    frequency: 'daily'
-  },
-  advanced: {
-    debugMode: false,
-    rateLimit: 100,
-    cacheDuration: 15
-  },
-  system: {
-    maintenanceMode: false
-  }
-})
-
-// Configuraciones originales para detectar cambios
-const originalSettings = ref({})
-
-// Fecha del último respaldo
-const lastBackupDate = ref('18 Dic 2024, 03:00 AM')
-
-// Toast notification
+// ===== TOAST NOTIFICATION =====
 const toast = ref({
   show: false,
   message: '',
   type: 'success',
   duration: 5000
-})
+});
 
-// ===== COMPUTED PROPERTIES =====
-const hasUnsavedChanges = computed(() => {
-  return JSON.stringify(settings.value) !== JSON.stringify(originalSettings.value)
-})
-
-// ===== FUNCIONES DE UTILIDAD =====
-const showToast = (options) => {
-  toast.value.show = false
-  
-  nextTick(() => {
-    toast.value = {
-      show: true,
-      message: options.message,
-      type: options.type || 'info',
-      duration: options.duration || 5000
-    }
-  })
-}
-
-const showSuccess = (message) => {
-  showToast({
+const showToastMessage = (message, type = 'success') => {
+  toast.value = {
+    show: true,
     message,
-    type: 'success',
-    duration: 3000
-  })
-}
-
-const showError = (message) => {
-  console.error('Error:', message)
-  showToast({
-    message: typeof message === 'string' ? message : 'Ocurrió un error inesperado',
-    type: 'error',
+    type,
     duration: 5000
-  })
-}
+  };
+};
 
-const showWarning = (message) => {
-  showToast({
-    message,
-    type: 'warning',
-    duration: 4000
-  })
-}
-
-// ===== FUNCIONES DE CONFIGURACIÓN =====
-const saveAllSettings = async () => {
+// ===== FUNCIONES PRINCIPALES =====
+const guardarConfiguraciones = async () => {
   try {
     isSaving.value = true
     
-    // Simular guardado de configuraciones
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // Detectar cambios y preparar datos para enviar
+    const cambios = []
     
-    // Actualizar configuraciones originales
-    originalSettings.value = JSON.parse(JSON.stringify(settings.value))
+    if (configuracionMembresia.value !== valoresOriginales.value.membresia) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'membresia')?.id_config,
+        tipo_config: 'membresia',
+        valor: configuracionMembresia.value
+      })
+    }
     
-    showSuccess('Todas las configuraciones han sido guardadas exitosamente')
+    if (configuracionVisita.value !== valoresOriginales.value.visita_tecnico) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'visita_tecnico')?.id_config,
+        tipo_config: 'visita_tecnico',
+        valor: configuracionVisita.value
+      })
+    }
+    
+    if (configuracionComision.value !== valoresOriginales.value.comision_por_servicio) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'comision_por_servicio')?.id_config,
+        tipo_config: 'comision_por_servicio',
+        valor: configuracionComision.value
+      })
+    }
+    
+    if (configuracionTelefono.value !== valoresOriginales.value.numero_empresa) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'numero_empresa')?.id_config,
+        tipo_config: 'numero_empresa',
+        valor: configuracionTelefono.value
+      })
+    }
+    
+    if (configuracionEmail.value !== valoresOriginales.value.correo_empresa) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'correo_empresa')?.id_config,
+        tipo_config: 'correo_empresa',
+        valor: configuracionEmail.value
+      })
+    }
+    
+    if (configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_descuento')?.id_config,
+        tipo_config: 'porcentaje_descuento',
+        valor: configuracionDescuento.value
+      })
+    }
+    
+    if (configuracionReferido.value !== valoresOriginales.value.porcentaje_referido) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_referido')?.id_config,
+        tipo_config: 'porcentaje_referido',
+        valor: configuracionReferido.value
+      })
+    }
+    
+    if (configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_retiro')?.id_config,
+        tipo_config: 'porcentaje_retiro',
+        valor: configuracionRetiro.value
+      })
+    }
+
+    console.log('Cambios detectados para enviar:', cambios)
+
+    if (cambios.length === 0) {
+      showToastMessage('No hay cambios para guardar', 'info')
+      return
+    }
+
+    // Hacer peticiones PUT individuales para cada cambio
+    const promesas = cambios.map(async (cambio) => {
+      const payload = {
+        tipo_config: cambio.tipo_config,
+        valor: cambio.valor
+      }
+      
+      console.log(`Enviando PUT a /config/${cambio.id}:`, payload)
+      
+      const response = await $fetch(`/config/${cambio.id}`, {
+        baseURL: config.public.apiBase,
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: payload
+      })
+      
+      console.log(`Respuesta del backend para ${cambio.tipo_config}:`, response)
+      return response
+    })
+
+    await Promise.all(promesas)
+    
+    // Actualizar valores originales después de guardar exitosamente
+    await cargarConfiguraciones()
+    
+    showToastMessage('Configuraciones guardadas exitosamente', 'success')
   } catch (error) {
-    showError('Error al guardar las configuraciones')
+    console.error('Error al guardar configuraciones:', error)
+    showToastMessage('Error al guardar las configuraciones', 'error')
   } finally {
     isSaving.value = false
   }
 }
 
-const createBackup = async () => {
+const cargarConfiguraciones = async () => {
+  isLoading.value = true;
   try {
-    isCreatingBackup.value = true
+    console.log('Iniciando carga de configuraciones...');
     
-    // Simular creación de respaldo
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
-    // Actualizar fecha del último respaldo
-    const now = new Date()
-    lastBackupDate.value = now.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-    
-    showSuccess('Respaldo creado exitosamente')
-  } catch (error) {
-    showError('Error al crear el respaldo')
-  } finally {
-    isCreatingBackup.value = false
-  }
-}
-
-const toggleMaintenanceMode = async () => {
-  try {
-    isTogglingMaintenance.value = true
-    
-    // Simular cambio de modo mantenimiento
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    settings.value.system.maintenanceMode = !settings.value.system.maintenanceMode
-    
-    if (settings.value.system.maintenanceMode) {
-      showWarning('Modo mantenimiento activado. Los usuarios no podrán acceder a la aplicación.')
-    } else {
-      showSuccess('Modo mantenimiento desactivado. La aplicación está disponible nuevamente.')
-    }
-    
-    showMaintenanceModal.value = false
-  } catch (error) {
-    showError('Error al cambiar el modo mantenimiento')
-  } finally {
-    isTogglingMaintenance.value = false
-  }
-}
-
-const resetConfiguration = async () => {
-  try {
-    isResetting.value = true
-    
-    // Simular restablecimiento
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
-    // Restablecer a valores predeterminados
-    settings.value = {
-      general: {
-        companyName: 'HogarSeguro',
-        companyEmail: 'info@hogarseguro.com',
-        companyPhone: '+504 2234-5678',
-        timezone: 'America/Tegucigalpa'
-      },
-      global: {
-        membershipPrice: 250,
-        technicalVisitPrice: 150,
-        serviceCommission: 70,
-        companyNumber: '99866626',
-        companyEmail: 'hogarseguro@gmail.com',
-        discountPercentage: 10,
-        referralPercentage: 10,
-        withdrawalPercentage: 99
-      },
-      notifications: {
-        email: true,
-        sms: false,
-        push: true
-      },
-      security: {
-        twoFactor: false,
-        sessionTimeout: 30,
-        passwordLength: 8
-      },
-      services: {
-        autoAssignment: false,
-        basePrice: 150.00,
-        maxTechnicians: 1
-      },
-      backup: {
-        autoBackup: true,
-        frequency: 'daily'
-      },
-      advanced: {
-        debugMode: false,
-        rateLimit: 100,
-        cacheDuration: 15
-      },
-      system: {
-        maintenanceMode: false
+    const response = await $fetch('/config', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
       }
-    }
-    
-    originalSettings.value = JSON.parse(JSON.stringify(settings.value))
-    
-    showSuccess('Configuración restablecida a valores predeterminados')
-    showResetModal.value = false
-  } catch (error) {
-    showError('Error al restablecer la configuración')
-  } finally {
-    isResetting.value = false
-  }
-}
+    });
 
-// ===== FUNCIONES DE CARGA =====
-const loadSettings = async () => {
-  try {
-    // Simular carga de configuraciones desde la API
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Las configuraciones ya están inicializadas en el estado
-    // En una aplicación real, aquí se cargarían desde la API
-    
-    // Guardar configuraciones originales
-    originalSettings.value = JSON.parse(JSON.stringify(settings.value))
-    
+    console.log('Respuesta de la API:', response);
+
+    if (Array.isArray(response)) {
+      configuraciones.value = response
+      
+      // Mapeo directo de la respuesta de la API a las variables
+      response.forEach(item => {
+        switch(item.tipo_config) {
+          case 'membresia':
+            configuracionMembresia.value = Number(item.valor) || 0;
+            break;
+          case 'visita_tecnico':
+            configuracionVisita.value = Number(item.valor) || 0;
+            break;
+          case 'comision_por_servicio':
+            configuracionComision.value = Number(item.valor) || 0;
+            break;
+          case 'numero_empresa':
+            configuracionTelefono.value = item.valor?.toString() || '';
+            break;
+          case 'correo_empresa':
+            configuracionEmail.value = item.valor?.toString() || '';
+            break;
+          case 'porcentaje_descuento':
+            configuracionDescuento.value = Number(item.valor) || 0;
+            break;
+          case 'porcentaje_referido':
+            configuracionReferido.value = Number(item.valor) || 0;
+            break;
+          case 'porcentaje_retiro':
+            configuracionRetiro.value = Number(item.valor) || 0;
+            break;
+        }
+      });
+      
+      // Guardar valores originales para detectar cambios
+      valoresOriginales.value = {
+        membresia: configuracionMembresia.value,
+        visita_tecnico: configuracionVisita.value,
+        comision_por_servicio: configuracionComision.value,
+        numero_empresa: configuracionTelefono.value,
+        correo_empresa: configuracionEmail.value,
+        porcentaje_descuento: configuracionDescuento.value,
+        porcentaje_referido: configuracionReferido.value,
+        porcentaje_retiro: configuracionRetiro.value
+      }
+      
+      console.log('Configuraciones cargadas:', valoresOriginales.value);
+    } else {
+      console.error('La respuesta de la API no es un array:', response);
+      showToastMessage('Error: Formato de respuesta inválido', 'error');
+    }
   } catch (error) {
-    console.error('Error al cargar configuraciones:', error)
-    showError('Error al cargar las configuraciones del sistema')
+    console.error('Error al cargar configuraciones:', error);
+    showToastMessage('Error al cargar las configuraciones. Por favor, recarga la página.', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
-  await loadSettings()
-})
-
+  try {
+    await cargarConfiguraciones();
+  } catch (error) {
+    console.error('Error en la inicialización:', error);
+    showToastMessage('Error al inicializar la configuración', 'error');
+  }
+});
 </script>
 
-<style scoped>
-/* Animaciones para modales */
-.backdrop-enter-active {
-  transition: opacity 0.3s ease-out;
+<style scoped> 
+input, select, textarea {
+  font-size: 14px;
 }
 
-.backdrop-leave-active {
-  transition: opacity 0.2s ease-in;
-}
-
-.backdrop-enter-from,
-.backdrop-leave-to {
-  opacity: 0;
-}
-
-.modal-content-enter-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transition-delay: 0.1s;
-}
-
-.modal-content-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modal-content-enter-from,
-.modal-content-leave-to {
-  opacity: 0;
-  transform: translateY(20px) scale(0.98);
-}
-
-/* Transiciones del modal */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-/* Estilos generales */
-.transition-all {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
+/* Personalizar scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -1060,16 +556,24 @@ onMounted(async () => {
   background: rgba(107, 114, 128, 0.6);
 }
 
-button, input, textarea, select {
-  min-height: 44px;
+/* Transiciones suaves */
+* {
+  transition: colors 0.3s ease;
 }
 
-input, textarea, select {
-  font-size: 16px;
+/* Asegurar que el contenido principal tome el espacio disponible */
+.flex-1 {
+  flex: 1 1 0%;
 }
 
-/* Estilos para toggle switches */
-.toggle-switch {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Mejorar espaciado en móvil */
+@media (max-width: 640px) {
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1rem;
+  }
+  
+  .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.25rem;
+  }
 }
 </style>
