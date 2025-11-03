@@ -2061,10 +2061,13 @@ const loadServices = async () => {
     
     // Verificar el estado de los pagos para cada solicitud
     const solicitudesConPago = await Promise.all(response.solicitudes.map(async (solicitud) => {
-      
       // Verificar estado del pago de la visita si corresponde
       if (solicitud.estado === 'pendiente_pagovisita') {
+        console.log(`🔍 [${new Date().toISOString()}] Verificando estado de pago para solicitud ${solicitud.id_solicitud}`);
+        
         try {
+          console.log(`📡 [${new Date().toISOString()}] Solicitando estado de pago a: /pagovisita/solicitud/${solicitud.id_solicitud}`);
+          
           const pagoResponse = await $fetch(`/pagovisita/solicitud/${solicitud.id_solicitud}`, {
             baseURL: config.public.apiBase,
             method: 'GET',
@@ -2073,20 +2076,36 @@ const loadServices = async () => {
             }
           });
           
+          console.log(`✅ [${new Date().toISOString()}] Respuesta de pago para solicitud ${solicitud.id_solicitud}:`, pagoResponse);
+          
+          // Extraer el estado del pago de la respuesta anidada
+          const estadoPago = pagoResponse.data?.estado || 'pendiente';
+          
           const solicitudActualizada = {
             ...solicitud,
-            pago_estado: pagoResponse.estado || 'pendiente'
+            pago_estado: estadoPago,
+            _rawPagoResponse: pagoResponse // Guardar la respuesta completa para depuración
           };
+          
+          console.log(`📊 [${new Date().toISOString()}] Estado de pago extraído para solicitud ${solicitud.id_solicitud}:`, estadoPago);
+          
+          console.log(`📝 [${new Date().toISOString()}] Actualizando estado de pago para solicitud ${solicitud.id_solicitud}: ${solicitudActualizada.pago_estado}`);
           
           return solicitudActualizada;
           
         } catch (error) {
+          console.error(`❌ [${new Date().toISOString()}] Error al verificar pago para solicitud ${solicitud.id_solicitud}:`, {
+            error: error.message,
+            stack: error.stack
+          });
+          
           return {
             ...solicitud,
-            pago_estado: 'pendiente'
+            pago_estado: 'pendiente',
+            _error: error.message
           };
         }
-      }
+        }
       
       // Verificar estado de la cotización si corresponde
       if (solicitud.estado === 'pendiente_pagoservicio') {

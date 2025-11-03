@@ -1929,21 +1929,21 @@ const verifyPayment = async (isApproved) => {
     // Deshabilitar botones mientras se procesa
     isVerifying.value = true
     
+    // Determinar el tipo de pago (visita o servicio)
+    const isVisitPayment = paymentType.value === 'visit'
+    
     if (isApproved) {
-      // APROBAR PAGO: Usar endpoint unificado que actualiza cotización, solicitud y movimiento
+      // APROBAR PAGO
+      const endpoint = isVisitPayment ? '/pagovisita/confirmar' : '/pagoservicio/aceptar'
+      const paymentPayload = { id_solicitud: solicitudId }
       
-      const paymentPayload = {
-        id_cotizacion: cotizacionId,
-        id_solicitud: solicitudId
-      }
-      
-      console.log('📤 Enviando aprobación de pago:', {
-        endpoint: '/pagoservicio/aceptar',
+      console.log(`📤 Enviando aprobación de pago de ${isVisitPayment ? 'visita' : 'servicio'}:`, {
+        endpoint,
         method: 'POST',
         payload: paymentPayload
       })
       
-      const response = await $fetch('/pagoservicio/aceptar', {
+      const response = await $fetch(endpoint, {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -1955,24 +1955,20 @@ const verifyPayment = async (isApproved) => {
       });
       
       console.log('📥 Respuesta de aprobación de pago:', response)
-      console.log('✅ Pago aprobado: cotización confirmada, solicitud finalizada y movimiento completado')
+      console.log(`✅ Pago de ${isVisitPayment ? 'visita' : 'servicio'} aprobado`)
       
     } else {
-      // RECHAZAR PAGO: Usar endpoint unificado que revierte cotización, solicitud, crédito y comisiones
+      // RECHAZAR PAGO
+      const endpoint = isVisitPayment ? '/pagovisita/denegar' : '/pagoservicio/denegar'
+      const denyPayload = { id_solicitud: solicitudId }
       
-      const denyPayload = {
-        id_cotizacion: cotizacionId,
-        id_solicitud: solicitudId,
-        id_usuario: idUsuario
-      }
-      
-      console.log('📤 Enviando rechazo de pago:', {
-        endpoint: '/pagoservicio/denegar',
+      console.log(`📤 Enviando rechazo de pago de ${isVisitPayment ? 'visita' : 'servicio'}:`, {
+        endpoint,
         method: 'POST',
         payload: denyPayload
       })
       
-      const response = await $fetch('/pagoservicio/denegar', {
+      const response = await $fetch(endpoint, {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -1984,7 +1980,7 @@ const verifyPayment = async (isApproved) => {
       });
       
       console.log('📥 Respuesta de rechazo de pago:', response)
-      console.log('✅ Pago rechazado: cotización rechazada, solicitud revertida, crédito devuelto y comisiones revertidas')
+      console.log(`❌ Pago de ${isVisitPayment ? 'visita' : 'servicio'} rechazado`)
     }
     
     // Cerrar el modal de pago
