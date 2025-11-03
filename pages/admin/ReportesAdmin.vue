@@ -1,203 +1,169 @@
 <template>
   <div class="min-h-screen bg-white dark:bg-gray-900">
     <!-- Toast Notification -->
-    <div v-if="toast.show" 
-         :class="`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${getToastClass()}`">
-      <div class="flex items-center space-x-3">
-        <span v-html="getToastIcon()"></span>
-        <span class="font-medium">{{ toast.message }}</span>
-        <button @click="toast.show = false" class="ml-2 text-white hover:text-gray-200">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
+    <Toast 
+      v-if="toast.show"
+      :key="toast.message + Date.now()"
+      :message="toast.message" 
+      :type="toast.type"
+      :duration="toast.duration"
+      @close="toast.show = false"
+    />
+    
     <!-- Loading Spinner -->
-    <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 flex flex-col items-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p class="text-gray-700 dark:text-gray-300">Cargando datos...</p>
-      </div>
-    </div>
+    <LoadingSpinner 
+      :loading="isLoading"
+    />
 
-    <!-- Modal Universal para Pagos/Retiros -->
-    <div v-if="showDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeDetailsModal"></div>
-      <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[85vw] max-w-4xl max-h-[85vh] overflow-y-auto relative z-10">
-        <!-- Modal Header -->
-        <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg sm:rounded-t-xl">
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2 min-w-0">
-              <div :class="getModalIconClass()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center text-base sm:text-lg">
-                {{ getModalIcon() }}
-              </div>
-              <div class="min-w-0">
-                <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate">{{ getModalTitle() }}</h3>
-                <p class="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">{{ getModalSubtitle() }}</p>
-              </div>
-            </div>
-            <button @click="closeDetailsModal" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Modal Content -->
-        <div class="p-3 text-[13px] sm:text-sm">
-          <!-- Información del Monto -->
-          <div class="mb-3 sm:mb-4">
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between">
-                <span class="text-[12px] text-gray-500 dark:text-gray-400">Monto:</span>
-                <span :class="getModalAmountClass()" class="font-medium text-sm">{{ formatCurrency(selectedItem?.amount) }}</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-[12px] text-gray-500 dark:text-gray-400">Fecha:</span>
-                <span class="text-gray-900 dark:text-white">{{ formatDate(selectedItem?.date) }}</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-[12px] text-gray-500 dark:text-gray-400">Estado:</span>
-                <span :class="getStatusBadgeClass(selectedItem?.status)" class="text-[11px] px-2 py-0.5 rounded-full">
-                  {{ selectedItem?.status || 'Pendiente' }}
-                </span>
-              </div>
-              <template v-if="modalType !== 'withdrawal'">
-                <div class="flex items-center justify-between">
-                  <span class="text-[12px] text-gray-500 dark:text-gray-400">Método:</span>
-                  <span class="text-gray-900 dark:text-white">{{ selectedItem?.method || 'No especificado' }}</span>
+    <!-- Modal Universal para Pagos/Retiros con Transición -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeDetailsModal"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[85vw] max-w-4xl max-h-[85vh] overflow-y-auto relative z-10">
+          <!-- Modal Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg sm:rounded-t-xl">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <div :class="getModalIconClass()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center text-base sm:text-lg">
+                  {{ getModalIcon() }}
                 </div>
-              </template>
+                <div class="min-w-0">
+                  <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate">{{ getModalTitle() }}</h3>
+                  <p class="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">{{ getModalSubtitle() }}</p>
+                </div>
+              </div>
+              <button @click="closeDetailsModal" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
             </div>
           </div>
 
-          <!-- Datos de Cuenta -->
-          <div class="mb-3 sm:mb-4">
-            <h4 class="text-[12px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              {{ modalType === 'withdrawal' ? 'Datos Bancarios' : 'Información de Cuenta' }}
-            </h4>
-            <div class="bg-gray-50 dark:bg-gray-700/30 p-2 rounded">
-              <pre class="text-[11px] sm:text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-snug">{{ getAccountDetails() }}</pre>
+          <!-- Modal Content -->
+          <div class="p-3 text-[13px] sm:text-sm">
+            <!-- Información del Monto -->
+            <div class="mb-3 sm:mb-4">
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[12px] text-gray-500 dark:text-gray-400">Monto:</span>
+                  <span :class="getModalAmountClass()" class="font-medium text-sm">{{ formatCurrency(selectedItem?.amount) }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-[12px] text-gray-500 dark:text-gray-400">Fecha:</span>
+                  <span class="text-gray-900 dark:text-white">{{ formatDate(selectedItem?.date) }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-[12px] text-gray-500 dark:text-gray-400">Estado:</span>
+                  <span :class="getStatusBadgeClass(selectedItem?.status)" class="text-[11px] px-2 py-0.5 rounded-full">
+                    {{ selectedItem?.status || 'Pendiente' }}
+                  </span>
+                </div>
+                <template v-if="modalType !== 'withdrawal'">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[12px] text-gray-500 dark:text-gray-400">Método:</span>
+                    <span class="text-gray-900 dark:text-white">{{ selectedItem?.method || 'No especificado' }}</span>
+                  </div>
+                </template>
+              </div>
             </div>
-          </div>
 
-          <!-- Acciones -->
-          <div v-if="selectedItem?.status === 'Pendiente'" class="flex gap-2 mt-4">
-            <button @click="rejectItem" 
-                    class="flex-1 py-1.5 text-xs sm:text-[13px] font-medium rounded border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-              Rechazar
-            </button>
-            <button @click="approveItem" 
-                    class="flex-1 py-1.5 text-xs sm:text-[13px] font-medium rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-              Aprobar
-            </button>
-          </div>
-          <div v-else class="text-center py-1 text-xs text-gray-500 dark:text-gray-400">
-            {{ modalType === 'withdrawal' ? 'Retiro' : 'Pago' }} {{ selectedItem?.status?.toLowerCase() }}
+            <!-- Datos de Cuenta -->
+            <div class="mb-3 sm:mb-4">
+              <h4 class="text-[12px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                {{ modalType === 'withdrawal' ? 'Datos Bancarios' : 'Información de Cuenta' }}
+              </h4>
+              <div class="bg-gray-50 dark:bg-gray-700/30 p-2 rounded">
+                <pre class="text-[11px] sm:text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-snug">{{ getAccountDetails() }}</pre>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div v-if="selectedItem?.status === 'Pendiente'" class="flex gap-2 mt-4">
+              <button @click="rejectItem" 
+                      class="flex-1 py-1.5 text-xs sm:text-[13px] font-medium rounded border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                Rechazar
+              </button>
+              <button @click="approveItem" 
+                      class="flex-1 py-1.5 text-xs sm:text-[13px] font-medium rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                Aprobar
+              </button>
+            </div>
+            <div v-else class="text-center py-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ modalType === 'withdrawal' ? 'Retiro' : 'Pago' }} {{ selectedItem?.status?.toLowerCase() }}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
 
     <!-- Header --> 
-      <HeadersHeaderReportesAdmin /> 
+    <HeadersHeaderReportesAdmin />
 
     <!-- Content Container -->
     <div class="max-w-xl mx-auto bg-white dark:bg-gray-900 min-h-screen pb-20">
       
-      <!-- Resumen Ejecutivo -->
-      <section class="px-3 sm:px-4 py-3 sm:py-4"> 
-        <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white mb-3 sm:mb-4">
-          <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Resumen Ejecutivo</h2>
-          <div class="grid grid-cols-2 gap-3 mb-4">
-            <!-- Ingresos -->
-            <div class="bg-white/10 rounded-lg p-3">
-              <p class="text-purple-100 text-xs font-medium mb-2">💰 Ingresos</p>
-              <div class="space-y-1">
-                <div>
-                  <p class="text-xs text-purple-200">Último mes</p>
-                  <p class="text-base font-bold">L. {{ formatCurrency(executiveSummary.monthlyRevenue) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-purple-200">Total</p>
-                  <p class="text-xs font-medium">L. {{ formatCurrency(executiveSummary.totalRevenue) }}</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Comisiones Técnicos -->
-            <div class="bg-white/10 rounded-lg p-3">
-              <p class="text-purple-100 text-xs font-medium mb-2">🏆 Comisiones</p>
-              <div class="space-y-1">
-                <div>
-                  <p class="text-xs text-purple-200">Último mes</p>
-                  <p class="text-base font-bold">L. {{ formatCurrency(executiveSummary.monthlyCommissions) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-purple-200">Total</p>
-                  <p class="text-xs font-medium">L. {{ formatCurrency(executiveSummary.totalCommissions) }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Retiros -->
-            <div class="bg-white/10 rounded-lg p-3">
-              <p class="text-purple-100 text-xs font-medium mb-2">💳 Retiros</p>
-              <div class="space-y-1">
-                <div>
-                  <p class="text-xs text-purple-200">Último mes</p>
-                  <p class="text-base font-bold">L. {{ formatCurrency(executiveSummary.monthlyWithdrawals) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-purple-200">Total</p>
-                  <p class="text-xs font-medium">L. {{ formatCurrency(executiveSummary.totalWithdrawals) }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Ingresos Referidos -->
-            <div class="bg-white/10 rounded-lg p-3">
-              <p class="text-purple-100 text-xs font-medium mb-2">👥 Referidos</p>
-              <div class="space-y-1">
-                <div>
-                  <p class="text-xs text-purple-200">Último mes</p>
-                  <p class="text-base font-bold">L. {{ formatCurrency(executiveSummary.monthlyReferrals) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-purple-200">Total</p>
-                  <p class="text-xs font-medium">L. {{ formatCurrency(executiveSummary.totalReferrals) }}</p>
-                </div>
-              </div>
-            </div>
-          </div> 
-        </div>
-      </section>
-
-      <!-- Estadísticas de la Plataforma con Filtro -->
-      <section class="px-2 sm:px-4 mb-4 sm:mb-6">
+      <!-- Estadísticas de la Plataforma con Filtro (Fusionado con Ingresos) -->
+      <section class="px-2 sm:px-4 py-3 sm:py-4 mb-4 sm:mb-6">
         <div class="flex items-center justify-between mb-3 sm:mb-4">
           <h2 class="text-sm sm:text-lg font-black text-gray-900 dark:text-white whitespace-nowrap">
-            Estadísticas de la Plataforma
+            Estadísticas Financieras
           </h2>
-          <select 
-            v-model="selectedPeriod" 
-            @change="updateStats"
-            class="px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="1">Último mes</option>
-            <option value="6">Últimos 6 meses</option>
-            <option value="all">Total</option>
-          </select>
         </div>
+        
+        <!-- Filtros de fecha para estadísticas -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-3 mb-3 shadow border border-gray-100 dark:border-gray-700">
+          <h3 class="text-xs font-semibold text-gray-900 dark:text-white mb-2">Período de Análisis</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-gray-500 dark:text-gray-400 mb-0.5 block">Desde</label>
+              <input 
+                type="date"
+                v-model="platformDateFrom"
+                @change="updatePlatformStats"
+                class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white text-xs rounded px-2 py-1.5"
+              />
+            </div>
+            <div>
+              <label class="text-[11px] text-gray-500 dark:text-gray-400 mb-0.5 block">Hasta</label>
+              <input 
+                type="date"
+                v-model="platformDateTo"
+                @change="updatePlatformStats"
+                class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white text-xs rounded px-2 py-1.5"
+              />
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-2 sm:gap-3">
-          <!-- Ingresos Membresía -->
+          <!-- Ingresos Totales -->
           <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
             <div class="flex items-center space-x-2 sm:space-x-3">
               <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <span class="text-green-600 dark:text-green-400 text-sm sm:text-lg">💳</span>
+                <span class="text-green-600 dark:text-green-400 text-sm sm:text-lg">💰</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
+                  L. {{ formatCurrency(platformStats.totalRevenue) }}
+                </p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
+                  Ingresos Totales
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ingresos por Membresía -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <span class="text-purple-600 dark:text-purple-400 text-sm sm:text-lg">💳</span>
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
@@ -213,8 +179,8 @@
           <!-- Ingresos Por Visita -->
           <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
             <div class="flex items-center space-x-2 sm:space-x-3">
-              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                <span class="text-purple-600 dark:text-purple-400 text-sm sm:text-lg">🏠</span>
+              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <span class="text-blue-600 dark:text-blue-400 text-sm sm:text-lg">🏠</span>
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
@@ -260,6 +226,23 @@
               </div>
             </div>
           </div>
+
+          <!-- Comisiones Técnicos -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                <span class="text-indigo-600 dark:text-indigo-400 text-sm sm:text-lg">🏆</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
+                  L. {{ formatCurrency(platformStats.totalCommissions) }}
+                </p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
+                  Comisiones
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -276,11 +259,16 @@
         </div>
       </section>
 
-      <!-- Gráfico Dinámico -->
+      <!-- Contenedor de Gráficos -->
       <section class="px-3 sm:px-4 mb-4 sm:mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-          <div class="h-56 sm:h-64">
-            <canvas :id="'chart-' + selectedChart" class="w-full h-full"></canvas>
+          <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-2">
+            {{ getChartTitle() }}
+          </h3>
+          <div class="relative w-full" style="padding-bottom: 60%;">
+            <div class="absolute inset-0">
+              <canvas :id="'chart-' + selectedChart" class="w-full h-full"></canvas>
+            </div>
           </div>
         </div>
       </section>
@@ -422,7 +410,6 @@
                   'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600': statusFilter !== filter.id
                 }"
                 class="px-2 py-1 text-[10px] font-medium transition-colors"
-
                 :title="filter.id === 'all' ? 'Todos' : 
                        filter.id === 'pending' ? 'Pendientes' :
                        filter.id === 'approved' ? 'Aprobados' : 'Rechazados'"
@@ -528,15 +515,40 @@
         </div>
       </section>
 
+      <!-- Footer -->
       <FootersFooterAdmin />
     </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
-import { Chart, registerables } from 'chart.js'
-import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { defineComponent, ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import { Chart, registerables } from 'chart.js';
+import { useHead, useCookie } from '#imports';
+import { useAuthStore } from '~/middleware/auth.store'; 
+import { jsPDF } from 'jspdf';
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
+import Toast from '~/components/ui/Toast.vue'; 
+import DataLabelsPlugin from 'chartjs-plugin-datalabels';
+import autoTable from 'jspdf-autotable';
+
+const router = useRouter();
+const route = useRoute();
+
+// ===== VARIABLES DE CONFIGURACIÓN =====
+const config = useRuntimeConfig()
+const auth = useAuthStore()
+const userCookie = useCookie('user')
+
+// SEO and Meta
+useHead({
+  title: 'HogarSeguro - Reportes',
+  meta: [
+    { name: 'description', content: 'Reportes del sistema HogarSeguro - Administrar solicitudes, asignaciones y seguimiento' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+  ]
+})
 
 // ===== VARIABLES DE ESTADO =====
 const currentUser = ref({ nombre: 'Admin Principal' })
@@ -552,9 +564,13 @@ const showDetailsModal = ref(false)
 const selectedItem = ref(null)
 const modalType = ref('') // 'membership', 'visits', 'services', 'withdrawals'
 
-// Variables para reportería
-const reportDateFrom = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0])
-const reportDateTo = ref(new Date().toISOString().split('T')[0])
+// Variables para fechas de filtros (todas inician vacías)
+const platformDateFrom = ref('')
+const platformDateTo = ref('')
+
+// Variables para reportería (todas inician vacías)
+const reportDateFrom = ref('')
+const reportDateTo = ref('')
 
 // ===== DATOS REACTIVOS =====
 const executiveSummary = reactive({
@@ -573,11 +589,12 @@ const executiveSummary = reactive({
 })
 
 const platformStats = reactive({
-  newUsers: 247,
-  membershipRevenue: 89760,
-  visitRevenue: 156420,
-  serviceRevenue: 234580,
-  totalWithdrawals: 145320
+  totalRevenue: 480760,
+  membershipRevenue: 125430,
+  visitRevenue: 234560,
+  serviceRevenue: 120770,
+  totalWithdrawals: 145320,
+  totalCommissions: 89760
 })
 
 const transactions = ref([])
@@ -677,10 +694,9 @@ const generateMonthLabels = () => {
 const earningsData = reactive({
   labels: generateMonthLabels(),
   datasets: [{
-    label: 'Ingresos Mensuales',
-    data: [45000, 52000, 48000, 61000, 59000, 67000, 73000, 69000, 78000, 82000, 89000, 94000],
+    label: 'Ingresos Mensuales', 
     borderColor: '#10B981',
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    backgroundColor: 'rgba(22, 248, 173, 0.26)',
     tension: 0.4,
     fill: true
   }]
@@ -734,6 +750,17 @@ const citiesData = reactive({
 const visibleTransactions = computed(() => {
   return transactions.value.slice(0, visibleTransactionsCount.value)
 })
+
+const getChartTitle = () => {
+  const chartTitles = {
+    earnings: 'Ingresos Mensuales',
+    serviceTypes: 'Distribución de Servicios por Tipo', 
+    services: 'Servicios Realizados por Mes',
+    users: 'Crecimiento de Usuarios',
+    cities: 'Servicios por Ciudad'
+  }
+  return chartTitles[selectedChart.value] || 'Gráfico'
+}
 
 // ===== FUNCIONES DE UTILIDAD =====
 const formatCurrency = (value) => {
@@ -792,23 +819,493 @@ const getTransactionAmountClass = (type) => {
   return type === 'commission' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
 }
 
-// ===== FUNCIONES DE ESTADÍSTICAS =====
-const updateStats = () => {
-  const baseStats = {
-    newUsers: { '1': 247, '6': 1452, 'all': 2847 },
-    membershipRevenue: { '1': 89760, '6': 523840, 'all': 1247600 },
-    visitRevenue: { '1': 156420, '6': 892340, 'all': 2134580 },
-    serviceRevenue: { '1': 234580, '6': 1345670, 'all': 3245890 },
-    totalWithdrawals: { '1': 145320, '6': 876540, 'all': 2098760 }
+// ===== FUNCIONES DE GRÁFICOS =====
+let chart = null;
+
+// Funciones para cargar datos de diferentes endpoints
+const loadServiceTypesData = async () => {
+  try {
+    console.log('Cargando datos de servicios por tipo...');
+    const response = await $fetch('/solicitudservicio/grafica/servicios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    console.log('Datos de servicios por tipo recibidos:', response);
+
+    if (response.success && response.data && window.currentChart) {
+      const { labels, data: valores } = response.data;
+      
+      // Actualizar los datos del gráfico
+      window.currentChart.data.labels = labels;
+      window.currentChart.data.datasets[0].data = valores;
+      
+      // Colores para los segmentos del gráfico
+      const colors = [
+        '#3B82F6', '#EF4444', '#10B981', '#8B5CF6', '#F59E0B',
+        '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#8B5CF6'
+      ];
+      
+      window.currentChart.data.datasets[0].backgroundColor = colors;
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de servicios por tipo:', error);
+    showToast('Error al cargar los datos del gráfico de servicios', 'error');
+  }
+};
+
+const loadServicesPerMonthData = async () => {
+  try {
+    console.log('Cargando datos de servicios por mes...');
+    const response = await $fetch('/solicitudservicio/grafica/servicios-por-mes', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    console.log('Datos de servicios por mes recibidos:', response);
+
+    if (response.success && response.data && window.currentChart) {
+      const { labels, data: valores } = response.data;
+      
+      // Actualizar los datos del gráfico
+      window.currentChart.data.labels = labels;
+      window.currentChart.data.datasets[0].data = valores;
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de servicios por mes:', error);
+    showToast('Error al cargar los datos del gráfico de servicios por mes', 'error');
+  }
+};
+
+const loadUserGrowthData = async () => {
+  try {
+    console.log('Cargando datos de crecimiento de usuarios...');
+    const response = await $fetch('/usuarios/grafica/crecimiento-usuarios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    console.log('Datos de crecimiento de usuarios recibidos:', response);
+
+    if (response.success && response.data && window.currentChart) {
+      const { labels, data: valores } = response.data;
+      
+      // Actualizar los datos del gráfico
+      window.currentChart.data.labels = labels;
+      window.currentChart.data.datasets[0].data = valores;
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de crecimiento de usuarios:', error);
+    showToast('Error al cargar los datos del gráfico de crecimiento de usuarios', 'error');
+  }
+};
+
+const loadServicesByCityData = async () => {
+  try {
+    console.log('Cargando datos de servicios por ciudad...');
+    const response = await $fetch('/solicitudservicio/grafica/servicios-por-ciudad', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    console.log('Datos de servicios por ciudad recibidos:', response);
+
+    if (response.success && response.data && window.currentChart) {
+      const { labels, data: valores } = response.data;
+      
+      // Actualizar los datos del gráfico
+      window.currentChart.data.labels = labels;
+      window.currentChart.data.datasets[0].data = valores;
+      
+      // Colores para ciudades
+      const colors = ['#8B5CF6', '#EC4899', '#F59E0B', '#EF4444', '#06B6D4'];
+      window.currentChart.data.datasets[0].backgroundColor = colors;
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de servicios por ciudad:', error);
+    showToast('Error al cargar los datos del gráfico de servicios por ciudad', 'error');
+  }
+};
+
+const createChart = async () => {
+  if (!selectedChart.value) {
+    console.error('No se ha seleccionado ningún gráfico');
+    return;
   }
   
-  const period = selectedPeriod.value
-  platformStats.newUsers = baseStats.newUsers[period]
-  platformStats.membershipRevenue = baseStats.membershipRevenue[period]
-  platformStats.visitRevenue = baseStats.visitRevenue[period]
-  platformStats.serviceRevenue = baseStats.serviceRevenue[period]
-  platformStats.totalWithdrawals = baseStats.totalWithdrawals[period]
-}
+  console.log('Creando gráfico:', selectedChart.value);
+  
+  // Destruir el gráfico anterior si existe
+  if (window.currentChart) {
+    console.log('Destruyendo gráfico anterior');
+    window.currentChart.destroy();
+  }
+  
+  // Obtener el canvas
+  const canvas = document.getElementById(`chart-${selectedChart.value}`);
+  if (!canvas) {
+    console.error('No se encontró el elemento canvas para el gráfico:', `chart-${selectedChart.value}`);
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
+  const isDark = document.documentElement.classList.contains('dark');
+   
+  let config = {};
+  
+  switch (selectedChart.value) {
+    case 'earnings':
+      config = {
+        type: 'bar',
+        data: earningsData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: isDark ? '#9CA3AF' : '#6B7280',
+                font: {
+                  size: 11,
+                  family: 'sans-serif',
+                  weight: 500
+                },
+                padding: 20,
+                usePointStyle: true,
+                pointStyle: 'circle',
+                boxWidth: 6,
+                boxHeight: 6
+              }
+            },
+            tooltip: {
+              backgroundColor: isDark ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+              titleColor: isDark ? '#F9FAFB' : '#111827',
+              bodyColor: isDark ? '#D1D5DB' : '#4B5563',
+              borderColor: isDark ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.8)',
+              borderWidth: 1,
+              padding: 10,
+              titleFont: {
+                size: 12,
+                weight: 'bold'
+              },
+              bodyFont: {
+                size: 12
+              },
+              callbacks: {
+                label: function(context) {
+                  return 'L. ' + context.raw.toLocaleString('es-HN');
+                }
+              }
+            },
+            datalabels: {
+              display: false // Desactivar etiquetas dentro de las barras
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: isDark ? '#9CA3AF' : '#6B7280',
+                font: {
+                  size: 10,
+                  family: 'sans-serif'
+                },
+                callback: function(value) {
+                  return 'L. ' + (value/1000) + 'K';
+                }
+              },
+              grid: {
+                color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)',
+                borderDash: [4, 4]
+              }
+            },
+            x: {
+              ticks: {
+                color: isDark ? '#9CA3AF' : '#6B7280',
+                font: {
+                  size: 10,
+                  family: 'sans-serif'
+                }
+              },
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      };
+      break;
+    
+    case 'serviceTypes':
+    case 'cities':
+      config = {
+        type: 'doughnut',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+            backgroundColor: [
+              '#3B82F6', '#EF4444', '#10B981', '#8B5CF6', '#F59E0B',
+              '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#8B5CF6'
+            ],
+            borderWidth: 0
+          }]
+        },
+        plugins: [DataLabelsPlugin],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '50%',
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right',
+              labels: {
+                color: isDark ? '#9CA3AF' : '#6B7280',
+                font: {
+                  size: 10,
+                  family: 'sans-serif',
+                  weight: 500
+                },
+                padding: 12,
+                usePointStyle: true,
+                pointStyle: 'circle',
+                boxWidth: 6,
+                boxHeight: 6
+              }
+            },
+            tooltip: {
+              backgroundColor: isDark ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+              titleColor: isDark ? '#F9FAFB' : '#111827',
+              bodyColor: isDark ? '#D1D5DB' : '#4B5563',
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            },
+            datalabels: {
+              display: true,
+              color: '#FFFFFF',
+              font: {
+                weight: 'bold',
+                size: 11,
+                family: 'sans-serif'
+              },
+              formatter: (value, context) => {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                return percentage > 8 ? `${value}\n(${percentage}%)` : percentage > 4 ? `${percentage}%` : '';
+              },
+              textAlign: 'center',
+              anchor: 'center',
+              align: 'center'
+            }
+          }
+        }
+      };
+      break;
+
+    case 'services':
+    case 'users':
+      config = {
+        type: 'line',
+        data: selectedChart.value === 'services' ? servicesData : usersData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: isDark ? '#9CA3AF' : '#6B7280',
+                font: {
+                  size: 11,
+                  family: 'sans-serif',
+                  weight: 500
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: isDark ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+              titleColor: isDark ? '#F9FAFB' : '#111827',
+              bodyColor: isDark ? '#D1D5DB' : '#4B5563'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: isDark ? '#9CA3AF' : '#6B7280',
+                font: {
+                  size: 10,
+                  family: 'sans-serif'
+                }
+              },
+              grid: {
+                color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)'
+              }
+            },
+            x: {
+              ticks: {
+                color: isDark ? '#9CA3AF' : '#6B7280',
+                font: {
+                  size: 10,
+                  family: 'sans-serif'
+                }
+              },
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      };
+      break;
+      
+    default:
+      console.warn('Tipo de gráfico no soportado:', selectedChart.value);
+      return;
+  }
+  
+  // Crear el gráfico con la configuración
+  window.currentChart = new Chart(ctx, config);
+  
+  // Cargar datos según el tipo de gráfico
+  switch (selectedChart.value) {
+    case 'earnings':
+      await updatePlatformStats();
+      break;
+    case 'serviceTypes':
+      await loadServiceTypesData();
+      break;
+    case 'services':
+      await loadServicesPerMonthData();
+      break;
+    case 'users':
+      await loadUserGrowthData();
+      break;
+    case 'cities':
+      await loadServicesByCityData();
+      break;
+  }
+};
+
+const updateChart = (chartData) => {
+  if (window.currentChart && chartData) {
+    window.currentChart.data.labels = chartData.etiquetas || [];
+    window.currentChart.data.datasets[0].data = chartData.datos || [];
+    window.currentChart.update();
+  }
+};
+
+
+
+const updatePlatformStats = async () => {
+  try { 
+    // Formatear el mes actual para la API (YYYY-MM)
+    const mesActual = platformDateFrom.value ? 
+      `${platformDateFrom.value.substring(0, 7)}` : 
+      `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      
+    // Construir la URL con los parámetros
+    let url = `/movimientos/reporte/ingresos?mesActual=${mesActual}`;
+    
+    // Agregar fechas de filtro si están definidas
+    if (platformDateFrom.value) {
+      url += `&fechaInicio=${platformDateFrom.value}`;
+    }
+    if (platformDateTo.value) {
+      url += `&fechaFin=${platformDateTo.value}`;
+    }
+    
+    const fullUrl = `${config.public.apiBase}${url}`;
+    console.log('🔵 Enviando petición a:', fullUrl);
+    console.log('🔹 Parámetros:', { 
+      mesActual,
+      fechaInicio: platformDateFrom.value,
+      fechaFin: platformDateTo.value
+    });
+    
+    // Hacer la petición al endpoint
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    console.log('🟢 Respuesta del servidor:', JSON.parse(JSON.stringify(response)));
+    
+    if (response.success && response.data) {
+      const data = response.data.resumen;
+      
+      // Actualizar las estadísticas con los datos del servidor
+      platformStats.totalRevenue = data.ingresosTotales || 0;
+      platformStats.membershipRevenue = data.ingresosMembresias || 0;
+      platformStats.visitRevenue = data.ingresosVisitas || 0;
+      platformStats.serviceRevenue = data.ingresosServicios || 0;
+      platformStats.totalWithdrawals = data.retiros || 0;
+      platformStats.totalCommissions = data.comisiones || 0;
+      
+      console.log('📊 Datos actualizados:', {
+        totalRevenue: platformStats.totalRevenue,
+        membershipRevenue: platformStats.membershipRevenue,
+        visitRevenue: platformStats.visitRevenue,
+        serviceRevenue: platformStats.serviceRevenue,
+        totalWithdrawals: platformStats.totalWithdrawals,
+        totalCommissions: platformStats.totalCommissions
+      });
+      
+      // Si hay datos de gráfico, actualizar el gráfico
+      if (response.data.grafico) {
+        console.log('📈 Datos del gráfico recibidos:', response.data.grafico);
+        updateChart(response.data.grafico);
+      }
+      
+      showToast('Datos actualizados correctamente', 'success');
+    } else {
+      console.warn('⚠️ La respuesta no tiene éxito o no contiene datos:', response);
+    }
+  } catch (error) {
+    console.error('❌ Error al cargar estadísticas:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      url: error.request?.responseURL
+    });
+    showToast('Error al cargar las estadísticas', 'error');
+  }  
+};
 
 // ===== FUNCIONES DE FILTROS =====
 const getAllItems = () => {
@@ -1124,7 +1621,7 @@ const rejectItem = () => {
   closeDetailsModal()
 }
 
-// ===== FUNCIONES DE REPORTERÍA =====
+// ===== FUNCIONES DE REPORTERÍA MEJORADA =====
 const generateReport = async (report) => {
   report.generating = true
   
@@ -1132,91 +1629,323 @@ const generateReport = async (report) => {
     // Simular tiempo de generación
     await new Promise(resolve => setTimeout(resolve, 2000))
     
-    // Crear contenido del PDF
-    const { jsPDF } = window.jspdf
-    const doc = new jsPDF()
+    // Crear instancia de jsPDF con configuración profesional
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
     
-    // Header
-    doc.setFontSize(20)
-    doc.text(report.title, 20, 30)
+    // Asignar autoTable a la instancia de jsPDF
+    doc.autoTable = autoTable;
     
-    doc.setFontSize(12)
-    doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 20, 45)
-    doc.text(`Período: ${formatDate(reportDateFrom.value)} - ${formatDate(reportDateTo.value)}`, 20, 55)
-    doc.text('HogarSeguro - Sistema Administrativo', 20, 65)
+    // Configuración de colores y estilo
+    const primaryColor = [93, 92, 222]
+    const secondaryColor = [107, 114, 128]
+    const accentColor = [16, 185, 129]
+    const errorColor = [239, 68, 68]
     
-    // Contenido basado en el tipo de reporte
-    let yPosition = 90
+    // ===== HEADER PROFESIONAL =====
+    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+    doc.rect(0, 0, 210, 35, 'F')
     
+    // Logo y título principal
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(24)
+    doc.setFont('helvetica', 'bold')
+    doc.text('HOGAR SEGURO', 20, 20)
+    
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.text('SISTEMA DE GESTIÓN ADMINISTRATIVO', 20, 25)
+    doc.text('Reportes y Análisis Empresarial', 20, 30)
+    
+    // Fecha y período en el header
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(8)
+    doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 130, 20)
+    doc.text(`Período: ${formatDate(reportDateFrom.value)} - ${formatDate(reportDateTo.value)}`, 130, 25)
+    doc.text(`Usuario: Admin Principal`, 130, 30)
+    
+    // ===== TÍTULO DEL REPORTE =====
+    doc.setTextColor(0, 0, 0)
+    doc.setFillColor(248, 250, 252)
+    doc.rect(0, 35, 210, 20, 'F')
+    
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
+    doc.text(report.title.toUpperCase(), 20, 47)
+    
+    // Línea decorativa
+    doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
+    doc.setLineWidth(0.8)
+    doc.line(20, 51, 190, 51)
+    
+    let currentY = 65
+    
+    // ===== CONTENIDO ESPECÍFICO POR REPORTE =====
     switch (report.id) {
       case 1: // Reporte Financiero
-        doc.setFontSize(14)
-        doc.text('Resumen Financiero', 20, yPosition)
-        yPosition += 20
+        // Resumen ejecutivo
+        doc.setFillColor(accentColor[0], accentColor[1], accentColor[2])
+        doc.rect(20, currentY, 170, 8, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('RESUMEN EJECUTIVO FINANCIERO', 25, currentY + 5)
+        currentY += 15
         
-        doc.setFontSize(10)
-        doc.text(`Ingresos por Membresía: L. ${formatCurrency(platformStats.membershipRevenue)}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Ingresos por Visitas: L. ${formatCurrency(platformStats.visitRevenue)}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Ingresos por Servicios: L. ${formatCurrency(platformStats.serviceRevenue)}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Total de Ingresos: L. ${formatCurrency(platformStats.membershipRevenue + platformStats.visitRevenue + platformStats.serviceRevenue)}`, 20, yPosition)
+        // Tabla de ingresos
+        const financialData = [
+          ['CONCEPTO', 'MONTO (L.)', 'PORCENTAJE'],
+          ['Ingresos por Membresías', formatCurrency(platformStats.membershipRevenue), '26.1%'],
+          ['Ingresos por Visitas', formatCurrency(platformStats.visitRevenue), '48.8%'],
+          ['Ingresos por Servicios', formatCurrency(platformStats.serviceRevenue), '25.1%'],
+          ['TOTAL INGRESOS', formatCurrency(platformStats.totalRevenue), '100.0%'],
+          ['', '', ''],
+          ['Retiros Procesados', formatCurrency(platformStats.totalWithdrawals), '-30.2%'],
+          ['Comisiones Pagadas', formatCurrency(platformStats.totalCommissions), '-18.7%'],
+          ['BALANCE NETO', formatCurrency(platformStats.totalRevenue - platformStats.totalWithdrawals - platformStats.totalCommissions), '51.1%']
+        ]
+        
+autoTable(doc, {
+          startY: currentY,
+          head: [financialData[0]],
+          body: financialData.slice(1),
+          theme: 'grid',
+          headStyles: {
+            fillColor: primaryColor,
+            textColor: 255,
+            fontStyle: 'bold',
+            fontSize: 9
+          },
+          bodyStyles: {
+            fontSize: 8,
+            cellPadding: 3
+          },
+          alternateRowStyles: {
+            fillColor: [248, 250, 252]
+          },
+          columnStyles: {
+            0: { cellWidth: 80, fontStyle: 'bold' },
+            1: { cellWidth: 50, halign: 'right' },
+            2: { cellWidth: 30, halign: 'center' }
+          },
+          margin: { left: 20, right: 20 }
+        })
+        
+        currentY = doc.lastAutoTable.finalY + 15
+        
+        // Análisis financiero
+        doc.setTextColor(0, 0, 0)
+        doc.setFontSize(11)
+        doc.setFont('helvetica', 'bold')
+        doc.text('ANÁLISIS DE RENDIMIENTO', 20, currentY)
+        currentY += 8
+        
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        const analysisText = [
+          '• Los ingresos por visitas representan el 48.8% del total, siendo la principal fuente de ingresos.',
+          '• Las membresías contribuyen con el 26.1%, mostrando un crecimiento estable.',
+          '• Los servicios adicionales generan el 25.1% restante.',
+          '• El balance neto positivo del 51.1% indica una operación rentable.',
+          '• Se recomienda optimizar los costos de comisiones para mejorar la rentabilidad.'
+        ]
+        
+        analysisText.forEach(text => {
+          doc.text(text, 25, currentY)
+          currentY += 6
+        })
         break
         
       case 2: // Reporte de Usuarios
-        doc.setFontSize(14)
-        doc.text('Estadísticas de Usuarios y Técnicos', 20, yPosition)
-        yPosition += 20
+        doc.setFillColor(59, 130, 246)
+        doc.rect(20, currentY, 170, 8, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('ESTADÍSTICAS DE USUARIOS Y TÉCNICOS', 25, currentY + 5)
+        currentY += 15
         
-        doc.setFontSize(10)
-        doc.text(`Nuevos Usuarios (período): ${formatNumber(platformStats.newUsers)}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Total de Técnicos: ${formatNumber(executiveSummary.totalTechnicians)}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Servicios del Mes: ${formatNumber(executiveSummary.monthlyServices)}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Satisfacción Promedio: ${executiveSummary.averageSatisfaction}%`, 20, yPosition)
+        // Métricas de usuarios
+        const userMetrics = [
+          ['MÉTRICA', 'VALOR', 'TENDENCIA'],
+          ['Total de Técnicos Activos', formatNumber(executiveSummary.totalTechnicians), '+12.5%'],
+          ['Servicios del Mes', formatNumber(executiveSummary.monthlyServices), '+8.3%'],
+          ['Satisfacción Promedio', `${executiveSummary.averageSatisfaction}%`, '+2.1%'],
+          ['Tiempo de Respuesta', `${executiveSummary.responseTime} horas`, '-15.2%'],
+          ['Retención de Técnicos', '87.3%', '+5.1%'],
+          ['Nuevos Registros', '247', '+18.7%']
+        ]
+        
+autoTable(doc, {
+          startY: currentY,
+          head: [userMetrics[0]],
+          body: userMetrics.slice(1),
+          theme: 'grid',
+          headStyles: {
+            fillColor: [59, 130, 246],
+            textColor: 255,
+            fontStyle: 'bold',
+            fontSize: 9
+          },
+          bodyStyles: {
+            fontSize: 8,
+            cellPadding: 3
+          },
+          alternateRowStyles: {
+            fillColor: [248, 250, 252]
+          },
+          margin: { left: 20, right: 20 }
+        })
+        
+        currentY = doc.lastAutoTable.finalY + 15
+        
+        // Recomendaciones
+        doc.setTextColor(0, 0, 0)
+        doc.setFontSize(11)
+        doc.setFont('helvetica', 'bold')
+        doc.text('RECOMENDACIONES ESTRATÉGICAS', 20, currentY)
+        currentY += 8
+        
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        const recommendations = [
+          '• Mantener el programa de capacitación continua para técnicos.',
+          '• Implementar incentivos adicionales para mejorar la retención.',
+          '• Desarrollar un sistema de reconocimiento por desempeño.',
+          '• Crear programas de referidos para técnicos destacados.'
+        ]
+        
+        recommendations.forEach(text => {
+          doc.text(text, 25, currentY)
+          currentY += 6
+        })
         break
         
       case 3: // Reporte de Servicios
-        doc.setFontSize(14)
-        doc.text('Análisis de Servicios', 20, yPosition)
-        yPosition += 20
+        doc.setFillColor(139, 92, 246)
+        doc.rect(20, currentY, 170, 8, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('ANÁLISIS DETALLADO DE SERVICIOS', 25, currentY + 5)
+        currentY += 15
         
-        doc.setFontSize(10)
-        doc.text(`Servicios Completados: ${formatNumber(executiveSummary.monthlyServices)}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Tiempo de Respuesta Promedio: ${executiveSummary.responseTime} horas`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Índice de Satisfacción: ${executiveSummary.averageSatisfaction}%`, 20, yPosition)
+        // Tabla de servicios por categoría
+        const serviceData = [
+          ['CATEGORÍA', 'SERVICIOS', 'INGRESOS (L.)', 'PROMEDIO'],
+          ['Electricidad', '387', '89,450', '231'],
+          ['Plomería', '245', '67,890', '277'],
+          ['Climatización', '198', '78,560', '397'],
+          ['Carpintería', '156', '45,230', '290'],
+          ['Pintura', '98', '23,450', '239'],
+          ['Limpieza', '67', '18,670', '279'],
+          ['TOTAL', '1,151', '323,250', '281']
+        ]
+        
+autoTable(doc, {
+          startY: currentY,
+          head: [serviceData[0]],
+          body: serviceData.slice(1),
+          theme: 'grid',
+          headStyles: {
+            fillColor: [139, 92, 246],
+            textColor: 255,
+            fontStyle: 'bold',
+            fontSize: 9
+          },
+          bodyStyles: {
+            fontSize: 8,
+            cellPadding: 3
+          },
+          alternateRowStyles: {
+            fillColor: [248, 250, 252]
+          },
+          columnStyles: {
+            0: { cellWidth: 50, fontStyle: 'bold' },
+            1: { cellWidth: 30, halign: 'center' },
+            2: { cellWidth: 40, halign: 'right' },
+            3: { cellWidth: 30, halign: 'right' }
+          },
+          margin: { left: 20, right: 20 }
+        })
         break
         
       case 4: // Reporte de Transacciones
-        doc.setFontSize(14)
-        doc.text('Resumen de Transacciones', 20, yPosition)
-        yPosition += 20
+        doc.setFillColor(245, 158, 11)
+        doc.rect(20, currentY, 170, 8, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('RESUMEN DE TRANSACCIONES Y MOVIMIENTOS', 25, currentY + 5)
+        currentY += 15
         
-        doc.setFontSize(10)
-        doc.text(`Total de Transacciones: ${transactions.value.length}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Retiros Procesados: ${pendingWithdrawals.value.length}`, 20, yPosition)
-        yPosition += 10
-        doc.text(`Pagos de Membresía: ${membershipPayments.value.length}`, 20, yPosition)
+        // Resumen de transacciones
+        const transactionSummary = [
+          ['TIPO DE TRANSACCIÓN', 'CANTIDAD', 'MONTO TOTAL (L.)', 'PROMEDIO (L.)'],
+          ['Pagos de Membresía', membershipPayments.value.length.toString(), formatCurrency(125430), formatCurrency(125430 / membershipPayments.value.length)],
+          ['Pagos por Visitas', visitPayments.value.length.toString(), formatCurrency(234560), formatCurrency(234560 / visitPayments.value.length)],
+          ['Pagos por Servicios', servicePayments.value.length.toString(), formatCurrency(345670), formatCurrency(345670 / servicePayments.value.length)],
+          ['Retiros Procesados', pendingWithdrawals.value.filter(w => w.status === 'Aprobado').length.toString(), formatCurrency(145320), '2,847'],
+          ['Comisiones Pagadas', '456', formatCurrency(89760), '197']
+        ]
+        
+autoTable(doc, {
+          startY: currentY,
+          head: [transactionSummary[0]],
+          body: transactionSummary.slice(1),
+          theme: 'grid',
+          headStyles: {
+            fillColor: [245, 158, 11],
+            textColor: 255,
+            fontStyle: 'bold',
+            fontSize: 9
+          },
+          bodyStyles: {
+            fontSize: 8,
+            cellPadding: 3
+          },
+          alternateRowStyles: {
+            fillColor: [248, 250, 252]
+          },
+          columnStyles: {
+            1: { halign: 'center' },
+            2: { halign: 'right' },
+            3: { halign: 'right' }
+          },
+          margin: { left: 20, right: 20 }
+        })
         break
     }
     
-    // Footer
-    doc.setFontSize(8)
-    doc.text('Este reporte fue generado automáticamente por el sistema HogarSeguro', 20, 280)
+    // ===== FOOTER PROFESIONAL =====
+    doc.setFillColor(75, 85, 99)
+    doc.rect(0, 270, 210, 27, 'F')
     
-    // Descargar el PDF
-    doc.save(`${report.title.replace(/\s+/g, '_')}_${reportDateFrom.value}_${reportDateTo.value}.pdf`)
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'normal')
+    doc.text('HOGAR SEGURO - Sistema de Gestión Administrativo', 20, 280)
+    doc.text('Este reporte fue generado automáticamente por el sistema.', 20, 285)
+    doc.text(`Confidencial - Solo para uso interno | Página 1 de 1`, 20, 290)
+    
+    // Información de contacto
+    doc.text('soporte@hogarseguro.hn | +504 2234-5678', 130, 280)
+    doc.text('Tegucigalpa, Honduras', 130, 285)
+    doc.text(`ID Reporte: RPT-${Date.now().toString().slice(-6)}`, 130, 290)
+    
+    // Descargar el PDF con nombre optimizado
+    const fileName = `HogarSeguro_${report.title.replace(/\s+/g, '_')}_${reportDateFrom.value}_${reportDateTo.value}.pdf`
+    doc.save(fileName)
     
     showToast(`${report.title} generado correctamente`, 'success')
     
   } catch (error) {
-    showToast('Error al generar el reporte', 'error')
+    console.error('Error al generar reporte:', error)
+    showToast('Error al generar el reporte PDF', 'error')
   } finally {
     report.generating = false
   }
@@ -1414,370 +2143,97 @@ const exportData = () => {
     showToast('Datos exportados correctamente', 'success')
   }, 2000)
 }
-
-// ===== FUNCIONES DE GRÁFICOS =====
-const createChart = () => {
-  if (!selectedChart.value) return
-  
-  if (window.currentChart) {
-    window.currentChart.destroy()
-  }
-  
-  const canvas = document.getElementById(`chart-${selectedChart.value}`)
-  if (!canvas) return
-
-  const ctx = canvas.getContext('2d')
-  const isDark = document.documentElement.classList.contains('dark')
-
-  let config = {}
-  
-  switch (selectedChart.value) {
-    case 'earnings':
-      config = {
-        type: 'bar',
-        data: earningsData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                font: {
-                  size: 11,
-                  family: 'sans-serif',
-                  weight: 500
-                },
-                padding: 20,
-                usePointStyle: true,
-                pointStyle: 'circle',
-                boxWidth: 6,
-                boxHeight: 6
-              }
-            },
-            tooltip: {
-              backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-              titleColor: isDark ? '#F3F4F6' : '#111827',
-              bodyColor: isDark ? '#9CA3AF' : '#4B5563',
-              borderColor: isDark ? '#374151' : '#E5E7EB',
-              borderWidth: 1,
-              padding: 10,
-              titleFont: {
-                size: 12,
-                weight: 'bold'
-              },
-              bodyFont: {
-                size: 12
-              },
-              callbacks: {
-                label: function(context) {
-                  return 'L. ' + context.raw.toLocaleString('es-HN')
-                },
-                labelColor: function(context) {
-                  return {
-                    borderColor: 'transparent',
-                    backgroundColor: context.dataset.backgroundColor,
-                    borderRadius: 2,
-                    borderWidth: 2
-                  }
-                }
-              }
-            },
-            datalabels: {
-              display: true,
-              color: function(context) {
-                return isDark ? '#E5E7EB' : '#1F2937';
-              },
-              anchor: 'center',
-              align: 'center',
-              formatter: (value) => 'L. ' + (value/1000).toFixed(0) + 'K',
-              font: {
-                weight: 'bold',
-                size: 9,
-                family: 'sans-serif'
-              },
-              textShadowColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-              textShadowBlur: 2,
-              textStrokeWidth: 0.5,
-              textStrokeColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)',
-              display: function(context) {
-                return context.dataset.data[context.dataIndex] > 0
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                font: {
-                  size: 10,
-                  family: 'sans-serif'
-                },
-                padding: 5,
-                callback: function(value) {
-                  return 'L. ' + (value/1000) + 'K'
-                }
-              },
-              grid: {
-                color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
-                drawBorder: false,
-                drawTicks: false
-              },
-              border: {
-                display: false
-              }
-            },
-            x: {
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                font: {
-                  size: 10,
-                  family: 'sans-serif'
-                },
-                maxRotation: 45,
-                minRotation: 45
-              },
-              grid: {
-                display: false,
-                drawBorder: false
-              },
-              border: {
-                display: false
-              }
-            }
-          }
-        },
-        plugins: [ChartDataLabels]
-      }
-      break
-
-    case 'serviceTypes':
-      config = {
-        type: 'doughnut',
-        data: serviceTypesData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '60%',
-          plugins: {
-            legend: {
-              position: 'left',
-              labels: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                padding: 8,
-                font: { 
-                  size: 11, 
-                  weight: '500',
-                  family: 'sans-serif'
-                },
-                usePointStyle: true,
-                pointStyle: 'circle',
-                boxWidth: 6,
-                boxHeight: 6
-              }
-            },
-            datalabels: {
-              formatter: (value, context) => {
-                const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                const percentage = Math.round((value / total) * 100)
-                return percentage >= 5 ? percentage + '%' : ''
-              },
-              color: function(context) {
-                // Make text color white for dark segments, black for light segments
-                const bgColor = context.dataset.backgroundColor[context.dataIndex];
-                // Simple brightness calculation from RGB
-                if (typeof bgColor === 'string' && bgColor.startsWith('#')) {
-                  const hex = bgColor.replace('#', '');
-                  const r = parseInt(hex.substr(0, 2), 16);
-                  const g = parseInt(hex.substr(2, 2), 16);
-                  const b = parseInt(hex.substr(4, 2), 16);
-                  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-                  return brightness > 155 ? '#1F2937' : '#FFFFFF';
-                }
-                return '#FFFFFF';
-              },
-              font: { 
-                weight: 'bold', 
-                size: 10,
-                family: 'sans-serif'
-              },
-              anchor: 'center',
-              align: 'center'
-            }
-          }
-        },
-        plugins: [ChartDataLabels]
-      }
-      break
-
-    case 'services':
-      config = {
-        type: 'line',
-        data: servicesData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                font: {
-                  size: 11,
-                  family: 'sans-serif',
-                  weight: 500
-                },
-                padding: 20,
-                usePointStyle: true,
-                pointStyle: 'circle',
-                boxWidth: 6,
-                boxHeight: 6
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                font: {
-                  size: 10,
-                  family: 'sans-serif'
-                },
-                padding: 5,
-                stepSize: 1,
-                precision: 0
-              },
-              grid: {
-                color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
-                drawBorder: false,
-                drawTicks: false
-              },
-              border: {
-                display: false
-              }
-            },
-            x: {
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                font: {
-                  size: 10,
-                  family: 'sans-serif'
-                },
-                maxRotation: 45,
-                minRotation: 45
-              },
-              grid: {
-                display: false,
-                drawBorder: false
-              },
-              border: {
-                display: false
-              }
-            }
-          }
-        }
-      }
-      break
-
-    case 'users':
-      config = {
-        type: 'line',
-        data: usersData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: isDark ? '#ffffff' : '#374151'
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280'
-              },
-              grid: {
-                color: isDark ? '#374151' : '#E5E7EB'
-              }
-            },
-            x: {
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280'
-              },
-              grid: {
-                display: false
-              }
-            }
-          }
-        }
-      }
-      break
-
-    case 'cities':
-      config = {
-        type: 'doughnut',
-        data: citiesData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '60%',
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: isDark ? '#ffffff' : '#374151',
-                padding: 20
-              }
-            }
-          }
-        }
-      }
-      break
-  }
-
-  window.currentChart = new Chart(ctx, config)
-}
+ 
 
 // ===== WATCHERS =====
-watch(selectedChart, () => {
-  nextTick(() => {
-    createChart()
-  })
-})
+watch(selectedChart, async (newVal) => {
+  console.log('Gráfico seleccionado:', newVal);
+  
+  // Esperar a que el DOM se actualice
+  await nextTick();
+  
+  // Crear el gráfico
+  createChart();
+  
+  // Cargar los datos específicos del gráfico seleccionado
+  switch (newVal) {
+    case 'earnings':
+      await updatePlatformStats();
+      break;
+    case 'serviceTypes':
+      await loadServiceTypesData();
+      break;
+    case 'services':
+      await loadServicesPerMonthData();
+      break;
+    case 'users':
+      await loadUserGrowthData();
+      break;
+    case 'cities':
+      await loadServicesByCityData();
+      break;
+  }
+});
 
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
-  Chart.register(...registerables)
+  Chart.register(...registerables, DataLabelsPlugin)
   
   // Configurar tema oscuro
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  // Verificar el tema del sistema
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
   }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+  
+  // Escuchar cambios en el tema del sistema
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
     if (event.matches) {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
-  })
+  });
 
   // Cargar datos iniciales
-  updateStats() // Inicializar estadísticas
+  await nextTick();
+  createChart();
   
-  await Promise.all([
-    loadTransactions(),
-    loadTabData()
-  ])
-  createChart()
+  // Cargar datos de la gráfica de ingresos si es la seleccionada
+  if (selectedChart.value === 'earnings') {
+    await updatePlatformStats();
+  }
+  
+  await updatePlatformStats();
+  loadTabData();
+  loadTransactions();
+  
+  isLoading.value = false;
 })
+
 </script>
+
+<style>
+[v-cloak] {
+  display: none !important;
+}
+
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+/* Estilos para transiciones de modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+</style>
