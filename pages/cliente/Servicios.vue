@@ -2105,7 +2105,7 @@ const loadServices = async () => {
             _error: error.message
           };
         }
-        }
+      }
       
       // Verificar estado de la cotización si corresponde
       if (solicitud.estado === 'pendiente_pagoservicio') {

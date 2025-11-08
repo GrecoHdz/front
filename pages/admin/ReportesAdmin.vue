@@ -298,35 +298,109 @@
           </div>
 
           <template v-else>
-            <div v-for="transaction in visibleTransactions" :key="transaction.id"
+            <div v-for="transaction in visibleTransactions" :key="transaction.id_movimiento"
                  class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                  <div :class="getTransactionIconClass(transaction.type)" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center">
-                    <span class="text-[8px] text-white text-xs sm:text-sm">{{ getTransactionIcon(transaction.type) }}</span>
+                  <div :class="getTransactionIconClass(transaction.tipo)" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center">
+                    <span class="text-[8px] text-white text-xs sm:text-sm">{{ getTransactionIcon(transaction.tipo) }}</span>
                   </div>
                   <div>
-                    <p class="text-[6px]font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{{ transaction.description }}</p>
+                    <p class="text-[6px]font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{{ getTransactionTitle(transaction) }}</p>
                     <p class="text-xs text-gray-600 dark:text-gray-400">
-                      {{ formatDate(transaction.date) }} • {{ transaction.technician }}
+                      <template v-if="transaction.id_solicitud">#{{ transaction.id_solicitud }}</template>
+                      <template v-if="transaction.id_solicitud && getTransactionSubtitle(transaction)"> • </template>
+                      <template v-if="getTransactionSubtitle(transaction)">{{ getTransactionSubtitle(transaction) }}</template>
+                      <template v-if="transaction.id_solicitud || getTransactionSubtitle(transaction)"> • </template>
+                      {{ formatDate(transaction.fecha) }}
                     </p>
                   </div>
                 </div>
                 <div class="text-right">
-                  <p :class="getTransactionAmountClass(transaction.type)" class="font-bold text-[12px] sm:text-base">
-                    {{ transaction.type === 'commission' ? '+' : '-' }}L. {{ formatCurrency(transaction.amount) }}
+                  <p :class="getTransactionAmountClass(transaction.tipo, transaction.estado)" class="font-bold text-[12px] sm:text-base">
+                    {{ transaction.tipo === 'ingreso' ? '+' : (transaction.tipo === 'ingreso_referido' ? '' : '-') }}L. {{ formatCurrency(transaction.monto) }}
                   </p>
-                  <p class="text-[10px]" :class="getStatusColor(transaction.status)">
-                    {{ transaction.status }}
+                  <p class="text-[10px]" :class="getStatusColor(transaction.estado, transaction.tipo)">
+                    {{ transaction.estado }}
                   </p>
                 </div>
               </div>
             </div>
 
-            <button v-if="hasMoreTransactions" @click="loadMoreTransactions" 
-                    class="w-full py-2 text-xs sm:text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-              Ver más transacciones
-            </button>
+            <!-- Paginación - Siempre visible cuando hay transacciones -->
+            <div v-if="transactions.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+              <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  Mostrando {{ transactions.length }} de {{ transactionsPagination.total }} transacciones
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button 
+                    @click="previousPage" 
+                    :disabled="currentTransactionPage <= 1 || isLoadingTransactions"
+                    class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                    :class="{ 'opacity-50 cursor-not-allowed': currentTransactionPage <= 1 }"
+                    aria-label="Página anterior"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  
+                  <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Página {{ currentTransactionPage }} de {{ transactionsPagination.totalPages || 1 }}
+                  </span>
+                  
+                  <button 
+                    @click="nextPage" 
+                    :disabled="currentTransactionPage >= transactionsPagination.totalPages || isLoadingTransactions"
+                    class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                    :class="{ 'opacity-50 cursor-not-allowed': currentTransactionPage >= transactionsPagination.totalPages }"
+                    aria-label="Página siguiente"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Footer con totales -->
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg p-3 mt-4 border border-gray-200 dark:border-gray-600">
+              <div class="flex items-center justify-between">
+                <!-- Ingresos -->
+                <div class="flex items-center space-x-2">
+                  <span class="text-green-500">💰</span>
+                  <div>
+                    <p class="text-xs text-gray-600 dark:text-gray-300">Ingresos</p>
+                    <p class="text-sm font-bold text-green-600 dark:text-green-400">+L. {{ formatCurrency(transactionsSummary.totalIngresos) }}</p>
+                  </div>
+                </div>
+
+                <!-- Separador -->
+                <div class="h-8 w-px bg-gray-200 dark:bg-gray-600"></div>
+
+                <!-- Retiros -->
+                <div class="flex items-center space-x-2">
+                  <span class="text-red-500">💳</span>
+                  <div>
+                    <p class="text-xs text-gray-600 dark:text-gray-300">Retiros</p>
+                    <p class="text-sm font-bold text-red-600 dark:text-red-400">-L. {{ formatCurrency(transactionsSummary.totalRetiros) }}</p>
+                  </div>
+                </div>
+
+                <!-- Separador -->
+                <div class="h-8 w-px bg-gray-200 dark:bg-gray-600"></div>
+
+                <!-- Balance Neto -->
+                <div class="text-right">
+                  <p class="text-xs text-gray-600 dark:text-gray-300">Balance Neto</p>
+                  <p class="text-sm font-bold" :class="getBalanceClass()">
+                    {{ getNetBalance() }}
+                  </p>
+                </div>
+              </div>
+            </div>
           </template>
         </div>
       </section>
@@ -558,7 +632,7 @@ const isLoadingTransactions = ref(false)
 const selectedChart = ref('earnings')
 const activeTab = ref('membership')
 const selectedPeriod = ref('1')
-const selectedMonthInput = ref(new Date().toISOString().slice(0, 7)) // YYYY-MM format
+const selectedMonthInput = ref('') // YYYY-MM format - iniciado vacío
 const statusFilter = ref('all') // 'all', 'pending', 'approved', 'rejected'
 const showDetailsModal = ref(false)
 const selectedItem = ref(null)
@@ -571,6 +645,13 @@ const platformDateTo = ref('')
 // Variables para reportería (todas inician vacías)
 const reportDateFrom = ref('')
 const reportDateTo = ref('')
+
+// Variables de paginación para transacciones
+const currentTransactionPage = ref(1)
+const offset = ref(0) // Ahora es una referencia reactiva
+
+// Caché para transacciones
+const transactionsCache = ref({})
 
 // ===== DATOS REACTIVOS =====
 const executiveSummary = reactive({
@@ -598,6 +679,16 @@ const platformStats = reactive({
 })
 
 const transactions = ref([])
+const transactionsSummary = ref({
+  totalIngresos: '0.00',
+  totalRetiros: '0.00'
+})
+const transactionsPagination = ref({
+  total: 0,
+  page: 1,
+  limit: 5,
+  totalPages: 0
+})
 const membershipPayments = ref([])
 const visitPayments = ref([])
 const servicePayments = ref([])
@@ -747,8 +838,15 @@ const citiesData = reactive({
 })
 
 // ===== COMPUTED PROPERTIES =====
+const transactionsPerPage = 5; // Definir el número de transacciones por página
+
 const visibleTransactions = computed(() => {
-  return transactions.value.slice(0, visibleTransactionsCount.value)
+  // No necesitamos hacer slice aquí ya que el backend ya maneja la paginación
+  return transactions.value;
+})
+
+const totalTransactionPages = computed(() => {
+  return transactionsPagination.value.totalPages || 1;
 })
 
 const getChartTitle = () => {
@@ -779,12 +877,27 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('es-ES', options)
 }
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case 'Completado': return 'text-green-600 dark:text-green-400'
-    case 'Pendiente': return 'text-yellow-600 dark:text-yellow-400'
-    case 'Cancelado': return 'text-red-600 dark:text-red-400'
-    default: return 'text-gray-600 dark:text-gray-400'
+const getStatusColor = (status, tipo) => {
+  const statusLower = (status || '').toLowerCase();
+  
+  // Si es un ingreso por referido, siempre mostrar en azul
+  if (tipo === 'ingreso_referido') {
+    return 'text-blue-400';
+  }
+  
+  // Si es un retiro completado, mostrar en rojo
+  if (tipo === 'retiro' && statusLower === 'completado') {
+    return 'text-red-400';
+  }
+  
+  // Para otros tipos, usar la lógica normal
+  switch (statusLower) {
+    case 'completado': return 'text-green-500';
+    case 'pendiente': return 'text-yellow-500';
+    case 'rechazado': return 'text-red-500';
+    case 'cancelado': return 'text-red-400';
+    case 'en proceso': return 'text-blue-500';
+    default: return 'text-gray-500';
   }
 }
 
@@ -799,6 +912,9 @@ const getStatusBadgeClass = (status) => {
 
 const getTransactionIcon = (type) => {
   switch (type) {
+    case 'ingreso': 
+    case 'ingreso_referido': return '💰'
+    case 'retiro': return '💳'
     case 'commission': return '💰'
     case 'withdrawal': return '💳'
     case 'refund': return '↩️'
@@ -808,6 +924,9 @@ const getTransactionIcon = (type) => {
 
 const getTransactionIconClass = (type) => {
   switch (type) {
+    case 'ingreso':
+    case 'ingreso_referido': return 'bg-green-500'
+    case 'retiro': return 'bg-red-500'
     case 'commission': return 'bg-green-500'
     case 'withdrawal': return 'bg-red-500'
     case 'refund': return 'bg-yellow-500'
@@ -815,17 +934,102 @@ const getTransactionIconClass = (type) => {
   }
 }
 
-const getTransactionAmountClass = (type) => {
-  return type === 'commission' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+const getTransactionAmountClass = (type, estado) => {
+  const estadoLower = estado?.toLowerCase() || '';
+  
+  // Mostrar en amarillo para transacciones pendientes (tanto ingresos como retiros)
+  if (estadoLower === 'pendiente') {
+    return 'text-yellow-600 dark:text-yellow-400';
+  }
+  
+  // Para otros casos, mantener la lógica de colores por tipo
+  if (type === 'ingreso' || type === 'commission') {
+    return 'text-green-600 dark:text-green-400';
+  } else if (type === 'ingreso_referido') {
+    return 'text-blue-600 dark:text-blue-400'; // Color azul para ingresos por referido
+  } else {
+    return 'text-red-600 dark:text-red-400'; // Color rojo para retiros
+  }
 }
+
+// Nuevas funciones para mostrar información condicional en transacciones
+const getTransactionTitle = (transaction) => {
+  switch (transaction.tipo) {
+    case 'ingreso':
+      return transaction.servicio || transaction.descripcion || 'Ingreso por servicio'
+    case 'ingreso_referido':
+      return transaction.descripcion || 'Ingreso por referido'
+    default:
+      return transaction.descripcion || 'Transacción'
+  }
+}
+
+const getTransactionSubtitle = (transaction) => {
+  const parts = [];
+  
+  // Agregar información específica según el tipo de transacción
+  switch (transaction.tipo) {
+    case 'ingreso':
+      if (transaction.colonia) parts.push(transaction.colonia);
+      break;
+    case 'ingreso_referido':
+      return transaction.id_usuario || transaction.nombre_usuario || 'Usuario referido';
+  }
+  
+  // Si no hay información específica, usar nombre de usuario o 'Usuario'
+  if (parts.length === 0 && transaction.nombre_usuario && transaction.nombre_usuario !== 'Usuario') {
+    parts.push(transaction.nombre_usuario);
+  }
+  
+  return parts.join(' • ');
+}
+
+// Funciones para el footer de transacciones
+const getBalanceClass = () => {
+  const balance = parseFloat(transactionsSummary.value.totalIngresos) - parseFloat(transactionsSummary.value.totalRetiros)
+  return balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+}
+
+const getNetBalance = () => {
+  // Asegurarse de que los valores sean números
+  const ingresos = parseFloat(transactionsSummary.value.totalIngresos) || 0;
+  const retiros = parseFloat(transactionsSummary.value.totalRetiros) || 0;
+  const balance = Number((ingresos - retiros).toFixed(2));
+  const prefix = balance >= 0 ? '+' : '-';
+  return `${prefix}L. ${formatCurrency(Math.abs(balance))}`;
+}
+
+// Funciones de paginación
+const nextPage = () => {
+  const nextPage = currentTransactionPage.value + 1;
+  console.log('🚀 Intentando ir a la página:', nextPage, 'de', transactionsPagination.value.totalPages);
+  
+  if (nextPage <= transactionsPagination.value.totalPages) {
+    console.log('🔄 Cargando página:', nextPage);
+    loadTransactions(nextPage);
+  } else {
+    console.log('ℹ️ Ya estás en la última página');
+  }
+};
+
+const previousPage = () => {
+  const prevPage = currentTransactionPage.value - 1;
+  console.log('⏮️ Intentando ir a la página anterior:', prevPage);
+  
+  if (prevPage >= 1) {
+    console.log('🔄 Cargando página:', prevPage);
+    loadTransactions(prevPage);
+  } else {
+    console.log('ℹ️ Ya estás en la primera página');
+  }
+};
 
 // ===== FUNCIONES DE GRÁFICOS =====
 let chart = null;
 
 // Funciones para cargar datos de diferentes endpoints
 const loadServiceTypesData = async () => {
-  try {
-    console.log('Cargando datos de servicios por tipo...');
+  try { 
     const response = await $fetch('/solicitudservicio/grafica/servicios', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -835,8 +1039,6 @@ const loadServiceTypesData = async () => {
       }
     });
     
-    console.log('Datos de servicios por tipo recibidos:', response);
-
     if (response.success && response.data && window.currentChart) {
       const { labels, data: valores } = response.data;
       
@@ -860,8 +1062,7 @@ const loadServiceTypesData = async () => {
 };
 
 const loadServicesPerMonthData = async () => {
-  try {
-    console.log('Cargando datos de servicios por mes...');
+  try { 
     const response = await $fetch('/solicitudservicio/grafica/servicios-por-mes', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -871,8 +1072,6 @@ const loadServicesPerMonthData = async () => {
       }
     });
     
-    console.log('Datos de servicios por mes recibidos:', response);
-
     if (response.success && response.data && window.currentChart) {
       const { labels, data: valores } = response.data;
       
@@ -888,8 +1087,7 @@ const loadServicesPerMonthData = async () => {
 };
 
 const loadUserGrowthData = async () => {
-  try {
-    console.log('Cargando datos de crecimiento de usuarios...');
+  try { 
     const response = await $fetch('/usuarios/grafica/crecimiento-usuarios', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -899,8 +1097,6 @@ const loadUserGrowthData = async () => {
       }
     });
     
-    console.log('Datos de crecimiento de usuarios recibidos:', response);
-
     if (response.success && response.data && window.currentChart) {
       const { labels, data: valores } = response.data;
       
@@ -916,8 +1112,7 @@ const loadUserGrowthData = async () => {
 };
 
 const loadServicesByCityData = async () => {
-  try {
-    console.log('Cargando datos de servicios por ciudad...');
+  try { 
     const response = await $fetch('/solicitudservicio/grafica/servicios-por-ciudad', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -927,8 +1122,6 @@ const loadServicesByCityData = async () => {
       }
     });
     
-    console.log('Datos de servicios por ciudad recibidos:', response);
-
     if (response.success && response.data && window.currentChart) {
       const { labels, data: valores } = response.data;
       
@@ -951,13 +1144,10 @@ const createChart = async () => {
   if (!selectedChart.value) {
     console.error('No se ha seleccionado ningún gráfico');
     return;
-  }
-  
-  console.log('Creando gráfico:', selectedChart.value);
+  } 
   
   // Destruir el gráfico anterior si existe
   if (window.currentChart) {
-    console.log('Destruyendo gráfico anterior');
     window.currentChart.destroy();
   }
   
@@ -1201,7 +1391,9 @@ const createChart = async () => {
   // Cargar datos según el tipo de gráfico
   switch (selectedChart.value) {
     case 'earnings':
-      await updatePlatformStats();
+      if (platformDateFrom.value || platformDateTo.value) {
+        await updatePlatformStats();
+      }
       break;
     case 'serviceTypes':
       await loadServiceTypesData();
@@ -1226,33 +1418,38 @@ const updateChart = (chartData) => {
   }
 };
 
-
-
 const updatePlatformStats = async () => {
   try { 
-    // Formatear el mes actual para la API (YYYY-MM)
-    const mesActual = platformDateFrom.value ? 
-      `${platformDateFrom.value.substring(0, 7)}` : 
-      `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+    // Construir URL base
+    let url = '/movimientos/reporte/ingresos'
+    
+    // Agregar parámetros solo si existen valores
+    const params = new URLSearchParams()
+    
+    if (platformDateFrom.value || platformDateTo.value) {
+      // Si hay al menos una fecha, usar el mes de la fecha de inicio o mes actual
+      const mesActual = platformDateFrom.value ? 
+        `${platformDateFrom.value.substring(0, 7)}` : 
+        `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
+      params.append('mesActual', mesActual)
       
-    // Construir la URL con los parámetros
-    let url = `/movimientos/reporte/ingresos?mesActual=${mesActual}`;
-    
-    // Agregar fechas de filtro si están definidas
-    if (platformDateFrom.value) {
-      url += `&fechaInicio=${platformDateFrom.value}`;
+      if (platformDateFrom.value) {
+        params.append('fechaInicio', platformDateFrom.value)
+      }
+      if (platformDateTo.value) {
+        params.append('fechaFin', platformDateTo.value)
+      }
+    } else {
+      // Si no hay fechas específicas, usar mes actual
+      const mesActual = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
+      params.append('mesActual', mesActual)
     }
-    if (platformDateTo.value) {
-      url += `&fechaFin=${platformDateTo.value}`;
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`
     }
     
-    const fullUrl = `${config.public.apiBase}${url}`;
-    console.log('🔵 Enviando petición a:', fullUrl);
-    console.log('🔹 Parámetros:', { 
-      mesActual,
-      fechaInicio: platformDateFrom.value,
-      fechaFin: platformDateTo.value
-    });
+    const fullUrl = `${config.public.apiBase}${url}`
     
     // Hacer la petición al endpoint
     const response = await $fetch(url, {
@@ -1263,8 +1460,6 @@ const updatePlatformStats = async () => {
         'Authorization': `Bearer ${auth.token}`
       }
     });
-    
-    console.log('🟢 Respuesta del servidor:', JSON.parse(JSON.stringify(response)));
     
     if (response.success && response.data) {
       const data = response.data.resumen;
@@ -1277,18 +1472,8 @@ const updatePlatformStats = async () => {
       platformStats.totalWithdrawals = data.retiros || 0;
       platformStats.totalCommissions = data.comisiones || 0;
       
-      console.log('📊 Datos actualizados:', {
-        totalRevenue: platformStats.totalRevenue,
-        membershipRevenue: platformStats.membershipRevenue,
-        visitRevenue: platformStats.visitRevenue,
-        serviceRevenue: platformStats.serviceRevenue,
-        totalWithdrawals: platformStats.totalWithdrawals,
-        totalCommissions: platformStats.totalCommissions
-      });
-      
       // Si hay datos de gráfico, actualizar el gráfico
       if (response.data.grafico) {
-        console.log('📈 Datos del gráfico recibidos:', response.data.grafico);
         updateChart(response.data.grafico);
       }
       
@@ -1385,12 +1570,21 @@ const getEmptyMessage = () => {
   }
 }
 
-const updateSelectedMonth = () => {
-  loadTabData()
-  loadTransactions()
+const updateSelectedMonth = async () => {
+  console.log('📅 Mes seleccionado:', selectedMonthInput.value);
+  
+  // Limpiar caché cuando cambia el filtro de fecha
+  transactionsCache.value = {};
+  currentTransactionPage.value = 1; // Reset a la primera página
+  
+  // Forzar recarga de transacciones con el nuevo filtro de fecha
+  await loadTransactions(1);
+  
+  console.log('🔄 Transacciones cargadas con filtro de fecha:', selectedMonthInput.value);
 }
 
 const getSelectedMonthName = () => {
+  if (!selectedMonthInput.value) return 'Seleccionar mes'
   const date = new Date(selectedMonthInput.value + '-01')
   return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
 }
@@ -1978,29 +2172,6 @@ const showToast = (message, type = 'info') => {
 }
 
 // ===== FUNCIONES DE DATOS =====
-const generateMockTransactions = () => {
-  const types = ['commission', 'withdrawal', 'refund']
-  const statuses = ['Completado', 'Pendiente', 'Cancelado']
-  const technicians = ['Carlos Mendoza', 'Ana Rodriguez', 'Miguel Santos', 'Sofia Martinez']
-  const descriptions = [
-    'Comisión por servicio de electricidad',
-    'Retiro de ganancias',
-    'Reembolso por cancelación',
-    'Comisión por reparación de plomería',
-    'Pago por servicio de climatización'
-  ]
-
-  return Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    type: types[Math.floor(Math.random() * types.length)],
-    amount: Math.floor(Math.random() * 1000) + 100,
-    description: descriptions[Math.floor(Math.random() * descriptions.length)],
-    technician: technicians[Math.floor(Math.random() * technicians.length)],
-    date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    status: statuses[Math.floor(Math.random() * statuses.length)]
-  }))
-}
-
 const generateMockMembershipPayments = () => {
   const plans = ['Plan Básico', 'Plan Premium', 'Plan Pro']
   const users = ['Juan Pérez', 'María González', 'Carlos López', 'Ana Martínez', 'Roberto Silva', 'Carmen Flores']
@@ -2092,13 +2263,135 @@ Cédula: 0801-1992-09876`
   }))
 }
 
-const loadTransactions = async () => {
-  isLoadingTransactions.value = true
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  transactions.value = generateMockTransactions()
-  visibleTransactionsCount.value = 5
-  hasMoreTransactions.value = transactions.value.length > 5
-  isLoadingTransactions.value = false
+const getCacheKey = (page) => {
+  return `${selectedMonthInput.value || 'all'}-${page}`;
+}
+
+const loadTransactions = async (page = 1) => {
+  console.log('📥 Iniciando carga de transacciones - Página:', page);
+  
+  // Verificar si ya tenemos esta página en caché
+  const cacheKey = getCacheKey(page);
+  if (transactionsCache.value[cacheKey]) {
+    console.log('💾 Usando transacciones desde caché para la página:', page);
+    const cachedData = transactionsCache.value[cacheKey];
+    transactions.value = cachedData.data;
+    transactionsSummary.value = cachedData.summary;
+    transactionsPagination.value = cachedData.pagination;
+    currentTransactionPage.value = page;
+    return;
+  }
+  
+  isLoadingTransactions.value = true;
+  
+  try {
+    const limit = 5;
+    
+    // Construir URL base con paginación
+    let url = `/movimientos?page=${page}&limit=${limit}`;
+    
+    // Solo agregar filtro de fecha si hay una fecha seleccionada
+    if (selectedMonthInput.value) {
+      // El backend espera el parámetro 'fecha' en formato YYYY-MM
+      const fechaFormateada = selectedMonthInput.value;
+      url += `&fecha=${fechaFormateada}`;
+      
+      console.log('📅 Aplicando filtro de fecha:', fechaFormateada);
+    }
+    
+    console.log('🌐 Realizando petición a:', url);
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    console.log('📦 Respuesta de la API:', response);
+    
+    if (response.success) {
+      console.log('📊 Respuesta completa de la API:', response);
+      
+      const transactionsData = response.data?.movimientos || response.data || [];
+      const summary = response.summary || response.data?.summary || response.data?.resumen;
+      const summaryData = {
+        totalIngresos: parseFloat(summary?.totalIngresos || '0').toFixed(2),
+        totalRetiros: parseFloat(summary?.totalRetiros || '0').toFixed(2)
+      };
+      
+      const paginationData = response.pagination || response.data?.pagination || {};
+      const totalItems = paginationData.total || transactionsData.length;
+      const totalPages = paginationData.totalPages || Math.ceil(totalItems / limit) || 1;
+      const paginationInfo = { 
+        total: totalItems, 
+        page: page, 
+        limit: limit, 
+        totalPages: totalPages 
+      };
+      
+      // Actualizar los datos reactivos
+      transactions.value = transactionsData;
+      transactionsSummary.value = summaryData;
+      transactionsPagination.value = paginationInfo;
+      currentTransactionPage.value = page;
+      
+      // Guardar en caché
+      transactionsCache.value[getCacheKey(page)] = {
+        data: [...transactionsData],
+        summary: { ...summaryData },
+        pagination: { ...paginationInfo },
+        timestamp: Date.now()
+      };
+      
+      console.log('💾 Datos guardados en caché para la página:', page);
+      
+      // Limpiar caché antiguo (más de 1 hora)
+      const oneHourAgo = Date.now() - (60 * 60 * 1000);
+      Object.keys(transactionsCache.value).forEach(key => {
+        if (transactionsCache.value[key].timestamp < oneHourAgo) {
+          delete transactionsCache.value[key];
+        }
+      });
+      
+      // Forzar actualización de la UI
+      await nextTick();
+    } else {
+      console.warn('⚠️ La respuesta no fue exitosa:', response);
+      transactions.value = [];
+      transactionsSummary.value = { 
+        totalIngresos: '0.00', 
+        totalRetiros: '0.00' 
+      };
+      transactionsPagination.value = {
+        total: 0,
+        page: 1,
+        limit: 5,
+        totalPages: 1
+      };
+      currentTransactionPage.value = 1;
+    }
+  } catch (error) {
+    console.error('❌ Error al cargar transacciones:', error);
+    showToast('Error al cargar las transacciones', 'error');
+    
+    // Limpiar datos en caso de error
+    transactions.value = [];
+    transactionsSummary.value = { 
+      totalIngresos: '0.00', 
+      totalRetiros: '0.00' 
+    };
+    transactionsPagination.value = {
+      total: 0,
+      page: 1,
+      limit: 5,
+      totalPages: 1
+    };
+    currentTransactionPage.value = 1;
+  } finally {
+    isLoadingTransactions.value = false;
+  }
 }
 
 const loadTabData = async () => {
@@ -2146,8 +2439,7 @@ const exportData = () => {
  
 
 // ===== WATCHERS =====
-watch(selectedChart, async (newVal) => {
-  console.log('Gráfico seleccionado:', newVal);
+watch(selectedChart, async (newVal) => { 
   
   // Esperar a que el DOM se actualice
   await nextTick();
@@ -2158,7 +2450,9 @@ watch(selectedChart, async (newVal) => {
   // Cargar los datos específicos del gráfico seleccionado
   switch (newVal) {
     case 'earnings':
-      await updatePlatformStats();
+      if (platformDateFrom.value || platformDateTo.value) {
+        await updatePlatformStats();
+      }
       break;
     case 'serviceTypes':
       await loadServiceTypesData();
@@ -2200,14 +2494,11 @@ onMounted(async () => {
   await nextTick();
   createChart();
   
-  // Cargar datos de la gráfica de ingresos si es la seleccionada
-  if (selectedChart.value === 'earnings') {
-    await updatePlatformStats();
-  }
-  
+  // Cargar datos iniciales sin filtros de fecha
   await updatePlatformStats();
+  await loadTransactions();
+  
   loadTabData();
-  loadTransactions();
   
   isLoading.value = false;
 })
