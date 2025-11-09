@@ -15,87 +15,318 @@
       :loading="isLoading"
     />
 
-    <!-- Modal Universal para Pagos/Retiros con Transición -->
+    <!-- Modal con Detalles Dinámico -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="showDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeDetailsModal"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[85vw] max-w-2xl max-h-[85vh] overflow-y-auto relative z-10">
+          <!-- Encabezado del Modal -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="getModalIconClass()">
+                  <span class="text-lg">{{ getModalIcon() }}</span>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ getModalTitle() }}</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">ID: #{{ getModalId() }}</p>
+                </div>
+              </div>
+              <button @click="closeDetailsModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+    
+          <!-- Contenido del Modal -->
+          <div class="p-4 space-y-4">
+            <!-- Información del Pago -->
+            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
+              <h4 class="font-medium text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ getPaymentInfoTitle() }}
+              </h4>
+              <div class="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p class="text-gray-500 dark:text-gray-400">N° Comprobante</p>
+                  <p class="font-medium">{{ selectedItem?.num_comprobante || 'N/A' }}</p>
+                </div>
+                <div>
+                  <p class="text-gray-500 dark:text-gray-400">Monto</p>
+                  <p class="font-medium text-blue-600 dark:text-blue-400">{{ formatCurrency(getItemAmount()) }}</p>
+                </div>
+                <div>
+                  <p class="text-gray-500 dark:text-gray-400">Fecha</p>
+                  <p class="font-medium">{{ formatDate(selectedItem?.fecha) }}</p>
+                </div>
+                <div>
+                  <p class="text-gray-500 dark:text-gray-400">Estado</p>
+                  <span :class="getStatusBadgeClass(selectedItem?.estado)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                    {{ selectedItem?.estado || 'Pendiente' }}
+                  </span>
+                </div>
+                
+                <!-- Campos específicos para Servicios -->
+                <template v-if="modalType === 'services'">
+                  <div>
+                    <p class="text-gray-500 dark:text-gray-400">Mano de Obra</p>
+                    <p class="font-medium">{{ formatCurrency(selectedItem?.monto_manodeobra) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500 dark:text-gray-400">Materiales</p>
+                    <p class="font-medium">{{ formatCurrency(selectedItem?.monto_materiales) }}</p>
+                  </div>
+                  <div v-if="selectedItem?.descuento_membresia">
+                    <p class="text-gray-500 dark:text-gray-400">Descuento Membresía</p>
+                    <p class="font-medium text-green-600">-{{ formatCurrency(selectedItem?.descuento_membresia) }}</p>
+                  </div>
+                  <div v-if="selectedItem?.credito_usado">
+                    <p class="text-gray-500 dark:text-gray-400">Crédito Usado</p>
+                    <p class="font-medium text-green-600">-{{ formatCurrency(selectedItem?.credito_usado) }}</p>
+                  </div>
+                </template>
+                
+                <!-- Campo específico para Retiros -->
+                <template v-if="modalType === 'withdrawals'">
+                  <div class="col-span-2">
+                    <p class="text-gray-500 dark:text-gray-400">Descripción</p>
+                    <p class="font-medium">{{ selectedItem?.descripcion || 'Retiro de fondos' }}</p>
+                  </div>
+                </template>
+              </div>
+            </div>
+    
+            <!-- Información del Usuario -->
+            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
+              <h4 class="font-medium text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Información del {{ getUserType() }}
+              </h4>
+              <div class="space-y-2 text-sm">
+                <div>
+                  <p class="text-gray-500 dark:text-gray-400">Nombre</p>
+                  <p class="font-medium">{{ getUserName() }}</p>
+                </div>
+                <div v-if="getUserPhone()">
+                  <p class="text-gray-500 dark:text-gray-400">Teléfono</p>
+                  <p class="font-medium">{{ getUserPhone() }}</p>
+                </div>
+                <div v-if="getUserEmail()">
+                  <p class="text-gray-500 dark:text-gray-400">Email</p>
+                  <p class="font-medium">{{ getUserEmail() }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Información del Servicio (solo para Servicios y Visitas) -->
+            <div v-if="hasServiceInfo()" class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
+              <h4 class="font-medium text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Información del Servicio
+              </h4>
+              <div class="space-y-2 text-sm">
+                <div v-if="getServiceName()">
+                  <p class="text-gray-500 dark:text-gray-400">Servicio</p>
+                  <p class="font-medium">{{ getServiceName() }}</p>
+                </div>
+                <div v-if="getServiceDescription()">
+                  <p class="text-gray-500 dark:text-gray-400">Descripción</p>
+                  <p class="font-medium">{{ getServiceDescription() }}</p>
+                </div>
+                <div v-if="getServiceLocation()">
+                  <p class="text-gray-500 dark:text-gray-400">Ubicación</p>
+                  <p class="font-medium">{{ getServiceLocation() }}</p>
+                </div>
+                <div v-if="getTechnicianName()">
+                  <p class="text-gray-500 dark:text-gray-400">Técnico</p>
+                  <p class="font-medium">{{ getTechnicianName() }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comentarios (solo para Servicios) -->
+            <div v-if="modalType === 'services' && selectedItem?.comentario" class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
+              <h4 class="font-medium text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Comentarios
+              </h4>
+              <div class="text-sm">
+                <p class="text-gray-700 dark:text-gray-300">{{ selectedItem.comentario }}</p>
+              </div>
+            </div>
+    
+            <!-- Información Bancaria -->
+            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
+              <h4 class="font-medium text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Información Bancaria
+              </h4>
+              <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="col-span-2">
+                  <p class="text-gray-500 dark:text-gray-400">Banco</p>
+                  <p class="font-medium">{{ selectedItem?.cuenta?.banco || 'No especificado' }}</p>
+                </div>
+                <div>
+                  <p class="text-gray-500 dark:text-gray-400">Tipo de Cuenta</p>
+                  <p class="font-medium">{{ selectedItem?.cuenta?.tipo || 'No especificado' }}</p>
+                </div>
+                <div>
+                  <p class="text-gray-500 dark:text-gray-400">N° de Cuenta</p>
+                  <p class="font-medium">{{ selectedItem?.cuenta?.num_cuenta || 'No disponible' }}</p>
+                </div>
+                <div class="col-span-2">
+                  <p class="text-gray-500 dark:text-gray-400">Beneficiario</p>
+                  <p class="font-medium">{{ selectedItem?.cuenta?.beneficiario || 'No especificado' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <!-- Pie del Modal -->
+          <div class="sticky bottom-0 bg-white dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700 rounded-b-xl flex justify-end gap-3">
+            <button 
+              @click="closeDetailsModal" 
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+            >
+              Cerrar
+            </button>
+            <!-- Botón Ver Servicio - Solo mostrar cuando hay información del servicio -->
+            <button 
+              v-if="shouldShowServiceButton()"
+              @click.stop="openServiceDetail(getServiceDetails())"
+              class="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-200 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 dark:hover:bg-blue-800/40 transition-colors flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Ver Servicio
+            </button>
+            <button 
+              v-if="selectedItem?.estado === 'Pendiente' || selectedItem?.estado === 'pendiente'"
+              @click="approveItem" 
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Aprobar Pago
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Service Detail Modal -->
     <Transition
       name="modal"
       enter-active-class="modal-enter-active"
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to">
-      <div v-if="showDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeDetailsModal"></div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[85vw] max-w-4xl max-h-[85vh] overflow-y-auto relative z-10">
-          <!-- Modal Header -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg sm:rounded-t-xl">
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-2 min-w-0">
-                <div :class="getModalIconClass()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center text-base sm:text-lg">
-                  {{ getModalIcon() }}
+      <div v-if="showServiceDetailModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeServiceDetailModal"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[90%] sm:w-full max-w-md max-h-[85vh] overflow-y-auto relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl z-10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2 sm:space-x-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center"
+                     :class="getServiceTypeColor(selectedService?.servicio?.nombre)">
+                  <span class="text-sm sm:text-base">{{ getServiceTypeIcon(selectedService?.servicio?.nombre) }}</span>
                 </div>
-                <div class="min-w-0">
-                  <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate">{{ getModalTitle() }}</h3>
-                  <p class="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">{{ getModalSubtitle() }}</p>
+                <div>
+                  <h3 class="text-sm sm:text-lg font-black text-gray-900 dark:text-white">{{ selectedService?.servicio?.nombre }}</h3>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService?.id_solicitud }}</p>
                 </div>
               </div>
-              <button @click="closeDetailsModal" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button @click="closeServiceDetailModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
             </div>
           </div>
 
-          <!-- Modal Content -->
-          <div class="p-3 text-[13px] sm:text-sm">
-            <!-- Información del Monto -->
-            <div class="mb-3 sm:mb-4">
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <span class="text-[12px] text-gray-500 dark:text-gray-400">Monto:</span>
-                  <span :class="getModalAmountClass()" class="font-medium text-sm">{{ formatCurrency(selectedItem?.amount) }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-[12px] text-gray-500 dark:text-gray-400">Fecha:</span>
-                  <span class="text-gray-900 dark:text-white">{{ formatDate(selectedItem?.date) }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-[12px] text-gray-500 dark:text-gray-400">Estado:</span>
-                  <span :class="getStatusBadgeClass(selectedItem?.status)" class="text-[11px] px-2 py-0.5 rounded-full">
-                    {{ selectedItem?.status || 'Pendiente' }}
-                  </span>
-                </div>
-                <template v-if="modalType !== 'withdrawal'">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[12px] text-gray-500 dark:text-gray-400">Método:</span>
-                    <span class="text-gray-900 dark:text-white">{{ selectedItem?.method || 'No especificado' }}</span>
-                  </div>
-                </template>
+          <!-- Content -->
+          <div class="p-3 sm:p-4 space-y-4"> 
+            <!-- Client Info -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Información del Cliente</h4>
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                <p class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ selectedService?.cliente?.nombre }}</p>
               </div>
             </div>
 
-            <!-- Datos de Cuenta -->
-            <div class="mb-3 sm:mb-4">
-              <h4 class="text-[12px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                {{ modalType === 'withdrawal' ? 'Datos Bancarios' : 'Información de Cuenta' }}
-              </h4>
-              <div class="bg-gray-50 dark:bg-gray-700/30 p-2 rounded">
-                <pre class="text-[11px] sm:text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-snug">{{ getAccountDetails() }}</pre>
+            <!-- Location -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Ubicación</h4>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService?.colonia }}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ selectedService?.direccion_precisa }}, {{ selectedService?.ciudad?.nombre }}</p>
               </div>
             </div>
 
-            <!-- Acciones -->
-            <div v-if="selectedItem?.status === 'Pendiente'" class="flex gap-2 mt-4">
-              <button @click="rejectItem" 
-                      class="flex-1 py-1.5 text-xs sm:text-[13px] font-medium rounded border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                Rechazar
-              </button>
-              <button @click="approveItem" 
-                      class="flex-1 py-1.5 text-xs sm:text-[13px] font-medium rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-                Aprobar
-              </button>
+            <!-- Description -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Descripción del Problema</h4>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService?.descripcion }}</p>
+              </div>
             </div>
-            <div v-else class="text-center py-1 text-xs text-gray-500 dark:text-gray-400">
-              {{ modalType === 'withdrawal' ? 'Retiro' : 'Pago' }} {{ selectedItem?.status?.toLowerCase() }}
+
+            <!-- Technician -->
+            <div v-if="selectedService?.tecnico?.nombre">
+              <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Técnico Asignado</h4>
+              <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                <p class="font-bold text-green-800 dark:text-green-200 text-sm">{{ selectedService.tecnico.nombre }}</p>
+              </div>
+            </div>
+
+            <!-- Cotizacion -->
+            <div v-if="selectedService?.cotizacion && ['en_proceso', 'pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(selectedService.estado)">
+              <div class="flex justify-between items-center mb-2">
+                <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Cotización</h4>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ formatCurrency(selectedService.cotizacion.total) }}</p>
+              </div>
+            </div>
+            
+            <!-- Comments -->
+            <div v-if="selectedService?.comentario">
+              <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Comentarios</h4>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService.comentario }}</p>
+              </div>
+            </div>
+
+            <!-- Rating if exists -->
+            <div v-if="selectedService?.calificacion?.calificacion">
+              <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Calificación</h4>
+              <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <span class="text-yellow-500 mr-2">⭐</span>
+                  <span class="font-bold text-yellow-800 dark:text-yellow-200">{{ selectedService.calificacion.calificacion }}/5</span>
+                </div>
+                <p v-if="selectedService.calificacion.comentario" class="text-yellow-700 dark:text-yellow-300 text-sm">{{ selectedService.calificacion.comentario }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -280,8 +511,8 @@
           <!-- Selector de mes (igual que el de pestañas) -->
           <input 
             type="month"
-            v-model="selectedMonthInput"
-            @change="updateSelectedMonth"
+            v-model="selectedMonthTransactions"
+            @change="updateSelectedMonth('transactions')"
             class="px-2 py-1 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
           />
         </div>
@@ -301,7 +532,7 @@
             <div v-for="transaction in visibleTransactions" :key="transaction.id_movimiento"
                  class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2">
               <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2 sm:space-x-3">
+                <div class="flex items-center space-x-2 sm:space-x-3"> 
                   <div :class="getTransactionIconClass(transaction.tipo)" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center">
                     <span class="text-[8px] text-white text-xs sm:text-sm">{{ getTransactionIcon(transaction.tipo) }}</span>
                   </div>
@@ -413,8 +644,8 @@
             <h2 class="text-sm font-black text-gray-900 dark:text-white">Gestión de Pagos y Retiros</h2>
             <input 
               type="month"
-              v-model="selectedMonthInput"
-              @change="updateSelectedMonth"
+              v-model="selectedMonthPayments"
+              @change="updateSelectedMonth('payments')"
               class="px-2 py-1 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
             />
           </div>
@@ -453,7 +684,7 @@
                   <div class="text-[9px] text-gray-600 dark:text-gray-400">Rechazados</div>
                 </div>
                 <div>
-                  <div class="text-sm font-bold text-yellow-600 dark:text-yellow-400">{{ getPendingItems().length }}</div>
+                  <div class="text-sm font-bold text-yellow-600 dark:text-yellow-400">{{ monthlyStats[activeTab]?.pendientes || 0 }}</div>
                   <div class="text-[9px] text-gray-600 dark:text-gray-400">Pendientes</div>
                 </div>
                 <div>
@@ -469,10 +700,18 @@
             <div class="flex bg-gray-50 dark:bg-gray-700/50 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
               <button 
                 v-for="filter in [
-                  { id: 'all', label: '📋Todos', count: getAllItems().length, color: 'blue' },
-                  { id: 'pending', label: '⏳Pendientes', count: getPendingItems().length, color: 'yellow' },
-                  { id: 'approved', label: '✅Aprobados', count: getApprovedItems().length, color: 'green' },
-                  { id: 'rejected', label: '❌Rechazados', count: getRejectedItems().length, color: 'red' }
+                  { id: 'all', label: '📋Todos', 
+                    count: (monthlyStats[activeTab]?.aprobados || 0) + (monthlyStats[activeTab]?.rechazados || 0) + (monthlyStats[activeTab]?.pendientes || 0), 
+                    color: 'blue' },
+                  { id: 'pending', label: '⏳Pendientes', 
+                    count: monthlyStats[activeTab]?.pendientes || 0, 
+                    color: 'yellow' },
+                  { id: 'approved', label: '✅Aprobados', 
+                    count: monthlyStats[activeTab]?.aprobados || 0, 
+                    color: 'green' },
+                  { id: 'rejected', label: '❌Rechazados', 
+                    count: monthlyStats[activeTab]?.rechazados || 0, 
+                    color: 'red' }
                 ]"
                 :key="filter.id"
                 @click="setStatusFilter(filter.id)"
@@ -632,11 +871,27 @@ const isLoadingTransactions = ref(false)
 const selectedChart = ref('earnings')
 const activeTab = ref('membership')
 const selectedPeriod = ref('1')
-const selectedMonthInput = ref('') // YYYY-MM format - iniciado vacío
+const selectedMonthTransactions = ref('') // Para la sección de transacciones
+const selectedMonthPayments = ref('') // Para la sección de pagos y retiros
 const statusFilter = ref('all') // 'all', 'pending', 'approved', 'rejected'
 const showDetailsModal = ref(false)
 const selectedItem = ref(null)
 const modalType = ref('') // 'membership', 'visits', 'services', 'withdrawals'
+
+// Data arrays and cache
+const membershipPayments = ref([])
+const visitPayments = ref([])
+const servicePayments = ref([])
+const withdrawals = ref([])
+
+// Cache for payments and withdrawals data
+const paymentsCache = ref({})
+const monthlyStats = ref({
+  membership: { aprobados: 0, rechazados: 0, pendientes: 0, total: 0 },
+  visits: { aprobados: 0, rechazados: 0, pendientes: 0, total: 0 },
+  services: { aprobados: 0, rechazados: 0, pendientes: 0, total: 0 },
+  withdrawals: { aprobados: 0, rechazados: 0, pendientes: 0, total: 0 }
+})
 
 // Variables para fechas de filtros (todas inician vacías)
 const platformDateFrom = ref('')
@@ -688,20 +943,578 @@ const transactionsPagination = ref({
   page: 1,
   limit: 5,
   totalPages: 0
-})
-const membershipPayments = ref([])
-const visitPayments = ref([])
-const servicePayments = ref([])
-const pendingWithdrawals = ref([])
+}) 
 const visibleTransactionsCount = ref(5)
 const hasMoreTransactions = ref(true)
 
 // Variables de notificaciones
-const toast = ref({
+const toast = reactive({
   show: false,
   message: '',
-  type: 'info'
-})
+  type: 'info',
+  duration: 3000
+});
+
+// Service detail modal
+const showServiceDetailModal = ref(false);
+const selectedService = ref(null);
+
+// Open service detail modal
+const openServiceDetail = (service) => {
+  selectedService.value = service;
+  showServiceDetailModal.value = true;
+};
+
+// Close service detail modal
+const closeServiceDetailModal = () => {
+  showServiceDetailModal.value = false;
+  setTimeout(() => {
+    selectedService.value = null;
+  }, 300);
+};
+
+// Get service type color
+const getServiceTypeColor = (serviceType) => {
+  const colors = {
+    'plomeria': 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+    'electricidad': 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'carpinteria': 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+    'pintura': 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+    'limpieza': 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+    'jardineria': 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+    'albañileria': 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
+  };
+  return colors[serviceType?.toLowerCase()] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+};
+
+// Get service type icon
+const getServiceTypeIcon = (serviceType) => {
+  const icons = {
+    'plomeria': '🚰',
+    'electricidad': '💡',
+    'carpinteria': '🪚',
+    'pintura': '🎨',
+    'limpieza': '🧹',
+    'jardineria': '🌿',
+    'albañileria': '🧱'
+  };
+  return icons[serviceType?.toLowerCase()] || '🔧';
+};
+
+// ===== FUNCIONES PARA CARGAR DATOS REALES =====
+const loadMembershipPayments = async () => {
+  try {
+    const cacheKey = `membership-${selectedMonthPayments.value || 'all'}`
+    
+    // Verificar si los datos están en caché
+    if (paymentsCache.value[cacheKey]) {
+      const { data, stats } = paymentsCache.value[cacheKey]
+      membershipPayments.value = data
+      if (stats) {
+        monthlyStats.value.membership = stats
+      }
+      return
+    }
+    
+    let url = '/membresia'
+    
+    // Agregar filtro de fecha si está seleccionado
+    if (selectedMonthPayments.value) {
+      const params = new URLSearchParams()
+      params.append('month', selectedMonthPayments.value)
+      url += `?${params.toString()}`
+    }
+    
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response.success) {
+      if (response.data) {
+        // Transformar datos para compatibilidad con el frontend
+        const transformedData = response.data.map(item => ({
+          ...item,
+          id: item.id_membresia,
+          status: mapApiStatusToFrontend(item.estado),
+          amount: item.monto,
+          date: item.fecha,
+          plan: 'Membresía Premium',
+          user: item.usuario?.nombre || 'Usuario desconocido'
+        }))
+        
+        // Actualizar datos y caché
+        membershipPayments.value = transformedData
+        
+        // Almacenar en caché
+        paymentsCache.value[cacheKey] = {
+          data: transformedData,
+          stats: response.estadisticas ? {
+            aprobados: response.estadisticas.aprobados || 0,
+            rechazados: response.estadisticas.rechazados || 0,
+            pendientes: response.estadisticas.pendientes || 0,
+            total: response.estadisticas.total || 0
+          } : null
+        }
+        
+        // Actualizar estadísticas
+        if (response.estadisticas) {
+          monthlyStats.value.membership = {
+            aprobados: response.estadisticas.aprobados || 0,
+            rechazados: response.estadisticas.rechazados || 0,
+            pendientes: response.estadisticas.pendientes || 0,
+            total: response.estadisticas.total || 0
+          }
+        }
+      } else {
+        membershipPayments.value = []
+        paymentsCache.value[cacheKey] = { data: [], stats: null }
+      }
+    } else {
+      membershipPayments.value = []
+    }
+  } catch (error) {
+    console.error('Error al cargar pagos de membresía:', error)
+    showToast('Error al cargar los pagos de membresía', 'error')
+    membershipPayments.value = []
+  }
+}
+
+const loadVisitPayments = async () => {
+  try {
+    const cacheKey = `visits-${selectedMonthPayments.value || 'all'}`
+    
+    // Verificar si los datos están en caché
+    if (paymentsCache.value[cacheKey]) {
+      const { data, stats } = paymentsCache.value[cacheKey]
+      visitPayments.value = data
+      if (stats) {
+        monthlyStats.value.visits = stats
+      }
+      return
+    }
+    
+    let url = '/pagovisita'
+    
+    // Agregar filtro de fecha si está seleccionado
+    if (selectedMonthPayments.value) {
+      const params = new URLSearchParams()
+      params.append('month', selectedMonthPayments.value)
+      url += `?${params.toString()}`
+    }
+    
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response.success) {
+      if (response.data) {
+        // Transformar datos para compatibilidad con el frontend
+        const transformedData = response.data.map(item => ({
+          ...item,
+          id: item.id_pagovisita,
+          status: mapApiStatusToFrontend(item.estado),
+          amount: item.monto,
+          date: item.fecha,
+          service: item.solicitud?.servicio?.nombre || 'Servicio de visita',
+          client: item.usuario?.nombre || 'Cliente desconocido',
+          technician: item.solicitud?.tecnico?.nombre || 'Sin asignar'
+        }))
+        
+        // Actualizar datos y caché
+        visitPayments.value = transformedData
+        
+        // Almacenar en caché
+        paymentsCache.value[cacheKey] = {
+          data: transformedData,
+          stats: response.estadisticas ? {
+            aprobados: response.estadisticas.aprobados || 0,
+            rechazados: response.estadisticas.rechazados || 0,
+            pendientes: response.estadisticas.pendientes || 0,
+            total: response.estadisticas.total || 0
+          } : null
+        }
+        
+        // Actualizar estadísticas
+        if (response.estadisticas) {
+          monthlyStats.value.visits = {
+            aprobados: response.estadisticas.aprobados || 0,
+            rechazados: response.estadisticas.rechazados || 0,
+            pendientes: response.estadisticas.pendientes || 0,
+            total: response.estadisticas.total || 0
+          }
+        }
+      } else {
+        visitPayments.value = []
+        paymentsCache.value[cacheKey] = { data: [], stats: null }
+      }
+    } else {
+      visitPayments.value = []
+    }
+  } catch (error) {
+    console.error('Error al cargar pagos de visitas:', error)
+    showToast('Error al cargar los pagos de visitas', 'error')
+    visitPayments.value = []
+  }
+}
+
+const loadServicePayments = async () => {
+  try {
+    const cacheKey = `services-${selectedMonthPayments.value || 'all'}`
+    
+    // Verificar si los datos están en caché
+    if (paymentsCache.value[cacheKey]) {
+      const { data, stats } = paymentsCache.value[cacheKey]
+      servicePayments.value = data
+      if (stats) {
+        monthlyStats.value.services = stats
+      }
+      return
+    }
+    
+    let url = '/cotizacion'
+    
+    // Agregar filtro de fecha si está seleccionado
+    if (selectedMonthPayments.value) {
+      const params = new URLSearchParams()
+      params.append('month', selectedMonthPayments.value)
+      url += `?${params.toString()}`
+    }
+    
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response.success) {
+      if (response.data) {
+        // Transformar datos para compatibilidad con el frontend
+        const transformedData = response.data.map(item => ({
+          ...item,
+          id: item.id_cotizacion,
+          status: mapApiStatusToFrontend(item.estado),
+          amount: item.monto_total,
+          date: item.fecha,
+          service: item.solicitud?.servicio?.nombre || 'Servicio',
+          client: item.solicitud?.cliente?.nombre || 'Cliente desconocido',
+          technician: item.solicitud?.tecnico?.nombre || 'Sin asignar',
+          category: item.solicitud?.servicio?.categoria || 'general'
+        }))
+        
+        // Actualizar datos y caché
+        servicePayments.value = transformedData
+        
+        // Almacenar en caché
+        paymentsCache.value[cacheKey] = {
+          data: transformedData,
+          stats: response.estadisticas ? {
+            aprobados: response.estadisticas.aprobados || 0,
+            rechazados: response.estadisticas.rechazados || 0,
+            pendientes: response.estadisticas.pendientes || 0,
+            total: response.estadisticas.total || 0
+          } : null
+        }
+        
+        // Actualizar estadísticas
+        if (response.estadisticas) {
+          monthlyStats.value.services = {
+            aprobados: response.estadisticas.aprobados || 0,
+            rechazados: response.estadisticas.rechazados || 0,
+            pendientes: response.estadisticas.pendientes || 0,
+            total: response.estadisticas.total || 0
+          }
+        }
+      } else {
+        servicePayments.value = []
+        paymentsCache.value[cacheKey] = { data: [], stats: null }
+      }
+    } else {
+      servicePayments.value = []
+    }
+  } catch (error) {
+    console.error('Error al cargar pagos de servicios:', error)
+    showToast('Error al cargar los pagos de servicios', 'error')
+    servicePayments.value = []
+  }
+}
+
+const loadWithdrawals = async () => {
+  try {
+    const cacheKey = `withdrawals-${selectedMonthPayments.value || 'all'}`
+    
+    // Verificar si los datos están en caché
+    if (paymentsCache.value[cacheKey]) {
+      const { data, stats } = paymentsCache.value[cacheKey]
+      withdrawals.value = data
+      if (stats) {
+        monthlyStats.value.withdrawals = stats
+      }
+      return
+    }
+    
+    let url = '/movimientos/retiros'
+    
+    // Agregar filtro de fecha si está seleccionado
+    if (selectedMonthPayments.value) {
+      const params = new URLSearchParams()
+      params.append('month', selectedMonthPayments.value)
+      url += `?${params.toString()}`
+    }
+    
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response.movimientos) {
+      // Transformar datos para compatibilidad con el frontend
+      const transformedData = response.movimientos.map(item => ({
+        ...item,
+        id: item.id_movimiento,
+        status: mapApiStatusToFrontend(item.estado),
+        amount: item.monto,
+        date: item.fecha,
+        technician: item.nombre_usuario || 'Técnico desconocido',
+        bankDetails: item.descripcion || 'Retiro de fondos'
+      }));
+      
+      // Actualizar datos y caché
+      withdrawals.value = transformedData;
+      
+      // Almacenar en caché
+      paymentsCache.value[cacheKey] = {
+        data: transformedData,
+        stats: response.estadisticas ? {
+          aprobados: response.estadisticas.aprobados || 0,
+          rechazados: response.estadisticas.rechazados || 0,
+          pendientes: response.estadisticas.pendientes || 0,
+          total: response.estadisticas.total || 0
+        } : null
+      };
+      
+      // Actualizar estadísticas
+      if (response.estadisticas) {
+        monthlyStats.value.withdrawals = {
+          aprobados: response.estadisticas.aprobados || 0,
+          rechazados: response.estadisticas.rechazados || 0,
+          pendientes: response.estadisticas.pendientes || 0,
+          total: response.estadisticas.total || 0
+        };
+      }
+    } else {
+      withdrawals.value = [];
+      paymentsCache.value[cacheKey] = { data: [], stats: null };
+    }
+  } catch (error) {
+    console.error('Error al cargar retiros:', error)
+    showToast('Error al cargar los retiros', 'error')
+    withdrawals.value = []
+  }
+}
+
+// Función para mapear estados de la API al frontend
+const mapApiStatusToFrontend = (apiStatus) => {
+  const statusMap = {
+    'pendiente': 'Pendiente',
+    'aprobado': 'Aprobado', 
+    'rechazado': 'Rechazado',
+    'confirmado': 'Aprobado',
+    'activa': 'Aprobado',
+    'expirada': 'Rechazado',
+    'cancelado': 'Rechazado',
+    'Pendiente': 'Pendiente',
+    'Completado': 'Aprobado'
+  }
+  
+  return statusMap[apiStatus] || 'Pendiente'
+}
+
+const loadTabData = async () => {
+  isLoadingData.value = true
+  
+  try {
+    switch (activeTab.value) {
+      case 'membership':
+        await loadMembershipPayments()
+        break
+      case 'visits':
+        await loadVisitPayments()
+        break
+      case 'services':
+        await loadServicePayments()
+        break
+      case 'withdrawals':
+        await loadWithdrawals()
+        break
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de la pestaña:', error)
+    showToast('Error al cargar los datos', 'error')
+  }
+  
+  isLoadingData.value = false
+}
+
+// ===== NUEVAS FUNCIONES PARA MODAL DINÁMICO =====
+
+// Función para determinar el tipo de modal basado en los datos
+const determineModalType = (item) => {
+  if (item?.id_membresia) return 'membership'
+  if (item?.id_pagovisita) return 'visits'
+  if (item?.id_cotizacion) return 'services'
+  if (item?.id_movimiento && item?.tipo === 'retiro') return 'withdrawals'
+  return modalType.value || 'membership' // fallback
+}
+
+// Funciones para el encabezado del modal
+const getModalIconClass = () => {
+  const type = determineModalType(selectedItem.value)
+  switch (type) {
+    case 'membership': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+    case 'visits': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+    case 'services': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+    case 'withdrawals': return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+    default: return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+  }
+}
+
+const getModalIcon = () => {
+  const type = determineModalType(selectedItem.value)
+  switch (type) {
+    case 'membership': return '💳'
+    case 'visits': return '🏠'
+    case 'services': return '🛠️'
+    case 'withdrawals': return '💸'
+    default: return '📄'
+  }
+}
+
+const getModalTitle = () => {
+  const type = determineModalType(selectedItem.value)
+  switch (type) {
+    case 'membership': return 'Detalles del Pago de Membresía'
+    case 'visits': return 'Detalles del Pago de Visita'
+    case 'services': return 'Detalles del Pago de Servicio'
+    case 'withdrawals': return 'Detalles del Retiro'
+    default: return 'Detalles del Item'
+  }
+}
+
+const getModalId = () => {
+  if (!selectedItem.value) return 'N/A'
+  const item = selectedItem.value
+  return item.id_membresia || item.id_pagovisita || item.id_cotizacion || item.id_movimiento || 'N/A'
+}
+
+const getPaymentInfoTitle = () => {
+  const type = determineModalType(selectedItem.value)
+  switch (type) {
+    case 'membership': return 'Información del Pago de Membresía'
+    case 'visits': return 'Información del Pago de Visita'
+    case 'services': return 'Información del Pago de Servicio'
+    case 'withdrawals': return 'Información del Retiro'
+    default: return 'Información del Pago'
+  }
+}
+
+const getItemAmount = () => {
+  if (!selectedItem.value) return 0
+  return selectedItem.value.monto || selectedItem.value.monto_total || selectedItem.value.amount || 0
+}
+
+// Funciones para información del usuario
+const getUserType = () => {
+  const type = determineModalType(selectedItem.value)
+  return type === 'withdrawals' ? 'Técnico' : 'Usuario'
+}
+
+const getUserName = () => {
+  if (!selectedItem.value) return 'No disponible'
+  const item = selectedItem.value
+  
+  // Para retiros, usar nombre_usuario directamente
+  if (item.nombre_usuario) return item.nombre_usuario
+  
+  // Para otros casos, usar estructura anidada usuario
+  return item.usuario?.nombre || item.user?.nombre || item.cliente?.nombre || 'No disponible'
+}
+
+const getUserPhone = () => {
+  if (!selectedItem.value) return ''
+  const item = selectedItem.value
+  return item.usuario?.telefono || item.user?.telefono || item.cliente?.telefono || ''
+}
+
+const getUserEmail = () => {
+  if (!selectedItem.value) return ''
+  const item = selectedItem.value
+  return item.usuario?.email || item.user?.email || item.cliente?.email || ''
+}
+
+// Funciones para información del servicio
+const hasServiceInfo = () => {
+  const type = determineModalType(selectedItem.value)
+  return (type === 'services' || type === 'visits') && selectedItem.value?.solicitud
+}
+
+const getServiceName = () => {
+  if (!selectedItem.value?.solicitud) return ''
+  return selectedItem.value.solicitud.servicio?.nombre || ''
+}
+
+const getServiceDescription = () => {
+  if (!selectedItem.value?.solicitud) return ''
+  return selectedItem.value.solicitud.descripcion || ''
+}
+
+const getServiceLocation = () => {
+  if (!selectedItem.value?.solicitud) return ''
+  const solicitud = selectedItem.value.solicitud
+  const parts = []
+  if (solicitud.colonia) parts.push(solicitud.colonia)
+  if (solicitud.direccion_precisa) parts.push(solicitud.direccion_precisa)
+  if (solicitud.ciudad?.nombre) parts.push(solicitud.ciudad.nombre)
+  return parts.join(', ')
+}
+
+const getTechnicianName = () => {
+  if (!selectedItem.value?.solicitud?.tecnico) return ''
+  return selectedItem.value.solicitud.tecnico.nombre || ''
+}
+
+// Función para determinar si mostrar el botón "Ver Servicio"
+const shouldShowServiceButton = () => {
+  return hasServiceInfo() && selectedItem.value?.solicitud
+}
+
+// Función para obtener los detalles del servicio para el modal secundario
+const getServiceDetails = () => {
+  if (!selectedItem.value?.solicitud) return null
+  return {
+    ...selectedItem.value.solicitud,
+    servicio: selectedItem.value.solicitud.servicio,
+    cliente: selectedItem.value.solicitud.cliente,
+    ciudad: selectedItem.value.solicitud.ciudad,
+    id_solicitud: selectedItem.value.solicitud.id_solicitud
+  }
+}
 
 // ===== REPORTES DISPONIBLES =====
 const availableReports = ref([
@@ -892,20 +1705,29 @@ const getStatusColor = (status, tipo) => {
   
   // Para otros tipos, usar la lógica normal
   switch (statusLower) {
-    case 'completado': return 'text-green-500';
+    case 'completado': 
+    case 'confirmado':
+    case 'aprobado': return 'text-green-500';
     case 'pendiente': return 'text-yellow-500';
     case 'rechazado': return 'text-red-500';
     case 'cancelado': return 'text-red-400';
     case 'en proceso': return 'text-blue-500';
+    case 'activa': return 'text-green-500';
+    case 'expirada': return 'text-gray-500';
     default: return 'text-gray-500';
   }
 }
 
 const getStatusBadgeClass = (status) => {
-  switch (status) {
-    case 'Aprobado': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-    case 'Rechazado': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-    case 'Pendiente': 
+  const statusLower = (status || '').toLowerCase()
+  switch (statusLower) {
+    case 'aprobado':
+    case 'confirmado':
+    case 'activa': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+    case 'rechazado':
+    case 'cancelado': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    case 'expirada': return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+    case 'pendiente': 
     default: return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
   }
 }
@@ -1001,27 +1823,19 @@ const getNetBalance = () => {
 
 // Funciones de paginación
 const nextPage = () => {
-  const nextPage = currentTransactionPage.value + 1;
-  console.log('🚀 Intentando ir a la página:', nextPage, 'de', transactionsPagination.value.totalPages);
+  const nextPage = currentTransactionPage.value + 1; 
   
   if (nextPage <= transactionsPagination.value.totalPages) {
-    console.log('🔄 Cargando página:', nextPage);
     loadTransactions(nextPage);
-  } else {
-    console.log('ℹ️ Ya estás en la última página');
-  }
+  } 
 };
 
 const previousPage = () => {
   const prevPage = currentTransactionPage.value - 1;
-  console.log('⏮️ Intentando ir a la página anterior:', prevPage);
   
   if (prevPage >= 1) {
-    console.log('🔄 Cargando página:', prevPage);
     loadTransactions(prevPage);
-  } else {
-    console.log('ℹ️ Ya estás en la primera página');
-  }
+  } 
 };
 
 // ===== FUNCIONES DE GRÁFICOS =====
@@ -1492,13 +2306,13 @@ const updatePlatformStats = async () => {
   }  
 };
 
-// ===== FUNCIONES DE FILTROS =====
+// ===== FUNCIONES DE FILTROS ADAPTADAS PARA DATOS REALES =====
 const getAllItems = () => {
   switch (activeTab.value) {
     case 'membership': return membershipPayments.value
     case 'visits': return visitPayments.value
     case 'services': return servicePayments.value
-    case 'withdrawals': return pendingWithdrawals.value
+    case 'withdrawals': return withdrawals.value
     default: return []
   }
 }
@@ -1515,15 +2329,9 @@ const getRejectedItems = () => {
   return getAllItems().filter(item => item.status === 'Rechazado')
 }
 
-const getReviewedItems = () => {
-  return getAllItems().filter(item => item.status === 'Aprobado' || item.status === 'Rechazado')
-}
-
 const setStatusFilter = async (filter) => {
   statusFilter.value = filter
-  // Forzar actualización de los datos
   await nextTick()
-  // Si es necesario, forzar la recarga de datos
   if (getCurrentTabData().length === 0) {
     await loadTabData()
   }
@@ -1570,35 +2378,34 @@ const getEmptyMessage = () => {
   }
 }
 
-const updateSelectedMonth = async () => {
-  console.log('📅 Mes seleccionado:', selectedMonthInput.value);
-  
-  // Limpiar caché cuando cambia el filtro de fecha
-  transactionsCache.value = {};
-  currentTransactionPage.value = 1; // Reset a la primera página
-  
-  // Forzar recarga de transacciones con el nuevo filtro de fecha
-  await loadTransactions(1);
-  
-  console.log('🔄 Transacciones cargadas con filtro de fecha:', selectedMonthInput.value);
+const updateSelectedMonth = async (type = 'payments') => {
+  if (type === 'transactions') {
+    // Limpiar caché cuando cambia el filtro de fecha de transacciones
+    transactionsCache.value = {};
+    currentTransactionPage.value = 1; // Reset a la primera página
+    
+    // Forzar recarga de transacciones con el nuevo filtro de fecha
+    await loadTransactions(1);
+  } else {
+    // Recargar datos de las pestañas de pagos
+    await loadTabData();
+  }
 }
 
-const getSelectedMonthName = () => {
-  if (!selectedMonthInput.value) return 'Seleccionar mes'
-  const date = new Date(selectedMonthInput.value + '-01')
+const getSelectedMonthName = (type = 'payments') => {
+  const monthValue = type === 'transactions' ? selectedMonthTransactions.value : selectedMonthPayments.value;
+  if (!monthValue) return 'Seleccionar mes'
+  const date = new Date(monthValue + '-01')
   return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
 }
 
 const getMonthlyStats = () => {
-  // Simular estadísticas mensuales basadas en el mes seleccionado
-  const baseStats = {
-    membership: { approved: 45, rejected: 8, total: 125430 },
-    visits: { approved: 78, rejected: 12, total: 234560 },
-    services: { approved: 92, rejected: 15, total: 345670 },
-    withdrawals: { approved: 34, rejected: 5, total: 89760 }
+  const stats = monthlyStats.value[activeTab.value] || { aprobados: 0, rechazados: 0, pendientes: 0, total: 0 }
+  return {
+    approved: stats.aprobados || 0,
+    rejected: stats.rechazados || 0,
+    total: stats.total || 0
   }
-  
-  return baseStats[activeTab.value] || { approved: 0, rejected: 0, total: 0 }
 }
 
 const getItemCardClass = (status) => {
@@ -1652,23 +2459,13 @@ const getItemAmountClass = (status) => {
 const getItemTitle = (item) => {
   let title;
   switch (activeTab.value) {
-    case 'membership': title = item.plan; break;
-    case 'visits': title = item.service; break;
-    case 'services': title = item.serviceName; break;
-    case 'withdrawals': title = item.technician; break;
+    case 'membership': title = item.plan || 'Membresía'; break;
+    case 'visits': title = item.service || 'Visita'; break;
+    case 'services': title = item.serviceName || 'Servicio'; break;
+    case 'withdrawals': title = item.technician || 'Retiro'; break;
     default: return 'Item';
   }
   return title.length > 12 ? `${title.substring(0, 12)}...` : title;
-}
-
-const getItemSubtitle = (item) => {
-  switch (activeTab.value) {
-    case 'membership': return `${item.user} • ${formatDate(item.date)}`
-    case 'visits': return `${item.client} • ${formatDate(item.date)}`
-    case 'services': return `${item.client} • ${formatDate(item.date)}`
-    case 'withdrawals': return `Solicitado: ${formatDate(item.date)}`
-    default: return ''
-  }
 }
 
 // ===== FUNCIONES DE MODAL =====
@@ -1684,107 +2481,6 @@ const closeDetailsModal = () => {
   modalType.value = ''
 }
 
-const getModalIconClass = () => {
-  switch (modalType.value) {
-    case 'membership': return 'bg-gradient-to-r from-green-500 to-green-600'
-    case 'visits': return 'bg-gradient-to-r from-blue-500 to-blue-600'
-    case 'services': return 'bg-gradient-to-r from-yellow-500 to-yellow-600'
-    case 'withdrawals': return 'bg-gradient-to-r from-red-500 to-red-600'
-    default: return 'bg-gradient-to-r from-gray-500 to-gray-600'
-  }
-}
-
-const getModalIcon = () => {
-  switch (modalType.value) {
-    case 'membership': return '💳'
-    case 'visits': return '🏠'
-    case 'services': return '🛠️'
-    case 'withdrawals': return '💳'
-    default: return '📄'
-  }
-}
-
-const getModalTitle = () => {
-  switch (modalType.value) {
-    case 'membership': return 'Detalles del Pago de Membresía'
-    case 'visits': return 'Detalles del Pago de Visita'
-    case 'services': return 'Detalles del Pago de Servicio'
-    case 'withdrawals': return 'Detalles del Retiro'
-    default: return 'Detalles'
-  }
-}
-
-const getModalSubtitle = () => {
-  if (!selectedItem.value) return ''
-  switch (modalType.value) {
-    case 'membership': return selectedItem.value.user
-    case 'visits': return selectedItem.value.client
-    case 'services': return selectedItem.value.client
-    case 'withdrawals': return selectedItem.value.technician
-    default: return ''
-  }
-}
-
-const getModalAmountClass = () => {
-  switch (modalType.value) {
-    case 'membership': return 'text-green-600 dark:text-green-400'
-    case 'visits': return 'text-blue-600 dark:text-blue-400'
-    case 'services': return 'text-yellow-600 dark:text-yellow-400'
-    case 'withdrawals': return 'text-red-600 dark:text-red-400'
-    default: return 'text-gray-600'
-  }
-}
-
-const getServiceLabel = () => {
-  switch (modalType.value) {
-    case 'membership': return 'Plan'
-    case 'visits': return 'Servicio'
-    case 'services': return 'Servicio'
-    default: return 'Elemento'
-  }
-}
-
-const getItemService = () => {
-  if (!selectedItem.value) return ''
-  switch (modalType.value) {
-    case 'membership': return selectedItem.value.plan
-    case 'visits': return selectedItem.value.service
-    case 'services': return selectedItem.value.serviceName
-    default: return ''
-  }
-}
-
-const getAccountDetails = () => {
-  if (!selectedItem.value) return ''
-  switch (modalType.value) {
-    case 'membership':
-      return `Método de Pago: ${selectedItem.value.method}
-Plan: ${selectedItem.value.plan}
-Usuario: ${selectedItem.value.user}
-Email: ${selectedItem.value.user.toLowerCase().replace(' ', '.')}@email.com
-Vencimiento: ${formatDate(selectedItem.value.expires)}`
-    case 'visits':
-      return `Servicio: ${selectedItem.value.service}
-Cliente: ${selectedItem.value.client}
-Técnico: ${selectedItem.value.technician}
-Duración: ${selectedItem.value.duration}
-Email: ${selectedItem.value.client.toLowerCase().replace(' ', '.')}@email.com`
-    case 'services':
-      return `Servicio: ${selectedItem.value.serviceName}
-Cliente: ${selectedItem.value.client}
-Técnico: ${selectedItem.value.technician}
-Categoría: ${selectedItem.value.category}
-Email: ${selectedItem.value.client.toLowerCase().replace(' ', '.')}@email.com`
-    case 'withdrawals':
-      return selectedItem.value.bankDetails || `Banco: BAC Honduras
-Cuenta: 123456789
-Titular: ${selectedItem.value.technician}
-Tipo: Cuenta de Ahorros
-Cédula: 0801-1985-12345`
-    default: return ''
-  }
-}
-
 const approveItem = () => {
   if (!selectedItem.value) return
   
@@ -1797,21 +2493,6 @@ const approveItem = () => {
   selectedItem.value.reviewedAt = new Date().toISOString()
   
   showToast(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} aprobado correctamente`, 'success')
-  closeDetailsModal()
-}
-
-const rejectItem = () => {
-  if (!selectedItem.value) return
-  
-  const itemType = modalType.value === 'membership' ? 'pago de membresía' : 
-                   modalType.value === 'visits' ? 'pago de visita' : 
-                   modalType.value === 'services' ? 'pago de servicio' : 'retiro'
-  
-  // Cambiar estado en lugar de eliminar
-  selectedItem.value.status = 'Rechazado'
-  selectedItem.value.reviewedAt = new Date().toISOString()
-  
-  showToast(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} rechazado`, 'warning')
   closeDetailsModal()
 }
 
@@ -1903,7 +2584,7 @@ const generateReport = async (report) => {
           ['BALANCE NETO', formatCurrency(platformStats.totalRevenue - platformStats.totalWithdrawals - platformStats.totalCommissions), '51.1%']
         ]
         
-autoTable(doc, {
+        autoTable(doc, {
           startY: currentY,
           head: [financialData[0]],
           body: financialData.slice(1),
@@ -1974,7 +2655,7 @@ autoTable(doc, {
           ['Nuevos Registros', '247', '+18.7%']
         ]
         
-autoTable(doc, {
+        autoTable(doc, {
           startY: currentY,
           head: [userMetrics[0]],
           body: userMetrics.slice(1),
@@ -2040,7 +2721,7 @@ autoTable(doc, {
           ['TOTAL', '1,151', '323,250', '281']
         ]
         
-autoTable(doc, {
+        autoTable(doc, {
           startY: currentY,
           head: [serviceData[0]],
           body: serviceData.slice(1),
@@ -2077,20 +2758,20 @@ autoTable(doc, {
         doc.text('RESUMEN DE TRANSACCIONES Y MOVIMIENTOS', 25, currentY + 5)
         currentY += 15
         
-        // Resumen de transacciones
-        const transactionSummary = [
+        // Resumen de transacciones usando datos reales
+        const transactionSummaryData = [
           ['TIPO DE TRANSACCIÓN', 'CANTIDAD', 'MONTO TOTAL (L.)', 'PROMEDIO (L.)'],
-          ['Pagos de Membresía', membershipPayments.value.length.toString(), formatCurrency(125430), formatCurrency(125430 / membershipPayments.value.length)],
-          ['Pagos por Visitas', visitPayments.value.length.toString(), formatCurrency(234560), formatCurrency(234560 / visitPayments.value.length)],
-          ['Pagos por Servicios', servicePayments.value.length.toString(), formatCurrency(345670), formatCurrency(345670 / servicePayments.value.length)],
-          ['Retiros Procesados', pendingWithdrawals.value.filter(w => w.status === 'Aprobado').length.toString(), formatCurrency(145320), '2,847'],
-          ['Comisiones Pagadas', '456', formatCurrency(89760), '197']
+          ['Pagos de Membresía', membershipPayments.value.length.toString(), formatCurrency(platformStats.membershipRevenue), formatCurrency(membershipPayments.value.length > 0 ? platformStats.membershipRevenue / membershipPayments.value.length : 0)],
+          ['Pagos por Visitas', visitPayments.value.length.toString(), formatCurrency(platformStats.visitRevenue), formatCurrency(visitPayments.value.length > 0 ? platformStats.visitRevenue / visitPayments.value.length : 0)],
+          ['Pagos por Servicios', servicePayments.value.length.toString(), formatCurrency(platformStats.serviceRevenue), formatCurrency(servicePayments.value.length > 0 ? platformStats.serviceRevenue / servicePayments.value.length : 0)],
+          ['Retiros Procesados', pendingWithdrawals.value.filter(w => w.status === 'Aprobado').length.toString(), formatCurrency(platformStats.totalWithdrawals), formatCurrency(pendingWithdrawals.value.length > 0 ? platformStats.totalWithdrawals / pendingWithdrawals.value.length : 0)],
+          ['Comisiones Pagadas', '456', formatCurrency(platformStats.totalCommissions), '197']
         ]
         
-autoTable(doc, {
+        autoTable(doc, {
           startY: currentY,
-          head: [transactionSummary[0]],
-          body: transactionSummary.slice(1),
+          head: [transactionSummaryData[0]],
+          body: transactionSummaryData.slice(1),
           theme: 'grid',
           headStyles: {
             fillColor: [245, 158, 11],
@@ -2146,24 +2827,6 @@ autoTable(doc, {
 }
 
 // ===== FUNCIONES DE TOAST =====
-const getToastClass = () => {
-  switch (toast.value.type) {
-    case 'success': return 'bg-green-500 text-white'
-    case 'error': return 'bg-red-500 text-white'
-    case 'warning': return 'bg-yellow-500 text-white'
-    default: return 'bg-blue-500 text-white'
-  }
-}
-
-const getToastIcon = () => {
-  switch (toast.value.type) {
-    case 'success': return '✅'
-    case 'error': return '❌'
-    case 'warning': return '⚠️'
-    default: return 'ℹ️'
-  }
-}
-
 const showToast = (message, type = 'info') => {
   toast.value = { show: true, message, type }
   setTimeout(() => {
@@ -2171,109 +2834,14 @@ const showToast = (message, type = 'info') => {
   }, 5000)
 }
 
-// ===== FUNCIONES DE DATOS =====
-const generateMockMembershipPayments = () => {
-  const plans = ['Plan Básico', 'Plan Premium', 'Plan Pro']
-  const users = ['Juan Pérez', 'María González', 'Carlos López', 'Ana Martínez', 'Roberto Silva', 'Carmen Flores']
-  const methods = ['Tarjeta de Crédito', 'Transferencia', 'PayPal']
-  const statuses = ['Pendiente', 'Aprobado', 'Rechazado']
-
-  return Array.from({ length: 8 }, (_, i) => ({
-    id: i + 1,
-    plan: plans[Math.floor(Math.random() * plans.length)],
-    user: users[Math.floor(Math.random() * users.length)],
-    amount: [99, 199, 299][Math.floor(Math.random() * 3)],
-    date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    method: methods[Math.floor(Math.random() * methods.length)],
-    expires: new Date(Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
-    status: i < 3 ? 'Pendiente' : statuses[Math.floor(Math.random() * statuses.length)]
-  }))
-}
-
-const generateMockVisitPayments = () => {
-  const services = ['Reparación Eléctrica', 'Instalación de Tubería', 'Mantenimiento AC', 'Pintura', 'Carpintería', 'Limpieza']
-  const clients = ['Roberto Silva', 'Carmen Flores', 'Diego Morales', 'Lucia Herrera', 'Fernando López', 'Patricia Vega']
-  const technicians = ['Carlos Mendoza', 'Ana Rodriguez', 'Miguel Santos', 'Sofia Martinez']
-  const statuses = ['Pendiente', 'Aprobado', 'Rechazado']
-
-  return Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    service: services[Math.floor(Math.random() * services.length)],
-    client: clients[Math.floor(Math.random() * clients.length)],
-    technician: technicians[Math.floor(Math.random() * technicians.length)],
-    amount: Math.floor(Math.random() * 500) + 200,
-    date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    duration: ['2 horas', '3 horas', '1.5 horas', '4 horas'][Math.floor(Math.random() * 4)],
-    status: i < 4 ? 'Pendiente' : statuses[Math.floor(Math.random() * statuses.length)]
-  }))
-}
-
-const generateMockServicePayments = () => {
-  const services = ['Instalación Completa', 'Reparación Mayor', 'Mantenimiento Preventivo', 'Diagnóstico Técnico', 'Consultoría']
-  const clients = ['Luis García', 'Elena Castro', 'Pedro Ramírez', 'Claudia Vega', 'Ricardo Torres', 'Mónica Herrera']
-  const technicians = ['Carlos Mendoza', 'Ana Rodriguez', 'Miguel Santos', 'Sofia Martinez']
-  const categories = ['Electricidad', 'Plomería', 'Climatización', 'Carpintería', 'Pintura']
-  const statuses = ['Pendiente', 'Aprobado', 'Rechazado']
-
-  return Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    serviceName: services[Math.floor(Math.random() * services.length)],
-    client: clients[Math.floor(Math.random() * clients.length)],
-    technician: technicians[Math.floor(Math.random() * technicians.length)],
-    category: categories[Math.floor(Math.random() * categories.length)],
-    amount: Math.floor(Math.random() * 800) + 300,
-    date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    status: i < 5 ? 'Pendiente' : statuses[Math.floor(Math.random() * statuses.length)]
-  }))
-}
-
-const generateMockWithdrawals = () => {
-  const technicians = ['Carlos Mendoza', 'Ana Rodriguez', 'Miguel Santos', 'Sofia Martinez', 'Luis García', 'Patricia Morales']
-  const statuses = ['Pendiente', 'Aprobado', 'Rechazado']
-  const bankDetails = [
-    `Banco: BAC Honduras
-Cuenta: 123456789
-Titular: Carlos Alberto Mendoza López
-Tipo: Cuenta de Ahorros
-Cédula: 0801-1985-12345`,
-    `Banco: Banco Atlántida
-Cuenta: 987654321
-Titular: Ana Beatriz Rodriguez
-Tipo: Cuenta Corriente
-Cédula: 0801-1990-54321`,
-    `Banco: Ficohsa
-Cuenta: 456789123
-Titular: Miguel Angel Santos
-Tipo: Cuenta de Ahorros
-Cédula: 0801-1988-67890`,
-    `Banco: Banrural
-Cuenta: 789123456
-Titular: Sofia Martinez Gutierrez
-Tipo: Cuenta de Ahorros
-Cédula: 0801-1992-09876`
-  ]
-
-  return Array.from({ length: 6 }, (_, i) => ({
-    id: i + 1,
-    technician: technicians[Math.floor(Math.random() * technicians.length)],
-    amount: Math.floor(Math.random() * 2000) + 500,
-    date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-    bankDetails: bankDetails[Math.floor(Math.random() * bankDetails.length)],
-    status: i < 2 ? 'Pendiente' : statuses[Math.floor(Math.random() * statuses.length)]
-  }))
-}
-
 const getCacheKey = (page) => {
-  return `${selectedMonthInput.value || 'all'}-${page}`;
+  return `${selectedMonthTransactions.value || 'all'}-${page}`;
 }
 
 const loadTransactions = async (page = 1) => {
-  console.log('📥 Iniciando carga de transacciones - Página:', page);
-  
   // Verificar si ya tenemos esta página en caché
   const cacheKey = getCacheKey(page);
   if (transactionsCache.value[cacheKey]) {
-    console.log('💾 Usando transacciones desde caché para la página:', page);
     const cachedData = transactionsCache.value[cacheKey];
     transactions.value = cachedData.data;
     transactionsSummary.value = cachedData.summary;
@@ -2291,15 +2859,12 @@ const loadTransactions = async (page = 1) => {
     let url = `/movimientos?page=${page}&limit=${limit}`;
     
     // Solo agregar filtro de fecha si hay una fecha seleccionada
-    if (selectedMonthInput.value) {
+    if (selectedMonthTransactions.value) {
       // El backend espera el parámetro 'fecha' en formato YYYY-MM
-      const fechaFormateada = selectedMonthInput.value;
+      const fechaFormateada = selectedMonthTransactions.value;
       url += `&fecha=${fechaFormateada}`;
-      
-      console.log('📅 Aplicando filtro de fecha:', fechaFormateada);
     }
     
-    console.log('🌐 Realizando petición a:', url);
     const response = await $fetch(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -2309,11 +2874,7 @@ const loadTransactions = async (page = 1) => {
       }
     });
     
-    console.log('📦 Respuesta de la API:', response);
-    
     if (response.success) {
-      console.log('📊 Respuesta completa de la API:', response);
-      
       const transactionsData = response.data?.movimientos || response.data || [];
       const summary = response.summary || response.data?.summary || response.data?.resumen;
       const summaryData = {
@@ -2344,8 +2905,6 @@ const loadTransactions = async (page = 1) => {
         pagination: { ...paginationInfo },
         timestamp: Date.now()
       };
-      
-      console.log('💾 Datos guardados en caché para la página:', page);
       
       // Limpiar caché antiguo (más de 1 hora)
       const oneHourAgo = Date.now() - (60 * 60 * 1000);
@@ -2394,35 +2953,6 @@ const loadTransactions = async (page = 1) => {
   }
 }
 
-const loadTabData = async () => {
-  isLoadingData.value = true
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  switch (activeTab.value) {
-    case 'membership':
-      membershipPayments.value = generateMockMembershipPayments()
-      break
-    case 'visits':
-      visitPayments.value = generateMockVisitPayments()
-      break
-    case 'services':
-      servicePayments.value = generateMockServicePayments()
-      break
-    case 'withdrawals':
-      pendingWithdrawals.value = generateMockWithdrawals()
-      break
-  }
-  
-  isLoadingData.value = false
-}
-
-const loadMoreTransactions = () => {
-  const remaining = transactions.value.length - visibleTransactionsCount.value
-  const toAdd = Math.min(5, remaining)
-  visibleTransactionsCount.value += toAdd
-  hasMoreTransactions.value = visibleTransactionsCount.value < transactions.value.length
-}
-
 const setActiveTab = (tab) => {
   if (activeTab.value === tab) return
   activeTab.value = tab
@@ -2430,17 +2960,8 @@ const setActiveTab = (tab) => {
   loadTabData()
 }
 
-const exportData = () => {
-  showToast('Exportando datos...', 'info')
-  setTimeout(() => {
-    showToast('Datos exportados correctamente', 'success')
-  }, 2000)
-}
- 
-
 // ===== WATCHERS =====
 watch(selectedChart, async (newVal) => { 
-  
   // Esperar a que el DOM se actualice
   await nextTick();
   
@@ -2474,7 +2995,6 @@ onMounted(async () => {
   Chart.register(...registerables, DataLabelsPlugin)
   
   // Configurar tema oscuro
-  // Verificar el tema del sistema
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.documentElement.classList.add('dark')
   } else {
@@ -2527,4 +3047,4 @@ onMounted(async () => {
 .modal-leave-to {
   opacity: 0;
 }
-</style>
+</style> 
