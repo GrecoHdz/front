@@ -2495,36 +2495,43 @@ const availableReports = ref([
   }
 ]); 
 
-// ===== FUNCIONES DE REPORTERÍA ===== 
+// ===== FUNCIÓN PRINCIPAL PARA GENERAR REPORTES =====
 const generateReport = async (report) => {
   try {
     report.generating = true;
 
-    // 🔹 1️⃣ Obtener todos los datos base del mes seleccionado
-    const [membershipRes, visitRes, withdrawalsRes, quotationRes, serviceRes] = await Promise.all([
+    const config = useRuntimeConfig();
+    const auth = useAuthStore();
+
+    // 🗓️ 1️⃣ Obtener mes y año seleccionados
+    const [year, month] = selectedMonthReports.value.split('-').map(Number);
+    const monthNames = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    const mesNombre = monthNames[month - 1];
+
+    // 📦 2️⃣ Obtener datos base comunes
+    const [membershipRes, visitRes, withdrawalsRes, quotationRes] = await Promise.all([
       $fetch(`/membresia?month=${selectedMonthReports.value}`, {
         baseURL: config.public.apiBase,
-        headers: { 'Authorization': `Bearer ${auth.token}` }
+        headers: { Authorization: `Bearer ${auth.token}` }
       }),
       $fetch(`/pagovisita?month=${selectedMonthReports.value}`, {
         baseURL: config.public.apiBase,
-        headers: { 'Authorization': `Bearer ${auth.token}` }
+        headers: { Authorization: `Bearer ${auth.token}` }
       }),
       $fetch(`/movimientos/retiros?month=${selectedMonthReports.value}`, {
         baseURL: config.public.apiBase,
-        headers: { 'Authorization': `Bearer ${auth.token}` }
+        headers: { Authorization: `Bearer ${auth.token}` }
       }),
       $fetch(`/cotizacion?month=${selectedMonthReports.value}`, {
         baseURL: config.public.apiBase,
-        headers: { 'Authorization': `Bearer ${auth.token}` }
-      }),
-      $fetch(`/solicitudservicio?month=${selectedMonthReports.value}`, {
-        baseURL: config.public.apiBase,
-        headers: { 'Authorization': `Bearer ${auth.token}` }
+        headers: { Authorization: `Bearer ${auth.token}` }
       })
     ]);
 
-    // 🔹 2️⃣ Normalizar data
+    // 🔄 3️⃣ Normalizar data
     const processData = (data, label) => ({
       label,
       total: parseFloat(data?.estadisticas?.total || 0),
@@ -2536,22 +2543,21 @@ const generateReport = async (report) => {
     const visitData = processData(visitRes, 'Visitas Técnicas');
     const quotationData = processData(quotationRes, 'Cotizaciones');
     const withdrawalsData = processData(withdrawalsRes, 'Retiros');
-    const serviceData = processData(serviceRes, 'Servicios');
 
+    const serviceData = processData(quotationRes, 'Servicios'); // 👈 Cotizaciones se consideran "servicios" en el reporte financiero
+
+    // 💰 4️⃣ Cálculos de balance
     const ingresosTotales = membershipData.total + visitData.total + serviceData.total;
     const retirosTotales = withdrawalsData.total;
     const balanceNeto = ingresosTotales - retirosTotales;
 
-    // 🔹 3️⃣ Crear documento PDF
+    // 🧾 5️⃣ Crear documento PDF
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     doc.autoTable = autoTable;
     const colorPrincipal = [93, 92, 222];
     const colorSecundario = [75, 85, 99];
-    const [year, month] = selectedMonthReports.value.split('-').map(Number);
-    const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    const mesNombre = monthNames[month - 1];
 
-    // 🔹 Encabezado
+    // 🏷️ Encabezado
     doc.setFillColor(...colorPrincipal);
     doc.rect(0, 0, 210, 28, 'F');
     doc.setTextColor(255, 255, 255);
@@ -2562,7 +2568,7 @@ const generateReport = async (report) => {
     doc.text(`Reporte: ${report.title}`, 15, 18);
     doc.text(`Período: ${mesNombre} ${year}`, 15, 23);
 
-    // 🔹 4️⃣ Seleccionar reporte
+    // 📚 6️⃣ Seleccionar tipo de reporte
     switch (report.id) {
 
       // ===== REPORTE FINANCIERO =====
@@ -2579,9 +2585,16 @@ const generateReport = async (report) => {
         break;
 
       // ===== REPORTE DE SERVICIOS =====
-      case 2:
+      case 2: {
+        // Solo en este reporte se usa /solicitudservicio
+        const serviceRes = await $fetch(`/solicitudservicio?month=${selectedMonthReports.value}`, {
+          baseURL: config.public.apiBase,
+          headers: { Authorization: `Bearer ${auth.token}` }
+        });
+        const serviceData = processData(serviceRes, 'Servicios');
         await generarReporteServiciosDetallado(doc, serviceData);
         break;
+      }
 
       // ===== REPORTE DE TRANSACCIONES =====
       case 4:
@@ -2592,7 +2605,7 @@ const generateReport = async (report) => {
         showToast('Tipo de reporte no reconocido', 'error');
     }
 
-    // 🔹 5️⃣ Footer con número de página
+    // 📄 7️⃣ Footer con número de página
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
@@ -2607,7 +2620,7 @@ const generateReport = async (report) => {
       doc.text(`Página ${i} de ${totalPages}`, 190, 287, { align: 'right' });
     }
 
-    // 🔹 6️⃣ Mostrar PDF
+    // 🖨️ 8️⃣ Mostrar PDF
     const fileName = `${report.title.replace(/\s+/g, '_')}_${mesNombre}_${year}.pdf`;
     const pdfBlob = doc.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -2622,20 +2635,21 @@ const generateReport = async (report) => {
   }
 };
 
-
-// ===== REPORTE FINANCIERO =====
 const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }) => {
   let currentY = 40;
+
+  // 🎯 Título
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(93, 92, 222);
   doc.setFontSize(14);
   doc.text('REPORTE FINANCIERO MENSUAL', 10, currentY);
   currentY += 6;
 
+  // 📊 Calcular porcentajes
   const totalIngresos = membershipData.total + visitData.total + serviceData.total;
-  const calcPorcentaje = (valor) =>
-    totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
+  const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
 
+  // 📋 Tabla resumen de totales
   autoTable(doc, {
     startY: currentY,
     head: [['Concepto', 'Total (HNL)', 'Porcentaje (%)']],
@@ -2652,10 +2666,122 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     columnStyles: { 0: { cellWidth: 70 }, 1: { halign: 'right' }, 2: { halign: 'center' } },
     margin: { left: 10, right: 10 }
   });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // 📋 Detalle de Ingresos
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(12);
+  doc.text('Detalle de Ingresos', 10, currentY);
+  currentY += 8;
+
+  const membresiasFiltradas = membershipData.data
+    .filter(m => m.estado?.toLowerCase() !== 'pendiente')
+    .map(m => [formatDate(m.fecha), 'Membresía', m.usuario?.nombre || m.usuario?.cliente?.nombre || '-', formatCurrency(m.monto)]);
+
+  const visitasFiltradas = visitData.data
+    .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
+    .map(v => [formatDate(v.fecha), 'Visita', v.cliente?.nombre || v.client || v.usuario?.nombre || '-', formatCurrency(v.monto)]);
+
+  const serviciosFiltrados = serviceData.data
+    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
+    .map(s => [formatDate(s.fecha), 'Servicio', s.solicitud?.cliente?.nombre || '-', formatCurrency(s.monto_total || 0)]);
+
+  const totalIngresosTabla = [...membresiasFiltradas, ...visitasFiltradas, ...serviciosFiltrados]
+    .reduce((sum, row) => sum + (parseFloat(row[3].replace(/[^0-9.-]+/g, "")) || 0), 0);
+
+  const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0;
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Fecha', 'Tipo', 'Cliente', 'Monto']],
+    body: hayDatos
+      ? [
+          ...membresiasFiltradas,
+          ...visitasFiltradas,
+          ...serviciosFiltrados,
+          [
+            { content: 'TOTAL INGRESOS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalIngresosTabla), styles: { fontStyle: 'bold' } }
+          ]
+        ]
+      : [[{ content: 'No hay datos disponibles', colSpan: 4, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 30 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 } },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // 📋 Detalle de Retiros
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(12);
+  doc.text('Detalle de Retiros', 10, currentY);
+  currentY += 8;
+
+  const retirosFiltrados = withdrawalsData.data
+    .filter(r => r.estado?.toLowerCase() !== 'pendiente')
+    .map(r => [
+      formatDate(r.fecha),
+      r.nombre_usuario || '-',
+      r.descripcion?.replace(/\n/g, ' ') || 'Sin descripción',
+      formatCurrency(r.monto),
+      r.estado
+    ]);
+
+  const totalRetiros = withdrawalsData.data.reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
+  const hayRetiros = retirosFiltrados.length > 0;
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Fecha', 'Usuario', 'Descripción', 'Monto', 'Estado']],
+    body: hayRetiros
+      ? [
+          ...retirosFiltrados,
+          [
+            { content: 'TOTAL RETIROS', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalRetiros), styles: { fontStyle: 'bold' } }
+          ]
+        ]
+      : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // 📄 Resumen Final
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(33, 33, 33);
+  doc.text('Resumen Final', 10, currentY);
+  currentY += 6;
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Total Ingresos', 'Total Retiros', 'Balance Neto']],
+    body: [[
+      formatCurrency(totalIngresos),
+      formatCurrency(withdrawalsData.total),
+      formatCurrency(balanceNeto)
+    ]],
+    theme: 'grid',
+    headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 9 },
+    bodyStyles: { fontSize: 9 },
+    margin: { left: 10, right: 10 }
+  });
 };
 
 
-// ===== REPORTE DE SERVICIOS DETALLADO =====
+ 
 // ===== REPORTE DE SERVICIOS DETALLADO =====
 const generarReporteServiciosDetallado = async (doc, serviceData) => {
   const servicios = Array.isArray(serviceData?.data) ? serviceData.data : [];
