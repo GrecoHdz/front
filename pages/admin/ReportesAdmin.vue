@@ -2492,7 +2492,15 @@ const availableReports = ref([
     icon: '🛠️',
     iconClass: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
     generating: false
-  }
+  },
+  {
+    id: 3,
+    title: 'Reporte de Usuarios',
+    description: 'Resumen de todos los Usuarios',
+    icon: '👥',
+    iconClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+    generating: false
+  },
 ]); 
 
 // ===== FUNCIÓN PRINCIPAL PARA GENERAR REPORTES =====
@@ -2512,7 +2520,7 @@ const generateReport = async (report) => {
     const mesNombre = monthNames[month - 1];
 
     // 📦 2️⃣ Obtener datos base comunes
-    const [membershipRes, visitRes, withdrawalsRes, quotationRes] = await Promise.all([
+    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes] = await Promise.all([
       $fetch(`/membresia?month=${selectedMonthReports.value}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
@@ -2528,6 +2536,10 @@ const generateReport = async (report) => {
       $fetch(`/cotizacion?month=${selectedMonthReports.value}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
+      }),
+      $fetch(`/usuarios?month=${selectedMonthReports.value}`, {
+        baseURL: config.public.apiBase,
+        headers: { 'Authorization': `Bearer ${auth.token}` }
       })
     ]);
 
@@ -2538,6 +2550,13 @@ const generateReport = async (report) => {
       data: data?.data || [],
       stats: data?.estadisticas || {}
     });
+    const usersData = {
+  label: 'Usuarios',
+  total: usersRes?.estadisticas?.total || 0,
+  data: usersRes?.data || [],
+  stats: usersRes?.estadisticas || {}
+};
+
 
     const membershipData = processData(membershipRes, 'Membresías');
     const visitData = processData(visitRes, 'Visitas Técnicas');
@@ -2596,6 +2615,11 @@ const generateReport = async (report) => {
         break;
       }
 
+      // ===== REPORTE DE USUARIOS =====
+      case 3:
+        await generarReporteUsuarios(doc, { usersData, mesNombre, year });
+        break;
+
       // ===== REPORTE DE TRANSACCIONES =====
       case 4:
         await generarReporteTransacciones(doc, membershipData, visitData, withdrawalsData);
@@ -2635,6 +2659,7 @@ const generateReport = async (report) => {
   }
 };
 
+// ===== REPORTE FINANCIERO =====
 const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }) => {
   let currentY = 40;
 
@@ -2780,8 +2805,180 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   });
 };
 
+// ===== REPORTE DE USUARIOS =====
+const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
+  let currentY = 40;
 
- 
+  // 🔹 Título principal
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(14);
+  doc.text('REPORTE DE USUARIOS', 10, currentY);
+  currentY += 8;
+
+  // ============================================================
+  // 1️⃣ TABLA DE CLIENTES
+  // ============================================================
+  const clientes = usersData.data.filter(u => u.rol?.nombre_rol?.toLowerCase() === 'usuario');
+  const totalClientes = clientes.length;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(93, 92, 222);
+  doc.text('Clientes Registrados', 10, currentY);
+  currentY += 8;
+
+  const clientesBody = clientes.map(c => [
+    formatDate(c.fecha_registro),
+    c.nombre,
+    c.telefono || '-',
+    c.ciudad?.nombre_ciudad || '-',
+    c.estado,
+    c.total_servicios_cliente || 0,
+    c.total_membresias || 0
+  ]);
+
+  if (clientesBody.length > 0) {
+    const totalServicios = clientes.reduce((sum, c) => sum + (parseInt(c.total_servicios_cliente) || 0), 0);
+    const totalMembresias = clientes.reduce((sum, c) => sum + (parseInt(c.total_membresias) || 0), 0);
+    
+    clientesBody.push([
+      { content: `Total clientes: ${totalClientes}`, colSpan: 5, styles: { fontStyle: 'bold' } },
+      { content: totalServicios.toString(), styles: { halign: 'right', fontStyle: 'bold' } },
+      { content: totalMembresias.toString(), styles: { halign: 'right', fontStyle: 'bold' } }
+    ]);
+  }
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Fecha Registro', 'Nombre', 'Teléfono', 'Ciudad', 'Estado', 'Servicios', 'Membresías']],
+    body: clientesBody.length
+      ? clientesBody
+      : [[{ content: 'No hay clientes registrados en este período', colSpan: 7, styles: { halign: 'center', fontStyle: 'italic', textColor: [120, 120, 120] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 25 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 25 },
+      5: { cellWidth: 22, halign: 'right' },
+      6: { cellWidth: 25, halign: 'right' }
+    },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // ============================================================
+  // 2️⃣ TABLA DE TÉCNICOS
+  // ============================================================
+  const tecnicos = usersData.data.filter(u =>
+    ['técnico', 'tecnico'].includes(u.rol?.nombre_rol?.toLowerCase())
+  );
+  const totalTecnicos = tecnicos.length;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(93, 92, 222);
+  doc.text('Técnicos Registrados', 10, currentY);
+  currentY += 8;
+
+  const tecnicosBody = tecnicos.map(t => [
+    formatDate(t.fecha_registro),
+    t.nombre,
+    t.telefono || '-',
+    t.ciudad?.nombre_ciudad || '-',
+    t.estado,
+    t.total_servicios_tecnico || 0
+  ]);
+
+  if (tecnicosBody.length > 0) {
+    const totalServiciosTecnicos = tecnicos.reduce((sum, t) => sum + (parseInt(t.total_servicios_tecnico) || 0), 0);
+    
+    tecnicosBody.push([
+      { content: `Total técnicos: ${totalTecnicos}`, colSpan: 5, styles: { fontStyle: 'bold' } },
+      { content: totalServiciosTecnicos.toString(), styles: { halign: 'right', fontStyle: 'bold' } }
+    ]);
+  }
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Fecha Registro', 'Nombre', 'Teléfono', 'Ciudad', 'Estado', 'Servicios']],
+    body: tecnicosBody.length
+      ? tecnicosBody
+      : [[{ content: 'No hay técnicos registrados en este período', colSpan: 6, styles: { halign: 'center', fontStyle: 'italic', textColor: [120, 120, 120] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 53 },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 35 },
+      4: { cellWidth: 25 },
+      5: { cellWidth: 20, halign: 'right' }
+    },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // ============================================================
+  // 3️⃣ ESTADÍSTICAS GENERALES (dividida en 2 columnas)
+  // ============================================================
+  const stats = usersData.stats || {};
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(93, 92, 222);
+  doc.text('Estadísticas Generales (Actuales)', 10, currentY);
+  currentY += 6;
+
+  const statsCol1 = [
+    ['Usuarios activos', stats.activos || 0],
+    ['Usuarios inactivos', stats.inactivos || 0],
+    ['Usuarios deshabilitados', stats.deshabilitados || 0],
+    ['Total de usuarios', stats.total || 0]
+  ];
+
+  const statsCol2 = [
+    ['Usuarios que solicitaron servicios', stats.usuarios_que_solicitaron_servicios || 0],
+    ['Usuarios con membresía', stats.usuarios_con_membresia || 0],
+    ['Técnicos activos', stats.tecnicos_activos || 0]
+  ];
+
+  // 🟦 Primera columna
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Métrica', 'Cantidad']],
+    body: statsCol1,
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8, cellPadding: 1.5 },
+    margin: { left: 10 },
+    tableWidth: 85,
+    columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 30, halign: 'right' } }
+  });
+
+  // 🟩 Segunda columna (a la derecha)
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Métrica', 'Cantidad']],
+    body: statsCol2,
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8, cellPadding: 1.5 },
+    margin: { left: 110 },
+    tableWidth: 85,
+    columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 30, halign: 'right' } }
+  });
+};
+
+
 // ===== REPORTE DE SERVICIOS DETALLADO =====
 const generarReporteServiciosDetallado = async (doc, serviceData) => {
   const servicios = Array.isArray(serviceData?.data) ? serviceData.data : [];
