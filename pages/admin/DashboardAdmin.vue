@@ -12,7 +12,7 @@
     
     <!-- Loading Spinner -->
     <LoadingSpinner 
-      :loading="isLoading" 
+      :loading="isLoading"
     />
 
     <!-- Contenido principal -->
@@ -73,19 +73,19 @@
                 </div> 
                 <div class="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mt-4">
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-4 border border-white/20">
-                      <div class="text-[10px] xs:text-xs text-white/80 text-center">Usuarios</div>
+                      <div class="text-[10px] xs:text-xs md:text-xs text-white/80 text-center">Usuarios</div>
                       <div class="text-[14px] sm:text-xs md:text-base font-bold sm:font-black text-center">{{ stats.totalUsers }}</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-4 border border-white/20">
-                      <div class="text-[10px] xs:text-xs text-white/80 text-center">Servicios</div>
+                      <div class="text-[10px] xs:text-xs md:text-xs text-white/80 text-center">Servicios</div>
                       <div class="text-[14px] sm:text-xs md:text-base font-bold sm:font-black text-center">{{ stats.pendingServices }}</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-4 border border-white/20">
-                      <div class="text-[10px] xs:text-xs text-white/80 text-center">Membresías Activas</div>
+                      <div class="text-[10px] xs:text-xs md:text-xs text-white/80 text-center">Membresías Activas</div>
                       <div class="text-[14px] sm:text-xs md:text-base font-bold sm:font-black text-center">{{ stats.activeMemberships }}</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-4 border border-white/20">
-                      <div class="text-[10px] xs:text-xs text-white/80 text-center">Ingresos</div>
+                      <div class="text-[10px] xs:text-xs md:text-xs text-white/80 text-center">Ingresos</div>
                       <div class="text-[14px] sm:text-xs md:text-base font-bold sm:font-black text-center">L. {{ stats.monthlyRevenue.toLocaleString('es-HN') }}</div>
                     </div>
                   </div>
@@ -124,69 +124,7 @@
                 </div>
               </div>
             </section>
-
-            <!-- Actividad Reciente -->
-            <section class="px-2 sm:px-4 mb-3 sm:mb-5">
-              <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">Actividad Reciente</h2>
-              <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md border border-gray-100 dark:border-gray-700">
-                <div v-if="recentActivities.length === 0" class="text-center py-4 sm:py-5">
-                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 dark:bg-gray-700 rounded-lg mx-auto mb-1.5 flex items-center justify-center">
-                    <span class="text-lg">📋</span>
-                  </div>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">No hay actividad reciente</p>
-                </div>
-
-                <div v-else class="space-y-2">
-                  <div v-for="activity in displayedActivities" :key="activity.id"
-                       class="flex items-start space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                         :class="activity.iconBg">
-                      <span :class="activity.iconColor" class="text-sm sm:text-base">{{ activity.icon }}</span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">{{ activity.title }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ activity.description }}</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ getRelativeTime(activity.timestamp) }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Paginación Actividades -->
-                  <div v-if="recentActivities.length > activityItemsPerPage" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
-                    <div class="flex items-center justify-between">
-                      <div class="text-xs text-gray-500 dark:text-gray-400">
-                        Página {{ currentActivityPage }} de {{ totalActivityPages }}
-                      </div>
-                      <div class="flex items-center space-x-1">
-                        <button 
-                          @click="prevActivityPage"
-                          :disabled="currentActivityPage === 1"
-                          class="p-1.5 rounded-full disabled:opacity-40 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-                          :class="{ 'cursor-not-allowed': currentActivityPage === 1 }"
-                        >
-                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </button>
-                        <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
-                          {{ currentActivityPage }} / {{ totalActivityPages }}
-                        </span>
-                        <button 
-                          @click="nextActivityPage"
-                          :disabled="currentActivityPage >= totalActivityPages"
-                          class="p-1.5 rounded-full disabled:opacity-40 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-                          :class="{ 'cursor-not-allowed': currentActivityPage >= totalActivityPages }"
-                        >
-                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
+            
             <!-- Soporte Técnico -->
             <section class="px-2 sm:px-4 mb-3 sm:mb-5">
               <div class="flex items-center justify-between mb-2 sm:mb-3">
@@ -219,7 +157,7 @@
 
                 <div v-else class="space-y-2">
                   <div v-for="ticket in displayedTickets" :key="ticket.id"
-                       @click="viewTicket(ticket)"
+                       @click="openTicketModal(ticket)"
                        class="group rounded-lg p-2.5 sm:p-3 border transition-colors cursor-pointer"
                        :class="[
                          ticket.estado === 1 
@@ -317,6 +255,78 @@
               </div>
             </section>
 
+            <!-- Actividad Reciente -->
+            <section class="px-2 sm:px-4 mb-3 sm:mb-5">
+              <div class="flex items-center justify-between mb-2 sm:mb-3">
+                <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Actividad Reciente</h2>
+                <button @click="fetchNotifications" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline flex items-center">
+                  <span class="mr-1">🔄</span> Actualizar
+                </button>
+              </div>
+              <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md border border-gray-100 dark:border-gray-700">
+                <div v-if="isLoadingNotifications" class="text-center py-4 sm:py-5">
+                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Cargando notificaciones...</p>
+                </div>
+                <div v-else-if="notifications.length === 0" class="text-center py-4 sm:py-5">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 dark:bg-gray-700 rounded-lg mx-auto mb-1.5 flex items-center justify-center">
+                    <span class="text-lg">📋</span>
+                  </div>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">No hay notificaciones recientes</p>
+                </div>
+
+                <div v-else class="space-y-2">
+                  <div v-for="notification in displayedNotifications" :key="notification.id"
+                       class="flex items-start space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                         :class="{'bg-green-100 dark:bg-green-900/30': notification.leido, 'bg-blue-100 dark:bg-blue-900/30': !notification.leido}">
+                      <span :class="{'text-green-600 dark:text-green-400': notification.leido, 'text-blue-600 dark:text-blue-400': !notification.leido}" class="text-sm sm:text-base">
+                        {{ notification.leido ? '📭' : '📨' }}
+                      </span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">{{ notification.titulo }}</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ notification.nombreUsuario || 'Sistema' }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {{ getRelativeTime(notification.fechaLeido || notification.fecha) }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Paginación Notificaciones -->
+                  <div v-if="totalNotificationPages > 1" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                    <div class="flex items-center justify-between">
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        Página {{ currentNotificationPage }} de {{ totalNotificationPages }}
+                      </div>
+                      <div class="flex items-center space-x-1">
+                        <button 
+                          @click="prevNotificationPage"
+                          :disabled="currentNotificationPage === 1"
+                          class="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-50"
+                          :class="{'hover:bg-gray-100 dark:hover:bg-gray-700': currentNotificationPage > 1}"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <button 
+                          @click="nextNotificationPage"
+                          :disabled="currentNotificationPage === totalNotificationPages"
+                          class="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-50"
+                          :class="{'hover:bg-gray-100 dark:hover:bg-gray-700': currentNotificationPage < totalNotificationPages}"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section> 
+
           </main>
         </div>
       </div>
@@ -367,7 +377,7 @@
                   </div> 
                   <div class="flex items-center gap-1 sm:gap-2">
                     <p class="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Teléfono:</p>
-                    <p class="text-xs sm:text-sm text-gray-900 dark:text-white">{{ selectedTicket?.phone || 'N/A' }}</p>
+                    <p class="text-xs sm:text-sm text-gray-900 dark:text-white">{{ selectedTicket?.userPhone || 'N/A' }}</p>
                   </div>
                   <div v-if="selectedTicket?.serviceId" class="col-span-full flex items-center gap-1 sm:gap-2">
                     <p class="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">ID de Servicio:</p>
@@ -412,7 +422,7 @@
                   ></div>
                   <div class="flex-1 min-w-0">
                     <p class="text-xs text-gray-900 dark:text-white">{{ entry.action }}</p>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ entry.date }} - {{ entry.user }}</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ entry.date }}</p>
                   </div>
                 </div>
               </div>
@@ -792,7 +802,8 @@ const fetchSupportTickets = async () => {
           id: ticket.id_soporte,
           subject: ticket.asunto,
           message: ticket.mensaje,
-          user: `Usuario #${ticket.id_usuario}`, // We'll need to fetch user details separately if needed
+          user: ticket.usuario.nombre,
+          userPhone: ticket.usuario.telefono,
           date: new Date(ticket.fecha_creacion),
           estado: ticket.estado ? 1 : 0,
           service: ticket.id_solicitud ? `Solicitud #${ticket.id_solicitud}` : 'Sin solicitud',
@@ -894,12 +905,6 @@ const formatPriority = (priority) => {
     baja: 'Baja'
   };
   return priorities[priority] || priority;
-};
-
-// Ver detalles del ticket
-const viewTicket = (ticketId) => {
-  // Aquí iría la lógica para ver los detalles del ticket
-  showInfo(`Viendo detalles del ticket #${ticketId}`);
 };
 
 // Asignar ticket a mí mismo
@@ -1043,6 +1048,62 @@ const nextActivityPage = () => {
   }
 };
 
+// Notificaciones
+const notifications = ref([]);
+const isLoadingNotifications = ref(false);
+const notificationsPerPage = 5;
+const currentNotificationPage = ref(1);
+
+// Obtener notificaciones
+const fetchNotifications = async () => {
+  try {
+    isLoadingNotifications.value = true;
+    const response = await $fetch('/notificaciones', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response.success) {
+      notifications.value = response.data;
+    } else {
+      showError('Error al cargar las notificaciones');
+    }
+  } catch (error) {
+    console.error('Error al obtener notificaciones:', error);
+    showError('Error al cargar las notificaciones');
+  } finally {
+    isLoadingNotifications.value = false;
+  }
+};
+
+// Computed properties para la paginación de notificaciones
+const totalNotificationPages = computed(() => {
+  return Math.ceil(notifications.value.length / notificationsPerPage);
+});
+
+const displayedNotifications = computed(() => {
+  const start = (currentNotificationPage.value - 1) * notificationsPerPage;
+  const end = start + notificationsPerPage;
+  return notifications.value.slice(0, 10); // Mostrar solo las primeras 10 notificaciones
+});
+
+// Funciones de paginación
+const prevNotificationPage = () => {
+  if (currentNotificationPage.value > 1) {
+    currentNotificationPage.value--;
+  }
+};
+
+const nextNotificationPage = () => {
+  if (currentNotificationPage.value < totalNotificationPages.value) {
+    currentNotificationPage.value++;
+  }
+};
+
 // Técnicos disponibles
 const availableTechnicians = ref([
   {
@@ -1127,18 +1188,40 @@ const formatDate = (dateString) => {
   })
 }
 
-const getRelativeTime = (timestamp) => {
-  const now = new Date()
-  const diff = now - timestamp
-  const minutes = Math.floor(diff / (1000 * 60))
-  const hours = Math.floor(diff / (1000 * 60 * 60))
+const getRelativeTime = (dateString) => {
+  if (!dateString) return 'Fecha no disponible';
   
-  if (minutes < 60) {
-    return `hace ${minutes} minutos`
-  } else if (hours < 24) {
-    return `hace ${hours} horas`
-  } else {
-    return timestamp.toLocaleDateString('es-ES')
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      throw new Error('Fecha inválida');
+    }
+    
+    const now = new Date();
+    const diff = now - date; // Diferencia en milisegundos
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    if (seconds < 60) {
+      return 'hace unos segundos';
+    } else if (minutes < 60) {
+      return `hace ${minutes} minuto${minutes !== 1 ? 's' : ''}`;
+    } else if (hours < 24) {
+      return `hace ${hours} hora${hours !== 1 ? 's' : ''}`;
+    } else if (days < 30) {
+      return `hace ${days} día${days !== 1 ? 's' : ''}`;
+    } else if (months < 12) {
+      return `hace ${months} mes${months !== 1 ? 'es' : ''}`;
+    } else {
+      return `hace ${years} año${years !== 1 ? 's' : ''}`;
+    }
+  } catch (error) {
+    console.error('Error al formatear fecha:', error);
+    return 'Fecha inválida';
   }
 }
 
@@ -1459,6 +1542,9 @@ const initializeDashboard = async () => {
       
       // Cargar estadísticas u otros datos necesarios
       await fetchStatistics()
+      
+      // Cargar notificaciones
+      await fetchNotifications()
       
     } catch (error) {
       console.error('Error al cargar el dashboard:', error)

@@ -11,7 +11,9 @@
     />
 
     <!-- Loading Spinner -->
-    <LoadingSpinner v-if="isLoading" :loading="isLoading" />
+    <LoadingSpinner 
+      :loading="isLoading"
+    />
 
     <!-- Header -->
     <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
@@ -479,6 +481,7 @@ import { Chart, registerables } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue'
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 
 // SEO and Meta
 useHead({

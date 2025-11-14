@@ -13,6 +13,7 @@
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@pinia/nuxt": "^0.11.2",
     "@types/jwt-decode": "^2.2.1",
+    "@vueuse/core": "^14.0.0",
     "axios": "^1.11.0",
     "chart.js": "^4.5.0",
     "chartjs-plugin-datalabels": "^2.2.0",

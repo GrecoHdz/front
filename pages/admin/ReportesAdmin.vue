@@ -683,11 +683,11 @@
               <p class="mt-1.5 text-[11px] text-gray-600 dark:text-gray-400">Cargando {{ getLoadingMessage() }}...</p>
             </div>
       
-            <div v-else-if="getCurrentTabData().length === 0" class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center border border-dashed border-gray-200 dark:border-gray-600">
+            <div v-if="getCurrentTabData().length === 0" class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center border border-dashed border-gray-200 dark:border-gray-600">
               <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-0.5">Sin {{ getEmptyMessage() }}</h3>
               <p class="text-[11px] text-gray-600 dark:text-gray-400">No hay {{ getEmptyMessage() }} {{ getStatusFilterText() }}</p>
             </div>
-      
+            
             <template v-else>
               <div class="grid grid-cols-2 gap-1.5">
                 <div v-for="item in getCurrentTabData()" :key="item.id || item.id_membresia || item.id_pagovisita || item.id_cotizacion || item.id_movimiento"
@@ -711,6 +711,49 @@
                 </div>
               </div>
             </template>
+            
+            <!-- Paginación -->
+            <div v-if="getCurrentTabData().length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+              <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  Mostrando {{ getCurrentTabData().length }} de {{ 
+                    statusFilter === 'pending' ? getPendingItems().length :
+                    statusFilter === 'approved' ? getApprovedItems().length :
+                    statusFilter === 'rejected' ? getRejectedItems().length :
+                    getAllItems().length
+                  }} registros
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button 
+                    @click="previousPaymentsPage" 
+                    :disabled="currentPaymentsPage <= 1 || isLoadingData"
+                    class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                    :class="{ 'opacity-50 cursor-not-allowed': currentPaymentsPage <= 1 }"
+                    aria-label="Página anterior"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  
+                  <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Página {{ pagination.page }} de {{ pagination.totalPages }}
+                  </span>
+                  
+                  <button 
+                    @click="nextPaymentsPage" 
+                    :disabled="!pagination.hasMore || isLoadingData"
+                    class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                    :class="{ 'opacity-50 cursor-not-allowed': !pagination.hasMore }"
+                    aria-label="Página siguiente"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -729,25 +772,25 @@
             />
           </div>
           
-          <div class="grid grid-cols-2 gap-2 sm:gap-3">
-            <div v-for="report in availableReports" :key="report.id"
-                 class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-2 sm:p-3 shadow-sm hover:shadow transition-shadow">
-              <div class="flex justify-between items-start h-full">
-                <div class="pr-1 sm:pr-2 flex-1 min-w-0">
-                  <h3 class="text-[11px] sm:text-xs font-medium text-gray-900 dark:text-white mb-0.5 line-clamp-1">{{ report.title }}</h3>
-                  <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{{ report.description }}</p>
-                </div>
-                <button 
-                  @click="generateReport(report)" 
-                  :disabled="report.generating"
-                  class="flex-shrink-0 text-[10px] sm:text-xs bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white px-2 sm:px-3 py-1 rounded-lg transition-colors flex items-center justify-center h-6 sm:h-7 min-w-[40px] sm:min-w-[50px] shadow-sm"
-                >
-                  <span v-if="report.generating" class="animate-spin">⏳</span>
-                  <span v-else class="leading-none">PDF</span>
-                </button>
+        <div class="grid grid-cols-1 gap-2 sm:gap-3">
+          <div v-for="report in availableReports" :key="report.id"
+               class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-2 sm:p-3 shadow-sm hover:shadow transition-shadow">
+            <div class="flex justify-between items-start h-full">
+              <div class="pr-1 sm:pr-2 flex-1 min-w-0">
+                <h3 class="text-[12px] sm:text-xs font-medium text-gray-900 dark:text-white mb-0.5 line-clamp-1">{{ report.title }}</h3>
+                <p class="text-[12px] sm:text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{{ report.description }}</p>
               </div>
+              <button 
+                @click="generateReport(report)" 
+                :disabled="report.generating"
+                class="flex-shrink-0 text-[12px] sm:text-xs bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white px-2 sm:px-3 py-1 rounded-lg transition-colors flex items-center justify-center h-6 sm:h-7 min-w-[40px] sm:min-w-[50px] shadow-sm"
+              >
+                <span v-if="report.generating" class="animate-spin">⏳</span>
+                <span v-else class="leading-none">PDF</span>
+              </button>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
@@ -829,8 +872,10 @@ const platformDateTo = ref('');
 const reportDateFrom = ref('');
 const reportDateTo = ref('');
 
-// Variables de paginación para transacciones
+// Variables de paginación
 const currentTransactionPage = ref(1);
+const currentPaymentsPage = ref(1);
+const paymentsPerPage = 4;
 
 // ===== DATOS REACTIVOS CON VALORES POR DEFECTO =====
 const platformStats = reactive({
@@ -1206,26 +1251,42 @@ const mapApiStatusToFrontend = (apiStatus) => {
   }
 };
 
-const loadMembershipPayments = async () => {
+const loadMembershipPayments = async (page = 1) => {
   try {
-    const cacheKey = `membership-${selectedMonthPayments.value || 'all'}`;
+    const limit = paymentsPerPage;
+    const offset = (page - 1) * limit;
+    const cacheKey = `membership-${selectedMonthPayments.value || 'all'}-${page}-${limit}`;
     
-    if (paymentsCache.value[cacheKey]) {
-      const { data, stats } = paymentsCache.value[cacheKey];
+    // Usar caché solo si no hay filtro de mes
+    if (paymentsCache.value[cacheKey] && !selectedMonthPayments.value) {
+      const { data, stats, pagination: cachedPagination } = paymentsCache.value[cacheKey];
       membershipPayments.value = data || [];
+      
       if (stats) {
         monthlyStats.value.membership = stats;
       }
+      
+      if (cachedPagination) {
+        pagination.value = { ...cachedPagination };
+      }
+      
       return;
     }
     
-    let url = '/membresia';
+    // Construir URL con parámetros
+    const params = new URLSearchParams();
     
     if (selectedMonthPayments.value) {
-      const params = new URLSearchParams();
       params.append('month', selectedMonthPayments.value);
-      url += `?${params.toString()}`;
     }
+    
+    // Agregar parámetros de paginación
+    params.append('limit', limit);
+    params.append('offset', offset);
+    
+    const url = `/membresia?${params.toString()}`;
+    
+    isLoadingData.value = true;
     
     const response = await $fetch(url, {
       baseURL: config.public.apiBase,
@@ -1236,29 +1297,13 @@ const loadMembershipPayments = async () => {
       }
     });
     
-    if (response?.success && response.data) {
-      const transformedData = response.data.map(item => ({
-        ...item,
-        id: item.id_membresia,
-        status: mapApiStatusToFrontend(item.estado),
-        amount: item.monto || 0,
-        date: item.fecha,
-        plan: 'Membresía',
-        user: item.usuario?.nombre || 'Usuario desconocido'
-      }));
+    if (response?.data) {
+      const items = Array.isArray(response.data) ? response.data : [response.data];
       
-      membershipPayments.value = transformedData;
+      // Actualizar los datos
+      membershipPayments.value = items;
       
-      paymentsCache.value[cacheKey] = {
-        data: transformedData,
-        stats: response.estadisticas ? {
-          aprobados: response.estadisticas.aprobados || 0,
-          rechazados: response.estadisticas.rechazados || 0,
-          pendientes: response.estadisticas.pendientes || 0,
-          total: response.estadisticas.total || 0
-        } : null
-      };
-      
+      // Actualizar estadísticas
       if (response.estadisticas) {
         monthlyStats.value.membership = {
           aprobados: response.estadisticas.aprobados || 0,
@@ -1267,9 +1312,31 @@ const loadMembershipPayments = async () => {
           total: response.estadisticas.total || 0
         };
       }
+      
+      // Actualizar paginación
+      const totalItems = response.total || items.length;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+      
+      pagination.value = {
+        total: totalItems,
+        page: page,
+        totalPages: totalPages,
+        hasMore: (offset + items.length) < totalItems
+      };
+      
+      // Actualizar caché si no hay filtro de mes
+      if (!selectedMonthPayments.value) {
+        paymentsCache.value[cacheKey] = { 
+          data: [...items],
+          stats: response.estadisticas ? { ...response.estadisticas } : null,
+          pagination: { ...pagination.value }
+        };
+      }
     } else {
       membershipPayments.value = [];
-      paymentsCache.value[cacheKey] = { data: [], stats: null };
+      if (!selectedMonthPayments.value) {
+        paymentsCache.value[cacheKey] = { data: [], stats: null };
+      }
     }
   } catch (error) {
     console.error('Error al cargar pagos de membresía:', error);
@@ -1278,26 +1345,43 @@ const loadMembershipPayments = async () => {
   }
 };
 
-const loadVisitPayments = async () => {
+const loadVisitPayments = async (page = 1) => {
   try {
-    const cacheKey = `visits-${selectedMonthPayments.value || 'all'}`;
+    const limit = paymentsPerPage;
+    const offset = (page - 1) * limit;
+    const cacheKey = `visits-${selectedMonthPayments.value || 'all'}-${page}-${limit}`;
     
-    if (paymentsCache.value[cacheKey]) {
-      const { data, stats } = paymentsCache.value[cacheKey];
+    // Limpiar datos anteriores
+    visitPayments.value = [];
+    
+    // Usar caché solo si no hay filtro de mes
+    if (paymentsCache.value[cacheKey] && !selectedMonthPayments.value) {
+      const { data, stats, pagination: cachedPagination } = paymentsCache.value[cacheKey];
       visitPayments.value = data || [];
+      
       if (stats) {
         monthlyStats.value.visits = stats;
       }
+      
+      if (cachedPagination) {
+        pagination.value = { ...cachedPagination };
+      }
+      
       return;
     }
     
-    let url = '/pagovisita';
+    // Construir URL con parámetros
+    const params = new URLSearchParams();
     
     if (selectedMonthPayments.value) {
-      const params = new URLSearchParams();
       params.append('month', selectedMonthPayments.value);
-      url += `?${params.toString()}`;
     }
+    
+    // Agregar parámetros de paginación
+    params.append('limit', limit);
+    params.append('offset', offset);
+    
+    const url = `/pagovisita?${params.toString()}`;
     
     const response = await $fetch(url, {
       baseURL: config.public.apiBase,
@@ -1309,7 +1393,8 @@ const loadVisitPayments = async () => {
     });
     
     if (response?.success && response.data) {
-      const transformedData = response.data.map(item => ({
+      const items = Array.isArray(response.data) ? response.data : [response.data];
+      const transformedData = items.map(item => ({
         ...item,
         id: item.id_pagovisita,
         status: mapApiStatusToFrontend(item.estado),
@@ -1322,16 +1407,7 @@ const loadVisitPayments = async () => {
       
       visitPayments.value = transformedData;
       
-      paymentsCache.value[cacheKey] = {
-        data: transformedData,
-        stats: response.estadisticas ? {
-          aprobados: response.estadisticas.aprobados || 0,
-          rechazados: response.estadisticas.rechazados || 0,
-          pendientes: response.estadisticas.pendientes || 0,
-          total: response.estadisticas.total || 0
-        } : null
-      };
-      
+      // Actualizar estadísticas
       if (response.estadisticas) {
         monthlyStats.value.visits = {
           aprobados: response.estadisticas.aprobados || 0,
@@ -1340,9 +1416,31 @@ const loadVisitPayments = async () => {
           total: response.estadisticas.total || 0
         };
       }
+      
+      // Actualizar paginación
+      const totalItems = response.total || items.length;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+      
+      pagination.value = {
+        total: totalItems,
+        page: page,
+        totalPages: totalPages,
+        hasMore: (offset + items.length) < totalItems
+      };
+      
+      // Actualizar caché si no hay filtro de mes
+      if (!selectedMonthPayments.value) {
+        paymentsCache.value[cacheKey] = { 
+          data: [...transformedData],
+          stats: response.estadisticas ? { ...response.estadisticas } : null,
+          pagination: { ...pagination.value }
+        };
+      }
     } else {
       visitPayments.value = [];
-      paymentsCache.value[cacheKey] = { data: [], stats: null };
+      if (!selectedMonthPayments.value) {
+        paymentsCache.value[cacheKey] = { data: [], stats: null };
+      }
     }
   } catch (error) {
     console.error('Error al cargar pagos de visitas:', error);
@@ -1351,26 +1449,43 @@ const loadVisitPayments = async () => {
   }
 };
 
-const loadServicePayments = async () => {
+const loadServicePayments = async (page = 1) => {
   try {
-    const cacheKey = `services-${selectedMonthPayments.value || 'all'}`;
+    const limit = paymentsPerPage;
+    const offset = (page - 1) * limit;
+    const cacheKey = `services-${selectedMonthPayments.value || 'all'}-${page}-${limit}`;
     
-    if (paymentsCache.value[cacheKey]) {
-      const { data, stats } = paymentsCache.value[cacheKey];
+    // Limpiar datos anteriores
+    servicePayments.value = [];
+    
+    // Usar caché solo si no hay filtro de mes
+    if (paymentsCache.value[cacheKey] && !selectedMonthPayments.value) {
+      const { data, stats, pagination: cachedPagination } = paymentsCache.value[cacheKey];
       servicePayments.value = data || [];
+      
       if (stats) {
         monthlyStats.value.services = stats;
       }
+      
+      if (cachedPagination) {
+        pagination.value = { ...cachedPagination };
+      }
+      
       return;
     }
     
-    let url = '/cotizacion';
+    // Construir URL con parámetros
+    const params = new URLSearchParams();
     
     if (selectedMonthPayments.value) {
-      const params = new URLSearchParams();
       params.append('month', selectedMonthPayments.value);
-      url += `?${params.toString()}`;
     }
+    
+    // Agregar parámetros de paginación
+    params.append('limit', limit);
+    params.append('offset', offset);
+    
+    const url = `/cotizacion?${params.toString()}`;
     
     const response = await $fetch(url, {
       baseURL: config.public.apiBase,
@@ -1381,16 +1496,15 @@ const loadServicePayments = async () => {
       }
     });
     
-    if (response?.success && response.data) { 
+    if (response?.success && response.data) {
+      const items = Array.isArray(response.data) ? response.data : [response.data];
       
-      const transformedData = response.data.map(item => { 
-        
-        // Get the service name with a more reliable approach
+      const transformedData = items.map(item => { 
         const serviceName = (item.solicitud && item.solicitud.servicio && item.solicitud.servicio.nombre) 
           ? item.solicitud.servicio.nombre 
-          : 'Servicio (fallback)';
+          : 'Servicio';
         
-        const result = {
+        return {
           ...item,
           id: item.id_cotizacion,
           status: mapApiStatusToFrontend(item.estado),
@@ -1401,22 +1515,11 @@ const loadServicePayments = async () => {
           technician: item.solicitud?.tecnico?.nombre || 'Sin asignar',
           category: item.solicitud?.servicio?.categoria || 'general'
         };
-        
-        return result;
       });
       
       servicePayments.value = transformedData;
       
-      paymentsCache.value[cacheKey] = {
-        data: transformedData,
-        stats: response.estadisticas ? {
-          aprobados: response.estadisticas.aprobados || 0,
-          rechazados: response.estadisticas.rechazados || 0,
-          pendientes: response.estadisticas.pendientes || 0,
-          total: response.estadisticas.total || 0
-        } : null
-      };
-      
+      // Actualizar estadísticas
       if (response.estadisticas) {
         monthlyStats.value.services = {
           aprobados: response.estadisticas.aprobados || 0,
@@ -1425,9 +1528,31 @@ const loadServicePayments = async () => {
           total: response.estadisticas.total || 0
         };
       }
+      
+      // Actualizar paginación
+      const totalItems = response.total || items.length;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+      
+      pagination.value = {
+        total: totalItems,
+        page: page,
+        totalPages: totalPages,
+        hasMore: (offset + items.length) < totalItems
+      };
+      
+      // Actualizar caché si no hay filtro de mes
+      if (!selectedMonthPayments.value) {
+        paymentsCache.value[cacheKey] = { 
+          data: [...transformedData],
+          stats: response.estadisticas ? { ...response.estadisticas } : null,
+          pagination: { ...pagination.value }
+        };
+      }
     } else {
       servicePayments.value = [];
-      paymentsCache.value[cacheKey] = { data: [], stats: null };
+      if (!selectedMonthPayments.value) {
+        paymentsCache.value[cacheKey] = { data: [], stats: null };
+      }
     }
   } catch (error) {
     console.error('Error al cargar pagos de servicios:', error);
@@ -1436,26 +1561,43 @@ const loadServicePayments = async () => {
   }
 };
 
-const loadWithdrawals = async () => {
+const loadWithdrawals = async (page = 1) => {
   try {
-    const cacheKey = `withdrawals-${selectedMonthPayments.value || 'all'}`;
+    const limit = paymentsPerPage;
+    const offset = (page - 1) * limit;
+    const cacheKey = `withdrawals-${selectedMonthPayments.value || 'all'}-${page}-${limit}`;
     
-    if (paymentsCache.value[cacheKey]) {
-      const { data, stats } = paymentsCache.value[cacheKey];
+    // Limpiar datos anteriores
+    withdrawals.value = [];
+    
+    // Usar caché solo si no hay filtro de mes
+    if (paymentsCache.value[cacheKey] && !selectedMonthPayments.value) {
+      const { data, stats, pagination: cachedPagination } = paymentsCache.value[cacheKey];
       withdrawals.value = data || [];
+      
       if (stats) {
         monthlyStats.value.withdrawals = stats;
       }
+      
+      if (cachedPagination) {
+        pagination.value = { ...cachedPagination };
+      }
+      
       return;
     }
     
-    let url = '/movimientos/retiros';
+    // Construir URL con parámetros
+    const params = new URLSearchParams();
     
     if (selectedMonthPayments.value) {
-      const params = new URLSearchParams();
       params.append('month', selectedMonthPayments.value);
-      url += `?${params.toString()}`;
     }
+    
+    // Agregar parámetros de paginación
+    params.append('limit', limit);
+    params.append('offset', offset);
+    
+    const url = `/movimientos/retiros?${params.toString()}`;
     
     const response = await $fetch(url, {
       baseURL: config.public.apiBase,
@@ -1467,7 +1609,9 @@ const loadWithdrawals = async () => {
     });
     
     if (response?.movimientos) {
-      const transformedData = response.movimientos.map(item => ({
+      const items = Array.isArray(response.movimientos) ? response.movimientos : [response.movimientos];
+      
+      const transformedData = items.map(item => ({
         ...item,
         id: item.id_movimiento,
         status: mapApiStatusToFrontend(item.estado),
@@ -1479,16 +1623,7 @@ const loadWithdrawals = async () => {
       
       withdrawals.value = transformedData;
       
-      paymentsCache.value[cacheKey] = {
-        data: transformedData,
-        stats: response.estadisticas ? {
-          aprobados: response.estadisticas.aprobados || 0,
-          rechazados: response.estadisticas.rechazados || 0,
-          pendientes: response.estadisticas.pendientes || 0,
-          total: response.estadisticas.total || 0
-        } : null
-      };
-      
+      // Actualizar estadísticas
       if (response.estadisticas) {
         monthlyStats.value.withdrawals = {
           aprobados: response.estadisticas.aprobados || 0,
@@ -1497,9 +1632,31 @@ const loadWithdrawals = async () => {
           total: response.estadisticas.total || 0
         };
       }
+      
+      // Actualizar paginación
+      const totalItems = response.total || items.length;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+      
+      pagination.value = {
+        total: totalItems,
+        page: page,
+        totalPages: totalPages,
+        hasMore: (offset + items.length) < totalItems
+      };
+      
+      // Actualizar caché si no hay filtro de mes
+      if (!selectedMonthPayments.value) {
+        paymentsCache.value[cacheKey] = { 
+          data: [...transformedData],
+          stats: response.estadisticas ? { ...response.estadisticas } : null,
+          pagination: { ...pagination.value }
+        };
+      }
     } else {
       withdrawals.value = [];
-      paymentsCache.value[cacheKey] = { data: [], stats: null };
+      if (!selectedMonthPayments.value) {
+        paymentsCache.value[cacheKey] = { data: [], stats: null };
+      }
     }
   } catch (error) {
     console.error('Error al cargar retiros:', error);
@@ -1669,17 +1826,71 @@ const getRejectedItems = () => {
   }
 };
 
+// Obtener datos paginados de la pestaña actual
 const getCurrentTabData = () => {
   try {
+    let items = [];
+    
     switch (statusFilter.value) {
-      case 'pending': return getPendingItems();
-      case 'approved': return getApprovedItems();
-      case 'rejected': return getRejectedItems();
-      default: return getAllItems();
+      case 'pending': 
+        items = getPendingItems();
+        break;
+      case 'approved': 
+        items = getApprovedItems();
+        break;
+      case 'rejected': 
+        items = getRejectedItems();
+        break;
+      default: 
+        items = getAllItems();
+        break;
     }
+    
+    // Ya no necesitamos hacer paginación aquí ya que el backend la maneja
+    return items;
+    
   } catch (error) {
     console.error('Error obteniendo datos de pestaña actual:', error);
     return [];
+  }
+};
+
+// Datos de paginación de la API
+const pagination = ref({
+  total: 0,
+  page: 1,
+  totalPages: 1,
+  hasMore: false
+});
+
+// Obtener el total de páginas desde la API
+const getTotalPages = computed(() => pagination.value.totalPages || 1);
+
+// Navegar a la página anterior
+const previousPaymentsPage = () => {
+  if (currentPaymentsPage.value > 1) {
+    const prevPage = currentPaymentsPage.value - 1;
+    loadTabData(prevPage).then(() => {
+      // Desplazarse al principio de la lista después de cargar
+      const container = document.querySelector('.grid\\.grid-cols-2\\.gap-1\\.5');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+};
+
+// Navegar a la página siguiente
+const nextPaymentsPage = () => {
+  if (pagination.value.hasMore) {
+    const nextPage = currentPaymentsPage.value + 1;
+    loadTabData(nextPage).then(() => {
+      // Desplazarse al principio de la lista después de cargar
+      const container = document.querySelector('.grid\\.grid-cols-2\\.gap-1\\.5');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
   }
 };
 
@@ -1980,22 +2191,41 @@ const getServiceTypeIcon = (serviceType) => {
 };
 
 // ===== FUNCIONES DE DATOS SIN MOCK DATA =====
-const loadTabData = async () => {
+const loadTabData = async (page = 1) => {
   try {
+    // Actualizar el estado de carga
     isLoadingData.value = true;
     
+    // Actualizar la página actual
+    currentPaymentsPage.value = page;
+    
+    // Limpiar datos anteriores
+    membershipPayments.value = [];
+    visitPayments.value = [];
+    servicePayments.value = [];
+    withdrawals.value = [];
+    
+    // Resetear paginación
+    pagination.value = {
+      total: 0,
+      page: page,
+      totalPages: 1,
+      hasMore: false
+    };
+    
+    // Cargar datos según la pestaña activa
     switch (activeTab.value) {
       case 'membership':
-        await loadMembershipPayments();
+        await loadMembershipPayments(page);
         break;
       case 'visits':
-        await loadVisitPayments();
+        await loadVisitPayments(page);
         break;
       case 'services':
-        await loadServicePayments();
+        await loadServicePayments(page);
         break;
       case 'withdrawals':
-        await loadWithdrawals();
+        await loadWithdrawals(page);
         break;
     }
   } catch (error) {
@@ -2006,16 +2236,13 @@ const loadTabData = async () => {
   }
 };
 
-const setStatusFilter = async (filter) => {
-  try {
-    statusFilter.value = filter;
-    await nextTick();
-    if (getCurrentTabData().length === 0) {
-      await loadTabData();
-    }
-  } catch (error) {
-    console.error('Error estableciendo filtro de estado:', error);
-  }
+const setStatusFilter = (filter) => {
+  statusFilter.value = filter;
+  // Resetear a la primera página cuando se cambia el filtro
+  currentPaymentsPage.value = 1;
+  // Limpiar caché para forzar recarga de datos
+  paymentsCache.value = {};
+  loadTabData(1);
 };
 
 const setActiveTab = (tab) => {
@@ -2023,7 +2250,8 @@ const setActiveTab = (tab) => {
     if (activeTab.value === tab) return;
     activeTab.value = tab;
     statusFilter.value = 'all';
-    loadTabData();
+    currentPaymentsPage.value = 1; // Resetear a la primera página
+    loadTabData(1);
   } catch (error) {
     console.error('Error estableciendo pestaña activa:', error);
   }

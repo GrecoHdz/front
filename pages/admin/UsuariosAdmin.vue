@@ -53,7 +53,7 @@
                         <div class="w-3 h-3 border-2 border-white/50 border-t-transparent rounded-full animate-spin"></div>
                       </div>
                       <div v-else class="text-[12px] sm:text-base font-black">{{ stats.totalUsuarios }}</div>
-                      <div class="text-[11px] text-white/80">Usuarios</div>
+                      <div class="text-[11px] text-white/80">Usuarios Totales</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 text-center">
                       <div v-if="loadingStats" class="h-5 flex items-center justify-center">
