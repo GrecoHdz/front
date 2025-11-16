@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
     <!-- Header -->
     <HeadersHeaderConfigAdmin />
-
+    
    <!-- Toast Notification -->
     <Toast 
       v-if="toast.show"
@@ -19,7 +19,7 @@
       :message="'Cargando configuraciones...'"
     />
 
-    <!-- Main Content -->
+    <!-- Contenido Principal -->
     <div v-if="!isLoading" class="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 pb-10 sm:pb-32">
       
       <!-- Header Section -->
@@ -108,22 +108,7 @@
               </div>
             </div>
 
-            <!-- Comisión -->
-            <div>
-              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Comisión por Servicio
-              </label>
-              <div class="relative">
-                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">L.</span>
-                <input
-                  v-model.number="configuracionComision"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  class="w-full pl-8 pr-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                  placeholder="70.00">
-              </div>
-            </div>
+            <!-- Espacio para futuros campos de precios y tarifas -->
           </div>
         </div>
 
@@ -195,6 +180,24 @@
           </div>
 
           <div class="space-y-4 sm:space-y-5">
+            <!-- Comisión por Servicio -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Comisión por Servicio
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionComision"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full pl-4 pr-10 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="10.00">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+
             <!-- Descuento -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -248,7 +251,288 @@
           </div>
         </div>
 
-        <!-- Card 4: Gestión de Notificaciones -->
+        <!-- Card 4: Beneficios de Membresía -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 dark:bg-emerald-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">🎁</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  Beneficios de Membresía
+                </h3>
+                <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                  Administra los beneficios disponibles para miembros de HogarSeguro
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="mostrarModalNuevoBeneficio = true; cargarBeneficios()"
+              class="px-4 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors">
+              + Nuevo Beneficio
+            </button>
+          </div>
+
+          <!-- Filtros y búsqueda -->
+          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4">
+            <div class="relative flex-1 min-w-0">
+              <input
+                v-model="filtroBusquedaBeneficios"
+                type="text"
+                placeholder="Buscar beneficios..."
+                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm sm:text-base transition-all"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista de beneficios -->
+          <div class="space-y-3">
+            <div v-if="beneficiosCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+              <p>Cargando beneficios...</p>
+            </div>
+            
+            <div v-else-if="beneficiosFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <span class="text-4xl mb-2 block">🎁</span>
+              <p>No se encontraron beneficios</p>
+            </div>
+            
+            <div v-for="beneficio in beneficiosPaginados" :key="beneficio.id_beneficio" 
+                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-lg">🎁</span>
+                  <div>
+                    <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">{{ beneficio.tipo_beneficio }}</h5>
+                    <p class="text-[12px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                      {{ beneficio.descripcion || 'Sin descripción' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 px-2 py-1 rounded-full text-xs font-medium">
+                    Mes {{ beneficio.mes_requerido }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
+                <button 
+                  @click="editarBeneficio(beneficio)"
+                  class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Editar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="confirmarEliminarBeneficio(beneficio)"
+                  class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Eliminar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación para beneficios -->
+          <div v-if="beneficiosFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Página {{ paginacionBeneficios.paginaActual }} de {{ paginacionBeneficiosCalculada.totalPaginas }}
+              </div>
+              <div class="flex items-center space-x-1">
+                <button 
+                  @click="$event => cambiarPaginaBeneficios(paginacionBeneficios.paginaActual - 1, $event)" 
+                  :disabled="paginacionBeneficios.paginaActual === 1 || beneficiosCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {{ paginacionBeneficios.paginaActual }} / {{ paginacionBeneficiosCalculada.totalPaginas }}
+                </span>
+                <button 
+                  @click="$event => cambiarPaginaBeneficios(paginacionBeneficios.paginaActual + 1, $event)" 
+                  :disabled="paginacionBeneficios.paginaActual >= paginacionBeneficiosCalculada.totalPaginas || beneficiosCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Gestión de Servicios -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">🔧</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  Gestión de Servicios
+                </h3>
+                <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                  Administra los servicios disponibles en HogarSeguro
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="mostrarModalNuevoServicio = true; cargarServicios()"
+              class="px-4 py-2 text-sm bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors">
+              + Nuevo Servicio
+            </button>
+          </div>
+
+          <!-- Filtros y búsqueda -->
+          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4">
+            <div class="relative flex-1 min-w-0">
+              <input
+                v-model="filtroBusqueda"
+                type="text"
+                placeholder="Buscar..."
+                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base transition-all"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            <select 
+              v-model="filtroEstado"
+              class="w-32 sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base transition-all">
+              <option value="">Todos</option>
+              <option value="1">Activos</option>
+              <option value="0">Inactivos</option>
+            </select>
+          </div>
+
+          <!-- Lista de servicios -->
+          <div class="space-y-3">
+            <div v-if="serviciosCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <p>Cargando servicios...</p>
+            </div>
+            
+            <div v-else-if="serviciosFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <span class="text-4xl mb-2 block">🔧</span>
+              <p>No se encontraron servicios</p>
+            </div>
+            
+            <div v-for="servicio in serviciosPaginados" :key="servicio.id_servicio" 
+                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-lg">🔧</span>
+                  <div>
+                    <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">{{ servicio.nombre }}</h5>
+                    <p class="text-[12px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                      {{ servicio.descripcion || 'Sin descripción' }}
+                    </p>
+                  </div>
+                </div>
+                <span 
+                  :class="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': servicio.estado,
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !servicio.estado
+                  }" 
+                  class="px-2 py-1 rounded-full text-xs font-medium">
+                  {{ servicio.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+              
+              <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
+                <button 
+                  @click="editarServicio(servicio)"
+                  class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Editar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                
+                <button 
+                  v-if="servicio.estado"
+                  @click="confirmarCambioEstado(servicio, false)"
+                  class="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Desactivar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </button>
+                
+                <button 
+                  v-else
+                  @click="confirmarCambioEstado(servicio, true)"
+                  class="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Activar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="confirmarEliminarServicio(servicio)"
+                  class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Eliminar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación -->
+          <div v-if="serviciosFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Página {{ paginacion.paginaActual }} de {{ paginacionCalculada.totalPaginas }}
+              </div>
+              <div class="flex items-center space-x-1">
+                <button 
+                  @click="$event => cambiarPagina(paginacion.paginaActual - 1, $event)" 
+                  :disabled="paginacion.paginaActual === 1 || serviciosCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                  :class="{ 'cursor-not-allowed': paginacion.paginaActual === 1 }">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {{ paginacion.paginaActual }} / {{ paginacionCalculada.totalPaginas }}
+                </span>
+                <button 
+                  @click="$event => cambiarPagina(paginacion.paginaActual + 1, $event)" 
+                  :disabled="paginacion.paginaActual >= paginacionCalculada.totalPaginas || serviciosCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                  :class="{ 'cursor-not-allowed': paginacion.paginaActual >= paginacionCalculada.totalPaginas }">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6: Gestión de Notificaciones -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="flex items-center">
@@ -517,12 +801,217 @@
     </div>
     
     <!-- Footer -->
-    <FootersFooterAdmin />
+    <FootersFooterAdmin /> 
+
+    <!-- Modal para crear/editar servicio -->
+    <div v-if="mostrarModalNuevoServicio" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+              {{ servicioEditando ? 'Editar Servicio' : 'Nuevo Servicio' }}
+            </h3>
+            <button @click="cerrarModalServicio" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+              <span class="sr-only">Cerrar</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <form @submit.prevent="guardarServicio">
+            <div class="space-y-4">
+              <div>
+                <label for="nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nombre del servicio <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="nombre"
+                  v-model="formServicio.nombre"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Ej: Reparación eléctrica">
+              </div>
+              
+              <div>
+                <label for="descripcion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  id="descripcion"
+                  v-model="formServicio.descripcion"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Descripción detallada del servicio"></textarea>
+              </div>
+              
+              <div class="flex items-center">
+                <input
+                  id="estado"
+                  v-model="formServicio.estado"
+                  type="checkbox"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700">
+                <label for="estado" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  Activo
+                </label>
+              </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+              <button
+                type="button"
+                @click="cerrarModalServicio"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                :disabled="guardandoServicio"
+                class="inline-flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span v-if="guardandoServicio" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Guardando...
+                </span>
+                <span v-else>
+                  {{ servicioEditando ? 'Actualizar' : 'Crear' }} servicio
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para crear/editar beneficio -->
+    <div v-if="mostrarModalNuevoBeneficio" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+              {{ beneficioEditando ? 'Editar Beneficio' : 'Nuevo Beneficio' }}
+            </h3>
+            <button @click="cerrarModalBeneficio" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+              <span class="sr-only">Cerrar</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <form @submit.prevent="guardarBeneficio">
+            <div class="space-y-4">
+              <div>
+                <label for="mes_requerido" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Mes requerido <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="mes_requerido"
+                  v-model.number="formBeneficio.mes_requerido"
+                  type="number"
+                  min="1"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="1">
+              </div>
+
+              <div>
+                <label for="tipo_beneficio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tipo de beneficio <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="tipo_beneficio"
+                  v-model="formBeneficio.tipo_beneficio"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Ej: Visita técnica gratis">
+              </div>
+              
+              <div>
+                <label for="descripcion_beneficio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Descripción <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="descripcion_beneficio"
+                  v-model="formBeneficio.descripcion"
+                  rows="3"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Descripción detallada del beneficio"></textarea>
+              </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+              <button
+                type="button"
+                @click="cerrarModalBeneficio"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                :disabled="guardandoBeneficio"
+                class="inline-flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span v-if="guardandoBeneficio" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Guardando...
+                </span>
+                <span v-else>
+                  {{ beneficioEditando ? 'Actualizar' : 'Crear' }} beneficio
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div v-if="mostrarModalConfirmacion" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900 mb-4">
+            <svg class="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ tituloConfirmacion }}</h3>
+          <div class="mt-2">
+            <p class="text-sm text-gray-500 dark:text-gray-300">
+              {{ mensajeConfirmacion }}
+            </p>
+          </div>
+          <div class="mt-5 flex justify-center space-x-3">
+            <button
+              type="button"
+              @click="mostrarModalConfirmacion = false"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              @click="ejecutarAccionConfirmada"
+              class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store'
 
 // ===== CONFIGURACIÓN =====
@@ -585,6 +1074,60 @@ const isSendingNotification = ref(false)
 const mostrarModalConfirmacionEliminar = ref(false)
 const notificacionAEliminar = ref(null)
 const mostrarModalConfirmacionEliminarLeidas = ref(false)
+const mostrarModalConfirmacion = ref(false)
+const accionConfirmar = ref(null)
+const servicioSeleccionado = ref(null)
+const mensajeConfirmacion = ref('')
+const tituloConfirmacion = ref('')
+
+// Estados para gestión de servicios
+const servicios = ref([]);
+const serviciosCargando = ref(false);
+const servicioEditando = ref(null);
+const mostrarModalNuevoServicio = ref(false);
+const guardandoServicio = ref(false);
+const formServicio = ref({
+  nombre: '',
+  descripcion: '',
+  estado: true
+});
+const filtroBusqueda = ref('')
+const filtroEstado = ref('')
+
+// Estados para gestión de beneficios
+const beneficios = ref([]);
+const beneficiosCargando = ref(false);
+const beneficioEditando = ref(null);
+const mostrarModalNuevoBeneficio = ref(false);
+const guardandoBeneficio = ref(false);
+const formBeneficio = ref({
+  mes_requerido: 1,
+  tipo_beneficio: '',
+  descripcion: ''
+});
+const filtroBusquedaBeneficios = ref('')
+
+// Paginación
+const paginacion = ref({
+  paginaActual: 1,
+  porPagina: 3, // Mostrar solo 3 elementos por página
+  total: 0,
+  totalPaginas: 1,
+  paginas: [],
+  desde: 0,
+  hasta: 0
+})
+
+// Paginación para beneficios
+const paginacionBeneficios = ref({
+  paginaActual: 1,
+  porPagina: 3,
+  total: 0,
+  totalPaginas: 1,
+  paginas: [],
+  desde: 0,
+  hasta: 0
+})
 
 // ===== COMPUTED PARA DETECTAR CAMBIOS =====
 const hayChanges = computed(() => {
@@ -604,6 +1147,131 @@ const puedeEnviar = computed(() => {
   if (tipoEnvio.value === 'rol') return !!nombreRolDestino.value
   if (tipoEnvio.value === 'global') return true
   return false
+})
+
+// Computed para servicios filtrados (sin paginación)
+const serviciosFiltrados = computed(() => {
+  let resultado = [...servicios.value]
+  
+  // Aplicar filtro de búsqueda
+  if (filtroBusqueda.value) {
+    const busqueda = filtroBusqueda.value.toLowerCase()
+    resultado = resultado.filter(servicio => 
+      servicio.nombre.toLowerCase().includes(busqueda) || 
+      (servicio.descripcion && servicio.descripcion.toLowerCase().includes(busqueda))
+    )
+  }
+  
+  // Aplicar filtro de estado
+  if (filtroEstado.value !== '') {
+    const estadoFiltro = filtroEstado.value === '1'
+    resultado = resultado.filter(servicio => servicio.estado === estadoFiltro)
+  }
+  
+  return resultado
+})
+
+// Computed para beneficios filtrados
+const beneficiosFiltrados = computed(() => {
+  let resultado = [...beneficios.value]
+  
+  // Aplicar filtro de búsqueda
+  if (filtroBusquedaBeneficios.value) {
+    const busqueda = filtroBusquedaBeneficios.value.toLowerCase()
+    resultado = resultado.filter(beneficio => 
+      beneficio.tipo_beneficio.toLowerCase().includes(busqueda) || 
+      (beneficio.descripcion && beneficio.descripcion.toLowerCase().includes(busqueda))
+    )
+  }
+  
+  return resultado
+})
+
+// Computed para la paginación
+const paginacionCalculada = computed(() => {
+  const total = serviciosFiltrados.value.length
+  const totalPaginas = Math.ceil(total / paginacion.value.porPagina) || 1
+  const paginaActual = Math.min(paginacion.value.paginaActual, totalPaginas || 1)
+  
+  // Calcular índices para la paginación
+  const inicio = (paginaActual - 1) * paginacion.value.porPagina
+  const fin = inicio + paginacion.value.porPagina
+  
+  // Calcular páginas para la navegación
+  let paginas = []
+  if (totalPaginas > 0) {
+    let paginaInicial = Math.max(1, paginaActual - 2)
+    if (totalPaginas - paginaActual < 2) {
+      paginaInicial = Math.max(1, totalPaginas - 4)
+    }
+    paginas = Array.from(
+      { length: Math.min(5, totalPaginas) },
+      (_, i) => Math.min(paginaInicial + i, totalPaginas)
+    ).filter((pagina, index, array) => !index || pagina > array[index - 1])
+  }
+  
+  return {
+    total,
+    totalPaginas,
+    paginaActual,
+    desde: total > 0 ? inicio + 1 : 0,
+    hasta: Math.min(fin, total),
+    paginas
+  }
+})
+
+// Computed para la paginación de beneficios
+const paginacionBeneficiosCalculada = computed(() => {
+  const total = beneficiosFiltrados.value.length
+  const totalPaginas = Math.ceil(total / paginacionBeneficios.value.porPagina) || 1
+  const paginaActual = Math.min(paginacionBeneficios.value.paginaActual, totalPaginas || 1)
+  
+  const inicio = (paginaActual - 1) * paginacionBeneficios.value.porPagina
+  const fin = inicio + paginacionBeneficios.value.porPagina
+  
+  let paginas = []
+  if (totalPaginas > 0) {
+    let paginaInicial = Math.max(1, paginaActual - 2)
+    if (totalPaginas - paginaActual < 2) {
+      paginaInicial = Math.max(1, totalPaginas - 4)
+    }
+    paginas = Array.from(
+      { length: Math.min(5, totalPaginas) },
+      (_, i) => Math.min(paginaInicial + i, totalPaginas)
+    ).filter((pagina, index, array) => !index || pagina > array[index - 1])
+  }
+  
+  return {
+    total,
+    totalPaginas,
+    paginaActual,
+    desde: total > 0 ? inicio + 1 : 0,
+    hasta: Math.min(fin, total),
+    paginas
+  }
+})
+
+// Servicios paginados
+const serviciosPaginados = computed(() => {
+  const inicio = (paginacionCalculada.value.paginaActual - 1) * paginacion.value.porPagina
+  const fin = inicio + paginacion.value.porPagina
+  return serviciosFiltrados.value.slice(inicio, fin)
+})
+
+// Beneficios paginados
+const beneficiosPaginados = computed(() => {
+  const inicio = (paginacionBeneficiosCalculada.value.paginaActual - 1) * paginacionBeneficios.value.porPagina
+  const fin = inicio + paginacionBeneficios.value.porPagina
+  return beneficiosFiltrados.value.slice(inicio, fin)
+})
+
+// Watchers para reiniciar la paginación cuando cambian los filtros
+watch([filtroBusqueda, filtroEstado], () => {
+  paginacion.value.paginaActual = 1
+})
+
+watch([filtroBusquedaBeneficios], () => {
+  paginacionBeneficios.value.paginaActual = 1
 })
 
 // ===== TOAST NOTIFICATION =====
@@ -740,6 +1408,7 @@ const guardarConfiguraciones = async () => {
     await cargarConfiguraciones()
     
     showToastMessage('Configuraciones guardadas exitosamente', 'success')
+    
   } catch (error) {
     console.error('Error al guardar configuraciones:', error)
     showToastMessage('Error al guardar las configuraciones', 'error')
@@ -820,6 +1489,225 @@ const cargarConfiguraciones = async () => {
   } finally {
     isLoading.value = false;
   }
+}
+
+// ===== FUNCIONES PARA BENEFICIOS =====
+const cargarBeneficios = async () => {
+  beneficiosCargando.value = true;
+  try {
+    const response = await $fetch('/membresiabeneficios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (response && response.beneficios) {
+      beneficios.value = response.beneficios.map(beneficio => ({
+        ...beneficio,
+        id_beneficio: beneficio.id_beneficio || beneficio.id
+      }));
+      console.log('Beneficios cargados:', beneficios.value);
+    } else {
+      showToastMessage('Error al cargar los beneficios', 'error');
+    }
+  } catch (error) {
+    console.error('Error al cargar beneficios:', error);
+    showToastMessage('Error al cargar los beneficios', 'error');
+  } finally {
+    beneficiosCargando.value = false;
+  }
+}
+
+const editarBeneficio = (beneficio) => {
+  console.log('Editando beneficio:', beneficio);
+  // Primero cerramos el modal si está abierto
+  mostrarModalNuevoBeneficio.value = false;
+  
+  // Usamos nextTick para asegurarnos que el modal se cierre antes de abrirlo de nuevo
+  nextTick(() => {
+    beneficioEditando.value = beneficio.id_beneficio;
+    formBeneficio.value = {
+      mes_requerido: beneficio.mes_requerido,
+      tipo_beneficio: beneficio.tipo_beneficio,
+      descripcion: beneficio.descripcion
+    };
+    // Abrimos el modal después de actualizar los datos
+    mostrarModalNuevoBeneficio.value = true;
+    console.log('Modal de edición abierto para ID:', beneficioEditando.value);
+  });
+}
+
+const cerrarModalBeneficio = () => {
+  console.log('Cerrando modal de beneficio');
+  mostrarModalNuevoBeneficio.value = false;
+  // Usamos setTimeout para limpiar los datos después de que se cierre la animación del modal
+  setTimeout(() => {
+    beneficioEditando.value = null;
+    formBeneficio.value = {
+      mes_requerido: 1,
+      tipo_beneficio: '',
+      descripcion: ''
+    };
+    console.log('Datos del formulario reiniciados');
+  }, 300);
+}
+
+const crearBeneficio = async () => {
+  try {
+    console.log('=== Creando nuevo beneficio ===');
+    const url = '/membresiabeneficios';
+    const method = 'POST';
+    
+    const response = await $fetch(url, {
+      method,
+      baseURL: config.public.apiBase,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        mes_requerido: formBeneficio.value.mes_requerido,
+        tipo_beneficio: formBeneficio.value.tipo_beneficio,
+        descripcion: formBeneficio.value.descripcion
+      })
+    });
+
+    console.log('Beneficio creado:', response);
+    showToastMessage('Beneficio creado correctamente', 'success');
+    return true;
+  } catch (error) {
+    console.error('Error al crear beneficio:', error);
+    const errorMessage = error.data?.message || 'Error al crear el beneficio. Por favor, inténtalo de nuevo.';
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+};
+
+const actualizarBeneficio = async () => {
+  try {
+    if (!beneficioEditando.value) {
+      throw new Error('No se ha especificado el beneficio a actualizar');
+    }
+
+    console.log(`=== Actualizando beneficio ID: ${beneficioEditando.value} ===`);
+    const url = `/membresiabeneficios/${beneficioEditando.value}`;
+    
+    const response = await $fetch(url, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`,
+        'X-HTTP-Method-Override': 'PUT'
+      },
+      body: JSON.stringify({
+        mes_requerido: formBeneficio.value.mes_requerido,
+        tipo_beneficio: formBeneficio.value.tipo_beneficio,
+        descripcion: formBeneficio.value.descripcion,
+        _method: 'PUT' // Para compatibilidad con Laravel
+      })
+    });
+
+    console.log('Beneficio actualizado:', response);
+    showToastMessage('Beneficio actualizado correctamente', 'success');
+    return true;
+  } catch (error) {
+    console.error('Error al actualizar beneficio:', error);
+    const errorMessage = error.data?.message || 'Error al actualizar el beneficio. Por favor, inténtalo de nuevo.';
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+};
+
+const guardarBeneficio = async () => {
+  guardandoBeneficio.value = true;
+  
+  try {
+    const esEdicion = !!beneficioEditando.value;
+    
+    // Llamar a la función correspondiente
+    const resultado = esEdicion 
+      ? await actualizarBeneficio() 
+      : await crearBeneficio();
+    
+    if (resultado) {
+      await cargarBeneficios();
+      cerrarModalBeneficio();
+    }
+    
+    return resultado;
+  } catch (error) {
+    console.error('Error en guardarBeneficio:', error);
+    showToastMessage('Ocurrió un error inesperado', 'error');
+    return false;
+  } finally {
+    guardandoBeneficio.value = false;
+  }
+}
+
+const confirmarEliminarBeneficio = (beneficio) => {
+  servicioSeleccionado.value = beneficio.id_beneficio;
+  tituloConfirmacion.value = 'Eliminar Beneficio';
+  mensajeConfirmacion.value = `¿Estás seguro de que deseas eliminar el beneficio "${beneficio.tipo_beneficio}"? Esta acción no se puede deshacer.`;
+  accionConfirmar.value = () => eliminarBeneficio(beneficio.id_beneficio);
+  mostrarModalConfirmacion.value = true;
+}
+
+const eliminarBeneficio = async (beneficioId) => {
+  if (!beneficioId) {
+    console.error('ID de beneficio no válido');
+    showToastMessage('Error: No se pudo identificar el beneficio a eliminar', 'error');
+    return false;
+  }
+  
+  try {
+    const response = await $fetch(`/membresiabeneficios/${beneficioId}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response.success) {
+      showToastMessage('Beneficio eliminado correctamente', 'success');
+      await cargarBeneficios();
+      return true;
+    } else {
+      throw new Error(response.message || 'Error al eliminar el beneficio');
+    }
+  } catch (error) {
+    console.error('Error al eliminar beneficio:', error);
+    const errorMessage = error.data?.message || error.message || 'Error al eliminar el beneficio';
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+}
+
+const cambiarPaginaBeneficios = (nuevaPagina, event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  if (nuevaPagina < 1 || nuevaPagina > paginacionBeneficiosCalculada.value.totalPaginas) {
+    return false;
+  }
+  
+  paginacionBeneficios.value.paginaActual = nuevaPagina;
+  
+  const beneficiosContainer = document.querySelector('.space-y-3');
+  if (beneficiosContainer) {
+    beneficiosContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  return false;
 }
 
 // ===== FUNCIONES PARA NOTIFICACIONES =====
@@ -1021,6 +1909,299 @@ const eliminarNotificacionesLeidas = async () => {
   }
 }
 
+// ===== FUNCIONES PARA GESTIÓN DE SERVICIOS =====
+
+// Mostrar confirmación para eliminar servicio
+function confirmarEliminarServicio(servicio) {
+  servicioSeleccionado.value = servicio.id_servicio;
+  tituloConfirmacion.value = 'Eliminar Servicio';
+  mensajeConfirmacion.value = `¿Estás seguro de que deseas eliminar el servicio "${servicio.nombre}"? Esta acción no se puede deshacer.`;
+  accionConfirmar.value = () => eliminarServicio(servicio.id_servicio);
+  mostrarModalConfirmacion.value = true;
+}
+
+// Eliminar un servicio
+async function eliminarServicio(servicioId) {
+  if (!servicioId) {
+    console.error('ID de servicio no válido');
+    showToastMessage('Error: No se pudo identificar el servicio a eliminar', 'error');
+    return false;
+  }
+  
+  try {
+    const auth = useAuthStore();
+    
+    const response = await $fetch(`/servicios/${servicioId}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response.success) {
+      showToastMessage('Servicio eliminado correctamente', 'success');
+      await cargarServicios();
+      return true;
+    } else {
+      throw new Error(response.message || 'Error al eliminar el servicio');
+    }
+  } catch (error) {
+    console.error('Error al eliminar servicio:', error);
+    const errorMessage = error.data?.message || error.message || 'Error al eliminar el servicio';
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+}
+
+// Cargar lista de servicios
+async function cargarServicios() {
+  let data;
+  try {
+    serviciosCargando.value = true;
+    const auth = useAuthStore()
+    
+    if (!auth.token) {
+      throw new Error('No se encontró el token de autenticación');
+    }
+    
+    const response = await $fetch('/servicios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (!response) {
+      throw new Error('La respuesta del servidor está vacía');
+    }
+    
+    data = response;
+    
+    if (!Array.isArray(data)) {
+      console.warn('Se esperaba un arreglo de servicios, se recibió:', data);
+      data = [];
+    }
+    
+    servicios.value = data.map(servicio => ({
+      ...servicio,
+      // Asegurarse de que el estado sea booleano
+      estado: Boolean(servicio.estado)
+    }));
+    
+    return data;
+  } catch (error) {
+    console.error('Error en cargarServicios:', {
+      error: error.message,
+      response: data,
+      stack: error.stack
+    });
+    showToastMessage('Error al cargar los servicios', 'error');
+    throw error; // Relanzar el error para que pueda ser manejado por el llamador
+  } finally {
+    serviciosCargando.value = false;
+  }
+}
+
+// Abrir modal para nuevo servicio
+function nuevoServicio() {
+  servicioEditando.value = null
+  formServicio.value = {
+    nombre: '',
+    descripcion: '',
+    estado: true
+  }
+  mostrarModalNuevoServicio.value = true
+}
+
+// Abrir modal para editar servicio
+function editarServicio(servicio) {
+  servicioEditando.value = servicio.id_servicio
+  formServicio.value = {
+    nombre: servicio.nombre,
+    descripcion: servicio.descripcion || '',
+    estado: servicio.estado
+  }
+  mostrarModalNuevoServicio.value = true
+}
+
+// Cerrar modal de servicio
+function cerrarModalServicio() {
+  mostrarModalNuevoServicio.value = false
+  servicioEditando.value = null
+}
+
+// Guardar o actualizar servicio
+async function guardarServicio() {
+  try {
+    guardandoServicio.value = true;
+    const auth = useAuthStore();
+    
+    const url = servicioEditando.value 
+      ? `/servicios/${servicioEditando.value}`
+      : '/servicios';
+    
+    const method = servicioEditando.value ? 'PUT' : 'POST';
+    
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        nombre: formServicio.value.nombre,
+        descripcion: formServicio.value.descripcion || null,
+        estado: formServicio.value.estado ? 1 : 0
+      })
+    });
+
+    // Usar el mensaje del backend si está disponible
+    const successMessage = response?.message || 
+      (servicioEditando.value ? 'Servicio actualizado correctamente' : 'Servicio creado correctamente');
+    
+    showToastMessage(successMessage, 'success');
+    
+    await cargarServicios();
+    cerrarModalServicio();
+    
+    return true;
+    
+  } catch (error) {
+    console.error('Error al guardar servicio:', error);
+    
+    // Mostrar mensaje de error más descriptivo
+    const errorMessage = error.data?.message || 
+                       error.response?._data?.message || 
+                       'Error al guardar el servicio. Por favor, inténtalo de nuevo.';
+    
+    showToastMessage(errorMessage, 'error');
+    return false;
+  } finally {
+    guardandoServicio.value = false;
+  }
+}
+
+// Mostrar confirmación para cambiar estado
+// Función para ejecutar la acción confirmada
+async function ejecutarAccionConfirmada() {
+  if (accionConfirmar.value) {
+    try {
+      await accionConfirmar.value();
+      showToastMessage('Operación realizada con éxito', 'success');
+    } catch (error) {
+      console.error('Error al ejecutar la acción:', error);
+      showToastMessage('Ocurrió un error al realizar la operación', 'error');
+    } finally {
+      mostrarModalConfirmacion.value = false;
+      accionConfirmar.value = null;
+      servicioSeleccionado.value = null;
+    }
+  }
+}
+
+function confirmarCambioEstado(servicio, activar) {
+  servicioSeleccionado.value = servicio.id_servicio;
+  tituloConfirmacion.value = activar ? 'Activar Servicio' : 'Desactivar Servicio';
+  mensajeConfirmacion.value = `¿Estás seguro de que deseas ${activar ? 'activar' : 'desactivar'} el servicio "${servicio.nombre}"?`;
+  accionConfirmar.value = () => cambiarEstadoServicio(servicio.id_servicio, activar);
+  mostrarModalConfirmacion.value = true;
+}
+
+// Cambiar estado de un servicio
+async function cambiarEstadoServicio(servicioId, activar) {
+  console.log('Cambiando estado del servicio. ID:', servicioId, 'Nuevo estado:', activar);
+  
+  if (servicioId === undefined || servicioId === null || servicioId === '') {
+    console.error('ID de servicio no válido (undefined/null/vacío):', servicioId);
+    showToastMessage('Error: No se pudo identificar el servicio seleccionado', 'error');
+    return false;
+  }
+  
+  try {
+    const auth = useAuthStore();
+    
+    // Realizar la petición al servidor
+    const response = await $fetch(`/servicios/${servicioId}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        estado: activar ? 1 : 0
+      })
+    });
+    
+    // Usar el mensaje del backend si está disponible
+    const successMessage = response?.message || 
+      `Servicio ${activar ? 'activado' : 'desactivado'} correctamente`;
+    
+    showToastMessage(successMessage, 'success');
+    
+    // Actualizar el estado local
+    const index = servicios.value.findIndex(s => s.id_servicio === servicioId);
+    if (index !== -1) {
+      // Crear un nuevo array para asegurar la reactividad
+      servicios.value = [
+        ...servicios.value.slice(0, index),
+        { 
+          ...servicios.value[index], 
+          estado: activar,
+          // Asegurar que se actualice la fecha de actualización si existe
+          updatedAt: new Date().toISOString()
+        },
+        ...servicios.value.slice(index + 1)
+      ];
+    }
+    
+    return true;
+    
+  } catch (error) {
+    console.error('Error al cambiar estado del servicio:', error);
+    
+    // Mostrar mensaje de error detallado
+    const errorMessage = error.data?.message || 
+                        error.response?._data?.message || 
+                        'Error al cambiar el estado del servicio';
+    
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+}
+
+// Cambiar de página
+function cambiarPagina(nuevaPagina, event) {
+  // Prevenir el comportamiento por defecto del botón
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  // Validar que la página esté dentro de los límites
+  if (nuevaPagina < 1 || nuevaPagina > paginacionCalculada.value.totalPaginas) {
+    return false;
+  }
+  
+  // Actualizar solo la página actual en el estado reactivo
+  paginacion.value.paginaActual = nuevaPagina;
+  
+  // Desplazamiento suave al principio de la lista de servicios
+  const serviciosContainer = document.querySelector('.space-y-3');
+  if (serviciosContainer) {
+    serviciosContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  return false;
+}
+
 // ===== UTILIDADES =====
 const formatearFecha = (fecha) => {
   return new Date(fecha).toLocaleString('es-ES', {
@@ -1035,13 +2216,32 @@ const formatearFecha = (fecha) => {
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
-    await cargarConfiguraciones();
-    await cargarNotificaciones();
+    await Promise.all([
+      cargarConfiguraciones().catch(error => {
+        console.error('Error al cargar configuraciones:', error);
+        showToastMessage('Error al cargar las configuraciones', 'error');
+      }),
+      cargarNotificaciones().catch(error => {
+        console.error('Error al cargar notificaciones:', error);
+        showToastMessage('Error al cargar las notificaciones', 'error');
+      }),
+      cargarServicios().catch(error => {
+        console.error('Error en cargarServicios:', error);
+        showToastMessage('Error al cargar los servicios', 'error');
+      }),
+      cargarBeneficios().catch(error => {
+        console.error('Error al cargar beneficios:', error);
+        showToastMessage('Error al cargar los beneficios', 'error');
+      })
+    ]);
   } catch (error) {
-    console.error('Error en la inicialización:', error);
-    showToastMessage('Error al inicializar la configuración', 'error');
+    console.error('Error inesperado al cargar datos iniciales:', error);
+    showToastMessage('Error inesperado al cargar los datos', 'error');
+  } finally {
+    isLoading.value = false;
   }
 });
+
 </script>
 
 <style scoped> 

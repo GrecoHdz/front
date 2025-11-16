@@ -157,14 +157,14 @@
           Ver Servicio
         </button>
         <button
-          v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente'"
+          v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente' || selectedPayment.estado === 'pagado'"
           @click="rejectPayment(selectedPayment.id)"
           class="px-3 py-2 font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
         >
           Rechazar
         </button>
         <button
-          v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente'"
+          v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente' || selectedPayment.estado === 'pagado'"
           @click="approvePayment(selectedPayment.id)"
           class="px-3 py-2 font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
         >
@@ -617,23 +617,23 @@
               </button>
             </div>
       
-            <!-- Resumen mensual integrado (CONTADORES FIJOS) -->
+            <!-- Resumen mensual integrado (CONTADORES DINÁMICOS) -->
             <div class="p-2">
               <div class="grid grid-cols-4 gap-2 text-center">
                 <div>
-                  <div class="text-sm font-bold text-green-600 dark:text-green-400">{{ initialStats.aprobados || 0 }}</div>
+                  <div class="text-sm font-bold text-green-600 dark:text-green-400">{{ totalMonthlyStats[activeTab]?.aprobados || 0 }}</div>
                   <div class="text-[9px] text-gray-600 dark:text-gray-400">Aprobados</div>
                 </div>
                 <div>
-                  <div class="text-sm font-bold text-red-600 dark:text-red-400">{{ initialStats.rechazados || 0 }}</div>
+                  <div class="text-sm font-bold text-red-600 dark:text-red-400">{{ totalMonthlyStats[activeTab]?.rechazados || 0 }}</div>
                   <div class="text-[9px] text-gray-600 dark:text-gray-400">Rechazados</div>
                 </div>
                 <div>
-                  <div class="text-sm font-bold text-yellow-600 dark:text-yellow-400">{{ initialStats.pendientes || 0 }}</div>
+                  <div class="text-sm font-bold text-yellow-600 dark:text-yellow-400">{{ totalMonthlyStats[activeTab]?.pendientes || 0 }}</div>
                   <div class="text-[9px] text-gray-600 dark:text-gray-400">Pendientes</div>
                 </div>
                 <div>
-                  <div class="text-[12px] font-bold text-blue-600 dark:text-blue-400">L. {{ formatCurrency(initialStats.totalMoney || 0) }}</div>
+                  <div class="text-[12px] font-bold text-blue-600 dark:text-blue-400">L. {{ formatCurrency(totalMonthlyStats[activeTab]?.total || 0) }}</div>
                   <div class="text-[8px] text-gray-600 dark:text-gray-400">Total</div>
                 </div>
               </div>
@@ -646,16 +646,18 @@
               <button 
                 v-for="filter in [
                   { id: 'all', label: '📋Todos', 
-                    count: initialStats.total || 0, 
+                    count: (totalMonthlyStats[activeTab]?.aprobados || 0) + 
+                           (totalMonthlyStats[activeTab]?.rechazados || 0) + 
+                           (totalMonthlyStats[activeTab]?.pendientes || 0), 
                     color: 'blue' },
                   { id: 'pending', label: '⏳Pendientes', 
-                    count: initialStats.pendientes || 0, 
+                    count: totalMonthlyStats[activeTab]?.pendientes || 0, 
                     color: 'yellow' },
                   { id: 'approved', label: '✅Aprobados', 
-                    count: initialStats.aprobados || 0, 
+                    count: totalMonthlyStats[activeTab]?.aprobados || 0, 
                     color: 'green' },
                   { id: 'rejected', label: '❌Rechazados', 
-                    count: initialStats.rechazados || 0, 
+                    count: totalMonthlyStats[activeTab]?.rechazados || 0, 
                     color: 'red' }
                 ]"
                 :key="filter.id"
@@ -949,10 +951,14 @@ const mapApiStatusToFrontend = (apiStatus) => {
   try {
     if (!apiStatus) return 'Pendiente';
     
+    // Convertir a minúsculas para manejo insensible a mayúsculas
+    const statusLower = String(apiStatus).toLowerCase().trim();
+    
     const statusMap = {
       'pendiente': 'Pendiente',
       'aprobado': 'Aprobado', 
-      'pagado': 'Aprobado',
+      'aceptado': 'Aprobado',
+      'pagado': 'Pendiente',
       'rechazado': 'Rechazado',
       'confirmado': 'Aprobado',
       'activa': 'Aprobado',
@@ -960,11 +966,11 @@ const mapApiStatusToFrontend = (apiStatus) => {
       'rechazada': 'Rechazado',
       'expirada': 'Rechazado',
       'cancelado': 'Rechazado',
-      'Pendiente': 'Pendiente',
-      'Completado': 'Aprobado'
+      'pendiente': 'Pendiente',
+      'completado': 'Aprobado'
     };
     
-    return statusMap[apiStatus] || 'Pendiente';
+    return statusMap[statusLower] || 'Pendiente';
   } catch (error) {
     console.error('Error mapeando estado:', error);
     return 'Pendiente';
@@ -1166,7 +1172,7 @@ const loadVisitPayments = async (page = 1) => {
     if (statusFilter.value && statusFilter.value !== 'all') {
       const estadoMap = {
         'pending': 'Pendiente',
-        'approved': 'Aprobado',
+        'approved': 'Aceptado',
         'rejected': 'Rechazado'
       };
       const estado = estadoMap[statusFilter.value] || statusFilter.value;
@@ -1307,7 +1313,7 @@ const loadServicePayments = async (page = 1) => {
     // Agregar filtro de estado
     if (statusFilter.value && statusFilter.value !== 'all') {
       const estadoMap = {
-        'pending': 'pendiente',
+        'pending': 'pagado',
         'approved': 'confirmado',
         'rejected': 'rechazado'
       };
@@ -1977,8 +1983,9 @@ const getStatusBadgeClass = (status) => {
   try {
     const statusLower = (status || '').toLowerCase();
     switch (statusLower) {
-      case 'pagado': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+      case 'pagado': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
       case 'aprobado': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+      case 'aceptado': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
       case 'confirmado': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
       case 'completado': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
       case 'activa': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
@@ -2010,8 +2017,8 @@ const getStatusColor = (status, tipo) => {
     }
     
     switch (statusLower) {
-      case 'completado': 
-      case 'confirmado':
+      case 'pagado': return 'text-yellow-500';
+      case 'aceptado': return 'text-green-500';
       case 'aprobado': return 'text-green-500';
       case 'pendiente': return 'text-yellow-500';
       case 'rechazado': return 'text-red-500';
@@ -2034,6 +2041,8 @@ const getItemCardClass = (status) => {
     switch (status) {
       case 'Aprobado': return baseClass + ' border-l-4 border-l-green-500';
       case 'Rechazado': return baseClass + ' border-l-4 border-l-red-500';
+      case 'Aceptado': return baseClass + ' border-l-4 border-l-green-500';
+      case 'Pagado': return baseClass + ' border-l-4 border-l-yellow-500';
       case 'Pendiente':
       default: return baseClass + ' border-l-4 border-l-yellow-500';
     }
@@ -2047,6 +2056,8 @@ const getItemIconClass = (status) => {
   try {
     switch (status) {
       case 'Aprobado': return 'bg-green-100 dark:bg-green-900/30';
+      case 'Aceptado': return 'bg-green-100 dark:bg-green-900/30';
+      case 'Pagado': return 'bg-yellow-100 dark:bg-yellow-900/30';
       case 'Rechazado': return 'bg-red-100 dark:bg-red-900/30'; 
       case 'Pendiente':
       default: return 'bg-yellow-100 dark:bg-yellow-900/30';
@@ -2061,6 +2072,8 @@ const getItemIconTextClass = (status) => {
   try {
     switch (status) {
       case 'Aprobado': return 'text-green-600 dark:text-green-400';
+      case 'Aceptado': return 'text-green-600 dark:text-green-400';
+      case 'Pagado': return 'text-yellow-600 dark:text-yellow-400';
       case 'Rechazado': return 'text-red-600 dark:text-red-400';
       case 'Pendiente':
       default: return 'text-yellow-600 dark:text-yellow-400';
@@ -2088,15 +2101,30 @@ const getItemIcon = () => {
 
 const getItemAmountClass = (status) => {
   try {
-    switch (status) {
-      case 'Aprobado': return 'text-green-600 dark:text-green-400';
-      case 'Rechazado': return 'text-red-600 dark:text-red-400';
-      case 'Pendiente':
-      default: return 'text-yellow-600 dark:text-yellow-400';
+    if (!status) return 'text-gray-600 dark:text-gray-400';
+    
+    // Manejar tanto estados en mayúsculas como en minúsculas
+    const statusStr = String(status).toLowerCase().trim();
+    
+    switch (statusStr) {
+      case 'aprobado':
+      case 'aceptado':
+      case 'aprobada':
+      case 'aceptada':
+        return 'text-green-600 dark:text-green-400';
+      case 'rechazado':
+      case 'rechazada':
+        return 'text-red-600 dark:text-red-400';
+      case 'pendiente':
+      case 'pagado':
+      case 'pendiente de pago':
+        return 'text-yellow-600 dark:text-yellow-400';
+      default:
+        return 'text-gray-600 dark:text-gray-400';
     }
   } catch (error) {
     console.error('Error obteniendo clase de monto:', error);
-    return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-gray-600 dark:text-gray-400';
   }
 };
 
@@ -2748,24 +2776,144 @@ const generarReporteServiciosDetallado = async (doc, data) => {
   // Implementación del reporte de servicios...
 };
 
-// ===== FUNCIONES DUMMY PARA MODAL =====
-const approvePayment = (id) => {
-  try { 
-    showToast('Pago aprobado correctamente', 'success');
+// ===== FUNCIONES DE APROBACION o RECHAZO DE PAGOS =====
+const approvePayment = async (id) => {
+  try {
+    const payment = selectedPayment.value;
+    let response;
+
+    const config = useRuntimeConfig();
+    const auth = useAuthStore();
+    
+    const headers = {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${auth.token}`,
+      'Content-Type': 'application/json'
+    };
+
+    switch (activeTab.value) {
+      case 'membership':
+        response = await $fetch(`/membresia/${payment.id_membresia || payment.id}`, {
+          baseURL: config.public.apiBase,
+          method: 'PUT',
+          headers,
+          body: { estado: 'activa' }
+        });
+        break;
+
+      case 'visits':
+        response = await $fetch(`/pagovisita/${payment.id_solicitud || payment.id}`, {
+          baseURL: config.public.apiBase,
+          method: 'PUT',
+          headers,
+          body: { estado: 'aceptado' }   
+        });
+        break;
+
+      case 'services':
+        response = await $fetch(`/pagoservicio/aceptar`, {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers,
+          body: { id_solicitud: payment.id_solicitud || payment.id, id_cotizacion: payment.id_cotizacion || payment.id }
+        });
+        break;
+
+      case 'withdrawals':
+        response = await $fetch(`/movimientos/${payment.id_movimiento || payment.id}`, {
+          baseURL: config.public.apiBase,
+          method: 'PUT',
+          headers,
+          body: { estado: 'completado' }
+        });
+        break;
+    }
+
     closeDetailsModal();
+    showToast('Pago aprobado correctamente', 'success');
+
+    const currentPage = currentPaymentsPage.value;
+    const cacheKey = `${activeTab.value}-${selectedMonthPayments.value || 'all'}-${statusFilter.value || 'all'}-${currentPage}-${paymentsPerPage}`;
+    
+    if (paymentsCache.value[cacheKey]) delete paymentsCache.value[cacheKey];
+
+    await loadTabData(currentPage);
+    await updatePlatformStats();
+
   } catch (error) {
     console.error('Error aprobando pago:', error);
-    showToast('Error al aprobar el pago', 'error');
+    showToast(error.response?._data?.message || 'Error al aprobar el pago', 'error');
   }
 };
 
-const rejectPayment = (id) => {
-  try { 
-    showToast('Pago rechazado correctamente', 'success');
+
+const rejectPayment = async (id) => {
+  try {
+    const payment = selectedPayment.value;
+    let response;
+
+    const config = useRuntimeConfig();
+    const auth = useAuthStore();
+    
+    const headers = {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${auth.token}`,
+      'Content-Type': 'application/json'
+    };
+
+    switch (activeTab.value) {
+      case 'membership':
+        response = await $fetch(`/membresia/${payment.id_membresia || payment.id}`, {
+          baseURL: config.public.apiBase,
+          method: 'PUT',
+          headers,
+          body: { estado: 'rechazada' }
+        });
+        break;
+
+      case 'visits':
+        response = await $fetch(`/pagovisita/${payment.id_solicitud || payment.id}`, {
+          baseURL: config.public.apiBase,
+          method: 'PUT',
+          headers,
+          body: { estado: 'rechazado' }
+        });
+        break;
+
+      case 'services':
+        response = await $fetch(`/pagoservicio/denegar`, {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers,
+          body: { id_solicitud: payment.id_solicitud || payment.id, 
+                  id_cotizacion: payment.id_cotizacion || payment.id,
+                  id_usuario: payment.id_usuario || payment.id }
+        });
+        break;
+
+      case 'withdrawals':
+        response = await $fetch(`/movimientos/${payment.id_movimiento || payment.id}`, {
+          baseURL: config.public.apiBase,
+          method: 'PUT',
+          headers,
+          body: { estado: 'rechazado' }
+        });
+        break;
+    }
+
     closeDetailsModal();
+    showToast('Pago rechazado correctamente', 'success');
+
+    const currentPage = currentPaymentsPage.value;
+    const cacheKey = `${activeTab.value}-${selectedMonthPayments.value || 'all'}-${statusFilter.value || 'all'}-${currentPage}-${paymentsPerPage}`;
+
+    if (paymentsCache.value[cacheKey]) delete paymentsCache.value[cacheKey];
+
+    await loadTabData(currentPage);
+
   } catch (error) {
     console.error('Error rechazando pago:', error);
-    showToast('Error al rechazar el pago', 'error');
+    showToast(error.response?._data?.message || 'Error al rechazar el pago', 'error');
   }
 };
 

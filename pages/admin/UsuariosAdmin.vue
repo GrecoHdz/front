@@ -2645,6 +2645,8 @@ const formatDate = (dateString) => {
 const getStatusColor = (status) => {
   const colors = {
     activo: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    pagado: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+    aceptado: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
     inactivo: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
     deshabilitado: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
   }
