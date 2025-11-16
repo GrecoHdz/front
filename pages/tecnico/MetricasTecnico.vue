@@ -15,22 +15,8 @@
       :loading="isLoading"
     />
 
-    <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-      <div class="max-w-xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2 sm:space-x-3">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg sm:rounded-xl flex items-center justify-center">
-              <span class="text-white text-lg sm:text-xl">📊</span>
-            </div>
-            <div>
-              <h1 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Mis Métricas</h1>
-              <p class="text-xs text-gray-600 dark:text-gray-400">{{ currentUser?.nombre || 'Técnico' }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- Header con notificaciones -->
+    <HeadersHeaderMetricasTecnico />
 
     <!-- Content Container -->
     <div class="max-w-xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen pb-20">
@@ -476,11 +462,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
-import { Chart, registerables } from 'chart.js'
+import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { useAuthStore } from '~/middleware/auth.store'
-import Toast from '~/components/ui/Toast.vue'
+import { useAuthStore } from '~/middleware/auth.store';
+import Toast from '~/components/ui/Toast.vue';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 
 // SEO and Meta

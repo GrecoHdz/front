@@ -369,13 +369,9 @@ const fetchServices = async () => {
   try {
     loading.value = true
     
-    const userId = auth.user?.id_usuario
+    const userCookieValue = useCookie('user').value
     
-    if (!userId) {
-      throw new Error('No se pudo obtener el ID del usuario')
-    }
-    
-    const response = await $fetch(`/solicitudservicio/tecnico/${userId}`, {
+    const response = await $fetch(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {

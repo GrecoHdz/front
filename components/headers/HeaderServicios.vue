@@ -25,6 +25,10 @@
             </div>
           </div>
           <div class="flex items-center space-x-2">
+            <!-- Botón de notificaciones -->
+            <NotificationsDropdown />
+            
+            <!-- Botón de filtros -->
             <button @click="toggleFilters" 
                     class="p-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-lg hover:bg-white/30 transition-all duration-300">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,6 +108,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 
 const props = defineProps({
   totalServices: {

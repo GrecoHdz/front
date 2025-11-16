@@ -30,9 +30,11 @@
               </div>
             </div>
           </div>
-          <div class="flex items-center space-x-2"> 
+          <div class="flex items-center space-x-2">
+            <!-- Botón de notificaciones -->
+            <NotificationsDropdown />
             
-            <!-- Filter Toggle Button -->
+            <!-- Botón de filtros -->
             <button @click="toggleFilters" 
                     class="p-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-lg hover:bg-white/30 transition-all duration-300"
                     :class="{ 'bg-white/30': showFilters }">
@@ -117,6 +119,7 @@
 <script setup>
 import { defineProps, defineEmits, computed } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store';
+import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 
 // Filtros de servicio
 const serviceFilters = [

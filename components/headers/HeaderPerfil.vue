@@ -11,7 +11,12 @@
             </button>
             <h1 class="text-2xl font-black text-gray-900 dark:text-white">Perfil</h1>
           </div>
+          
+          <div class="flex items-center space-x-2">
+            <!-- Botón de notificaciones -->
+            <NotificationsDropdown />
+          </div>
         </div>
       </div>
     </div>
-</template> 
+</template>

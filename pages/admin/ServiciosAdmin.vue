@@ -612,8 +612,13 @@
               <div 
                 v-for="tech in paginatedTechnicians" 
                 :key="tech.id_usuario"
-                @click="selectTechnician(tech)"
-                class="group p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer transition-colors"
+                @click="tech.estado === 'activo' ? selectTechnician(tech) : null"
+                :class="[
+                  'group p-2.5 rounded-lg border transition-colors',
+                  tech.estado === 'activo' 
+                    ? 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer'
+                    : 'bg-gray-100/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-70'
+                ]"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1 min-w-0">
@@ -622,9 +627,16 @@
                   </div>
                   <div class="flex items-center space-x-2 ml-2">
                     <span 
+                      v-if="tech.estado === 'activo'"
                       class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                     >
                       Disponible
+                    </span>
+                    <span 
+                      v-else
+                      class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                    >
+                      Inactivo
                     </span>
                     <span class="text-[10px] sm:text-xs text-gray-500 flex items-center whitespace-nowrap">
                       <svg class="w-3 h-3 text-yellow-400 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -1907,7 +1919,7 @@ const verifyPayment = async (isApproved) => {
     }
     
     // Obtener el ID del usuario - intentar múltiples ubicaciones posibles
-    const idUsuario = serviceToPayment.value?.cliente?.id_cliente ||
+    const idUsuario = serviceToPayment.value?.cliente?.id_cliente 
                       
     
     console.log('🔍 ID de usuario encontrado:', idUsuario)
@@ -1935,7 +1947,12 @@ const verifyPayment = async (isApproved) => {
     if (isApproved) {
       // APROBAR PAGO
       const endpoint = isVisitPayment ? '/pagovisita/confirmar' : '/pagoservicio/aceptar'
-      const paymentPayload = { id_solicitud: solicitudId }
+      const paymentPayload = { 
+        id_solicitud: solicitudId,
+        id_cotizacion: cotizacionId
+      }
+      
+      console.log('📦 Payload de aprobación:', paymentPayload)
       
       console.log(`📤 Enviando aprobación de pago de ${isVisitPayment ? 'visita' : 'servicio'}:`, {
         endpoint,
@@ -1959,8 +1976,9 @@ const verifyPayment = async (isApproved) => {
       
     } else {
       // RECHAZAR PAGO
+      const id_usuario = serviceToPayment.value?.cliente?.id_cliente 
       const endpoint = isVisitPayment ? '/pagovisita/denegar' : '/pagoservicio/denegar'
-      const denyPayload = { id_solicitud: solicitudId }
+      const denyPayload = { id_solicitud: solicitudId, id_cotizacion: cotizacionId, id_usuario }
       
       console.log(`📤 Enviando rechazo de pago de ${isVisitPayment ? 'visita' : 'servicio'}:`, {
         endpoint,

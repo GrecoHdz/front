@@ -624,7 +624,7 @@
     enter-from-class="modal-enter-from"
     leave-to-class="modal-leave-to">
 
-    <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+    <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-3">
 
       <!-- Backdrop con animación -->
       <Transition
@@ -649,7 +649,7 @@
         leave-to-class="modal-content-leave-to">
         <div 
           v-if="showPaymentModal"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs h-[calc(100vh-2rem)] sm:max-h-[90vh] overflow-y-auto relative z-10"
           @click.stop
         >
           <!-- Encabezado del modal -->
@@ -2714,6 +2714,7 @@ const acceptQuotation = async () => {
     } 
     
     const montoTecnico = montoManoObra * factorComision;
+    const montoCliente = montoManoObra - montoTecnico;
     const fechaActual = new Date().toISOString().split('T')[0];
     console.log('Monto para el técnico (comisión):', montoTecnico);
 
@@ -2721,7 +2722,7 @@ const acceptQuotation = async () => {
       id_usuario: idTecnico,
       id_cotizacion: cotizacionId,
       tipo: 'ingreso',
-      monto: Number(montoTecnico.toFixed(2)), 
+      monto: Number(montoCliente.toFixed(2)), 
       fecha: fechaActual,
       estado: 'pendiente'
     };
@@ -2959,10 +2960,14 @@ const processPayment = async () => {
     monto_credito: Number(parseFloat(membresiaProgreso.value?.monto_credito_mostrado || 0)),
     num_comprobante: comprobante.value,
     monto_manodeobra: totalAPagar.value,
-    descuento_membresia: Math.round(parseFloat(quotationData.value?.monto_manodeobra || 0) * (discountPercentage.value || 0) * 100) / 100,
     id_usuario: auth.user.id_usuario,
     nombre: auth.user.nombre
   };
+  
+  // Solo agregar el descuento si está activo
+  if (shouldShowDiscountBenefit.value) {
+    payload.descuento_membresia = Math.round(parseFloat(quotationData.value?.monto_manodeobra || 0) * (discountPercentage.value || 0) * 100) / 100;
+  }
 
   console.log('🛰️ Enviando al backend /pagoservicio/procesar:', payload);
 
@@ -3085,28 +3090,44 @@ const totalAPagar = ref(0)
 const calcularTotal = () => {
   const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
   
+  console.log('=== CÁLCULO DE TOTAL ===');
+  console.log('Mano de obra:', montoManodeObra);
+  
   // Solo aplicar descuento si se cumple el beneficio
   const montoDescuento = shouldShowDiscountBenefit.value 
     ? montoManodeObra * discountPercentage.value 
     : 0
     
+  console.log('¿Aplica descuento?', shouldShowDiscountBenefit.value);
+  console.log('Porcentaje de descuento:', discountPercentage.value);
+  console.log('Monto de descuento:', montoDescuento);
+  
   // Calcular el monto después del descuento
   const montoDespuesDescuento = montoManodeObra - montoDescuento
+  console.log('Monto después de descuento:', montoDespuesDescuento);
     
   // Solo aplicar crédito si se cumple el beneficio
   const creditoDisponible = shouldShowCreditBenefit.value 
     ? parseFloat(membresiaProgreso.value?.monto_credito || 0)
     : 0
     
+  console.log('¿Aplica crédito?', shouldShowCreditBenefit.value);
+  console.log('Crédito disponible:', creditoDisponible);
+    
   // El crédito aplicado no puede ser mayor al monto después del descuento
   const montoCreditoAplicado = Math.min(creditoDisponible, montoDespuesDescuento)
+  console.log('Crédito a aplicar:', montoCreditoAplicado);
   
   // Actualizar el monto de crédito mostrado
   if (membresiaProgreso.value) {
     membresiaProgreso.value.monto_credito_mostrado = montoCreditoAplicado
   }
+  
+  const total = Math.max(0, montoDespuesDescuento - montoCreditoAplicado);
+  console.log('TOTAL A PAGAR:', total);
+  console.log('=======================');
     
-  return Math.max(0, montoDespuesDescuento - montoCreditoAplicado)
+  return total;
 }
 
 // Actualizar el total cuando cambien los datos relevantes

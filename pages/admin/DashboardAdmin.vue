@@ -259,62 +259,56 @@
             <section class="px-2 sm:px-4 mb-3 sm:mb-5">
               <div class="flex items-center justify-between mb-2 sm:mb-3">
                 <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Actividad Reciente</h2>
-                <button @click="fetchNotifications" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline flex items-center">
+                <button @click="refreshPendingItems" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline flex items-center">
                   <span class="mr-1">🔄</span> Actualizar
                 </button>
               </div>
               <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md border border-gray-100 dark:border-gray-700">
-                <div v-if="isLoadingNotifications" class="text-center py-4 sm:py-5">
-                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Cargando notificaciones...</p>
-                </div>
-                <div v-else-if="notifications.length === 0" class="text-center py-4 sm:py-5">
+                <div v-if="recentActivities.length === 0" class="text-center py-4 sm:py-5">
                   <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 dark:bg-gray-700 rounded-lg mx-auto mb-1.5 flex items-center justify-center">
                     <span class="text-lg">📋</span>
                   </div>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">No hay notificaciones recientes</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">No hay actividad reciente</p>
                 </div>
 
                 <div v-else class="space-y-2">
-                  <div v-for="notification in displayedNotifications" :key="notification.id"
+                  <div v-for="activity in displayedActivities" :key="activity.id"
                        class="flex items-start space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                         :class="{'bg-green-100 dark:bg-green-900/30': notification.leido, 'bg-blue-100 dark:bg-blue-900/30': !notification.leido}">
-                      <span :class="{'text-green-600 dark:text-green-400': notification.leido, 'text-blue-600 dark:text-blue-400': !notification.leido}" class="text-sm sm:text-base">
-                        {{ notification.leido ? '📭' : '📨' }}
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-blue-100 dark:bg-blue-900/30">
+                      <span class="text-blue-600 dark:text-blue-400 text-sm sm:text-base">
+                        {{ activity.icon || '📝' }}
                       </span>
                     </div>
                     <div class="flex-1 min-w-0">
-                      <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">{{ notification.titulo }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ notification.nombreUsuario || 'Sistema' }}</p>
+                      <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">{{ activity.title }}</p>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {{ getRelativeTime(notification.fechaLeido || notification.fecha) }}
+                        {{ getRelativeTime(activity.date) }}
                       </p>
                     </div>
                   </div>
 
-                  <!-- Paginación Notificaciones -->
-                  <div v-if="totalNotificationPages > 1" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                  <!-- Paginación Actividades -->
+                  <div v-if="totalActivityPages > 1" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
                     <div class="flex items-center justify-between">
                       <div class="text-xs text-gray-500 dark:text-gray-400">
-                        Página {{ currentNotificationPage }} de {{ totalNotificationPages }}
+                        Página {{ currentActivityPage }} de {{ totalActivityPages }}
                       </div>
                       <div class="flex items-center space-x-1">
                         <button 
-                          @click="prevNotificationPage"
-                          :disabled="currentNotificationPage === 1"
+                          @click="prevActivityPage"
+                          :disabled="currentActivityPage === 1"
                           class="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-50"
-                          :class="{'hover:bg-gray-100 dark:hover:bg-gray-700': currentNotificationPage > 1}"
+                          :class="{'hover:bg-gray-100 dark:hover:bg-gray-700': currentActivityPage > 1}"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                           </svg>
                         </button>
                         <button 
-                          @click="nextNotificationPage"
-                          :disabled="currentNotificationPage === totalNotificationPages"
+                          @click="nextActivityPage"
+                          :disabled="currentActivityPage === totalActivityPages"
                           class="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-50"
-                          :class="{'hover:bg-gray-100 dark:hover:bg-gray-700': currentNotificationPage < totalNotificationPages}"
+                          :class="{'hover:bg-gray-100 dark:hover:bg-gray-700': currentActivityPage < totalActivityPages}"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -1048,61 +1042,7 @@ const nextActivityPage = () => {
   }
 };
 
-// Notificaciones
-const notifications = ref([]);
-const isLoadingNotifications = ref(false);
-const notificationsPerPage = 5;
-const currentNotificationPage = ref(1);
-
-// Obtener notificaciones
-const fetchNotifications = async () => {
-  try {
-    isLoadingNotifications.value = true;
-    const response = await $fetch('/notificaciones', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
-    });
-    
-    if (response.success) {
-      notifications.value = response.data;
-    } else {
-      showError('Error al cargar las notificaciones');
-    }
-  } catch (error) {
-    console.error('Error al obtener notificaciones:', error);
-    showError('Error al cargar las notificaciones');
-  } finally {
-    isLoadingNotifications.value = false;
-  }
-};
-
-// Computed properties para la paginación de notificaciones
-const totalNotificationPages = computed(() => {
-  return Math.ceil(notifications.value.length / notificationsPerPage);
-});
-
-const displayedNotifications = computed(() => {
-  const start = (currentNotificationPage.value - 1) * notificationsPerPage;
-  const end = start + notificationsPerPage;
-  return notifications.value.slice(0, 10); // Mostrar solo las primeras 10 notificaciones
-});
-
-// Funciones de paginación
-const prevNotificationPage = () => {
-  if (currentNotificationPage.value > 1) {
-    currentNotificationPage.value--;
-  }
-};
-
-const nextNotificationPage = () => {
-  if (currentNotificationPage.value < totalNotificationPages.value) {
-    currentNotificationPage.value++;
-  }
-};
+// Las notificaciones ahora se manejan a través del componente NotificationsDropdown
 
 // Técnicos disponibles
 const availableTechnicians = ref([
@@ -1437,12 +1377,54 @@ const viewServiceDetails = (serviceId) => {
 }
 
 const refreshPendingItems = async () => {
+  isLoading.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    showSuccess('Datos actualizados')
+    const config = useRuntimeConfig()
+    const auth = useAuthStore()
+    
+    const response = await $fetch(`${config.public.apiBase}/notificaciones`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (response.success && Array.isArray(response.data)) {
+      // Mapear la respuesta al formato esperado por el componente
+      recentActivities.value = response.data.map(notif => ({
+        id: notif.id || Math.random().toString(36).substr(2, 9),
+        title: notif.titulo,
+        date: notif.fecha,
+        read: notif.leido === 1,
+        readDate: notif.fechaLeido,
+        user: notif.nombreUsuario,
+        icon: getNotificationIcon(notif.titulo)
+      }))
+      
+      // Actualizar contadores de notificaciones no leídas si es necesario
+      const unreadCount = recentActivities.value.filter(a => !a.read).length
+      // Aquí podrías actualizar algún store o estado global con el contador
+      
+      showSuccess('Actividades actualizadas')
+    } else {
+      throw new Error('Formato de respuesta inesperado')
+    }
   } catch (error) {
-    showError('Error al actualizar los datos')
+    console.error('Error al cargar notificaciones:', error)
+    showError('Error al cargar las actividades recientes')
+  } finally {
+    isLoading.value = false
   }
+}
+
+// Función auxiliar para obtener iconos según el tipo de notificación
+const getNotificationIcon = (title) => {
+  if (title.includes('asignado')) return '👨‍💼'
+  if (title.includes('Cotización')) return '📄'
+  if (title.includes('Aceptada')) return '✅'
+  if (title.includes('Rechazada')) return '❌'
+  return '📝'
 }
 
 // Marcar ticket como resuelto
@@ -1543,8 +1525,8 @@ const initializeDashboard = async () => {
       // Cargar estadísticas u otros datos necesarios
       await fetchStatistics()
       
-      // Cargar notificaciones
-      await fetchNotifications()
+      // Cargar actividades recientes
+      await refreshPendingItems()
       
     } catch (error) {
       console.error('Error al cargar el dashboard:', error)

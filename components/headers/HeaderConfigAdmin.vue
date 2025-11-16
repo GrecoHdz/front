@@ -1,6 +1,15 @@
 <template>
+  <!-- Toast Notifications -->
+  <Toast 
+    v-if="toast.show"
+    :message="toast.message"
+    :type="toast.type"
+    :duration="toast.duration"
+    @close="toast.show = false"
+  />
+  
+  <!-- Mobile Header -->
   <header class="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 overflow-hidden">
-    <!-- Patrón de cuadrícula sutil -->
     <div class="absolute inset-0 opacity-10">
       <svg class="w-full h-full" viewBox="0 0 100 100">
         <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
@@ -20,41 +29,52 @@
           </div>
           <div>
             <h1 class="text-lg font-black text-white">Configuración</h1>
-            <p class="text-emerald-100 text-xs">Panel de administración</p>
+            <p class="text-emerald-100 text-xs">Panel de configuración</p>
           </div>
         </div>
         
-        <!-- Botón de notificaciones -->
-        <button 
-          @click="$emit('toggle-notifications')" 
-          class="relative px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-semibold rounded-lg hover:bg-white/30 transition-all duration-300 flex items-center space-x-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          <span>Notificaciones</span>
-          <span v-if="unreadCount > 0" 
-                class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
-            {{ unreadCount > 9 ? '9+' : unreadCount }}
-          </span>
-        </button>
+        <!-- Componente de notificaciones -->
+        <NotificationsDropdown 
+          @notification-click="onNotificationClick"
+        />
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
+import { ref, reactive } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store';
-import { computed } from 'vue';
+import Toast from '~/components/ui/Toast.vue';
+import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 
 const auth = useAuthStore();
-const user = computed(() => auth.user || {});
 
-defineProps({
-  unreadCount: {
-    type: Number,
-    default: 0
-  }
+// Toast state
+const toast = reactive({
+  show: false,
+  message: '',
+  type: 'success',
+  duration: 3000
 });
 
-defineEmits(['toggle-notifications']);
+// Mostrar notificación toast
+const showToast = (message, type = 'success', duration = 3000) => {
+  toast.message = message;
+  toast.type = type;
+  toast.duration = duration;
+  toast.show = true;
+};
+
+// Manejar clic en notificación
+const onNotificationClick = (notification) => {
+  // Aquí puedes manejar la navegación o acciones al hacer clic en una notificación
+  console.log('Notificación clickeada:', notification);
+  
+  // Ejemplo de cómo podrías manejar diferentes tipos de notificaciones
+  if (notification.tipo === 'configuracion') {
+    // Navegar a la página de configuración relevante
+    // navigateTo(`/configuracion/${notification.id_referencia}`);
+  }
+};
 </script>

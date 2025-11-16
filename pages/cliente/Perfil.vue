@@ -753,14 +753,10 @@ const userCookie = useCookie('user')
 // Obtener datos del usuario desde la API
 const fetchUserData = async () => {
   try {
-    const userId = auth.user?.id_usuario
-    if (!userId) {
-      console.error('No se pudo obtener el ID del usuario')
-      return false
-    }
-     
+    const userCookie = useCookie('user')
+    const userData = userCookie.value
     
-    const data = await $fetch(`/usuarios/id/${userId}`, {
+    const data = await $fetch(`/usuarios/id/${userData.id_usuario}`, {
       baseURL: config.public.apiBase,
       credentials: 'include',
       headers: {
@@ -777,7 +773,7 @@ const fetchUserData = async () => {
     const safeUserData = {
       ...data,
       nombre: data.nombre || 'Invitado',
-      id_usuario: data.id_usuario || userId,
+      id_usuario: data.id_usuario || userData.id_usuario,
       id_rol: data.id_rol || null,
       id_ciudad: data.id_ciudad || data.ciudad?.id_ciudad || null,
       ciudad: data.ciudad?.nombre_ciudad || data.ciudad || '',

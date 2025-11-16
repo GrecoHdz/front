@@ -1407,86 +1407,69 @@
           <!-- Header -->
           <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
             <div class="flex items-center justify-between">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
               <h3 class="text-sm font-black text-gray-900 dark:text-white">Cambiar Contraseña</h3>
-              <button 
-                @click="showPasswordModal = false"
-                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-              >
+              <button @click="showPasswordModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
           </div>
           
           <!-- Contenido -->
-          <div class="p-3">
-            <form @submit.prevent="updateUserPassword" class="space-y-3">
-              <!-- Campo de usuario oculto para accesibilidad -->
-              <div class="sr-only">
-                <label for="username">Nombre de usuario</label>
-                <input 
-                  id="username"
-                  type="text" 
-                  :value="userForm.email"
-                  name="username"
-                  autocomplete="username"
-                  class="hidden"
-                  aria-hidden="true"
-                >
-              </div>
-              
-              <div class="space-y-1">
-                <label for="newPassword" class="block text-xs font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
-                <input 
+          <div class="p-4">
+            <form @submit.prevent="updatePassword" class="space-y-4">
+              <div>
+                <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nueva Contraseña</label>
+                <input
                   id="newPassword"
                   v-model="newPassword"
-                  type="password" 
+                  type="password"
                   class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-sm"
                   placeholder="Ingresa la nueva contraseña"
-                  autocomplete="new-password"
                   required
                   minlength="6"
                 >
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Mínimo 6 caracteres</p>
               </div>
               
-              <div class="space-y-1">
-                <label for="confirmPassword" class="block text-xs font-medium text-gray-700 dark:text-gray-300">Confirmar Nueva Contraseña</label>
-                <input 
+              <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirmar Contraseña</label>
+                <input
                   id="confirmPassword"
                   v-model="confirmPassword"
-                  type="password" 
+                  type="password"
                   class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-sm"
                   placeholder="Confirma la nueva contraseña"
-                  autocomplete="new-password"
                   required
                   :class="{'border-red-500 dark:border-red-400': passwordMismatch}"
                 >
-                <p v-if="passwordMismatch" class="text-xs text-red-600 dark:text-red-400">Las contraseñas no coinciden</p>
+                <p v-if="passwordMismatch" class="mt-1 text-xs text-red-600 dark:text-red-400">Las contraseñas no coinciden</p>
               </div>
               
-              <div class="space-y-2"> 
-                
-                <div class="flex space-x-2">
-                  <button 
-                    type="button"
-                    @click="closeModal"
-                    class="w-1/2 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
-                  >
-                    Cancelar
-                  </button>
-                  <button 
-                    type="submit" 
-                    :disabled="isSaving"
-                    class="w-1/2 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  >
-                    <span v-if="isSaving">Guardando...</span>
-                    <span v-else>Guardar Cambios</span>
-                  </button>
-                </div>
+              <div class="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  @click="showPasswordModal = false"
+                  class="flex-1 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+                  :disabled="isUpdatingPassword"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center"
+                  :disabled="isUpdatingPassword || passwordMismatch"
+                >
+                  <span v-if="isUpdatingPassword" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Actualizando...
+                  </span>
+                  <span v-else>Actualizar</span>
+                </button>
               </div>
             </form>
           </div>
@@ -2177,6 +2160,11 @@ const showTopReferralsModal = ref(false)
 const showTopBalancesModal = ref(false)
 const showTopRatingsModal = ref(false)
 
+// Estados para el cambio de contraseña
+const newPassword = ref('')
+const confirmPassword = ref('')
+const isUpdatingPassword = ref(false)
+
 // ===== VARIABLES DE PAGINACIÓN =====
 const itemsPerPage = 6
 const techniciansPerPage = ref(6)
@@ -2277,11 +2265,7 @@ const userForm = ref({
   telefono: '',
   estado: 'activo',
   ciudad: null
-})
-
-// Variables para cambio de contraseña
-const newPassword = ref('')
-const confirmPassword = ref('')
+}) 
 
 // Variables para filtros de modales
 const referralsFilterMonth = ref('')
@@ -2408,16 +2392,36 @@ watch([selectedStatus, selectedCity], () => {
 
 // ===== COMPUTED PROPERTIES =====
 // Para administradores seguimos filtrando en frontend
+const hasActiveFilters = computed(() => {
+  return !!(
+    searchQuery.value || 
+    selectedStatus.value || 
+    selectedCity.value
+  );
+});
+
 const filteredAdmins = computed(() => {
+  if (!users.value) return [];
+  
   return users.value.filter(user => {
-    const matchesSearch = searchQuery.value === '' || 
-                         user.nombre.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesStatus = !selectedStatus.value || !selectedStatus.value.value || user.estado === selectedStatus.value.value
-    const isAdmin = user.rol?.nombre_rol?.toLowerCase() === 'admin'
+    // Filter by search query
+    const searchQuery = searchQuery.value?.toLowerCase() || '';
+    const matchesSearch = !searchQuery || 
+      (user.nombre && user.nombre.toLowerCase().includes(searchQuery)) ||
+      (user.email && user.email.toLowerCase().includes(searchQuery)) ||
+      (user.telefono && user.telefono.includes(searchQuery));
     
-    return matchesSearch && matchesStatus && isAdmin
-  })
-})
+    // Filter by status
+    const matchesStatus = !selectedStatus.value || 
+      user.estado === selectedStatus.value.value;
+    
+    // Filter by city
+    const matchesCity = !selectedCity.value || 
+      (user.ciudad && user.ciudad.id_ciudad === selectedCity.value);
+    
+    return matchesSearch && matchesStatus && matchesCity;
+  });
+});
 
 // Paginación principal - Los usuarios y técnicos ahora muestran lo que viene del backend
 const paginatedAdmins = computed(() => {
@@ -2535,15 +2539,75 @@ const servicesTotalPages = computed(() => Math.ceil(filteredServices.value.lengt
 const servicesStartItem = computed(() => (servicesCurrentPage.value - 1) * modalItemsPerPage + 1)
 const servicesEndItem = computed(() => Math.min(servicesCurrentPage.value * modalItemsPerPage, filteredServices.value.length))
 
-const hasActiveFilters = computed(() => {
-  return searchQuery.value !== '' || selectedStatus.value !== '' || selectedCity.value !== ''
-})
-
 // Validar si las contraseñas coinciden
 const passwordMismatch = computed(() => {
   return newPassword.value && confirmPassword.value && 
          newPassword.value !== confirmPassword.value
 })
+
+// Actualizar contraseña del usuario
+const updatePassword = async () => {
+  try {
+    // Validar que las contraseñas coincidan
+    if (passwordMismatch.value) {
+      showToast({
+        type: 'error',
+        message: 'Las contraseñas no coinciden',
+        duration: 3000
+      });
+      return;
+    }
+    
+    // Validar longitud mínima
+    if (newPassword.value.length < 6) {
+      showToast({
+        type: 'error',
+        message: 'La contraseña debe tener al menos 6 caracteres',
+        duration: 3000
+      });
+      return;
+    }
+    
+    isUpdatingPassword.value = true;
+    
+    const response = await $fetch(`/usuarios/cambio-clave/${userForm.value.id_usuario}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      body: JSON.stringify({
+        currentPassword: '',  // No requerido para admin
+        newPassword: newPassword.value
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    // Cerrar el modal de contraseña
+    showPasswordModal.value = false;
+    
+    // Limpiar los campos
+    newPassword.value = '';
+    confirmPassword.value = '';
+    
+    // Mostrar mensaje de éxito
+    showToast({
+      type: 'success',
+      message: 'Contraseña actualizada correctamente',
+      duration: 3000
+    });
+    
+  } catch (error) {
+    console.error('Error al actualizar la contraseña:', error);
+    showToast({
+      type: 'error',
+      message: error.data?.message || 'Error al actualizar la contraseña',
+      duration: 3000
+    });
+  } finally {
+    isUpdatingPassword.value = false;
+  }
+}
 
 // Verificar si el usuario seleccionado es un técnico
 const isTechnician = computed(() => {
@@ -2652,8 +2716,8 @@ const showError = (message) => {
 const resetUserForm = () => {
   userForm.value = {
     id_usuario: null,
-    id_ciudad: '',
-    id_rol: '',
+    id_ciudad: null,
+    id_rol: null,
     rol: null,
     nombre: '',
     identidad: '',
@@ -2662,7 +2726,14 @@ const resetUserForm = () => {
     estado: 'activo',
     ciudad: null
   }
+  
+  // Resetear campos de contraseña
+  newPassword.value = ''
+  confirmPassword.value = ''
+  isUpdatingPassword.value = false
 }
+
+
 
 // ===== FUNCIONES DE PAGINACIÓN =====
 const changeReferralsPage = (page) => {
@@ -2798,7 +2869,7 @@ const filterCredits = async () => {
   const currentMonth = now.getMonth() // 0-11
   
   // Parse the selected month and year
-  const [year, month] = creditsFilterMonth.value.split('-')
+  const [year, month] = creditsFilterMonth.value.split('-').map(Number)
   
   // Ensure we have a valid year (in case of invalid input)
   const validYear = year || currentYear
@@ -2834,6 +2905,7 @@ const closeModal = () => {
   selectedUser.value = null
   creditsResponse.value = null
   isEditing.value = false
+  isUpdatingPassword.value = false
   isDeleting.value = false
 } 
 
