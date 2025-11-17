@@ -129,38 +129,7 @@
                   </div>
                 </div>
               </div>
-            </section>
-
-            <!-- Retirar Ganancias -->
-            <section v-if="stats.availableBalance > 0" class="px-4 mb-4"> 
-              <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 text-white relative overflow-hidden">
-                <div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
-                <div class="relative">
-                  <div class="flex items-center space-x-3 mb-3">
-                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <span class="text-white text-xl">💳</span>
-                    </div>
-                    <div>
-                      <h2 class="text-xl font-black">Retirar Ganancias</h2>
-                      <p class="text-white/90 text-sm">
-                        Disponible: L. {{ (stats?.availableBalance || 0).toLocaleString('es-HN') }}
-                        <span v-if="withdrawalPercentage > 0" class="block text-xs opacity-80">
-                          Puedes retirar hasta el {{ withdrawalPercentage }}%: L. {{ (maxWithdrawableAmount || 0).toLocaleString('es-HN') }}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <button 
-                    @click="showWithdrawModal = true"
-                    :disabled="!maxWithdrawableAmount || maxWithdrawableAmount <= 0"
-                    class="w-full py-3 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-black text-base rounded-xl transition-all duration-300 hover:bg-white/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                  >
-                    {{ maxWithdrawableAmount > 0 ? 'Retirar Ahora' : 'Sin saldo disponible' }}
-                  </button>
-                </div>
-              </div>
-            </section>
+            </section> 
 
             <!-- Historial de Ingresos/Retiros con pestañas -->
             <section class="px-4 mb-6">
@@ -373,6 +342,48 @@
                 </template>
               </div>
             </section>
+            
+            <!-- Retirar Ganancias -->
+            <section class="px-4 mb-4"> 
+              <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 relative">
+                <div class="relative">
+                  <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center">
+                      <span class="text-gray-700 dark:text-gray-300 text-xl">💳</span>
+                    </div>
+                    <div>
+                      <h2 class="text-xl font-black">Retirar Ganancias</h2>
+                      <p class="text-white/90 text-sm">
+                        Disponible: L. {{ (stats?.availableBalance || 0).toLocaleString('es-HN') }}
+                        <span v-if="withdrawalPercentage > 0" class="block text-xs opacity-80">
+                          Puedes retirar hasta el {{ withdrawalPercentage }}%: L. {{ (maxWithdrawableAmount || 0).toLocaleString('es-HN') }}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div class="w-full">
+                    <button 
+                      @click="showWithdrawModal = true"
+                      :disabled="!canWithdrawFromTotal"
+                      class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold text-base rounded-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      <template v-if="stats?.availableBalance > 0">
+                        <template v-if="stats.availableBalance >= minWithdrawAmount">
+                          Retirar Ahora
+                        </template>
+                        <template v-else>
+                          Mínimo L. {{ minWithdrawAmount.toFixed(2) }}
+                        </template>
+                      </template>
+                      <template v-else>
+                        Sin saldo disponible
+                      </template>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
 
             <!-- Historial de Referidos -->
             <section class="px-4 mb-4">
@@ -413,20 +424,42 @@
                   </div>
                 </div>
 
-                <!-- Botón Ver más referidos -->
-                <div v-if="hasMoreReferrals" class="text-center mt-4">
-                  <button 
-                    @click="loadMoreReferrals" 
-                    class="w-full py-2 text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                    :disabled="isLoadingReferrals"
-                  >
-                    <span v-if="isLoadingReferrals">
-                      Cargando...
-                    </span>
-                    <span v-else>
-                      Ver más referidos ({{ totalReferrals - referralHistory.length }} restantes)
-                    </span>
-                  </button>
+                <!-- Paginación de referidos -->
+                <div v-if="referralsPagination.totalItems > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                  <div class="flex items-center justify-between">
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ referralHistory.length }} de {{ referralsPagination.totalItems }}
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <button 
+                        @click="previousReferralsPage" 
+                        :disabled="referralsPagination.currentPage <= 1 || isLoadingReferrals"
+                        class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                        :class="{ 'opacity-50 cursor-not-allowed': referralsPagination.currentPage <= 1 }"
+                        aria-label="Página anterior"
+                      >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      
+                      <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                        Página {{ referralsPagination.currentPage }} de {{ referralsPagination.totalPages }}
+                      </span>
+                      
+                      <button 
+                        @click="nextReferralsPage" 
+                        :disabled="referralsPagination.currentPage >= referralsPagination.totalPages || isLoadingReferrals"
+                        class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                        :class="{ 'opacity-50 cursor-not-allowed': referralsPagination.currentPage >= referralsPagination.totalPages }"
+                        aria-label="Página siguiente"
+                      >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
@@ -660,6 +693,7 @@ const isLoadingReferrals = ref(false)
 // Configuración del programa
 const referralReward = ref(50)
 const withdrawalPercentage = ref(0)
+const minWithdrawAmount = ref(0)
 
 // Estado reactivo para las estadísticas
 const stats = ref({
@@ -698,9 +732,12 @@ const totalMovements = ref(0)
 const hasMoreMovements = ref(false)
 
 // Estados de paginación para referidos
-const currentReferralsPage = ref(1)
-const totalReferrals = ref(0)
-const hasMoreReferrals = ref(false)
+const referralsPagination = ref({
+  currentPage: 1,
+  totalItems: 0,
+  totalPages: 1,
+  itemsPerPage: 3
+})
 
 // Configuración de paginación
 const itemsPerPage = 3
@@ -731,7 +768,11 @@ const referralLink = computed(() => {
 
 const maxWithdrawableAmount = computed(() => {
   const percentage = withdrawalPercentage.value / 100
-  return Math.floor(stats.value.availableBalance * percentage * 100) / 100 
+  return Math.max(0, Math.floor(stats.value.availableBalance * percentage * 100) / 100)
+})
+
+const canWithdrawFromTotal = computed(() => {
+  return (stats.value?.availableBalance || 0) > 0 && (stats.value?.availableBalance || 0) >= minWithdrawAmount.value
 })
 
 const isWithdrawFormValid = computed(() => {
@@ -823,6 +864,22 @@ const loadReferralData = async () => {
   try {
     const user = useCookie('user').value
     if (!user?.id_usuario) return 
+    
+    // Cargar configuración de monto mínimo de retiro
+    try {
+      const minWithdrawConfig = await $fetch('/config/valor/retiro_minimo', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      });
+      minWithdrawAmount.value = parseFloat(minWithdrawConfig?.valor || 0);
+    } catch (error) {
+      console.error('Error al cargar configuración de retiro mínimo:', error);
+      minWithdrawAmount.value = 0;
+    }
 
     const [configData, porcentajeRetiroData, ingresosData] = await Promise.all([
       $fetch('/config/valor/porcentaje_referido', {
@@ -899,17 +956,9 @@ const loadReferralData = async () => {
   }
 }
 
-const loadReferrals = async (loadMore = false) => {
+const loadReferrals = async (page = 1) => {
   const user = useCookie('user').value
   if (!user?.id_usuario) return
-
-  if (!loadMore) {
-    currentReferralsPage.value = 1
-    hasMoreReferrals.value = false
-    referralHistory.value = []
-  } else {
-    currentReferralsPage.value++
-  }
 
   isLoadingReferrals.value = true
 
@@ -922,22 +971,24 @@ const loadReferrals = async (loadMore = false) => {
         'Authorization': `Bearer ${auth.token}`
       },
       query: {
-        page: currentReferralsPage.value,
-        limit: itemsPerPage
+        page: page,
+        limit: referralsPagination.value.itemsPerPage
       }
     })
 
     if (response?.success) {
-      referralHistory.value = loadMore 
-        ? [...referralHistory.value, ...(response.data || [])] 
-        : (response.data || [])
+      referralHistory.value = response.data || []
       
       // Actualizar información de paginación
-      totalReferrals.value = response.pagination?.total || 0
-      stats.value.totalReferrals = totalReferrals.value
-      hasMoreReferrals.value = response.pagination ? 
-        (response.pagination.page * response.pagination.limit) < response.pagination.total : 
-        false
+      referralsPagination.value = {
+        currentPage: response.pagination?.page || 1,
+        totalItems: response.pagination?.total || 0,
+        totalPages: response.pagination?.totalPages || 1,
+        itemsPerPage: response.pagination?.limit || referralsPagination.value.itemsPerPage
+      }
+      
+      // Actualizar estadísticas
+      stats.value.totalReferrals = referralsPagination.value.totalItems
     }
   } catch (error) {
     console.error('Error al cargar referidos:', error)
@@ -945,6 +996,18 @@ const loadReferrals = async (loadMore = false) => {
     referralHistory.value = []
   } finally {
     isLoadingReferrals.value = false
+  }
+}
+
+const nextReferralsPage = async () => {
+  if (referralsPagination.value.currentPage < referralsPagination.value.totalPages) {
+    await loadReferrals(referralsPagination.value.currentPage + 1)
+  }
+}
+
+const previousReferralsPage = async () => {
+  if (referralsPagination.value.currentPage > 1) {
+    await loadReferrals(referralsPagination.value.currentPage - 1)
   }
 }
 
@@ -1155,16 +1218,48 @@ const processWithdraw = async () => {
       return;
     }
 
+    // Obtener el monto mínimo de retiro desde la configuración
+    let minWithdrawAmount = 0;
+    try {
+      const minWithdrawConfig = await $fetch('/config/valor/retiro_minimo', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      });
+      minWithdrawAmount = parseFloat(minWithdrawConfig?.valor || 0);
+    } catch (error) {
+      console.error('Error al obtener la configuración de retiro mínimo:', error);
+      // Continuar con 0 como valor por defecto
+    }
+
     const montoRetiro = parseFloat(stats.value.availableBalance) || 0; 
     const montoMaximoRetiro = parseFloat(maxWithdrawableAmount.value) || 0;
+    
+    // Validar monto mínimo de retiro contra el saldo total
+    if (montoRetiro < minWithdrawAmount) {
+      showError(`El monto mínimo de retiro es de L. ${minWithdrawAmount.toFixed(2)}. Tu saldo actual es de L. ${montoRetiro.toFixed(2)}`);
+      isProcessingWithdraw.value = false;
+      return;
+    }
+
+    // Validar que el monto a retirar no sea mayor al permitido
+    if (montoMaximoRetiro <= 0) {
+      showError('No tienes saldo disponible para retirar');
+      isProcessingWithdraw.value = false;
+      return;
+    }
+
     const montoCredito = parseFloat((montoRetiro - montoMaximoRetiro).toFixed(2));
     
     const requestBody = {
       id_usuario: userCookie.value.id_usuario,
       tipo: 'retiro',
-      monto: montoRetiro,
+      monto: montoMaximoRetiro,
       descripcion: `Retiro de ${montoMaximoRetiro} a: ${withdrawForm.value.bankDetails}`
-    }  
+    };  
     
     let response;
     try {
@@ -1179,47 +1274,58 @@ const processWithdraw = async () => {
         body: requestBody
       });
     } catch (error) {
-      showError('Error al procesar el retiro. Por favor, inténtalo de nuevo.')
+      console.error('Error en la solicitud de retiro:', error);
+      const errorMessage = error.data?.message || 'Error al procesar el retiro. Por favor, inténtalo de nuevo.';
+      showError(errorMessage);
+      return;
     }
 
     if (response && response.success === true) {
       if (stats.value) {
-        stats.value.availableBalance -= parseFloat(withdrawForm.value.amount);
+        stats.value.availableBalance -= montoMaximoRetiro;
+        stats.value.retirado = (parseFloat(stats.value.retirado) + montoMaximoRetiro).toFixed(2);
       }
       
       if (montoCredito > 0) {
         try { 
-          const requestBody = {
+          const creditRequestBody = {
             id_usuario: userCookie.value.id_usuario,
             monto_credito: montoCredito
           }; 
           
-          const creditResponse = await $fetch('/credito', {
+          await $fetch('/credito', {
             baseURL: config.public.apiBase,
             method: 'POST',
             headers: {
               'Accept': 'application/json',
+              'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth.token}`
             },
-            body: requestBody
-          })  
+            body: creditRequestBody
+          });
           
-          showSuccess('¡Retiro Solicitado!', 'El pago puede tardar hasta 72 horas en procesarse.')
+          showSuccess('¡Retiro Solicitado!', 'El pago puede tardar hasta 72 horas en procesarse.');
         } catch (creditError) {
-          showError('Error al procesar el retiro. Por favor, inténtalo de nuevo.')
+          console.error('Error al procesar el crédito:', creditError);
+          // Mostrar mensaje de éxito parcial
+          showSuccess('Retiro Parcial', 'El retiro se procesó, pero hubo un error al aplicar el crédito. Contacta a soporte.');
         }
+      } else {
+        showSuccess('¡Retiro Solicitado!', 'El pago puede tardar hasta 72 horas en procesarse.');
       }
     } else {
-      showError('Retiro Fallido!, Intente de nuevo más tarde')
+      const errorMessage = response?.message || 'Error al procesar el retiro. Por favor, inténtalo de nuevo.';
+      showError(errorMessage);
     }
     
-    closeWithdrawModal()
-    await loadReferralData()
+    closeWithdrawModal();
+    await loadReferralData();
     
   } catch (error) {
-    showError(error.data?.message || 'Error al procesar el retiro. Por favor, inténtalo de nuevo.')
+    console.error('Error inesperado en processWithdraw:', error);
+    showError('Ocurrió un error inesperado. Por favor, inténtalo de nuevo.');
   } finally {
-    isProcessingWithdraw.value = false
+    isProcessingWithdraw.value = false;
   }
 }
 

@@ -2131,6 +2131,7 @@ const loadingCities = ref(false)
 const loadingStats = ref(false)
 const isSaving = ref(false)
 const isEditing = ref(false)
+const isDeleting = ref(false) // Added missing reactive reference
 
 // Estadísticas
 const stats = ref({
@@ -2173,6 +2174,7 @@ const modalItemsPerPage = 5
 
 // Cache para almacenar páginas ya cargadas (incluye filtros en la clave)
 const usersCache = {}
+const techniciansCache = {}  // Cache for technicians data
 
 // Paginación principal
 const usersCurrentPage = ref(1)
@@ -2908,7 +2910,9 @@ const closeModal = () => {
   creditsResponse.value = null
   isEditing.value = false
   isUpdatingPassword.value = false
-  isDeleting.value = false
+  if (isDeleting) {
+    isDeleting.value = false
+  }
 } 
 
 const showCredits = async (user, page = 1, dateRange = null) => {
@@ -3391,14 +3395,47 @@ const showTopRatings = async () => {
   }
 }
 
-// ===== FUNCIONES DE ACCIONES =====
+// Watch for changes in the selected role to keep id_rol in sync
+watch(() => userForm.value.rol, (newRole) => {
+  if (newRole && newRole.id_rol) {
+    userForm.value.id_rol = newRole.id_rol
+    console.log('Rol actualizado:', { 
+      id_rol: userForm.value.id_rol,
+      rol: userForm.value.rol 
+    })
+  }
+}, { deep: true })
+
 const editUser = (user) => {
+  console.log('Raw user data:', JSON.parse(JSON.stringify(user)))
+  console.log('Available roles:', JSON.parse(JSON.stringify(roles.value)))
+
+  // Find the role by name since we have the role name but not the ID in the user object
+  const roleName = user.rol?.nombre_rol || user.rol
+  let userRole = null
+  
+  if (roleName) {
+    // Find the role by name in the roles list to get the full role object with ID
+    userRole = roles.value.find(r => 
+      (r.nombre_rol && r.nombre_rol.toLowerCase() === roleName.toLowerCase()) ||
+      (r.nombre && r.nombre.toLowerCase() === roleName.toLowerCase())
+    )
+  }
+  
+  // If we still don't have a role, try to get it from the user's ID if available
+  if (!userRole && user.id_rol) {
+    userRole = roles.value.find(r => r.id_rol === user.id_rol) || null
+  }
+
   // Mapear los campos del usuario al formulario
   userForm.value = {
     id_usuario: user.id_usuario || user.id,
     id_ciudad: user.id_ciudad || null,
-    id_rol: user.id_rol || (user.rol ? user.rol.id_rol : null),
-    rol: user.rol || roles.value.find(r => r.id_rol === (user.id_rol || user.rol?.id_rol)) || null,
+    id_rol: userRole?.id_rol || user.id_rol || null,
+    rol: userRole || { 
+      id_rol: user.id_rol,
+      nombre_rol: roleName || '' 
+    },
     nombre: user.nombre || user.name || '',
     identidad: user.identidad || '',
     email: user.email || '',
@@ -3406,39 +3443,57 @@ const editUser = (user) => {
     estado: user.estado || user.status || 'activo',
     ciudad: user.ciudad || null
   }
+
+  console.log('Formulario después de mapear:', {
+    ...JSON.parse(JSON.stringify(userForm.value)),
+    rol: userForm.value.rol ? { ...userForm.value.rol } : null
+  })
   
   showEditModal.value = true
 }
 
 const saveUser = async () => {
-  // Validar campos requeridos
-  if (!userForm.value.nombre || !userForm.value.email) {
-    showError('Por favor completa todos los campos requeridos')
-    return
-  }
-
-  // Validar que se haya seleccionado un rol
-  if (!userForm.value.rol || !userForm.value.rol.id_rol) {
-    showError('Por favor selecciona un rol')
-    return
-  }
-
-  // Validar que se haya seleccionado un estado
-  if (!userForm.value.estado) {
-    showError('Por favor selecciona un estado')
-    return
-  }
-
   try {
-    isSaving.value = true
+    isSaving.value = true;
     
-    // Preparar los datos para la API
-    const userData = { 
-      id_rol: parseInt(userForm.value.rol.id_rol), 
-      estado: typeof userForm.value.estado === 'object' ? userForm.value.estado.value : userForm.value.estado
+    // Asegurarse de que tenemos un rol seleccionado
+    if (!userForm.value.rol) {
+      showError('Por favor selecciona un rol');
+      isSaving.value = false;
+      return;
     }
 
-    // Llamada a la API para actualizar el usuario
+    // Obtener el ID del rol del objeto de rol seleccionado
+    const roleId = userForm.value.rol.id_rol || userForm.value.rol.value;
+    
+    if (!roleId) {
+      showError('No se pudo determinar el ID del rol seleccionado');
+      isSaving.value = false;
+      return;
+    }
+
+    // Obtener el nombre del rol
+    const selectedRole = roles.value.find(r => r.id_rol === parseInt(roleId));
+    if (!selectedRole) {
+      showError('El rol seleccionado no es válido');
+      isSaving.value = false;
+      return;
+    }
+
+    // Preparar los datos para enviar
+    const userData = { 
+      id_rol: parseInt(roleId),
+      estado: typeof userForm.value.estado === 'object' 
+        ? userForm.value.estado.value 
+        : userForm.value.estado
+    };
+
+    console.log('Enviando al backend:', {
+      url: `usuarios/${userForm.value.id_usuario}`,
+      method: 'PUT',
+      data: userData
+    });
+
     const response = await $fetch(`usuarios/${userForm.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
@@ -3447,25 +3502,68 @@ const saveUser = async () => {
         'Authorization': `Bearer ${auth.token}`
       },
       body: userData
-    })
+    });
 
-    // Recargar datos
+    console.log('Respuesta del backend:', response);
+
+    // Función para actualizar el usuario en una lista
+    const updateUserInList = (list) => {
+      return list.map(user => {
+        if (user.id_usuario === userForm.value.id_usuario) {
+          return {
+            ...user,
+            id_rol: parseInt(roleId),
+            rol: {
+              id_rol: parseInt(roleId),
+              nombre_rol: selectedRole.nombre_rol
+            },
+            estado: userData.estado
+          };
+        }
+        return user;
+      });
+    };
+
+    // Actualizar las listas reactivas
+    users.value = updateUserInList(users.value);
+    technicians.value = updateUserInList(technicians.value);
+    administrators.value = updateUserInList(administrators.value);
+
+    // Forzar actualización de la UI
+    await nextTick();
+
+    // Cerrar el modal
+    closeModal();
+
+    // Limpiar la cache de usuarios y técnicos
+    for (const key in usersCache) {
+      delete usersCache[key];
+    }
+    for (const key in techniciansCache) {
+      delete techniciansCache[key];
+    }
+
+    // Recargar los datos del servidor para asegurar consistencia
     await Promise.all([
-      loadUsers(),
-      loadTechnicians()
-    ])
-    
-    showSuccess(`Usuario actualizado correctamente`)
-    closeModal()
+      loadUsers(usersCurrentPage.value),
+      loadTechnicians(techniciansCurrentPage.value),
+      loadAdministrators(adminsCurrentPage.value) 
+    ]);
+
+    showSuccess(`Usuario actualizado correctamente`);
     
   } catch (error) {
-    console.error('Error al actualizar el usuario:', error)
-    const errorMessage = error.data?.message || 'Error al actualizar el usuario'
-    showError(errorMessage)
+    console.error('Error al actualizar el usuario:', {
+      error: error,
+      response: error.data,
+      message: error.message
+    });
+    const errorMessage = error.data?.message || 'Error al actualizar el usuario';
+    showError(errorMessage);
   } finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
-}
+};
 
 // Actualizar la contraseña del usuario
 const updateUserPassword = async () => {
@@ -3514,31 +3612,7 @@ const updateUserPassword = async () => {
   }
 }
 
-// ===== FUNCIONES PARA CARGAR DATOS DE APIS =====
-// Función para cargar roles desde la API
-const loadRoles = async () => {
-  try {
-    loadingRoles.value = true
-    const response = await $fetch('/roles', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
-    })
-    
-    roles.value = Array.isArray(response) ? response : []
-    return roles.value
-  } catch (error) {
-    console.error('Error al cargar roles:', error)
-    showError('No se pudieron cargar los roles')
-    roles.value = []
-    return []
-  } finally {
-    loadingRoles.value = false
-  }
-}
+// ===== FUNCIONES PARA CARGAR DATOS DE APIS ===== 
 
 // Función para cargar usuarios desde la API con filtros aplicados en backend
 const loadUsers = async (page = 1) => {
@@ -3638,6 +3712,23 @@ const loadTechnicians = async (page = 1) => {
     loadingTechnicians.value = true
     const offset = (page - 1) * techniciansPerPage.value
     
+    // Generar clave de caché que incluya filtros
+    const filtersKey = JSON.stringify({ 
+      search: searchQuery.value || '',
+      status: selectedStatus.value?.value || selectedStatus.value || '',
+      city: selectedCity.value?.id || selectedCity.value?.value || selectedCity.value || ''
+    })
+    const cacheKey = `${page}_${filtersKey}`
+    
+    // Verificar si ya tenemos la página con estos filtros en caché
+    if (techniciansCache[cacheKey]) {
+      const cachedData = techniciansCache[cacheKey]
+      technicians.value = cachedData.tecnicos
+      totalTechnicians.value = cachedData.total
+      techniciansCurrentPage.value = page
+      return cachedData
+    }
+    
     // Construir parámetros con filtros
     const params = new URLSearchParams({
       limit: techniciansPerPage.value.toString(),
@@ -3681,6 +3772,12 @@ const loadTechnicians = async (page = 1) => {
         'Authorization': `Bearer ${auth.token}`
       }
     })
+
+    // Guardar en caché
+    techniciansCache[cacheKey] = {
+      tecnicos: response.tecnicos || [],
+      total: response.total || 0
+    }
 
     technicians.value = response.tecnicos || []
     totalTechnicians.value = response.total || 0
@@ -3796,6 +3893,53 @@ const loadCities = async () => {
     return []
   } finally {
     loadingCities.value = false
+  }
+}
+
+const loadRoles = async () => {
+  try {
+    loadingRoles.value = true
+    
+    // Cargar roles desde la API siguiendo el estándar de peticiones HTTP del proyecto
+    const response = await $fetch('/roles', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    // Verificar si la respuesta es un array (formato directo) o un objeto con propiedad data
+    if (Array.isArray(response)) {
+      roles.value = response
+    } else if (response?.data && Array.isArray(response.data)) {
+      roles.value = response.data
+    } else if (response?.success && Array.isArray(response.data)) {
+      roles.value = response.data
+    } else {
+      console.warn('Formato de respuesta inesperado al cargar roles, usando valores por defecto:', response)
+      // Usar roles por defecto si la respuesta no es la esperada
+      roles.value = [
+        { id_rol: 1, nombre_rol: 'Administrador' },
+        { id_rol: 2, nombre_rol: 'Técnico' },
+        { id_rol: 3, nombre_rol: 'Cliente' }
+      ]
+    }
+    
+    console.log('Roles cargados exitosamente:', roles.value)
+  } catch (error) {
+    console.error('Error al cargar roles:', error)
+    showError(`Error al cargar roles: ${error.message || 'Intente nuevamente'}`)
+    
+    // Usar roles por defecto en caso de error
+    roles.value = [
+      { id_rol: 1, nombre_rol: 'Administrador' },
+      { id_rol: 2, nombre_rol: 'Técnico' },
+      { id_rol: 3, nombre_rol: 'Cliente' }
+    ]
+  } finally {
+    loadingRoles.value = false
   }
 }
 

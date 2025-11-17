@@ -108,7 +108,22 @@
               </div>
             </div>
 
-            <!-- Espacio para futuros campos de precios y tarifas -->
+            <!-- Monto Mínimo de Retiro -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Monto Mínimo de Retiro
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">L.</span>
+                <input
+                  v-model.number="configuracionRetiroMinimo"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full pl-8 pr-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="500.00">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -617,184 +632,23 @@
                 </div>
               </div>
               
-              <div class="flex gap-2 ml-4">
+              <div class="flex flex-col sm:flex-row gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0">
                 <button 
                   @click="mostrarFormularioEnvio(notif)"
                   class="px-3 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
-                  Enviar
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                  </svg>
                 </button>
                 <button 
                   @click="confirmarEliminarNotificacion(notif.id_notificacion)"
                   class="px-3 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
-                  Eliminar
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal para confirmar eliminación de notificación individual -->
-    <div v-if="mostrarModalConfirmacionEliminar" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-        <div class="p-6">
-          <div class="flex items-center justify-center mb-4">
-            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900 sm:mx-0 sm:h-10 sm:w-10">
-              <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-          </div>
-          <div class="text-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-2">¿Eliminar notificación?</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-300">
-              Esta acción no se puede deshacer. La notificación será eliminada permanentemente.
-            </p>
-            <div class="mt-6 flex justify-center space-x-4">
-              <button 
-                type="button" 
-                @click="mostrarModalConfirmacionEliminar = false"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancelar
-              </button>
-              <button 
-                type="button" 
-                @click="eliminarNotificacion"
-                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal para confirmar eliminación de notificaciones leídas -->
-    <div v-if="mostrarModalConfirmacionEliminarLeidas" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-        <div class="p-6">
-          <div class="flex items-center justify-center mb-4">
-            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900 sm:mx-0 sm:h-10 sm:w-10">
-              <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-          </div>
-          <div class="text-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-2">¿Eliminar notificaciones leídas?</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-300">
-              Se eliminarán todas las notificaciones marcadas como leídas. Esta acción no se puede deshacer.
-            </p>
-            <div class="mt-6 flex justify-center space-x-4">
-              <button 
-                type="button" 
-                @click="mostrarModalConfirmacionEliminarLeidas = false"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancelar
-              </button>
-              <button 
-                type="button" 
-                @click="eliminarNotificacionesLeidas"
-                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                :disabled="isDeletingRead"
-              >
-                <div class="flex items-center">
-                  <div v-if="isDeletingRead" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {{ isDeletingRead ? 'Eliminando...' : 'Eliminar' }}
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal para enviar notificación -->
-    <div v-if="mostrarModalEnvio" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-              Enviar Notificación
-            </h3>
-            <button @click="cerrarModalEnvio" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-              <span class="text-2xl">×</span>
-            </button>
-          </div>
-          
-          <div class="mb-4">
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              <strong>{{ notificacionAEnviar?.titulo }}</strong>
-            </p>
-            
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Tipo de Envío
-                </label>
-                <select 
-                  v-model="tipoEnvio"
-                  @change="resetearFormularioEnvio"
-                  class="w-full px-3 py-2 text-base bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white">
-                  <option value="">Seleccionar...</option>
-                  <option value="usuario">Usuario Específico</option>
-                  <option value="rol">Por Rol</option>
-                  <option value="global">Global (Todos)</option>
-                </select>
-              </div>
-
-              <div v-if="tipoEnvio === 'usuario'">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  ID del Usuario
-                </label>
-                <input 
-                  v-model.number="idUsuarioDestino"
-                  type="number"
-                  class="w-full px-3 py-2 text-base bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                  placeholder="Ingrese ID del usuario">
-              </div>
-
-              <div v-if="tipoEnvio === 'rol'">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Nombre del Rol
-                </label>
-                <select 
-                  v-model="nombreRolDestino"
-                  class="w-full px-3 py-2 text-base bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white">
-                  <option value="">Seleccionar rol...</option>
-                  <option value="admin">Administradores</option>
-                  <option value="usuario">Usuarios</option>
-                  <option value="tecnico">Técnicos</option>
-                </select>
-              </div>
-
-              <div v-if="tipoEnvio === 'global'">
-                <p class="text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                  Esta notificación será enviada a todos los usuarios del sistema.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <button 
-              @click="enviarNotificacion"
-              :disabled="!puedeEnviar || isSendingNotification"
-              class="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-              <div class="flex items-center justify-center">
-                <div v-if="isSendingNotification" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {{ isSendingNotification ? 'Enviando...' : 'Enviar' }}
-              </div>
-            </button>
-            <button 
-              @click="cerrarModalEnvio"
-              class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
-              Cancelar
-            </button>
           </div>
         </div>
       </div>
@@ -802,211 +656,245 @@
     
     <!-- Footer -->
     <FootersFooterAdmin /> 
-
-    <!-- Modal para crear/editar servicio -->
-    <div v-if="mostrarModalNuevoServicio" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-              {{ servicioEditando ? 'Editar Servicio' : 'Nuevo Servicio' }}
-            </h3>
-            <button @click="cerrarModalServicio" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-              <span class="sr-only">Cerrar</span>
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          <form @submit.prevent="guardarServicio">
-            <div class="space-y-4">
-              <div>
-                <label for="nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Nombre del servicio <span class="text-red-500">*</span>
-                </label>
-                <input
-                  id="nombre"
-                  v-model="formServicio.nombre"
-                  type="text"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="Ej: Reparación eléctrica">
-              </div>
-              
-              <div>
-                <label for="descripcion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Descripción
-                </label>
-                <textarea
-                  id="descripcion"
-                  v-model="formServicio.descripcion"
-                  rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="Descripción detallada del servicio"></textarea>
-              </div>
-              
-              <div class="flex items-center">
-                <input
-                  id="estado"
-                  v-model="formServicio.estado"
-                  type="checkbox"
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700">
-                <label for="estado" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                  Activo
-                </label>
-              </div>
-            </div>
-            
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="cerrarModalServicio"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                :disabled="guardandoServicio"
-                class="inline-flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                <span v-if="guardandoServicio" class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Guardando...
-                </span>
-                <span v-else>
-                  {{ servicioEditando ? 'Actualizar' : 'Crear' }} servicio
-                </span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal para crear/editar beneficio -->
-    <div v-if="mostrarModalNuevoBeneficio" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-              {{ beneficioEditando ? 'Editar Beneficio' : 'Nuevo Beneficio' }}
-            </h3>
-            <button @click="cerrarModalBeneficio" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-              <span class="sr-only">Cerrar</span>
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          <form @submit.prevent="guardarBeneficio">
-            <div class="space-y-4">
-              <div>
-                <label for="mes_requerido" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Mes requerido <span class="text-red-500">*</span>
-                </label>
-                <input
-                  id="mes_requerido"
-                  v-model.number="formBeneficio.mes_requerido"
-                  type="number"
-                  min="1"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="1">
-              </div>
-
-              <div>
-                <label for="tipo_beneficio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Tipo de beneficio <span class="text-red-500">*</span>
-                </label>
-                <input
-                  id="tipo_beneficio"
-                  v-model="formBeneficio.tipo_beneficio"
-                  type="text"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="Ej: Visita técnica gratis">
-              </div>
-              
-              <div>
-                <label for="descripcion_beneficio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Descripción <span class="text-red-500">*</span>
-                </label>
-                <textarea
-                  id="descripcion_beneficio"
-                  v-model="formBeneficio.descripcion"
-                  rows="3"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="Descripción detallada del beneficio"></textarea>
-              </div>
-            </div>
-            
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="cerrarModalBeneficio"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                :disabled="guardandoBeneficio"
-                class="inline-flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                <span v-if="guardandoBeneficio" class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Guardando...
-                </span>
-                <span v-else>
-                  {{ beneficioEditando ? 'Actualizar' : 'Crear' }} beneficio
-                </span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Confirmación -->
-    <div v-if="mostrarModalConfirmacion" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <div class="text-center">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900 mb-4">
-            <svg class="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+<!-- Modal para crear/editar servicio -->
+<Transition name="fade">
+  <div v-if="mostrarModalNuevoServicio" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalServicio"></div>
+    <Transition name="modal">
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+      <!-- Header -->
+      <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black text-gray-900 dark:text-white">
+            {{ servicioEditando ? 'Editar Servicio' : 'Nuevo Servicio' }}
+          </h3>
+          <button @click="cerrarModalServicio" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-4">
+        <form @submit.prevent="guardarServicio" class="space-y-4">
+          <div>
+            <label for="nombre" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Nombre del servicio <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="nombre"
+              v-model="formServicio.nombre"
+              type="text"
+              required
+              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+              placeholder="Ej: Reparación eléctrica">
           </div>
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ tituloConfirmacion }}</h3>
-          <div class="mt-2">
-            <p class="text-sm text-gray-500 dark:text-gray-300">
-              {{ mensajeConfirmacion }}
-            </p>
+          
+          <div>
+            <label for="descripcion" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Descripción
+            </label>
+            <textarea
+              id="descripcion"
+              v-model="formServicio.descripcion"
+              rows="3"
+              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+              placeholder="Descripción detallada del servicio"></textarea>
           </div>
-          <div class="mt-5 flex justify-center space-x-3">
+          
+          <div class="flex items-center">
+            <input
+              id="estado"
+              v-model="formServicio.estado"
+              type="checkbox"
+              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded">
+            <label for="estado" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+              Activo
+            </label>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex space-x-3 pt-2">
             <button
               type="button"
-              @click="mostrarModalConfirmacion = false"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              @click="cerrarModalServicio"
+              class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              :disabled="guardandoServicio"
             >
               Cancelar
             </button>
             <button
-              type="button"
-              @click="ejecutarAccionConfirmada"
-              class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              type="submit"
+              :disabled="guardandoServicio"
+              class="flex-1 py-2 px-4 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-50"
             >
-              Confirmar
+              <svg v-if="guardandoServicio" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ guardandoServicio ? 'Guardando...' : (servicioEditando ? 'Actualizar' : 'Crear') }}
             </button>
           </div>
+        </form>
+      </div>
+      </div>
+    </Transition>
+  </div>
+</Transition>
+
+<!-- Modal para crear/editar beneficio -->
+<Transition name="fade">
+  <div v-if="mostrarModalNuevoBeneficio" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalBeneficio"></div>
+    <Transition name="modal">
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+      <!-- Header -->
+      <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black text-gray-900 dark:text-white">
+            {{ beneficioEditando ? 'Editar Beneficio' : 'Nuevo Beneficio' }}
+          </h3>
+          <button @click="cerrarModalBeneficio" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
       </div>
-    </div>
+
+      <!-- Content -->
+      <div class="p-4">
+        <form @submit.prevent="guardarBeneficio" class="space-y-4">
+          <div>
+            <label for="mes_requerido" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Mes requerido <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="mes_requerido"
+              v-model.number="formBeneficio.mes_requerido"
+              type="number"
+              min="1"
+              required
+              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
+              placeholder="1">
+          </div>
+
+          <div>
+            <label for="tipo_beneficio" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Tipo de beneficio <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="tipo_beneficio"
+              v-model="formBeneficio.tipo_beneficio"
+              type="text"
+              required
+              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
+              placeholder="Ej: Visita técnica gratis">
+          </div>
+          
+          <div>
+            <label for="descripcion_beneficio" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Descripción <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              id="descripcion_beneficio"
+              v-model="formBeneficio.descripcion"
+              rows="3"
+              required
+              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
+              placeholder="Descripción detallada del beneficio"></textarea>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex space-x-3 pt-2">
+            <button
+              type="button"
+              @click="cerrarModalBeneficio"
+              class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              :disabled="guardandoBeneficio"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              :disabled="guardandoBeneficio"
+              class="flex-1 py-2 px-4 bg-emerald-600 text-white font-medium text-sm rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center disabled:opacity-50"
+            >
+              <svg v-if="guardandoBeneficio" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ guardandoBeneficio ? 'Guardando...' : (beneficioEditando ? 'Actualizar' : 'Crear') }}
+            </button>
+          </div>
+        </form>
+      </div>
+      </div>
+    </Transition>
+  </div>
+</Transition>
+
+<!-- Modal de Confirmación -->
+<Transition name="fade">
+  <div v-if="mostrarModalConfirmacion" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="mostrarModalConfirmacion = false"></div>
+    <Transition name="modal">
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+      <!-- Header -->
+      <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black text-gray-900 dark:text-white">{{ tituloConfirmacion }}</h3>
+          <button @click="mostrarModalConfirmacion = false" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-4">
+        <div class="text-center mb-6">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 mb-4">
+            <svg class="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+            {{ mensajeConfirmacion }}
+          </p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Esta acción no se puede deshacer.
+          </p>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="flex space-x-3">
+          <button 
+            type="button"
+            @click="mostrarModalConfirmacion = false"
+            class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="button"
+            @click="ejecutarAccionConfirmada"
+            class="flex-1 py-2 px-4 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+      </div>
+    </Transition>
+  </div>
+</Transition>
   </div>
 </template>
 
@@ -1044,6 +932,7 @@ const configuracionEmail = ref('')
 const configuracionDescuento = ref(0)
 const configuracionReferido = ref(0)
 const configuracionRetiro = ref(0)
+const configuracionRetiroMinimo = ref(0)
 
 // ===== VALORES ORIGINALES PARA DETECTAR CAMBIOS =====
 const valoresOriginales = ref({})
@@ -1138,7 +1027,8 @@ const hayChanges = computed(() => {
          configuracionEmail.value !== valoresOriginales.value.correo_empresa ||
          configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento ||
          configuracionReferido.value !== valoresOriginales.value.porcentaje_referido ||
-         configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro
+         configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro ||
+         configuracionRetiroMinimo.value !== valoresOriginales.value.retiro_minimo
 })
 
 const puedeEnviar = computed(() => {
@@ -1370,6 +1260,14 @@ const guardarConfiguraciones = async () => {
         valor: configuracionRetiro.value
       })
     }
+    
+    if (configuracionRetiroMinimo.value !== valoresOriginales.value.retiro_minimo) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'retiro_minimo')?.id_config,
+        tipo_config: 'retiro_minimo',
+        valor: configuracionRetiroMinimo.value
+      })
+    }
 
     console.log('Cambios detectados para enviar:', cambios)
 
@@ -1461,7 +1359,10 @@ const cargarConfiguraciones = async () => {
             configuracionReferido.value = Number(item.valor) || 0;
             break;
           case 'porcentaje_retiro':
-            configuracionRetiro.value = Number(item.valor) || 0;
+            configuracionRetiro.value = parseFloat(item.valor) || 0
+            break;
+          case 'retiro_minimo':
+            configuracionRetiroMinimo.value = parseFloat(item.valor) || 0
             break;
         }
       });
@@ -1475,7 +1376,8 @@ const cargarConfiguraciones = async () => {
         correo_empresa: configuracionEmail.value,
         porcentaje_descuento: configuracionDescuento.value,
         porcentaje_referido: configuracionReferido.value,
-        porcentaje_retiro: configuracionRetiro.value
+        porcentaje_retiro: configuracionRetiro.value,
+        retiro_minimo: configuracionRetiroMinimo.value
       }
       
       console.log('Configuraciones cargadas:', valoresOriginales.value);
@@ -2244,7 +2146,33 @@ onMounted(async () => {
 
 </script>
 
-<style scoped> 
+<style scoped>
+/* Transiciones */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.modal-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: translateY(1rem) scale(0.95);
+}
+
+/* Estilos generales */
 input, select, textarea {
   font-size: 14px;
 }

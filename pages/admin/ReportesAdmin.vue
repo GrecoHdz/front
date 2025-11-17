@@ -175,6 +175,149 @@
   </div>
 </Transition>
 
+<!-- Modal de Detalles del Retiro -->
+<Transition
+  name="modal"
+  enter-active-class="modal-enter-active"
+  leave-active-class="modal-leave-active"
+  enter-from-class="modal-enter-from"
+  leave-to-class="modal-leave-to"
+>
+  <div
+    v-if="showWithdrawalModal && selectedWithdrawal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+  >
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeWithdrawalModal"></div>
+
+    <div
+      class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[90%] sm:w-full max-w-md max-h-[85vh] overflow-y-auto relative z-10 text-[12px] sm:text-xs md:text-base"
+    >
+      <!-- Header -->
+      <div
+        class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl z-10"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2 sm:space-x-3">
+            <div
+              class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-black text-gray-900 dark:text-white">Detalles del Retiro</h3>
+              <p class="text-gray-600 dark:text-gray-400">ID: #{{ selectedWithdrawal.id || 'N/A' }}</p>
+            </div>
+          </div>
+          <button
+            @click="closeWithdrawalModal"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-3 sm:p-4 space-y-4">
+        <!-- Información del Retiro -->
+        <div>
+          <h4 class="font-bold text-gray-900 dark:text-white mb-2">Información del Retiro</h4>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+              <p class="text-gray-500 dark:text-gray-400 mb-1">Monto</p>
+              <p class="font-medium text-gray-900 dark:text-white">
+                L. {{ formatCurrency(selectedWithdrawal.monto || 0) }}
+              </p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+              <p class="text-gray-500 dark:text-gray-400 mb-1">Estado</p>
+              <div class="inline-block">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" :class="getStatusBadgeClass(selectedWithdrawal.estado)">
+                  {{ selectedWithdrawal.estado || 'Pendiente' }}
+                </span>
+              </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+              <p class="text-gray-500 dark:text-gray-400 mb-1">Fecha</p>
+              <p class="font-medium text-gray-900 dark:text-white">
+                {{ formatDate(selectedWithdrawal.fecha) || 'N/A' }}
+              </p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+              <p class="text-gray-500 dark:text-gray-400 mb-1">Solicitado por</p>
+              <p class="font-medium text-gray-900 dark:text-white">
+                {{ selectedWithdrawal.nombre_usuario || 'N/A' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información Bancaria -->
+        <div>
+          <h4 class="font-bold text-gray-900 dark:text-white mb-2">Información Bancaria</h4>
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+            <pre class="whitespace-pre-wrap font-sans text-gray-800 dark:text-gray-200 text-sm">{{ selectedWithdrawal.descripcion || 'No hay información bancaria disponible' }}</pre>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="pt-2 flex justify-end space-x-2">
+          <template v-if="selectedWithdrawal.estado === 'pendiente' || selectedWithdrawal.estado === 'Pendiente'">
+            <button
+              @click="rejectPayment(selectedWithdrawal.id_movimiento)"
+              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span>Rechazar</span>
+            </button>
+            <button
+              @click="approvePayment(selectedWithdrawal.id_movimiento)"
+              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Aprobar</span>
+            </button>
+          </template>
+          <button
+            v-else
+            @click="closeWithdrawalModal"
+            class="py-1.5 px-3 sm:py-2 sm:px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span>Cerrar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</Transition>
+
 
     <!-- Service Detail Modal -->
     <Transition
@@ -803,24 +946,11 @@ import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { useHead, useCookie, useRouter, useRoute, useRuntimeConfig } from '#imports';
 import { useAuthStore } from '~/middleware/auth.store'; 
-let jsPDF;
-let autoTable;
-
-// Function to load jsPDF and autoTable when needed
-async function loadPdfLibraries() {
-  if (!jsPDF) {
-    const jsPDFModule = await import('jspdf');
-    jsPDF = jsPDFModule.default || jsPDFModule;
-    
-    const autoTableModule = await import('jspdf-autotable');
-    autoTable = autoTableModule.default || autoTableModule;
-  }
-  return { jsPDF, autoTable };
-}
-
+import DataLabelsPlugin from 'chartjs-plugin-datalabels';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import Toast from '~/components/ui/Toast.vue'; 
-import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
 const router = useRouter();
 const route = useRoute();
@@ -848,7 +978,9 @@ const selectedMonthPayments = ref('');
 const selectedMonthReports = ref(new Date().toISOString().slice(0, 7));
 const statusFilter = ref('all');
 const showDetailsModal = ref(false);
+const showWithdrawalModal = ref(false);
 const selectedPayment = ref(null);
+const selectedWithdrawal = ref(null);
 const showServiceDetailModal = ref(false);
 const selectedService = ref(null);
 const initialStats = ref({
@@ -2212,6 +2344,8 @@ const getTransactionTitle = (transaction) => {
         return transaction.servicio || transaction.descripcion || 'Ingreso por servicio';
       case 'ingreso_referido':
         return transaction.descripcion || 'Ingreso por referido';
+      case 'retiro':
+        return 'Retiro de fondos'; // Siempre muestra este texto para retiros
       default:
         return transaction.descripcion || 'Transacción';
     }
@@ -2274,8 +2408,13 @@ const getNetBalance = () => {
 // ===== FUNCIONES DE MODAL =====
 const showItemDetails = (item) => {
   try {
-    selectedPayment.value = item;
-    showDetailsModal.value = true;
+    if (item.tipo === 'retiro') {
+      selectedWithdrawal.value = item;
+      showWithdrawalModal.value = true;
+    } else {
+      selectedPayment.value = item;
+      showDetailsModal.value = true;
+    }
     document.body.style.overflow = 'hidden';
   } catch (error) {
     console.error('Error al mostrar detalles del ítem:', error);
@@ -2289,6 +2428,16 @@ const closeDetailsModal = () => {
     selectedPayment.value = null;
   } catch (error) {
     console.error('Error cerrando modal:', error);
+  }
+};
+
+const closeWithdrawalModal = () => {
+  try {
+    showWithdrawalModal.value = false;
+    selectedWithdrawal.value = null;
+    document.body.style.overflow = 'auto';
+  } catch (error) {
+    console.error('Error cerrando modal de retiro:', error);
   }
 };
 
@@ -2568,9 +2717,60 @@ const createChart = async () => {
           }
         };
         break;
+
+      case 'services':
+      case 'users':
+        config = {
+          type: 'line',
+          data: selectedChart.value === 'services' ? servicesData : usersData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: { color: isDark ? '#9CA3AF' : '#6B7280' }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { color: isDark ? '#9CA3AF' : '#6B7280' },
+                grid: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)' }
+              },
+              x: {
+                ticks: { color: isDark ? '#9CA3AF' : '#6B7280' },
+                grid: { display: false }
+              }
+            }
+          }
+        };
+        break;
     }
     
     window.currentChart = new Chart(ctx, config);
+    
+    // Cargar datos según el tipo de gráfico
+    switch (selectedChart.value) {
+      case 'earnings':
+        if (platformDateFrom.value || platformDateTo.value) {
+          await updatePlatformStats();
+        }
+        break;
+      case 'serviceTypes':
+        await loadServiceTypesData();
+        break;
+      case 'services':
+        await loadServicesPerMonthData();
+        break;
+      case 'users':
+        await loadUserGrowthData();
+        break;
+      case 'cities':
+        await loadServicesByCityData();
+        break;
+    }
   } catch (error) {
     console.error('Error creando gráfico:', error);
   }
@@ -2588,6 +2788,108 @@ const updateChart = (chartData) => {
   }
 };
 
+// ===== FUNCIONES DE CARGA DE DATOS DE GRÁFICOS =====
+const loadServiceTypesData = async () => {
+  try { 
+    const response = await $fetch('/solicitudservicio/grafica/servicios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response?.success && response.data && window.currentChart) {
+      const { labels, data: valores } = response.data;
+      
+      window.currentChart.data.labels = labels || [];
+      window.currentChart.data.datasets[0].data = valores || [];
+      
+      const colors = ['#3B82F6', '#EF4444', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899'];
+      window.currentChart.data.datasets[0].backgroundColor = colors;
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de servicios por tipo:', error);
+    showToast('Error al cargar los datos del gráfico de servicios', 'error');
+  }
+};
+const loadServicesPerMonthData = async () => {
+  try { 
+    const response = await $fetch('/solicitudservicio/grafica/servicios-por-mes', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response?.success && response.data && window.currentChart) {
+      const { labels, data: valores } = response.data;
+      
+      window.currentChart.data.labels = labels || [];
+      window.currentChart.data.datasets[0].data = valores || [];
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de servicios por mes:', error);
+    showToast('Error al cargar los datos del gráfico de servicios por mes', 'error');
+  }
+};
+
+const loadUserGrowthData = async () => {
+  try { 
+    const response = await $fetch('/usuarios/grafica/crecimiento-usuarios', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response?.success && response.data && window.currentChart) {
+      const { labels, data: valores } = response.data;
+      
+      window.currentChart.data.labels = labels || [];
+      window.currentChart.data.datasets[0].data = valores || [];
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de crecimiento de usuarios:', error);
+    showToast('Error al cargar los datos del gráfico de crecimiento de usuarios', 'error');
+  }
+};
+
+const loadServicesByCityData = async () => {
+  try { 
+    const response = await $fetch('/solicitudservicio/grafica/servicios-por-ciudad', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response?.success && response.data && window.currentChart) {
+      const { labels, data: valores } = response.data;
+      
+      window.currentChart.data.labels = labels || [];
+      window.currentChart.data.datasets[0].data = valores || [];
+      
+      const colors = ['#8B5CF6', '#EC4899', '#F59E0B', '#EF4444', '#06B6D4'];
+      window.currentChart.data.datasets[0].backgroundColor = colors;
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de servicios por ciudad:', error);
+    showToast('Error al cargar los datos del gráfico de servicios por ciudad', 'error');
+  }
+};
+
 // ===== COMPUTED PROPERTIES =====
 const visibleTransactions = computed(() => {
   try {
@@ -2599,6 +2901,31 @@ const visibleTransactions = computed(() => {
 });
 
 // ===== REPORTES =====
+const servicesData = reactive({
+  labels: generateMonthLabels(),
+  datasets: [{
+    label: 'Servicios Realizados',
+    data: [85, 92, 78, 105, 98, 112, 125, 118, 132, 145, 158, 167],
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    borderColor: '#8B5CF6',
+    borderWidth: 3,
+    tension: 0.3,
+    fill: true
+  }]
+});
+
+const usersData = reactive({
+  labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+  datasets: [{
+    label: 'Usuarios Registrados',
+    data: [150, 280, 420, 650, 890, 1200],
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: '#10B981',
+    borderWidth: 3,
+    tension: 0.3,
+    fill: true
+  }]
+});
 const availableReports = ref([
   {
     id: 1,
@@ -2629,71 +2956,76 @@ const availableReports = ref([
 const generateReport = async (report) => {
   try {
     report.generating = true;
-
-    const { jsPDF, autoTable } = await loadPdfLibraries();
     
     const config = useRuntimeConfig();
     const auth = useAuthStore();
 
-    const [year, month] = selectedMonthReports.value.split('-').map(Number);
+    // 🗓️ 1️⃣ Obtener mes y año seleccionados
+    const selectedMonth = selectedMonthReports.value || new Date().toISOString().slice(0, 7);
+    const [year, month] = selectedMonth.split('-').map(Number);
     const monthNames = [
       'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
     const mesNombre = monthNames[month - 1];
 
+    // 📦 2️⃣ Obtener datos base comunes
     const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes] = await Promise.all([
-      $fetch(`/membresia?month=${selectedMonthReports.value}`, {
+      $fetch(`/membresia?month=${selectedMonth}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
       }),
-      $fetch(`/pagovisita?month=${selectedMonthReports.value}`, {
+      $fetch(`/pagovisita?month=${selectedMonth}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
       }),
-      $fetch(`/movimientos/retiros?month=${selectedMonthReports.value}`, {
+      $fetch(`/movimientos/retiros?month=${selectedMonth}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
       }),
-      $fetch(`/cotizacion?month=${selectedMonthReports.value}`, {
+      $fetch(`/cotizacion?month=${selectedMonth}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
       }),
-      $fetch(`/usuarios?month=${selectedMonthReports.value}`, {
+      $fetch(`/usuarios?month=${selectedMonth}`, {
         baseURL: config.public.apiBase,
         headers: { 'Authorization': `Bearer ${auth.token}` }
       })
     ]);
 
+    // 🔄 3️⃣ Normalizar data
     const processData = (data, label) => ({
       label,
       total: parseFloat(data?.estadisticas?.total || 0),
       data: data?.data || [],
       stats: data?.estadisticas || {}
     });
-
     const usersData = {
-      label: 'Usuarios',
-      total: usersRes?.estadisticas?.total || 0,
-      data: usersRes?.data || [],
-      stats: usersRes?.estadisticas || {}
-    };
+  label: 'Usuarios',
+  total: usersRes?.estadisticas?.total || 0,
+  data: usersRes?.data || [],
+  stats: usersRes?.estadisticas || {}
+};
+
 
     const membershipData = processData(membershipRes, 'Membresías');
     const visitData = processData(visitRes, 'Visitas Técnicas');
     const quotationData = processData(quotationRes, 'Cotizaciones');
     const withdrawalsData = processData(withdrawalsRes, 'Retiros');
-    const serviceData = processData(quotationRes, 'Servicios');
 
+    const serviceData = processData(quotationRes, 'Servicios'); // 👈 Cotizaciones se consideran "servicios" en el reporte financiero
+
+    // 💰 4️⃣ Cálculos de balance
     const ingresosTotales = membershipData.total + visitData.total + serviceData.total;
     const retirosTotales = withdrawalsData.total;
     const balanceNeto = ingresosTotales - retirosTotales;
 
+    // 🧾 5️⃣ Crear documento PDF
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    doc.autoTable = autoTable;
     const colorPrincipal = [93, 92, 222];
     const colorSecundario = [75, 85, 99];
 
+    // 🏷️ Encabezado
     doc.setFillColor(...colorPrincipal);
     doc.rect(0, 0, 210, 28, 'F');
     doc.setTextColor(255, 255, 255);
@@ -2704,7 +3036,10 @@ const generateReport = async (report) => {
     doc.text(`Reporte: ${report.title}`, 15, 18);
     doc.text(`Período: ${mesNombre} ${year}`, 15, 23);
 
+    // 📚 6️⃣ Seleccionar tipo de reporte
     switch (report.id) {
+
+      // ===== REPORTE FINANCIERO =====
       case 1:
         await generarReporteFinanciero(doc, {
           membershipData,
@@ -2717,7 +3052,9 @@ const generateReport = async (report) => {
         });
         break;
 
+      // ===== REPORTE DE SERVICIOS =====
       case 2: {
+        // Solo en este reporte se usa /solicitudservicio
         const serviceRes = await $fetch(`/solicitudservicio?month=${selectedMonthReports.value}`, {
           baseURL: config.public.apiBase,
           headers: { Authorization: `Bearer ${auth.token}` }
@@ -2727,14 +3064,21 @@ const generateReport = async (report) => {
         break;
       }
 
+      // ===== REPORTE DE USUARIOS =====
       case 3:
         await generarReporteUsuarios(doc, { usersData, mesNombre, year });
+        break;
+
+      // ===== REPORTE DE TRANSACCIONES =====
+      case 4:
+        await generarReporteTransacciones(doc, membershipData, visitData, withdrawalsData);
         break;
 
       default:
         showToast('Tipo de reporte no reconocido', 'error');
     }
 
+    // 📄 7️⃣ Footer con número de página
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
@@ -2749,6 +3093,7 @@ const generateReport = async (report) => {
       doc.text(`Página ${i} de ${totalPages}`, 190, 287, { align: 'right' });
     }
 
+    // 🖨️ 8️⃣ Mostrar PDF
     const fileName = `${report.title.replace(/\s+/g, '_')}_${mesNombre}_${year}.pdf`;
     const pdfBlob = doc.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -2763,23 +3108,553 @@ const generateReport = async (report) => {
   }
 };
 
-// Funciones auxiliares para reportes (simplificadas por espacio)
-const generarReporteFinanciero = async (doc, data) => {
-  // Implementación del reporte financiero...
+// ===== REPORTE FINANCIERO =====
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }) => {
+  let currentY = 40;
+
+  // 🎯 Título
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(14);
+  doc.text('REPORTE FINANCIERO MENSUAL', 10, currentY);
+  currentY += 6;
+
+  // 📊 Calcular porcentajes
+  const totalIngresos = membershipData.total + visitData.total + serviceData.total;
+  const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
+
+  // 📋 Tabla resumen de totales
+  doc.autoTable({
+    startY: currentY,
+    head: [['Concepto', 'Total (HNL)', 'Porcentaje (%)']],
+    body: [
+      ['Membresías', formatCurrency(membershipData.total), calcPorcentaje(membershipData.total)],
+      ['Visitas Técnicas', formatCurrency(visitData.total), calcPorcentaje(visitData.total)],
+      ['Servicios', formatCurrency(serviceData.total), calcPorcentaje(serviceData.total)],
+      ['Retiros', formatCurrency(withdrawalsData.total), '-'],
+      ['Balance Neto', formatCurrency(balanceNeto), '-']
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 9 },
+    bodyStyles: { fontSize: 9 },
+    columnStyles: { 0: { cellWidth: 70 }, 1: { halign: 'right' }, 2: { halign: 'center' } },
+    margin: { left: 10, right: 10 }
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // 📋 Detalle de Ingresos
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(12);
+  doc.text('Detalle de Ingresos', 10, currentY);
+  currentY += 8;
+
+  const membresiasFiltradas = membershipData.data
+    .filter(m => m.estado?.toLowerCase() !== 'pendiente')
+    .map(m => [formatDate(m.fecha), 'Membresía', m.usuario?.nombre || m.usuario?.cliente?.nombre || '-', formatCurrency(m.monto)]);
+
+  const visitasFiltradas = visitData.data
+    .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
+    .map(v => [formatDate(v.fecha), 'Visita', v.cliente?.nombre || v.client || v.usuario?.nombre || '-', formatCurrency(v.monto)]);
+
+  const serviciosFiltrados = serviceData.data
+    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
+    .map(s => [formatDate(s.fecha), 'Servicio', s.solicitud?.cliente?.nombre || '-', formatCurrency(s.monto_total || 0)]);
+
+  const totalIngresosTabla = [...membresiasFiltradas, ...visitasFiltradas, ...serviciosFiltrados]
+    .reduce((sum, row) => sum + (parseFloat(row[3].replace(/[^0-9.-]+/g, "")) || 0), 0);
+
+  const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0;
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Fecha', 'Tipo', 'Cliente', 'Monto']],
+    body: hayDatos
+      ? [
+          ...membresiasFiltradas,
+          ...visitasFiltradas,
+          ...serviciosFiltrados,
+          [
+            { content: 'TOTAL INGRESOS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalIngresosTabla), styles: { fontStyle: 'bold' } }
+          ]
+        ]
+      : [[{ content: 'No hay datos disponibles', colSpan: 4, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 30 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 } },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // 📋 Detalle de Retiros
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(12);
+  doc.text('Detalle de Retiros', 10, currentY);
+  currentY += 8;
+
+  const retirosFiltrados = withdrawalsData.data
+    .filter(r => r.estado?.toLowerCase() !== 'pendiente')
+    .map(r => [
+      formatDate(r.fecha),
+      r.nombre_usuario || '-',
+      r.descripcion?.replace(/\n/g, ' ') || 'Sin descripción',
+      formatCurrency(r.monto),
+      r.estado
+    ]);
+
+  const totalRetiros = withdrawalsData.data.reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
+  const hayRetiros = retirosFiltrados.length > 0;
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Fecha', 'Usuario', 'Descripción', 'Monto', 'Estado']],
+    body: hayRetiros
+      ? [
+          ...retirosFiltrados,
+          [
+            { content: 'TOTAL RETIROS', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalRetiros), styles: { fontStyle: 'bold' } }
+          ]
+        ]
+      : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // 📄 Resumen Final
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(33, 33, 33);
+  doc.text('Resumen Final', 10, currentY);
+  currentY += 6;
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Total Ingresos', 'Total Retiros', 'Balance Neto']],
+    body: [[
+      formatCurrency(totalIngresos),
+      formatCurrency(withdrawalsData.total),
+      formatCurrency(balanceNeto)
+    ]],
+    theme: 'grid',
+    headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 9 },
+    bodyStyles: { fontSize: 9 },
+    margin: { left: 10, right: 10 }
+  });
 };
 
-const generarReporteUsuarios = async (doc, data) => {
-  // Implementación del reporte de usuarios...
+// ===== REPORTE DE USUARIOS =====
+const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
+  let currentY = 40;
+
+  // 🔹 Título principal
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(14);
+  doc.text('REPORTE DE USUARIOS', 10, currentY);
+  currentY += 8;
+
+  // ============================================================
+  // 1️⃣ TABLA DE CLIENTES
+  // ============================================================
+  const clientes = usersData.data.filter(u => u.rol?.nombre_rol?.toLowerCase() === 'usuario');
+  const totalClientes = clientes.length;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(93, 92, 222);
+  doc.text('Clientes Registrados', 10, currentY);
+  currentY += 8;
+
+  const clientesBody = clientes.map(c => [
+    formatDate(c.fecha_registro),
+    c.nombre,
+    c.telefono || '-',
+    c.ciudad?.nombre_ciudad || '-',
+    c.estado,
+    c.total_servicios_cliente || 0,
+    c.total_membresias || 0
+  ]);
+
+  if (clientesBody.length > 0) {
+    const totalServicios = clientes.reduce((sum, c) => sum + (parseInt(c.total_servicios_cliente) || 0), 0);
+    const totalMembresias = clientes.reduce((sum, c) => sum + (parseInt(c.total_membresias) || 0), 0);
+    
+    clientesBody.push([
+      { content: `Total clientes: ${totalClientes}`, colSpan: 5, styles: { fontStyle: 'bold' } },
+      { content: totalServicios.toString(), styles: { halign: 'right', fontStyle: 'bold' } },
+      { content: totalMembresias.toString(), styles: { halign: 'right', fontStyle: 'bold' } }
+    ]);
+  }
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Fecha Registro', 'Nombre', 'Teléfono', 'Ciudad', 'Estado', 'Servicios', 'Membresías']],
+    body: clientesBody.length
+      ? clientesBody
+      : [[{ content: 'No hay clientes registrados en este período', colSpan: 7, styles: { halign: 'center', fontStyle: 'italic', textColor: [120, 120, 120] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 25 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 25 },
+      5: { cellWidth: 22, halign: 'right' },
+      6: { cellWidth: 25, halign: 'right' }
+    },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // ============================================================
+  // 2️⃣ TABLA DE TÉCNICOS
+  // ============================================================
+  const tecnicos = usersData.data.filter(u =>
+    ['técnico', 'tecnico'].includes(u.rol?.nombre_rol?.toLowerCase())
+  );
+  const totalTecnicos = tecnicos.length;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(93, 92, 222);
+  doc.text('Técnicos Registrados', 10, currentY);
+  currentY += 8;
+
+  const tecnicosBody = tecnicos.map(t => [
+    formatDate(t.fecha_registro),
+    t.nombre,
+    t.telefono || '-',
+    t.ciudad?.nombre_ciudad || '-',
+    t.estado,
+    t.total_servicios_tecnico || 0
+  ]);
+
+  if (tecnicosBody.length > 0) {
+    const totalServiciosTecnicos = tecnicos.reduce((sum, t) => sum + (parseInt(t.total_servicios_tecnico) || 0), 0);
+    
+    tecnicosBody.push([
+      { content: `Total técnicos: ${totalTecnicos}`, colSpan: 5, styles: { fontStyle: 'bold' } },
+      { content: totalServiciosTecnicos.toString(), styles: { halign: 'right', fontStyle: 'bold' } }
+    ]);
+  }
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Fecha Registro', 'Nombre', 'Teléfono', 'Ciudad', 'Estado', 'Servicios']],
+    body: tecnicosBody.length
+      ? tecnicosBody
+      : [[{ content: 'No hay técnicos registrados en este período', colSpan: 6, styles: { halign: 'center', fontStyle: 'italic', textColor: [120, 120, 120] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 53 },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 35 },
+      4: { cellWidth: 25 },
+      5: { cellWidth: 20, halign: 'right' }
+    },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  // ============================================================
+  // 3️⃣ ESTADÍSTICAS GENERALES (dividida en 2 columnas)
+  // ============================================================
+  const stats = usersData.stats || {};
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(93, 92, 222);
+  doc.text('Estadísticas Generales (Actuales)', 10, currentY);
+  currentY += 6;
+
+  const statsCol1 = [
+    ['Usuarios activos', stats.activos || 0],
+    ['Usuarios inactivos', stats.inactivos || 0],
+    ['Usuarios deshabilitados', stats.deshabilitados || 0],
+    ['Total de usuarios', stats.total || 0]
+  ];
+
+  const statsCol2 = [
+    ['Usuarios que solicitaron servicios', stats.usuarios_que_solicitaron_servicios || 0],
+    ['Usuarios con membresía', stats.usuarios_con_membresia || 0],
+    ['Técnicos activos', stats.tecnicos_activos || 0]
+  ];
+
+  // 🟦 Primera columna
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Métrica', 'Cantidad']],
+    body: statsCol1,
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8, cellPadding: 1.5 },
+    margin: { left: 10 },
+    tableWidth: 85,
+    columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 30, halign: 'right' } }
+  });
+
+  // 🟩 Segunda columna (a la derecha)
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Métrica', 'Cantidad']],
+    body: statsCol2,
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8, cellPadding: 1.5 },
+    margin: { left: 110 },
+    tableWidth: 85,
+    columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 30, halign: 'right' } }
+  });
 };
 
-const generarReporteServiciosDetallado = async (doc, data) => {
-  // Implementación del reporte de servicios...
+
+// ===== REPORTE DE SERVICIOS DETALLADO =====
+const generarReporteServiciosDetallado = async (doc, serviceData) => {
+  const servicios = Array.isArray(serviceData?.data) ? serviceData.data : [];
+  const TERMINADOS = ['finalizado', 'calificado', 'cancelado'];
+
+  // 📊 Clasificación
+  const serviciosActivosConPago = servicios.filter(
+    s => s.pagoVisita?.monto != null && !TERMINADOS.includes(s.estado)
+  );
+  const serviciosActivosSinPago = servicios.filter(
+    s => (s.pagoVisita == null || s.pagoVisita.monto == null) && !TERMINADOS.includes(s.estado)
+  );
+  const serviciosTerminados = servicios.filter(s => TERMINADOS.includes(s.estado));
+
+  // 🧩 Helpers
+  const formatValue = (v) => v ?? '-';
+  const obtenerUbicacion = (s) => {
+    const colonia = s?.colonia?.trim() || '';
+    const ciudad = s?.ciudad?.nombre?.trim() || '';
+    if (colonia && ciudad) return `${colonia} - ${ciudad}`;
+    return colonia || ciudad || '-';
+  };
+  const montoFila_ConPago = (s) => (parseFloat(s?.cotizacion?.total || 0) + parseFloat(s?.pagoVisita?.monto || 0));
+  const montoFila_SinPago = (s) => parseFloat(s?.cotizacion?.total || 0);
+  const montoFila_Terminado = (s) => (parseFloat(s?.cotizacion?.total || 0) + parseFloat(s?.pagoVisita?.monto || 0));
+
+  let currentY = 40;
+
+  // ========= 1️⃣ SERVICIOS ACTIVOS CON PAGO DE VISITA =========
+  if (serviciosActivosConPago.length) {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(93, 92, 222);
+    doc.setFontSize(13);
+    doc.text('SERVICIOS ACTIVOS CON PAGO DE VISITA', 10, currentY);
+    currentY += 6;
+
+    const headers = ['Fecha Solicitud', 'Cliente', 'Técnico', 'Servicio', 'Ubicación', 'Estado', 'Monto Total'];
+    const rows = serviciosActivosConPago.map(s => ([
+      formatDate(s.fecha_solicitud),
+      formatValue(s.cliente?.nombre),
+      formatValue(s.tecnico?.nombre),
+      formatValue(s.servicio?.nombre),
+      obtenerUbicacion(s),
+      formatValue(s.estado),
+      formatCurrency(montoFila_ConPago(s))
+    ]));
+
+    autoTable(doc, {
+      startY: currentY,
+      head: [headers],
+      body: rows, // 🔹 sin fila de total general
+      theme: 'grid',
+      headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
+      margin: { left: 10, right: 10 },
+      pageBreak: 'auto'
+    });
+
+    currentY = doc.lastAutoTable.finalY + 10;
+  }
+
+  // ========= 2️⃣ SERVICIOS ACTIVOS SIN PAGO DE VISITA =========
+  if (serviciosActivosSinPago.length) {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(93, 92, 222);
+    doc.setFontSize(13);
+    doc.text('SERVICIOS ACTIVOS SIN PAGO DE VISITA', 10, currentY);
+    currentY += 6;
+
+    const headers = ['Fecha Solicitud', 'Cliente', 'Técnico', 'Servicio', 'Ubicación', 'Estado', 'Monto Total'];
+    const rows = serviciosActivosSinPago.map(s => ([
+      formatDate(s.fecha_solicitud),
+      formatValue(s.cliente?.nombre),
+      formatValue(s.tecnico?.nombre),
+      formatValue(s.servicio?.nombre),
+      obtenerUbicacion(s),
+      formatValue(s.estado),
+      formatCurrency(montoFila_SinPago(s))
+    ]));
+
+    autoTable(doc, {
+      startY: currentY,
+      head: [headers],
+      body: rows, // 🔹 sin fila de total general
+      theme: 'grid',
+      headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
+      margin: { left: 10, right: 10 },
+      pageBreak: 'auto'
+    });
+
+    currentY = doc.lastAutoTable.finalY + 10;
+  }
+
+  // ========= 3️⃣ SERVICIOS TERMINADOS =========
+  if (serviciosTerminados.length) {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(93, 92, 222);
+    doc.setFontSize(13);
+    doc.text('SERVICIOS TERMINADOS', 10, currentY);
+    currentY += 6;
+
+    const headers = ['Fecha Solicitud', 'Cliente', 'Técnico', 'Servicio', 'Ubicación', 'Estado', 'Monto Total'];
+    const rows = serviciosTerminados.map(s => ([
+      formatDate(s.fecha_solicitud),
+      formatValue(s.cliente?.nombre),
+      formatValue(s.tecnico?.nombre),
+      formatValue(s.servicio?.nombre),
+      obtenerUbicacion(s),
+      formatValue(s.estado),
+      formatCurrency(montoFila_Terminado(s))
+    ]));
+
+    const totalTabla = serviciosTerminados.reduce((sum, s) => sum + montoFila_Terminado(s), 0);
+    const totalRow = [
+      { content: 'TOTAL GENERAL', colSpan: headers.length - 1, styles: { halign: 'right', fontStyle: 'bold' } },
+      { content: formatCurrency(totalTabla), styles: { fontStyle: 'bold' } }
+    ];
+
+    autoTable(doc, {
+      startY: currentY,
+      head: [headers],
+      body: [...rows, totalRow],
+      theme: 'grid',
+      headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
+      margin: { left: 10, right: 10 },
+      pageBreak: 'auto'
+    });
+
+    currentY = doc.lastAutoTable.finalY + 10;
+  }
+
+  // ========= 4️⃣ DESGLOSE POR TIPO DE SERVICIO =========
+  const contadorPorServicio = servicios.reduce((acc, s) => {
+    const nombre = s?.servicio?.nombre ? String(s.servicio.nombre).trim() : 'Sin servicio';
+    acc[nombre] = (acc[nombre] || 0) + 1;
+    return acc;
+  }, {});
+
+  const desgloseRows = Object.keys(contadorPorServicio).map(nombre => [nombre, contadorPorServicio[nombre]]);
+
+  if (desgloseRows.length) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(93, 92, 222);
+    doc.text('DESGLOSE POR TIPO DE SERVICIO', 10, currentY);
+    currentY += 6;
+
+    autoTable(doc, {
+      startY: currentY,
+      head: [['Servicio', 'Cantidad']],
+      body: desgloseRows,
+      theme: 'grid',
+      headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 9 },
+      margin: { left: 10, right: 10 },
+      pageBreak: 'auto'
+    });
+  }
 };
+
+
+// ===== REPORTE DE TRANSACCIONES =====
+const generarReporteTransacciones = async (doc, membershipData, visitData, withdrawalsData) => {
+  const data = [
+    ...(membershipData?.data || []).map((m) => ({
+      tipo: 'Membresía',
+      fecha: m?.fecha || new Date().toISOString(),
+      descripcion: `Pago de membresía - ${m?.usuario?.nombre || 'Sin nombre'}`,
+      monto: parseFloat(m?.monto || 0),
+      estado: m?.estado || 'Pendiente'
+    })),
+    ...(visitData?.data || []).map((v) => ({
+      tipo: 'Visita',
+      fecha: v?.fecha || new Date().toISOString(),
+      descripcion: `Pago visita - ${v?.solicitud?.servicio?.nombre || 'Servicio'}`,
+      monto: parseFloat(v?.monto || 0),
+      estado: v?.estado || 'Pendiente'
+    })),
+    ...(withdrawalsData?.data || []).map((r) => ({
+      tipo: 'Retiro',
+      fecha: r?.fecha || new Date().toISOString(),
+      descripcion: r?.descripcion || 'Retiro de fondos',
+      monto: -Math.abs(parseFloat(r?.monto || 0)),
+      estado: r?.estado || 'Pendiente'
+    }))
+  ].filter(Boolean);
+
+  let currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 12 : 40;
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(14);
+  doc.text('REPORTE DE TRANSACCIONES', 10, currentY);
+  currentY += 6;
+
+  const headers = ['Fecha', 'Tipo', 'Descripción', 'Estado', 'Monto']; // monto al final
+  const rows = data.map((t) => [
+    formatDate(t.fecha),
+    t.tipo,
+    t.descripcion,
+    t.estado,
+    formatCurrency(t.monto)
+  ]);
+
+  const total = data.reduce((sum, t) => sum + (t.monto || 0), 0);
+  const totalRow = [
+    { content: 'TOTAL GENERAL', colSpan: headers.length - 1, styles: { halign: 'right', fontStyle: 'bold' } },
+    { content: formatCurrency(total), styles: { fontStyle: 'bold' } }
+  ];
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [headers],
+    body: [...rows, totalRow],
+    theme: 'grid',
+    headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    margin: { left: 10, right: 10 }
+  });
+};
+
 
 // ===== FUNCIONES DE APROBACION o RECHAZO DE PAGOS =====
 const approvePayment = async (id) => {
   try {
-    const payment = selectedPayment.value;
+    const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
     let response;
 
     const config = useRuntimeConfig();
@@ -2820,7 +3695,8 @@ const approvePayment = async (id) => {
         break;
 
       case 'withdrawals':
-        response = await $fetch(`/movimientos/${payment.id_movimiento || payment.id}`, {
+        const withdrawalId = payment.id_movimiento || payment.id;
+        response = await $fetch(`/movimientos/${withdrawalId}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers,
@@ -2829,7 +3705,15 @@ const approvePayment = async (id) => {
         break;
     }
 
-    closeDetailsModal();
+    if (activeTab.value === 'withdrawals') {
+      // Update the withdrawal status in the UI
+      if (selectedWithdrawal.value) {
+        selectedWithdrawal.value.estado = 'completado';
+      }
+      closeWithdrawalModal();
+    } else {
+      closeDetailsModal();
+    }
     showToast('Pago aprobado correctamente', 'success');
 
     const currentPage = currentPaymentsPage.value;
@@ -2849,7 +3733,7 @@ const approvePayment = async (id) => {
 
 const rejectPayment = async (id) => {
   try {
-    const payment = selectedPayment.value;
+    const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
     let response;
 
     const config = useRuntimeConfig();
@@ -2892,7 +3776,8 @@ const rejectPayment = async (id) => {
         break;
 
       case 'withdrawals':
-        response = await $fetch(`/movimientos/${payment.id_movimiento || payment.id}`, {
+        const withdrawalId = payment.id_movimiento || payment.id;
+        response = await $fetch(`/movimientos/${withdrawalId}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers,
@@ -2901,7 +3786,15 @@ const rejectPayment = async (id) => {
         break;
     }
 
-    closeDetailsModal();
+    if (activeTab.value === 'withdrawals') {
+      // Update the withdrawal status in the UI
+      if (selectedWithdrawal.value) {
+        selectedWithdrawal.value.estado = 'rechazado';
+      }
+      closeWithdrawalModal();
+    } else {
+      closeDetailsModal();
+    }
     showToast('Pago rechazado correctamente', 'success');
 
     const currentPage = currentPaymentsPage.value;
