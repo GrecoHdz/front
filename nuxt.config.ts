@@ -41,7 +41,7 @@ export default defineNuxtConfig({
     public: {
       appName: 'TecniServ',
       appVersion: '1.0.0',
-      apiBase: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:4000'   
+      apiBase: process.env.NUXT_PUBLIC_API_URLL || 'http://localhost:4000'   
     }
   }
 })

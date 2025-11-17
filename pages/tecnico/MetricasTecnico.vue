@@ -1347,6 +1347,26 @@ const processWithdraw = async () => {
     balance.value.balanceDisponible -= parseFloat(withdrawForm.amount)
     balance.value.ultimoRetiro = withdrawForm.amount
     
+    // Notificar a los administradores sobre la nueva petición de retiro
+    try {
+      await $fetch('/notificaciones/enviar', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({
+          titulo: 'Nueva Petición de Retiro',
+          nombre_rol: 'admin'
+        })
+      });
+    } catch (error) {
+      console.error('Error al enviar notificación a administradores:', error);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
+    
     showSuccess(`Retiro de L. ${formatCurrency(withdrawForm.amount)} solicitado correctamente`)
     
     closeWithdrawModal()

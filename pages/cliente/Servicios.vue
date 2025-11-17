@@ -3140,7 +3140,11 @@ const cancelarSolicitud = async () => {
   try {
     const token = useCookie('token').value
     
-    await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+    // Obtener el servicio actual del modal usando selectedServiceRef
+    const currentService = selectedServiceRef.value;
+    
+    // Actualizar el estado del servicio a cancelado
+    const response = await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       headers: {
@@ -3152,7 +3156,45 @@ const cancelarSolicitud = async () => {
         estado: 'cancelado',
         comentario: cancelAdditionalInfo.value.trim()
       })
-    })
+    });
+
+    // Notificar al técnico si está asignado, de lo contrario notificar a los administradores
+    try {
+      if (currentService?.technician) {
+        // Notificar al técnico asignado
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Servicio Cancelado',
+            id_usuario: currentService.technician
+          })
+        });
+      } else {
+        // Notificar a los administradores cuando no hay técnico asignado
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Servicio Cancelado - Sin Técnico Asignado',
+            nombre_rol: 'admin'
+          })
+        });
+      }
+    } catch (notificationError) {
+      console.error('Error al enviar notificación:', notificationError);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
 
     closeCancelModal()
     

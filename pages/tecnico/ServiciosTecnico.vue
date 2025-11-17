@@ -30,8 +30,7 @@
        @toggle-filters="showFilters = !showFilters"
        @filter-change="currentFilter = $event"
        @service-type-toggle="toggleServiceTypeFilter($event)"
-       @date-filter-change="currentDateFilter = $event"
-       @status-toggle="toggleTechnicianStatus"
+       @date-filter-change="currentDateFilter = $event" 
      />
 
     <!-- Content Container -->
@@ -907,6 +906,7 @@ const mapSolicitudToService = (solicitud) => {
     date: formatDate(solicitud.fecha_solicitud),
     assignedDate: solicitud.fecha_solicitud,
     customer: {
+      id: solicitud.cliente?.id_usuario,
       name: solicitud.cliente?.nombre || 'Desconocido',
       phone: solicitud.cliente?.telefono || 'N/A'
     },
@@ -974,11 +974,7 @@ const resetFilters = () => {
   currentFilter.value = 'all'
   currentDateFilter.value = 'all'
   selectedServiceTypes.value = []
-}
-
-const toggleTechnicianStatus = () => {
-  updateStatus()
-}
+} 
 
 // ===== FUNCIONES DE CARGA DE DATOS =====
 // Variable para mantener el offset actual
@@ -1175,29 +1171,7 @@ const loadQuotationDetails = async () => {
   } finally {
     isLoading.value = false
   }
-}
-
-// ===== FUNCIONES DE ESTADO =====
-const updateStatus = async () => {
-  try {
-    const newStatus = 'disponible'
-    
-    await $fetch(`/api/tecnico/estado`, {
-      baseURL: config.public.apiBase,
-      method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: { estado: newStatus }
-    })
-    
-    showToast(`Estado actualizado correctamente`, 'success')
-  } catch (error) {
-    console.error('Error al actualizar estado:', error)
-    showToast('Error al actualizar el estado. Intente de nuevo.', 'error')
-  }
-}
+} 
 
 // ===== FUNCIONES DE MODAL =====
 const openServiceModal = async (service) => { 
@@ -1312,6 +1286,33 @@ const submitQuotation = async () => {
     
     console.log('Respuesta del servidor:', cotizacionResponse);
     
+    // Notificar al usuario que solicitó el servicio sobre la cotización enviada
+    try {
+      const userId = selectedService.value.rawData.cliente?.id_usuario;
+      
+      if (userId) {
+        console.log('ID del usuario a notificar:', userId);
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Cotización Recibida',
+            id_usuario: userId
+          })
+        });
+      } else {
+        console.warn('No se pudo obtener el ID del usuario para enviar la notificación');
+      }
+    } catch (error) {
+      console.error('Error al enviar notificación al usuario:', error);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
+    
     showToast('Cotización enviada correctamente', 'success')
     
     closeQuotationModal()
@@ -1397,6 +1398,33 @@ const updateQuotation = async () => {
     })
     
     if ((response && response.status === 'success') || (Array.isArray(response) && response.length > 0)) {
+      // Notificar al usuario sobre la actualización de la cotización
+      try {
+        const userId = selectedService.value.rawData.cliente?.id_usuario;
+        
+        if (userId) {
+          console.log('Notificando al usuario sobre cotización actualizada, ID:', userId);
+          await $fetch('/notificaciones/enviar', {
+            baseURL: config.public.apiBase,
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${auth.token}`
+            },
+            body: JSON.stringify({
+              titulo: 'Cotización Editada',
+              id_usuario: userId
+            })
+          });
+        } else {
+          console.warn('No se pudo obtener el ID del usuario para notificar sobre la actualización de la cotización');
+        }
+      } catch (notificationError) {
+        console.error('Error al enviar notificación de cotización actualizada:', notificationError);
+        // No mostrar error al usuario para no afectar su experiencia
+      }
+      
       showToast({
         message: 'Cotización actualizada correctamente',
         type: 'success'
@@ -1453,11 +1481,40 @@ const confirmCompleteService = async () => {
       }
     })
     
+    // Notificar al usuario que solicitó el servicio sobre la finalización
+    try {
+      const userId = selectedService.value.rawData.cliente?.id_usuario;
+      
+      if (userId) {
+        console.log('Notificando al usuario sobre servicio completado, ID:', userId);
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Servicio Finalizado',
+            id_usuario: userId
+          })
+        });
+      } else {
+        console.warn('No se pudo obtener el ID del usuario para notificar sobre la finalización del servicio');
+      }
+    } catch (notificationError) {
+      console.error('Error al enviar notificación de servicio completado:', notificationError);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
+    
     showToast('Servicio marcado como completado exitosamente', 'success')
     
     showCompleteConfirmation.value = false
+    completeServiceComment.value = ''
     
     await loadServices()
+    closeServiceModal()
     
   } catch (error) {
     console.error('Error al completar el servicio:', error)
@@ -1483,11 +1540,38 @@ const cancelService = async () => {
       }
     })
 
+    // Notificar al usuario sobre la cancelación del servicio
+    try {
+      const userId = selectedService.value.rawData.cliente?.id_usuario;
+      
+      if (userId) {
+        console.log('Notificando al usuario sobre servicio cancelado, ID:', userId);
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Servicio Cancelado',
+            id_usuario: userId
+          })
+        });
+      } else {
+        console.warn('No se pudo obtener el ID del usuario para notificar sobre la cancelación del servicio');
+      }
+    } catch (notificationError) {
+      console.error('Error al enviar notificación de servicio cancelado:', notificationError);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
+
     showToast('Servicio cancelado correctamente', 'success')
 
     closeServiceModal()
     showCancelConfirmation.value = false
-    loadServices()
+    await loadServices()
   } catch (error) {
     console.error('Error al cancelar el servicio:', error)
     showToast('Error al cancelar el servicio. Por favor, inténtalo de nuevo.', 'error')
