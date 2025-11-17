@@ -1281,6 +1281,25 @@ const processWithdraw = async () => {
     }
 
     if (response && response.success === true) {
+      // Notificar a los administradores sobre el nuevo retiro
+      try {
+        await $fetch('/notificaciones/enviar', {
+          method: 'POST',
+          baseURL: config.public.apiBase,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Nueva Petición de Retiro',
+            nombre_rol: 'admin'
+          })
+        });
+      } catch (error) {
+        console.error('Error al enviar notificación:', error); 
+      }
+
       if (stats.value) {
         stats.value.availableBalance -= montoMaximoRetiro;
         stats.value.retirado = (parseFloat(stats.value.retirado) + montoMaximoRetiro).toFixed(2);

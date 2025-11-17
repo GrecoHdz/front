@@ -2598,6 +2598,26 @@ const submitRating = async () => {
         })
       }) 
 
+      // Notificar al técnico sobre la calificación
+      try {
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Calificacion Recibida',
+            id_usuario: currentService.technician
+          })
+        });
+      } catch (error) {
+        console.error('Error al enviar notificación al técnico:', error);
+        // No mostrar error al usuario para no afectar su experiencia
+      }
+
       // Actualizar el estado local
       const serviceIndex = allServices.value.findIndex(s => s.id === currentService.id)
       if (serviceIndex !== -1) {
@@ -2742,7 +2762,33 @@ const acceptQuotation = async () => {
     
     console.log('Respuesta de creación de movimiento:', movimientoResponse);
     
-    // ✅ Cerrar modal y recargar datos
+    // Notificar al técnico sobre la cotización aceptada
+    try {
+      const servicioActual = servicesData.value.solicitudes.find(s => s.id_solicitud === selectedServiceId.value);
+      const idTecnico = servicioActual?.id_tecnico;
+      
+      if (idTecnico) {
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Cotización Aceptada',
+            id_usuario: idTecnico
+          })
+        });
+        console.log('Notificación enviada al técnico');
+      }
+    } catch (error) {
+      console.error('Error al enviar notificación al técnico:', error);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
+    
+    // Cerrar modal y recargar datos
     showQuotationModal.value = false;
     console.log('Cerrando modal de cotización...');
     
@@ -2828,6 +2874,32 @@ const rejectQuotation = async () => {
         console.error('Error al actualizar el estado de la solicitud:', updateError);
         // No mostramos error al usuario para no confundirlo, ya que la cotización sí se rechazó
       }
+    }
+    
+    // Notificar al técnico sobre la cotización rechazada
+    try {
+      const servicioActual = servicesData.value.solicitudes.find(s => s.id_solicitud === selectedServiceId.value);
+      const idTecnico = servicioActual?.id_tecnico;
+      
+      if (idTecnico) {
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Cotización Rechazada',
+            id_usuario: idTecnico
+          })
+        });
+        console.log('Notificación de rechazo enviada al técnico');
+      }
+    } catch (error) {
+      console.error('Error al enviar notificación de rechazo al técnico:', error);
+      // No mostrar error al usuario para no afectar su experiencia
     }
     
     // Cerrar el modal de cotización
@@ -2927,6 +2999,26 @@ const processVisitPayment = async () => {
       throw new Error(`Error al actualizar el estado de la solicitud: ${updateError.message}`);
     }
     
+    // Notificar a los administradores sobre el pago de visita recibido
+    try {
+      await $fetch('/notificaciones/enviar', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          titulo: 'Pago de visita recibido',
+          nombre_rol: 'admin'
+        })
+      });
+    } catch (error) {
+      console.error('Error al enviar notificación a administradores:', error);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
+    
     closeVisitPaymentModal();
     await loadServices();
     
@@ -2983,6 +3075,26 @@ const processPayment = async () => {
     });
 
     console.log('✅ Respuesta del backend /pagoservicio/procesar:', response);
+    
+    // Notificar a los administradores sobre el pago de servicio recibido
+    try {
+      await $fetch('/notificaciones/enviar', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${useCookie('token').value}`
+        },
+        body: JSON.stringify({
+          titulo: 'Pago de servicio recibido',
+          nombre_rol: 'admin'
+        })
+      });
+    } catch (error) {
+      console.error('Error al enviar notificación a administradores:', error);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
     
     // Cerrar el modal de pago
     showPaymentModal.value = false;

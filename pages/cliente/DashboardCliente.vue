@@ -1144,6 +1144,27 @@ const handleRequestService = async () => {
       }
     })
 
+    // Enviar notificación según el tipo de membresía
+    try {
+      const notificationData = tieneMembresiaActiva
+        ? { titulo: 'Asignación Pendiente', nombre_rol: 'admin' }
+        : { titulo: 'Pago de visita pendiente', id_usuario: Number(userData.id_usuario) }
+
+      await $fetch('/notificaciones/enviar', {
+        method: 'POST',
+        baseURL: config.public.apiBase,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify(notificationData)
+      })
+    } catch (error) {
+      console.error('Error al enviar notificación:', error)
+      // No mostramos error al usuario para no afectar su experiencia
+    }
+
     const newService = {
       id: response.id_solicitud_servicio || Date.now(),
       title: serviceFormData.value.type,
@@ -1163,7 +1184,13 @@ const handleRequestService = async () => {
       direccion: '' 
     }
     
-    showToast('¡Solicitud enviada!', 'Te contactaremos pronto.', 'success')
+    showToast(
+      '¡Solicitud enviada!', 
+      tieneMembresiaActiva 
+        ? 'Solicitud Enviada! Pronto se le asignará un técnico.' 
+        : 'Solicitud Enviada! Ya puedes pagar la visita.',
+      'success'
+    )
     
   } catch (error) {
     console.error('Error al enviar la solicitud de servicio:', error)

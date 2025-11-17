@@ -1188,7 +1188,27 @@ const handleAuth = async () => {
             
             const responseData = await referralResponse.json();
             
-            if (!referralResponse.ok) {
+            if (referralResponse.ok) {
+              // Enviar notificación de nuevo referido
+              try {
+                const config = useRuntimeConfig();
+                await $fetch('/notificaciones/enviar', {
+                  baseURL: config.public.apiBase,
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    titulo: 'Nuevo referido',
+                    id_usuario: referralCode // ID del usuario que refirió
+                  })
+                });
+              } catch (error) {
+                console.error('Error al enviar notificación de referido:', error);
+                // No mostramos error al usuario para no afectar su experiencia
+              }
+            } else {
               console.warn('No se pudo registrar el referido:', responseData);
               // No mostramos error al usuario para no afectar su experiencia
             }
@@ -1203,6 +1223,26 @@ const handleAuth = async () => {
         
         // Mostrar mensaje de éxito
         showToast('¡Registro exitoso! Por favor inicia sesión.', 'success');
+        
+        // Enviar notificación a administradores
+        try {
+          const config = useRuntimeConfig();
+          await $fetch('/notificaciones/enviar', {
+            baseURL: config.public.apiBase,
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              titulo: 'Nuevo registro',
+              nombre_rol: 'admin'
+            })
+          });
+        } catch (error) {
+          console.error('Error al enviar notificación:', error);
+          // No mostramos error al usuario para no afectar su experiencia
+        }
         
         // Cambiar a pestaña de login
         isLogin.value = true;

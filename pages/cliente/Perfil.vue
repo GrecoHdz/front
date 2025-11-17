@@ -1407,6 +1407,25 @@ const confirmRenewal = async () => {
       body: requestData
     });
 
+    // Enviar notificación a administradores
+    try {
+      await $fetch('/notificaciones/enviar', {
+        method: 'POST',
+        baseURL: config.public.apiBase,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({
+          titulo: 'Pago por membresía recibido',
+          nombre_rol: 'admin'
+        })
+      });
+    } catch (error) {
+      console.error('Error al enviar notificación:', error);
+      // No mostramos error al usuario para no afectar su experiencia
+    }
+
     // Cerrar el modal y actualizar datos
     showRenewalModal.value = false;
     await fetchMembershipData();

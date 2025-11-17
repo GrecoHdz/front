@@ -138,7 +138,7 @@
             </div>
             <div>
               <h3 class="font-medium text-gray-900 dark:text-white text-sm">Correo Electrónico</h3>
-              <p class="text-gray-600 dark:text-gray-300 text-sm">soporte@prohogar.hn</p>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@prohogar.hn' }}</p>
               <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Respuesta en 24 horas</p>
             </div>
           </div>
@@ -151,24 +151,11 @@
             </div>
             <div>
               <h3 class="font-medium text-gray-900 dark:text-white text-sm">Teléfono</h3>
-              <p class="text-gray-600 dark:text-gray-300 text-sm">+504 2234-5678</p>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">{{ contactInfo.find(c => c.type === 'phone')?.value || '+504 2234-5678' }}</p>
               <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Lunes a Viernes, 8:00 AM - 5:00 PM</p>
             </div>
           </div>
-          
-          <div class="flex items-start">
-            <div class="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3">
-              <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <div>
-              <h3 class="font-medium text-gray-900 dark:text-white text-sm">Oficina Principal</h3>
-              <p class="text-gray-600 dark:text-gray-300 text-sm">Colonia Palmira, Avenida República de Panamá</p>
-              <p class="text-gray-600 dark:text-gray-300 text-sm">Tegucigalpa, Honduras</p>
-            </div>
-          </div>
+           
         </div>
       </div>
     </div>
@@ -197,7 +184,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { useHead, useCookie, useRouter } from '#imports'
+import { useHead, useCookie, useRouter, useRuntimeConfig } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
@@ -205,9 +192,9 @@ import Toast from '~/components/ui/Toast.vue'
 // =========================
 // CONFIGURACIÓN Y SETUP
 // =========================
-const config = useRuntimeConfig()
 const auth = useAuthStore()
 const router = useRouter()
+const config = useRuntimeConfig()
 const userCookie = useCookie('user')
 const tokenCookie = useCookie('token')
 
@@ -237,57 +224,61 @@ const subjectOptions = [
 // FAQs
 const faqs = [
   {
+    question: '¿Puedo solicitar un servicio sin membresia?',
+    answer: 'Sí, puedes solicitar un servicio sin membresia, solo tendrás que pagar la visita inicial. Y a la hora de pagar el servicio no se aplica ningún descuento.'
+  },
+  {
     question: '¿Cómo puedo solicitar un servicio?',
-    answer: 'Para solicitar un servicio, inicia sesión en tu cuenta, ve a la sección "Servicios" y selecciona el tipo de servicio que necesitas. Completa el formulario con los detalles y un técnico se pondrá en contacto contigo a la brevedad.'
+    answer: 'Para solicitar un servicio ve al Dashboard y selecciona el tipo de servicio que necesitas. Si no tienes membresia, tendrás que pagar la visita inicial. Luego el técnico hará el diagnóstico y la cotización, si la rechazas se asigará a otro técnico, si la aceptas se procede con el servicio.'
   },
   {
     question: '¿Cuáles son los métodos de pago aceptados?',
-    answer: 'Aceptamos pagos con tarjeta de crédito/débito (Visa, MasterCard, American Express), transferencia bancaria y efectivo al momento del servicio.'
+    answer: 'Por los momento solo transferencias bancarias y CRIPTO'
   },
   {
     question: '¿Cuál es el tiempo de respuesta para soporte?',
-    answer: 'Nuestro equipo de soporte atiende consultas por correo electrónico en un plazo máximo de 24 horas hábiles. Para emergencias, contamos con un número de atención telefónica de lunes a domingo.'
+    answer: 'Nuestro equipo de soporte atiende consultas en un plazo máximo de 48 horas hábiles.'
   },
   {
     question: '¿Ofrecen garantía por los servicios?',
     answer: 'Sí, todos nuestros servicios incluyen una garantía de 30 días. Si el problema persiste después de nuestra intervención, volveremos sin costo adicional.'
   },
   {
-    question: '¿Cómo puedo cancelar o reprogramar una cita?',
-    answer: 'Puedes cancelar o reprogramar tu cita con al menos 24 horas de anticipación llamando a nuestro centro de atención al cliente o a través de la sección "Mis Citas" en tu perfil.'
+    question: '¿Cómo puedo cancelar o reprogramar un servicio?',
+    answer: 'Puedes cancelar un servicio siempre y cuando no hayas aceptado la cotización. Para reprogramar un servicio, debes cancelar el servicio y solicitarlo cuando lo necesites.'
   }
 ]
-
-// Información de contacto
-const contactInfo = [
+ 
+const contactInfo = ref([
   {
     type: 'email',
     title: 'Correo Electrónico',
-    value: 'soporte@prohogar.hn',
-    description: 'Respuesta en 24 horas',
+    value: 'cargando...',
+    description: 'Respuesta en 24-48 horas',
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
     iconColor: 'text-blue-600 dark:text-blue-400',
-    iconPath: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
+    iconPath: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 z',
+    configKey: 'correo_empresa'  // Clave para identificar el endpoint de la API
   },
   {
     type: 'phone',
     title: 'Teléfono',
-    value: '+504 2234-5678',
-    description: 'Lunes a Viernes, 8:00 AM - 5:00 PM',
+    value: 'cargando...',
+    description: 'Lunes a Domingo, 7:00 AM - 5:00 PM',
     iconBg: 'bg-green-100 dark:bg-green-900/30',
     iconColor: 'text-green-600 dark:text-green-400',
-    iconPath: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'
-  },
-  {
-    type: 'address',
-    title: 'Oficina Principal',
-    value: 'Colonia Palmira, Avenida República de Panamá, Tegucigalpa, Honduras',
-    description: 'Visítanos de lunes a viernes',
-    iconBg: 'bg-purple-100 dark:bg-purple-900/30',
-    iconColor: 'text-purple-600 dark:text-purple-400',
-    iconPath: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z'
+    iconPath: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
+    configKey: 'numero_empresa'  // Clave para identificar el endpoint de la API
   }
-]
+])
+
+// Función para actualizar un valor específico de contactInfo
+const updateContactInfo = (type, newValue) => {
+  const index = contactInfo.value.findIndex(item => item.type === type)
+  if (index !== -1) {
+    contactInfo.value[index].value = newValue
+  }
+}
 
 // =========================
 // VARIABLES REACTIVAS
@@ -353,6 +344,48 @@ const toggleFaq = (index) => {
 // =========================
 // FUNCIONES DE CARGA DE DATOS
 // =========================
+
+// Obtener información de contacto de la empresa
+const fetchContactInfo = async () => {
+  try {
+    // Usar Promise.all para hacer las peticiones en paralelo
+    const requests = contactInfo.value.map(async (contact) => {
+      try {
+        const response = await $fetch(`/config/valor/${contact.configKey}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        })
+        
+        // Actualizar el valor correspondiente
+        if (response?.valor) {
+          updateContactInfo(contact.type, response.valor)
+        }
+      } catch (error) {
+        console.error(`Error al obtener ${contact.type}:`, error)
+        // Mostrar un mensaje de error específico para cada campo
+        if (contact.type === 'email') {
+          updateContactInfo('email', 'soporte@prohogar.hn')
+        } else if (contact.type === 'phone') {
+          updateContactInfo('phone', '+504 2234-5678')
+        }
+      }
+    })
+    
+    await Promise.all(requests)
+    
+  } catch (error) {
+    console.error('Error general al obtener información de contacto:', error)
+    showError('No se pudieron cargar los datos de contacto. Se están utilizando valores por defecto.')
+    
+    // Establecer valores por defecto en caso de error general
+    updateContactInfo('email', 'soporte@prohogar.hn')
+    updateContactInfo('phone', '+504 2234-5678')
+  }
+}
 
 const checkAuth = async () => {
   try {
@@ -430,7 +463,8 @@ const submitForm = async () => {
       ...(form.value.servicio_id && { id_solicitud: parseInt(form.value.servicio_id) })
     }
     
-    await $fetch('/soporte', {
+    // Enviar el ticket de soporte
+    const response = await $fetch('/soporte', {
       baseURL: config.public.apiBase,
       method: 'POST',
       body: dataToSend,
@@ -440,9 +474,29 @@ const submitForm = async () => {
       }
     })
     
+    // Enviar notificación a los administradores
+    try {
+      await $fetch('/notificaciones/enviar', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({
+          titulo: 'Nuevo Ticket',
+          nombre_rol: 'admin'
+        })
+      });
+    } catch (error) {
+      console.error('Error al enviar notificación:', error);
+      // No mostrar error al usuario para no afectar su experiencia
+    }
+    
     showSuccess(
-      '¡Mensaje enviado!',
-      'Tu solicitud ha sido enviada. Nos pondremos en contacto contigo pronto.'
+      '¡Ticket enviado!',
+      '¡Ticket enviado! Pronto te contactaremos.'
     )
     
     // Resetear formulario
@@ -498,17 +552,31 @@ const showError = (message) => {
 }
 
 // =========================
+// INICIALIZACIÓN
+// =========================
+
+onMounted(async () => {
+  try {
+    await checkAuth()
+    await Promise.all([
+      cargarServiciosFinalizados(),
+      fetchContactInfo()
+    ])
+  } catch (error) {
+    console.error('Error al cargar datos iniciales:', error)
+    showError('Ocurrió un error al cargar los datos. Por favor, recarga la página.')
+  }
+})
+
+// =========================
 // WATCHERS
 // =========================
 
 // Observar cambios en el select de asunto
-watch(() => form.value.subject, (newVal) => {
-  // Resetear el servicio seleccionado
-  form.value.servicio_id = ''
-  
+watch(() => form.subject, async (newVal) => {
   // Si se selecciona "Problema con un Servicio Completado", cargar los servicios
   if (newVal === 'falla') {
-    cargarServiciosFinalizados()
+    await cargarServiciosFinalizados()
   }
 })
 
@@ -528,9 +596,6 @@ onMounted(async () => {
       // Usar nextTick para asegurar que el DOM esté listo
       nextTick(async () => {
         try {
-          // Cargar los servicios finalizados
-          await cargarServiciosFinalizados()
-          
           // Esperar un momento para asegurar que el DOM se haya actualizado
           await nextTick()
           
