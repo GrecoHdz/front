@@ -204,20 +204,38 @@
                 </div>
               </template>
               
-              <!-- Botón Ver más -->
-              <div v-if="earnings.length > 0 && hasMoreItems && activeTab === 'ingresos'" class="text-center mt-3 sm:mt-4">
-                <button 
-                  @click="loadMoreEarnings" 
-                  class="w-full py-2 text-xs sm:text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                  :disabled="isLoadingMovements"
-                >
-                  <span v-if="isLoadingMovements">
-                    Cargando...
-                  </span>
-                  <span v-else>
-                    Ver más ingresos ({{ totalItems - earnings.length }} restantes)
-                  </span>
-                </button>
+              <!-- Paginación de Ingresos -->
+              <div v-if="earnings.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                <div class="flex items-center justify-between">
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    Página {{ earningsPagination.currentPage }} de {{ earningsPagination.totalPages }}
+                  </div>
+                  <div class="flex items-center space-x-1">
+                    <button 
+                      @click="loadMovements(earningsPagination.currentPage - 1)" 
+                      :disabled="earningsPagination.currentPage === 1 || isLoadingMovements"
+                      class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                      :class="{ 'cursor-not-allowed': earningsPagination.currentPage === 1 }"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {{ earningsPagination.currentPage }} / {{ earningsPagination.totalPages }}
+                    </span>
+                    <button 
+                      @click="loadMovements(earningsPagination.currentPage + 1)" 
+                      :disabled="!earningsPagination.hasMore || isLoadingMovements"
+                      class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                      :class="{ 'cursor-not-allowed': !earningsPagination.hasMore }"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- Resumen -->
@@ -277,20 +295,38 @@
                 </div>
               </template>
               
-              <!-- Botón Ver más -->
-              <div v-if="withdrawals.length > 0 && hasMoreItems && activeTab === 'retiros'" class="text-center mt-3 sm:mt-4">
-                <button 
-                  @click="loadMoreWithdrawals" 
-                  class="w-full py-2 text-xs sm:text-sm font-medium text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                  :disabled="isLoadingMovements"
-                >
-                  <span v-if="isLoadingMovements">
-                    Cargando...
-                  </span>
-                  <span v-else>
-                    Ver más retiros ({{ totalItems - withdrawals.length }} restantes)
-                  </span>
-                </button>
+              <!-- Paginación de Retiros -->
+              <div v-if="withdrawals.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                <div class="flex items-center justify-between">
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    Página {{ withdrawalsPagination.currentPage }} de {{ withdrawalsPagination.totalPages }}
+                  </div>
+                  <div class="flex items-center space-x-1">
+                    <button 
+                      @click="loadMovements(withdrawalsPagination.currentPage - 1)" 
+                      :disabled="withdrawalsPagination.currentPage === 1 || isLoadingMovements"
+                      class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                      :class="{ 'cursor-not-allowed': withdrawalsPagination.currentPage === 1 }"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {{ withdrawalsPagination.currentPage }} / {{ withdrawalsPagination.totalPages }}
+                    </span>
+                    <button 
+                      @click="loadMovements(withdrawalsPagination.currentPage + 1)" 
+                      :disabled="!withdrawalsPagination.hasMore || isLoadingMovements"
+                      class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                      :class="{ 'cursor-not-allowed': !withdrawalsPagination.hasMore }"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- Resumen -->
@@ -331,54 +367,89 @@
 
         <!-- Lista de calificaciones -->
         <template v-else>
-          <div class="space-y-2 sm:space-y-3">
-            <div v-for="review in reviews.slice(0, 3)" :key="review.id || `${review.nombre_cliente}-${review.fecha}`"
-                 class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-              <div class="flex items-start justify-between mb-2 sm:mb-3">
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                  <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
-                    <span class="text-white text-xs sm:text-sm font-bold">{{ getInitials(review.nombre_cliente) }}</span>
-                  </div>
-                  <div>
-                    <p class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{{ review.nombre_cliente }}</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(review.fecha) }}</p>
-                  </div>
-                </div>
-                <div class="flex items-center space-x-1">
-                  <span v-for="i in 5" :key="i" 
-                        :class="i <= Number(review.calificacion) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'"
-                        class="text-xs sm:text-sm">
-                    <template v-if="i <= Math.floor(Number(review.calificacion))">
-                      <span class="text-yellow-400">⭐</span>
-                    </template>
-                    <template v-else-if="i === Math.ceil(Number(review.calificacion)) && Number(review.calificacion) % 1 > 0">
-                      <span class="relative inline-block">
-                        <span class="text-gray-300 dark:text-gray-600">⭐</span>
-                        <span class="absolute left-0 overflow-hidden" :style="{ width: (Number(review.calificacion) % 1) * 100 + '%' }">
-                          <span class="text-yellow-400">⭐</span>
+          <div v-if="isLoadingReviews" class="text-center py-6 sm:py-8">
+            <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Cargando calificaciones...</p>
+          </div>
+          
+          <template v-else>
+            <div class="space-y-2 sm:space-y-3">
+              <div v-for="review in reviews" :key="review.id || `${review.nombre_cliente}-${review.fecha}`"
+                   class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+                <div class="flex items-start justify-between mb-2 sm:mb-3">
+                    <div class="flex items-center space-x-2">
+                      <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
+                        <span class="text-white text-xs sm:text-sm font-bold">{{ getInitials(review.nombre_cliente) }}</span>
+                      </div>
+                      <div class="flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{{ review.nombre_cliente }}</p>
+                        <div class="flex items-center space-x-2">
+                          <p class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(review.fecha) }}</p>
+                          <span class="text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                            {{ review.id_servicio }} - {{ review.nombre_servicio }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  <div class="flex items-center space-x-1">
+                    <span v-for="i in 5" :key="i" 
+                          :class="i <= Number(review.calificacion) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'"
+                          class="text-xs sm:text-sm">
+                      <template v-if="i <= Math.floor(Number(review.calificacion))">
+                        <span class="text-yellow-400">⭐</span>
+                      </template>
+                      <template v-else-if="i === Math.ceil(Number(review.calificacion)) && Number(review.calificacion) % 1 > 0">
+                        <span class="relative inline-block">
+                          <span class="text-gray-300 dark:text-gray-600">⭐</span>
+                          <span class="absolute left-0 overflow-hidden" :style="{ width: (Number(review.calificacion) % 1) * 100 + '%' }">
+                            <span class="text-yellow-400">⭐</span>
+                          </span>
                         </span>
-                      </span>
-                    </template> 
-                  </span>
-                  <span class="text-xs text-gray-600 dark:text-gray-400 ml-1">({{ Number(review.calificacion).toFixed(1) }}/5)</span>
+                      </template> 
+                    </span>
+                    <span class="text-xs text-gray-600 dark:text-gray-400 ml-1">({{ Number(review.calificacion).toFixed(1) }}/5)</span>
+                  </div>
                 </div>
-              </div>
-              <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3">{{ review.comentario }}</p>
-              <div class="flex items-center space-x-2">
-                <span class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
-                  {{ review.nombre_servicio }}
-                </span>
+                <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mt-2">{{ review.comentario }}</p>
               </div>
             </div>
-          </div>
 
-          <button v-if="pagination.hasMore"
-                  @click="loadMoreReviews" 
-                  :disabled="isLoading"
-                  class="w-full mt-2 sm:mt-3 py-2 text-blue-600 dark:text-blue-400 text-xs sm:text-sm font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            <span v-if="isLoading">Cargando más...</span>
-            <span v-else>Ver más calificaciones ({{ pagination.totalItems - reviews.length }} restantes)</span>
-          </button>
+            <!-- Paginación de Calificaciones -->
+            <div v-if="reviews.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+              <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  Página {{ reviewsPagination.currentPage }} de {{ reviewsPagination.totalPages }}
+                </div>
+                <div class="flex items-center space-x-1">
+                  <button 
+                    @click="loadReviews(reviewsPagination.currentPage - 1)" 
+                    :disabled="reviewsPagination.currentPage === 1 || isLoadingReviews"
+                    class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                    :class="{ 'cursor-not-allowed': reviewsPagination.currentPage === 1 }"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  
+                  <span class="px-2 text-xs text-gray-600 dark:text-gray-300">
+                    {{ reviewsPagination.currentPage }} / {{ reviewsPagination.totalPages }}
+                  </span>
+                  
+                  <button 
+                    @click="loadReviews(reviewsPagination.currentPage + 1)" 
+                    :disabled="!reviewsPagination.hasMore || isLoadingReviews"
+                    class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                    :class="{ 'cursor-not-allowed': !reviewsPagination.hasMore }"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
         </template>
       </section>
 
@@ -483,6 +554,7 @@ useHead({
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
+const userCookie = useCookie('user')
 
 // ===== VARIABLES DE ESTADO =====
 const currentUser = ref(auth.user)
@@ -512,17 +584,68 @@ const movementSummary = ref(null)
 
 // Estado de paginación
 const currentPage = ref(1)
-const itemsPerPage = 2
+const itemsPerPage = 2 // Mostrar solo 2 ítems por página para ver la paginación en acción
 const totalItems = ref(0)
 const hasMoreItems = ref(true)
 
 // Paginación para reseñas
-const pagination = ref({
+const reviewsPagination = ref({
   currentPage: 1,
-  itemsPerPage: 5,
-  totalItems: 0,
   totalPages: 1,
-  hasMore: false
+  hasMore: false,
+  totalItems: 0,
+  itemsPerPage: 3
+})
+
+const isLoadingReviews = ref(false)
+
+// Configuración de caché para reseñas
+const REVIEWS_CACHE_KEY = 'prohogar_technician_reviews_cache'
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos en milisegundos
+
+// Obtener datos del caché
+const getCachedReviews = (userId) => {
+  try {
+    const cache = JSON.parse(localStorage.getItem(`${REVIEWS_CACHE_KEY}_${userId}`) || '{}')
+    
+    // Verificar si el caché es válido (menos de 5 minutos)
+    if (cache.timestamp && (Date.now() - cache.timestamp) < CACHE_DURATION) {
+      return cache.data
+    }
+  } catch (error) {
+    console.error('Error al leer el caché de reseñas:', error)
+  }
+  return null
+}
+
+// Guardar datos en caché
+const cacheReviews = (userId, data) => {
+  try {
+    localStorage.setItem(
+      `${REVIEWS_CACHE_KEY}_${userId}`,
+      JSON.stringify({
+        data,
+        timestamp: Date.now()
+      })
+    )
+  } catch (error) {
+    console.error('Error al guardar en caché las reseñas:', error)
+  }
+}
+
+// Paginación
+const earningsPagination = ref({
+  currentPage: 1,
+  totalPages: 1,
+  hasMore: false,
+  totalItems: 0
+})
+
+const withdrawalsPagination = ref({
+  currentPage: 1,
+  totalPages: 1,
+  hasMore: false,
+  totalItems: 0
 })
 
 // Variables de notificaciones
@@ -642,8 +765,20 @@ const getStatusWithDrawalColor = (status) => {
 }
 
 const getInitials = (name) => {
-  if (!name) return '??'
-  return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase()
+  return name.split(' ').map(word => word[0]).join('').toUpperCase()
+}
+
+const compactNumber = (num) => {
+  const isMobile = window.innerWidth < 640; // Breakpoint de Tailwind sm
+  
+  if (!isMobile) {
+    return num.toLocaleString('es-HN');
+  }
+  
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}k`;
+  
+  return num.toString();
 }
 
 const getNoEarningsMessage = () => {
@@ -720,22 +855,47 @@ const showError = (message) => {
   })
 }
 
-// ===== FUNCIONES DE CARGA DE DATOS =====
-const loadMovements = async (loadMore = false) => {
+// Configuración de caché para movimientos
+const MOVEMENTS_CACHE_KEY = 'prohogar_technician_movements_cache'
+const MOVEMENTS_CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
+
+// Obtener movimientos del caché
+const getCachedMovements = (cacheKey) => {
   try {
-    if (!loadMore) {
-      currentPage.value = 1
-      activeTab.value === 'ingresos' ? earnings.value = [] : withdrawals.value = []
-      hasMoreItems.value = true
-    } else {
-      currentPage.value++
+    const cache = JSON.parse(localStorage.getItem(cacheKey) || '{}')
+    if (cache.timestamp && (Date.now() - cache.timestamp) < MOVEMENTS_CACHE_DURATION) {
+      return cache.data
     }
+  } catch (error) {
+    console.error('Error al leer el caché de movimientos:', error)
+  }
+  return null
+}
 
+// Guardar movimientos en caché
+const cacheMovements = (cacheKey, data) => {
+  try {
+    localStorage.setItem(
+      cacheKey,
+      JSON.stringify({
+        data,
+        timestamp: Date.now()
+      })
+    )
+  } catch (error) {
+    console.error('Error al guardar en caché los movimientos:', error)
+  }
+}
+
+// ===== FUNCIONES DE CARGA DE DATOS =====
+const loadMovements = async (page = 1, forceRefresh = false) => {
+  try {
     isLoadingMovements.value = true
-    const userId = auth.user?.id_usuario
-    if (!userId) throw new Error('No se pudo obtener el ID del usuario')
+    const userId = userCookie.value.id_usuario
+    if (!userId) throw new Error('Erro al obtener Usuario. Recargue la página.')
 
-    const selectedMonthValue = activeTab.value === 'ingresos' ? selectedMonth.value : selectedWithdrawMonth.value
+    const movementType = activeTab.value
+    const selectedMonthValue = movementType === 'ingresos' ? selectedMonth.value : selectedWithdrawMonth.value
     let year, monthNum
     
     if (selectedMonthValue) {
@@ -748,8 +908,29 @@ const loadMovements = async (loadMore = false) => {
       monthNum = now.getMonth() + 1
     }
 
-    const tipoMovimiento = activeTab.value === 'ingresos' ? 'ingreso' : 'retiro'
+    const tipoMovimiento = movementType === 'ingresos' ? 'ingreso' : 'retiro'
+    const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}`
     
+    // Verificar caché primero si no es una recarga forzada
+    if (!forceRefresh) {
+      const cachedData = getCachedMovements(cacheKey)
+      if (cachedData) {
+        console.log(`[CACHE] ${movementType.toUpperCase()} - Página ${page} cargada desde caché`)
+        if (movementType === 'ingresos') {
+          earnings.value = cachedData.items
+          earningsPagination.value = cachedData.pagination
+        } else {
+          withdrawals.value = cachedData.items
+          withdrawalsPagination.value = cachedData.pagination
+        }
+        isLoadingMovements.value = false
+        return
+      }
+    }
+    
+    console.log(`[API] Solicitando ${movementType} - Página ${page}...`)
+    
+    // Si no hay datos en caché o es una recarga forzada, hacer la petición a la API
     const response = await $fetch(`/movimientos/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -760,47 +941,55 @@ const loadMovements = async (loadMore = false) => {
       params: { 
         mes: monthNum, 
         tipo: tipoMovimiento,
-        page: currentPage.value,
+        page: page,
         limit: itemsPerPage
       }
     })
-
-    if (response.success) {
-      if (loadMore && movementSummary.value && response.summary) {
-        movementSummary.value = {
-          mes: response.summary.mes || movementSummary.value.mes,
-          totalIngresos: parseFloat(movementSummary.value.totalIngresos || 0) + parseFloat(response.summary.totalIngresos || 0),
-          totalRetiros: parseFloat(movementSummary.value.totalRetiros || 0) + parseFloat(response.summary.totalRetiros || 0)
-        }
-      } else if (response.summary) {
-        movementSummary.value = response.summary
-      }
-      
-      totalItems.value = response.pagination?.total || 0
-      
-      hasMoreItems.value = response.pagination ? 
-        (response.pagination.page * response.pagination.limit) < response.pagination.total : 
-        false
-      
+    
+    if (response) {
       const items = response.data.map(item => ({
         id_movimiento: item.id_movimiento,
         monto: parseFloat(item.monto) || 0,
         fecha: item.fecha,
-        estado: activeTab.value === 'ingresos' ? (item.estado || 'Pendiente') : (item.estado || 'pendiente').toLowerCase(),
-        ...(activeTab.value === 'ingresos' ? {
+        estado: movementType === 'ingresos' ? (item.estado || 'Pendiente') : (item.estado || 'pendiente').toLowerCase(),
+        ...(movementType === 'ingresos' ? {
           servicio: item.servicio || 'Servicio no especificado',
           colonia: item.colonia || 'Sin ubicación'
         } : {})
       }))
-
-      if (activeTab.value === 'ingresos') {
-        earnings.value = loadMore ? [...earnings.value, ...items] : items
-        visibleEarningsCount.value = Math.min(earnings.value.length, currentPage.value * itemsPerPage)
-      } else {
-        withdrawals.value = loadMore ? [...withdrawals.value, ...items] : items
-        visibleWithdrawalsCount.value = Math.min(withdrawals.value.length, currentPage.value * itemsPerPage)
+      
+      const paginationData = response.pagination || response.meta?.pagination || {
+        currentPage: 1,
+        totalPages: 1,
+        total: items.length,
+        limit: itemsPerPage
       }
-    }
+      
+      const pagination = {
+        currentPage: Number(paginationData.currentPage || paginationData.page || 1),
+        totalPages: Number(paginationData.totalPages || Math.ceil((paginationData.total || items.length) / (paginationData.limit || itemsPerPage))),
+        hasMore: paginationData.currentPage ? 
+          (paginationData.currentPage < (paginationData.totalPages || 1)) : 
+          (items.length >= (paginationData.limit || itemsPerPage)),
+        totalItems: Number(paginationData.total || items.length)
+      }
+
+      // Guardar en caché
+      cacheMovements(cacheKey, {
+        items,
+        pagination
+      })
+      console.log(`[API] ${movementType.toUpperCase()} - Página ${page} cargada desde la API y guardada en caché`)
+
+      // Actualizar el estado con los datos obtenidos
+      if (movementType === 'ingresos') {
+        earnings.value = items
+        earningsPagination.value = pagination
+      } else {
+        withdrawals.value = items
+        withdrawalsPagination.value = pagination
+      }
+      }
   } catch (error) {
     console.error('Error al cargar movimientos:', error)
     showError('No se pudieron cargar los movimientos. Por favor, inténtalo de nuevo.')
@@ -809,80 +998,100 @@ const loadMovements = async (loadMore = false) => {
   }
 }
 
-const loadMoreEarnings = async () => {
-  if (earnings.value.length < totalItems.value) {
-    await loadMovements(true)
-  } else {
-    visibleEarningsCount.value = Math.min(visibleEarningsCount.value + 3, earnings.value.length)
-  }
-}
+// Eliminar loadMoreEarnings y loadMoreWithdrawals ya que ahora usamos paginación
 
-const loadMoreWithdrawals = async () => {
-  if (withdrawals.value.length < totalItems.value) {
-    await loadMovements(true)
-  } else {
-    visibleWithdrawalsCount.value = Math.min(visibleWithdrawalsCount.value + 3, withdrawals.value.length)
-  }
-}
+// Cache para todas las páginas
+const reviewsCache = new Map()
 
-const loadReviews = async (loadMore = false) => {
+const loadReviews = async (page = 1, forceRefresh = false) => {
   try {
-    const userId = auth.user?.id_usuario
+    isLoadingReviews.value = true
+    const userId = userCookie.value.id_usuario
     
     if (!userId) {
-      throw new Error('No se pudo obtener el ID del usuario')
+      throw new Error('Error al obtener el ID del usuario. Recargue la página.')
+    }
+
+    const cacheKey = `${userId}_page_${page}`
+    const cacheTimestampKey = `${cacheKey}_timestamp`
+    const now = Date.now()
+    
+    // Verificar si los datos están en caché y son recientes (menos de 5 minutos)
+    if (!forceRefresh) {
+      const cachedData = getCachedReviews(cacheKey)
+      if (cachedData && (now - (cachedData.timestamp || 0) < CACHE_DURATION)) {
+        reviews.value = cachedData.reviews
+        reviewsPagination.value = cachedData.pagination
+        isLoadingReviews.value = false
+        return
+      }
     }
     
-    if (!loadMore) {
-      pagination.value.currentPage = 1
-      reviews.value = []
-    }
-    
-    const response = await $fetch(`/calificaciones/usuario/${userId}?page=${pagination.value.currentPage}&limit=${pagination.value.itemsPerPage}`, {
+    // Si no hay datos en caché o son viejos, hacer la petición a la API
+    const response = await $fetch(`/calificaciones/usuario/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
+      },
+      params: {
+        page: page,
+        limit: reviewsPagination.value.itemsPerPage
       }
     })
     
-    const newReviews = response.data.map(review => ({
-      id: `${review.nombre_cliente}-${review.fecha}`,
-      calificacion: review.calificacion,
-      comentario: review.comentario || 'Sin comentario',
-      fecha: review.fecha,
-      nombre_servicio: review.nombre_servicio,
-      nombre_cliente: review.nombre_cliente
-    }))
-    
-    if (loadMore) {
-      reviews.value = [...reviews.value, ...newReviews]
-    } else {
-      reviews.value = newReviews
+    if (response) {
+      // Mapear los datos de las reseñas
+      const reviewsData = response.data.map(review => ({
+        id: `${review.nombre_cliente}-${review.fecha}`,
+        calificacion: review.calificacion,
+        comentario: review.comentario || 'Sin comentario',
+        fecha: review.fecha,
+        id_servicio: review.id_servicio || 'N/A',
+        nombre_servicio: review.nombre_servicio,
+        nombre_cliente: review.nombre_cliente
+      }))
+
+      // Actualizar los datos en el estado
+      reviews.value = reviewsData
+      
+      // Actualizar la paginación con la respuesta de la API
+      let paginationData
+      if (response.pagination) {
+        paginationData = {
+          currentPage: Number(response.pagination.currentPage) || 1,
+          totalPages: Number(response.pagination.totalPages) || 1,
+          hasMore: response.pagination.hasNextPage || false,
+          totalItems: Number(response.pagination.totalItems) || 0,
+          itemsPerPage: Number(response.pagination.itemsPerPage) || 3
+        }
+      } else {
+        // Si no hay datos de paginación, asumir que es la única página
+        paginationData = {
+          currentPage: 1,
+          totalPages: 1,
+          hasMore: false,
+          totalItems: reviewsData.length,
+          itemsPerPage: reviewsPagination.value.itemsPerPage
+        }
+      }
+      
+      reviewsPagination.value = paginationData
+      
+      // Guardar en caché la página actual
+      cacheReviews(cacheKey, {
+        reviews: reviewsData,
+        pagination: paginationData,
+        timestamp: now
+      })
     }
-    
-    pagination.value = {
-      ...pagination.value,
-      totalItems: response.pagination.totalItems,
-      totalPages: response.pagination.totalPages,
-      hasMore: response.pagination.currentPage < response.pagination.totalPages,
-      currentPage: response.pagination.currentPage
-    }
-    
   } catch (error) {
     console.error('Error al cargar calificaciones:', error)
     showError('No se pudieron cargar las calificaciones.')
-    if (!loadMore) {
-      reviews.value = []
-    }
-  }
-}
-
-const loadMoreReviews = async () => {
-  if (pagination.value.hasMore) {
-    pagination.value.currentPage++
-    await loadReviews(true)
+    reviews.value = []
+  } finally {
+    isLoadingReviews.value = false
   }
 }
 
@@ -920,7 +1129,7 @@ const loadEstadisticasGenerales = async () => {
 
 const loadServicesByType = async () => {
   try {
-    const data = await $fetch(`/movimientos/servicios/tipo/${currentUser.value.id_usuario}`, {
+    const data = await $fetch(`/movimientos/servicios/tipo/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -943,7 +1152,7 @@ const loadServicesByType = async () => {
 
 const loadMonthlyIncomes = async () => {
   try {
-    const data = await $fetch(`/movimientos/ingresos/mensuales/${currentUser.value.id_usuario}`, {
+    const data = await $fetch(`/movimientos/ingresos/mensuales/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -954,20 +1163,35 @@ const loadMonthlyIncomes = async () => {
 
     monthlyIncomes.value = data || []
     
-    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-    const monthlyData = Array(12).fill(0)
+    // Obtener los últimos 12 meses incluyendo el mes actual
+    const months = [];
+    const monthlyData = [];
+    const now = new Date();
     
+    // Crear un mapa para agrupar por año-mes
+    const incomeMap = new Map();
     monthlyIncomes.value.forEach(item => {
       const [year, month] = item.fecha.split('-')
-      const monthIndex = parseInt(month) - 1
-      monthlyData[monthIndex] = parseFloat(item.monto)
+      incomeMap.set(`${year}-${month.padStart(2, '0')}`, parseFloat(item.monto))
     })
     
-    earningsData.labels = monthNames
-    earningsData.datasets[0].data = monthlyData
+    // Generar etiquetas y datos para los últimos 12 meses
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const monthName = date.toLocaleString('es-ES', { month: 'short' });
+      const yearShort = String(year).slice(-2);
+      
+      months.push(`${monthName} '${yearShort}`);
+      monthlyData.push(incomeMap.get(`${year}-${month}`) || 0);
+    }
+    
+    earningsData.labels = months;
+    earningsData.datasets[0].data = monthlyData;
     
     if (selectedChart.value === 'earnings') {
-      createChart()
+      createChart();
     }
   } catch (error) {
     console.error('Error al cargar ingresos mensuales:', error)
@@ -977,7 +1201,7 @@ const loadMonthlyIncomes = async () => {
 
 const loadMonthlyServices = async () => {
   try {
-    const data = await $fetch(`/movimientos/servicios/mensuales/${currentUser.value.id_usuario}`, {
+    const data = await $fetch(`/movimientos/servicios/mensuales/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -988,24 +1212,49 @@ const loadMonthlyServices = async () => {
 
     monthlyServices.value = data || []
     
-    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-    const monthlyData = Array(12).fill(0)
+    // Obtener los últimos 12 meses incluyendo el mes actual
+    const months = [];
+    const monthlyData = [];
+    const now = new Date();
     
+    // Crear un mapa para agrupar por año-mes
+    const servicesMap = new Map();
     monthlyServices.value.forEach(item => {
       const [year, month] = item.fecha.split('-')
-      const monthIndex = parseInt(month) - 1
-      monthlyData[monthIndex] = item.cantidad
+      servicesMap.set(`${year}-${month.padStart(2, '0')}`, item.cantidad)
     })
     
-    servicesData.labels = monthNames
-    servicesData.datasets[0].data = monthlyData
+    // Variables para estadísticas
+    let thisMonthCount = 0;
+    let last3MonthsCount = 0;
     
-    stats.thisMonth = monthlyData[new Date().getMonth()] || 0
-    stats.last3Months = monthlyData.slice(-3).reduce((a, b) => a + b, 0)
-    stats.totalServices = monthlyData.reduce((a, b) => a + b, 0)
+    // Generar etiquetas y datos para los últimos 12 meses
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const monthName = date.toLocaleString('es-ES', { month: 'short' });
+      const yearShort = String(year).slice(-2);
+      const count = servicesMap.get(`${year}-${month}`) || 0;
+      
+      months.push(`${monthName} '${yearShort}`);
+      monthlyData.push(count);
+      
+      // Actualizar estadísticas
+      if (i === 0) thisMonthCount = count; // Mes actual
+      if (i < 3) last3MonthsCount += count; // Últimos 3 meses
+    }
+    
+    servicesData.labels = months;
+    servicesData.datasets[0].data = monthlyData;
+    
+    // Actualizar estadísticas
+    stats.thisMonth = thisMonthCount;
+    stats.last3Months = last3MonthsCount;
+    stats.totalServices = monthlyData.reduce((a, b) => a + b, 0);
     
     if (selectedChart.value === 'services') {
-      createChart()
+      createChart();
     }
   } catch (error) {
     console.error('Error al cargar servicios mensuales:', error)
@@ -1051,7 +1300,7 @@ const createChart = () => {
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return context.raw.toLocaleString('es-HN')
+                  return `L. ${context.raw.toLocaleString('es-HN')}`
                 }
               }
             },
@@ -1062,7 +1311,7 @@ const createChart = () => {
               },
               anchor: 'center',
               align: 'center',
-              formatter: (value) => value.toLocaleString('es-HN'),
+              formatter: (value) => compactNumber(value),
               font: {
                 weight: 'bold',
                 size: 12
@@ -1085,7 +1334,8 @@ const createChart = () => {
               ticks: {
                 color: isDark ? '#9CA3AF' : '#6B7280',
                 callback: function(value) {
-                  return value.toLocaleString('es-HN')
+                  const isMobile = window.innerWidth < 640;
+                  return isMobile ? `L. ${compactNumber(value)}` : `L. ${value.toLocaleString('es-HN')}`
                 }
               },
               grid: {
@@ -1325,7 +1575,7 @@ const processWithdraw = async () => {
 
   try {
     const requestBody = {
-      id_usuario: currentUser.value.id_usuario,
+      id_usuario: userCookie.value.id_usuario,
       tipo: 'retiro',
       monto: parseFloat(withdrawForm.amount),
       descripcion: `Retiro a cuenta bancaria: ${withdrawForm.bankDetails}`
@@ -1427,14 +1677,11 @@ const setActiveTab = async (tab) => {
 
 // ===== WATCHERS =====
 watch(activeTab, (newTab) => {
-  currentPage.value = 1
-  hasMoreItems.value = true
   if (newTab === 'ingresos') {
-    visibleEarningsCount.value = 3
+    loadMovements(1)
   } else {
-    visibleWithdrawalsCount.value = 3
+    loadMovements(1)
   }
-  loadMovements()
 })
 
 watch(selectedChart, (newVal, oldVal) => {

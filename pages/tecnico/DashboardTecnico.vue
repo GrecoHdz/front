@@ -61,7 +61,7 @@
                     <span class="text-white text-sm sm:text-lg">📋</span>
                   </div>
                   <div class="min-w-0">
-                    <p class="text-[10px] xs:text-xs text-gray-600 dark:text-gray-400 truncate">Servicios</p>
+                    <p class="text-[10px] xs:text-xs text-gray-600 dark:text-gray-400 truncate">Servicios Activos</p>
                     <p class="text-base sm:text-xl font-black text-gray-900 dark:text-white">{{ stats.activeServices }}</p>
                   </div>
                 </div>
@@ -106,7 +106,7 @@
             </div>
             
             <div class="space-y-2 sm:space-y-3">
-              <div v-for="service in services.slice(0, 3)" :key="service.id" 
+              <div v-for="service in services" :key="service.id" 
                    @click="$router.push('/tecnico/ServiciosTecnico')"
                    class="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 cursor-pointer">
                 <div class="flex items-start justify-between">
@@ -137,9 +137,39 @@
                 </div>
               </div>
               
-              <NuxtLink v-if="services.length > 3" to="/tecnico/ServiciosTecnico" class="block text-center text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mt-2">
-                Ver {{ services.length - 3 }} más
-              </NuxtLink>
+              <!-- Paginación -->
+              <div v-if="totalServices > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                <div class="flex items-center justify-between">
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    Página {{ currentPage }} de {{ totalPages }}
+                  </div>
+                  <div class="flex items-center space-x-1">
+                    <button 
+                      @click="changePage(currentPage - 1)" 
+                      :disabled="currentPage === 1 || loading"
+                      class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                      :class="{ 'cursor-not-allowed': currentPage === 1 }"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {{ currentPage }} / {{ totalPages }}
+                    </span>
+                    <button 
+                      @click="changePage(currentPage + 1)" 
+                      :disabled="currentPage >= totalPages || loading"
+                      class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                      :class="{ 'cursor-not-allowed': currentPage >= totalPages }"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -177,7 +207,7 @@
                   </div>
                   <div class="w-full min-w-0">
                     <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">
-                      {{ isAvailable ? 'Activo para trabajos' : 'No disponible' }}
+                      {{ isAvailable ? 'Disponible' : 'No disponible' }}
                     </p>
                     <div class="flex items-center justify-between mt-1 sm:mt-2">
                       <span class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate pr-1">
@@ -365,13 +395,17 @@ const showError = (message) => {
 }
 
 // ===== FUNCIONES DE CARGA DE DATOS =====
-const fetchServices = async () => {
+const fetchServices = async (page = 1) => {
   try {
     loading.value = true
-    
     const userCookieValue = useCookie('user').value
     
-    const response = await $fetch(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}`, {
+    // Calcular el offset basado en la página actual
+    const offset = (page - 1) * itemsPerPage
+    
+    console.log('Solicitando página:', page, 'con offset:', offset, 'límite:', itemsPerPage)
+    
+    const response = await $fetch(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}?offset=${offset}&limit=${itemsPerPage}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -380,23 +414,46 @@ const fetchServices = async () => {
       }
     })
     
+    // Manejar la respuesta de la API con paginación
+    console.log('Respuesta de la API:', response)
+    
+    // Primero verificar si la respuesta tiene el array de solicitudes
+    if (response.solicitudes && Array.isArray(response.solicitudes)) {
+      // Mapear los servicios al formato esperado
+      services.value = response.solicitudes.map(servicio => ({
+        id: servicio.id_solicitud || servicio.id,
+        title: servicio.servicio?.nombre || servicio.titulo || 'Servicio sin nombre',
+        location: servicio.colonia || servicio.ubicacion || 'Ubicación no especificada',
+        date: servicio.fecha_solicitud || servicio.fecha || new Date().toISOString(),
+        status: servicio.estado || 'pendiente',
+        description: servicio.descripcion || 'Sin descripción',
+        client: servicio.nombre_cliente || servicio.cliente || 'Cliente no especificado',
+        phone: servicio.telefono_contacto || servicio.telefono || 'Sin teléfono'
+      }))
+      
+      // Actualizar los totales de la paginación
+      totalServices.value = response.total || response.solicitudes.length
+      hasMorePages.value = response.hasMore || false
+    } 
+    // Manejar otros formatos de respuesta para compatibilidad
+    else if (Array.isArray(response)) {
+      services.value = response
+      totalServices.value = response.length
+    } else if (response.data && Array.isArray(response.data)) {
+      services.value = response.data
+      totalServices.value = response.total || response.data.length
+      hasMorePages.value = response.hasMore || false
+    }
+    
+    console.log('Paginación - Total:', totalServices.value, 
+                'Páginas:', totalPages.value, 
+                'Página actual:', currentPage.value,
+                'HasMore:', hasMorePages.value)
+    
     stats.value = {
       ...stats.value,
       activeServices: response.activas,
       completedServices: response.finalizadas
-    }
-    
-    if (response.solicitudes && response.solicitudes.length > 0) {
-      services.value = response.solicitudes.map(servicio => ({
-        id: servicio.id_solicitud,
-        title: servicio.servicio?.nombre || 'Servicio sin nombre',
-        location: servicio.colonia || 'Ubicación no especificada',
-        date: servicio.fecha_solicitud,
-        status: servicio.estado,
-        description: servicio.descripcion || 'Sin descripción',
-        client: servicio.nombre_cliente || 'Cliente no especificado',
-        phone: servicio.telefono_contacto || 'Sin teléfono'
-      }))
     }
     
   } catch (error) {
@@ -550,13 +607,43 @@ const viewReports = async () => {
   }
 }
 
+// ===== PAGINACIÓN =====
+const currentPage = ref(1)
+const itemsPerPage = 3
+const totalServices = ref(0)
+const hasMorePages = ref(false)
+const totalPages = computed(() => Math.ceil(totalServices.value / itemsPerPage))
+
+const changePage = (page) => {
+  // Si intentamos ir a una página inválida, no hacemos nada
+  if (page < 1) return
+  
+  // Si no hay más páginas y estamos intentando ir más allá, no hacemos nada
+  if (page > totalPages.value && !hasMorePages.value) return
+  
+  // Si ya estamos en esta página, no hacemos nada
+  if (page === currentPage.value) return
+  
+  console.log('Cambiando a página:', page, 'Página actual:', currentPage.value)
+  
+  // Actualizamos la página actual primero para reflejar el cambio en la UI
+  currentPage.value = page
+  
+  // Hacer la petición con el número de página actual
+  fetchServices(page)
+  
+  // Desplazamiento suave al principio de la página
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 // ===== INICIALIZACIÓN =====
 onMounted(() => { 
-  fetchServices()
+  // Forzar la carga de la primera página
+  currentPage.value = 1
+  fetchServices(1)
   fetchAvailability()
-  fetchReviews(false)
+  fetchReviews()
 })
-
 </script>
 
 <style scoped>

@@ -62,7 +62,7 @@
                 <span class="text-white text-lg">📊</span>
               </div>
               <div>
-                <p class="text-gray-600 dark:text-gray-400 text-xs">Servicios</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">Servicios Totales</p>
                 <p class="text-xl font-black text-gray-900 dark:text-white">{{ statsData.totalServices }}</p>
               </div>
             </div>
@@ -1191,6 +1191,11 @@ const handleRequestService = async () => {
         : 'Solicitud Enviada! Ya puedes pagar la visita.',
       'success'
     )
+    
+    // Redirigir a la página de servicios después de 1.5 segundos
+    setTimeout(() => {
+      navigateTo('/cliente/Servicios')
+    }, 1500)
     
   } catch (error) {
     console.error('Error al enviar la solicitud de servicio:', error)

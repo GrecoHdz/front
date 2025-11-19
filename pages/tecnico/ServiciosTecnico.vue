@@ -850,6 +850,7 @@ const getStatusColor = (status) => {
     'pendiente_pagoservicio': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     'verificando_pagoservicio': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     'finalizado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    'calificado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     'cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
   }
   return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
@@ -872,6 +873,7 @@ const getServiceIcon = (estado) => {
     'asignado': '👨‍🔧',
     'en_proceso': '⚡',
     'finalizado': '✅',
+    'calificado': '⭐',
     'cancelado': '❌'
   }
   
@@ -887,6 +889,7 @@ const mapApiStatusToLocal = (apiStatus) => {
     'pendiente_pagoservicio': 'Finalizado',
     'verificando_pagoservicio': 'Finalizado',
     'finalizado': 'Finalizado',
+    'calificado': 'Calificado',
     'cancelado': 'Cancelado'
   }
   

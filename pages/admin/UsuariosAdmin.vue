@@ -3395,6 +3395,13 @@ const showTopRatings = async () => {
   }
 }
 
+// Watch for search query changes
+watch(searchQuery, debounce((newQuery) => {
+  if (newQuery !== undefined) {
+    loadUsers(1) // Reiniciar a la primera página al buscar
+  }
+}, 500))
+
 // Watch for changes in the selected role to keep id_rol in sync
 watch(() => userForm.value.rol, (newRole) => {
   if (newRole && newRole.id_rol) {
@@ -3621,6 +3628,7 @@ const loadUsers = async (page = 1) => {
     
     // Generar clave de caché que incluya filtros
     const filtersKey = JSON.stringify({ 
+      search: searchQuery.value || '',
       status: selectedStatus.value?.value || '',
       city: selectedCity.value?.value || ''
     })
@@ -3645,6 +3653,11 @@ const loadUsers = async (page = 1) => {
       limit: limit.toString(),
       offset: offset.toString()
     }) 
+    
+    // Agregar búsqueda por nombre si existe
+    if (searchQuery.value) {
+      params.append('nombre', searchQuery.value)
+    }
     
     if (selectedStatus.value?.value) {
       params.append('estado', selectedStatus.value.value)

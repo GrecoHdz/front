@@ -1842,6 +1842,9 @@ const selectTechnician = (technician) => {
 // Función para confirmar la asignación del técnico
 const confirmTechnicianAssignment = async () => {
   try {
+    console.log('ID de servicio a asignar:', serviceToAssign.value?.id_solicitud);
+    console.log('ID de técnico seleccionado:', selectedTechnician.value?.id_usuario);
+    
     // Actualizar el servicio en el backend primero
     const updateResponse = await $fetch(`/solicitudservicio/${serviceToAssign.value.id_solicitud}`, {
       baseURL: config.public.apiBase,
@@ -1855,6 +1858,27 @@ const confirmTechnicianAssignment = async () => {
         id_tecnico: selectedTechnician.value.id_usuario
       })
     })
+
+    // Obtener el ID del técnico que se está asignando
+    const idTecnico = selectedTechnician.value.id_usuario;
+    
+    console.log('Enviando notificación con los siguientes datos:', {
+      titulo: 'Servicio Asignado',
+      id_usuario: idTecnico
+    });
+
+    await $fetch('/notificaciones/enviar', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        titulo: 'Servicio Asignado', 
+        id_usuario: idTecnico
+      })
+    });
 
     // Buscar en servicios pendientes
     const pendingIndex = pendingServices.value.findIndex(s => s.id_solicitud === serviceToAssign.value.id_solicitud)
@@ -1872,6 +1896,7 @@ const confirmTechnicianAssignment = async () => {
     serviceToAssign.value = null
     selectedTechnician.value = null
   } catch (error) {
+    console.error('Error en asignación de técnico:', error)
     showError('Error al asignar técnico')
   }
 }
@@ -1974,6 +1999,40 @@ const verifyPayment = async (isApproved) => {
       console.log('📥 Respuesta de aprobación de pago:', response)
       console.log(`✅ Pago de ${isVisitPayment ? 'visita' : 'servicio'} aprobado`)
       
+      // Notificar al técnico sobre el pago aprobado
+      try {
+        // Obtener el ID del técnico del servicio actual
+        const idTecnico = serviceToPayment.value?.tecnico?.id_tecnico;
+                         
+        if (!idTecnico) {
+          console.warn('⚠️ No se encontró el ID del técnico en el servicio:', serviceToPayment.value);
+          return;
+        }
+        
+        console.log('🔍 ID de técnico encontrado:', idTecnico);
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Pago de servicio recibido',
+            id_usuario: idTecnico
+          })
+        });
+        console.log('📤 Enviando notificación de pago aprobado:', {
+          payload: {
+            titulo: 'Pago de servicio recibido',
+            id_usuario: idTecnico
+            }
+             
+        });
+      } catch (notifError) {
+        console.error('Error al enviar notificación de pago aprobado:', notifError);
+      }
+      
     } else {
       // RECHAZAR PAGO
       const id_usuario = serviceToPayment.value?.cliente?.id_cliente 
@@ -1999,6 +2058,31 @@ const verifyPayment = async (isApproved) => {
       
       console.log('📥 Respuesta de rechazo de pago:', response)
       console.log(`❌ Pago de ${isVisitPayment ? 'visita' : 'servicio'} rechazado`)
+      
+      // Notificar al técnico sobre el pago rechazado
+      try {
+        await $fetch('/notificaciones', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Pago de servicio rechazado',
+            id_usuario: serviceToPayment.value?.tecnico?.id_tecnico
+          })
+        });
+        console.log('✅ Notificación de pago rechazado enviada al técnico:', {
+          payload: {
+            titulo: 'Pago de servicio rechazado',
+            id_usuario: serviceToPayment.value?.tecnico?.id_tecnico
+            }
+             
+        });
+      } catch (notifError) {
+        console.error('Error al enviar notificación de pago rechazado:', notifError);
+      }
     }
     
     // Cerrar el modal de pago
@@ -2017,7 +2101,7 @@ const verifyPayment = async (isApproved) => {
     
     // Mostrar mensaje de éxito DESPUÉS de recargar todo
     if (isApproved) {
-      showSuccess('Pago del servicio aprobado correctamente. El servicio ha sido finalizado.')
+      showSuccess('Pago del servicio aprobado correctamente.')
     } else {
       showSuccess('Pago rechazado. El cliente deberá realizar el pago nuevamente.')
     }

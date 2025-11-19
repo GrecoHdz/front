@@ -617,230 +617,269 @@
     </Transition>
  
   <!-- Payment Modal with Transitions -->
-  <Transition
-    name="modal"
-    enter-active-class="modal-enter-active"
-    leave-active-class="modal-leave-active"
-    enter-from-class="modal-enter-from"
-    leave-to-class="modal-leave-to">
+<Transition
+  name="modal"
+  enter-active-class="modal-enter-active"
+  leave-active-class="modal-leave-active"
+  enter-from-class="modal-enter-from"
+  leave-to-class="modal-leave-to">
 
-    <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-3">
+  <div 
+    v-if="showPaymentModal"
+    class="fixed inset-0 z-50 flex items-start justify-center 
+           p-2 sm:p-3 overflow-y-auto"
+  >
 
-      <!-- Backdrop con animación -->
-      <Transition
-        name="backdrop"
-        enter-active-class="backdrop-enter-active"
-        leave-active-class="backdrop-leave-active"
-        enter-from-class="backdrop-enter-from"
-        leave-to-class="backdrop-leave-to">
-        <div 
-          v-if="showPaymentModal"
-          class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          @click="closePaymentModal"
-        ></div>
-      </Transition>
+    <!-- Backdrop con animación -->
+    <Transition
+      name="backdrop"
+      enter-active-class="backdrop-enter-active"
+      leave-active-class="backdrop-leave-active"
+      enter-from-class="backdrop-enter-from"
+      leave-to-class="backdrop-leave-to">
+      <div 
+        v-if="showPaymentModal"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        @click="closePaymentModal"
+      ></div>
+    </Transition>
 
-      <!-- Contenido del modal con animación -->
-      <Transition
-        name="modal-content"
-        enter-active-class="modal-content-enter-active"
-        leave-active-class="modal-content-leave-active"
-        enter-from-class="modal-content-enter-from"
-        leave-to-class="modal-content-leave-to">
-        <div 
-          v-if="showPaymentModal"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs h-[calc(100vh-2rem)] sm:max-h-[90vh] overflow-y-auto relative z-10"
-          @click.stop
-        >
-          <!-- Encabezado del modal -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-base">
-                  💳
-                </div>
-                <div>
-                  <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Servicio</h3>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
-                </div>
+    <!-- Contenido del modal -->
+    <Transition
+      name="modal-content"
+      enter-active-class="modal-content-enter-active"
+      leave-active-class="modal-content-leave-active"
+      enter-from-class="modal-content-enter-from"
+      leave-to-class="modal-content-leave-to">
+
+      <div 
+        v-if="showPaymentModal"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full 
+               max-w-md max-h-[85vh] overflow-y-auto relative z-10"
+        @click.stop
+      >
+
+        <!-- Encabezado -->
+        <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 
+                    border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 
+                          rounded-lg flex items-center justify-center text-base">
+                💳
               </div>
-              <button @click="closePaymentModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
+              <div>
+                <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Servicio</h3>
+                <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
+              </div>
+            </div>
+            <button @click="closePaymentModal" 
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="p-3">
+
+          <!-- Resumen -->
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
+            <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Resumen del Servicio</h4>
+            <div class="flex items-center space-x-2 mb-2">
+              <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-indigo-500
+                          rounded-lg flex items-center justify-center text-sm">
+                {{ selectedService.icon }}
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ selectedService.title }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedService.date }}</p>
+              </div>
             </div>
           </div>
 
-          <!-- Contenido principal del modal -->
-          <div class="p-3">
-            <!-- Resumen del Servicio -->
-            <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
-              <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Resumen del Servicio</h4>
-              <div class="flex items-center space-x-2 mb-2">
-                <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
-                  {{ selectedService.icon }}
-                </div>
-                <div>
-                  <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ selectedService.title }}</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedService.date }}</p>
-                </div>
-              </div>
+          <!-- Desglose -->
+          <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg mb-3">
+            <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
+
+            <div v-if="isLoadingQuotation" class="py-3 flex justify-center">
+              <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
             </div>
 
-            <!-- Desglose de Pago -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg mb-3">
-              <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
-              <div v-if="isLoadingQuotation" class="py-3 flex justify-center">
-                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
-              </div>
-              <div v-else class="space-y-1 text-sm">
-                <!-- Mano de obra -->
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-blue-700 dark:text-blue-300">Mano de obra:</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ parseFloat(quotationData?.monto_manodeobra || 0).toFixed(2) }}</span>
-                </div>
-                
-                <!-- Descuento por membresía -->
-                <template v-if="shouldShowDiscountBenefit">
-                  <div class="flex justify-between items-center mb-1">
-                    <span class="text-blue-700 dark:text-blue-300">Descuento por membresía:</span>
-                    <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                      -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * discountPercentage).toFixed(2) }}
-                    </span>
-                  </div>
-                  </template>
+            <div v-else class="space-y-1 text-sm">
 
-                <!-- Crédito de membresía -->
-                <template v-if="shouldShowCreditBenefit && membresiaProgreso?.monto_credito_mostrado > 0">
-                  <div class="flex justify-between items-center mb-1">
-                    <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
-                    <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                      -L. {{ parseFloat(membresiaProgreso?.monto_credito_mostrado || 0).toFixed(2) }} 
-                    </span>
-                  </div>
-                </template>
-                
-                <!-- Total a pagar -->
-                <div class="flex justify-between items-center pt-2 mt-2 border-t border-blue-200 dark:border-blue-700">
-                  <span class="font-bold text-blue-800 dark:text-blue-100">Total a pagar:</span>
-                  <span class="font-bold text-lg text-blue-800 dark:text-blue-100">
-                    L. {{ totalAPagar.toFixed(2) }}
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-blue-700 dark:text-blue-300">Mano de obra:</span>
+                <span class="font-bold text-blue-800 dark:text-blue-200">
+                  L. {{ parseFloat(quotationData?.monto_manodeobra || 0).toFixed(2) }}
+                </span>
+              </div>
+
+              <template v-if="shouldShowDiscountBenefit">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-blue-700 dark:text-blue-300">Descuento por membresía:</span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                    -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * discountPercentage).toFixed(2) }}
                   </span>
                 </div>
+              </template>
+
+              <template v-if="shouldShowCreditBenefit && membresiaProgreso?.monto_credito_mostrado > 0">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                    -L. {{ parseFloat(membresiaProgreso?.monto_credito_mostrado || 0).toFixed(2) }}
+                  </span>
+                </div>
+              </template>
+
+              <div class="flex justify-between items-center pt-2 mt-2 
+                          border-t border-blue-200 dark:border-blue-700">
+                <span class="font-bold text-blue-800 dark:text-blue-100">Total a pagar:</span>
+                <span class="font-bold text-lg text-blue-800 dark:text-blue-100">
+                  L. {{ totalAPagar.toFixed(2) }}
+                </span>
               </div>
             </div>
+          </div>
 
-            <!-- Sección de Cuenta Bancaria -->
-            <div class="space-y-2 mb-3">
-              <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Transferencia
-              </label>
-              <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
-              </div>
-              <div v-else class="space-y-3">
-                <select
-                  id="bank-account"
-                  v-model="selectedAccount"
-                  class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
-                  :disabled="bankAccounts.length === 0"
+          <!-- Cuentas -->
+          <div class="space-y-2 mb-3">
+
+            <label for="bank-account" 
+                  class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Transferencia
+            </label>
+
+            <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
+            </div>
+
+            <div v-else class="space-y-3">
+
+              <select
+                id="bank-account"
+                v-model="selectedAccount"
+                class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200
+                       dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500
+                       text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
+              >
+                <option value="" disabled selected>Selecciona una cuenta</option>
+                <option 
+                  v-for="account in bankAccounts" 
+                  :key="account.id_cuenta" 
+                  :value="account.id_cuenta"
+                  class="py-2"
                 >
-                  <option value="" disabled selected>Selecciona una cuenta</option>
-                  <option 
-                    v-for="account in bankAccounts" 
-                    :key="account.id_cuenta" 
-                    :value="account.id_cuenta"
-                    class="py-2"
-                  >
-                    {{ account.banco }}
-                  </option>
-                </select>
+                  {{ account.banco }}
+                </option>
+              </select>
 
-                  <!-- Detalles de la cuenta seleccionada -->
-                  <div 
-                    v-if="getSelectedAccount" 
-                    class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
-                  >
-                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de la cuenta:</h4>
-                    <div class="space-y-1">
-                      <div class="flex justify-between">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Nombre:</span>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.titular }}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
-                      </div>
-                      <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Cuenta:</span>
-                        <div class="flex items-center space-x-2">
-                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
-                            {{ getSelectedAccount.numero_cuenta.length > 10 ? getSelectedAccount.numero_cuenta.slice(0, 10) + '...' : getSelectedAccount.numero_cuenta }}
-                          </span>
-                          <button 
-                            v-if="getSelectedAccount.numero_cuenta.length > 10"
-                            @click="copyToClipboard(getSelectedAccount.numero_cuenta)"
-                            class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                            title="Copiar número de cuenta"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
+              <!-- Detalles -->
+              <div 
+                v-if="getSelectedAccount" 
+                class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+              >
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Detalles de la cuenta:
+                </h4>
+                <div class="space-y-1">
+
+                  <div class="flex justify-between">
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Nombre:</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
+                  </div>
+
+                  <div class="flex justify-between">
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.titular }}</span>
+                  </div>
+
+                  <div class="flex justify-between">
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
+                  </div>
+
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Cuenta:</span>
+                    <div class="flex items-center space-x-2">
+                      <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
+                        {{ getSelectedAccount.numero_cuenta.length > 10 ? getSelectedAccount.numero_cuenta.slice(0, 10) + '...' : getSelectedAccount.numero_cuenta }}
+                      </span>
+                      <button 
+                        v-if="getSelectedAccount.numero_cuenta.length > 10"
+                        @click="copyToClipboard(getSelectedAccount.numero_cuenta)"
+                        class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
 
-                <!-- Input para el número de comprobante -->
-                <div class="space-y-1">
-                  <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Número de comprobante
-                  </label>
-                  <input
-                    id="comprobante"
-                    v-model="comprobante"
-                    type="text"
-                    class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200 text-base"
-                    placeholder="Ingresa el número de comprobante"
-                  >
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Realiza la transferencia a la cuenta seleccionada e ingresa el número de comprobante.
-                  </p>
                 </div>
               </div>
 
-              <!-- Botón de pago -->
-              <div class="mt-4">
-                <button 
-                  @click="processPayment"
-                  :disabled="!selectedAccount || !comprobante || isProcessingPayment"
-                  class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
+              <!-- Comprobante -->
+              <div class="space-y-1">
+                <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Número de comprobante
+                </label>
+                <input
+                  id="comprobante"
+                  v-model="comprobante"
+                  type="text"
+                  class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200
+                         dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500
+                         text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200 text-base"
+                  placeholder="Ingresa el número de comprobante"
                 >
-                  <span v-if="!isProcessingPayment">
-                    Procesar Pago L. {{ totalAPagar.toFixed(2) }}
-                  </span>
-                  <span v-else class="flex items-center justify-center">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Procesando...
-                  </span>
-                </button>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Realiza la transferencia e ingresa el número de comprobante.
+                </p>
               </div>
             </div>
+
+            <!-- Botón -->
+            <div class="mt-4">
+              <button 
+                @click="processPayment"
+                :disabled="!selectedAccount || !comprobante || isProcessingPayment"
+                class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg 
+                       hover:shadow-lg transition-all duration-300 transform hover:scale-105 
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
+              >
+                <span v-if="!isProcessingPayment">
+                  Procesar Pago L. {{ totalAPagar.toFixed(2) }}
+                </span>
+                <span v-else class="flex items-center justify-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" 
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                  </svg>
+                  Procesando...
+                </span>
+              </button>
+            </div>
+
           </div>
+
         </div>
-      </Transition>
-    </div>
-  </Transition>
+
+      </div>
+
+    </Transition>
+  </div>
+</Transition>
+
 
   <!-- Modal de Cancelación con Transiciones -->
   <Transition
