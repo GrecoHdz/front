@@ -48,18 +48,32 @@ export const useAuthStore = defineStore('auth', () => {
       return null;
     }
 
-    const updatedUser: User = { ...userData };
-    user.value = updatedUser;
+    // Normalizar el rol y asegurar que siempre tenga un valor por defecto
+    const normalizedUser: User = {
+      ...userData,
+      role: (userData.rol?.nombre_rol?.toLowerCase() || userData.role || 'usuario'),
+      estado: userData.estado || 'activo'
+    };
+
+    console.log('🔑 [auth] Usuario establecido:', {
+      id: normalizedUser.id_usuario,
+      role: normalizedUser.role,
+      estado: normalizedUser.estado
+    });
+
+    user.value = normalizedUser;
 
     // Guardar datos mínimos en la cookie
     const minimalUserData = {
-      id_usuario: updatedUser.id_usuario,
-      nombre: updatedUser.nombre,
-      id_ciudad: updatedUser.id_ciudad
+      id_usuario: normalizedUser.id_usuario,
+      nombre: normalizedUser.nombre,
+      id_ciudad: normalizedUser.id_ciudad,
+      role: normalizedUser.role,
+      estado: normalizedUser.estado
     };
     userCookie.value = JSON.stringify(minimalUserData);
 
-    return updatedUser;
+    return normalizedUser;
   };
 
   const setToken = (newToken: string | null) => {
@@ -202,25 +216,42 @@ export const useAuthStore = defineStore('auth', () => {
     _refreshPromise = (async () => {
       try {
         const config = useRuntimeConfig();
-        const headers: Record<string, string> = { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' };
-        if (token.value) headers['Authorization'] = `Bearer ${token.value}`;
-
+        const headers: Record<string, string> = { 
+          'Cache-Control': 'no-cache', 
+          'Pragma': 'no-cache',
+          'Accept': 'application/json'
+        };
+        
+        // No incluimos el token en el header para el refresh
         const response = await $fetch('/auth/refresh-token', {
           method: 'POST',
           baseURL: config.public.apiBase,
           credentials: 'include',
           headers
-        }) as { token?: string; user?: User };
+        }) as { token?: string; user?: any };
 
         if (response?.token) {
           setToken(response.token);
-          if (response.user) setUser(response.user);
+          
+          // Normalizar los datos del usuario
+          if (response.user) {
+            const normalizedUser = {
+              ...response.user,
+              role: response.user.rol?.nombre_rol?.toLowerCase() || 'usuario',
+              estado: response.user.estado || 'activo'
+            };
+            setUser(normalizedUser);
+            
+            // Forzar una actualización del usuario para asegurar que los datos estén actualizados
+            await fetchUser();
+          }
+          
           return true;
         }
 
         return false;
       } catch (err) {
-        console.error('Error al renovar token:', err);
+        console.error('❌ [auth] Error al renovar token:', err);
         clearAuthState();
         return false;
       } finally {

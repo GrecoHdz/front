@@ -1,14 +1,20 @@
+// Importar solo en el cliente
 import { defineNuxtPlugin } from '#app';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 
-export default defineNuxtPlugin(() => {
-  return {
-    provide: {
-      pdf: {
-        create: () => new jsPDF(),
-        autoTable: autoTable
+export default defineNuxtPlugin((nuxtApp) => {
+  // Solo ejecutar en el cliente
+  if (process.client) {
+    // Cargar jspdf y autotable dinámicamente
+    return {
+      provide: {
+        pdf: {
+          create: async () => {
+            const { jsPDF } = await import('jspdf');
+            await import('jspdf-autotable');
+            return new jsPDF();
+          }
+        }
       }
-    }
+    };
   }
 });

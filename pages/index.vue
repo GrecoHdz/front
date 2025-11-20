@@ -459,12 +459,19 @@
             </button>
           </form>
 
-          <div class="mt-6 text-center">
+          <div class="mt-6 text-center space-y-3">
             <button 
               @click="isLogin = !isLogin"
-              class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline transition-all duration-200 text-sm"
+              class="block w-full text-sm text-emerald-600 dark:text-emerald-400 hover:underline focus:outline-none"
             >
-              {{ isLogin ? '¿No tienes cuenta? Regístrate aquí' : '¿Ya tienes cuenta? Inicia sesión' }}
+              {{ isLogin ? '¿No tienes una cuenta? Regístrate' : '¿Ya tienes una cuenta? Inicia sesión' }}
+            </button>
+            <button 
+              v-if="isLogin"
+              @click="showForgotPassword = true"
+              class="block w-full text-sm text-gray-600 dark:text-gray-400 hover:underline focus:outline-none"
+            >
+              ¿Olvidaste tu contraseña?
             </button>
           </div>
 
@@ -492,6 +499,71 @@
       :duration="toast.duration"
       @close="toast.show = false"
     />
+
+    <!-- Forgot Password Modal -->
+    <div v-if="showForgotPassword" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm relative">
+        <button 
+          @click="showForgotPassword = false" 
+          class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        
+        <div class="p-6">
+          <div class="text-center mb-6 pt-4">
+            <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl mx-auto mb-3 flex items-center justify-center">
+              <span class="text-white text-xl">🔑</span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Recuperar contraseña</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+            </p>
+          </div>
+
+          <form @submit.prevent="handlePasswordReset" class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
+                Correo electrónico
+              </label>
+              <input 
+                v-model="emailForPasswordReset"
+                type="email" 
+                required
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-gray-800 dark:text-white"
+                placeholder="tucorreo@ejemplo.com"
+              >
+            </div>
+
+            <button 
+              type="submit" 
+              :disabled="isResettingPassword"
+              class="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-xl transition-all duration-200 flex items-center justify-center"
+            >
+              <span v-if="!isResettingPassword">Enviar enlace</span>
+              <span v-else class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Enviando...
+              </span>
+            </button>
+          </form>
+
+          <div class="mt-4 text-center">
+            <button 
+              @click="showForgotPassword = false; isLogin = true"
+              class="text-sm text-gray-600 dark:text-gray-400 hover:underline focus:outline-none"
+            >
+              Volver al inicio de sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <style>
@@ -692,7 +764,6 @@ const cargarCiudades = async () => {
 // Verificar autenticación al cargar la página
 const checkAuthStatus = async () => {
   try {
-    const authStore = useAuthStore()
     const isAuthenticated = await authStore.checkAuth()
     
     if (isAuthenticated) {
@@ -800,8 +871,6 @@ const discountPercentage = ref()
 // Función para obtener el porcentaje de descuento del backend
 const fetchDiscountPercentage = async () => {
   try {
-    const config = useRuntimeConfig()
-    const auth = useAuthStore()
     
     const response = await $fetch('/config/valor/porcentaje_descuento', {
       baseURL: config.public.apiBase,
@@ -1036,8 +1105,43 @@ const getIconBg = (index) => {
 }
 
 // Methods
-// Obtener instancia del store de autenticación
 const authStore = useAuthStore()
+// Manejar el envío del formulario de recuperación de contraseña
+const handlePasswordReset = async () => {
+  try {
+    isResettingPassword.value = true
+    
+    // Validar el correo electrónico
+    if (!emailForPasswordReset.value) {
+      showToast('Por favor ingresa tu correo electrónico', 'error')
+      return
+    }
+
+    // Enviar solicitud de recuperación de contraseña
+    const response = await $fetch('/auth/forgot-password', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: emailForPasswordReset.value
+      })
+    })
+
+    // Mostrar mensaje de éxito
+    showToast('Hemos enviado un enlace de recuperación a tu correo electrónico', 'success')
+    showForgotPassword.value = false
+    emailForPasswordReset.value = ''
+  } catch (error) {
+    console.error('Error al solicitar recuperación de contraseña:', error)
+    const errorMessage = error?.data?.message || 'Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo.'
+    showToast(errorMessage, 'error')
+  } finally {
+    isResettingPassword.value = false
+  }
+}
 
 const handleAuth = async () => {
   // Validar identidad antes de continuar
@@ -1080,26 +1184,30 @@ const handleAuth = async () => {
           // Esperar para mostrar el estado de éxito
           await new Promise(resolve => setTimeout(resolve, 1500));
           
-          // Cerrar modal
+          // Obtener el rol del usuario autenticado
+          const userRole = authStore.user?.role?.toLowerCase() || '';
+          
+          // Cerrar modal después de un breve retraso para mostrar el estado de éxito
           showLoginModal.value = false;
           showSuccess.value = true;
           
-           const role = auth.user?.role?.toLowerCase()
-
-  switch (role) {
-    case 'admin':
-      router.push('/admin/DashboardAdmin')
-      break
-    case 'tecnico':
-      router.push('/tecnico/DashboardTecnico')
-      break
-    case 'usuario':
-      router.push('/cliente/DashboardCliente')
-      break
-    default:
-      router.push('/') // si no hay rol, volver al login
-      break
-  }
+          // Redirigir según el rol después de un breve retraso
+          setTimeout(() => {
+            switch(userRole) {
+              case 'admin':
+                window.location.href = '/admin/DashboardAdmin';
+                break;
+              case 'tecnico':
+                window.location.href = '/tecnico/DashboardTecnico';
+                break;
+              case 'usuario':
+                window.location.href = '/cliente/DashboardCliente';
+                break;
+              default:
+                window.location.href = '/';
+                break;
+            }
+          }, 1000); // Pequeño retraso para permitir que se cierre el modal
         } else {
           throw new Error(loginResult?.error || 'Error en las credenciales');
         }
@@ -1191,7 +1299,6 @@ const handleAuth = async () => {
             if (referralResponse.ok) {
               // Enviar notificación de nuevo referido
               try {
-                const config = useRuntimeConfig();
                 await $fetch('/notificaciones/enviar', {
                   baseURL: config.public.apiBase,
                   method: 'POST',
@@ -1226,7 +1333,6 @@ const handleAuth = async () => {
         
         // Enviar notificación a administradores
         try {
-          const config = useRuntimeConfig();
           await $fetch('/notificaciones/enviar', {
             baseURL: config.public.apiBase,
             method: 'POST',
@@ -1311,6 +1417,11 @@ const handleAuth = async () => {
     }
   }
 }
+
+// Estado para el modal de recuperación de contraseña
+const showForgotPassword = ref(false)
+const emailForPasswordReset = ref('')
+const isResettingPassword = ref(false)
 
 // Toast state
 const toast = ref({

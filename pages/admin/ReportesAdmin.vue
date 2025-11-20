@@ -3018,8 +3018,9 @@ const generateReport = async (report) => {
     const retirosTotales = withdrawalsData.total;
     const balanceNeto = ingresosTotales - retirosTotales;
 
-    // 🧾 5️⃣ Crear documento PDF
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    // 🧾 5️⃣ Crear documento PDF usando el plugin $pdf
+    const { $pdf } = useNuxtApp();
+    const doc = await $pdf.create();
     const colorPrincipal = [93, 92, 222];
     const colorSecundario = [75, 85, 99];
 
@@ -3107,15 +3108,8 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }, { $pdf }) => {
-  // Si no se proporciona un doc, crear uno nuevo
-  if (!doc) {
-    doc = $pdf.create();
-  }
-  // Crear una nueva instancia de jsPDF si no se proporciona
-  if (!doc) {
-    doc = new jsPDF();
-  }
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }) => {
+  // Usar autoTable del documento
   let currentY = 40;
 
   // 🎯 Título
@@ -3130,7 +3124,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
 
   // 📋 Tabla resumen de totales
-  $pdf.autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [['Concepto', 'Total (HNL)', 'Porcentaje (%)']],
     body: [
@@ -3179,7 +3173,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
 
   const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0;
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [['Fecha', 'Tipo', 'Cliente', 'Monto']],
     body: hayDatos
@@ -3229,7 +3223,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const totalRetiros = withdrawalsData.data.reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
   const hayRetiros = retirosFiltrados.length > 0;
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [['Fecha', 'Usuario', 'Descripción', 'Monto', 'Estado']],
     body: hayRetiros
@@ -3263,7 +3257,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.text('Resumen Final', 10, currentY);
   currentY += 6;
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [['Total Ingresos', 'Total Retiros', 'Balance Neto']],
     body: [[
@@ -3280,6 +3274,8 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
 
 // ===== REPORTE DE USUARIOS =====
 const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
+  // Usar autoTable del documento
+  const autoTable = (options) => doc.autoTable(options);
   let currentY = 40;
 
   // 🔹 Título principal
@@ -3322,7 +3318,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     ]);
   }
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [['Fecha Registro', 'Nombre', 'Teléfono', 'Ciudad', 'Estado', 'Servicios', 'Membresías']],
     body: clientesBody.length
@@ -3384,7 +3380,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     ]);
   }
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [['Fecha Registro', 'Nombre', 'Teléfono', 'Ciudad', 'Estado', 'Servicios']],
     body: tecnicosBody.length
@@ -3437,7 +3433,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
   ];
 
   // 🟦 Primera columna
-  autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [['Métrica', 'Cantidad']],
     body: statsCol1,
@@ -3450,7 +3446,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
   });
 
   // 🟩 Segunda columna (a la derecha)
-  autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [['Métrica', 'Cantidad']],
     body: statsCol2,
@@ -3466,6 +3462,8 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
 
 // ===== REPORTE DE SERVICIOS DETALLADO =====
 const generarReporteServiciosDetallado = async (doc, serviceData) => {
+  // Usar autoTable del documento
+  const autoTable = (options) => doc.autoTable(options);
   const servicios = Array.isArray(serviceData?.data) ? serviceData.data : [];
   const TERMINADOS = ['finalizado', 'calificado', 'cancelado'];
 
@@ -3511,7 +3509,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
       formatCurrency(montoFila_ConPago(s))
     ]));
 
-    autoTable(doc, {
+    doc.autoTable({
       startY: currentY,
       head: [headers],
       body: rows, // 🔹 sin fila de total general
@@ -3550,7 +3548,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
       formatCurrency(montoFila_SinPago(s))
     ]));
 
-    autoTable(doc, {
+    doc.autoTable({
       startY: currentY,
       head: [headers],
       body: rows, // 🔹 sin fila de total general
@@ -3595,7 +3593,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
       { content: formatCurrency(totalTabla), styles: { fontStyle: 'bold' } }
     ];
 
-    autoTable(doc, {
+    doc.autoTable({
       startY: currentY,
       head: [headers],
       body: [...rows, totalRow],
@@ -3631,7 +3629,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
     doc.text('DESGLOSE POR TIPO DE SERVICIO', 10, currentY);
     currentY += 6;
 
-    autoTable(doc, {
+    doc.autoTable({
       startY: currentY,
       head: [['Servicio', 'Cantidad']],
       body: desgloseRows,
@@ -3647,6 +3645,8 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
 
 // ===== REPORTE DE TRANSACCIONES =====
 const generarReporteTransacciones = async (doc, membershipData, visitData, withdrawalsData) => {
+  // Usar autoTable del documento
+  const autoTable = (options) => doc.autoTable(options);
   const data = [
     ...(membershipData?.data || []).map((m) => ({
       tipo: 'Membresía',
@@ -3693,7 +3693,7 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
     { content: formatCurrency(total), styles: { fontStyle: 'bold' } }
   ];
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: currentY,
     head: [headers],
     body: [...rows, totalRow],
