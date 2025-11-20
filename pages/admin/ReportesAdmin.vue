@@ -1060,11 +1060,15 @@ const toast = reactive({
 // ===== FUNCIONES DE UTILIDAD =====
 const formatCurrency = (value) => {
   try {
-    if (value === undefined || value === null || isNaN(value)) return '0';
-    return parseFloat(value).toFixed().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (value === undefined || value === null || isNaN(value)) return 'L. 0.00';
+    const number = parseFloat(value);
+    return `L. ${number.toLocaleString('es-HN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
   } catch (error) {
     console.error('Error formateando moneda:', error);
-    return '0';
+    return 'L. 0.00';
   }
 };
 
@@ -3168,8 +3172,20 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     .filter(s => s.estado?.toLowerCase() !== 'pendiente')
     .map(s => [formatDate(s.fecha), 'Servicio', s.solicitud?.cliente?.nombre || '-', formatCurrency(s.monto_total || 0)]);
 
-  const totalIngresosTabla = [...membresiasFiltradas, ...visitasFiltradas, ...serviciosFiltrados]
-    .reduce((sum, row) => sum + (parseFloat(row[3].replace(/[^0-9.-]+/g, "")) || 0), 0);
+  // Calculate totals from original data instead of formatted strings
+  const totalMembresias = membershipData.data
+    .filter(m => m.estado?.toLowerCase() !== 'pendiente')
+    .reduce((sum, m) => sum + (parseFloat(m.monto) || 0), 0);
+    
+  const totalVisitas = visitData.data
+    .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
+    .reduce((sum, v) => sum + (parseFloat(v.monto) || 0), 0);
+    
+  const totalServicios = serviceData.data
+    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
+    .reduce((sum, s) => sum + (parseFloat(s.monto_total) || 0), 0);
+    
+  const totalIngresosTabla = totalMembresias + totalVisitas + totalServicios;
 
   const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0;
 
