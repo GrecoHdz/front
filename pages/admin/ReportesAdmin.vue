@@ -1114,7 +1114,6 @@ const loadMembershipPayments = async (page = 1) => {
   // Store initial stats if not already set
   if (page === 1 && !initialStats.value.total && totalMonthlyStats.value?.membership) {
     const stats = totalMonthlyStats.value.membership;
-    console.log('Initial membership stats from API:', stats);
     
     initialStats.value = {
       aprobados: stats.aprobados || 0,
@@ -1124,9 +1123,7 @@ const loadMembershipPayments = async (page = 1) => {
              (stats.rechazados || 0) + 
              (stats.pendientes || 0),
       totalMoney: stats.total || 0
-    };
-    
-    console.log('Initial stats set with totalMoney:', initialStats.value);
+    }; 
   }
   try {
     const limit = paymentsPerPage;
@@ -2150,6 +2147,8 @@ const getStatusColor = (status, tipo) => {
     
     switch (statusLower) {
       case 'pagado': return 'text-yellow-500';
+      case 'completado': return 'text-green-500';
+      case 'calificado': return 'text-green-500';
       case 'aceptado': return 'text-green-500';
       case 'aprobado': return 'text-green-500';
       case 'pendiente': return 'text-yellow-500';
@@ -2242,6 +2241,7 @@ const getItemAmountClass = (status) => {
       case 'aprobado':
       case 'aceptado':
       case 'aprobada':
+      case 'completado':
       case 'aceptada':
         return 'text-green-600 dark:text-green-400';
       case 'rechazado':
@@ -2602,11 +2602,9 @@ const updatePlatformStats = async () => {
         updateChart(response.data.grafico);
       }
       
-      showToast('Datos actualizados correctamente', 'success');
     }
   } catch (error) {
     console.error('Error al cargar estadísticas:', error);
-    showToast('Error al cargar las estadísticas', 'error');
   }  
 };
 

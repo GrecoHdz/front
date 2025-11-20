@@ -1841,10 +1841,7 @@ const selectTechnician = (technician) => {
 
 // Función para confirmar la asignación del técnico
 const confirmTechnicianAssignment = async () => {
-  try {
-    console.log('ID de servicio a asignar:', serviceToAssign.value?.id_solicitud);
-    console.log('ID de técnico seleccionado:', selectedTechnician.value?.id_usuario);
-    
+  try { 
     // Actualizar el servicio en el backend primero
     const updateResponse = await $fetch(`/solicitudservicio/${serviceToAssign.value.id_solicitud}`, {
       baseURL: config.public.apiBase,
@@ -1862,11 +1859,6 @@ const confirmTechnicianAssignment = async () => {
     // Obtener el ID del técnico que se está asignando
     const idTecnico = selectedTechnician.value.id_usuario;
     
-    console.log('Enviando notificación con los siguientes datos:', {
-      titulo: 'Servicio Asignado',
-      id_usuario: idTecnico
-    });
-
     await $fetch('/notificaciones/enviar', {
       baseURL: config.public.apiBase,
       method: 'POST',
@@ -1909,11 +1901,6 @@ const verifyPayment = async (isApproved) => {
   }
   
   try {
-    // Log para debugging: ver estructura completa del servicio
-    console.log('🔍 Estructura completa de serviceToPayment:', JSON.stringify(serviceToPayment.value, null, 2))
-    console.log('🔍 Tipo de pago:', paymentType.value)
-    console.log('🔍 Propiedades disponibles en serviceToPayment:', Object.keys(serviceToPayment.value || {}))
-    
     // Obtener el ID de la cotización del servicio - intentar múltiples ubicaciones posibles
     const cotizacionId = serviceToPayment.value?.cotizacion?.id || 
                         serviceToPayment.value?.cotizacion?.id_cotizacion ||
@@ -1923,19 +1910,13 @@ const verifyPayment = async (isApproved) => {
                         serviceToPayment.value?.id_cotizacion ||
                         serviceToPayment.value?.cotizacion_id ||
                         serviceToPayment.value?.id ||
-                        serviceToPayment.value?.cotizacionId
-    
-    console.log('🔍 ID de cotización encontrado:', cotizacionId)
-    console.log('🔍 Ubicación encontrada:', cotizacionId ? 'Encontrado' : 'No encontrado')
+                        serviceToPayment.value?.cotizacionId 
     
     // Obtener el ID de la solicitud - intentar múltiples ubicaciones posibles
     const solicitudId = serviceToPayment.value?.id_solicitud || 
                         serviceToPayment.value?.id ||
                         serviceToPayment.value?.idSolicitud ||
                         serviceToPayment.value?.solicitud_id
-    
-    console.log('🔍 ID de solicitud encontrado:', solicitudId)
-    console.log('🔍 Ubicación encontrada:', solicitudId ? 'Encontrado' : 'No encontrado')
     
     if (!solicitudId) {
       console.error('ID de solicitud no encontrado en serviceToPayment:', serviceToPayment.value)
@@ -1946,9 +1927,6 @@ const verifyPayment = async (isApproved) => {
     // Obtener el ID del usuario - intentar múltiples ubicaciones posibles
     const idUsuario = serviceToPayment.value?.cliente?.id_cliente 
                       
-    
-    console.log('🔍 ID de usuario encontrado:', idUsuario)
-    console.log('🔍 Ubicación encontrada:', idUsuario ? 'Encontrado' : 'No encontrado')
     
     if (!idUsuario && !isApproved) {
       console.error('❌ ID de usuario no encontrado en serviceToPayment:', serviceToPayment.value)
@@ -1975,15 +1953,7 @@ const verifyPayment = async (isApproved) => {
       const paymentPayload = { 
         id_solicitud: solicitudId,
         id_cotizacion: cotizacionId
-      }
-      
-      console.log('📦 Payload de aprobación:', paymentPayload)
-      
-      console.log(`📤 Enviando aprobación de pago de ${isVisitPayment ? 'visita' : 'servicio'}:`, {
-        endpoint,
-        method: 'POST',
-        payload: paymentPayload
-      })
+      } 
       
       const response = await $fetch(endpoint, {
         baseURL: config.public.apiBase,
@@ -1996,9 +1966,6 @@ const verifyPayment = async (isApproved) => {
         body: JSON.stringify(paymentPayload)
       });
       
-      console.log('📥 Respuesta de aprobación de pago:', response)
-      console.log(`✅ Pago de ${isVisitPayment ? 'visita' : 'servicio'} aprobado`)
-      
       // Notificar al técnico sobre el pago aprobado
       try {
         // Obtener el ID del técnico del servicio actual
@@ -2009,7 +1976,6 @@ const verifyPayment = async (isApproved) => {
           return;
         }
         
-        console.log('🔍 ID de técnico encontrado:', idTecnico);
         await $fetch('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
@@ -2022,13 +1988,6 @@ const verifyPayment = async (isApproved) => {
             id_usuario: idTecnico
           })
         });
-        console.log('📤 Enviando notificación de pago aprobado:', {
-          payload: {
-            titulo: 'Pago de servicio recibido',
-            id_usuario: idTecnico
-            }
-             
-        });
       } catch (notifError) {
         console.error('Error al enviar notificación de pago aprobado:', notifError);
       }
@@ -2038,12 +1997,6 @@ const verifyPayment = async (isApproved) => {
       const id_usuario = serviceToPayment.value?.cliente?.id_cliente 
       const endpoint = isVisitPayment ? '/pagovisita/denegar' : '/pagoservicio/denegar'
       const denyPayload = { id_solicitud: solicitudId, id_cotizacion: cotizacionId, id_usuario }
-      
-      console.log(`📤 Enviando rechazo de pago de ${isVisitPayment ? 'visita' : 'servicio'}:`, {
-        endpoint,
-        method: 'POST',
-        payload: denyPayload
-      })
       
       const response = await $fetch(endpoint, {
         baseURL: config.public.apiBase,
@@ -2055,9 +2008,6 @@ const verifyPayment = async (isApproved) => {
         },
         body: JSON.stringify(denyPayload)
       });
-      
-      console.log('📥 Respuesta de rechazo de pago:', response)
-      console.log(`❌ Pago de ${isVisitPayment ? 'visita' : 'servicio'} rechazado`)
       
       // Notificar al técnico sobre el pago rechazado
       try {
@@ -2072,14 +2022,7 @@ const verifyPayment = async (isApproved) => {
             titulo: 'Pago de servicio rechazado',
             id_usuario: serviceToPayment.value?.tecnico?.id_tecnico
           })
-        });
-        console.log('✅ Notificación de pago rechazado enviada al técnico:', {
-          payload: {
-            titulo: 'Pago de servicio rechazado',
-            id_usuario: serviceToPayment.value?.tecnico?.id_tecnico
-            }
-             
-        });
+        }); 
       } catch (notifError) {
         console.error('Error al enviar notificación de pago rechazado:', notifError);
       }

@@ -1259,8 +1259,6 @@ const submitQuotation = async () => {
       fecha: new Date().toISOString()
     };
     
-    console.log('Datos de la cotización a enviar:', JSON.stringify(cotizacionData, null, 2));
-    
     const updateResponse = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
@@ -1274,8 +1272,6 @@ const submitQuotation = async () => {
     
     updateSuccessful = true;
     
-    console.log('Actualización de estado exitosa, creando cotización...');
-    
     const cotizacionResponse = await $fetch('/cotizacion', {
       baseURL: config.public.apiBase,
       method: 'POST',
@@ -1287,14 +1283,11 @@ const submitQuotation = async () => {
       body: cotizacionData
     });
     
-    console.log('Respuesta del servidor:', cotizacionResponse);
-    
     // Notificar al usuario que solicitó el servicio sobre la cotización enviada
     try {
       const userId = selectedService.value.rawData.cliente?.id_usuario;
       
       if (userId) {
-        console.log('ID del usuario a notificar:', userId);
         await $fetch('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
@@ -1309,11 +1302,8 @@ const submitQuotation = async () => {
           })
         });
       } else {
-        console.warn('No se pudo obtener el ID del usuario para enviar la notificación');
       }
     } catch (error) {
-      console.error('Error al enviar notificación al usuario:', error);
-      // No mostrar error al usuario para no afectar su experiencia
     }
     
     showToast('Cotización enviada correctamente', 'success')
@@ -1332,7 +1322,6 @@ const submitQuotation = async () => {
     
     if (updateSuccessful) {
       try {
-        console.log('Intentando revertir el estado de la solicitud...');
         await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
@@ -1343,7 +1332,6 @@ const submitQuotation = async () => {
           },
           body: { estado: 'asignado' }
         });
-        console.log('Estado de la solicitud revertido exitosamente');
       } catch (revertError) {
         console.error('Error al revertir el estado de la solicitud:', {
           message: revertError.message,
@@ -1406,7 +1394,6 @@ const updateQuotation = async () => {
         const userId = selectedService.value.rawData.cliente?.id_usuario;
         
         if (userId) {
-          console.log('Notificando al usuario sobre cotización actualizada, ID:', userId);
           await $fetch('/notificaciones/enviar', {
             baseURL: config.public.apiBase,
             method: 'POST',
@@ -1489,7 +1476,6 @@ const confirmCompleteService = async () => {
       const userId = selectedService.value.rawData.cliente?.id_usuario;
       
       if (userId) {
-        console.log('Notificando al usuario sobre servicio completado, ID:', userId);
         await $fetch('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
@@ -1548,7 +1534,6 @@ const cancelService = async () => {
       const userId = selectedService.value.rawData.cliente?.id_usuario;
       
       if (userId) {
-        console.log('Notificando al usuario sobre servicio cancelado, ID:', userId);
         await $fetch('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',

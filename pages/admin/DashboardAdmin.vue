@@ -556,12 +556,7 @@ const fetchStatistics = async () => {
           membresias: '0.00',
           visitas: '0.00'
         }
-      }
-      
-      showSuccess(
-        'Datos actualizados',
-        `Estadísticas actualizadas correctamente`
-      )
+      } 
     }
   } catch (error) {
     console.error('Error al obtener estadísticas:', error)
@@ -1403,10 +1398,7 @@ const refreshPendingItems = async () => {
       }))
       
       // Actualizar contadores de notificaciones no leídas si es necesario
-      const unreadCount = recentActivities.value.filter(a => !a.read).length
-      // Aquí podrías actualizar algún store o estado global con el contador
-      
-      showSuccess('Actividades actualizadas')
+      const unreadCount = recentActivities.value.filter(a => !a.read).length 
     } else {
       throw new Error('Formato de respuesta inesperado')
     }

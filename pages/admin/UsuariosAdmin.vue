@@ -2494,7 +2494,6 @@ const filterServices = async () => {
     }
     
     const url = `/solicitudservicio?${params.toString()}`
-    console.log('Solicitando servicios con parámetros:', params.toString())
     
     const data = await $fetch(url, {
       baseURL: config.public.apiBase,
@@ -2503,9 +2502,7 @@ const filterServices = async () => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       }
-    })
-    
-    console.log('Respuesta del servidor:', data)
+    }) 
     
     // Mapear la respuesta al formato esperado por la interfaz
     userServiceHistory.value = data.data.map(solicitud => ({
@@ -2980,9 +2977,6 @@ const showCredits = async (user, page = 1, dateRange = null) => {
       // Store the full response for balance display
       creditsResponse.value = response
       
-      // Depuración: Mostrar la respuesta de la API
-      console.log('Respuesta de la API de créditos:', response.data)
-      
       // Mapear la respuesta de la API al formato del frontend
       const transactions = response.data.map(tx => {
         // Formatear la descripción según el tipo de transacción
@@ -3065,15 +3059,6 @@ const showCredits = async (user, page = 1, dateRange = null) => {
         }
       })
       
-      // Debug: Mostrar información de caché
-      console.log('Datos de paginación:', {
-        currentPage: creditsCurrentPage.value,
-        totalPages: creditsTotalPages.value,
-        totalItems: totalCreditsCount.value,
-        cacheSize: Object.keys(creditsCache.value).length,
-        cachedKeys: Object.keys(creditsCache.value)
-      })
-      
     } else {
       const errorMessage = response?.error || 'No se pudieron cargar las transacciones de crédito'
       console.error('Error loading credits:', errorMessage)
@@ -3095,7 +3080,6 @@ const showCredits = async (user, page = 1, dateRange = null) => {
 
 const showReferrals = async (user, page = 1) => {
   try {
-    console.log('Mostrando referidos para el usuario:', user, 'Página:', page)
     selectedUser.value = user
     
     // Establecer la página actual
@@ -3112,7 +3096,6 @@ const showReferrals = async (user, page = 1) => {
     
     // Verificar si los datos ya están en caché
     if (referralsCache.value[cacheKey]) {
-      console.log('Usando datos de caché para la clave:', cacheKey)
       const cachedData = referralsCache.value[cacheKey]
       userReferrals.value = cachedData.referrals
       totalReferrals.value = cachedData.total
@@ -3133,8 +3116,6 @@ const showReferrals = async (user, page = 1) => {
         limit: 5
       }
     })
-    
-    console.log('Respuesta de la API de referidos:', response)
     
     if (response && response.success && Array.isArray(response.data)) {
       // Mapear la respuesta al formato esperado
@@ -3170,13 +3151,8 @@ const showReferrals = async (user, page = 1) => {
       
       // Actualizar los valores reactivos
       totalReferrals.value = total
-      referralsTotalPages.value = totalPages
-      
-      console.log('Referidos cargados:', userReferrals.value)
-      console.log('Total de referidos:', totalReferrals.value)
-      console.log('Total de páginas:', referralsTotalPages.value)
+      referralsTotalPages.value = totalPages 
     } else {
-      console.error('Formato de respuesta inesperado:', response)
       showError('Error al cargar los referidos: Formato de respuesta inesperado')
     }
   } catch (error) {
@@ -3406,16 +3382,10 @@ watch(searchQuery, debounce((newQuery) => {
 watch(() => userForm.value.rol, (newRole) => {
   if (newRole && newRole.id_rol) {
     userForm.value.id_rol = newRole.id_rol
-    console.log('Rol actualizado:', { 
-      id_rol: userForm.value.id_rol,
-      rol: userForm.value.rol 
-    })
   }
 }, { deep: true })
 
 const editUser = (user) => {
-  console.log('Raw user data:', JSON.parse(JSON.stringify(user)))
-  console.log('Available roles:', JSON.parse(JSON.stringify(roles.value)))
 
   // Find the role by name since we have the role name but not the ID in the user object
   const roleName = user.rol?.nombre_rol || user.rol
@@ -3451,11 +3421,6 @@ const editUser = (user) => {
     ciudad: user.ciudad || null
   }
 
-  console.log('Formulario después de mapear:', {
-    ...JSON.parse(JSON.stringify(userForm.value)),
-    rol: userForm.value.rol ? { ...userForm.value.rol } : null
-  })
-  
   showEditModal.value = true
 }
 
@@ -3495,12 +3460,6 @@ const saveUser = async () => {
         : userForm.value.estado
     };
 
-    console.log('Enviando al backend:', {
-      url: `usuarios/${userForm.value.id_usuario}`,
-      method: 'PUT',
-      data: userData
-    });
-
     const response = await $fetch(`usuarios/${userForm.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
@@ -3510,8 +3469,6 @@ const saveUser = async () => {
       },
       body: userData
     });
-
-    console.log('Respuesta del backend:', response);
 
     // Función para actualizar el usuario en una lista
     const updateUserInList = (list) => {
@@ -3837,8 +3794,6 @@ const loadAdministrators = async (page = 1) => {
       }
     }
     
-    console.log('Parámetros de búsqueda:', query)
-
     // Eliminar propiedades vacías del query
     Object.keys(query).forEach(key => {
       if (query[key] === '' || query[key] === null || query[key] === undefined) {
@@ -3848,8 +3803,6 @@ const loadAdministrators = async (page = 1) => {
 
     const queryString = new URLSearchParams(query).toString()
     const url = `/usuarios/administradores?${queryString}`
-    
-    console.log('📤 Cargando administradores con filtros:', { query, url })
 
     const response = await $fetch(url, {
       baseURL: config.public.apiBase,
@@ -3860,11 +3813,7 @@ const loadAdministrators = async (page = 1) => {
       }
     })
 
-    // Log the response
-    console.log('📥 Received response:', response)
-
     if (response.success) {
-      console.log(`✅ Successfully loaded ${response.administradores?.length || 0} administrators`)
       administrators.value = response.administradores || []
       totalAdmins.value = response.total || 0
       adminsCurrentPage.value = page
@@ -3939,8 +3888,7 @@ const loadRoles = async () => {
         { id_rol: 3, nombre_rol: 'Cliente' }
       ]
     }
-    
-    console.log('Roles cargados exitosamente:', roles.value)
+     
   } catch (error) {
     console.error('Error al cargar roles:', error)
     showError(`Error al cargar roles: ${error.message || 'Intente nuevamente'}`)

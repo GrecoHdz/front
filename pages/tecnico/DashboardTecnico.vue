@@ -403,8 +403,6 @@ const fetchServices = async (page = 1) => {
     // Calcular el offset basado en la página actual
     const offset = (page - 1) * itemsPerPage
     
-    console.log('Solicitando página:', page, 'con offset:', offset, 'límite:', itemsPerPage)
-    
     const response = await $fetch(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}?offset=${offset}&limit=${itemsPerPage}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -415,7 +413,6 @@ const fetchServices = async (page = 1) => {
     })
     
     // Manejar la respuesta de la API con paginación
-    console.log('Respuesta de la API:', response)
     
     // Primero verificar si la respuesta tiene el array de solicitudes
     if (response.solicitudes && Array.isArray(response.solicitudes)) {
@@ -444,11 +441,6 @@ const fetchServices = async (page = 1) => {
       totalServices.value = response.total || response.data.length
       hasMorePages.value = response.hasMore || false
     }
-    
-    console.log('Paginación - Total:', totalServices.value, 
-                'Páginas:', totalPages.value, 
-                'Página actual:', currentPage.value,
-                'HasMore:', hasMorePages.value)
     
     stats.value = {
       ...stats.value,
@@ -623,8 +615,6 @@ const changePage = (page) => {
   
   // Si ya estamos en esta página, no hacemos nada
   if (page === currentPage.value) return
-  
-  console.log('Cambiando a página:', page, 'Página actual:', currentPage.value)
   
   // Actualizamos la página actual primero para reflejar el cambio en la UI
   currentPage.value = page

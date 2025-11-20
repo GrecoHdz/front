@@ -2102,11 +2102,7 @@ const loadServices = async () => {
     const solicitudesConPago = await Promise.all(response.solicitudes.map(async (solicitud) => {
       // Verificar estado del pago de la visita si corresponde
       if (solicitud.estado === 'pendiente_pagovisita') {
-        console.log(`🔍 [${new Date().toISOString()}] Verificando estado de pago para solicitud ${solicitud.id_solicitud}`);
-        
         try {
-          console.log(`📡 [${new Date().toISOString()}] Solicitando estado de pago a: /pagovisita/solicitud/${solicitud.id_solicitud}`);
-          
           const pagoResponse = await $fetch(`/pagovisita/solicitud/${solicitud.id_solicitud}`, {
             baseURL: config.public.apiBase,
             method: 'GET',
@@ -2114,8 +2110,6 @@ const loadServices = async () => {
               'Authorization': `Bearer ${useCookie('token').value}`
             }
           });
-          
-          console.log(`✅ [${new Date().toISOString()}] Respuesta de pago para solicitud ${solicitud.id_solicitud}:`, pagoResponse);
           
           // Extraer el estado del pago de la respuesta anidada
           const estadoPago = pagoResponse.data?.estado || 'pendiente';
@@ -2125,10 +2119,6 @@ const loadServices = async () => {
             pago_estado: estadoPago,
             _rawPagoResponse: pagoResponse // Guardar la respuesta completa para depuración
           };
-          
-          console.log(`📊 [${new Date().toISOString()}] Estado de pago extraído para solicitud ${solicitud.id_solicitud}:`, estadoPago);
-          
-          console.log(`📝 [${new Date().toISOString()}] Actualizando estado de pago para solicitud ${solicitud.id_solicitud}: ${solicitudActualizada.pago_estado}`);
           
           return solicitudActualizada;
           
@@ -2332,7 +2322,6 @@ const fetchVisitCost = async () => {
 // =========================
 
 const openServiceModal = async (service) => {
-  console.log('Datos completos del servicio:', JSON.parse(JSON.stringify(service)));
   
   // Crear una copia del servicio para no modificar el original
   const serviceCopy = { ...service };
@@ -2691,20 +2680,16 @@ const acceptQuotation = async () => {
   // Deshabilitar botones mientras se procesa
   isProcessingQuotation.value = true
   
-  try {
-    console.log('=== INICIO acceptQuotation ===');
-    const cotizacionId = quotationData.value?.id || quotationData.value?.id_cotizacion;
-    console.log('ID de cotización:', cotizacionId);
+  try { 
+    const cotizacionId = quotationData.value?.id || quotationData.value?.id_cotizacion; 
     
     if (!cotizacionId) throw new Error('No se pudo encontrar el ID de la cotización');
     
     const token = useCookie('token').value;
     if (!token) throw new Error('No se encontró el token de autenticación');
     
-    // 1. Aceptar la cotización
-    console.log('\n[1/3] Actualizando estado de la cotización a "aceptado"...');
-    const cotizacionUpdate = { estado: 'aceptado' };
-    console.log('Enviando a /cotizacion/' + cotizacionId + ':', cotizacionUpdate);
+    // 1. Aceptar la cotización 
+    const cotizacionUpdate = { estado: 'aceptado' }; 
     
     const cotizacionResponse = await $fetch(`/cotizacion/${cotizacionId}`, {
       baseURL: config.public.apiBase,
@@ -2715,15 +2700,12 @@ const acceptQuotation = async () => {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(cotizacionUpdate)
-    });
-    console.log('Respuesta de actualización de cotización:', cotizacionResponse);
+    }); 
     
-    // 2. Actualizar el estado de la solicitud
-    console.log('\n[2/3] Actualizando estado de la solicitud a "en_proceso"...');
+    // 2. Actualizar el estado de la solicitud 
     if (!selectedServiceId.value) throw new Error('No se encontró el ID de la solicitud de servicio');
     
-    const solicitudUpdate = { estado: 'en_proceso' };
-    console.log('Enviando a /solicitudservicio/' + selectedServiceId.value + ':', solicitudUpdate);
+    const solicitudUpdate = { estado: 'en_proceso' }; 
     
     const solicitudResponse = await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
       baseURL: config.public.apiBase,
@@ -2734,20 +2716,16 @@ const acceptQuotation = async () => {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(solicitudUpdate)
-    });
-    console.log('Respuesta de actualización de solicitud:', solicitudResponse);
+    }); 
     
     // 3. Registrar movimiento
-    console.log('\n[3/3] Registrando movimiento...');
     
     // Obtener el ID del técnico de los datos del servicio
     const servicioActual = servicesData.value.solicitudes.find(s => s.id_solicitud === selectedServiceId.value);
     const idTecnico = servicioActual?.id_tecnico;
-    console.log('ID del técnico:', idTecnico);
     
     if (!idTecnico) throw new Error('No se encontró el ID del técnico en la solicitud de servicio');
     
-    console.log('Obteniendo porcentaje de comisión...');
     const configResponse = await $fetch('/config/valor/comision_por_servicio', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -2756,17 +2734,14 @@ const acceptQuotation = async () => {
         'Authorization': `Bearer ${token}`
       }
     });
-    console.log('Respuesta de configuración de comisión:', configResponse);
     
     if (!configResponse?.valor) throw new Error('No se pudo obtener el porcentaje de comisión');
     
     const porcentajeComision = parseFloat(configResponse.valor);
     const factorComision = porcentajeComision / 100;
-    console.log('Porcentaje de comisión:', porcentajeComision + '%', 'Factor:', factorComision);
     
     // Obtener el monto de mano de obra del campo correcto
     const montoManoObra = Number(quotationData.value.monto_manodeobra); 
-    console.log('Monto de mano de obra:', montoManoObra);
     
     if (isNaN(montoManoObra) || montoManoObra <= 0) {
       throw new Error(`El monto de mano de obra no es válido: ${quotationData.value.monto_manodeobra}`);
@@ -2775,7 +2750,6 @@ const acceptQuotation = async () => {
     const montoTecnico = montoManoObra * factorComision;
     const montoCliente = montoManoObra - montoTecnico;
     const fechaActual = new Date().toISOString().split('T')[0];
-    console.log('Monto para el técnico (comisión):', montoTecnico);
 
     const movimientoData = {
       id_usuario: idTecnico,
@@ -2785,8 +2759,6 @@ const acceptQuotation = async () => {
       fecha: fechaActual,
       estado: 'pendiente'
     };
-    
-    console.log('Creando movimiento con datos:', movimientoData);
     
     const movimientoResponse = await $fetch('/movimientos', {
       baseURL: config.public.apiBase,
@@ -2798,8 +2770,6 @@ const acceptQuotation = async () => {
       },
       body: JSON.stringify(movimientoData)
     });
-    
-    console.log('Respuesta de creación de movimiento:', movimientoResponse);
     
     // Notificar al técnico sobre la cotización aceptada
     try {
@@ -2820,22 +2790,17 @@ const acceptQuotation = async () => {
             id_usuario: idTecnico
           })
         });
-        console.log('Notificación enviada al técnico');
       }
     } catch (error) {
       console.error('Error al enviar notificación al técnico:', error);
-      // No mostrar error al usuario para no afectar su experiencia
     }
     
     // Cerrar modal y recargar datos
     showQuotationModal.value = false;
-    console.log('Cerrando modal de cotización...');
     
     await new Promise(resolve => setTimeout(resolve, 300)); // esperar animación
-    console.log('Recargando servicios...');
     await loadServices();
     
-    console.log('=== FINALIZADO CON ÉXITO ===');
     showSuccess('Cotización aceptada', 'El servicio ha sido iniciado correctamente');
     
   } catch (error) {
@@ -2908,10 +2873,8 @@ const rejectQuotation = async () => {
             estado: 'pendiente_asignacion'
           })
         });
-        console.log('Estado de la solicitud actualizado a "pendiente_asignacion"');
       } catch (updateError) {
         console.error('Error al actualizar el estado de la solicitud:', updateError);
-        // No mostramos error al usuario para no confundirlo, ya que la cotización sí se rechazó
       }
     }
     
@@ -2934,11 +2897,9 @@ const rejectQuotation = async () => {
             id_usuario: idTecnico
           })
         });
-        console.log('Notificación de rechazo enviada al técnico');
       }
     } catch (error) {
       console.error('Error al enviar notificación de rechazo al técnico:', error);
-      // No mostrar error al usuario para no afectar su experiencia
     }
     
     // Cerrar el modal de cotización
@@ -3100,8 +3061,6 @@ const processPayment = async () => {
     payload.descuento_membresia = Math.round(parseFloat(quotationData.value?.monto_manodeobra || 0) * (discountPercentage.value || 0) * 100) / 100;
   }
 
-  console.log('🛰️ Enviando al backend /pagoservicio/procesar:', payload);
-
   try {
     const response = await $fetch('/pagoservicio/procesar', {
       baseURL: config.public.apiBase,
@@ -3112,8 +3071,6 @@ const processPayment = async () => {
       },
       body: JSON.stringify(payload)
     });
-
-    console.log('✅ Respuesta del backend /pagoservicio/procesar:', response);
     
     // Notificar a los administradores sobre el pago de servicio recibido
     try {
@@ -3132,7 +3089,6 @@ const processPayment = async () => {
       });
     } catch (error) {
       console.error('Error al enviar notificación a administradores:', error);
-      // No mostrar error al usuario para no afectar su experiencia
     }
     
     // Cerrar el modal de pago
@@ -3283,33 +3239,21 @@ const totalAPagar = ref(0)
 const calcularTotal = () => {
   const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
   
-  console.log('=== CÁLCULO DE TOTAL ===');
-  console.log('Mano de obra:', montoManodeObra);
-  
   // Solo aplicar descuento si se cumple el beneficio
   const montoDescuento = shouldShowDiscountBenefit.value 
     ? montoManodeObra * discountPercentage.value 
-    : 0
-    
-  console.log('¿Aplica descuento?', shouldShowDiscountBenefit.value);
-  console.log('Porcentaje de descuento:', discountPercentage.value);
-  console.log('Monto de descuento:', montoDescuento);
+    : 0 
   
   // Calcular el monto después del descuento
   const montoDespuesDescuento = montoManodeObra - montoDescuento
-  console.log('Monto después de descuento:', montoDespuesDescuento);
     
   // Solo aplicar crédito si se cumple el beneficio
   const creditoDisponible = shouldShowCreditBenefit.value 
     ? parseFloat(membresiaProgreso.value?.monto_credito || 0)
     : 0
     
-  console.log('¿Aplica crédito?', shouldShowCreditBenefit.value);
-  console.log('Crédito disponible:', creditoDisponible);
-    
   // El crédito aplicado no puede ser mayor al monto después del descuento
   const montoCreditoAplicado = Math.min(creditoDisponible, montoDespuesDescuento)
-  console.log('Crédito a aplicar:', montoCreditoAplicado);
   
   // Actualizar el monto de crédito mostrado
   if (membresiaProgreso.value) {
@@ -3317,8 +3261,6 @@ const calcularTotal = () => {
   }
   
   const total = Math.max(0, montoDespuesDescuento - montoCreditoAplicado);
-  console.log('TOTAL A PAGAR:', total);
-  console.log('=======================');
     
   return total;
 }

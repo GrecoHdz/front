@@ -915,7 +915,6 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
     if (!forceRefresh) {
       const cachedData = getCachedMovements(cacheKey)
       if (cachedData) {
-        console.log(`[CACHE] ${movementType.toUpperCase()} - Página ${page} cargada desde caché`)
         if (movementType === 'ingresos') {
           earnings.value = cachedData.items
           earningsPagination.value = cachedData.pagination
@@ -927,8 +926,6 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
         return
       }
     }
-    
-    console.log(`[API] Solicitando ${movementType} - Página ${page}...`)
     
     // Si no hay datos en caché o es una recarga forzada, hacer la petición a la API
     const response = await $fetch(`/movimientos/${userId}`, {
@@ -979,7 +976,6 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
         items,
         pagination
       })
-      console.log(`[API] ${movementType.toUpperCase()} - Página ${page} cargada desde la API y guardada en caché`)
 
       // Actualizar el estado con los datos obtenidos
       if (movementType === 'ingresos') {
@@ -1105,8 +1101,6 @@ const loadEstadisticasGenerales = async () => {
         'Authorization': `Bearer ${auth.token}`
       }
     });
-
-    console.log('Datos recibidos del servidor:', data);
     
     stats.totalServices = data.totalServicios || 0;
     stats.last3Months = data.serviciosUltimos3Meses || 0;
@@ -1580,8 +1574,6 @@ const processWithdraw = async () => {
       monto: parseFloat(withdrawForm.amount),
       descripcion: `Retiro a cuenta bancaria: ${withdrawForm.bankDetails}`
     }
-    
-    console.log('Enviando al backend:', JSON.stringify(requestBody, null, 2))
     
     const response = await $fetch('/movimientos', {
       baseURL: config.public.apiBase,

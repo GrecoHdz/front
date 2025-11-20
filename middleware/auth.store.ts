@@ -235,6 +235,20 @@ export const useAuthStore = defineStore('auth', () => {
   const userName = computed(() => user.value?.nombre || null);
   const userId = computed(() => user.value?.id_usuario || null);
 
+  const redirectToDashboard = (): string => {
+    if (!user.value?.role) return '/';
+    
+    type Role = 'admin' | 'tecnico' | 'usuario';
+    const dashboardPaths: Record<Role, string> = {
+      'admin': '/admin/DashboardAdmin',
+      'tecnico': '/tecnico/DashboardTecnico',
+      'usuario': '/cliente/DashboardCliente'
+    };
+    
+    const role = user.value.role.toLowerCase() as Role;
+    return dashboardPaths[role] || '/';
+  };
+
   const hasRole = (requiredRole: string | string[]): boolean => {
     if (!user.value || !user.value.role) return false;
     const role = user.value.role.toLowerCase();
@@ -259,6 +273,7 @@ export const useAuthStore = defineStore('auth', () => {
     hasRole,
     userRole,
     userName,
-    userId
+    userId,
+    redirectToDashboard
   };
 });

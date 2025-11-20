@@ -1269,8 +1269,6 @@ const guardarConfiguraciones = async () => {
       })
     }
 
-    console.log('Cambios detectados para enviar:', cambios)
-
     if (cambios.length === 0) {
       showToastMessage('No hay cambios para guardar', 'info')
       return
@@ -1283,8 +1281,6 @@ const guardarConfiguraciones = async () => {
         valor: cambio.valor
       }
       
-      console.log(`Enviando PUT a /config/${cambio.id}:`, payload)
-      
       const response = await $fetch(`/config/${cambio.id}`, {
         baseURL: config.public.apiBase,
         method: 'PUT',
@@ -1296,7 +1292,6 @@ const guardarConfiguraciones = async () => {
         body: payload
       })
       
-      console.log(`Respuesta del backend para ${cambio.tipo_config}:`, response)
       return response
     })
 
@@ -1317,8 +1312,7 @@ const guardarConfiguraciones = async () => {
 
 const cargarConfiguraciones = async () => {
   isLoading.value = true;
-  try {
-    console.log('Iniciando carga de configuraciones...');
+  try { 
     
     const response = await $fetch('/config', {
       baseURL: config.public.apiBase,
@@ -1328,8 +1322,6 @@ const cargarConfiguraciones = async () => {
         'Authorization': `Bearer ${auth.token}`
       }
     });
-
-    console.log('Respuesta de la API:', response);
 
     if (Array.isArray(response)) {
       configuraciones.value = response
@@ -1378,9 +1370,7 @@ const cargarConfiguraciones = async () => {
         porcentaje_referido: configuracionReferido.value,
         porcentaje_retiro: configuracionRetiro.value,
         retiro_minimo: configuracionRetiroMinimo.value
-      }
-      
-      console.log('Configuraciones cargadas:', valoresOriginales.value);
+      } 
     } else {
       console.error('La respuesta de la API no es un array:', response);
       showToastMessage('Error: Formato de respuesta inválido', 'error');
@@ -1411,7 +1401,6 @@ const cargarBeneficios = async () => {
         ...beneficio,
         id_beneficio: beneficio.id_beneficio || beneficio.id
       }));
-      console.log('Beneficios cargados:', beneficios.value);
     } else {
       showToastMessage('Error al cargar los beneficios', 'error');
     }
@@ -1424,7 +1413,6 @@ const cargarBeneficios = async () => {
 }
 
 const editarBeneficio = (beneficio) => {
-  console.log('Editando beneficio:', beneficio);
   // Primero cerramos el modal si está abierto
   mostrarModalNuevoBeneficio.value = false;
   
@@ -1438,12 +1426,10 @@ const editarBeneficio = (beneficio) => {
     };
     // Abrimos el modal después de actualizar los datos
     mostrarModalNuevoBeneficio.value = true;
-    console.log('Modal de edición abierto para ID:', beneficioEditando.value);
   });
 }
 
 const cerrarModalBeneficio = () => {
-  console.log('Cerrando modal de beneficio');
   mostrarModalNuevoBeneficio.value = false;
   // Usamos setTimeout para limpiar los datos después de que se cierre la animación del modal
   setTimeout(() => {
@@ -1453,13 +1439,11 @@ const cerrarModalBeneficio = () => {
       tipo_beneficio: '',
       descripcion: ''
     };
-    console.log('Datos del formulario reiniciados');
   }, 300);
 }
 
 const crearBeneficio = async () => {
   try {
-    console.log('=== Creando nuevo beneficio ===');
     const url = '/membresiabeneficios';
     const method = 'POST';
     
@@ -1478,7 +1462,6 @@ const crearBeneficio = async () => {
       })
     });
 
-    console.log('Beneficio creado:', response);
     showToastMessage('Beneficio creado correctamente', 'success');
     return true;
   } catch (error) {
@@ -1495,7 +1478,6 @@ const actualizarBeneficio = async () => {
       throw new Error('No se ha especificado el beneficio a actualizar');
     }
 
-    console.log(`=== Actualizando beneficio ID: ${beneficioEditando.value} ===`);
     const url = `/membresiabeneficios/${beneficioEditando.value}`;
     
     const response = await $fetch(url, {
@@ -1513,9 +1495,7 @@ const actualizarBeneficio = async () => {
         descripcion: formBeneficio.value.descripcion,
         _method: 'PUT' // Para compatibilidad con Laravel
       })
-    });
-
-    console.log('Beneficio actualizado:', response);
+    }); 
     showToastMessage('Beneficio actualizado correctamente', 'success');
     return true;
   } catch (error) {
@@ -1627,7 +1607,6 @@ const cargarNotificaciones = async () => {
 
     if (response.success) {
       notificaciones.value = response.data
-      console.log('Notificaciones cargadas:', notificaciones.value)
     } else {
       showToastMessage('Error al cargar las notificaciones', 'error')
     }
@@ -1718,7 +1697,6 @@ const enviarNotificacion = async () => {
       payload.global = true
     }
 
-    console.log('Enviando al backend:', payload);
     const response = await $fetch('/notificaciones/enviar', {
       baseURL: config.public.apiBase,
       method: 'POST',
@@ -1729,7 +1707,6 @@ const enviarNotificacion = async () => {
       },
       body: payload
     })
-    console.log('Respuesta del backend:', response);
 
     if (response.success) {
       showToastMessage(`Notificación enviada a ${response.data.cantidad_destinatarios} destinatario(s)`, 'success')
@@ -2016,8 +1993,7 @@ function confirmarCambioEstado(servicio, activar) {
 }
 
 // Cambiar estado de un servicio
-async function cambiarEstadoServicio(servicioId, activar) {
-  console.log('Cambiando estado del servicio. ID:', servicioId, 'Nuevo estado:', activar);
+async function cambiarEstadoServicio(servicioId, activar) { 
   
   if (servicioId === undefined || servicioId === null || servicioId === '') {
     console.error('ID de servicio no válido (undefined/null/vacío):', servicioId);
