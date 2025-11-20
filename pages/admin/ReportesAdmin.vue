@@ -947,8 +947,8 @@ import { Chart, registerables } from 'chart.js';
 import { useHead, useCookie, useRouter, useRoute, useRuntimeConfig } from '#imports';
 import { useAuthStore } from '~/middleware/auth.store'; 
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+// Configuración del plugin de PDF
+const { $pdf } = useNuxtApp();
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import Toast from '~/components/ui/Toast.vue'; 
 
@@ -3107,7 +3107,15 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }) => {
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }, { $pdf }) => {
+  // Si no se proporciona un doc, crear uno nuevo
+  if (!doc) {
+    doc = $pdf.create();
+  }
+  // Crear una nueva instancia de jsPDF si no se proporciona
+  if (!doc) {
+    doc = new jsPDF();
+  }
   let currentY = 40;
 
   // 🎯 Título
@@ -3122,7 +3130,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
 
   // 📋 Tabla resumen de totales
-  doc.autoTable({
+  $pdf.autoTable(doc, {
     startY: currentY,
     head: [['Concepto', 'Total (HNL)', 'Porcentaje (%)']],
     body: [
@@ -3140,6 +3148,12 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
 
   // 📋 Detalle de Ingresos
   doc.setFont('helvetica', 'bold');
@@ -3188,6 +3202,12 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
 
   // 📋 Detalle de Retiros
   doc.setFont('helvetica', 'bold');
@@ -3229,6 +3249,12 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
 
   // 📄 Resumen Final
   doc.setFont('helvetica', 'bold');
@@ -3319,6 +3345,12 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
 
   // ============================================================
   // 2️⃣ TABLA DE TÉCNICOS
@@ -3374,6 +3406,12 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
 
   // ============================================================
   // 3️⃣ ESTADÍSTICAS GENERALES (dividida en 2 columnas)
@@ -3485,6 +3523,12 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
     });
 
     currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
   }
 
   // ========= 2️⃣ SERVICIOS ACTIVOS SIN PAGO DE VISITA =========
@@ -3518,6 +3562,12 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
     });
 
     currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
   }
 
   // ========= 3️⃣ SERVICIOS TERMINADOS =========
@@ -3557,6 +3607,12 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
     });
 
     currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
   }
 
   // ========= 4️⃣ DESGLOSE POR TIPO DE SERVICIO =========
