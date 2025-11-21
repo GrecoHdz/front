@@ -18,10 +18,21 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // 0. Obtener instancias y rutas
   const auth = useAuthStore();
   const currentPath = to.path;
-  const publicPaths = ['/', '/registro', '/auth', '/acceso-denegado', '/usuario-deshabilitado'];
+  const publicPaths = [
+    '/', 
+    '/registro', 
+    '/auth', 
+    '/acceso-denegado', 
+    '/usuario-deshabilitado',
+    '/reset-password',
+    '/forgot-password'
+  ];
   
-  // 1. Si es una ruta pública, permitir acceso
-  if (publicPaths.includes(currentPath)) {
+  // Verificar si la ruta actual es una ruta de restablecimiento de contraseña
+  const isResetPasswordPath = currentPath.startsWith('/reset-password/');
+  
+  // 1. Si es una ruta pública o de restablecimiento de contraseña, permitir acceso
+  if (publicPaths.includes(currentPath) || isResetPasswordPath) {
     console.log('✅ [auth.global] Ruta pública, acceso permitido');
     return;
   }
