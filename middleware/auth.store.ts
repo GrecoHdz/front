@@ -53,13 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
       ...userData,
       role: (userData.rol?.nombre_rol?.toLowerCase() || userData.role || 'usuario'),
       estado: userData.estado || 'activo'
-    };
-
-    console.log('🔑 [auth] Usuario establecido:', {
-      id: normalizedUser.id_usuario,
-      role: normalizedUser.role,
-      estado: normalizedUser.estado
-    });
+    }; 
 
     user.value = normalizedUser;
 
@@ -184,8 +178,7 @@ export const useAuthStore = defineStore('auth', () => {
       const tokenExpiresIn = tokenPayload.exp * 1000 - Date.now();
   
       // Si el token está por expirar (menos de 2 min) o ya expiró
-      if (tokenExpiresIn <= 0 || tokenExpiresIn < 2 * 60 * 1000) {
-        console.log('🔄 [auth] Token expirado o a punto de expirar, refrescando...');
+      if (tokenExpiresIn <= 0 || tokenExpiresIn < 2 * 60 * 1000) { 
         const refreshed = await refreshToken();
         if (!refreshed) {
           clearAuthState(); 

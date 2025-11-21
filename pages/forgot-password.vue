@@ -87,11 +87,13 @@ export default {
   auth: false, // No requiere autenticación
   
   data() {
+    const config = useRuntimeConfig()
     return {
       email: '',
       loading: false,
       error: null,
-      success: null
+      success: null,
+      apiBase: config.public.apiBase
     }
   },
   
@@ -102,15 +104,25 @@ export default {
       this.success = null
       
       try {
-        const response = await this.$axios.$post('/auth/forgot-password', {
-          email: this.email
-        })
+        const response = await $fetch('/auth/forgot-password', {
+          baseURL: this.apiBase,
+          method: 'POST',
+          body: JSON.stringify({ email: this.email }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
         
         this.success = response.message || 'Se ha enviado un enlace de restablecimiento a tu correo electrónico.'
         this.email = ''
       } catch (error) {
         console.error('Error al solicitar restablecimiento de contraseña:', error)
-        this.error = error.response?.data?.message || 'Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo.'
+        
+        // Mostrar mensaje de error específico si el correo no existe
+        if (error.statusCode === 404 || error.data?.message?.includes('No se encontró ningún usuario')) {
+          this.error = 'No existe ninguna cuenta asociada a este correo electrónico.'
+        } 
       } finally {
         this.loading = false
       }

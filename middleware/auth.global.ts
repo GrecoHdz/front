@@ -33,7 +33,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   
   // 1. Si es una ruta pública o de restablecimiento de contraseña, permitir acceso
   if (publicPaths.includes(currentPath) || isResetPasswordPath) {
-    console.log('✅ [auth.global] Ruta pública, acceso permitido');
     return;
   }
 
@@ -49,18 +48,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // 3. Verificar si hay token
   if (!auth.token) {
-    console.log('🔄 [auth.global] No hay token, intentando renovar...');
     try {
       const refreshed = await auth.refreshToken();
       
       if (!refreshed) {
-        console.log('❌ [auth.global] No se pudo renovar el token, redirigiendo a login');
         if (currentPath !== '/') {
           return navigateTo('/', { replace: true });
         }
         return;
-      }
-      console.log('✅ [auth.global] Token renovado exitosamente');
+      } 
     } catch (error) {
       console.error('❌ [auth.global] Error al renovar token:', error);
       return navigateTo('/', { replace: true });
@@ -79,7 +75,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // 5. Verificar si el usuario está deshabilitado
   if (auth.user?.estado === 'deshabilitado') {
-    console.log('🚫 [auth.global] Usuario deshabilitado, redirigiendo...');
     if (currentPath !== '/usuario-deshabilitado') {
       return navigateTo('/usuario-deshabilitado', { replace: true });
     }
@@ -88,14 +83,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // 6. Obtener el rol del usuario
   const userRole = (auth.user?.rol?.nombre_rol?.toLowerCase() as UserRole) || 'usuario';
-  console.log('🔍 [auth.global] Rol del usuario:', userRole);
   
   // 7. Obtener el dashboard correspondiente al rol
   const dashboardPath = getDashboardPath(userRole);
   
   // 8. Si ya está en su dashboard, permitir acceso
   if (currentPath === dashboardPath) {
-    console.log('✅ [auth.global] Usuario ya en su dashboard');
     return;
   }
 
@@ -113,9 +106,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // 11. Si la ruta no está permitida, redirigir al dashboard
   if (!isPathAllowed) {
-    console.log(`⛔ [auth.global] Ruta no permitida, redirigiendo a: ${dashboardPath}`);
     return navigateTo(dashboardPath, { replace: true });
-  }
-
-  console.log('✅ [auth.global] Acceso permitido a', currentPath);
+  } 
 });

@@ -1131,7 +1131,7 @@ const handlePasswordReset = async () => {
     })
 
     // Mostrar mensaje de éxito
-    showToast('Hemos enviado un enlace de recuperación a tu correo electrónico', 'success')
+    showToast('Si el correo está registrado, se enviará un enlace para restablecer la contraseña', 'success')
     showForgotPassword.value = false
     emailForPasswordReset.value = ''
   } catch (error) {

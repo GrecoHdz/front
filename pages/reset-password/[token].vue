@@ -27,7 +27,7 @@
       </div>
     </header>
 
-    <main class="relative -mt-4 pb-20 px-4">
+    <main class="relative mt-8 pb-20 px-4">
       <div v-if="!isTokenValid" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 text-center">
         <div class="text-red-500 text-5xl mb-4">⚠️</div>
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Enlace inválido o expirado</h2>
@@ -40,7 +40,7 @@
         </nuxt-link>
       </div>
       
-      <div v-else class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md mx-auto">
+      <div v-else class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 w-full max-w-md mx-auto mt-8">
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <!-- Contraseña -->
           <div>
@@ -90,7 +90,7 @@
           <div v-if="error" class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 rounded-lg text-sm">
             {{ error }}
           </div>
-
+          
           <div v-if="success" class="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-300 rounded-lg text-sm">
             {{ success }}
           </div>
@@ -150,8 +150,7 @@ export default {
     document.documentElement.classList.add('dark')
     
     // Obtener el token de la URL
-    this.token = this.$route.params.token;
-    console.log('Token en mounted:', this.token);
+    this.token = this.$route.params.token; 
     
     if (!this.token) {
       this.error = 'Token no proporcionado';
@@ -226,10 +225,10 @@ export default {
         
         this.success = data.message || '¡Contraseña actualizada exitosamente!';
         
-        // Redirigir a la página de inicio después de 3 segundos
+        // Redirigir a la página de inicio después de 2 segundos
         setTimeout(() => {
           this.$router.push('/');
-        }, 3000);
+        }, 2000);
       } catch (error) {
         console.error('Error al restablecer la contraseña:', error);
         this.error = error.data?.message || 'Ocurrió un error al intentar restablecer la contraseña. Por favor, inténtalo de nuevo.';
