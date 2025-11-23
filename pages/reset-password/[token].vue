@@ -223,7 +223,7 @@ export default {
           }
         });
         
-        this.success = data.message || '¡Contraseña actualizada exitosamente!';
+        this.success = data.message || '¡Contraseña actualizada exitosamente!'; 
         
         // Redirigir a la página de inicio después de 2 segundos
         setTimeout(() => {

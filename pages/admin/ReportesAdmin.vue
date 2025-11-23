@@ -86,7 +86,7 @@
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
               <p class="text-gray-500 dark:text-gray-400 mb-1">Monto</p>
               <p class="font-medium text-gray-900 dark:text-white">
-                L. {{ formatCurrency(selectedPayment.amount || selectedPayment.monto || 0) }}
+                {{ formatCurrency(selectedPayment.amount || selectedPayment.monto || 0) }}
               </p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
@@ -246,7 +246,7 @@
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
               <p class="text-gray-500 dark:text-gray-400 mb-1">Monto</p>
               <p class="font-medium text-gray-900 dark:text-white">
-                L. {{ formatCurrency(selectedWithdrawal.monto || 0) }}
+                {{ formatCurrency(selectedWithdrawal.monto || 0) }}
               </p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
@@ -469,7 +469,7 @@
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  L. {{ formatCurrency(platformStats.totalRevenue || 0) }}
+                  {{ formatCurrency(platformStats.totalRevenue || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
                   Ingresos Totales
@@ -486,7 +486,7 @@
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  L. {{ formatCurrency(platformStats.membershipRevenue || 0) }}
+                  {{ formatCurrency(platformStats.membershipRevenue || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
                   Ingresos Membresía
@@ -503,7 +503,7 @@
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  L. {{ formatCurrency(platformStats.visitRevenue || 0) }}
+                  {{ formatCurrency(platformStats.visitRevenue || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
                   Ingresos Por Visita
@@ -520,7 +520,7 @@
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  L. {{ formatCurrency(platformStats.serviceRevenue || 0) }}
+                  {{ formatCurrency(platformStats.serviceRevenue || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
                   Ingresos Servicios
@@ -537,7 +537,7 @@
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  L. {{ formatCurrency(platformStats.totalWithdrawals || 0) }}
+                  {{ formatCurrency(platformStats.totalWithdrawals || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
                   Retiros Totales
@@ -554,7 +554,7 @@
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  L. {{ formatCurrency(platformStats.totalCommissions || 0) }}
+                  {{ formatCurrency(platformStats.totalCommissions || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
                   Comisiones
@@ -637,7 +637,7 @@
                 </div>
                 <div class="text-right">
                   <p :class="getTransactionAmountClass(transaction.tipo, transaction.estado)" class="font-bold text-[12px] sm:text-base">
-                    {{ transaction.tipo === 'ingreso' ? '+' : (transaction.tipo === 'ingreso_referido' ? '' : '-') }}L. {{ formatCurrency(transaction.monto || 0) }}
+                    {{ transaction.tipo === 'ingreso' ? '+' : (transaction.tipo === 'ingreso_referido' ? '' : '-') }}{{ formatCurrency(transaction.monto || 0) }}
                   </p>
                   <p class="text-[10px]" :class="getStatusColor(transaction.estado, transaction.tipo)">
                     {{ transaction.estado || 'Sin estado' }}
@@ -692,7 +692,7 @@
                   <span class="text-green-500">💰</span>
                   <div>
                     <p class="text-xs text-gray-600 dark:text-gray-300">Ingresos</p>
-                    <p class="text-sm font-bold text-green-600 dark:text-green-400">+L. {{ formatCurrency(transactionsSummary.totalIngresos || 0) }}</p>
+                    <p class="text-sm font-bold text-green-600 dark:text-green-400">+{{ formatCurrency(transactionsSummary.totalIngresos || 0) }}</p>
                   </div>
                 </div>
 
@@ -704,7 +704,7 @@
                   <span class="text-red-500">💳</span>
                   <div>
                     <p class="text-xs text-gray-600 dark:text-gray-300">Retiros</p>
-                    <p class="text-sm font-bold text-red-600 dark:text-red-400">-L. {{ formatCurrency(transactionsSummary.totalRetiros || 0) }}</p>
+                    <p class="text-sm font-bold text-red-600 dark:text-red-400">-{{ formatCurrency(transactionsSummary.totalRetiros || 0) }}</p>
                   </div>
                 </div>
 
@@ -776,7 +776,7 @@
                   <div class="text-[9px] text-gray-600 dark:text-gray-400">Pendientes</div>
                 </div>
                 <div>
-                  <div class="text-[12px] font-bold text-blue-600 dark:text-blue-400">L. {{ formatCurrency(totalMonthlyStats[activeTab]?.total || 0) }}</div>
+                  <div class="text-[12px] font-bold text-blue-600 dark:text-blue-400">{{ formatCurrency(totalMonthlyStats[activeTab]?.total || 0) }}</div>
                   <div class="text-[8px] text-gray-600 dark:text-gray-400">Total</div>
                 </div>
               </div>
@@ -846,7 +846,7 @@
                         </div>
                         <h3 class="font-bold text-gray-900 dark:text-white text-[10px] truncate">{{ getItemTitle(item) }}</h3>
                       </div>
-                      <p :class="getItemAmountClass(item.status || item.estado)" class="font-bold text-[10px] whitespace-nowrap">L. {{ formatCurrency(item.amount || item.monto || item.monto_total || 0) }}</p>
+                      <p :class="getItemAmountClass(item.status || item.estado)" class="font-bold text-[10px] whitespace-nowrap">{{ formatCurrency(item.amount || item.monto || item.monto_total || 0) }}</p>
                     </div> 
                   </div>
                   <button @click="showItemDetails(item)" 
@@ -944,7 +944,8 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
-import { useHead, useCookie, useRouter, useRoute, useRuntimeConfig } from '#imports';
+import { useHead, useCookie, useRuntimeConfig } from '#imports';
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'; 
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 // Configuración del plugin de PDF
@@ -2402,10 +2403,10 @@ const getNetBalance = () => {
     const retiros = parseFloat(transactionsSummary.value?.totalRetiros || 0);
     const balance = Number((ingresos - retiros).toFixed(2));
     const prefix = balance >= 0 ? '+' : '-';
-    return `${prefix}L. ${formatCurrency(Math.abs(balance))}`;
+    return `${prefix}${formatCurrency(Math.abs(balance))}`;
   } catch (error) {
     console.error('Error calculando balance neto:', error);
-    return 'L. 0';
+    return '0';
   }
 };
 

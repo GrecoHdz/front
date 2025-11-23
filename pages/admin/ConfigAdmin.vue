@@ -901,10 +901,14 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store'
+import { useHead, useCookie, useRuntimeConfig } from '#imports';
+import { useRouter, useRoute } from 'vue-router'
 
 // ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
+const router = useRouter();
+const route = useRoute();
 
 // Componentes 
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'

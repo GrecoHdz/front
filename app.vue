@@ -4,10 +4,8 @@
     <LoadingSpinner 
       :loading="isLoading"
       class="fixed inset-0 z-50"
-    /> 
-    <NuxtLayout>
-      <NuxtPage/>
-    </NuxtLayout>
+    />  
+      <NuxtPage/> 
   </div>
 </template>
 

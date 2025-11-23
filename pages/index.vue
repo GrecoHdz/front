@@ -1182,7 +1182,7 @@ const handleAuth = async () => {
           authStatus.value = 'success';
           
           // Esperar para mostrar el estado de éxito
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await new Promise(resolve => setTimeout(resolve, 250));
           
           // Obtener el rol del usuario autenticado
           const userRole = authStore.user?.role?.toLowerCase() || '';
@@ -1207,7 +1207,7 @@ const handleAuth = async () => {
                 window.location.href = '/';
                 break;
             }
-          }, 1000); // Pequeño retraso para permitir que se cierre el modal
+          });
         } else {
           throw new Error(loginResult?.error || 'Error en las credenciales');
         }
@@ -1220,7 +1220,7 @@ const handleAuth = async () => {
           isLoading.value = false;
           authStatus.value = '';
           loadingMessage.value = '';
-        }, 5000);
+        }, 2000);
         return;
       }
     } else {

@@ -53,7 +53,7 @@
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-4 border border-white/20">
                       <div class="text-sm sm:text-xl font-black">{{ stats.pending }}</div>
-                      <div class="text-[10px] sm:text-xs text-white/80">Pendientes</div>
+                      <div class="text-[10px] sm:text-xs text-white/80">Activos</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-4 border border-white/20">
                       <div class="text-sm sm:text-xl font-black">{{ stats.completed }}</div>
@@ -79,7 +79,7 @@
                           Acción Pendiente
                         </h2>
                         <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                          {{ pendingServices.length }} servicios requieren atención
+                          {{ totalPendingItems }} servicios requieren atención
                         </p>
                       </div>
                     </div> 
@@ -102,12 +102,12 @@
 
                 <!-- Lista de Servicios con Acción Pendiente -->
                 <div v-else> 
-                  <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                  <div v-if="pendingServices.length > 0" class="grid grid-cols-2 gap-2 sm:gap-3">
                     <div 
                       v-for="service in pendingServices" 
                       :key="service.id_solicitud"
                       @click="viewService(service)"
-                      class="group bg-white dark:bg-gray-800 rounded-xl p-2.5 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700"
+                      class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer"
                     >
                       <!-- Service Header -->
                       <div class="flex items-start justify-between mb-1.5">
@@ -192,30 +192,44 @@
                       </div>
                     </div>
                   </div>
+                  
+                  <!-- Mensaje cuando no hay servicios -->
+                  <div v-else class="py-8 text-center text-gray-500 dark:text-gray-400">
+                    No hay servicios pendientes
+                  </div>
 
                   <!-- Pagination for Pending Actions -->
-                  <div v-if="hasMorePendingPages || currentPendingPage > 1" class="mt-6 flex items-center justify-center space-x-2">
-                    <button 
-                      @click="changePendingPage(currentPendingPage - 1)" 
-                      :disabled="currentPendingPage === 1 || loadingPending"
-                      class="p-2 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-                      title="Página anterior"
-                    >
-                      &larr;
-                    </button>
-                    
-                    <span class="text-xs text-gray-500 dark:text-gray-400">
-                      Página {{ currentPendingPage }}
-                    </span>
-                    
-                    <button 
-                      @click="changePendingPage(currentPendingPage + 1)" 
-                      :disabled="!hasMorePendingPages || loadingPending"
-                      class="p-2 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-                      title="Siguiente página"
-                    >
-                      &rarr;
-                    </button>
+                  <div v-if="(hasMorePendingPages || currentPendingPage > 1) && totalPendingItems > 0" class="mt-3 bg-white dark:bg-gray-800 p-1.5 sm:p-2 rounded-lg">
+                    <div class="flex items-center justify-between">
+                      <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        Pág. {{ currentPendingPage }} de {{ Math.max(1, Math.ceil(totalPendingItems / pendingItemsPerPage)) }}
+                      </div> 
+                      <div class="flex items-center space-x-1 sm:space-x-2">
+                        <button
+                          @click="changePendingPage(currentPendingPage - 1)"
+                          :disabled="currentPendingPage === 1"
+                          class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          aria-label="Página anterior"
+                        >
+                          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 px-1 sm:px-2 whitespace-nowrap">
+                          {{ currentPendingPage }} / {{ Math.ceil(totalPendingItems / pendingItemsPerPage) }}
+                        </div>
+                        <button
+                          @click="changePendingPage(currentPendingPage + 1)"
+                          :disabled="!hasMorePendingPages"
+                          class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          aria-label="Página siguiente"
+                        >
+                          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -236,7 +250,7 @@
                           Historial de Servicios
                         </h2>
                         <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">
-                          {{ historyServices.length }} servicios en total
+                          {{ totalHistoryItems }} servicios en total
                         </p>
                       </div>
                     </div>
@@ -407,29 +421,43 @@
                     </div>
                   </div>
 
+                  <!-- Mensaje cuando no hay servicios en el historial -->
+                  <div v-if="historyServices.length === 0" class="py-8 text-center text-gray-500 dark:text-gray-400">
+                    No se encontraron servicios en el historial
+                  </div>
+                  
                   <!-- Pagination for History -->
-                  <div v-if="hasMoreHistoryPages || currentHistoryPage > 1" class="mt-6 flex items-center justify-center space-x-2">
-                    <button 
-                      @click="changeHistoryPage(currentHistoryPage - 1)" 
-                      :disabled="currentHistoryPage === 1 || loadingHistory"
-                      class="p-2 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-                      title="Página anterior"
-                    >
-                      &larr;
-                    </button>
-                    
-                    <span class="text-xs text-gray-500 dark:text-gray-400">
-                      Página {{ currentHistoryPage }}
-                    </span>
-                    
-                    <button 
-                      @click="changeHistoryPage(currentHistoryPage + 1)" 
-                      :disabled="!hasMoreHistoryPages || loadingHistory"
-                      class="p-2 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-                      title="Siguiente página"
-                    >
-                      &rarr;
-                    </button>
+                  <div v-if="(hasMoreHistoryPages || currentHistoryPage > 1) && totalHistoryItems > 0" class="mt-3 bg-white dark:bg-gray-800 p-1.5 sm:p-2 rounded-lg">
+                    <div class="flex items-center justify-between">
+                      <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        Pág. {{ currentHistoryPage }} de {{ Math.max(1, Math.ceil(totalHistoryItems / historyItemsPerPage)) }}
+                      </div> 
+                      <div class="flex items-center space-x-1 sm:space-x-2">
+                        <button
+                          @click="changeHistoryPage(currentHistoryPage - 1)"
+                          :disabled="currentHistoryPage === 1"
+                          class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          aria-label="Página anterior"
+                        >
+                          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 px-1 sm:px-2 whitespace-nowrap">
+                          {{ currentHistoryPage }} / {{ Math.ceil(totalHistoryItems / historyItemsPerPage) }}
+                        </div>
+                        <button
+                          @click="changeHistoryPage(currentHistoryPage + 1)"
+                          :disabled="!hasMoreHistoryPages"
+                          class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          aria-label="Página siguiente"
+                        >
+                          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -840,8 +868,8 @@
                   <p class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">Monto</p>
                   <p class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
                     {{ paymentType === 'visit' 
-                        ? (serviceToPayment?.pagoVisita?.monto ? `L. ${serviceToPayment.pagoVisita.monto}` : 'L. 150.00')
-                        : (serviceToPayment?.cotizacion?.total ? `L. ${serviceToPayment.cotizacion.total}` : 'No especificado') 
+                        ? (serviceToPayment?.pagoVisita?.monto ? `${serviceToPayment.pagoVisita.monto}` : 'L. 150.00')
+                        : (serviceToPayment?.cotizacion?.total ? `${serviceToPayment.cotizacion.total}` : 'No especificado') 
                     }}
                   </p>
                 </div>
@@ -979,7 +1007,7 @@
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Monto:</span>
                     <span class="font-medium text-gray-900 dark:text-white">
-                      {{ serviceToPayment?.pagoVisita?.monto ? `L. ${serviceToPayment.pagoVisita.monto}` : 'L. 150.00' }}
+                      {{ serviceToPayment?.pagoVisita?.monto ? `${serviceToPayment.pagoVisita.monto}` : 'L. 150.00' }}
                     </span>
                   </div>
                 </div>
@@ -992,20 +1020,20 @@
                 <div class="text-xs sm:text-sm space-y-2">
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
-                    <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
-                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.descuento_membresia || 0 }}</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">{{ serviceToPayment.cotizacion.descuento_membresia || 0 }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Crédito usado:</span>
-                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.credito_usado || 0 }}</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">{{ serviceToPayment.cotizacion.credito_usado || 0 }}</span>
                   </div>
                   <hr class="border-gray-200 dark:border-gray-600">
                   <div class="flex justify-between font-bold">
                     <span class="text-gray-900 dark:text-white">Total a pagar:</span>
-                    <span class="text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.total || 0 }}</span>
+                    <span class="text-gray-900 dark:text-white">{{ serviceToPayment.cotizacion.total || 0 }}</span>
                   </div>
                 </div>
               </div>
@@ -1255,15 +1283,17 @@ const selectedCity = ref('')
 const selectedTechCity = ref('')
 const selectedMonth = ref(new Date().toISOString().slice(0, 7)) // Formato YYYY-MM
 
-// Paginación para Acción Pendiente con API
-const currentPendingPage = ref(1)
+// Paginación para Pendientes
 const pendingItemsPerPage = 4
+const currentPendingPage = ref(1)
 const hasMorePendingPages = ref(true)
+const totalPendingItems = ref(0)
 
 // Paginación para Historial con API
+const historyItemsPerPage = 6
+const hasMoreHistoryPages = ref(true) 
+const totalHistoryItems = ref(0);
 const currentHistoryPage = ref(1)
-const historyItemsPerPage = 8
-const hasMoreHistoryPages = ref(true)
 
 // Paginación de técnicos
 const currentTechPage = ref(1)
@@ -1423,13 +1453,23 @@ const fetchServices = async (page = 1, limit = 10, section = 'all', filters = {}
       throw new Error('Respuesta de API inválida')
     }
     
+    // Actualizar las estadísticas con los contadores de la API
+    if (response.contadores) {
+      stats.value = {
+        total: response.contadores.total || 0,
+        completed: response.contadores.completados || 0,
+        pending: response.contadores.activos || 0
+      };
+    }
+    
     return {
       data: response.data,
       hasMore: response.hasMore,
       total: response.total,
       currentPage: response.page,
       totalPages: response.totalPages,
-      fullData: response.data
+      fullData: response.data,
+      stats: response.contadores || {}
     }
   } catch (error) {
     console.error('Error en fetchServices:', error)
@@ -1439,27 +1479,35 @@ const fetchServices = async (page = 1, limit = 10, section = 'all', filters = {}
 
 const loadPendingServices = async (page = 1, resetList = false) => {
   try {
-    loadingPending.value = true
+    loadingPending.value = true;
     
     // Si es un refresh, forzar la carga de la primera página
     if (resetList) {
-      page = 1
+      page = 1;
     }
     
     // Cargar servicios pendientes con paginación
-    const result = await fetchServices(page, pendingItemsPerPage, 'pending')
+    const result = await fetchServices(page, pendingItemsPerPage, 'pending');
     
     // Reemplazar la lista de servicios con los nuevos resultados
-    pendingServices.value = result.data
+    pendingServices.value = result.data;
     
     // Actualizar el estado de la paginación
-    currentPendingPage.value = page
-    hasMorePendingPages.value = result.hasMore
+    currentPendingPage.value = page;
+    hasMorePendingPages.value = result.hasMore;
+    totalPendingItems.value = result.total || 0; // Asegurar que siempre tengamos un número
+    
+    console.log('Pendientes cargados:', {
+      page,
+      items: result.data.length,
+      total: totalPendingItems.value,
+      hasMore: hasMorePendingPages.value
+    });
   } catch (error) {
-    console.error('Error al cargar servicios pendientes:', error)
-    showError('Error al cargar servicios pendientes')
+    console.error('Error al cargar servicios pendientes:', error);
+    showError('Error al cargar servicios pendientes');
   } finally {
-    loadingPending.value = false
+    loadingPending.value = false;
   }
 }
 
@@ -1479,27 +1527,35 @@ const historyCache = {};
 const loadHistoryServices = async (page = 1, resetList = false) => {
   try {
     loadingHistory.value = true;
-    
-    // Si es un refresh, limpiar la caché para estos filtros
-    if (resetList) {
-      const cacheKey = getCacheKey();
-      delete historyCache[cacheKey];
-      page = 1;
-    }
+    console.log('Cargando historial - Página:', page, 'Reset:', resetList);
     
     const targetPage = page;
     const cacheKey = getCacheKey();
+    const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutos de caché
+    const now = Date.now();
     
-    // Si ya tenemos esta página en caché, usarla
-    if (historyCache[cacheKey]?.[targetPage]) {
-      const cachedData = historyCache[cacheKey][targetPage];
-      historyServices.value = cachedData.data;
+    // Clear cache if it's a refresh
+    if (resetList) {
+      console.log('Reseteando caché para los filtros actuales');
+      if (historyCache[cacheKey]) {
+        delete historyCache[cacheKey];
+      }
+    }
+    
+    // Check if we have valid cached data for this page
+    const cachedData = historyCache[cacheKey]?.[targetPage];
+    const isCacheValid = cachedData && (now - cachedData.timestamp < CACHE_EXPIRY);
+    
+    if (isCacheValid) {
+      console.log(`Usando datos en caché para la página ${targetPage} con clave:`, cacheKey);
+      historyServices.value = [...cachedData.data];
       currentHistoryPage.value = targetPage;
       hasMoreHistoryPages.value = cachedData.hasMore;
+      totalHistoryItems.value = cachedData.total;
       return;
-    } 
+    }
     
-    // Crear filtros excluyendo estados pendientes
+    // Create filters excluding pending statuses
     const filters = {
       search: searchQuery.value,
       status: selectedStatus.value,
@@ -1508,68 +1564,95 @@ const loadHistoryServices = async (page = 1, resetList = false) => {
       excludeStatus: 'pendiente_asignacion,verificando_pagovisita,verificando_pagoservicio'
     };
     
-    // Cargar servicios del historial con paginación
+    console.log('Solicitando datos de la API con filtros:', {
+      page: targetPage,
+      itemsPerPage: historyItemsPerPage,
+      filters: filters
+    });
+    
+    // Load history services with pagination
     const result = await fetchServices(targetPage, historyItemsPerPage, 'history', filters);
     
-    // Inicializar la caché para estos filtros si no existe
+    if (!result || !Array.isArray(result.data)) {
+      throw new Error('Respuesta inválida de la API');
+    }
+    
+    console.log('Respuesta de la API:', {
+      page: targetPage,
+      items: result.data.length,
+      total: result.total,
+      hasMore: result.hasMore
+    });
+    
+    // Create a deep copy of the data
+    const servicesData = JSON.parse(JSON.stringify(result.data));
+    
+    // Update reactive references with new data
+    historyServices.value = servicesData;
+    currentHistoryPage.value = targetPage;
+    hasMoreHistoryPages.value = result.hasMore;
+    totalHistoryItems.value = result.total || 0;
+    
+    console.log('Datos actualizados en la interfaz:', {
+      page: targetPage,
+      items: servicesData.length,
+      total: result.total,
+      hasMore: result.hasMore
+    });
+    
+    // Initialize cache for this filter set if it doesn't exist
     if (!historyCache[cacheKey]) {
       historyCache[cacheKey] = {};
     }
     
-    // Almacenar en caché
+    // Update cache with new data
     historyCache[cacheKey][targetPage] = {
-      data: [...result.data], // Hacer una copia del array
+      data: [...servicesData],
       hasMore: result.hasMore,
       total: result.total,
-      timestamp: Date.now()
+      timestamp: now
     };
     
-    // Limpiar caché antigua (más de 30 minutos)
-    const now = Date.now();
+    // Clean up old cache (older than 30 minutes) - pero mantenemos la caché actual aunque sea vieja
+    // ya que la limpieza se hace al cargar nuevas páginas
+    const CACHE_CLEANUP_THRESHOLD = 30 * 60 * 1000; // 30 minutos
+    
     Object.keys(historyCache).forEach(key => {
+      // No limpiar la caché actual
+      if (key === cacheKey) return;
+      
       Object.keys(historyCache[key]).forEach(pageNum => {
-        if (now - historyCache[key][pageNum].timestamp > 30 * 60 * 1000) {
+        if (now - historyCache[key][pageNum].timestamp > CACHE_CLEANUP_THRESHOLD) {
           delete historyCache[key][pageNum];
         }
       });
       
-      // Eliminar el conjunto de filtros si no tiene páginas
+      // Remove filter set if it has no pages
       if (Object.keys(historyCache[key]).length === 0) {
         delete historyCache[key];
       }
     });
     
-    // Actualizar la lista de servicios
-    historyServices.value = result.data;
-    
-    // Actualizar el estado de la paginación
-    currentHistoryPage.value = targetPage;
-    hasMoreHistoryPages.value = result.hasMore;
   } catch (error) {
-    console.error('Error al cargar historial:', error)
-    showError('Error al cargar el historial de servicios')
+    console.error('Error al cargar historial:', error);
+    
+    // Si hay un error, intentar cargar desde cachía si está disponible
+    const cachedData = historyCache[getCacheKey()]?.[page];
+    if (cachedData) {
+      console.warn('Usando datos en caché debido a un error en la API');
+      historyServices.value = [...cachedData.data];
+      currentHistoryPage.value = page;
+      hasMoreHistoryPages.value = cachedData.hasMore;
+      totalHistoryItems.value = cachedData.total;
+    } else {
+      showError('Error al cargar el historial de servicios');
+    }
   } finally {
-    loadingHistory.value = false
+    loadingHistory.value = false;
   }
 }
 
-const loadStats = async () => {
-  try {
-    // Cargar más servicios para obtener estadísticas más precisas
-    const result = await fetchServices(1, 100)
-    
-    const completedStates = ['finalizado', 'calificado']
-    const pendingStates = ['pendiente_pagovisita', 'pendiente_asignacion', 'verificando_pagovisita', 'pendiente_cotizacion', 'verificando_pagoservicio']
-    
-    stats.value = {
-      total: result.data.length,
-      completed: result.data.filter(s => completedStates.includes(s.estado)).length,
-      pending: result.data.filter(s => pendingStates.includes(s.estado)).length
-    }
-  } catch (error) {
-    console.error('Error al cargar estadísticas:', error)
-  }
-}
+
 
 // ===== COMPUTED PROPERTIES =====
 
@@ -1878,8 +1961,7 @@ const confirmTechnicianAssignment = async () => {
       // Remover el servicio de la lista de pendientes inmediatamente
       pendingServices.value.splice(pendingIndex, 1)
       
-      showSuccess(`${selectedTechnician.value.nombre} asignado al servicio exitosamente`)
-      await loadStats()
+      showSuccess(`${selectedTechnician.value.nombre} asignado al servicio exitosamente`) 
       await loadPendingServices(1, true) 
     }
     
@@ -2036,8 +2118,7 @@ const verifyPayment = async (isApproved) => {
     
     // Recargar los servicios pendientes e historial
     await loadPendingServices(1, true)
-    await loadHistoryServices(1, true)
-    await loadStats()
+    await loadHistoryServices(1, true) 
     
     // Resetear los detalles del pago
     resetPaymentDetails()
@@ -2106,17 +2187,50 @@ const changePendingPage = async (page) => {
 }
 
 const changeHistoryPage = async (page) => {
-  if (page < 1) return;
-  if (loadingHistory.value) return;
+  const totalPages = Math.ceil(totalHistoryItems.value / historyItemsPerPage);
   
-  // No pasar true como segundo parámetro para no resetear la lista
-  await loadHistoryServices(page, false);
+  // Validar que la página esté en un rango válido
+  if (page < 1 || page > totalPages) {
+    console.warn(`Página ${page} fuera de rango. Total de páginas: ${totalPages}`);
+    return;
+  }
   
-  // Desplazarse suavemente hacia arriba
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+  if (loadingHistory.value) {
+    console.log('Ya hay una carga en curso, ignorando solicitud de cambio de página');
+    return;
+  }
+  
+  console.log(`Cambiando a página ${page} de ${totalPages}`);
+  
+  try {
+    // Forzar una actualización de la interfaz para mostrar el estado de carga
+    loadingHistory.value = true;
+    
+    // Esperar un tick para asegurar que la UI se actualice
+    await nextTick();
+    
+    // Cargar los datos de la página solicitada
+    await loadHistoryServices(page, false);
+    
+    // Verificar que los datos se cargaron correctamente
+    if (historyServices.value.length === 0 && totalHistoryItems.value > 0) {
+      console.warn('No se cargaron servicios a pesar de que debería haber datos');
+      // Intentar recargar la página actual
+      await loadHistoryServices(page, true);
+    }
+    
+    // Desplazarse suavemente hacia arriba
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
+  } catch (error) {
+    console.error('Error al cambiar de página de historial:', error);
+    showError('Error al cargar la página solicitada');
+  } finally {
+    loadingHistory.value = false;
+  }
 }
 
 // ===== WATCHERS =====
@@ -2168,8 +2282,7 @@ watch([selectedStatus, selectedServiceType, selectedMonth], () => {
 onMounted(async () => {
   try {
     // Cargar datos iniciales
-    await Promise.all([
-      loadStats(),
+    await Promise.all([ 
       fetchCatalogoServicios(),
       fetchCities(),
       fetchTechnicians(),
