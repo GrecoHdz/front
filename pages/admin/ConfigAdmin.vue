@@ -675,7 +675,155 @@
     </div>
     
     <!-- Footer -->
-    <FootersFooterAdmin /> 
+    <FootersFooterAdmin />
+    
+    <!-- Modal para enviar notificación -->
+    <Transition name="fade">
+      <div v-if="mostrarModalEnvio" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalEnvio"></div>
+        <Transition name="modal">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 relative z-10">
+            <div class="p-6">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Enviar notificación
+              </h3>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Destinatario
+                  </label>
+                  <select 
+                    v-model="tipoEnvio"
+                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  >
+                    <option value="usuario">Usuario específico</option>
+                    <option value="rol">Por rol</option>
+                    <option value="global">Todos los usuarios</option>
+                  </select>
+                </div>
+
+                <div v-if="tipoEnvio === 'usuario'">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    ID de Usuario
+                  </label>
+                  <input
+                    v-model.number="idUsuarioDestino"
+                    type="number"
+                    min="1"
+                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                    placeholder="ID del usuario"
+                  >
+                </div>
+
+                <div v-if="tipoEnvio === 'rol'">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Rol
+                  </label>
+                  <select 
+                    v-model="nombreRolDestino"
+                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  >
+                    <option value="cliente">Cliente</option>
+                    <option value="tecnico">Técnico</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mt-6 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  @click="cerrarModalEnvio"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  @click="enviarNotificacion"
+                  :disabled="!puedeEnviar || isSendingNotification"
+                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span v-if="isSendingNotification" class="inline-flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Enviando...
+                  </span>
+                  <span v-else>Enviar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Modal de confirmación para eliminar notificación -->
+    <Transition name="fade">
+      <div v-if="mostrarModalConfirmacionEliminar" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="mostrarModalConfirmacionEliminar = false"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 relative z-10">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+            Confirmar eliminación
+          </h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-6">
+            ¿Estás seguro de que deseas eliminar esta notificación? Esta acción no se puede deshacer.
+          </p>
+          <div class="flex justify-end space-x-3">
+            <button
+              @click="mostrarModalConfirmacionEliminar = false"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="eliminarNotificacion"
+              class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Modal de confirmación para eliminar notificaciones leídas -->
+    <Transition name="fade">
+      <div v-if="mostrarModalConfirmacionEliminarLeidas" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="mostrarModalConfirmacionEliminarLeidas = false"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 relative z-10">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+            Eliminar notificaciones leídas
+          </h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-6">
+            ¿Estás seguro de que deseas eliminar todas las notificaciones leídas? Esta acción no se puede deshacer.
+          </p>
+          <div class="flex justify-end space-x-3">
+            <button
+              @click="mostrarModalConfirmacionEliminarLeidas = false"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              :disabled="isDeletingRead"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="eliminarNotificacionesLeidas"
+              class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center"
+              :disabled="isDeletingRead"
+            >
+              <svg v-if="isDeletingRead" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isDeletingRead ? 'Eliminando...' : 'Eliminar leídas' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
 <!-- Modal para crear/editar servicio -->
 <Transition name="fade">
   <div v-if="mostrarModalNuevoServicio" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
@@ -1744,6 +1892,7 @@ const enviarNotificacion = async () => {
   }
 
   isSendingNotification.value = true
+  
   try {
     const payload = {
       id_notificacion: notificacionAEnviar.value.id_notificacion
@@ -1770,14 +1919,39 @@ const enviarNotificacion = async () => {
     })
 
     if (response.success) {
-      showToastMessage(`Notificación enviada a ${response.data.cantidad_destinatarios} destinatario(s)`, 'success')
+      // Mensaje mejorado con información del tipo de envío
+      const tipoEnvioTexto = response.data.tipo_envio || 
+        (tipoEnvio.value === 'usuario' ? 'usuario individual' : 
+         tipoEnvio.value === 'rol' ? `rol ${nombreRolDestino.value}` : 
+         'todos los usuarios')
+      
+      showToastMessage(
+        `Notificación enviada exitosamente a ${response.data.cantidad_destinatarios} destinatario(s) - ${tipoEnvioTexto}`, 
+        'success'
+      )
+      
       cerrarModalEnvio()
+      
+      // Opcional: Recargar lista de notificaciones si existe la función
+      if (typeof obtenerNotificaciones === 'function') {
+        await obtenerNotificaciones()
+      }
     } else {
       showToastMessage(response.message || 'Error al enviar la notificación', 'error')
     }
   } catch (error) {
     console.error('Error al enviar notificación:', error)
-    showToastMessage('Error al enviar la notificación', 'error')
+    
+    // Manejo mejorado de errores
+    let errorMessage = 'Error al enviar la notificación'
+    
+    if (error.data?.message) {
+      errorMessage = error.data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    showToastMessage(errorMessage, 'error')
   } finally {
     isSendingNotification.value = false
   }
