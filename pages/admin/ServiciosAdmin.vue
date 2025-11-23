@@ -1020,20 +1020,20 @@
                 <div class="text-xs sm:text-sm space-y-2">
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
-                    <span class="font-medium text-green-600 dark:text-green-400">{{ serviceToPayment.cotizacion.descuento_membresia || 0 }}</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.descuento_membresia || 0 }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Crédito usado:</span>
-                    <span class="font-medium text-green-600 dark:text-green-400">{{ serviceToPayment.cotizacion.credito_usado || 0 }}</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.credito_usado || 0 }}</span>
                   </div>
                   <hr class="border-gray-200 dark:border-gray-600">
                   <div class="flex justify-between font-bold">
                     <span class="text-gray-900 dark:text-white">Total a pagar:</span>
-                    <span class="text-gray-900 dark:text-white">{{ serviceToPayment.cotizacion.total || 0 }}</span>
+                    <span class="text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.total || 0 }}</span>
                   </div>
                 </div>
               </div>
@@ -2110,25 +2110,17 @@ const verifyPayment = async (isApproved) => {
       }
     }
     
-    // Cerrar el modal de pago
-    showPaymentModal.value = false
+    // Actualizar la lista de servicios pendientes
+    await loadPendingServices(1, true);
     
-    // Esperar a que la animación del modal termine
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Cerrar el modal de pago y el modal de confirmación
+    showPaymentModal.value = false;
+    showPaymentConfirmationModal.value = false;
+    serviceToPayment.value = null;
+    paymentDetails.verified = false;
     
-    // Recargar los servicios pendientes e historial
-    await loadPendingServices(1, true)
-    await loadHistoryServices(1, true) 
-    
-    // Resetear los detalles del pago
-    resetPaymentDetails()
-    
-    // Mostrar mensaje de éxito DESPUÉS de recargar todo
-    if (isApproved) {
-      showSuccess('Pago del servicio aprobado correctamente.')
-    } else {
-      showSuccess('Pago rechazado. El cliente deberá realizar el pago nuevamente.')
-    }
+    // Mostrar mensaje de éxito
+    showSuccess(isApproved ? 'Pago verificado correctamente' : 'Pago rechazado correctamente');
     
   } catch (error) {
     console.error('Error al verificar el pago:', {
@@ -2150,13 +2142,18 @@ const showPaymentConfirmation = (action) => {
 }
 
 const confirmPaymentAction = async () => {
-  if (pendingPaymentAction.value === 'approve') {
-    await verifyPayment(true)
-  } else if (pendingPaymentAction.value === 'reject') {
-    await verifyPayment(false)
+  try {
+    if (pendingPaymentAction.value === 'approve') {
+      await verifyPayment(true);
+    } else if (pendingPaymentAction.value === 'reject') {
+      await verifyPayment(false);
+    }
+  } catch (error) {
+    console.error('Error en confirmPaymentAction:', error);
+  } finally {
+    showPaymentConfirmationModal.value = false;
+    pendingPaymentAction.value = null;
   }
-  showPaymentConfirmationModal.value = false
-  pendingPaymentAction.value = null
 }
 
 const resetPaymentDetails = () => {
