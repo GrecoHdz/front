@@ -236,12 +236,7 @@
                   </div>
                   
                   <!-- Mensaje de días restantes para crédito -->
-                  <div v-if="diasRestantesCredito > 0" class="mt-2 text-xs font-medium px-2 py-1 rounded-md text-center"
-                    :class="{
-                      'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300': diasRestantesCredito <= 1,
-                      'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': diasRestantesCredito > 1 && diasRestantesCredito <= 3,
-                      'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300': diasRestantesCredito > 3
-                    }">
+                  <div v-if="diasRestantesCredito > 0" class="mt-2 text-xs font-medium px-2 py-1 rounded-md text-center bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
                     <template v-if="diasRestantesCredito > 0">
                       <span v-if="diasRestantesCredito === 1">⚠️ Tienes 1 día antes de perder tu crédito</span>
                       <span v-else>⏳ Tienes {{ diasRestantesCredito }} días antes de perder tu crédito</span>
@@ -662,17 +657,21 @@ const membershipStatus = computed(() => {
 
 // Días restantes antes de perder el crédito (3 días después del vencimiento)
 const diasRestantesCredito = computed(() => {
-  if (!membershipData.value.endDate || !isMembershipExpired.value) return null
+  if (!membershipData.value.endDate) return null;
   
-  const fechaVencimiento = new Date(membershipData.value.endDate)
-  const fechaLimite = new Date(fechaVencimiento)
-  fechaLimite.setDate(fechaLimite.getDate() + 3) // 3 días de gracia
+  const fechaVencimiento = new Date(membershipData.value.endDate);
+  const fechaLimite = new Date(fechaVencimiento);
   
-  const hoy = new Date()
-  const diffTime = fechaLimite - hoy
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  // Obtener el período de gracia de la membresía o usar 3 días por defecto
+  const diasGracia = membershipData.value.diasGracia || 3;
+  fechaLimite.setDate(fechaLimite.getDate() + diasGracia);
   
-  return Math.max(0, diffDays) // No mostrar números negativos
+  const hoy = new Date();
+  const diffTime = fechaLimite - hoy;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Solo mostrar días restantes si ya pasó la fecha de vencimiento
+  return hoy > fechaVencimiento ? Math.max(0, diffDays) : null;
 })
 
 // Computed para mapear los beneficios al formato esperado por la UI
@@ -854,11 +853,16 @@ const fetchMembershipProgress = async () => {
   }
 }
 
-// Función para verificar si han pasado 3 días desde el vencimiento
-const haPasadoPeriodoDeGracia = (fechaVencimiento) => {
-  const hoy = new Date()
-  const fechaLimite = new Date(fechaVencimiento)
-  fechaLimite.setDate(fechaLimite.getDate() + 3) // Añadimos 3 días al vencimiento
+// Función para verificar si ha pasado el período de gracia desde el vencimiento
+const haPasadoPeriodoDeGracia = (fechaVencimiento, diasGracia) => {
+  if (typeof diasGracia === 'undefined' || diasGracia === null) {
+    console.error('❌ Error: No se proporcionó el período de gracia');
+    return false;
+  }
+  
+  const hoy = new Date();
+  const fechaLimite = new Date(fechaVencimiento);
+  fechaLimite.setDate(fechaLimite.getDate() + parseInt(diasGracia, 10)); 
   
   return hoy > fechaLimite
 }
@@ -899,23 +903,41 @@ const fetchMembershipData = async () => {
         return { status: 'not_found' };
       }
 
+      const DURACION_MEMBRESIA_DIAS = 30; // La membresía siempre dura 30 días
       const fechaInicio = new Date(membresia.fecha);
       const fechaVencimiento = new Date(fechaInicio);
-      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
-
+      
+      // Establecer la fecha de vencimiento a 30 días después de la fecha de inicio
+      fechaVencimiento.setDate(fechaVencimiento.getDate() + DURACION_MEMBRESIA_DIAS);
+      
+      // Obtener el período de gracia desde la API
+      const diasGracia = await getCreditResetPeriod();
+      
       const hoy = new Date();
-      const totalDias = (fechaVencimiento - fechaInicio) / (1000 * 60 * 60 * 24);
+      const totalDias = DURACION_MEMBRESIA_DIAS; // La duración total es siempre 30 días
       const diasTranscurridos = (hoy - fechaInicio) / (1000 * 60 * 60 * 24);
+      const diasRestantes = Math.ceil((fechaVencimiento - hoy) / (1000 * 60 * 60 * 24));
       const progreso = Math.min(100, Math.max(0, Math.round((diasTranscurridos / totalDias) * 100)));
-
+      
       let estado = membresia.estado;
       const estaVencida = progreso >= 100;
-      if (estaVencida && membresia.estado === 'activa') {
-        estado = 'vencida';
+      
+      // Verificar si la membresía está vencida o está activa pero debería estar vencida
+      const esMembresiaVencida = estaVencida && (membresia.estado === 'activa' || membresia.estado === 'vencida');
+      
+      if (esMembresiaVencida) {
+        if (membresia.estado === 'activa') {
+          estado = 'vencida';
+        }
 
-        if (haPasadoPeriodoDeGracia(fechaVencimiento) && !creditResetDone.value) {
+        const haPasadoGracia = haPasadoPeriodoDeGracia(fechaVencimiento, diasGracia);
+        
+        if (haPasadoGracia && !creditResetDone.value) {
           try {
-            await updateMembershipToExpired(membresia.id_membresia);
+            // Solo actualizar si el estado no es 'vencida'
+            if (membresia.estado !== 'vencida') {
+              await updateMembershipToExpired(membresia.id_membresia);
+            }
             await resetCredito();
             creditResetDone.value = true;
           } catch (error) {
@@ -931,7 +953,8 @@ const fetchMembershipData = async () => {
         startDate: fechaInicio,
         endDate: fechaVencimiento,
         estado,
-        puedeReiniciar: haPasadoPeriodoDeGracia(fechaVencimiento) && !creditResetDone.value
+        diasGracia, // Añadir el período de gracia al objeto membershipInfo
+        puedeReiniciar: haPasadoPeriodoDeGracia(fechaVencimiento, diasGracia) && !creditResetDone.value
       };
 
       membershipData.value = membershipInfo;
@@ -1206,11 +1229,34 @@ const handleRequestService = async () => {
 // =========================
 // FUNCIONES DE GESTIÓN DE MEMBRESÍA
 // =========================
+// Función para obtener el período de reinicio de crédito desde la API
+const getCreditResetPeriod = async () => {
+  try {
+    const response = await $fetch('/config/valor/reset_credito', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (response && response.valor) {
+      const valor = parseInt(response.valor, 10);
+      return valor || 30; // Usar 30 como valor por defecto
+    }
+    return 30; // Valor por defecto si no hay respuesta
+  } catch (error) {
+    console.error('❌ Error al obtener el período de reinicio de crédito:', error);
+    return 30; // Valor por defecto en caso de error
+  }
+}
 
 // Función para actualizar el estado de la membresía a vencida en el backend
 const updateMembershipToExpired = async (membresiaId) => {
-  try {
-    await $fetch(`/membresia/${membresiaId}`, {
+  try { 
+    
+    const response = await $fetch(`/membresia/${membresiaId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1220,11 +1266,27 @@ const updateMembershipToExpired = async (membresiaId) => {
       },
       body: {
         estado: 'vencida'
+      },
+      onResponseError({ request, response, options }) {
+        console.error('Error en la respuesta de la API:', {
+          status: response.status,
+          statusText: response.statusText,
+          response: response._data
+        });
       }
-    });
+    }); 
     return { success: true };
   } catch (error) {
-    console.error('Error al actualizar el estado de la membresía:', error);
+    console.error('❌ Error al actualizar el estado de la membresía:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      response: error.data,
+      stack: error.stack
+    });
+    
+    // Mostrar mensaje de error al usuario
+    showToast('Error', 'No se pudo actualizar el estado de la membresía', 'error');
+    
     return { success: false, error };
   }
 };

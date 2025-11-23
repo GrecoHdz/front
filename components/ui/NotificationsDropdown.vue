@@ -276,13 +276,7 @@ const obtenerNotificaciones = async (page = 1, forceRefresh = false) => {
   
   try {
     loading.value = true;
-    error.value = null;
-    
-    console.log('Solicitando notificaciones con parámetros:', { 
-      page, 
-      limit: props.itemsPerPage,
-      id_usuario: auth.user?.id_usuario
-    });
+    error.value = null; 
     
     // Construir URL con parámetros de consulta
     const url = new URL(`/notificaciones/usuario/${auth.user.id_usuario}`, config.public.apiBase);
@@ -291,8 +285,6 @@ const obtenerNotificaciones = async (page = 1, forceRefresh = false) => {
       limit: props.itemsPerPage
     }).toString();
     
-    console.log('URL de la petición:', url.toString());
-    
     const response = await $fetch(url, {
       method: 'GET',
       headers: {
@@ -300,8 +292,6 @@ const obtenerNotificaciones = async (page = 1, forceRefresh = false) => {
         'Authorization': `Bearer ${auth.token}`
       }
     });
-    
-    console.log('API Response:', response); // Debug log
     
     if (response && response.success) {
       // Asegurarse de que response.pagination existe y tiene el total
@@ -329,17 +319,7 @@ const obtenerNotificaciones = async (page = 1, forceRefresh = false) => {
       }
       
       // Forzar la actualización del DOM
-      await nextTick();
-      
-      console.log('Estado actualizado:', { 
-        totalItems: totalItems.value, 
-        totalPages: totalPages.value,
-        currentPage: currentPage.value,
-        hasNextPage: hasNextPage.value,
-        itemsPerPage: props.itemsPerPage,
-        notificationsCount: allNotifications.value.length,
-        showPagination: totalPages.value > 1 || unreadCount.value > 0
-      }); // Debug log
+      await nextTick(); 
     }
   } catch (err) {
     console.error('Error al obtener notificaciones:', err);

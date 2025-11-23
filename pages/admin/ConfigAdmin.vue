@@ -124,6 +124,26 @@
                   placeholder="500.00">
               </div>
             </div>
+
+            <!-- Período de Gracia para Créditos -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Días de Gracia para Créditos
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">📅</span>
+                <input
+                  v-model.number="configuracionDiasGracia"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="w-full pl-10 pr-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="14">
+              </div>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Días de gracia después de vencida la membresía
+              </p>
+            </div>
           </div>
         </div>
 
@@ -937,6 +957,7 @@ const configuracionDescuento = ref(0)
 const configuracionReferido = ref(0)
 const configuracionRetiro = ref(0)
 const configuracionRetiroMinimo = ref(0)
+const configuracionDiasGracia = ref(14) // Valor por defecto de 14 días
 
 // ===== VALORES ORIGINALES PARA DETECTAR CAMBIOS =====
 const valoresOriginales = ref({})
@@ -1028,6 +1049,7 @@ const hayChanges = computed(() => {
          configuracionVisita.value !== valoresOriginales.value.visita_tecnico ||
          configuracionComision.value !== valoresOriginales.value.comision_por_servicio ||
          configuracionTelefono.value !== valoresOriginales.value.numero_empresa ||
+         configuracionDiasGracia.value !== valoresOriginales.value.dias_gracia ||
          configuracionEmail.value !== valoresOriginales.value.correo_empresa ||
          configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento ||
          configuracionReferido.value !== valoresOriginales.value.porcentaje_referido ||
@@ -1273,30 +1295,46 @@ const guardarConfiguraciones = async () => {
       })
     }
 
+    if (configuracionDiasGracia.value !== valoresOriginales.value.reset_credito) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'reset_credito')?.id_config || null,
+        tipo_config: 'reset_credito',
+        valor: configuracionDiasGracia.value
+      })
+    }
+
     if (cambios.length === 0) {
       showToastMessage('No hay cambios para guardar', 'info')
       return
     }
 
-    // Hacer peticiones PUT individuales para cada cambio
+    // Hacer peticiones individuales para cada cambio
     const promesas = cambios.map(async (cambio) => {
       const payload = {
         tipo_config: cambio.tipo_config,
         valor: cambio.valor
       }
       
-      const response = await $fetch(`/config/${cambio.id}`, {
-        baseURL: config.public.apiBase,
-        method: 'PUT',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`,
-          'Content-Type': 'application/json'
-        },
-        body: payload
-      })
+      // Si el cambio tiene un ID, es una actualización (PUT), de lo contrario es nuevo (POST)
+      const url = cambio.id ? `/config/${cambio.id}` : '/config/crear'
+      const method = cambio.id ? 'PUT' : 'POST'
       
-      return response
+      try {
+        const response = await $fetch(url, {
+          baseURL: config.public.apiBase,
+          method: method,
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: payload
+        })
+        return response
+      } catch (error) {
+        console.error(`Error al ${method === 'PUT' ? 'actualizar' : 'crear'} configuración ${cambio.tipo_config}:`, error)
+        throw error // Propagar el error para manejarlo en el bloque catch externo
+      }
     })
 
     await Promise.all(promesas)
@@ -1331,6 +1369,19 @@ const cargarConfiguraciones = async () => {
       configuraciones.value = response
       
       // Mapeo directo de la respuesta de la API a las variables
+      const configMapeo = {
+        membresia: 'membresia',
+        visita_tecnico: 'visita_tecnico',
+        comision_por_servicio: 'comision_por_servicio',
+        numero_empresa: 'numero_empresa',
+        correo_empresa: 'correo_empresa',
+        porcentaje_descuento: 'porcentaje_descuento',
+        porcentaje_referido: 'porcentaje_referido',
+        porcentaje_retiro: 'porcentaje_retiro',
+        retiro_minimo: 'retiro_minimo',
+        reset_credito: 'reset_credito'
+      }
+      
       response.forEach(item => {
         switch(item.tipo_config) {
           case 'membresia':
@@ -1359,6 +1410,11 @@ const cargarConfiguraciones = async () => {
             break;
           case 'retiro_minimo':
             configuracionRetiroMinimo.value = parseFloat(item.valor) || 0
+            valoresOriginales.value.retiro_minimo = configuracionRetiroMinimo.value
+            break;
+          case 'reset_credito':
+            configuracionDiasGracia.value = parseInt(item.valor, 10) || 14
+            valoresOriginales.value.reset_credito = configuracionDiasGracia.value
             break;
         }
       });
@@ -1373,7 +1429,8 @@ const cargarConfiguraciones = async () => {
         porcentaje_descuento: configuracionDescuento.value,
         porcentaje_referido: configuracionReferido.value,
         porcentaje_retiro: configuracionRetiro.value,
-        retiro_minimo: configuracionRetiroMinimo.value
+        retiro_minimo: configuracionRetiroMinimo.value,
+        reset_credito: configuracionDiasGracia.value
       } 
     } else {
       console.error('La respuesta de la API no es un array:', response);

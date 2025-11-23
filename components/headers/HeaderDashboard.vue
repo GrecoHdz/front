@@ -48,6 +48,9 @@ import { useAuthStore } from '~/middleware/auth.store';
 import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 
+// Definir eventos emitidos
+const emit = defineEmits(['availabilityChange']);
+
 const auth = useAuthStore();
 
 // Toast state

@@ -404,13 +404,12 @@ const cargarCiudades = async () => {
 
 const fetchUserData = async () => {
   try {
-    const userCookieValue = useCookie('user').value
-    if (!userCookieValue.id_usuario) {
+    if (!userCookie.value?.id_usuario) {
       console.error('No se pudo obtener el ID del usuario')
       return false
     }
     
-    const data = await $fetch(`/usuarios/id/${userCookieValue.id_usuario}`, {
+    const data = await $fetch(`/usuarios/id/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       credentials: 'include',
       headers: {
@@ -481,7 +480,7 @@ const saveProfile = async () => {
       id_ciudad: user.value.id_ciudad
     }; 
     
-    const response = await $fetch(`/usuarios/${userCookieValue.id_usuario}`, {
+    const response = await $fetch(`/usuarios/${userCookie.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       body: userData,
@@ -551,7 +550,7 @@ const updatePassword = async () => {
   }
   
   try {
-    const response = await $fetch(`/usuarios/cambio-clave/${userCookieValue.id_usuario}`, {
+    const response = await $fetch(`/usuarios/cambio-clave/${userCookie.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       body: JSON.stringify({
