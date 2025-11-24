@@ -254,32 +254,10 @@ export const useAuthStore = defineStore('auth', () => {
 
     return _refreshPromise;
   };
-
-  const userRole = computed(() => user.value?.role?.toLowerCase() || null);
+ 
   const userName = computed(() => user.value?.nombre || null);
-  const userId = computed(() => user.value?.id_usuario || null);
-
-  const redirectToDashboard = (): string => {
-    if (!user.value?.role) return '/';
-    
-    type Role = 'admin' | 'tecnico' | 'usuario';
-    const dashboardPaths: Record<Role, string> = {
-      'admin': '/admin/DashboardAdmin',
-      'tecnico': '/tecnico/DashboardTecnico',
-      'usuario': '/cliente/DashboardCliente'
-    };
-    
-    const role = user.value.role.toLowerCase() as Role;
-    return dashboardPaths[role] || '/';
-  };
-
-  const hasRole = (requiredRole: string | string[]): boolean => {
-    if (!user.value || !user.value.role) return false;
-    const role = user.value.role.toLowerCase();
-    return Array.isArray(requiredRole)
-      ? requiredRole.some(r => r.toLowerCase() === role)
-      : role === requiredRole.toLowerCase();
-  };
+  const userId = computed(() => user.value?.id_usuario || null); 
+ 
 
   return {
     user,
@@ -293,11 +271,8 @@ export const useAuthStore = defineStore('auth', () => {
     initAuth,
     checkAuth,
     refreshToken,
-    fetchUser,
-    hasRole,
-    userRole,
+    fetchUser, 
     userName,
-    userId,
-    redirectToDashboard
+    userId
   };
 });

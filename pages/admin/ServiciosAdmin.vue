@@ -1976,10 +1976,15 @@ const confirmTechnicianAssignment = async () => {
 }
 
 const verifyPayment = async (isApproved) => {
+  console.log('🚀 Iniciando verifyPayment con isApproved:', isApproved);
+  console.log('🔍 serviceToPayment inicial:', JSON.parse(JSON.stringify(serviceToPayment?.value || {})));
+  
   // Validar que se haya marcado el checkbox de verificación si se está aprobando
   if (isApproved && !paymentDetails.verified) {
-    showError('Debes verificar el pago en tu banca móvil antes de aprobarlo')
-    return
+    const errorMsg = 'Debes verificar el pago en tu banca móvil antes de aprobarlo';
+    console.warn('⚠️ ' + errorMsg);
+    showError(errorMsg);
+    return;
   }
   
   try {
@@ -2031,30 +2036,50 @@ const verifyPayment = async (isApproved) => {
     
     if (isApproved) {
       // APROBAR PAGO
+      console.log('🔵 Iniciando proceso de aprobación de pago');
+      console.log('🔵 isVisitPayment:', isVisitPayment);
+      console.log('🔵 solicitudId:', solicitudId);
+      console.log('🔵 cotizacionId:', cotizacionId);
+      
       const endpoint = isVisitPayment ? '/pagovisita/confirmar' : '/pagoservicio/aceptar'
       const paymentPayload = { 
         id_solicitud: solicitudId,
         id_cotizacion: cotizacionId
       } 
       
-      const response = await $fetch(endpoint, {
-        baseURL: config.public.apiBase,
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(paymentPayload)
-      });
+      console.log('🔵 Endpoint:', endpoint);
+      console.log('🔵 Payload:', paymentPayload);
       
-      // Notificar al técnico sobre el pago aprobado
       try {
-        // Obtener el ID del técnico del servicio actual
-        const idTecnico = serviceToPayment.value?.tecnico?.id_tecnico;
+        const response = await $fetch(endpoint, {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(paymentPayload)
+        });
+        
+        console.log('✅ Pago aprobado exitosamente. Respuesta:', response);
+        
+        // Notificar al cliente sobre el pago aprobado
+        console.log('🔵 Iniciando notificación de pago aprobado');
+        console.log('🔍 serviceToPayment:', JSON.parse(JSON.stringify(serviceToPayment?.value || {})));
+        
+        // Obtener el ID del cliente de múltiples ubicaciones posibles
+        const idUsuario = serviceToPayment.value?.cliente?.id_cliente ||
+                         serviceToPayment.value?.id_cliente ||
+                         serviceToPayment.value?.usuario?.id_cliente;
+        
+        console.log('🔵 ID de usuario obtenido para notificación:', idUsuario);
                          
-        if (!idTecnico) {
-          console.warn('⚠️ No se encontró el ID del técnico en el servicio:', serviceToPayment.value);
+        if (!idUsuario) {
+          const errorMsg = '⚠️ No se encontró el ID del cliente en el servicio.';
+          console.warn(errorMsg);
+          console.warn('Estructura completa de serviceToPayment:', JSON.parse(JSON.stringify(serviceToPayment?.value || {})));
+          showError('No se pudo obtener el ID del cliente para la notificación');
           return;
         }
         
@@ -2066,8 +2091,8 @@ const verifyPayment = async (isApproved) => {
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            titulo: 'Pago de servicio recibido',
-            id_usuario: idTecnico
+            titulo: 'Pago de Servicio Aprobado',
+            id_usuario: idUsuario
           })
         });
       } catch (notifError) {
@@ -2075,7 +2100,7 @@ const verifyPayment = async (isApproved) => {
       }
       
     } else {
-      // RECHAZAR PAGO
+      // RECHAZAR PAGO DE SERVICIO
       const id_usuario = serviceToPayment.value?.cliente?.id_cliente 
       const endpoint = isVisitPayment ? '/pagovisita/denegar' : '/pagoservicio/denegar'
       const denyPayload = { id_solicitud: solicitudId, id_cotizacion: cotizacionId, id_usuario }
@@ -2091,9 +2116,16 @@ const verifyPayment = async (isApproved) => {
         body: JSON.stringify(denyPayload)
       });
       
-      // Notificar al técnico sobre el pago rechazado
+      // Notificar al cliente sobre el pago rechazado
       try {
-        await $fetch('/notificaciones', {
+        console.log('🆔 ID de usuario para notificación de pago rechazado:', id_usuario);
+        console.log('📝 Datos de la notificación:', {
+          titulo: 'Pago de Servicio Rechazado',
+          id_usuario: id_usuario,
+          token: token ? 'Token presente' : '❌ Token no encontrado'
+        });
+        
+        await $fetch('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -2101,8 +2133,8 @@ const verifyPayment = async (isApproved) => {
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            titulo: 'Pago de servicio rechazado',
-            id_usuario: serviceToPayment.value?.tecnico?.id_tecnico
+            titulo: 'Pago de Servicio Rechazado',
+            id_usuario: id_usuario
           })
         }); 
       } catch (notifError) {

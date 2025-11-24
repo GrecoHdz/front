@@ -41,7 +41,7 @@
                       </div>
                       <div>
                         <h1 class="text-base sm:text-2xl font-black">Gestión de Usuarios</h1>
-                        <p class="text-white/90 font-medium text-xs sm:text-sm">{{ totalUsers }} usuarios registrados</p>
+                        <p class="text-white/90 font-medium text-xs sm:text-sm">{{ stats.totalUsuarios }} usuarios registrados</p>
                       </div>
                     </div>
                   </div>
@@ -372,7 +372,7 @@
                   </h2>
                   <div class="flex space-x-1">
                     <button 
-                      @click="showTopBalances"
+                      @click="showTopTechniciansCredits"
                       class="text-[11px] xs:text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-md font-bold hover:bg-yellow-200 dark:hover:bg-yellow-900/50 whitespace-nowrap"
                     >
                       💰Top Saldos
@@ -1262,7 +1262,7 @@
                           <!-- Icono de comentario si existe -->
                           <span v-if="service.comentario && service.comentario.trim() !== ''" 
                                 class="flex items-center text-blue-500 hover:text-blue-600 cursor-pointer text-xs font-medium"
-                                @click.stop="showComment(service.comentario, service.calificacion, service.user)">
+                                @click.stop="showComment(service.comentario, service.calificacion, service.cliente)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                             </svg>
@@ -2516,7 +2516,8 @@ const filterServices = async () => {
       calificacion: solicitud.calificacion?.calificacion || 0,
       colonia: solicitud.colonia || '',
       cotizacion: solicitud.cotizacion || null,
-      pagoVisita: solicitud.pagoVisita || null
+      pagoVisita: solicitud.pagoVisita || null,
+      cliente: solicitud.cliente?.nombre || 'Cliente no disponible'
     }))
     
   } catch (error) {
@@ -3164,17 +3165,6 @@ const showReferrals = async (user, page = 1) => {
 const showServiceHistory = (user) => {
   selectedUser.value = user
   servicesCurrentPage.value = 1
-  
-  // Mock data temporal - después conectar con API
-  const serviceTypes = ['Limpieza', 'Mantenimiento', 'Reparación', 'Instalación', 'Revisión']
-  userServiceHistory.value = Array.from({ length: 18 }, (_, i) => ({
-    id: i + 1,
-    name: `${serviceTypes[Math.floor(Math.random() * serviceTypes.length)]} ${i + 1}`,
-    status: Math.random() > 0.3 ? 'Completado' : 'Pendiente',
-    amount: Math.floor(Math.random() * 800) + 100,
-    technician: `Técnico ${String.fromCharCode(65 + Math.floor(Math.random() * 5))}`,
-    date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString()
-  }))
   showServiceHistoryModal.value = true
 }
 
@@ -3199,7 +3189,37 @@ const showComment = (comment, rating, client) => {
   showCommentModal.value = true
 }
 
-// ===== FUNCIONES PARA TOPS =====
+// ===== FUNCIONES Obtener top 5 tecnicos con mas creditos =====
+const showTopTechniciansCredits = async () => {
+  try {
+    isLoadingTopBalances.value = true
+    showTopBalancesModal.value = true
+    
+    const response = await $fetch('/movimientos/toptecnicos/creditos', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response && response.success) {
+      topBalances.value = response.data.map(tecnico => ({
+        name: tecnico.nombre || 'Técnico sin nombre',
+        balance: parseFloat(tecnico.saldo_total) || 0
+      }))
+    } else {
+      showError(response?.error || 'No se pudieron cargar los técnicos con más créditos')
+    }
+  } catch (error) {
+    console.error('Error al cargar los técnicos con más créditos:', error)
+    showError(`Error: ${error.message || 'No se pudieron cargar los técnicos con más créditos'}`)
+  } finally {
+    isLoadingTopBalances.value = false
+  }
+}
+
 const showTopCredits = async () => {
   try {
     isLoadingTopBalances.value = true
@@ -3879,26 +3899,12 @@ const loadRoles = async () => {
       roles.value = response.data
     } else if (response?.success && Array.isArray(response.data)) {
       roles.value = response.data
-    } else {
-      console.warn('Formato de respuesta inesperado al cargar roles, usando valores por defecto:', response)
-      // Usar roles por defecto si la respuesta no es la esperada
-      roles.value = [
-        { id_rol: 1, nombre_rol: 'Administrador' },
-        { id_rol: 2, nombre_rol: 'Técnico' },
-        { id_rol: 3, nombre_rol: 'Cliente' }
-      ]
-    }
+    } 
      
   } catch (error) {
     console.error('Error al cargar roles:', error)
     showError(`Error al cargar roles: ${error.message || 'Intente nuevamente'}`)
     
-    // Usar roles por defecto en caso de error
-    roles.value = [
-      { id_rol: 1, nombre_rol: 'Administrador' },
-      { id_rol: 2, nombre_rol: 'Técnico' },
-      { id_rol: 3, nombre_rol: 'Cliente' }
-    ]
   } finally {
     loadingRoles.value = false
   }

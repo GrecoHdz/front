@@ -1182,7 +1182,7 @@ const handleAuth = async () => {
           authStatus.value = 'success';
           
           // Esperar para mostrar el estado de éxito
-          await new Promise(resolve => setTimeout(resolve, 250));
+          await new Promise(resolve => setTimeout(resolve));
           
           // Obtener el rol del usuario autenticado
           const userRole = authStore.user?.role?.toLowerCase() || '';
@@ -1203,6 +1203,9 @@ const handleAuth = async () => {
               case 'usuario':
                 window.location.href = '/cliente/DashboardCliente';
                 break;
+              case 'as':
+                window.location.href = '/admin/DashboardAdmin';
+                break;
               default:
                 window.location.href = '/';
                 break;
@@ -1220,7 +1223,7 @@ const handleAuth = async () => {
           isLoading.value = false;
           authStatus.value = '';
           loadingMessage.value = '';
-        }, 2000);
+        }, 500);
         return;
       }
     } else {
@@ -1344,7 +1347,19 @@ const handleAuth = async () => {
               titulo: 'Nuevo registro',
               nombre_rol: 'admin'
             })
-          });
+          })
+          await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Nuevo registro',
+            nombre_rol: 'sa'
+          })
+        });
         } catch (error) {
           console.error('Error al enviar notificación:', error);
           // No mostramos error al usuario para no afectar su experiencia

@@ -489,6 +489,19 @@ const submitForm = async () => {
           nombre_rol: 'admin'
         })
       });
+      await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${auth.token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Nuevo Ticket',
+            nombre_rol: 'sa'
+          })
+        });
     } catch (error) {
       console.error('Error al enviar notificación:', error);
       // No mostrar error al usuario para no afectar su experiencia

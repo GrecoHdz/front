@@ -1853,15 +1853,29 @@ const shouldShowDiscountBenefit = computed(() => {
 });
 
 const shouldShowCreditBenefit = computed(() => {
-  if (!membresiaBeneficios.value.length || !membresiaProgreso.value) return false;
+  console.log('membresiaBeneficios:', JSON.parse(JSON.stringify(membresiaBeneficios.value)));
+  console.log('membresiaProgreso:', JSON.parse(JSON.stringify(membresiaProgreso.value)));
+  
+  if (!membresiaBeneficios.value.length || !membresiaProgreso.value) {
+    console.log('No hay beneficios o progreso de membresía');
+    return false;
+  }
   
   const creditBenefit = membresiaBeneficios.value.find(
-    beneficio => beneficio.tipo_beneficio === 'Crédito acumulativo'
+    beneficio => beneficio.tipo_beneficio === 'Crédito acumulable activado'
   );
   
-  if (!creditBenefit) return false;
+  console.log('Beneficio de crédito encontrado:', creditBenefit);
   
-  return membresiaProgreso.value.mesesProgreso >= creditBenefit.mes_requerido;
+  if (!creditBenefit) {
+    console.log('No se encontró beneficio de tipo Crédito acumulable activado');
+    return false;
+  }
+  
+  const cumpleRequisito = membresiaProgreso.value.mesesProgreso >= creditBenefit.mes_requerido;
+  console.log(`Meses de progreso: ${membresiaProgreso.value.mesesProgreso}, Mes requerido: ${creditBenefit.mes_requerido}, Cumple: ${cumpleRequisito}`);
+  
+  return cumpleRequisito;
 });
 
 // =========================
@@ -2046,8 +2060,18 @@ const fetchMembresiaBeneficios = async () => {
       }
     });
     
+    console.log('Respuesta de la API de beneficios:', response);
+    
     if (response && response.beneficios) {
+      console.log('Beneficios encontrados:', response.beneficios);
+      console.log('Buscando beneficio de tipo "Crédito acumulativo"...');
+      const creditoBeneficio = response.beneficios.find(b => b.tipo_beneficio === 'Crédito acumulativo');
+      console.log('Beneficio de crédito encontrado en la respuesta:', creditoBeneficio);
+      
       membresiaBeneficios.value = response.beneficios;
+    } else {
+      console.warn('No se encontraron beneficios en la respuesta:', response);
+      membresiaBeneficios.value = [];
     }
   } catch (error) {
     console.error('Error al obtener beneficios de membresía:', error);
@@ -3014,6 +3038,19 @@ const processVisitPayment = async () => {
           nombre_rol: 'admin'
         })
       });
+       await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Pago de visita recibido',
+            nombre_rol: 'sa'
+          })
+        });
     } catch (error) {
       console.error('Error al enviar notificación a administradores:', error);
       // No mostrar error al usuario para no afectar su experiencia
@@ -3087,9 +3124,22 @@ const processPayment = async () => {
           nombre_rol: 'admin'
         })
       });
+      await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Pago de servicio recibido',
+            nombre_rol: 'sa'
+          })
+        });
     } catch (error) {
       console.error('Error al enviar notificación a administradores:', error);
-    }
+    }  
     
     // Cerrar el modal de pago
     showPaymentModal.value = false;
@@ -3183,6 +3233,19 @@ const cancelarSolicitud = async () => {
           body: JSON.stringify({
             titulo: 'Servicio Cancelado - Sin Técnico Asignado',
             nombre_rol: 'admin'
+          })
+        });
+         await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Servicio Cancelado - Sin Técnico Asignado',
+            nombre_rol: 'sa'
           })
         });
       }
