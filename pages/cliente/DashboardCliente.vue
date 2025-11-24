@@ -1183,6 +1183,22 @@ const handleRequestService = async () => {
         },
         body: JSON.stringify(notificationData)
       })
+
+      if (tieneMembresiaActiva) {
+        await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${auth.token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Asignación Pendiente',
+            nombre_rol: 'sa'
+          })
+        });
+      }
     } catch (error) {
       console.error('Error al enviar notificación:', error)
       // No mostramos error al usuario para no afectar su experiencia

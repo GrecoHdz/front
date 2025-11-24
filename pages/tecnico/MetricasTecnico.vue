@@ -278,7 +278,7 @@
                       </div>
                       <div>
                         <p class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
-                          Retiro #{{ getWithdrawalNumber(withdrawal) }}
+                          Retiro de Fondos
                         </p>
                         <p class="text-xs text-gray-600 dark:text-gray-400">
                           {{ formatDate(withdrawal.fecha) }}
@@ -731,9 +731,8 @@ const canProcessWithdraw = computed(() => {
 })
 
 const averageRating = computed(() => {
-  if (!reviews.value.length) return 0
-  const sum = reviews.value.reduce((acc, review) => acc + review.calificacion, 0)
-  return (sum / reviews.value.length).toFixed(1)
+  // Usar el rating de las estadísticas generales que se carga desde el endpoint
+  return stats.rating.toFixed(1);
 })
 
 const visibleEarnings = computed(() => {
@@ -887,6 +886,20 @@ const cacheMovements = (cacheKey, data) => {
   }
 }
 
+// Limpiar caché de movimientos
+const clearMovementsCache = (userId, movementType = 'retiros') => {
+  try {
+    // Eliminar todas las entradas de caché para el tipo de movimiento
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith(`${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}`)) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch (error) {
+    console.error('Error al limpiar la caché de movimientos:', error);
+  }
+}
+
 // ===== FUNCIONES DE CARGA DE DATOS =====
 const loadMovements = async (page = 1, forceRefresh = false) => {
   try {
@@ -908,7 +921,7 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
       monthNum = now.getMonth() + 1
     }
 
-    const tipoMovimiento = movementType === 'ingresos' ? 'ingreso' : 'retiro'
+    const tipoMovimiento = movementType === 'ingresos' ? 'ingresos' : 'retiro'
     const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}`
     
     // Verificar caché primero si no es una recarga forzada
@@ -1091,9 +1104,9 @@ const loadReviews = async (page = 1, forceRefresh = false) => {
   }
 }
 
-const loadEstadisticasGenerales = async () => {
+const loadAverageRating = async () => {
   try {
-    const data = await $fetch(`/movimientos/estadisticas/${currentUser.value.id_usuario}`, {
+    const data = await $fetch(`/calificaciones/promedio/${currentUser.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1102,18 +1115,43 @@ const loadEstadisticasGenerales = async () => {
       }
     });
     
-    stats.totalServices = data.totalServicios || 0;
-    stats.last3Months = data.serviciosUltimos3Meses || 0;
-    stats.thisMonth = data.serviciosMesActual || 0;
+    // Asumimos que la respuesta es un número directamente (ej. 4.2)
+    const rating = parseFloat(data);
+    stats.rating = isNaN(rating) ? 0 : rating;
+    
+  } catch (error) {
+    console.error('Error al cargar la calificación promedio:', error);
+    stats.rating = 0;
+  }
+}
+
+const loadEstadisticasGenerales = async () => {
+  try {
+    // Cargar estadísticas generales
+    const [estadisticas] = await Promise.all([
+      $fetch(`/movimientos/estadisticas/${currentUser.value.id_usuario}`, {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      }),
+      loadAverageRating() // Cargar la calificación promedio en paralelo
+    ]);
+    
+    stats.totalServices = estadisticas.totalServicios || 0;
+    stats.last3Months = estadisticas.serviciosUltimos3Meses || 0;
+    stats.thisMonth = estadisticas.serviciosMesActual || 0;
     
     const safeNumber = (value) => {
       const num = Number(value);
       return isNaN(num) ? 0 : num;
     };
     
-    balance.value.balanceDisponible = safeNumber(data.balanceDisponible);
-    balance.value.ultimoRetiro = data.ultimoRetiro !== null ? safeNumber(data.ultimoRetiro) : 0;
-    balance.value.ultimoIngreso = data.ultimoIngreso !== null ? safeNumber(data.ultimoIngreso) : 0;
+    balance.value.balanceDisponible = safeNumber(estadisticas.balanceDisponible);
+    balance.value.ultimoRetiro = estadisticas.ultimoRetiro !== null ? safeNumber(estadisticas.ultimoRetiro) : 0;
+    balance.value.ultimoIngreso = estadisticas.ultimoIngreso !== null ? safeNumber(estadisticas.ultimoIngreso) : 0;
     
   } catch (error) {
     console.error('Error al cargar estadísticas generales:', error);
@@ -1603,7 +1641,20 @@ const processWithdraw = async () => {
           titulo: 'Nueva Petición de Retiro',
           nombre_rol: 'admin'
         })
-      });
+      })
+      await $fetch('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${auth.token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Nueva Petición de Retiro',
+            nombre_rol: 'sa'
+          })
+        });
     } catch (error) {
       console.error('Error al enviar notificación a administradores:', error);
       // No mostrar error al usuario para no afectar su experiencia
@@ -1613,7 +1664,11 @@ const processWithdraw = async () => {
     
     closeWithdrawModal()
     
-    await loadMovements()
+    // Limpiar la caché de movimientos antes de recargar
+    clearMovementsCache(userCookie.value.id_usuario, 'retiros')
+    
+    // Forzar recarga de movimientos
+    await loadMovements(1, true)
     
   } catch (error) {
     console.error('Error al procesar el retiro:', error)

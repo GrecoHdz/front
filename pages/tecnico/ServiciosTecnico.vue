@@ -1485,7 +1485,7 @@ const confirmCompleteService = async () => {
             'Authorization': `Bearer ${auth.token}`
           },
           body: JSON.stringify({
-            titulo: 'Servicio Finalizado',
+            titulo: 'Pago de Servicio Pendiente',
             id_usuario: userId
           })
         });

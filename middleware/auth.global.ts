@@ -1,7 +1,7 @@
 // auth.global.ts 
 import { useAuthStore } from './auth.store';
 
-type UserRole = 'admin' | 'tecnico' | 'usuario';
+type UserRole = 'admin' | 'tecnico' | 'usuario' | 'sa';
 
 interface UserResponse {
   id_usuario: number;
@@ -42,6 +42,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
       case 'admin': return '/admin/DashboardAdmin';
       case 'tecnico': return '/tecnico/DashboardTecnico';
       case 'usuario': return '/cliente/DashboardCliente';
+      case 'sa': return '/admin/DashboardAdmin';
       default: return '/';
     }
   };
@@ -94,9 +95,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // 9. Definir rutas permitidas por rol
   const allowedPaths: Record<UserRole, string[]> = {
-    admin: ['/admin', '/perfil', '/admin/DashboardAdmin'],
-    tecnico: ['/tecnico', '/perfil', '/tecnico/DashboardTecnico'],
-    usuario: ['/cliente', '/perfil', '/cliente/DashboardCliente']
+    admin: ['/admin'],
+    tecnico: ['/tecnico'],
+    usuario: ['/cliente'],
+    sa: ['/admin']
   };
 
   // 10. Verificar si la ruta actual está permitida para el rol
