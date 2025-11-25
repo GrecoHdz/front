@@ -537,7 +537,7 @@ const handleAvailabilityChange = async () => {
   }
 }
 
-// Obtener reseñas del técnico
+// Obtener la calificación promedio del técnico
 const fetchReviews = async (loadMore = false) => {
   try {
     const userId = auth.user?.id_usuario
@@ -546,7 +546,8 @@ const fetchReviews = async (loadMore = false) => {
       throw new Error('No se pudo obtener el ID del usuario')
     }
     
-    const response = await $fetch(`/calificaciones/usuario/${userId}`, {
+    // Obtener la calificación promedio directamente del endpoint
+    const rating = await $fetch(`/calificaciones/promedio/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -555,21 +556,12 @@ const fetchReviews = async (loadMore = false) => {
       }
     })
     
-    // Mapear la respuesta de la API al formato esperado
-    const loadedReviews = response.data || []
-    
-    if (!loadMore) {
-      reviews.value = loadedReviews
-    } else {
-      reviews.value = [...reviews.value, ...loadedReviews]
-    }
-    
     // Actualizar la calificación promedio en las estadísticas
-    if (reviews.value.length > 0) {
-      const totalRating = reviews.value.reduce((sum, review) => sum + review.calificacion, 0)
-      stats.value.rating = parseFloat((totalRating / reviews.value.length).toFixed(1))
-    } else {
-      stats.value.rating = 0.0
+    stats.value.rating = parseFloat(rating) || 0.0
+    
+    // Mantener compatibilidad con el array de reseñas para otros usos
+    if (!loadMore) {
+      reviews.value = []
     }
     
   } catch (error) {
@@ -577,13 +569,9 @@ const fetchReviews = async (loadMore = false) => {
   }
 }
 
-// Calcular calificación promedio
+// Mostrar la calificación promedio
 const averageRating = computed(() => {
-  if (reviews.value.length === 0) return '0.0'
-  
-  const totalRating = reviews.value.reduce((sum, review) => sum + review.calificacion, 0)
-  const average = totalRating / reviews.value.length
-  return average.toFixed(1)
+  return stats.value.rating?.toFixed(1) || '0.0'
 })
 
 // ===== FUNCIONES DE NAVEGACIÓN =====

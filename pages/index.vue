@@ -451,25 +451,39 @@
               <p v-if="formErrors.password" class="mt-1 text-sm text-red-500">{{ formErrors.password }}</p>
             </div>
 
+            <!-- Checkbox para registro como técnico -->
+            <div v-if="!isLogin" class="flex items-center mb-4">
+              <input 
+                type="checkbox" 
+                id="registerAsTechnician" 
+                v-model="registerAsTechnician"
+                class="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 focus:ring-2"
+              >
+              <label for="registerAsTechnician" class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Unirme como Técnico
+              </label>
+            </div>
+
             <button 
               type="submit"
-              class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              class="w-full py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded hover:shadow transition"
             >
               {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
             </button>
           </form>
 
-          <div class="mt-6 text-center space-y-3">
+          <div class="flex items-center justify-center gap-3 text-center text-xs mt-1">
             <button 
               @click="isLogin = !isLogin"
-              class="block w-full text-sm text-emerald-600 dark:text-emerald-400 hover:underline focus:outline-none"
+              class="text-emerald-600 dark:text-emerald-400 hover:underline focus:outline-none"
             >
-              {{ isLogin ? '¿No tienes una cuenta? Regístrate' : '¿Ya tienes una cuenta? Inicia sesión' }}
+              {{ isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión' }}
             </button>
+            <span v-if="isLogin" class="text-gray-300 dark:text-gray-600">|</span>
             <button 
               v-if="isLogin"
               @click="showForgotPassword = true"
-              class="block w-full text-sm text-gray-600 dark:text-gray-400 hover:underline focus:outline-none"
+              class="text-gray-600 dark:text-gray-400 hover:underline focus:outline-none"
             >
               ¿Olvidaste tu contraseña?
             </button>
@@ -694,6 +708,7 @@ const isCheckingAuth = ref(true) // Nuevo estado para controlar la verificación
 const authStatus = ref('') // '', 'success', 'error'
 const auth = useAuthStore()
 const formErrors = ref({})
+const registerAsTechnician = ref(false)
 const router = useRouter()
 
 // Validation functions
@@ -712,10 +727,10 @@ const validateForm = () => {
       errors.telefono = 'Ingresa un número de teléfono válido (ej: +504 9999-9999)'
     }
     
-    // Validar número de identidad (13 dígitos)
-    const identidadRegex = /^\d{13}$/
-    if (!identidadRegex.test(form.value.identidad)) {
-      errors.identidad = 'El número de identidad debe tener al menos 13 dígitos'
+    // Validar número de identidad (13 a 15 dígitos)
+    const identidadRegex = /^\d{13,15}$/
+    if (!form.value.identidad || !identidadRegex.test(form.value.identidad)) {
+      errors.identidad = 'El número de identidad debe tener entre 13 y 15 dígitos'
     }
   }
   
@@ -1235,8 +1250,11 @@ const handleAuth = async () => {
           telefono: form.value.telefono,
           identidad: form.value.identidad,
           password_hash: form.value.password, // Cambiado de password a password_hash
-          id_ciudad: ciudades.value.find(c => c.nombre === form.value.ciudad)?.id 
+          id_ciudad: ciudades.value.find(c => c.nombre === form.value.ciudad)?.id,
+          es_tecnico: registerAsTechnician.value ? 1 : 0
         }; 
+        
+        console.log('Enviando datos al backend:', JSON.stringify(registerData, null, 2));
         
         // Realizar la petición de registro directamente en el componente
         const response = await fetch(`${apiBase}/usuarios`, {
@@ -1247,7 +1265,8 @@ const handleAuth = async () => {
           body: JSON.stringify(registerData)
         });
         
-        const data = await response.json(); 
+        const data = await response.json();
+        console.log('Respuesta del backend:', JSON.stringify(data, null, 2)); 
         
         if (!response.ok) {
           // Crear un objeto de error con toda la información disponible
@@ -1271,64 +1290,67 @@ const handleAuth = async () => {
         
         // Verificar si hay un código de referido en la URL
         const urlParams = new URLSearchParams(window.location.search);
-        const referralCode = urlParams.get('ref');
+        let referralCode = urlParams.get('ref');
         
-        // Si hay un código de referido, crear el registro de referido
-        if (referralCode) {
-          try {
-            // Intentar obtener el ID del usuario de diferentes campos posibles en la respuesta
-            const userId = data.id_usuario || data.id || data.userId || data.user_id;
-            
-            if (!userId) {
-              console.error('No se pudo obtener el ID del usuario de la respuesta:', data);
-              throw new Error('No se pudo obtener el ID del usuario');
-            }
-            
-            const referralData = {
-              id_referidor: referralCode,
-              id_referido_usuario: userId
-            }; 
-            
-            const referralResponse = await fetch(`${apiBase}/referidos`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(referralData)
-            });
-            
-            const responseData = await referralResponse.json();
-            
-            if (referralResponse.ok) {
-              // Enviar notificación de nuevo referido
-              try {
-                await $fetch('/notificaciones/enviar', {
-                  baseURL: config.public.apiBase,
-                  method: 'POST',
-                  headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    titulo: 'Nuevo referido',
-                    id_usuario: referralCode // ID del usuario que refirió
-                  })
-                });
-              } catch (error) {
-                console.error('Error al enviar notificación de referido:', error);
-                // No mostramos error al usuario para no afectar su experiencia
-              }
-            } else {
-              console.warn('No se pudo registrar el referido:', responseData);
+        // Si no hay código de referido, usar el ID 1 (usuario por defecto)
+        if (!referralCode) {
+          referralCode = '36';
+          console.log('No se encontró código de referido, registrando bajo el usuario por defecto (ID: 36)');
+        }
+        
+        try {
+          // Intentar obtener el ID del usuario de diferentes campos posibles en la respuesta
+          const userId = data.id_usuario || data.id || data.userId || data.user_id;
+          
+          if (!userId) {
+            console.error('No se pudo obtener el ID del usuario de la respuesta:', data);
+            throw new Error('No se pudo obtener el ID del usuario');
+          }
+          
+          const referralData = {
+            id_referidor: referralCode,
+            id_referido_usuario: userId
+          }; 
+          
+          const referralResponse = await fetch(`${apiBase}/referidos`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(referralData)
+          });
+          
+          const responseData = await referralResponse.json();
+          
+          if (referralResponse.ok) {
+            // Enviar notificación de nuevo referido
+            try {
+              await $fetch('/notificaciones/enviar', {
+                baseURL: config.public.apiBase,
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  titulo: 'Nuevo referido',
+                  id_usuario: referralCode // ID del usuario que refirió (o 1 si no hay referido)
+                })
+              });
+            } catch (error) {
+              console.error('Error al enviar notificación de referido:', error);
               // No mostramos error al usuario para no afectar su experiencia
             }
-          } catch (error) {
-            console.error('Error al registrar referido:', {
-              error: error.message,
-              stack: error.stack
-            });
+          } else {
+            console.warn('No se pudo registrar el referido:', responseData);
             // No mostramos error al usuario para no afectar su experiencia
           }
+        } catch (error) {
+          console.error('Error al registrar referido:', {
+            error: error.message,
+            stack: error.stack
+          });
+          // No mostramos error al usuario para no afectar su experiencia
         }
         
         // Mostrar mensaje de éxito
@@ -1481,8 +1503,11 @@ const showCustomAlert = (message) => {
 
 // Validación del campo de identidad
 const handleIdentityInput = (e) => {
+  // Asegurarse de que form.identidad sea una cadena
+  if (!form.identidad) form.identidad = '';
+  
   // Solo permite números
-  form.identidad = form.identidad.replace(/\D/g, '')
+  form.identidad = form.identidad.toString().replace(/\D/g, '')
   // Limpia el mensaje de error al escribir
   if (form.identidad.length >= 13) {
     formErrors.identidad = ''
