@@ -286,7 +286,7 @@
                       </div>
                     </div>
                     <div class="text-right">
-                      <p class="font-bold text-red-600 dark:text-red-400 text-sm sm:text-base">L. {{ formatCurrency(withdrawal.monto) }}</p>
+                      <p class="font-bold text-yellow-600 dark:text-yellow-400 text-sm sm:text-base">L. {{ formatCurrency(withdrawal.monto) }}</p>
                       <p class="text-xs" :class="getStatusWithDrawalColor(withdrawal.estado)">
                         {{ withdrawal.estado }}
                       </p>
@@ -756,11 +756,17 @@ const formatDate = (dateString) => {
 }
 
 const getStatusColor = (status) => {
-  return status === 'Completado' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400' 
+  const statusLower = status?.toLowerCase()
+  if (statusLower === 'completado') return 'text-green-600 dark:text-green-400'
+  if (statusLower === 'rechazado') return 'text-red-600 dark:text-red-400'
+  return 'text-yellow-600 dark:text-yellow-400'
 }
 
 const getStatusWithDrawalColor = (status) => {
-  return status === 'completado' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400' 
+  const statusLower = status?.toLowerCase()
+  if (statusLower === 'completado') return 'text-green-600 dark:text-green-400'
+  if (statusLower === 'rechazado') return 'text-red-600 dark:text-red-400'
+  return 'text-yellow-600 dark:text-yellow-400'
 }
 
 const getInitials = (name) => {
@@ -903,40 +909,53 @@ const clearMovementsCache = (userId, movementType = 'retiros') => {
 // ===== FUNCIONES DE CARGA DE DATOS =====
 const loadMovements = async (page = 1, forceRefresh = false) => {
   try {
-    isLoadingMovements.value = true
-    const userId = userCookie.value.id_usuario
-    if (!userId) throw new Error('Erro al obtener Usuario. Recargue la página.')
+    isLoadingMovements.value = true;
+    const userId = userCookie.value.id_usuario;
+    if (!userId) throw new Error('Error al obtener Usuario. Recargue la página.');
 
-    const movementType = activeTab.value
-    const selectedMonthValue = movementType === 'ingresos' ? selectedMonth.value : selectedWithdrawMonth.value
-    let year, monthNum
+    const movementType = activeTab.value;
+    const selectedMonthValue = movementType === 'ingresos' ? selectedMonth.value : selectedWithdrawMonth.value;
+    let year, monthNum;
     
     if (selectedMonthValue) {
-      const [y, m] = selectedMonthValue.split('-')
-      year = parseInt(y)
-      monthNum = parseInt(m)
+      const [y, m] = selectedMonthValue.split('-');
+      year = parseInt(y);
+      monthNum = parseInt(m);
     } else {
-      const now = new Date()
-      year = now.getFullYear()
-      monthNum = now.getMonth() + 1
+      const now = new Date();
+      year = now.getFullYear();
+      monthNum = now.getMonth() + 1;
     }
 
-    const tipoMovimiento = movementType === 'ingresos' ? 'ingresos' : 'retiro'
-    const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}`
+    const tipoMovimiento = movementType === 'ingresos' ? 'ingresos' : 'retiro';
+    
+    // Usar timestamp para forzar la recarga cuando sea necesario
+    const cacheTimestamp = localStorage.getItem('movements_cache_timestamp') || Date.now();
+    const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}_${cacheTimestamp}`;
     
     // Verificar caché primero si no es una recarga forzada
     if (!forceRefresh) {
-      const cachedData = getCachedMovements(cacheKey)
-      if (cachedData) {
-        if (movementType === 'ingresos') {
-          earnings.value = cachedData.items
-          earningsPagination.value = cachedData.pagination
-        } else {
-          withdrawals.value = cachedData.items
-          withdrawalsPagination.value = cachedData.pagination
+      try {
+        const cachedData = getCachedMovements(cacheKey);
+        if (cachedData) {
+          if (movementType === 'ingresos') {
+            earnings.value = cachedData.items;
+            earningsPagination.value = cachedData.pagination;
+          } else {
+            withdrawals.value = cachedData.items;
+            withdrawalsPagination.value = cachedData.pagination;
+          }
+          // Verificar si los datos están desactualizados (más de 5 minutos)
+          const cacheAge = Date.now() - (cachedData.timestamp || 0);
+          if (cacheAge > 5 * 60 * 1000) { // 5 minutos
+            // Cargar datos en segundo plano
+            loadMovements(page, true).catch(console.error);
+          }
+          isLoadingMovements.value = false;
+          return;
         }
-        isLoadingMovements.value = false
-        return
+      } catch (e) {
+        console.warn('Error al leer caché, cargando datos frescos', e);
       }
     }
     
@@ -946,15 +965,17 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
+        'Authorization': `Bearer ${auth.token}`,
+        'Cache-Control': 'no-cache' // Evitar caché del navegador
       },
       params: { 
         mes: monthNum, 
         tipo: tipoMovimiento,
         page: page,
-        limit: itemsPerPage
+        limit: itemsPerPage,
+        _t: forceRefresh ? Date.now() : undefined // Forzar recarga
       }
-    })
+    });
     
     if (response) {
       const items = response.data.map(item => ({
@@ -966,14 +987,14 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
           servicio: item.servicio || 'Servicio no especificado',
           colonia: item.colonia || 'Sin ubicación'
         } : {})
-      }))
+      }));
       
       const paginationData = response.pagination || response.meta?.pagination || {
         currentPage: 1,
         totalPages: 1,
         total: items.length,
         limit: itemsPerPage
-      }
+      };
       
       const pagination = {
         currentPage: Number(paginationData.currentPage || paginationData.page || 1),
@@ -982,30 +1003,42 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
           (paginationData.currentPage < (paginationData.totalPages || 1)) : 
           (items.length >= (paginationData.limit || itemsPerPage)),
         totalItems: Number(paginationData.total || items.length)
-      }
+      };
 
-      // Guardar en caché
+      // Guardar en caché con timestamp
       cacheMovements(cacheKey, {
         items,
-        pagination
-      })
+        pagination,
+        timestamp: Date.now() // Añadir timestamp
+      });
 
       // Actualizar el estado con los datos obtenidos
       if (movementType === 'ingresos') {
-        earnings.value = items
-        earningsPagination.value = pagination
+        earnings.value = items;
+        earningsPagination.value = pagination;
       } else {
-        withdrawals.value = items
-        withdrawalsPagination.value = pagination
+        withdrawals.value = items;
+        withdrawalsPagination.value = pagination;
       }
-      }
+      
+      // Actualizar el timestamp del caché
+      localStorage.setItem('movements_cache_timestamp', Date.now().toString());
+    }
   } catch (error) {
-    console.error('Error al cargar movimientos:', error)
-    showError('No se pudieron cargar los movimientos. Por favor, inténtalo de nuevo.')
+    console.error('Error al cargar movimientos:', error);
+    showError('No se pudieron cargar los movimientos. Por favor, inténtalo de nuevo.');
   } finally {
-    isLoadingMovements.value = false
+    isLoadingMovements.value = false;
   }
-}
+};
+
+// Función para forzar la recarga de datos
+const refreshMovements = () => {
+  // Actualizar el timestamp para invalidar el caché
+  localStorage.setItem('movements_cache_timestamp', Date.now().toString());
+  // Forzar recarga
+  loadMovements(1, true);
+}; 
 
 // Eliminar loadMoreEarnings y loadMoreWithdrawals ya que ahora usamos paginación
 
@@ -1748,7 +1781,11 @@ onMounted(async () => {
     loadServicesByType(),
     loadEstadisticasGenerales(),
     loadMovements(),
-    loadReviews()
+    loadReviews(),
+    // Limpiar caché al montar el componente
+    clearMovementsCache(),
+    // Cargar datos frescos
+    refreshMovements()
   ])
   
   if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {

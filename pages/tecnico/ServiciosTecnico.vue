@@ -393,11 +393,11 @@
                   <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Monto Mano de Obra (L.)</label>
                   <input v-model.number="quotationForm.monto_manodeobra" 
                          type="number" 
-                         step="0.01" 
+                         step="1" 
                          min="0" 
                          required
                          class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                         placeholder="0.00">
+                         placeholder="0">
                 </div>
 
                 <!-- Monto Materiales -->
@@ -405,10 +405,10 @@
                   <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Monto Materiales (L.) - Estimado</label>
                   <input v-model.number="quotationForm.monto_materiales" 
                          type="number" 
-                         step="0.01" 
+                         step="1" 
                          min="0"
                          class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                         placeholder="0.00">
+                         placeholder="0">
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Este es un estimado que puede variar</p>
                 </div>
 
@@ -417,7 +417,7 @@
                   <div class="flex justify-between items-center">
                     <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Total Estimado:</span>
                     <span class="text-base sm:text-lg font-bold text-blue-900 dark:text-blue-100">
-                      L. {{ (Number(quotationForm.monto_manodeobra || 0) + Number(quotationForm.monto_materiales || 0)).toFixed(2) }}
+                      L. {{ (Number(quotationForm.monto_manodeobra || 0) + Number(quotationForm.monto_materiales || 0)).toFixed(0) }}
                     </span>
                   </div>
                 </div>
@@ -1241,7 +1241,7 @@ const confirmCancelService = () => {
 
 // ===== FUNCIONES DE ACCIONES =====
 const submitQuotation = async () => {
-  if (!quotationForm.value.comentario.trim() || quotationForm.value.monto_manodeobra <= 0) {
+  if (!quotationForm.value.comentario.trim() || quotationForm.value.monto_manodeobra === null || quotationForm.value.monto_manodeobra === undefined || quotationForm.value.monto_manodeobra < 0) {
     showToast('Por favor completa todos los campos requeridos', 'error')
     return
   }

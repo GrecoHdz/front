@@ -3721,39 +3721,43 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
   });
 };
 
-
 // ===== FUNCIONES DE APROBACION o RECHAZO DE PAGOS =====
 const approvePayment = async (id) => {
   try {
     const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
     let response;
-
     const config = useRuntimeConfig();
     const auth = useAuthStore();
-    
     const headers = {
       'Accept': 'application/json',
       'Authorization': `Bearer ${auth.token}`,
       'Content-Type': 'application/json'
     };
-    
-    // Obtener el ID del usuario para notificaciones  
+
+    // Obtener el ID del usuario para notificaciones
     let idUsuario;
     
     // Manejar diferentes estructuras de pago según el tipo
     if (activeTab.value === 'withdrawals') {
       // Para retiros
       idUsuario = payment?.usuario?.id_usuario || payment?.id_usuario;
-    } else if (payment?.solicitud?.cliente) {
-      // Para pagos de servicios/visitas con estructura de solicitud
-      idUsuario = payment.solicitud.cliente.id_usuario;
-    } else if (payment?.usuario) {
-      // Para pagos directos con usuario
-      idUsuario = payment.usuario.id_usuario;
-    } else if (payment?.id_usuario) {
-      // Si el pago tiene un id_usuario directo
-      idUsuario = payment.id_usuario;
+    } else if (activeTab.value === 'membership') {
+      // Para membresías
+      idUsuario = payment?.usuario?.id_usuario || payment?.id_usuario || payment?.id_cliente;
+    } else if (activeTab.value === 'visits' || activeTab.value === 'services') {
+      // Para pagos de visitas y servicios - buscar en múltiples ubicaciones
+      idUsuario = payment?.solicitud?.cliente?.id_usuario || 
+                  payment?.solicitud?.cliente?.id_cliente ||
+                  payment?.cliente?.id_usuario || 
+                  payment?.cliente?.id_cliente ||
+                  payment?.usuario?.id_usuario ||
+                  payment?.id_usuario ||
+                  payment?.id_cliente;
     }
+
+    console.log('🔍 ID de usuario obtenido para aprobación:', idUsuario);
+    console.log('📋 Tab activo:', activeTab.value);
+    console.log('💳 Estructura del pago:', JSON.parse(JSON.stringify(payment)));
 
     switch (activeTab.value) {
       case 'membership':
@@ -3766,56 +3770,36 @@ const approvePayment = async (id) => {
         break;
 
       case 'visits':
-        response = await $fetch(`/pagovisita/${payment.id_solicitud || payment.id}`, {
+        // Usar el endpoint correcto de confirmación de pago de visita
+        response = await $fetch('/pagovisita/confirmar', {
           baseURL: config.public.apiBase,
-          method: 'PUT',
+          method: 'POST',
           headers,
-          body: { estado: 'aceptado' }   
+          body: {
+            id_solicitud: payment.id_solicitud || payment.solicitud?.id_solicitud || payment.id,
+            id_cotizacion: payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion
+          }
         });
         break;
 
       case 'services':
-        // Primero aprobar el pago del servicio
-        response = await $fetch(`/pagoservicio/aceptar`, {
+        // Usar el endpoint correcto de aceptación de pago de servicio
+        const solicitudId = payment.id_solicitud || payment.solicitud?.id_solicitud || payment.id;
+        const cotizacionId = payment.id_cotizacion || 
+                           payment.cotizacion?.id || 
+                           payment.cotizacion?.id_cotizacion ||
+                           payment.cotizaciones?.[0]?.id ||
+                           payment.cotizaciones?.[0]?.id_cotizacion;
+
+        response = await $fetch('/pagoservicio/aceptar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers,
-          body: { id_solicitud: payment.id_solicitud || payment.id, id_cotizacion: payment.id_cotizacion || payment.id }
-        });
-
-        // Obtener los detalles del servicio para acreditar al técnico
-        const servicioResponse = await $fetch(`/solicitud/${payment.id_solicitud || payment.id}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers
-        });
-
-        const servicio = servicioResponse.data;
-        
-        // Verificar si el servicio tiene un técnico asignado
-        if (servicio.id_tecnico) {
-          try {
-            // Calcular el monto a acreditar (80% del monto total del servicio)
-            const montoServicio = parseFloat(servicio.monto_total) || 0;
-            const montoCredito = (montoServicio * 0.8).toFixed(2);
-
-            // Acreditar al técnico
-            await $fetch('/credito', {
-              baseURL: config.public.apiBase,
-              method: 'POST',
-              headers,
-              body: {
-                id_usuario: servicio.id_tecnico,
-                monto_credito: montoCredito
-              }
-            });
-
-            console.log(`✅ Se acreditó $${montoCredito} al técnico ID: ${servicio.id_tecnico}`);
-          } catch (creditError) {
-            console.error('Error al acreditar al técnico:', creditError);
-            // No detenemos el flujo si falla el crédito, solo lo registramos
+          body: {
+            id_solicitud: solicitudId,
+            id_cotizacion: cotizacionId
           }
-        }
+        });
         break;
 
       case 'withdrawals':
@@ -3830,7 +3814,6 @@ const approvePayment = async (id) => {
     }
 
     if (activeTab.value === 'withdrawals') {
-      // Update the withdrawal status in the UI
       if (selectedWithdrawal.value) {
         selectedWithdrawal.value.estado = 'completado';
       }
@@ -3838,25 +3821,25 @@ const approvePayment = async (id) => {
     } else {
       closeDetailsModal();
     }
+
     showToast('Pago aprobado correctamente', 'success');
-    
+
     // Notificar al cliente sobre el pago aprobado
     try {
-      console.log('🆔 ID de usuario para notificación de pago aprobado:', idUsuario);
+      console.log('📨 Enviando notificación de aprobación');
+      console.log('🆔 ID de usuario para notificación:', idUsuario);
+      
       let titulo = '';
       if (activeTab.value === 'withdrawals') {
         titulo = 'Retiro Aprobado';
-      } else {
-        const tipoPago = activeTab.value === 'visits' ? 'Visita' : (activeTab.value === 'membership' ? 'Membresía' : 'Servicio');
-        titulo = `Pago de ${tipoPago} Aprobado`;
+      } else if (activeTab.value === 'visits') {
+        titulo = 'Pago de Visita Aprobado';
+      } else if (activeTab.value === 'membership') {
+        titulo = 'Pago de Membresía Aprobado';
+      } else if (activeTab.value === 'services') {
+        titulo = 'Pago de Servicio Aprobado';
       }
-      
-      console.log('📝 Datos de la notificación:', {
-        titulo,
-        id_usuario: idUsuario,
-        token: auth.token ? 'Token presente' : '❌ Token no encontrado'
-      });
-      
+
       if (idUsuario) {
         await $fetch('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
@@ -3870,59 +3853,65 @@ const approvePayment = async (id) => {
             id_usuario: idUsuario
           })
         });
+        console.log('✅ Notificación enviada correctamente');
       } else {
-        console.warn('No se pudo enviar notificación: ID de usuario no encontrado');
+        console.warn('⚠️ No se pudo enviar notificación: ID de usuario no encontrado');
+        console.warn('Estructura del pago:', JSON.parse(JSON.stringify(payment)));
       }
     } catch (notifError) {
-      console.error('Error al enviar notificación de pago aprobado:', notifError);
+      console.error('❌ Error al enviar notificación de pago aprobado:', notifError);
     }
 
     const currentPage = currentPaymentsPage.value;
     const cacheKey = `${activeTab.value}-${selectedMonthPayments.value || 'all'}-${statusFilter.value || 'all'}-${currentPage}-${paymentsPerPage}`;
-    
     if (paymentsCache.value[cacheKey]) delete paymentsCache.value[cacheKey];
 
     await loadTabData(currentPage);
     await updatePlatformStats();
 
   } catch (error) {
-    console.error('Error aprobando pago:', error);
+    console.error('❌ Error aprobando pago:', error);
     showToast(error.response?._data?.message || 'Error al aprobar el pago', 'error');
   }
 };
 
-
 const rejectPayment = async (id) => {
   try {
     const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
-    let response; 
-
+    let response;
     const config = useRuntimeConfig();
     const auth = useAuthStore();
-    
     const headers = {
       'Accept': 'application/json',
       'Authorization': `Bearer ${auth.token}`,
       'Content-Type': 'application/json'
     };
-    
-    // Obtener el ID del usuario para notificaciones  
+
+    // Obtener el ID del usuario para notificaciones
     let idUsuario;
     
+    console.log('🔍 Estructura del pago para rechazo:', JSON.parse(JSON.stringify(payment)));
+
     // Manejar diferentes estructuras de pago según el tipo
     if (activeTab.value === 'withdrawals') {
       // Para retiros
       idUsuario = payment?.usuario?.id_usuario || payment?.id_usuario;
-    } else if (payment?.solicitud?.cliente) {
-      // Para pagos de servicios/visitas con estructura de solicitud
-      idUsuario = payment.solicitud.cliente.id_usuario;
-    } else if (payment?.usuario) {
-      // Para pagos directos con usuario
-      idUsuario = payment.usuario.id_usuario;
-    } else if (payment?.id_usuario) {
-      // Si el pago tiene un id_usuario directo
-      idUsuario = payment.id_usuario;
+    } else if (activeTab.value === 'membership') {
+      // Para membresías
+      idUsuario = payment?.usuario?.id_usuario || payment?.id_usuario || payment?.id_cliente;
+    } else if (activeTab.value === 'visits' || activeTab.value === 'services') {
+      // Para pagos de visitas y servicios - buscar en múltiples ubicaciones
+      idUsuario = payment?.solicitud?.cliente?.id_usuario || 
+                  payment?.solicitud?.cliente?.id_cliente ||
+                  payment?.cliente?.id_usuario || 
+                  payment?.cliente?.id_cliente ||
+                  payment?.usuario?.id_usuario ||
+                  payment?.id_usuario ||
+                  payment?.id_cliente;
     }
+
+    console.log('🔍 ID de usuario obtenido para rechazo:', idUsuario);
+    console.log('📋 Tab activo:', activeTab.value);
 
     switch (activeTab.value) {
       case 'membership':
@@ -3935,22 +3924,49 @@ const rejectPayment = async (id) => {
         break;
 
       case 'visits':
-        response = await $fetch(`/pagovisita/${payment.id_solicitud || payment.id}`, {
-          baseURL: config.public.apiBase,
-          method: 'PUT',
-          headers,
-          body: { estado: 'rechazado' }
-        });
-        break;
-
-      case 'services':
-        response = await $fetch(`/pagoservicio/denegar`, {
+        // Usar el endpoint correcto de denegación de pago de visita
+        response = await $fetch('/pagovisita/denegar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers,
-          body: { id_solicitud: payment.id_solicitud || payment.id, 
-                  id_cotizacion: payment.id_cotizacion || payment.id,
-                  id_usuario: payment.id_usuario || payment.id }
+          body: {
+            id_solicitud: payment.id_solicitud || payment.solicitud?.id_solicitud || payment.id,
+            id_cotizacion: payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion,
+            id_usuario: idUsuario
+          }
+        });
+
+        // Actualizar el estado de la solicitud a pendiente_pagovisita
+        try {
+          await $fetch(`/solicitudservicio/${payment.solicitud?.id_solicitud || payment.id_solicitud || payment.id}`, {
+            baseURL: config.public.apiBase,
+            method: 'PUT',
+            headers,
+            body: { estado: 'pendiente_pagovisita' }
+          });
+        } catch (error) {
+          console.error('Error al actualizar el estado de la solicitud:', error);
+        }
+        break;
+
+      case 'services':
+        // Usar el endpoint correcto de denegación de pago de servicio
+        const solicitudId = payment.id_solicitud || payment.solicitud?.id_solicitud || payment.id;
+        const cotizacionId = payment.id_cotizacion || 
+                           payment.cotizacion?.id || 
+                           payment.cotizacion?.id_cotizacion ||
+                           payment.cotizaciones?.[0]?.id ||
+                           payment.cotizaciones?.[0]?.id_cotizacion;
+
+        response = await $fetch('/pagoservicio/denegar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers,
+          body: {
+            id_solicitud: solicitudId,
+            id_cotizacion: cotizacionId,
+            id_usuario: idUsuario
+          }
         });
         break;
 
@@ -3966,7 +3982,6 @@ const rejectPayment = async (id) => {
     }
 
     if (activeTab.value === 'withdrawals') {
-      // Update the withdrawal status in the UI
       if (selectedWithdrawal.value) {
         selectedWithdrawal.value.estado = 'rechazado';
       }
@@ -3974,24 +3989,25 @@ const rejectPayment = async (id) => {
     } else {
       closeDetailsModal();
     }
+
     showToast('Pago rechazado correctamente', 'success');
-    
+
     // Notificar al cliente sobre el pago rechazado
     try {
-      console.log('🆔 ID de usuario para notificación de pago rechazado:', idUsuario);
+      console.log('📨 Enviando notificación de rechazo');
+      console.log('🆔 ID de usuario para notificación:', idUsuario);
+      
       let titulo = '';
       if (activeTab.value === 'withdrawals') {
         titulo = 'Retiro Rechazado';
-      } else {
-        const tipoPago = activeTab.value === 'visits' ? 'Visita' : (activeTab.value === 'membership' ? 'Membresía' : 'Servicio');
-        titulo = `Pago de ${tipoPago} Rechazado`;
+      } else if (activeTab.value === 'visits') {
+        titulo = 'Pago de Visita Rechazado';
+      } else if (activeTab.value === 'membership') {
+        titulo = 'Pago de Membresía Rechazado';
+      } else if (activeTab.value === 'services') {
+        titulo = 'Pago de Servicio Rechazado';
       }
-      
-      console.log('📝 Datos de la notificación:', {
-        titulo,
-        id_usuario: idUsuario
-      });
-      
+
       if (idUsuario) {
         await $fetch('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
@@ -4005,26 +4021,28 @@ const rejectPayment = async (id) => {
             id_usuario: idUsuario
           })
         });
+        console.log('✅ Notificación enviada correctamente');
       } else {
-        console.warn('No se pudo enviar notificación: ID de usuario no encontrado');
+        console.warn('⚠️ No se pudo enviar notificación: ID de usuario no encontrado');
+        console.warn('Estructura del pago:', JSON.parse(JSON.stringify(payment)));
       }
     } catch (notifError) {
-      console.error('Error al enviar notificación de pago rechazado:', notifError);
+      console.error('❌ Error al enviar notificación de pago rechazado:', notifError);
     }
 
     const currentPage = currentPaymentsPage.value;
     const cacheKey = `${activeTab.value}-${selectedMonthPayments.value || 'all'}-${statusFilter.value || 'all'}-${currentPage}-${paymentsPerPage}`;
-
     if (paymentsCache.value[cacheKey]) delete paymentsCache.value[cacheKey];
 
     await loadTabData(currentPage);
 
   } catch (error) {
-    console.error('Error rechazando pago:', error);
+    console.error('❌ Error rechazando pago:', error);
     showToast(error.response?._data?.message || 'Error al rechazar el pago', 'error');
   }
 };
 
+ 
 // ===== FUNCIONES DE TOAST =====
 const showToast = (message, type = 'info') => {
   try {

@@ -2767,7 +2767,7 @@ const acceptQuotation = async () => {
     // Obtener el monto de mano de obra del campo correcto
     const montoManoObra = Number(quotationData.value.monto_manodeobra); 
     
-    if (isNaN(montoManoObra) || montoManoObra <= 0) {
+    if (isNaN(montoManoObra) || montoManoObra < 0) {
       throw new Error(`El monto de mano de obra no es válido: ${quotationData.value.monto_manodeobra}`);
     } 
     
@@ -3110,8 +3110,12 @@ const processPayment = async () => {
     });
     
     // Notificar a los administradores sobre el pago de servicio recibido
+    console.log('Enviando notificación a administradores:', {
+      titulo: 'Pago de servicio recibido',
+      nombre_rol: 'admin'
+    });
     try {
-      await $fetch('/notificaciones/enviar', {
+      const responseAdmin = await $fetch('/notificaciones/enviar', {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -3124,11 +3128,21 @@ const processPayment = async () => {
           nombre_rol: 'admin'
         })
       });
-      await $fetch('/notificaciones/enviar', {
+      console.log('Notificación a administradores enviada:', responseAdmin);
+    } catch (error) {
+      console.error('Error al enviar notificación a administradores:', error);
+    }  
+
+    console.log('Enviando notificación a SA:', {
+      titulo: 'Pago de servicio recibido',
+      nombre_rol: 'sa'
+    });
+    try {
+      const responseSA = await $fetch('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${useCookie('token').value}`,
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
@@ -3137,8 +3151,9 @@ const processPayment = async () => {
             nombre_rol: 'sa'
           })
         });
+      console.log('Notificación a SA enviada:', responseSA);
     } catch (error) {
-      console.error('Error al enviar notificación a administradores:', error);
+      console.error('Error al enviar notificación a SA:', error);
     }  
     
     // Cerrar el modal de pago
