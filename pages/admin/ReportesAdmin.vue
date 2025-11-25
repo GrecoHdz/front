@@ -3736,24 +3736,6 @@ const approvePayment = async (id) => {
       'Authorization': `Bearer ${auth.token}`,
       'Content-Type': 'application/json'
     };
-    
-    // Obtener el ID del usuario para notificaciones  
-    let idUsuario;
-    
-    // Manejar diferentes estructuras de pago según el tipo
-    if (activeTab.value === 'withdrawals') {
-      // Para retiros
-      idUsuario = payment?.usuario?.id_usuario || payment?.id_usuario;
-    } else if (payment?.solicitud?.cliente) {
-      // Para pagos de servicios/visitas con estructura de solicitud
-      idUsuario = payment.solicitud.cliente.id_usuario;
-    } else if (payment?.usuario) {
-      // Para pagos directos con usuario
-      idUsuario = payment.usuario.id_usuario;
-    } else if (payment?.id_usuario) {
-      // Si el pago tiene un id_usuario directo
-      idUsuario = payment.id_usuario;
-    }
 
     switch (activeTab.value) {
       case 'membership':
@@ -3905,24 +3887,6 @@ const rejectPayment = async (id) => {
       'Authorization': `Bearer ${auth.token}`,
       'Content-Type': 'application/json'
     };
-    
-    // Obtener el ID del usuario para notificaciones  
-    let idUsuario;
-    
-    // Manejar diferentes estructuras de pago según el tipo
-    if (activeTab.value === 'withdrawals') {
-      // Para retiros
-      idUsuario = payment?.usuario?.id_usuario || payment?.id_usuario;
-    } else if (payment?.solicitud?.cliente) {
-      // Para pagos de servicios/visitas con estructura de solicitud
-      idUsuario = payment.solicitud.cliente.id_usuario;
-    } else if (payment?.usuario) {
-      // Para pagos directos con usuario
-      idUsuario = payment.usuario.id_usuario;
-    } else if (payment?.id_usuario) {
-      // Si el pago tiene un id_usuario directo
-      idUsuario = payment.id_usuario;
-    }
 
     switch (activeTab.value) {
       case 'membership':
@@ -3975,42 +3939,6 @@ const rejectPayment = async (id) => {
       closeDetailsModal();
     }
     showToast('Pago rechazado correctamente', 'success');
-    
-    // Notificar al cliente sobre el pago rechazado
-    try {
-      console.log('🆔 ID de usuario para notificación de pago rechazado:', idUsuario);
-      let titulo = '';
-      if (activeTab.value === 'withdrawals') {
-        titulo = 'Retiro Rechazado';
-      } else {
-        const tipoPago = activeTab.value === 'visits' ? 'Visita' : (activeTab.value === 'membership' ? 'Membresía' : 'Servicio');
-        titulo = `Pago de ${tipoPago} Rechazado`;
-      }
-      
-      console.log('📝 Datos de la notificación:', {
-        titulo,
-        id_usuario: idUsuario
-      });
-      
-      if (idUsuario) {
-        await $fetch('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
-          body: JSON.stringify({
-            titulo,
-            id_usuario: idUsuario
-          })
-        });
-      } else {
-        console.warn('No se pudo enviar notificación: ID de usuario no encontrado');
-      }
-    } catch (notifError) {
-      console.error('Error al enviar notificación de pago rechazado:', notifError);
-    }
 
     const currentPage = currentPaymentsPage.value;
     const cacheKey = `${activeTab.value}-${selectedMonthPayments.value || 'all'}-${statusFilter.value || 'all'}-${currentPage}-${paymentsPerPage}`;
