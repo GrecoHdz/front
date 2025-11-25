@@ -3753,11 +3753,7 @@ const approvePayment = async (id) => {
                   payment?.usuario?.id_usuario ||
                   payment?.id_usuario ||
                   payment?.id_cliente;
-    }
-
-    console.log('🔍 ID de usuario obtenido para aprobación:', idUsuario);
-    console.log('📋 Tab activo:', activeTab.value);
-    console.log('💳 Estructura del pago:', JSON.parse(JSON.stringify(payment)));
+    } 
 
     switch (activeTab.value) {
       case 'membership':
@@ -3791,6 +3787,7 @@ const approvePayment = async (id) => {
                            payment.cotizaciones?.[0]?.id ||
                            payment.cotizaciones?.[0]?.id_cotizacion;
 
+        // Aprobar el pago del servicio
         response = await $fetch('/pagoservicio/aceptar', {
           baseURL: config.public.apiBase,
           method: 'POST',
@@ -3800,6 +3797,28 @@ const approvePayment = async (id) => {
             id_cotizacion: cotizacionId
           }
         });
+
+        // Notificar al técnico sobre el pago recibido
+        if (response?.success && payment.solicitud?.tecnico?.id_usuario) {
+          try {
+            await $fetch('/notificaciones/enviar', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth.token}`
+              },
+              body: JSON.stringify({
+                titulo: 'Pago de servicio recibido',
+                id_usuario: payment.solicitud.tecnico.id_usuario
+              })
+            });
+          } catch (notificationError) {
+            console.error('❌ Error al enviar notificación al técnico:', notificationError);
+            // No interrumpir el flujo si falla la notificación
+          }
+        }
+        
         break;
 
       case 'withdrawals':
@@ -3826,9 +3845,6 @@ const approvePayment = async (id) => {
 
     // Notificar al cliente sobre el pago aprobado
     try {
-      console.log('📨 Enviando notificación de aprobación');
-      console.log('🆔 ID de usuario para notificación:', idUsuario);
-      
       let titulo = '';
       if (activeTab.value === 'withdrawals') {
         titulo = 'Retiro Aprobado';
@@ -3853,10 +3869,6 @@ const approvePayment = async (id) => {
             id_usuario: idUsuario
           })
         });
-        console.log('✅ Notificación enviada correctamente');
-      } else {
-        console.warn('⚠️ No se pudo enviar notificación: ID de usuario no encontrado');
-        console.warn('Estructura del pago:', JSON.parse(JSON.stringify(payment)));
       }
     } catch (notifError) {
       console.error('❌ Error al enviar notificación de pago aprobado:', notifError);
@@ -3890,8 +3902,6 @@ const rejectPayment = async (id) => {
     // Obtener el ID del usuario para notificaciones
     let idUsuario;
     
-    console.log('🔍 Estructura del pago para rechazo:', JSON.parse(JSON.stringify(payment)));
-
     // Manejar diferentes estructuras de pago según el tipo
     if (activeTab.value === 'withdrawals') {
       // Para retiros
@@ -3909,9 +3919,6 @@ const rejectPayment = async (id) => {
                   payment?.id_usuario ||
                   payment?.id_cliente;
     }
-
-    console.log('🔍 ID de usuario obtenido para rechazo:', idUsuario);
-    console.log('📋 Tab activo:', activeTab.value);
 
     switch (activeTab.value) {
       case 'membership':
@@ -3994,9 +4001,6 @@ const rejectPayment = async (id) => {
 
     // Notificar al cliente sobre el pago rechazado
     try {
-      console.log('📨 Enviando notificación de rechazo');
-      console.log('🆔 ID de usuario para notificación:', idUsuario);
-      
       let titulo = '';
       if (activeTab.value === 'withdrawals') {
         titulo = 'Retiro Rechazado';
@@ -4021,10 +4025,6 @@ const rejectPayment = async (id) => {
             id_usuario: idUsuario
           })
         });
-        console.log('✅ Notificación enviada correctamente');
-      } else {
-        console.warn('⚠️ No se pudo enviar notificación: ID de usuario no encontrado');
-        console.warn('Estructura del pago:', JSON.parse(JSON.stringify(payment)));
       }
     } catch (notifError) {
       console.error('❌ Error al enviar notificación de pago rechazado:', notifError);

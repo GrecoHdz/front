@@ -599,39 +599,10 @@ const reviewsPagination = ref({
 
 const isLoadingReviews = ref(false)
 
-// Configuración de caché para reseñas
-const REVIEWS_CACHE_KEY = 'prohogar_technician_reviews_cache'
+// Configuración de caché para reseñas 
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos en milisegundos
-
-// Obtener datos del caché
-const getCachedReviews = (userId) => {
-  try {
-    const cache = JSON.parse(localStorage.getItem(`${REVIEWS_CACHE_KEY}_${userId}`) || '{}')
-    
-    // Verificar si el caché es válido (menos de 5 minutos)
-    if (cache.timestamp && (Date.now() - cache.timestamp) < CACHE_DURATION) {
-      return cache.data
-    }
-  } catch (error) {
-    console.error('Error al leer el caché de reseñas:', error)
-  }
-  return null
-}
-
-// Guardar datos en caché
-const cacheReviews = (userId, data) => {
-  try {
-    localStorage.setItem(
-      `${REVIEWS_CACHE_KEY}_${userId}`,
-      JSON.stringify({
-        data,
-        timestamp: Date.now()
-      })
-    )
-  } catch (error) {
-    console.error('Error al guardar en caché las reseñas:', error)
-  }
-}
+ 
+ 
 
 // Paginación
 const earningsPagination = ref({
@@ -868,27 +839,55 @@ const MOVEMENTS_CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 const getCachedMovements = (cacheKey) => {
   try {
     const cache = JSON.parse(localStorage.getItem(cacheKey) || '{}')
-    if (cache.timestamp && (Date.now() - cache.timestamp) < MOVEMENTS_CACHE_DURATION) {
-      return cache.data
+    // Verificar que el caché tenga datos y no esté vencido
+    if (cache && cache.items && cache.timestamp && 
+        (Date.now() - cache.timestamp) < MOVEMENTS_CACHE_DURATION) {
+      return cache
     }
+    // Si el caché está vencido o no tiene datos, devolver null
+    return null
   } catch (error) {
     console.error('Error al leer el caché de movimientos:', error)
+    return null
   }
-  return null
 }
 
 // Guardar movimientos en caché
 const cacheMovements = (cacheKey, data) => {
   try {
-    localStorage.setItem(
-      cacheKey,
-      JSON.stringify({
-        data,
-        timestamp: Date.now()
-      })
-    )
+    const cacheData = {
+      ...data,
+      timestamp: Date.now()
+    }
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData))
   } catch (error) {
     console.error('Error al guardar en caché los movimientos:', error)
+    // Si hay un error de cuota, limpiar caché antiguo
+    if (error.name === 'QuotaExceededError') {
+      clearOldCache()
+    }
+  }
+}
+
+// Limpiar caché antiguo
+const clearOldCache = () => {
+  try {
+    const now = Date.now()
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith(MOVEMENTS_CACHE_KEY)) {
+        try {
+          const cache = JSON.parse(localStorage.getItem(key) || '{}')
+          if (now - (cache.timestamp || 0) > MOVEMENTS_CACHE_DURATION * 2) {
+            localStorage.removeItem(key)
+          }
+        } catch (e) {
+          // Si hay error al parsear, eliminar la entrada
+          localStorage.removeItem(key)
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Error al limpiar caché antiguo:', error)
   }
 }
 
@@ -929,9 +928,8 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
 
     const tipoMovimiento = movementType === 'ingresos' ? 'ingresos' : 'retiro';
     
-    // Usar timestamp para forzar la recarga cuando sea necesario
-    const cacheTimestamp = localStorage.getItem('movements_cache_timestamp') || Date.now();
-    const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}_${cacheTimestamp}`;
+    // Crear clave de caché sin timestamp para reutilización
+    const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}`;
     
     // Verificar caché primero si no es una recarga forzada
     if (!forceRefresh) {
@@ -945,11 +943,16 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
             withdrawals.value = cachedData.items;
             withdrawalsPagination.value = cachedData.pagination;
           }
-          // Verificar si los datos están desactualizados (más de 5 minutos)
+          // Verificar si los datos están a punto de vencer (menos de 1 minuto de vida restante)
           const cacheAge = Date.now() - (cachedData.timestamp || 0);
-          if (cacheAge > 5 * 60 * 1000) { // 5 minutos
-            // Cargar datos en segundo plano
-            loadMovements(page, true).catch(console.error);
+          const timeUntilRefresh = (MOVEMENTS_CACHE_DURATION - cacheAge) - (4 * 60 * 1000); // 4 minutos
+          
+          // Si faltan menos de 4 minutos para que el caché expire, actualizar en segundo plano
+          if (timeUntilRefresh <= 0) {
+            // Usar setTimeout para no bloquear la interfaz
+            setTimeout(() => {
+              loadMovements(page, true).catch(console.error);
+            }, 1000); // Pequeño retraso para no sobrecargar
           }
           isLoadingMovements.value = false;
           return;
@@ -965,16 +968,17 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`,
-        'Cache-Control': 'no-cache' // Evitar caché del navegador
+        'Authorization': `Bearer ${auth.token}`
       },
       params: { 
         mes: monthNum, 
         tipo: tipoMovimiento,
         page: page,
         limit: itemsPerPage,
-        _t: forceRefresh ? Date.now() : undefined // Forzar recarga
-      }
+        _t: forceRefresh ? Date.now() : undefined // Forzar recarga solo cuando sea necesario
+      },
+      // Asegurarse de no usar caché del navegador
+      headers: forceRefresh ? { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } : {}
     });
     
     if (response) {
@@ -1021,8 +1025,7 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
         withdrawalsPagination.value = pagination;
       }
       
-      // Actualizar el timestamp del caché
-      localStorage.setItem('movements_cache_timestamp', Date.now().toString());
+      // No es necesario actualizar un timestamp global, cada entrada tiene su propio timestamp
     }
   } catch (error) {
     console.error('Error al cargar movimientos:', error);
@@ -1042,8 +1045,63 @@ const refreshMovements = () => {
 
 // Eliminar loadMoreEarnings y loadMoreWithdrawals ya que ahora usamos paginación
 
-// Cache para todas las páginas
-const reviewsCache = new Map()
+// Configuración de caché para reseñas
+const REVIEWS_CACHE_KEY = 'prohogar_technician_reviews_cache'
+const REVIEWS_CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
+
+// Obtener reseñas del caché
+const getCachedReviews = (cacheKey) => {
+  try {
+    const cache = JSON.parse(localStorage.getItem(cacheKey) || '{}')
+    // Verificar que el caché tenga datos y no esté vencido
+    if (cache && cache.reviews && cache.timestamp && 
+        (Date.now() - cache.timestamp) < REVIEWS_CACHE_DURATION) {
+      return cache
+    }
+    return null
+  } catch (error) {
+    console.error('Error al leer el caché de reseñas:', error)
+    return null
+  }
+}
+
+// Guardar reseñas en caché
+const cacheReviews = (cacheKey, data) => {
+  try {
+    const cacheData = {
+      ...data,
+      timestamp: Date.now()
+    }
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData))
+  } catch (error) {
+    console.error('Error al guardar en caché las reseñas:', error)
+    if (error.name === 'QuotaExceededError') {
+      // Limpiar caché antiguo de reseñas
+      clearOldReviewsCache()
+    }
+  }
+}
+
+// Limpiar caché antiguo de reseñas
+const clearOldReviewsCache = () => {
+  try {
+    const now = Date.now()
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith(REVIEWS_CACHE_KEY)) {
+        try {
+          const cache = JSON.parse(localStorage.getItem(key) || '{}')
+          if (now - (cache.timestamp || 0) > REVIEWS_CACHE_DURATION * 2) {
+            localStorage.removeItem(key)
+          }
+        } catch (e) {
+          localStorage.removeItem(key)
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Error al limpiar caché antiguo de reseñas:', error)
+  }
+}
 
 const loadReviews = async (page = 1, forceRefresh = false) => {
   try {
@@ -1054,16 +1112,27 @@ const loadReviews = async (page = 1, forceRefresh = false) => {
       throw new Error('Error al obtener el ID del usuario. Recargue la página.')
     }
 
-    const cacheKey = `${userId}_page_${page}`
-    const cacheTimestampKey = `${cacheKey}_timestamp`
+    const cacheKey = `${REVIEWS_CACHE_KEY}_${userId}_page_${page}`
     const now = Date.now()
     
-    // Verificar si los datos están en caché y son recientes (menos de 5 minutos)
+    // Verificar si los datos están en caché y son recientes
     if (!forceRefresh) {
       const cachedData = getCachedReviews(cacheKey)
-      if (cachedData && (now - (cachedData.timestamp || 0) < CACHE_DURATION)) {
+      if (cachedData) {
         reviews.value = cachedData.reviews
         reviewsPagination.value = cachedData.pagination
+        
+        // Verificar si los datos están a punto de vencer
+        const cacheAge = now - (cachedData.timestamp || 0)
+        const timeUntilRefresh = (REVIEWS_CACHE_DURATION - cacheAge) - (4 * 60 * 1000) // 4 minutos
+        
+        // Si faltan menos de 4 minutos para que el caché expire, actualizar en segundo plano
+        if (timeUntilRefresh <= 0) {
+          setTimeout(() => {
+            loadReviews(page, true).catch(console.error)
+          }, 1000)
+        }
+        
         isLoadingReviews.value = false
         return
       }
