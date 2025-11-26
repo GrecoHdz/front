@@ -49,10 +49,12 @@ import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 import { useRuntimeConfig } from '#imports';
 import { useRouter } from 'vue-router'
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 // ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
+const isLoading = ref(true)
 
 // Definir eventos emitidos
 const emit = defineEmits(['availabilityChange']);
@@ -75,6 +77,9 @@ const showToast = (message, type = 'success', duration = 3000) => {
 
 // Manejar clic en notificación
 const onNotificationClick = async (notification) => {
+  // Activar loading spinner
+  isLoading.value = true;
+  
   // Log del objeto notificación recibido
   console.log('🔔 Notificación clickeada:', notification);
 
@@ -112,15 +117,23 @@ const onNotificationClick = async (notification) => {
     });
 
     showToast('Error al marcar notificación', 'error', 3000);
+    
+    // Desactivar loading en caso de error
+    isLoading.value = false;
+    return; // Salir de la función si hay error
   }
 
   // Navegación por tipo de notificación
+  // Mantener el loading activo durante la navegación
   if (notification.tipo === 'servicios') {
     navigateTo('/cliente/Servicios');
   } else if (notification.tipo === 'membresia') { 
     navigateTo('/cliente/DashboardCliente');
   } else if (notification.tipo === 'financieros') { 
     navigateTo('/cliente/Servicios');
+  } else {
+    // Si no hay tipo específico, desactivar loading
+    isLoading.value = false;
   }
 };
 

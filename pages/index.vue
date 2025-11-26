@@ -1197,16 +1197,17 @@ const handleAuth = async () => {
           authStatus.value = 'success';
           
           // Esperar para mostrar el estado de éxito
-          await new Promise(resolve => setTimeout(resolve));
+          await new Promise(resolve => setTimeout(resolve, 800));
           
           // Obtener el rol del usuario autenticado
           const userRole = authStore.user?.role?.toLowerCase() || '';
           
-          // Cerrar modal después de un breve retraso para mostrar el estado de éxito
+          // Cerrar modal
           showLoginModal.value = false;
           showSuccess.value = true;
           
-          // Redirigir según el rol después de un breve retraso
+          // MANTENER isLoading.value = true hasta la redirección
+          // Redirigir según el rol
           setTimeout(() => {
             switch(userRole) {
               case 'admin':
@@ -1225,7 +1226,8 @@ const handleAuth = async () => {
                 window.location.href = '/';
                 break;
             }
-          });
+            // NO desactivar isLoading aquí porque window.location.href cambiará la página
+          }, 300);
         } else {
           throw new Error(loginResult?.error || 'Error en las credenciales');
         }
@@ -1238,7 +1240,7 @@ const handleAuth = async () => {
           isLoading.value = false;
           authStatus.value = '';
           loadingMessage.value = '';
-        }, 500);
+        }, 1500);
         return;
       }
     } else {
@@ -1249,7 +1251,7 @@ const handleAuth = async () => {
           email: form.value.email,
           telefono: form.value.telefono,
           identidad: form.value.identidad,
-          password_hash: form.value.password, // Cambiado de password a password_hash
+          password_hash: form.value.password,
           id_ciudad: ciudades.value.find(c => c.nombre === form.value.ciudad)?.id,
           es_tecnico: registerAsTechnician.value ? 1 : 0
         }; 
@@ -1289,7 +1291,7 @@ const handleAuth = async () => {
         const urlParams = new URLSearchParams(window.location.search);
         let referralCode = urlParams.get('ref');
         
-        // Si no hay código de referido, usar el ID 1 (usuario por defecto)
+        // Si no hay código de referido, usar el ID 36 (usuario por defecto)
         if (!referralCode) {
           referralCode = '36'; 
         }
@@ -1330,23 +1332,20 @@ const handleAuth = async () => {
                 },
                 body: JSON.stringify({
                   titulo: 'Nuevo referido',
-                  id_usuario: referralCode // ID del usuario que refirió (o 1 si no hay referido)
+                  id_usuario: referralCode
                 })
               });
             } catch (error) {
               console.error('Error al enviar notificación de referido:', error);
-              // No mostramos error al usuario para no afectar su experiencia
             }
           } else {
             console.warn('No se pudo registrar el referido:', responseData);
-            // No mostramos error al usuario para no afectar su experiencia
           }
         } catch (error) {
           console.error('Error al registrar referido:', {
             error: error.message,
             stack: error.stack
           });
-          // No mostramos error al usuario para no afectar su experiencia
         }
         
         // Mostrar mensaje de éxito
@@ -1367,20 +1366,19 @@ const handleAuth = async () => {
             })
           })
           await $fetch('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: { 
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Nuevo registro',
-            nombre_rol: 'sa'
-          })
-        });
+            baseURL: config.public.apiBase,
+            method: 'POST',
+            headers: { 
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              titulo: 'Nuevo registro',
+              nombre_rol: 'sa'
+            })
+          });
         } catch (error) {
           console.error('Error al enviar notificación:', error);
-          // No mostramos error al usuario para no afectar su experiencia
         }
         
         // Cambiar a pestaña de login
@@ -1397,8 +1395,13 @@ const handleAuth = async () => {
           identidad: '',
           password: ''
         };
-      } catch (error) { 
         
+        // Desactivar loading solo para registro exitoso
+        setTimeout(() => {
+          isLoading.value = false;
+          authStatus.value = '';
+        }, 1500);
+      } catch (error) { 
         // Si hay una respuesta del servidor, extraer el mensaje de error
         if (error.response?.data) {
           const responseData = error.response.data;
@@ -1431,24 +1434,20 @@ const handleAuth = async () => {
           // Mensaje genérico si no hay información de error
           showToast('Error al procesar la solicitud. Por favor, inténtalo de nuevo.', 'error');
         }
+        
+        // Desactivar loading en caso de error
+        isLoading.value = false;
+        authStatus.value = '';
       }
     }
-    
-    // Resetear después de 3 segundos
-    setTimeout(() => {
-      isLoading.value = false;
-      authStatus.value = '';
-    }, 3000);
-  } finally {
-    // Asegurarse de que el loading se desactive
-    if (authStatus.value !== 'success') {
-      setTimeout(() => {
-        isLoading.value = false;
-      }, 500);
-    } else {
-      isLoading.value = false;
-    }
+  } catch (error) {
+    // Capturar cualquier error no manejado
+    console.error('Error en handleAuth:', error);
+    isLoading.value = false;
+    authStatus.value = '';
+    showToast('Error inesperado. Por favor, inténtalo de nuevo.', 'error');
   }
+  // NO hay finally que desactive isLoading para el caso de login exitoso
 }
 
 // Estado para el modal de recuperación de contraseña

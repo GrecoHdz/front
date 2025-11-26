@@ -49,10 +49,12 @@ import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 import { useRuntimeConfig } from '#imports';
 import { useRouter } from 'vue-router'
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 // ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
+const isLoading = ref(true)
 
 // Definir eventos emitidos
 const emit = defineEmits(['availabilityChange']);
@@ -75,6 +77,9 @@ const showToast = (message, type = 'success', duration = 3000) => {
 
 // Manejar clic en notificación
 const onNotificationClick = async (notification) => {
+  // Activar loading spinner
+  isLoading.value = true;
+  
   // Log del objeto notificación recibido
   console.log('🔔 Notificación clickeada:', notification);
 
@@ -112,9 +117,13 @@ const onNotificationClick = async (notification) => {
     });
 
     showToast('Error al marcar notificación', 'error', 3000);
+    
+    // Desactivar loading en caso de error
+    isLoading.value = false;
+    return; // Salir de la función si hay error
   }
   
-  // Ejemplo de cómo podrías manejar diferentes tipos de notificaciones
+  // Navegación por tipo de notificación 
   if (notification.tipo === 'servicios') {
     navigateTo('/tecnico/ServiciosTecnico');
   } else if (notification.tipo === 'membresia') { 
@@ -123,6 +132,9 @@ const onNotificationClick = async (notification) => {
     navigateTo('/tecnico/MetricasTecnico');
   } else if (notification.tipo === 'usuario') { 
     navigateTo('/tecnico/MetricasTecnico');
-  }
+  } else {
+    // Si no hay tipo específico, desactivar loading
+    isLoading.value = false;
+  } 
 };
 </script>

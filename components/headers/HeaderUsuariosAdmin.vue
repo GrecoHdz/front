@@ -39,11 +39,13 @@ import { computed } from 'vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 import { useRuntimeConfig } from '#imports';
 import { useRouter } from 'vue-router'
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 // ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const user = computed(() => auth.user || {});
+const isLoading = ref(true)
 
 const props = defineProps({
   unreadCount: {
@@ -56,6 +58,9 @@ defineEmits(['toggle-notifications']);
 
 // Manejar clic en notificación
 const onNotificationClick = async (notification) => {
+  // Activar loading spinner
+  isLoading.value = true;
+  
   // Log del objeto notificación recibido
   console.log('🔔 Notificación clickeada:', notification);
 
@@ -93,9 +98,13 @@ const onNotificationClick = async (notification) => {
     });
 
     showToast('Error al marcar notificación', 'error', 3000);
+    
+    // Desactivar loading en caso de error
+    isLoading.value = false;
+    return; // Salir de la función si hay error
   }
   
-  // Ejemplo de cómo podrías manejar diferentes tipos de notificaciones
+  // Navegación por tipo de notificación 
   if (notification.tipo === 'servicios') {
     navigateTo('/admin/ServiciosAdmin');
   } else if (notification.tipo === 'membresia') { 
@@ -106,6 +115,8 @@ const onNotificationClick = async (notification) => {
     navigateTo('/admin/UsuariosAdmin');
   } else if (notification.tipo === 'ticket') { 
     navigateTo('/admin/DashboardAdmin');
-  }
+  } else { 
+    isLoading.value = false;
+  } 
 };
 </script>
