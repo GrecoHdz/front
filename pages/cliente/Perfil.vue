@@ -1531,7 +1531,7 @@ const isMembershipExpired = computed(() => {
 });
 
 const isMembershipInactive = computed(() => {
-  return !membershipData.value.status || membershipData.value.status === 'inactiva';
+  return !membershipData.value.status || membershipData.value.status === 'inactiva' || membershipData.value.status === 'rechazada';
 });
 
 const membershipProgress = computed(() => membershipData.value.progress);
