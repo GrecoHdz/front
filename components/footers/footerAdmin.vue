@@ -1,24 +1,39 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const router = useRouter()
+const route = useRoute()
 const isLoading = ref(false)
-const activeTab = ref('dashboard')
+
+// Determine active tab based on current route
+const activeTab = computed(() => {
+  const path = route.path.toLowerCase()
+  if (path.includes('dashboard')) return 'dashboard'
+  if (path.includes('usuarios')) return 'usuarios'
+  if (path.includes('servicios')) return 'servicios'
+  if (path.includes('reportes')) return 'reportes'
+  if (path.includes('config')) return 'configuracion'
+  return 'dashboard' // default
+})
 
 const navigateTo = async (path, tabName) => {
   try {
     isLoading.value = true
-    activeTab.value = tabName
-    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    // Small delay to allow UI to update before navigation
+    await new Promise(resolve => setTimeout(resolve, 50))
+    
+    // Navigate to the new route
     await router.push(path)
   } catch (error) {
     console.error('Error en la navegación:', error)
   } finally {
+    // Shorter delay to ensure smooth transition
     setTimeout(() => {
       isLoading.value = false
-    }, 300)
+    }, 200)
   }
 }
 </script>
