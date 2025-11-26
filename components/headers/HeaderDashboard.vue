@@ -47,11 +47,15 @@ import { ref, reactive } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store';
 import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
+import { useRuntimeConfig } from '#imports';
+import { useRouter } from 'vue-router'
+
+// ===== CONFIGURACIÓN =====
+const config = useRuntimeConfig()
+const auth = useAuthStore()
 
 // Definir eventos emitidos
 const emit = defineEmits(['availabilityChange']);
-
-const auth = useAuthStore();
 
 // Toast state
 const toast = reactive({
@@ -70,14 +74,54 @@ const showToast = (message, type = 'success', duration = 3000) => {
 };
 
 // Manejar clic en notificación
-const onNotificationClick = (notification) => {
-  // Aquí puedes manejar la navegación o acciones al hacer clic en una notificación
-  console.log('Notificación clickeada:', notification);
-  
-  // Ejemplo de cómo podrías manejar diferentes tipos de notificaciones
-  if (notification.tipo === 'nuevo_servicio') {
-    // Navegar a la página de detalles del servicio
-    // navigateTo(`/servicios/${notification.id_servicio}`);
+const onNotificationClick = async (notification) => {
+  // Log del objeto notificación recibido
+  console.log('🔔 Notificación clickeada:', notification);
+
+  // Log de lo que se enviará al backend
+  console.log('📤 Datos enviados al backend:', {
+    url: `${config.public.apiBase}/notificaciones/marcar/individual`,
+    method: 'PUT',
+    body: {
+      id_destinatario_notificacion: notification.id
+    },
+    token: auth.token ? 'TOKEN_PRESENTE' : 'SIN_TOKEN'
+  });
+
+  try {
+    const response = await $fetch('/notificaciones/marcar/individual', {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: {
+        id_destinatario_notificacion: notification.id
+      }
+    });
+
+    // Log de la respuesta del backend
+    console.log('📥 Respuesta del backend (marcar notificación):', response);
+
+  } catch (error) {
+    // Log del error completo
+    console.error('❌ Error al marcar notificación:', {
+      message: error.message,
+      error
+    });
+
+    showToast('Error al marcar notificación', 'error', 3000);
+  }
+
+  // Navegación por tipo de notificación
+  if (notification.tipo === 'servicios') {
+    navigateTo('/cliente/Servicios');
+  } else if (notification.tipo === 'membresia') { 
+    navigateTo('/cliente/DashboardCliente');
+  } else if (notification.tipo === 'financieros') { 
+    navigateTo('/cliente/Servicios');
   }
 };
+
 </script>

@@ -25,7 +25,9 @@
         </div>
         
         <!-- Componente de notificaciones -->
-        <NotificationsDropdown />
+        <NotificationsDropdown 
+          @notification-click="onNotificationClick"
+        />
       </div>
     </div>
   </header>
@@ -35,8 +37,12 @@
 import { useAuthStore } from '~/middleware/auth.store'
 import { computed } from 'vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
+import { useRuntimeConfig } from '#imports';
+import { useRouter } from 'vue-router'
 
-const auth = useAuthStore();
+// ===== CONFIGURACIÓN =====
+const config = useRuntimeConfig()
+const auth = useAuthStore()
 const user = computed(() => auth.user || {});
 
 const props = defineProps({
@@ -47,4 +53,59 @@ const props = defineProps({
 });
 
 defineEmits(['toggle-notifications']);
+
+// Manejar clic en notificación
+const onNotificationClick = async (notification) => {
+  // Log del objeto notificación recibido
+  console.log('🔔 Notificación clickeada:', notification);
+
+  // Log de lo que se enviará al backend
+  console.log('📤 Datos enviados al backend:', {
+    url: `${config.public.apiBase}/notificaciones/marcar/individual`,
+    method: 'PUT',
+    body: {
+      id_destinatario_notificacion: notification.id
+    },
+    token: auth.token ? 'TOKEN_PRESENTE' : 'SIN_TOKEN'
+  });
+
+  try {
+    const response = await $fetch('/notificaciones/marcar/individual', {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: {
+        id_destinatario_notificacion: notification.id
+      }
+    });
+
+    // Log de la respuesta del backend
+    console.log('📥 Respuesta del backend (marcar notificación):', response);
+
+  } catch (error) {
+    // Log del error completo
+    console.error('❌ Error al marcar notificación:', {
+      message: error.message,
+      error
+    });
+
+    showToast('Error al marcar notificación', 'error', 3000);
+  }
+  
+  // Ejemplo de cómo podrías manejar diferentes tipos de notificaciones
+  if (notification.tipo === 'servicios') {
+    navigateTo('/admin/ServiciosAdmin');
+  } else if (notification.tipo === 'membresia') { 
+    navigateTo('/admin/ReportesAdmin');
+  } else if (notification.tipo === 'financieros') { 
+    navigateTo('/admin/ReportesAdmin');
+  } else if (notification.tipo === 'usuario') { 
+    navigateTo('/admin/UsuariosAdmin');
+  } else if (notification.tipo === 'ticket') { 
+    navigateTo('/admin/DashboardAdmin');
+  }
+};
 </script>

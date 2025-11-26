@@ -13,7 +13,7 @@
     <!-- Loading Spinner -->
     <LoadingSpinner v-if="isLoading" :loading="isLoading" />
 
-    <HeadersHeaderDashboard 
+    <HeadersHeaderDashboardTecnico 
       @availability-change="handleAvailabilityChange"
     />
 

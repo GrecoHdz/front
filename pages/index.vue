@@ -1254,8 +1254,6 @@ const handleAuth = async () => {
           es_tecnico: registerAsTechnician.value ? 1 : 0
         }; 
         
-        console.log('Enviando datos al backend:', JSON.stringify(registerData, null, 2));
-        
         // Realizar la petición de registro directamente en el componente
         const response = await fetch(`${apiBase}/usuarios`, {
           method: 'POST',
@@ -1265,8 +1263,7 @@ const handleAuth = async () => {
           body: JSON.stringify(registerData)
         });
         
-        const data = await response.json();
-        console.log('Respuesta del backend:', JSON.stringify(data, null, 2)); 
+        const data = await response.json(); 
         
         if (!response.ok) {
           // Crear un objeto de error con toda la información disponible
@@ -1294,8 +1291,7 @@ const handleAuth = async () => {
         
         // Si no hay código de referido, usar el ID 1 (usuario por defecto)
         if (!referralCode) {
-          referralCode = '36';
-          console.log('No se encontró código de referido, registrando bajo el usuario por defecto (ID: 36)');
+          referralCode = '36'; 
         }
         
         try {
