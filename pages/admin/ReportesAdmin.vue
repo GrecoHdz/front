@@ -1306,7 +1306,7 @@ const loadVisitPayments = async (page = 1) => {
     if (statusFilter.value && statusFilter.value !== 'all') {
       const estadoMap = {
         'pending': 'Pendiente',
-        'approved': 'Aceptado',
+        'approved': 'Aprobado',
         'rejected': 'Rechazado'
       };
       const estado = estadoMap[statusFilter.value] || statusFilter.value;
@@ -3799,6 +3799,44 @@ const approvePayment = async (id) => {
             id_cotizacion: payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion
           }
         });
+
+        // Notificar al admin de servicio pendiente
+        if (response?.success) {
+          try {
+            await $fetch('/notificaciones/enviar', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth.token}`
+              },
+              body: JSON.stringify({
+                titulo: 'Asignación Pendiente',
+                 nombre_rol: 'sa'
+              })
+            });
+          } catch (notificationError) {
+            console.error('❌ Error al enviar notificación al técnico:', notificationError);
+            // No interrumpir el flujo si falla la notificación
+          }
+          try {
+            await $fetch('/notificaciones/enviar', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth.token}`
+              },
+              body: JSON.stringify({
+                titulo: 'Asignación Pendiente',
+                 nombre_rol: 'admin'
+              })
+            });
+          } catch (notificationError) {
+            console.error('❌ Error al enviar notificación al técnico:', notificationError);
+            // No interrumpir el flujo si falla la notificación
+          }
+        }
         break;
 
       case 'services':

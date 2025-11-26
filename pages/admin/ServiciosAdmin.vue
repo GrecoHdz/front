@@ -2062,7 +2062,48 @@ const verifyPayment = async (isApproved) => {
           body: JSON.stringify(paymentPayload)
         });
         
-        console.log('✅ Pago aprobado exitosamente. Respuesta:', response);
+        console.log('✅ Pago aprobado exitosamente.');
+        
+        // Si es una visita, notificar a los administradores
+        if (isVisitPayment && response?.success) {
+          try {
+            // Notificar al super admin
+            await $fetch('/notificaciones/enviar', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+              },
+              body: JSON.stringify({
+                titulo: 'Asignación Pendiente',
+                nombre_rol: 'sa'
+              })
+            });
+          } catch (notificationError) {
+            console.error('❌ Error al enviar notificación al super admin:', notificationError);
+            // No interrumpir el flujo si falla la notificación
+          }
+          
+          try {
+            // Notificar a los administradores
+            await $fetch('/notificaciones/enviar', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+              },
+              body: JSON.stringify({
+                titulo: 'Asignación Pendiente',
+                nombre_rol: 'admin'
+              })
+            });
+          } catch (notificationError) {
+            console.error('❌ Error al enviar notificación a los administradores:', notificationError);
+            // No interrumpir el flujo si falla la notificación
+          }
+        }
         
         // Notificar al cliente sobre el pago aprobado
         console.log('🔵 Iniciando notificación de pago aprobado');
