@@ -7,8 +7,8 @@
     :duration="toast.duration"
     @close="toast.show = false"
   />
-  
-   <!-- Loading Spinner -->
+
+  <!-- Loading Spinner -->
     <LoadingSpinner 
       :loading="isLoading"
     />
@@ -29,12 +29,12 @@
         <div class="flex items-center space-x-2">
           <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
             <div class="w-5 h-5 bg-white rounded-lg flex items-center justify-center">
-              <span class="text-emerald-600 font-bold text-xs">⚙️</span>
+              <span class="text-emerald-600 font-bold text-xs">📊</span>
             </div>
           </div>
           <div>
-            <h1 class="text-lg font-black text-white">Configuración</h1>
-            <p class="text-emerald-100 text-xs">Panel de configuración</p>
+            <h1 class="text-lg font-black text-white">Reportes</h1>
+            <p class="text-emerald-100 text-xs">Panel de reportes</p>
           </div>
         </div>
         
@@ -42,6 +42,7 @@
         <NotificationsDropdown 
           @notification-click="onNotificationClick"
         />
+
       </div>
     </div>
   </header>
@@ -125,8 +126,7 @@ const onNotificationClick = async (notification) => {
     return; // Salir de la función si hay error
   }
   
-  // Navegación por tipo de notificación
-  // Mantener el loading activo durante la navegación
+  // Navegación por tipo de notificación 
   if (notification.tipo === 'servicios') {
     navigateTo('/admin/ServiciosAdmin');
   } else if (notification.tipo === 'membresia') { 
@@ -139,6 +139,6 @@ const onNotificationClick = async (notification) => {
     navigateTo('/admin/DashboardAdmin');
   } else { 
     isLoading.value = false;
-  }
+  } 
 };
 </script>

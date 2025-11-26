@@ -1,4 +1,8 @@
 <template>
+ <!-- Loading Spinner -->
+    <LoadingSpinner 
+      :loading="isLoading"
+    />
   <div>
     <!-- Full Width Header with Technician Theme -->
     <header class="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 overflow-hidden">
@@ -129,7 +133,7 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 // ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
-const isLoading = ref(true)
+const isLoading = ref(false)
 
 // Filtros de servicio
 const serviceFilters = [

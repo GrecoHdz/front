@@ -3757,12 +3757,35 @@ const approvePayment = async (id) => {
 
     switch (activeTab.value) {
       case 'membership':
+        // Update membership status
         response = await $fetch(`/membresia/${payment.id_membresia || payment.id}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers,
           body: { estado: 'activa' }
         });
+
+        // Add credit for the user with the membership amount
+
+        const creditRequestBody = {
+          id_usuario: idUsuario,
+          monto_credito: payment.monto
+        };
+
+        console.log('Enviando solicitud de crédito:', JSON.stringify(creditRequestBody, null, 2));
+        
+        const creditResponse = await $fetch('/credito', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          },
+          body: creditRequestBody
+        });
+        
+        console.log('Respuesta del servidor (crédito):', JSON.stringify(creditResponse, null, 2));
         break;
 
       case 'visits':

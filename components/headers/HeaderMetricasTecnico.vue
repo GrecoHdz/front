@@ -7,6 +7,11 @@
     :duration="toast.duration"
     @close="toast.show = false"
   />
+
+   <!-- Loading Spinner -->
+    <LoadingSpinner 
+      :loading="isLoading"
+    />
   
   <!-- Mobile Header -->
   <header class="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 overflow-hidden">
@@ -54,7 +59,7 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 // ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
 const auth = useAuthStore()
-const isLoading = ref(true)
+const isLoading = ref(false)
 
 // Toast state
 const toast = reactive({

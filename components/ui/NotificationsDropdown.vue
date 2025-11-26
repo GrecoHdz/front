@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative" ref="dropdownContainer">
     <!-- Botón de notificaciones -->
     <button 
       @click="toggleNotifications" 
@@ -200,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store';
 
 const props = defineProps({
@@ -252,9 +252,28 @@ const toggleNotifications = async () => {
   }
 };
 
+const dropdownContainer = ref(null);
+
 const closeDropdown = () => {
   showNotifications.value = false;
 };
+
+const handleClickOutside = (event) => {
+  if (dropdownContainer.value && !dropdownContainer.value.contains(event.target)) {
+    closeDropdown();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+  if (auth.user?.id_usuario) {
+    obtenerNotificaciones();
+  }
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 
 const obtenerNotificaciones = async (page = 1, forceRefresh = false) => {
   if (!auth.user?.id_usuario) return;
@@ -416,10 +435,4 @@ const formatFecha = (fechaString) => {
   });
 };
 
-// Obtener notificaciones al montar el componente
-onMounted(() => {
-  if (auth.user?.id_usuario) {
-    obtenerNotificaciones();
-  }
-});
 </script>

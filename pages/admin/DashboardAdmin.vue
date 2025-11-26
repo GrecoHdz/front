@@ -17,7 +17,7 @@
 
     <!-- Contenido principal -->
     <div v-if="!isLoading">
-      <HeadersHeaderDashboard />
+      <HeadersHeaderDashboardAdmin />
 
       <!-- Content Container -->
       <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative">

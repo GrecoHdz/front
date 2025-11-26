@@ -1,4 +1,8 @@
 <template>
+ <!-- Loading Spinner -->
+    <LoadingSpinner 
+      :loading="isLoading"
+    />
   <header class="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 overflow-hidden">
     <!-- Patrón de cuadrícula sutil -->
     <div class="absolute inset-0 opacity-10">
@@ -45,7 +49,7 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const user = computed(() => auth.user || {});
-const isLoading = ref(true)
+const isLoading = ref(false)
 
 const props = defineProps({
   unreadCount: {
