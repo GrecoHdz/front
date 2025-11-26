@@ -188,6 +188,34 @@
                 placeholder="hogarseguro@gmail.com">
             </div>
 
+            <!-- Referente Predeterminado -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300">
+                  Referente Predeterminado
+                </label>
+                <button 
+                  @click="abrirModalBuscarUsuario"
+                  type="button"
+                  class="-mt-1 -mr-1 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                <span v-if="referidorPredeterminado" class="text-gray-900 dark:text-white">
+                  {{ referidorPredeterminado.nombre || 'Sin nombre' }}
+                </span>
+                <span v-else class="text-gray-500 dark:text-gray-400">
+                  No se ha configurado un referente predeterminado
+                </span>
+              </div>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Este es el usuario que se asigna por defecto cuando un nuevo usuario se registra sin código de referido
+              </p>
+            </div>
+
             <!-- Info adicional -->
             <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 sm:p-4">
               <h4 class="text-[12px] sm:text-xs md:text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">Información</h4>
@@ -1064,10 +1092,85 @@
   </div>
 </Transition>
   </div>
+
+  <!-- Modal de búsqueda de usuario -->
+  <Transition name="fade" mode="out-in">
+    <div v-if="mostrarModalBuscarUsuario" class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="cerrarModalBuscarUsuario">
+          <div class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900 dark:opacity-75"></div>
+        </div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                  Buscar Usuario
+                </h3>
+                
+                <div class="mt-2">
+                  <div class="relative">
+                    <input
+                      v-model="terminoBusquedaUsuario"
+                      type="text"
+                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white pr-10"
+                      placeholder="Buscar por nombre"
+                    />
+                    <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                      <div v-if="buscandoUsuarios" class="h-5 w-5 animate-spin rounded-full border-b-2 border-blue-500"></div>
+                    </div>
+                  </div>
+
+                  <div v-if="buscandoUsuarios && usuariosEncontrados.length === 0" class="mt-4 text-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Buscando usuarios...</p>
+                  </div>
+
+                  <div v-else-if="!buscandoUsuarios && usuariosEncontrados.length === 0 && terminoBusquedaUsuario" class="mt-4 text-center py-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-300">No se encontraron usuarios que coincidan con la búsqueda</p>
+                  </div>
+
+                  <ul v-else-if="usuariosEncontrados.length > 0" class="mt-4 max-h-60 overflow-y-auto">
+                    <li 
+                      v-for="usuario in usuariosEncontrados" 
+                      :key="usuario.id_usuario"
+                      class="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer flex items-center"
+                      @click="seleccionarUsuario(usuario)"
+                    >
+                      <div class="flex-shrink-0 h-10 w-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-300 font-medium">
+                        {{ usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : 'U' }}
+                      </div>
+                      <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ usuario.nombre || 'Sin nombre' }}</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse rounded-b-lg">
+            <button
+              type="button"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+              @click="cerrarModalBuscarUsuario"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { debounce } from 'lodash';
 import { useAuthStore } from '~/middleware/auth.store'
 import { useHead, useCookie, useRuntimeConfig } from '#imports';
 import { useRouter, useRoute } from 'vue-router'
@@ -1094,6 +1197,50 @@ useHead({
 // ===== VARIABLES DE ESTADO =====
 const isLoading = ref(true)
 const isSaving = ref(false)
+const referidorPredeterminado = ref(null)
+
+// Variables para búsqueda de usuarios
+const mostrarModalBuscarUsuario = ref(false)
+const terminoBusquedaUsuario = ref('')
+const buscandoUsuarios = ref(false)
+const usuariosEncontrados = ref([])
+
+// Watcher para el término de búsqueda con debounce
+watch(terminoBusquedaUsuario, (newVal) => {
+  if (newVal) {
+    buscarUsuarios();
+  } else {
+    usuariosEncontrados.value = [];
+  }
+});
+
+// Configurar el debounce para la búsqueda
+const buscarUsuarios = debounce(async () => {
+  if (!terminoBusquedaUsuario.value.trim()) {
+    usuariosEncontrados.value = []
+    return
+  }
+
+  buscandoUsuarios.value = true
+  try {
+    const response = await $fetch(`/usuarios/${encodeURIComponent(terminoBusquedaUsuario.value)}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    usuariosEncontrados.value = Array.isArray(response) ? response : [response];
+  } catch (error) {
+    console.error('Error al buscar usuarios:', error);
+    showToastMessage('Error al buscar usuarios', 'error');
+    usuariosEncontrados.value = [];
+  } finally {
+    buscandoUsuarios.value = false;
+  }
+}, 500); // 500ms de debounce
 
 // ===== CONFIGURACIONES INDIVIDUALES =====
 const configuracionMembresia = ref(0)
@@ -1801,6 +1948,67 @@ const cambiarPaginaBeneficios = (nuevaPagina, event) => {
   return false;
 }
 
+// ===== FUNCIONES PARA BÚSQUEDA DE USUARIOS =====
+const abrirModalBuscarUsuario = () => {
+  mostrarModalBuscarUsuario.value = true
+  terminoBusquedaUsuario.value = ''
+  usuariosEncontrados.value = []
+}
+
+const cerrarModalBuscarUsuario = () => {
+  mostrarModalBuscarUsuario.value = false
+  terminoBusquedaUsuario.value = ''
+  usuariosEncontrados.value = []
+  buscandoUsuarios.value = false
+}
+
+const seleccionarUsuario = async (usuario) => {
+  try {
+    // Primero obtenemos el ID de la configuración existente
+    const configResponse = await $fetch('/config/valor/referidor_predeterminado', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    const configId = configResponse?.id_config;
+    
+    if (!configId) {
+      throw new Error('No se encontró la configuración existente');
+    }
+    
+    // Actualizar el referidor predeterminado en el backend
+    const response = await $fetch(`/config/${configId}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        tipo_config: 'referidor_predeterminado',
+        valor: usuario.id_usuario.toString()
+      })
+    });
+
+    // Actualizar el referidor predeterminado localmente
+    referidorPredeterminado.value = {
+      id_usuario: usuario.id_usuario,
+      nombre: usuario.nombre
+    };
+
+    showToastMessage('Referente predeterminado actualizado correctamente', 'success');
+    cerrarModalBuscarUsuario();
+  } catch (error) {
+    console.error('Error al actualizar el referente predeterminado:', error);
+    showToastMessage('Error al actualizar el referente predeterminado', 'error');
+  }
+}
+
 // ===== FUNCIONES PARA NOTIFICACIONES =====
 const cargarNotificaciones = async () => {
   isLoadingNotifications.value = true
@@ -2326,25 +2534,52 @@ const formatearFecha = (fecha) => {
   })
 }
 
+// Cargar referidor predeterminado
+const cargarReferidorPredeterminado = async () => {
+  try {
+    const response = await $fetch('/config/valor/referidor_predeterminado', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response && response.usuario) {
+      referidorPredeterminado.value = {
+        id_usuario: response.usuario.id_usuario,
+        nombre: response.usuario.nombre
+      };
+    } else {
+      referidorPredeterminado.value = null;
+    }
+  } catch (error) {
+    console.error('Error al cargar el referidor predeterminado:', error);
+    referidorPredeterminado.value = null;
+  }
+};
+
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
     await Promise.all([
-      cargarConfiguraciones().catch(error => {
-        console.error('Error al cargar configuraciones:', error);
-        showToastMessage('Error al cargar las configuraciones', 'error');
-      }),
-      cargarNotificaciones().catch(error => {
-        console.error('Error al cargar notificaciones:', error);
-        showToastMessage('Error al cargar las notificaciones', 'error');
+      cargarConfiguraciones(),
+      cargarBeneficios().catch(error => {
+        console.error('Error al cargar beneficios:', error);
+        showToastMessage('Error al cargar los beneficios', 'error');
       }),
       cargarServicios().catch(error => {
         console.error('Error en cargarServicios:', error);
         showToastMessage('Error al cargar los servicios', 'error');
       }),
-      cargarBeneficios().catch(error => {
-        console.error('Error al cargar beneficios:', error);
-        showToastMessage('Error al cargar los beneficios', 'error');
+      cargarNotificaciones().catch(error => {
+        console.error('Error al cargar notificaciones:', error);
+        showToastMessage('Error al cargar las notificaciones', 'error');
+      }),
+      cargarReferidorPredeterminado().catch(error => {
+        console.error('Error al cargar el referidor predeterminado:', error);
+        showToastMessage('Error al cargar el referidor predeterminado', 'error');
       })
     ]);
   } catch (error) {
