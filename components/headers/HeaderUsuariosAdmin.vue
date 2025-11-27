@@ -49,14 +49,7 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const user = computed(() => auth.user || {});
-const isLoading = ref(false)
-
-const props = defineProps({
-  unreadCount: {
-    type: Number,
-    default: 0
-  }
-});
+const isLoading = ref(false) 
 
 defineEmits(['toggle-notifications']);
 

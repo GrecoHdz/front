@@ -58,7 +58,11 @@
             </div>
             <div>
               <h3 class="font-black text-gray-900 dark:text-white">Detalles del Pago</h3>
-              <p class="text-gray-600 dark:text-gray-400">ID: #{{ selectedPayment.id || 'N/A' }}</p>
+              <div class="flex items-center space-x-2">
+                <p class="text-gray-600 dark:text-gray-400">ID: #{{ selectedPayment.id || 'N/A' }}</p>
+                <span class="text-gray-400">•</span>
+               <p class="text-gray-600 dark:text-gray-400">{{ formatDate(selectedPayment.fecha) || 'N/A' }}</p>
+              </div>
             </div>
           </div>
           <button
@@ -96,9 +100,9 @@
               </p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-              <p class="text-gray-500 dark:text-gray-400 mb-1">Fecha</p>
+              <p class="text-gray-500 dark:text-gray-400 mb-1">Nombre</p>
               <p class="font-medium text-gray-900 dark:text-white">
-                {{ formatDate(selectedPayment.fecha) || 'N/A' }}
+                {{ selectedPayment.nombre_usuario || selectedPayment.usuario?.nombre || 'N/A' }}
               </p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
@@ -2964,35 +2968,74 @@ const generateReport = async (report) => {
     const auth = useAuthStore();
 
     // 🗓️ 1️⃣ Obtener mes y año seleccionados
-    const selectedMonth = selectedMonthReports.value || new Date().toISOString().slice(0, 7);
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const monthNames = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-    const mesNombre = monthNames[month - 1];
+    const hasSelectedMonth = !!selectedMonthReports.value;
+    const selectedMonth = selectedMonthReports.value;
+    
+    // Solo incluir el parámetro month si se seleccionó un mes
+    const monthParam = hasSelectedMonth ? `?month=${selectedMonth}` : '';
+    
+    // Configurar título del reporte
+    let reportTitle = 'Reporte General';
+    let monthName = '';
+    let year = '';
+    let month = ''; // Declarar month en el scope exterior
+    
+    if (hasSelectedMonth) {
+      [year, month] = selectedMonth.split('-').map(Number);
+      const monthNames = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      ];
+      monthName = monthNames[month - 1];
+      reportTitle = `Reporte de ${monthName} ${year}`;
+    } 
 
     // 📦 2️⃣ Obtener datos base comunes
     const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes] = await Promise.all([
-      $fetch(`/membresia?month=${selectedMonth}`, {
+      $fetch(`/membresia${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
+      }).then(res => { 
+        return res;
+      }).catch(err => {
+        console.error('❌ Error en /membresia:', err);
+        throw err;
       }),
-      $fetch(`/pagovisita?month=${selectedMonth}`, {
+      $fetch(`/pagovisita${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
+      }).then(res => { 
+        return res;
+      }).catch(err => {
+        console.error('❌ Error en /pagovisita:', err);
+        throw err;
       }),
-      $fetch(`/movimientos/retiros?month=${selectedMonth}`, {
+      $fetch(`/movimientos/retiros${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
+      }).then(res => { 
+        return res;
+      }).catch(err => {
+        console.error('❌ Error en /movimientos/retiros:', err);
+        throw err;
       }),
-      $fetch(`/cotizacion?month=${selectedMonth}`, {
+      $fetch(`/cotizacion${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
+      }).then(res => { 
+        return res;
+      }).catch(err => {
+        console.error('❌ Error en /cotizacion:', err);
+        throw err;
       }),
-      $fetch(`/usuarios?month=${selectedMonth}`, {
+      $fetch(`/usuarios${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { 'Authorization': `Bearer ${auth.token}` }
+      }).then(res => { 
+        return res;
+      }).catch(err => {
+        console.error('❌ Error en /usuarios:', err);
+        throw err;
       })
     ]);
 
@@ -3038,7 +3081,9 @@ const generateReport = async (report) => {
     doc.text('HOGAR SEGURO', 15, 12);
     doc.setFontSize(9);
     doc.text(`Reporte: ${report.title}`, 15, 18);
-    doc.text(`Período: ${mesNombre} ${year}`, 15, 23);
+    doc.text(hasSelectedMonth 
+      ? `Período: ${monthName}`
+      : 'Período: General (Todos los meses)', 15, 23);
 
     // 📚 6️⃣ Seleccionar tipo de reporte
     switch (report.id) {
@@ -3050,7 +3095,7 @@ const generateReport = async (report) => {
           visitData,
           serviceData,
           withdrawalsData,
-          mesNombre,
+          mesNombre: monthName,
           year,
           balanceNeto
         });
@@ -3059,9 +3104,18 @@ const generateReport = async (report) => {
       // ===== REPORTE DE SERVICIOS =====
       case 2: {
         // Solo en este reporte se usa /solicitudservicio
-        const serviceRes = await $fetch(`/solicitudservicio?month=${selectedMonthReports.value}`, {
+        const serviceUrl = hasSelectedMonth 
+          ? `/solicitudservicio?month=${selectedMonth}`
+          : '/solicitudservicio'; 
+        
+        const serviceRes = await $fetch(serviceUrl, {
           baseURL: config.public.apiBase,
           headers: { Authorization: `Bearer ${auth.token}` }
+        }).then(res => { 
+          return res;
+        }).catch(err => {
+          console.error('❌ Error en /solicitudservicio:', err);
+          throw err;
         });
         const serviceData = processData(serviceRes, 'Servicios');
         await generarReporteServiciosDetallado(doc, serviceData);
@@ -3070,7 +3124,7 @@ const generateReport = async (report) => {
 
       // ===== REPORTE DE USUARIOS =====
       case 3:
-        await generarReporteUsuarios(doc, { usersData, mesNombre, year });
+        await generarReporteUsuarios(doc, { usersData, mesNombre: monthName, year });
         break;
 
       // ===== REPORTE DE TRANSACCIONES =====
@@ -3093,12 +3147,17 @@ const generateReport = async (report) => {
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       const title = typeof report.title === 'string' ? report.title : 'Reporte';
-      doc.text(`HOGAR SEGURO - ${title}`, 20, 287);
+      const reportTitle = hasSelectedMonth 
+        ? `HOGAR SEGURO - ${title} - ${monthName} ${year}`
+        : `HOGAR SEGURO - ${title} - Reporte General`;
+      doc.text(reportTitle, 20, 287);
       doc.text(`Página ${i} de ${totalPages}`, 190, 287, { align: 'right' });
     }
 
     // 🖨️ 8️⃣ Mostrar PDF
-    const fileName = `${report.title.replace(/\s+/g, '_')}_${mesNombre}_${year}.pdf`;
+    const fileName = hasSelectedMonth 
+      ? `${report.title.replace(/\s+/g, '_')}_${monthName}_${year}.pdf`
+      : `${report.title.replace(/\s+/g, '_')}_General.pdf`;
     const pdfBlob = doc.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
     window.open(pdfUrl, '_blank');
@@ -3482,6 +3541,17 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
   // Usar autoTable del documento
   const autoTable = (options) => doc.autoTable(options);
   const servicios = Array.isArray(serviceData?.data) ? serviceData.data : [];
+  
+  // Verificar si hay datos para mostrar
+  if (servicios.length === 0) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(120, 120, 120); // Color gris
+    doc.text('No hay datos disponibles para el período seleccionado.', 14, 40);
+    doc.setTextColor(0, 0, 0); // Restaurar color negro por defecto
+    return;
+  }
+  
   const TERMINADOS = ['finalizado', 'calificado', 'cancelado'];
 
   // 📊 Clasificación
@@ -3770,9 +3840,7 @@ const approvePayment = async (id) => {
         const creditRequestBody = {
           id_usuario: idUsuario,
           monto_credito: payment.monto
-        };
-
-        console.log('Enviando solicitud de crédito:', JSON.stringify(creditRequestBody, null, 2));
+        }; 
         
         const creditResponse = await $fetch('/credito', {
           baseURL: config.public.apiBase,
@@ -3783,9 +3851,7 @@ const approvePayment = async (id) => {
             'Authorization': `Bearer ${auth.token}`
           },
           body: creditRequestBody
-        });
-        
-        console.log('Respuesta del servidor (crédito):', JSON.stringify(creditResponse, null, 2));
+        }); 
         break;
 
       case 'visits':
