@@ -552,6 +552,7 @@ useHead({
 })
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const userCookie = useCookie('user')

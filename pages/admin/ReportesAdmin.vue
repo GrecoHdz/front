@@ -951,12 +951,13 @@ import { Chart, registerables } from 'chart.js';
 import { useHead, useCookie, useRuntimeConfig } from '#imports';
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'; 
-import DataLabelsPlugin from 'chartjs-plugin-datalabels';
-// Configuración del plugin de PDF
-const { $pdf } = useNuxtApp();
+import DataLabelsPlugin from 'chartjs-plugin-datalabels'; 
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import Toast from '~/components/ui/Toast.vue'; 
 
+// Configuración 
+const { $pdf } = useNuxtApp();
+const { $api } = useNuxtApp();
 const router = useRouter();
 const route = useRoute();
 const config = useRuntimeConfig();
@@ -2992,48 +2993,23 @@ const generateReport = async (report) => {
 
     // 📦 2️⃣ Obtener datos base comunes
     const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes] = await Promise.all([
-      $api(`/membresia${monthParam}`, {
-        baseURL: config.public.apiBase,
-        headers: { Authorization: `Bearer ${auth.token}` }
-      }).then(res => { 
-        return res;
-      }).catch(err => {
+      $api(`/membresia${monthParam}`).catch(err => {
         console.error('❌ Error en /membresia:', err);
         throw err;
       }),
-      $api(`/pagovisita${monthParam}`, {
-        baseURL: config.public.apiBase,
-        headers: { Authorization: `Bearer ${auth.token}` }
-      }).then(res => { 
-        return res;
-      }).catch(err => {
+      $api(`/pagovisita${monthParam}`).catch(err => {
         console.error('❌ Error en /pagovisita:', err);
         throw err;
       }),
-      $api(`/movimientos/retiros${monthParam}`, {
-        baseURL: config.public.apiBase,
-        headers: { Authorization: `Bearer ${auth.token}` }
-      }).then(res => { 
-        return res;
-      }).catch(err => {
+      $api(`/movimientos/retiros${monthParam}`).catch(err => {
         console.error('❌ Error en /movimientos/retiros:', err);
         throw err;
       }),
-      $api(`/cotizacion${monthParam}`, {
-        baseURL: config.public.apiBase,
-        headers: { Authorization: `Bearer ${auth.token}` }
-      }).then(res => { 
-        return res;
-      }).catch(err => {
+      $api(`/cotizacion${monthParam}`).catch(err => {
         console.error('❌ Error en /cotizacion:', err);
         throw err;
       }),
-      $api(`/usuarios${monthParam}`, {
-        baseURL: config.public.apiBase,
-        headers: { 'Authorization': `Bearer ${auth.token}` }
-      }).then(res => { 
-        return res;
-      }).catch(err => {
+      $api(`/usuarios${monthParam}`).catch(err => {
         console.error('❌ Error en /usuarios:', err);
         throw err;
       })

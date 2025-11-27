@@ -468,6 +468,7 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 // =========================
 // CONFIGURACIÓN Y SETUP
 // =========================
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const router = useRouter()

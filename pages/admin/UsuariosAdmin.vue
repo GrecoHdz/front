@@ -2106,6 +2106,7 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 
 // ===== CONFIGURACIÓN =====
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const userCookie = useCookie('user')

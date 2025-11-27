@@ -664,6 +664,7 @@ import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 const config = useRuntimeConfig()
+const { $api } = useNuxtApp();
 
 // SEO and Meta
 useHead({

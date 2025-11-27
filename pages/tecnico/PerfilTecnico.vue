@@ -253,6 +253,7 @@ import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const router = useRouter()
 const auth = useAuthStore()

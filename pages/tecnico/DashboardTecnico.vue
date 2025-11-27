@@ -274,6 +274,7 @@ useHead({
 })
 
 // ===== CONFIGURACIÓN Y AUTENTICACIÓN =====
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const router = useRouter()

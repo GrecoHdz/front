@@ -192,6 +192,7 @@ import Toast from '~/components/ui/Toast.vue'
 // =========================
 // CONFIGURACIÓN Y SETUP
 // =========================
+const { $api } = useNuxtApp();
 const auth = useAuthStore()
 const router = useRouter()
 const config = useRuntimeConfig()
