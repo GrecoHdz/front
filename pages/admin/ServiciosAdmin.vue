@@ -1351,7 +1351,7 @@ const fetchTechnicians = async (cityId = null, limit = 6, offset = 0) => {
       url += `&id_ciudad=${cityId}`
     }
 
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1375,7 +1375,7 @@ const fetchTechnicians = async (cityId = null, limit = 6, offset = 0) => {
 // Función para obtener el catálogo de servicios
 const fetchCatalogoServicios = async () => {
   try {
-    const response = await $fetch('/servicios', {
+    const response = await $api('/servicios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1439,7 +1439,7 @@ const fetchServices = async (page = 1, limit = 10, section = 'all', filters = {}
     if (filters.serviceType) params.append('serviceType', filters.serviceType)
     if (filters.month) params.append('month', filters.month)
 
-    const response = await $fetch('/solicitudservicio', {
+    const response = await $api('/solicitudservicio', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1662,7 +1662,7 @@ const cities = ref([])
 // Obtener ciudades desde la API
 const fetchCities = async () => {
   try {
-    const data = await $fetch('/ciudad', {
+    const data = await $api('/ciudad', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1926,7 +1926,7 @@ const selectTechnician = (technician) => {
 const confirmTechnicianAssignment = async () => {
   try { 
     // Actualizar el servicio en el backend primero
-    const updateResponse = await $fetch(`/solicitudservicio/${serviceToAssign.value.id_solicitud}`, {
+    const updateResponse = await $api(`/solicitudservicio/${serviceToAssign.value.id_solicitud}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1942,7 +1942,7 @@ const confirmTechnicianAssignment = async () => {
     // Obtener el ID del técnico que se está asignando
     const idTecnico = selectedTechnician.value.id_usuario;
     
-    await $fetch('/notificaciones/enviar', {
+    await $api('/notificaciones/enviar', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -2051,7 +2051,7 @@ const verifyPayment = async (isApproved) => {
       console.log('🔵 Payload:', paymentPayload);
       
       try {
-        const response = await $fetch(endpoint, {
+        const response = await $api(endpoint, {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -2068,7 +2068,7 @@ const verifyPayment = async (isApproved) => {
         if (isVisitPayment && response?.success) {
           try {
             // Notificar al super admin
-            await $fetch('/notificaciones/enviar', {
+            await $api('/notificaciones/enviar', {
               baseURL: config.public.apiBase,
               method: 'POST',
               headers: {
@@ -2087,7 +2087,7 @@ const verifyPayment = async (isApproved) => {
           
           try {
             // Notificar a los administradores
-            await $fetch('/notificaciones/enviar', {
+            await $api('/notificaciones/enviar', {
               baseURL: config.public.apiBase,
               method: 'POST',
               headers: {
@@ -2124,7 +2124,7 @@ const verifyPayment = async (isApproved) => {
           return;
         }
         
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -2146,7 +2146,7 @@ const verifyPayment = async (isApproved) => {
       const endpoint = isVisitPayment ? '/pagovisita/denegar' : '/pagoservicio/denegar'
       const denyPayload = { id_solicitud: solicitudId, id_cotizacion: cotizacionId, id_usuario }
       
-      const response = await $fetch(endpoint, {
+      const response = await $api(endpoint, {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -2166,7 +2166,7 @@ const verifyPayment = async (isApproved) => {
           token: token ? 'Token presente' : '❌ Token no encontrado'
         });
         
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {

@@ -403,7 +403,7 @@ const fetchServices = async (page = 1) => {
     // Calcular el offset basado en la página actual
     const offset = (page - 1) * itemsPerPage
     
-    const response = await $fetch(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}?offset=${offset}&limit=${itemsPerPage}`, {
+    const response = await $api(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}?offset=${offset}&limit=${itemsPerPage}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -465,7 +465,7 @@ const fetchAvailability = async () => {
       throw new Error('No se pudo obtener el ID del usuario')
     }
     
-    const response = await $fetch(`/usuarios/id/${userId}`, {
+    const response = await $api(`/usuarios/id/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -500,7 +500,7 @@ const updateAvailability = async () => {
     // Invertir el estado actual
     const newStatus = isAvailable.value ? 'inactivo' : 'activo'
     
-    await $fetch(`/usuarios/${userId}`, {
+    await $api(`/usuarios/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -547,7 +547,7 @@ const fetchReviews = async (loadMore = false) => {
     }
     
     // Obtener la calificación promedio directamente del endpoint
-    const rating = await $fetch(`/calificaciones/promedio/${userId}`, {
+    const rating = await $api(`/calificaciones/promedio/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {

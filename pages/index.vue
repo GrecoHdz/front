@@ -762,7 +762,8 @@ const cargarCiudades = async () => {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
-        'Accept': 'application/json' 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     })
     
@@ -802,7 +803,8 @@ const fetchMembershipCost = async () => {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     });
 
@@ -824,7 +826,8 @@ const fetchVisitCost = async () => {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     });
 
@@ -892,7 +895,7 @@ const fetchDiscountPercentage = async () => {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
+        'Content-Type': 'application/json'
       }
     })
     
@@ -929,7 +932,8 @@ const loadMembershipBenefits = async () => {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     })
     
@@ -1006,7 +1010,8 @@ const loadServices = async () => {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     })
     

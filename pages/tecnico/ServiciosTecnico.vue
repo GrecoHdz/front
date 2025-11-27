@@ -1007,7 +1007,7 @@ const loadServices = async (loadMore = false) => {
       return
     }
     
-    const response = await $fetch(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}`, {
+    const response = await $api(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1064,7 +1064,7 @@ const loadServices = async (loadMore = false) => {
 const loadServiceTypes = async () => {
   try {
     isLoadingServiceTypes.value = true
-    const data = await $fetch('/servicios/activos', {
+    const data = await $api('/servicios/activos', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1092,7 +1092,7 @@ const loadServiceTypes = async () => {
 
 const loadCalificacion = async (idSolicitud) => {
   try {  
-    const response = await $fetch(`/calificaciones/solicitud/${idSolicitud}`, {
+    const response = await $api(`/calificaciones/solicitud/${idSolicitud}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1127,7 +1127,7 @@ const loadQuotationDetails = async () => {
   try {
     isLoading.value = true
     
-    const response = await $fetch(`cotizacion/solicitud/${selectedService.value.id}`, {
+    const response = await $api(`cotizacion/solicitud/${selectedService.value.id}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1259,7 +1259,7 @@ const submitQuotation = async () => {
       fecha: new Date().toISOString()
     };
     
-    const updateResponse = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+    const updateResponse = await $api(`/solicitudservicio/${selectedService.value.id}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1272,7 +1272,7 @@ const submitQuotation = async () => {
     
     updateSuccessful = true;
     
-    const cotizacionResponse = await $fetch('/cotizacion', {
+    const cotizacionResponse = await $api('/cotizacion', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -1288,7 +1288,7 @@ const submitQuotation = async () => {
       const userId = selectedService.value.rawData.cliente?.id_usuario;
       
       if (userId) {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -1322,7 +1322,7 @@ const submitQuotation = async () => {
     
     if (updateSuccessful) {
       try {
-        await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+        await $api(`/solicitudservicio/${selectedService.value.id}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers: {
@@ -1377,7 +1377,7 @@ const updateQuotation = async () => {
       estado: currentQuotation.value.estado || 'pendiente'
     } 
     
-    const response = await $fetch(`/cotizacion/${currentQuotation.value.id}`, {
+    const response = await $api(`/cotizacion/${currentQuotation.value.id}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1394,7 +1394,7 @@ const updateQuotation = async () => {
         const userId = selectedService.value.rawData.cliente?.id_usuario;
         
         if (userId) {
-          await $fetch('/notificaciones/enviar', {
+          await $api('/notificaciones/enviar', {
             baseURL: config.public.apiBase,
             method: 'POST',
             headers: {
@@ -1458,7 +1458,7 @@ const confirmCompleteService = async () => {
   isCompleting.value = true
   
   try {
-    const response = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+    const response = await $api(`/solicitudservicio/${selectedService.value.id}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       headers: {
@@ -1476,7 +1476,7 @@ const confirmCompleteService = async () => {
       const userId = selectedService.value.rawData.cliente?.id_usuario;
       
       if (userId) {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -1517,7 +1517,7 @@ const cancelService = async () => {
   if (!selectedService.value) return
   
   try {
-    const response = await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+    const response = await $api(`/solicitudservicio/${selectedService.value.id}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       headers: {
@@ -1534,7 +1534,7 @@ const cancelService = async () => {
       const userId = selectedService.value.rawData.cliente?.id_usuario;
       
       if (userId) {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {

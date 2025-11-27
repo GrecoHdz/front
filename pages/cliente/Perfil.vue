@@ -702,7 +702,7 @@ const ciudades = ref([])
 // Cargar ciudades desde la API
 const cargarCiudades = async () => {
   try {
-    const data = await $fetch('/ciudad', {
+    const data = await $api('/ciudad', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -756,7 +756,7 @@ const fetchUserData = async () => {
     const userCookie = useCookie('user')
     const userData = userCookie.value
     
-    const data = await $fetch(`/usuarios/id/${userData.id_usuario}`, {
+    const data = await $api(`/usuarios/id/${userData.id_usuario}`, {
       baseURL: config.public.apiBase,
       credentials: 'include',
       headers: {
@@ -984,7 +984,7 @@ const saveProfile = async () => {
       id_ciudad: user.value.id_ciudad
     }; 
     
-    const response = await $fetch(`/usuarios/${user.value.id_usuario}`, {
+    const response = await $api(`/usuarios/${user.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       body: userData,
@@ -1065,7 +1065,7 @@ const updatePassword = async () => {
   
   try {
     
-    const response = await $fetch(`/usuarios/cambio-clave/${user.value.id_usuario}`, {
+    const response = await $api(`/usuarios/cambio-clave/${user.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       body: JSON.stringify({
@@ -1159,7 +1159,7 @@ const calcularProgreso = (fechaInicio) => {
 // Función para actualizar el estado de la membresía a vencida
 const updateMembershipToExpired = async (membresiaId) => {
   try {
-    await $fetch(`/membresia/${membresiaId}`, {
+    await $api(`/membresia/${membresiaId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1190,7 +1190,7 @@ const fetchMembershipData = async () => {
   } 
   
   try {
-    const data = await $fetch(`/membresia/${userId}`, {
+    const data = await $api(`/membresia/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1273,7 +1273,7 @@ const getSelectedAccount = computed(() => {
 const fetchMembershipCost = async () => {
   isLoadingMembershipCost.value = true;
   try {
-    const data = await $fetch('/config/valor/membresia', {
+    const data = await $api('/config/valor/membresia', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1338,7 +1338,7 @@ onMounted(() => {
 const fetchBankAccounts = async () => {
   isLoadingAccounts.value = true;
   try {
-    const data = await $fetch('/cuentas', {
+    const data = await $api('/cuentas', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1397,7 +1397,7 @@ const confirmRenewal = async () => {
       monto: membershipCost.value
     };
 
-    const data = await $fetch('/membresia', {
+    const data = await $api('/membresia', {
       method: 'POST',
       baseURL: config.public.apiBase,
       headers: {
@@ -1409,7 +1409,7 @@ const confirmRenewal = async () => {
 
     // Enviar notificación a administradores
     try {
-      await $fetch('/notificaciones/enviar', {
+      await $api('/notificaciones/enviar', {
         method: 'POST',
         baseURL: config.public.apiBase,
         headers: {
@@ -1421,7 +1421,7 @@ const confirmRenewal = async () => {
           nombre_rol: 'admin'
         })
       });
-       await $fetch('/notificaciones/enviar', {
+       await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {

@@ -963,7 +963,7 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
     }
     
     // Si no hay datos en caché o es una recarga forzada, hacer la petición a la API
-    const response = await $fetch(`/movimientos/${userId}`, {
+    const response = await $api(`/movimientos/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1139,7 +1139,7 @@ const loadReviews = async (page = 1, forceRefresh = false) => {
     }
     
     // Si no hay datos en caché o son viejos, hacer la petición a la API
-    const response = await $fetch(`/calificaciones/usuario/${userId}`, {
+    const response = await $api(`/calificaciones/usuario/${userId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1208,7 +1208,7 @@ const loadReviews = async (page = 1, forceRefresh = false) => {
 
 const loadAverageRating = async () => {
   try {
-    const data = await $fetch(`/calificaciones/promedio/${currentUser.value.id_usuario}`, {
+    const data = await $api(`/calificaciones/promedio/${currentUser.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1231,7 +1231,7 @@ const loadEstadisticasGenerales = async () => {
   try {
     // Cargar estadísticas generales
     const [estadisticas] = await Promise.all([
-      $fetch(`/movimientos/estadisticas/${currentUser.value.id_usuario}`, {
+      $api(`/movimientos/estadisticas/${currentUser.value.id_usuario}`, {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers: {
@@ -1263,7 +1263,7 @@ const loadEstadisticasGenerales = async () => {
 
 const loadServicesByType = async () => {
   try {
-    const data = await $fetch(`/movimientos/servicios/tipo/${userCookie.value.id_usuario}`, {
+    const data = await $api(`/movimientos/servicios/tipo/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1286,7 +1286,7 @@ const loadServicesByType = async () => {
 
 const loadMonthlyIncomes = async () => {
   try {
-    const data = await $fetch(`/movimientos/ingresos/mensuales/${userCookie.value.id_usuario}`, {
+    const data = await $api(`/movimientos/ingresos/mensuales/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1335,7 +1335,7 @@ const loadMonthlyIncomes = async () => {
 
 const loadMonthlyServices = async () => {
   try {
-    const data = await $fetch(`/movimientos/servicios/mensuales/${userCookie.value.id_usuario}`, {
+    const data = await $api(`/movimientos/servicios/mensuales/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1715,7 +1715,7 @@ const processWithdraw = async () => {
       descripcion: `Retiro a cuenta bancaria: ${withdrawForm.bankDetails}`
     }
     
-    const response = await $fetch('/movimientos', {
+    const response = await $api('/movimientos', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -1731,7 +1731,7 @@ const processWithdraw = async () => {
     
     // Notificar a los administradores sobre la nueva petición de retiro
     try {
-      await $fetch('/notificaciones/enviar', {
+      await $api('/notificaciones/enviar', {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -1744,7 +1744,7 @@ const processWithdraw = async () => {
           nombre_rol: 'admin'
         })
       })
-      await $fetch('/notificaciones/enviar', {
+      await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {

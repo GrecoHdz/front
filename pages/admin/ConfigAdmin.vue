@@ -1176,6 +1176,7 @@ import { useHead, useCookie, useRuntimeConfig } from '#imports';
 import { useRouter, useRoute } from 'vue-router'
 
 // ===== CONFIGURACIÓN =====
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const router = useRouter();
@@ -1223,7 +1224,7 @@ const buscarUsuarios = debounce(async () => {
 
   buscandoUsuarios.value = true
   try {
-    const response = await $fetch(`/usuarios/${encodeURIComponent(terminoBusquedaUsuario.value)}`, {
+    const response = await $api(`/usuarios/${encodeURIComponent(terminoBusquedaUsuario.value)}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1615,7 +1616,7 @@ const guardarConfiguraciones = async () => {
       const method = cambio.id ? 'PUT' : 'POST'
       
       try {
-        const response = await $fetch(url, {
+        const response = await $api(url, {
           baseURL: config.public.apiBase,
           method: method,
           headers: {
@@ -1651,7 +1652,7 @@ const cargarConfiguraciones = async () => {
   isLoading.value = true;
   try { 
     
-    const response = await $fetch('/config', {
+    const response = await $api('/config', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1743,7 +1744,7 @@ const cargarConfiguraciones = async () => {
 const cargarBeneficios = async () => {
   beneficiosCargando.value = true;
   try {
-    const response = await $fetch('/membresiabeneficios', {
+    const response = await $api('/membresiabeneficios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1803,7 +1804,7 @@ const crearBeneficio = async () => {
     const url = '/membresiabeneficios';
     const method = 'POST';
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       method,
       baseURL: config.public.apiBase,
       headers: {
@@ -1836,7 +1837,7 @@ const actualizarBeneficio = async () => {
 
     const url = `/membresiabeneficios/${beneficioEditando.value}`;
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       headers: {
@@ -1904,7 +1905,7 @@ const eliminarBeneficio = async (beneficioId) => {
   }
   
   try {
-    const response = await $fetch(`/membresiabeneficios/${beneficioId}`, {
+    const response = await $api(`/membresiabeneficios/${beneficioId}`, {
       baseURL: config.public.apiBase,
       method: 'DELETE',
       headers: {
@@ -1965,7 +1966,7 @@ const cerrarModalBuscarUsuario = () => {
 const seleccionarUsuario = async (usuario) => {
   try {
     // Primero obtenemos el ID de la configuración existente
-    const configResponse = await $fetch('/config/valor/referidor_predeterminado', {
+    const configResponse = await $api('/config/valor/referidor_predeterminado', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1981,7 +1982,7 @@ const seleccionarUsuario = async (usuario) => {
     }
     
     // Actualizar el referidor predeterminado en el backend
-    const response = await $fetch(`/config/${configId}`, {
+    const response = await $api(`/config/${configId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -2013,7 +2014,7 @@ const seleccionarUsuario = async (usuario) => {
 const cargarNotificaciones = async () => {
   isLoadingNotifications.value = true
   try {
-    const response = await $fetch('/notificaciones/manuales', {
+    const response = await $api('/notificaciones/manuales', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2043,7 +2044,7 @@ const crearNotificacion = async () => {
 
   isCreatingNotification.value = true
   try {
-    const response = await $fetch('/notificaciones', {
+    const response = await $api('/notificaciones', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -2115,7 +2116,7 @@ const enviarNotificacion = async () => {
       payload.global = true
     }
 
-    const response = await $fetch('/notificaciones/enviar', {
+    const response = await $api('/notificaciones/enviar', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -2174,7 +2175,7 @@ const confirmarEliminarNotificacion = (idNotificacion) => {
 // Eliminar notificación después de confirmación
 const eliminarNotificacion = async () => {
   try {
-    const response = await $fetch(`/notificaciones/${notificacionAEliminar.value}`, {
+    const response = await $api(`/notificaciones/${notificacionAEliminar.value}`, {
       baseURL: config.public.apiBase,
       method: 'DELETE',
       headers: {
@@ -2207,7 +2208,7 @@ const confirmarEliminarNotificacionesLeidas = () => {
 const eliminarNotificacionesLeidas = async () => {
   isDeletingRead.value = true
   try {
-    const response = await $fetch('/notificaciones/eliminar/leidas', {
+    const response = await $api('/notificaciones/eliminar/leidas', {
       baseURL: config.public.apiBase,
       method: 'DELETE',
       headers: {
@@ -2253,7 +2254,7 @@ async function eliminarServicio(servicioId) {
   try {
     const auth = useAuthStore();
     
-    const response = await $fetch(`/servicios/${servicioId}`, {
+    const response = await $api(`/servicios/${servicioId}`, {
       baseURL: config.public.apiBase,
       method: 'DELETE',
       headers: {
@@ -2288,7 +2289,7 @@ async function cargarServicios() {
       throw new Error('No se encontró el token de autenticación');
     }
     
-    const response = await $fetch('/servicios', {
+    const response = await $api('/servicios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2368,7 +2369,7 @@ async function guardarServicio() {
     
     const method = servicioEditando.value ? 'PUT' : 'POST';
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method,
       headers: {
@@ -2448,7 +2449,7 @@ async function cambiarEstadoServicio(servicioId, activar) {
     const auth = useAuthStore();
     
     // Realizar la petición al servidor
-    const response = await $fetch(`/servicios/${servicioId}`, {
+    const response = await $api(`/servicios/${servicioId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -2537,7 +2538,7 @@ const formatearFecha = (fecha) => {
 // Cargar referidor predeterminado
 const cargarReferidorPredeterminado = async () => {
   try {
-    const response = await $fetch('/config/valor/referidor_predeterminado', {
+    const response = await $api('/config/valor/referidor_predeterminado', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {

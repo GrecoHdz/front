@@ -455,13 +455,14 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
-const router = useRouter();
-const route = useRoute();
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const userCookie = useCookie('user')
+const router = useRouter();
+const route = useRoute();
 
 // SEO and Meta
 useHead({
@@ -533,8 +534,9 @@ const fetchStatistics = async () => {
     }
     
     // Realizar la petición usando $fetch según el estándar del proyecto
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
+      credentials: 'include',
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -894,39 +896,6 @@ const formatPriority = (priority) => {
     baja: 'Baja'
   };
   return priorities[priority] || priority;
-};
-
-// Asignar ticket a mí mismo
-const assignToMe = async (ticketId) => {
-  try {
-    const ticket = pendingTickets.value.find(t => t.id === ticketId)
-    if (!ticket) return
-
-    // Aquí iría la llamada a la API para asignar el ticket
-    // const response = await $fetch(`/api/support/tickets/${ticketId}/assign`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${auth.token}`,
-    //     'Accept': 'application/json'
-    //   }
-    // })
-
-    // Simular respuesta exitosa
-    showSuccess('Ticket asignado', `El ticket #${ticketId} ha sido asignado a tu cuenta.`)
-    
-    // Actualizar el ticket localmente
-    const index = pendingTickets.value.findIndex(t => t.id === ticketId)
-    if (index !== -1) {
-      pendingTickets.value.splice(index, 1)
-    }
-    
-    // Cerrar el modal si está abierto
-    closeTicketModal()
-    
-  } catch (error) {
-    console.error('Error al asignar ticket:', error)
-    showError('No se pudo asignar el ticket. Intente nuevamente.')
-  }
 };
 
 // Actualizar lista de tickets
@@ -1377,12 +1346,13 @@ const refreshPendingItems = async () => {
     const config = useRuntimeConfig()
     const auth = useAuthStore()
     
-    const response = await $fetch(`${config.public.apiBase}/notificaciones`, {
+    const response = await $api(`${config.public.apiBase}/notificaciones`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include'
     })
     
     if (response.success && Array.isArray(response.data)) {
@@ -1424,7 +1394,7 @@ const marcarComoResuelto = async (ticket) => {
   try {
     const url = `/soporte/${ticket.id_soporte || ticket.id}`
     
-    const data = await $fetch(url, {
+    const data = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1432,6 +1402,7 @@ const marcarComoResuelto = async (ticket) => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       },
+      credentials: 'include',
       body: JSON.stringify({
         estado: 0, // 0 = cerrado
         fecha_actualizacion: new Date().toISOString()

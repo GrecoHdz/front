@@ -351,7 +351,7 @@ const fetchContactInfo = async () => {
     // Usar Promise.all para hacer las peticiones en paralelo
     const requests = contactInfo.value.map(async (contact) => {
       try {
-        const response = await $fetch(`/config/valor/${contact.configKey}`, {
+        const response = await $api(`/config/valor/${contact.configKey}`, {
           baseURL: config.public.apiBase,
           method: 'GET',
           headers: {
@@ -412,7 +412,7 @@ const cargarServiciosFinalizados = async () => {
   servicesError.value = ''
   
   try {
-    const response = await $fetch(`/solicitudservicio/usuario/${userCookie.id_usuario}`, {
+    const response = await $api(`/solicitudservicio/usuario/${userCookie.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -464,7 +464,7 @@ const submitForm = async () => {
     }
     
     // Enviar el ticket de soporte
-    const response = await $fetch('/soporte', {
+    const response = await $api('/soporte', {
       baseURL: config.public.apiBase,
       method: 'POST',
       body: dataToSend,
@@ -476,7 +476,7 @@ const submitForm = async () => {
     
     // Enviar notificación a los administradores
     try {
-      await $fetch('/notificaciones/enviar', {
+      await $api('/notificaciones/enviar', {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -489,7 +489,7 @@ const submitForm = async () => {
           nombre_rol: 'admin'
         })
       });
-      await $fetch('/notificaciones/enviar', {
+      await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {

@@ -57,6 +57,7 @@ import { useRouter } from 'vue-router'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 // ===== CONFIGURACIÓN =====
+const { $http } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const isLoading = ref(false)
@@ -99,13 +100,9 @@ const onNotificationClick = async (notification) => {
   });
 
   try {
-    const response = await $fetch('/notificaciones/marcar/individual', {
+    const response = await $http('/notificaciones/marcar/individual', {
       baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: {
         id_destinatario_notificacion: notification.id
       }

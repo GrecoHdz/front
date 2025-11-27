@@ -1190,7 +1190,7 @@ const loadMembershipPayments = async (page = 1) => {
     
     const url = `/membresia?${params.toString()}`;
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1343,7 +1343,7 @@ const loadVisitPayments = async (page = 1) => {
     
     const url = `/pagovisita?${params.toString()}`;
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1485,7 +1485,7 @@ const loadServicePayments = async (page = 1) => {
     
     const url = `/cotizacion?${params.toString()}`;
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1635,7 +1635,7 @@ const loadWithdrawals = async (page = 1) => {
     
     const url = `/movimientos/retiros?${params.toString()}`;
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1748,7 +1748,7 @@ const loadTransactions = async (page = 1) => {
       url += `&fecha=${selectedMonthTransactions.value}`;
     }
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2588,7 +2588,7 @@ const updatePlatformStats = async () => {
       url += `?${params.toString()}`;
     }
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2798,7 +2798,7 @@ const updateChart = (chartData) => {
 // ===== FUNCIONES DE CARGA DE DATOS DE GRÁFICOS =====
 const loadServiceTypesData = async () => {
   try { 
-    const response = await $fetch('/solicitudservicio/grafica/servicios', {
+    const response = await $api('/solicitudservicio/grafica/servicios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2824,7 +2824,7 @@ const loadServiceTypesData = async () => {
 };
 const loadServicesPerMonthData = async () => {
   try { 
-    const response = await $fetch('/solicitudservicio/grafica/servicios-por-mes', {
+    const response = await $api('/solicitudservicio/grafica/servicios-por-mes', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2848,7 +2848,7 @@ const loadServicesPerMonthData = async () => {
 
 const loadUserGrowthData = async () => {
   try { 
-    const response = await $fetch('/usuarios/grafica/crecimiento-usuarios', {
+    const response = await $api('/usuarios/grafica/crecimiento-usuarios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2872,7 +2872,7 @@ const loadUserGrowthData = async () => {
 
 const loadServicesByCityData = async () => {
   try { 
-    const response = await $fetch('/solicitudservicio/grafica/servicios-por-ciudad', {
+    const response = await $api('/solicitudservicio/grafica/servicios-por-ciudad', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2992,7 +2992,7 @@ const generateReport = async (report) => {
 
     // 📦 2️⃣ Obtener datos base comunes
     const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes] = await Promise.all([
-      $fetch(`/membresia${monthParam}`, {
+      $api(`/membresia${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
       }).then(res => { 
@@ -3001,7 +3001,7 @@ const generateReport = async (report) => {
         console.error('❌ Error en /membresia:', err);
         throw err;
       }),
-      $fetch(`/pagovisita${monthParam}`, {
+      $api(`/pagovisita${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
       }).then(res => { 
@@ -3010,7 +3010,7 @@ const generateReport = async (report) => {
         console.error('❌ Error en /pagovisita:', err);
         throw err;
       }),
-      $fetch(`/movimientos/retiros${monthParam}`, {
+      $api(`/movimientos/retiros${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
       }).then(res => { 
@@ -3019,7 +3019,7 @@ const generateReport = async (report) => {
         console.error('❌ Error en /movimientos/retiros:', err);
         throw err;
       }),
-      $fetch(`/cotizacion${monthParam}`, {
+      $api(`/cotizacion${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { Authorization: `Bearer ${auth.token}` }
       }).then(res => { 
@@ -3028,7 +3028,7 @@ const generateReport = async (report) => {
         console.error('❌ Error en /cotizacion:', err);
         throw err;
       }),
-      $fetch(`/usuarios${monthParam}`, {
+      $api(`/usuarios${monthParam}`, {
         baseURL: config.public.apiBase,
         headers: { 'Authorization': `Bearer ${auth.token}` }
       }).then(res => { 
@@ -3108,7 +3108,7 @@ const generateReport = async (report) => {
           ? `/solicitudservicio?month=${selectedMonth}`
           : '/solicitudservicio'; 
         
-        const serviceRes = await $fetch(serviceUrl, {
+        const serviceRes = await $api(serviceUrl, {
           baseURL: config.public.apiBase,
           headers: { Authorization: `Bearer ${auth.token}` }
         }).then(res => { 
@@ -3828,7 +3828,7 @@ const approvePayment = async (id) => {
     switch (activeTab.value) {
       case 'membership':
         // Update membership status
-        response = await $fetch(`/membresia/${payment.id_membresia || payment.id}`, {
+        response = await $api(`/membresia/${payment.id_membresia || payment.id}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers,
@@ -3842,7 +3842,7 @@ const approvePayment = async (id) => {
           monto_credito: payment.monto
         }; 
         
-        const creditResponse = await $fetch('/credito', {
+        const creditResponse = await $api('/credito', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -3856,7 +3856,7 @@ const approvePayment = async (id) => {
 
       case 'visits':
         // Usar el endpoint correcto de confirmación de pago de visita
-        response = await $fetch('/pagovisita/confirmar', {
+        response = await $api('/pagovisita/confirmar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers,
@@ -3869,7 +3869,7 @@ const approvePayment = async (id) => {
         // Notificar al admin de servicio pendiente
         if (response?.success) {
           try {
-            await $fetch('/notificaciones/enviar', {
+            await $api('/notificaciones/enviar', {
               baseURL: config.public.apiBase,
               method: 'POST',
               headers: {
@@ -3886,7 +3886,7 @@ const approvePayment = async (id) => {
             // No interrumpir el flujo si falla la notificación
           }
           try {
-            await $fetch('/notificaciones/enviar', {
+            await $api('/notificaciones/enviar', {
               baseURL: config.public.apiBase,
               method: 'POST',
               headers: {
@@ -3915,7 +3915,7 @@ const approvePayment = async (id) => {
                            payment.cotizaciones?.[0]?.id_cotizacion;
 
         // Aprobar el pago del servicio
-        response = await $fetch('/pagoservicio/aceptar', {
+        response = await $api('/pagoservicio/aceptar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers,
@@ -3928,7 +3928,7 @@ const approvePayment = async (id) => {
         // Notificar al técnico sobre el pago recibido
         if (response?.success && payment.solicitud?.tecnico?.id_usuario) {
           try {
-            await $fetch('/notificaciones/enviar', {
+            await $api('/notificaciones/enviar', {
               baseURL: config.public.apiBase,
               method: 'POST',
               headers: {
@@ -3950,7 +3950,7 @@ const approvePayment = async (id) => {
 
       case 'withdrawals':
         const withdrawalId = payment.id_movimiento || payment.id;
-        response = await $fetch(`/movimientos/${withdrawalId}`, {
+        response = await $api(`/movimientos/${withdrawalId}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers,
@@ -3984,7 +3984,7 @@ const approvePayment = async (id) => {
       }
 
       if (idUsuario) {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -4049,7 +4049,7 @@ const rejectPayment = async (id) => {
 
     switch (activeTab.value) {
       case 'membership':
-        response = await $fetch(`/membresia/${payment.id_membresia || payment.id}`, {
+        response = await $api(`/membresia/${payment.id_membresia || payment.id}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers,
@@ -4059,7 +4059,7 @@ const rejectPayment = async (id) => {
 
       case 'visits':
         // Usar el endpoint correcto de denegación de pago de visita
-        response = await $fetch('/pagovisita/denegar', {
+        response = await $api('/pagovisita/denegar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers,
@@ -4072,7 +4072,7 @@ const rejectPayment = async (id) => {
 
         // Actualizar el estado de la solicitud a pendiente_pagovisita
         try {
-          await $fetch(`/solicitudservicio/${payment.solicitud?.id_solicitud || payment.id_solicitud || payment.id}`, {
+          await $api(`/solicitudservicio/${payment.solicitud?.id_solicitud || payment.id_solicitud || payment.id}`, {
             baseURL: config.public.apiBase,
             method: 'PUT',
             headers,
@@ -4092,7 +4092,7 @@ const rejectPayment = async (id) => {
                            payment.cotizaciones?.[0]?.id ||
                            payment.cotizaciones?.[0]?.id_cotizacion;
 
-        response = await $fetch('/pagoservicio/denegar', {
+        response = await $api('/pagoservicio/denegar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers,
@@ -4106,7 +4106,7 @@ const rejectPayment = async (id) => {
 
       case 'withdrawals':
         const withdrawalId = payment.id_movimiento || payment.id;
-        response = await $fetch(`/movimientos/${withdrawalId}`, {
+        response = await $api(`/movimientos/${withdrawalId}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers,
@@ -4140,7 +4140,7 @@ const rejectPayment = async (id) => {
       }
 
       if (idUsuario) {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {

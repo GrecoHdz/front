@@ -867,7 +867,7 @@ const loadReferralData = async () => {
     
     // Cargar configuración de monto mínimo de retiro
     try {
-      const minWithdrawConfig = await $fetch('/config/valor/retiro_minimo', {
+      const minWithdrawConfig = await $api('/config/valor/retiro_minimo', {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers: {
@@ -882,7 +882,7 @@ const loadReferralData = async () => {
     }
 
     const [configData, porcentajeRetiroData, ingresosData] = await Promise.all([
-      $fetch('/config/valor/porcentaje_referido', {
+      $api('/config/valor/porcentaje_referido', {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers: {
@@ -890,7 +890,7 @@ const loadReferralData = async () => {
           'Authorization': `Bearer ${auth.token}`
         }
       }),
-      $fetch('/config/valor/porcentaje_retiro', {
+      $api('/config/valor/porcentaje_retiro', {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers: {
@@ -898,7 +898,7 @@ const loadReferralData = async () => {
           'Authorization': `Bearer ${auth.token}`
         }
       }),
-      $fetch(`/movimientos/ingresos/referidos/${user.id_usuario}`, {
+      $api(`/movimientos/ingresos/referidos/${user.id_usuario}`, {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers: {
@@ -963,7 +963,7 @@ const loadReferrals = async (page = 1) => {
   isLoadingReferrals.value = true
 
   try {
-    const response = await $fetch(`/referidos/${user.id_usuario}`, {
+    const response = await $api(`/referidos/${user.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1033,7 +1033,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
     const selectedMonthValue = month || (tipo === 'ingreso_referido' ? selectedMonth.value : selectedWithdrawMonth.value)
     const monthNumber = selectedMonthValue.split('-')[1]
     
-    const response = await $fetch(`/movimientos/historial/referidos/${user.id_usuario}`, {
+    const response = await $api(`/movimientos/historial/referidos/${user.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1221,7 +1221,7 @@ const processWithdraw = async () => {
     // Obtener el monto mínimo de retiro desde la configuración
     let minWithdrawAmount = 0;
     try {
-      const minWithdrawConfig = await $fetch('/config/valor/retiro_minimo', {
+      const minWithdrawConfig = await $api('/config/valor/retiro_minimo', {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers: {
@@ -1263,7 +1263,7 @@ const processWithdraw = async () => {
     
     let response;
     try {
-      response = await $fetch('/movimientos', {
+      response = await $api('/movimientos', {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -1283,7 +1283,7 @@ const processWithdraw = async () => {
     if (response && response.success === true) {
       // Notificar a los administradores sobre el nuevo retiro
       try {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           method: 'POST',
           baseURL: config.public.apiBase,
           headers: {
@@ -1296,7 +1296,7 @@ const processWithdraw = async () => {
             nombre_rol: 'admin'
           })
         });
-         await $fetch('/notificaciones/enviar', {
+         await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -1325,7 +1325,7 @@ const processWithdraw = async () => {
             monto_credito: montoCredito
           }; 
           
-          await $fetch('/credito', {
+          await $api('/credito', {
             baseURL: config.public.apiBase,
             method: 'POST',
             headers: {

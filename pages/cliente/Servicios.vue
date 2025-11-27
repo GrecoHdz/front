@@ -2052,7 +2052,7 @@ const fetchMembresiaBeneficios = async () => {
   try {
     isLoadingBeneficios.value = true;
     
-    const response = await $fetch('/membresiabeneficios', {
+    const response = await $api('/membresiabeneficios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2084,7 +2084,7 @@ const fetchMembresiaBeneficios = async () => {
 // Obtener el porcentaje de descuento del backend
 const fetchDiscountPercentage = async () => {
   try {
-    const response = await $fetch('/config/valor/porcentaje_descuento', {
+    const response = await $api('/config/valor/porcentaje_descuento', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2111,7 +2111,7 @@ const loadServices = async () => {
       return
     }
 
-    const response = await $fetch(`/solicitudservicio/usuario/${userCookieValue.id_usuario}`, {
+    const response = await $api(`/solicitudservicio/usuario/${userCookieValue.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2127,7 +2127,7 @@ const loadServices = async () => {
       // Verificar estado del pago de la visita si corresponde
       if (solicitud.estado === 'pendiente_pagovisita') {
         try {
-          const pagoResponse = await $fetch(`/pagovisita/solicitud/${solicitud.id_solicitud}`, {
+          const pagoResponse = await $api(`/pagovisita/solicitud/${solicitud.id_solicitud}`, {
             baseURL: config.public.apiBase,
             method: 'GET',
             headers: {
@@ -2163,7 +2163,7 @@ const loadServices = async () => {
       // Verificar estado de la cotización si corresponde
       if (solicitud.estado === 'pendiente_pagoservicio') {
         try {
-          const response = await $fetch(`/cotizacion/solicitud/${solicitud.id_solicitud}`, {
+          const response = await $api(`/cotizacion/solicitud/${solicitud.id_solicitud}`, {
             baseURL: config.public.apiBase,
             method: 'GET',
             headers: {
@@ -2221,7 +2221,7 @@ const loadServices = async () => {
 const loadServiceTypes = async () => {
   try {
     isLoadingServiceTypes.value = true
-    const data = await $fetch('/servicios/activos', {
+    const data = await $api('/servicios/activos', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2249,7 +2249,7 @@ const fetchQuotationData = async (solicitudId) => {
     isLoadingQuotation.value = true
     const token = useCookie('token').value
     
-    const response = await $fetch(`/cotizacion/solicitud/${solicitudId}`, {
+    const response = await $api(`/cotizacion/solicitud/${solicitudId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2293,7 +2293,7 @@ const fetchQuotationData = async (solicitudId) => {
 const fetchBankAccounts = async () => {
   isLoadingAccounts.value = true;
   try {
-    const data = await $fetch('/cuentas', {
+    const data = await $api('/cuentas', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2324,7 +2324,7 @@ const fetchBankAccounts = async () => {
 
 const fetchVisitCost = async () => {
   try {
-    const data = await $fetch('/config/valor/visita_tecnico', {
+    const data = await $api('/config/valor/visita_tecnico', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2514,13 +2514,13 @@ const fetchMembresiaProgreso = async (userId) => {
     
     // Obtener progreso de membresía
     const [membresiaResponse, creditoResponse] = await Promise.all([
-      $fetch(`/membresia/progreso/${userId}`, {
+      $api(`/membresia/progreso/${userId}`, {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers
       }),
       // Obtener crédito del usuario
-      $fetch(`/credito/usuario/${userId}`, {
+      $api(`/credito/usuario/${userId}`, {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers
@@ -2626,7 +2626,7 @@ const submitRating = async () => {
     }
 
     // 1. Enviar la calificación
-    const response = await $fetch('/calificaciones', {
+    const response = await $api('/calificaciones', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -2638,7 +2638,7 @@ const submitRating = async () => {
     
     try {
       // Actualizar el estado del servicio a 'calificado' directamente
-      const updateResponse = await $fetch(`/solicitudservicio/${currentService.id}`, {
+      const updateResponse = await $api(`/solicitudservicio/${currentService.id}`, {
         baseURL: config.public.apiBase,
         method: 'PUT',
         headers: {
@@ -2652,7 +2652,7 @@ const submitRating = async () => {
 
       // Notificar al técnico sobre la calificación
       try {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -2715,7 +2715,7 @@ const acceptQuotation = async () => {
     // 1. Aceptar la cotización 
     const cotizacionUpdate = { estado: 'aceptado' }; 
     
-    const cotizacionResponse = await $fetch(`/cotizacion/${cotizacionId}`, {
+    const cotizacionResponse = await $api(`/cotizacion/${cotizacionId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -2731,7 +2731,7 @@ const acceptQuotation = async () => {
     
     const solicitudUpdate = { estado: 'en_proceso' }; 
     
-    const solicitudResponse = await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+    const solicitudResponse = await $api(`/solicitudservicio/${selectedServiceId.value}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -2750,7 +2750,7 @@ const acceptQuotation = async () => {
     
     if (!idTecnico) throw new Error('No se encontró el ID del técnico en la solicitud de servicio');
     
-    const configResponse = await $fetch('/config/valor/comision_por_servicio', {
+    const configResponse = await $api('/config/valor/comision_por_servicio', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2784,7 +2784,7 @@ const acceptQuotation = async () => {
       estado: 'pendiente'
     };
     
-    const movimientoResponse = await $fetch('/movimientos', {
+    const movimientoResponse = await $api('/movimientos', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -2801,7 +2801,7 @@ const acceptQuotation = async () => {
       const idTecnico = servicioActual?.id_tecnico;
       
       if (idTecnico) {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -2869,7 +2869,7 @@ const rejectQuotation = async () => {
     isProcessingQuotation.value = true
     
     // 1. Rechazar la cotización
-    await $fetch(`/cotizacion/${cotizacionId}`, {
+    await $api(`/cotizacion/${cotizacionId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -2885,7 +2885,7 @@ const rejectQuotation = async () => {
     // 2. Actualizar el estado de la solicitud a 'pendiente_asignacion'
     if (selectedServiceId.value) {
       try {
-        await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+        await $api(`/solicitudservicio/${selectedServiceId.value}`, {
           baseURL: config.public.apiBase,
           method: 'PUT',
           headers: {
@@ -2908,7 +2908,7 @@ const rejectQuotation = async () => {
       const idTecnico = servicioActual?.id_tecnico;
       
       if (idTecnico) {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -2996,7 +2996,7 @@ const processVisitPayment = async () => {
     
     const authToken = useCookie('token').value;
     
-    await $fetch('/pagovisita', {
+    await $api('/pagovisita', {
       method: 'POST',
       baseURL: config.public.apiBase,
       headers: {
@@ -3009,7 +3009,7 @@ const processVisitPayment = async () => {
     const token = useCookie('token').value;
     
     try {
-      await $fetch(`/solicitudservicio/${selectedService.value.id}`, {
+      await $api(`/solicitudservicio/${selectedService.value.id}`, {
         method: 'PUT',
         baseURL: config.public.apiBase,
         headers: {
@@ -3025,7 +3025,7 @@ const processVisitPayment = async () => {
     
     // Notificar a los administradores sobre el pago de visita recibido
     try {
-      await $fetch('/notificaciones/enviar', {
+      await $api('/notificaciones/enviar', {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -3038,7 +3038,7 @@ const processVisitPayment = async () => {
           nombre_rol: 'admin'
         })
       });
-       await $fetch('/notificaciones/enviar', {
+       await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -3099,7 +3099,7 @@ const processPayment = async () => {
   }
 
   try {
-    const response = await $fetch('/pagoservicio/procesar', {
+    const response = await $api('/pagoservicio/procesar', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -3115,7 +3115,7 @@ const processPayment = async () => {
       nombre_rol: 'admin'
     });
     try {
-      const responseAdmin = await $fetch('/notificaciones/enviar', {
+      const responseAdmin = await $api('/notificaciones/enviar', {
         baseURL: config.public.apiBase,
         method: 'POST',
         headers: {
@@ -3138,7 +3138,7 @@ const processPayment = async () => {
       nombre_rol: 'sa'
     });
     try {
-      const responseSA = await $fetch('/notificaciones/enviar', {
+      const responseSA = await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -3204,7 +3204,7 @@ const cancelarSolicitud = async () => {
     const currentService = selectedServiceRef.value;
     
     // Actualizar el estado del servicio a cancelado
-    const response = await $fetch(`/solicitudservicio/${selectedServiceId.value}`, {
+    const response = await $api(`/solicitudservicio/${selectedServiceId.value}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       headers: {
@@ -3222,7 +3222,7 @@ const cancelarSolicitud = async () => {
     try {
       if (currentService?.technician) {
         // Notificar al técnico asignado
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -3237,7 +3237,7 @@ const cancelarSolicitud = async () => {
         });
       } else {
         // Notificar a los administradores cuando no hay técnico asignado
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -3250,7 +3250,7 @@ const cancelarSolicitud = async () => {
             nombre_rol: 'admin'
           })
         });
-         await $fetch('/notificaciones/enviar', {
+         await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -3360,7 +3360,7 @@ const fetchTecnicoRating = async (idTecnico) => {
     isLoadingTecnicoRating.value = true
     const token = useCookie('token').value
     
-    const response = await $fetch(`/calificaciones/usuario/${idTecnico}`, {
+    const response = await $api(`/calificaciones/usuario/${idTecnico}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {

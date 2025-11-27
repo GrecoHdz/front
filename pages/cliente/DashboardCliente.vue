@@ -800,7 +800,7 @@ const fetchUserCredit = async () => {
     const user = useCookie('user').value
     if (!user?.id_usuario) return
     
-    const response = await $fetch(`/credito/usuario/${user.id_usuario}`, {
+    const response = await $api(`/credito/usuario/${user.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -832,7 +832,7 @@ const fetchMembershipProgress = async () => {
       return
     }
 
-    const response = await $fetch(`/membresia/progreso/${userData.id_usuario}`, {
+    const response = await $api(`/membresia/progreso/${userData.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -878,7 +878,7 @@ const fetchMembershipData = async () => {
   }
 
   try {
-    const response = await $fetch(`/membresia/${userData.id_usuario}`, {
+    const response = await $api(`/membresia/${userData.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -981,7 +981,7 @@ const fetchTotalSolicitudes = async () => {
     const user = useCookie('user').value
     if (!user || !user.id_usuario) return
 
-    const response = await $fetch(`/solicitudservicio/usuario/${user.id_usuario}`, {
+    const response = await $api(`/solicitudservicio/usuario/${user.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1002,7 +1002,7 @@ const fetchTotalSolicitudes = async () => {
 const fetchServices = async () => {
   try {
     isLoadingServices.value = true
-    const data = await $fetch('/servicios', {
+    const data = await $api('/servicios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1033,7 +1033,7 @@ const fetchBeneficios = async () => {
   benefitsError.value = null;
   
   try {
-    const response = await $fetch('/membresiabeneficios', {
+    const response = await $api('/membresiabeneficios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1095,7 +1095,7 @@ const resetCredito = async () => {
       return
     }
 
-    const response = await $fetch(`/credito/reset/${userData.id_usuario}`, {
+    const response = await $api(`/credito/reset/${userData.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -1156,7 +1156,7 @@ const handleRequestService = async () => {
       estado: estadoInicial
     }
 
-    const response = await $fetch('/solicitudservicio', {
+    const response = await $api('/solicitudservicio', {
       method: 'POST',
       baseURL: config.public.apiBase,
       body: JSON.stringify(requestData),
@@ -1173,7 +1173,7 @@ const handleRequestService = async () => {
         ? { titulo: 'Asignación Pendiente', nombre_rol: 'admin' }
         : { titulo: 'Pago de visita pendiente', id_usuario: Number(userData.id_usuario) }
 
-      await $fetch('/notificaciones/enviar', {
+      await $api('/notificaciones/enviar', {
         method: 'POST',
         baseURL: config.public.apiBase,
         headers: {
@@ -1185,7 +1185,7 @@ const handleRequestService = async () => {
       })
 
       if (tieneMembresiaActiva) {
-        await $fetch('/notificaciones/enviar', {
+        await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
           headers: {
@@ -1248,7 +1248,7 @@ const handleRequestService = async () => {
 // Función para obtener el período de reinicio de crédito desde la API
 const getCreditResetPeriod = async () => {
   try {
-    const response = await $fetch('/config/valor/reset_credito', {
+    const response = await $api('/config/valor/reset_credito', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1272,7 +1272,7 @@ const getCreditResetPeriod = async () => {
 const updateMembershipToExpired = async (membresiaId) => {
   try { 
     
-    const response = await $fetch(`/membresia/${membresiaId}`, {
+    const response = await $api(`/membresia/${membresiaId}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {

@@ -2299,7 +2299,7 @@ const quoteLoading = ref(false)
 const loadQuoteDetails = async (quoteId) => {
   try {
     quoteLoading.value = true
-    const response = await $fetch(`/cotizaciones/${quoteId}`, {
+    const response = await $api(`/cotizaciones/${quoteId}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2495,7 +2495,7 @@ const filterServices = async () => {
     
     const url = `/solicitudservicio?${params.toString()}`
     
-    const data = await $fetch(url, {
+    const data = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -2570,7 +2570,7 @@ const updatePassword = async () => {
     
     isUpdatingPassword.value = true;
     
-    const response = await $fetch(`/usuarios/cambio-clave/${userForm.value.id_usuario}`, {
+    const response = await $api(`/usuarios/cambio-clave/${userForm.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       body: JSON.stringify({
@@ -2827,7 +2827,7 @@ const filterCredits = async () => {
       
       // Make a fresh API call to get the latest balance
       try {
-        const response = await $fetch(`/movimientos/creditos/${selectedUser.value.id_usuario}?page=1&limit=${modalItemsPerPage}`, {
+        const response = await $api(`/movimientos/creditos/${selectedUser.value.id_usuario}?page=1&limit=${modalItemsPerPage}`, {
           baseURL: config.public.apiBase,
           method: 'GET',
           headers: {
@@ -2965,7 +2965,7 @@ const showCredits = async (user, page = 1, dateRange = null) => {
     const url = `/movimientos/creditos/${user.id_usuario}?${params.toString()}`
     
     // Make the API request
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3105,7 +3105,7 @@ const showReferrals = async (user, page = 1) => {
     }
     
     // Hacer la petición a la API con paginación
-    const response = await $fetch(`/referidos/${user.id_usuario}`, {
+    const response = await $api(`/referidos/${user.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3195,7 +3195,7 @@ const showTopTechniciansCredits = async () => {
     isLoadingTopBalances.value = true
     showTopBalancesModal.value = true
     
-    const response = await $fetch('/movimientos/toptecnicos/creditos', {
+    const response = await $api('/movimientos/toptecnicos/creditos', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3226,7 +3226,7 @@ const showTopCredits = async () => {
     showTopCreditsModal.value = true
     
     // Obtener el ID del rol de Usuario
-    const rolesResponse = await $fetch('/roles', {
+    const rolesResponse = await $api('/roles', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3243,7 +3243,7 @@ const showTopCredits = async () => {
       throw new Error('No se encontró el rol de Usuario')
     }
     
-    const response = await $fetch('/credito/tops', {
+    const response = await $api('/credito/tops', {
       baseURL: config.public.apiBase,
       method: 'GET',
       params: {
@@ -3278,7 +3278,7 @@ const showTopReferrals = async () => {
     isLoadingTopReferrals.value = true
     showTopReferralsModal.value = true
     
-    const response = await $fetch('/referidos/top/usuarios', {
+    const response = await $api('/referidos/top/usuarios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3311,7 +3311,7 @@ const showTopBalances = async () => {
     showTopBalancesModal.value = true
     
     // Obtener el ID del rol de Técnico
-    const rolesResponse = await $fetch('/roles', {
+    const rolesResponse = await $api('/roles', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3328,7 +3328,7 @@ const showTopBalances = async () => {
       throw new Error('No se encontró el rol de Técnico')
     }
     
-    const response = await $fetch('/credito/tops', {
+    const response = await $api('/credito/tops', {
       baseURL: config.public.apiBase,
       method: 'GET',
       params: {
@@ -3363,7 +3363,7 @@ const showTopRatings = async () => {
     isLoadingTopRatings.value = true
     showTopRatingsModal.value = true
     
-    const response = await $fetch('/calificaciones/top-tecnicos', {
+    const response = await $api('/calificaciones/top-tecnicos', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3480,7 +3480,7 @@ const saveUser = async () => {
         : userForm.value.estado
     };
 
-    const response = await $fetch(`usuarios/${userForm.value.id_usuario}`, {
+    const response = await $api(`usuarios/${userForm.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -3567,7 +3567,7 @@ const updateUserPassword = async () => {
     }
     
     // Llamar a la API para actualizar la contraseña
-    await $fetch(`usuarios/${userForm.value.id_usuario}/cambiar-clave`, {
+    await $api(`usuarios/${userForm.value.id_usuario}/cambiar-clave`, {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {
@@ -3648,7 +3648,7 @@ const loadUsers = async (page = 1) => {
       }
     }
     
-    const response = await $fetch(`/usuarios/usuarios?${params.toString()}`, {
+    const response = await $api(`/usuarios/usuarios?${params.toString()}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3754,7 +3754,7 @@ const loadTechnicians = async (page = 1) => {
       }
     }
 
-    const response = await $fetch(`/usuarios/tecnicos?${params.toString()}`, {
+    const response = await $api(`/usuarios/tecnicos?${params.toString()}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3824,7 +3824,7 @@ const loadAdministrators = async (page = 1) => {
     const queryString = new URLSearchParams(query).toString()
     const url = `/usuarios/administradores?${queryString}`
 
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3852,7 +3852,7 @@ const loadAdministrators = async (page = 1) => {
 const loadCities = async () => {
   try {
     loadingCities.value = true
-    const response = await $fetch('/ciudad', {
+    const response = await $api('/ciudad', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3883,7 +3883,7 @@ const loadRoles = async () => {
     loadingRoles.value = true
     
     // Cargar roles desde la API siguiendo el estándar de peticiones HTTP del proyecto
-    const response = await $fetch('/roles', {
+    const response = await $api('/roles', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3913,7 +3913,7 @@ const loadRoles = async () => {
 const fetchStatistics = async () => {
   try {
     loadingStats.value = true
-    const response = await $fetch('/usuarios/estadisticas', {
+    const response = await $api('/usuarios/estadisticas', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {

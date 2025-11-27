@@ -381,7 +381,7 @@ const showError = (title, message) => {
 // ===== FUNCIONES DE CARGA DE DATOS =====
 const cargarCiudades = async () => {
   try {
-    const data = await $fetch('/ciudad', {
+    const data = await $api('/ciudad', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -409,7 +409,7 @@ const fetchUserData = async () => {
       return false
     }
     
-    const data = await $fetch(`/usuarios/id/${userCookie.value.id_usuario}`, {
+    const data = await $api(`/usuarios/id/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       credentials: 'include',
       headers: {
@@ -480,7 +480,7 @@ const saveProfile = async () => {
       id_ciudad: user.value.id_ciudad
     }; 
     
-    const response = await $fetch(`/usuarios/${userCookie.value.id_usuario}`, {
+    const response = await $api(`/usuarios/${userCookie.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       body: userData,
@@ -550,7 +550,7 @@ const updatePassword = async () => {
   }
   
   try {
-    const response = await $fetch(`/usuarios/cambio-clave/${userCookie.value.id_usuario}`, {
+    const response = await $api(`/usuarios/cambio-clave/${userCookie.value.id_usuario}`, {
       method: 'PUT',
       baseURL: config.public.apiBase,
       body: JSON.stringify({
