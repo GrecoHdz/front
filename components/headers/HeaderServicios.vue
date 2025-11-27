@@ -225,15 +225,16 @@ const onNotificationClick = async (notification) => {
   }
 
   // Navegación por tipo de notificación
-  // Mantener el loading activo durante la navegación
-  if (notification.tipo === 'servicios') {
-    navigateTo('/cliente/Servicios');
-  } else if (notification.tipo === 'membresia') { 
-    navigateTo('/cliente/DashboardCliente');
-  } else if (notification.tipo === 'financieros') { 
-    navigateTo('/cliente/Servicios');
-  } else {
-    // Si no hay tipo específico, desactivar loading
+  try {
+    if (notification.tipo === 'servicios') {
+      await navigateTo('/cliente/Servicios');
+    } else if (notification.tipo === 'membresia') { 
+      await navigateTo('/cliente/DashboardCliente');
+    } else if (notification.tipo === 'financieros') { 
+      await navigateTo('/cliente/Servicios');
+    }
+  } finally {
+    // Asegurarse de que el loading siempre se desactive
     isLoading.value = false;
   }
 };

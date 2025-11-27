@@ -108,19 +108,22 @@ const onNotificationClick = async (notification) => {
     return; // Salir de la función si hay error
   }
   
-  // Navegación por tipo de notificación 
-  if (notification.tipo === 'servicios') {
-    navigateTo('/admin/ServiciosAdmin');
-  } else if (notification.tipo === 'membresia') { 
-    navigateTo('/admin/ReportesAdmin');
-  } else if (notification.tipo === 'financieros') { 
-    navigateTo('/admin/ReportesAdmin');
-  } else if (notification.tipo === 'usuario') { 
-    navigateTo('/admin/UsuariosAdmin');
-  } else if (notification.tipo === 'ticket') { 
-    navigateTo('/admin/DashboardAdmin');
-  } else { 
+    // Navegación por tipo de notificación 
+  try {
+    if (notification.tipo === 'servicios') {
+      await navigateTo('/admin/ServiciosAdmin');
+    } else if (notification.tipo === 'membresia') { 
+      await navigateTo('/admin/ReportesAdmin');
+    } else if (notification.tipo === 'financieros') { 
+      await navigateTo('/admin/ReportesAdmin');
+    } else if (notification.tipo === 'usuario') { 
+      await navigateTo('/admin/UsuariosAdmin');
+    } else if (notification.tipo === 'ticket') { 
+      await navigateTo('/admin/DashboardAdmin');
+    }
+  } finally {
+    // Asegurarse de que el loading siempre se desactive
     isLoading.value = false;
-  } 
+  }
 };
 </script>

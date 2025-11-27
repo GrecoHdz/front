@@ -247,15 +247,18 @@ const onNotificationClick = async (notification) => {
   }
   
   // Navegación por tipo de notificación 
-  if (notification.tipo === 'servicios') {
-    navigateTo('/tecnico/ServiciosTecnico');
-  } else if (notification.tipo === 'membresia') { 
-    navigateTo('/tecnico/DashboardTecnico');
-  } else if (notification.tipo === 'financieros') { 
-    navigateTo('/tecnico/MetricasTecnico');
-  } else if (notification.tipo === 'usuario') { 
-    navigateTo('/tecnico/MetricasTecnico');
-  } else {
+  try {
+    if (notification.tipo === 'servicios') {
+      await navigateTo('/tecnico/ServiciosTecnico');
+    } else if (notification.tipo === 'membresia') { 
+      await navigateTo('/tecnico/DashboardTecnico');
+    } else if (notification.tipo === 'financieros') { 
+      await navigateTo('/tecnico/MetricasTecnico');
+    } else if (notification.tipo === 'usuario') { 
+      await navigateTo('/tecnico/MetricasTecnico');
+    }
+  } finally {
+    // Asegurarse de que el loading siempre se desactive
     isLoading.value = false;
   } 
 };
