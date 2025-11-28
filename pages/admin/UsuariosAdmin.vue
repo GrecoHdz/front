@@ -1198,8 +1198,9 @@
           <div class="p-3">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-black text-gray-900 dark:text-white">
-                {{ selectedUser?.role === 'technician' ? '🔧' : '📋' }} 
-                {{ selectedUser?.role === 'technician' ? 'Servicios de ' : 'Historial de ' }}
+                {{ console.log('Rol del usuario:', selectedUser?.rol?.nombre_rol) || '' }}
+                {{ selectedUser?.rol?.nombre_rol === 'usuario' ? '📋' : '🔧' }} 
+                {{ selectedUser?.rol?.nombre_rol === 'usuario' ? 'Historial de ' : 'Servicios de ' }}
                 {{ selectedUser?.nombre }}
               </h3>
               <button @click="showServiceHistoryModal = false" class="text-gray-400 hover:text-gray-600">
@@ -1219,7 +1220,7 @@
                   <input 
                     type="month"
                     v-model="servicesFilterDate"
-                    @change="filterServices"
+                    @change="handleFilterServices"
                     class="w-full px-2 py-1.5 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white appearance-none"
                     :class="{ 'text-transparent': !servicesFilterDate }"
                   />
@@ -2156,6 +2157,7 @@ const showEditModal = ref(false)
 const showPasswordModal = ref(false)
 const showReferralsModal = ref(false) 
 const showServiceHistoryModal = ref(false)
+const selectedUserType = ref('') // 'user' o 'technician'
 const showCommentModal = ref(false)
 const showTopCreditsModal = ref(false)
 const showTopReferralsModal = ref(false)
@@ -2524,6 +2526,68 @@ const filterServices = async () => {
   } catch (error) {
     console.error('Error al filtrar servicios:', error)
     showError('No se pudieron cargar los servicios filtrados')
+  }
+}
+
+// Filtrar servicios por mes para USUARIOS
+const filterUserServices = async () => {
+  try {
+    if (!selectedUser.value) return
+    
+    const params = new URLSearchParams({
+      id_usuario: selectedUser.value.id_usuario
+    })
+    
+    if (servicesFilterDate.value) {
+      params.append('month', servicesFilterDate.value)
+    }
+    
+    const url = `/solicitudservicio?${params.toString()}`
+    
+    const data = await $api(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    }) 
+    
+    // Mapear la respuesta al formato esperado por la interfaz
+    userServiceHistory.value = data.data.map(solicitud => ({
+      id: solicitud.id_solicitud,
+      name: solicitud.servicio?.nombre || 'Servicio sin nombre',
+      date: solicitud.fecha_solicitud,
+      status: solicitud.estado,
+      descripcion: solicitud.descripcion || 'Sin descripción',
+      estado: solicitud.estado,
+      comentario: solicitud.calificacion?.comentario || '',
+      calificacion: solicitud.calificacion?.calificacion || 0,
+      colonia: solicitud.colonia || '',
+      cotizacion: solicitud.cotizacion || null,
+      pagoVisita: solicitud.pagoVisita || null,
+      cliente: solicitud.cliente?.nombre || 'Cliente no disponible'
+    }))
+    
+  } catch (error) {
+    console.error('Error al filtrar servicios de usuario:', error)
+    showError('No se pudieron cargar los servicios del usuario')
+  }
+}
+
+// Función intermedia para manejar el filtro según el tipo de usuario
+const handleFilterServices = async () => {
+  if (!selectedUser.value) return
+  
+  // Verificar el tipo de usuario usando selectedUserType primero, luego verificar rol.nombre_rol
+  const isTechnician = selectedUserType.value === 'technician' || 
+                       (selectedUser.value.rol?.nombre_rol === 'tecnico') ||
+                       (selectedUser.value.rol?.nombre_rol === 'técnico')
+  
+  if (isTechnician) {
+    await filterServices()
+  } else {
+    await filterUserServices()
   }
 }
 
@@ -3163,15 +3227,25 @@ const showReferrals = async (user, page = 1) => {
   }
 }
 
-const showServiceHistory = (user) => {
-  selectedUser.value = user
-  servicesCurrentPage.value = 1
-  showServiceHistoryModal.value = true
+const showServiceHistory = async (user) => {
+  try {
+    selectedUser.value = user
+    selectedUserType.value = 'user'
+    servicesCurrentPage.value = 1
+    servicesFilterDate.value = '' // Reset filter when opening modal
+    
+    await filterUserServices()
+    showServiceHistoryModal.value = true
+  } catch (error) {
+    console.error('Error al cargar el historial del usuario:', error)
+    showError('No se pudieron cargar los servicios del usuario. Intente de nuevo.')
+  }
 }
 
 const showTechnicianServices = async (technician) => {
   try {
     selectedUser.value = technician
+    selectedUserType.value = 'technician'
     servicesCurrentPage.value = 1 
     servicesFilterDate.value = '' // Reset filter when opening modal
     

@@ -102,7 +102,7 @@
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
               <p class="text-gray-500 dark:text-gray-400 mb-1">Nombre</p>
               <p class="font-medium text-gray-900 dark:text-white">
-                {{ selectedPayment.nombre_usuario || selectedPayment.usuario?.nombre || 'N/A' }}
+                {{ selectedPayment.usuario?.nombre || selectedPayment?.cliente?.nombre || 'N/A' }}
               </p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
@@ -361,8 +361,8 @@
             <div>
               <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Información del Cliente</h4>
               <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                <p class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ selectedService?.cliente?.nombre || selectedPayment?.cliente?.nombre || 'Cliente no disponible' }}</p>
-                <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">{{ selectedService?.cliente?.telefono || selectedPayment?.cliente?.telefono || '' }}</p>
+                <p class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ selectedPayment?.cliente?.nombre || 'Cliente no disponible' }}</p>
+                <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">{{ selectedPayment?.cliente?.telefono || '' }}</p>
               </div>
             </div>
 
@@ -3019,7 +3019,7 @@ const generateReport = async (report) => {
     const processData = (data, label) => ({
       label,
       total: parseFloat(data?.estadisticas?.total || 0),
-      data: data?.data || [],
+      data: data?.data || data?.movimientos || [],
       stats: data?.estadisticas || {}
     });
     const usersData = {
