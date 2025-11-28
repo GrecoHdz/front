@@ -314,7 +314,138 @@
           </div>
         </div>
 
-        <!-- Card 4: Beneficios de Membresía -->
+        <!-- Card 4: Gestión de Cuentas Bancarias -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-teal-100 dark:bg-teal-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">🏦</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  Gestión de Cuentas Bancarias
+                </h3>
+                <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                  Administra las cuentas bancarias para retiros
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="mostrarModalNuevaCuenta = true; cargarCuentas()"
+              class="px-4 py-2 text-sm bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors">
+              + Nueva Cuenta
+            </button>
+          </div>
+
+          <!-- Filtros y búsqueda -->
+          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4">
+            <div class="relative flex-1 min-w-0">
+              <input
+                v-model="filtroBusquedaCuentas"
+                type="text"
+                placeholder="Buscar cuentas..."
+                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm sm:text-base transition-all"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid de cuentas bancarias -->
+          <div v-if="cuentasCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-4"></div>
+            <p>Cargando cuentas...</p>
+          </div>
+          
+          <div v-else-if="cuentasFiltradas.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <span class="text-4xl mb-2 block">🏦</span>
+            <p>No se encontraron cuentas bancarias</p>
+          </div>
+          
+          <!-- Grid 2x2 incluso en móvil -->
+          <div v-else class="grid grid-cols-2 gap-3 sm:gap-4">
+            <div v-for="cuenta in cuentasPaginadas" :key="cuenta.id_cuenta" 
+                 @click="abrirDetallesCuenta(cuenta)"
+                 class="cursor-pointer bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg hover:border-teal-300 dark:hover:border-teal-600 transition-all duration-200 min-h-[120px] sm:min-h-[140px] flex flex-col justify-between">
+              
+              <!-- Header de la tarjeta -->
+              <div class="flex items-start justify-between mb-2">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 bg-teal-100 dark:bg-teal-900 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="text-sm">🏦</span>
+                  </div>
+                  <div class="min-w-0">
+                    <h5 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {{ cuenta.banco }}
+                    </h5>
+                  </div>
+                </div>
+                <span 
+                  :class="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': cuenta.activo,
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !cuenta.activo
+                  }" 
+                  class="px-1.5 py-0.5 rounded-full text-xs font-medium">
+                  {{ cuenta.activo ? 'Activa' : 'Inactiva' }}
+                </span>
+              </div>
+
+              <!-- Información de la cuenta -->
+              <div class="space-y-1.5 flex-1">
+                <div>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">Número de cuenta</p>
+                  <p class="text-xs sm:text-sm font-mono text-gray-900 dark:text-white truncate">{{ cuenta.num_cuenta }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">Tipo</p>
+                  <p class="text-xs sm:text-sm text-gray-900 dark:text-white truncate">{{ cuenta.tipo }}</p>
+                </div>
+              </div>
+
+              <!-- Footer de la tarjeta -->
+              <div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  ID: {{ cuenta.beneficiario }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación para cuentas -->
+          <div v-if="cuentasFiltradas.length > 0" class="mt-4 bg-white dark:bg-gray-800 p-2 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Página {{ paginacionCuentas.paginaActual }} de {{ paginacionCuentasCalculada.totalPaginas }}
+              </div>
+              <div class="flex items-center space-x-1">
+                <button 
+                  @click="$event => cambiarPaginaCuentas(paginacionCuentas.paginaActual - 1, $event)" 
+                  :disabled="paginacionCuentas.paginaActual === 1 || cuentasCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {{ paginacionCuentas.paginaActual }} / {{ paginacionCuentasCalculada.totalPaginas }}
+                </span>
+                <button 
+                  @click="$event => cambiarPaginaCuentas(paginacionCuentas.paginaActual + 1, $event)" 
+                  :disabled="paginacionCuentas.paginaActual >= paginacionCuentasCalculada.totalPaginas || cuentasCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Beneficios de Membresía -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="flex items-center">
@@ -438,7 +569,7 @@
           </div>
         </div>
 
-        <!-- Card 5: Gestión de Servicios -->
+        <!-- Card 6: Gestión de Servicios -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="flex items-center">
@@ -595,7 +726,7 @@
           </div>
         </div>
 
-        <!-- Card 6: Gestión de Notificaciones -->
+        <!-- Card 7: Gestión de Notificaciones -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="flex items-center">
@@ -852,245 +983,450 @@
         </div>
       </div>
     </Transition>
-<!-- Modal para crear/editar servicio -->
-<Transition name="fade">
-  <div v-if="mostrarModalNuevoServicio" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalServicio"></div>
-    <Transition name="modal">
-    
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
-      <!-- Header -->
-      <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-black text-gray-900 dark:text-white">
-            {{ servicioEditando ? 'Editar Servicio' : 'Nuevo Servicio' }}
-          </h3>
-          <button @click="cerrarModalServicio" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
 
-      <!-- Content -->
-      <div class="p-4">
-        <form @submit.prevent="guardarServicio" class="space-y-4">
-          <div>
-            <label for="nombre" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Nombre del servicio <span class="text-red-500">*</span>
-            </label>
-            <input
-              id="nombre"
-              v-model="formServicio.nombre"
-              type="text"
-              required
-              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-              placeholder="Ej: Reparación eléctrica">
-          </div>
-          
-          <div>
-            <label for="descripcion" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Descripción
-            </label>
-            <textarea
-              id="descripcion"
-              v-model="formServicio.descripcion"
-              rows="3"
-              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-              placeholder="Descripción detallada del servicio"></textarea>
-          </div>
-          
-          <div class="flex items-center">
-            <input
-              id="estado"
-              v-model="formServicio.estado"
-              type="checkbox"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded">
-            <label for="estado" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-              Activo
-            </label>
-          </div>
-
-          <!-- Buttons -->
-          <div class="flex space-x-3 pt-2">
-            <button
-              type="button"
-              @click="cerrarModalServicio"
-              class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              :disabled="guardandoServicio"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              :disabled="guardandoServicio"
-              class="flex-1 py-2 px-4 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-50"
-            >
-              <svg v-if="guardandoServicio" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ guardandoServicio ? 'Guardando...' : (servicioEditando ? 'Actualizar' : 'Crear') }}
-            </button>
-          </div>
-        </form>
-      </div>
-      </div>
-    </Transition>
-  </div>
-</Transition>
-
-<!-- Modal para crear/editar beneficio -->
-<Transition name="fade">
-  <div v-if="mostrarModalNuevoBeneficio" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalBeneficio"></div>
-    <Transition name="modal">
-    
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
-      <!-- Header -->
-      <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-black text-gray-900 dark:text-white">
-            {{ beneficioEditando ? 'Editar Beneficio' : 'Nuevo Beneficio' }}
-          </h3>
-          <button @click="cerrarModalBeneficio" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Content -->
-      <div class="p-4">
-        <form @submit.prevent="guardarBeneficio" class="space-y-4">
-          <div>
-            <label for="mes_requerido" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Mes requerido <span class="text-red-500">*</span>
-            </label>
-            <input
-              id="mes_requerido"
-              v-model.number="formBeneficio.mes_requerido"
-              type="number"
-              min="1"
-              required
-              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
-              placeholder="1">
-          </div>
-
-          <div>
-            <label for="tipo_beneficio" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Tipo de beneficio <span class="text-red-500">*</span>
-            </label>
-            <input
-              id="tipo_beneficio"
-              v-model="formBeneficio.tipo_beneficio"
-              type="text"
-              required
-              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
-              placeholder="Ej: Visita técnica gratis">
-          </div>
-          
-          <div>
-            <label for="descripcion_beneficio" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Descripción <span class="text-red-500">*</span>
-            </label>
-            <textarea
-              id="descripcion_beneficio"
-              v-model="formBeneficio.descripcion"
-              rows="3"
-              required
-              class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
-              placeholder="Descripción detallada del beneficio"></textarea>
-          </div>
-
-          <!-- Buttons -->
-          <div class="flex space-x-3 pt-2">
-            <button
-              type="button"
-              @click="cerrarModalBeneficio"
-              class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              :disabled="guardandoBeneficio"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              :disabled="guardandoBeneficio"
-              class="flex-1 py-2 px-4 bg-emerald-600 text-white font-medium text-sm rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center disabled:opacity-50"
-            >
-              <svg v-if="guardandoBeneficio" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ guardandoBeneficio ? 'Guardando...' : (beneficioEditando ? 'Actualizar' : 'Crear') }}
-            </button>
-          </div>
-        </form>
-      </div>
-      </div>
-    </Transition>
-  </div>
-</Transition>
-
-<!-- Modal de Confirmación -->
-<Transition name="fade">
-  <div v-if="mostrarModalConfirmacion" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="mostrarModalConfirmacion = false"></div>
-    <Transition name="modal">
-    
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
-      <!-- Header -->
-      <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-black text-gray-900 dark:text-white">{{ tituloConfirmacion }}</h3>
-          <button @click="mostrarModalConfirmacion = false" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Content -->
-      <div class="p-4">
-        <div class="text-center mb-6">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 mb-4">
-            <svg class="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
-            {{ mensajeConfirmacion }}
-          </p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            Esta acción no se puede deshacer.
-          </p>
-        </div>
+    <!-- Modal para crear/editar servicio -->
+    <Transition name="fade">
+      <div v-if="mostrarModalNuevoServicio" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalServicio"></div>
+        <Transition name="modal">
         
-        <!-- Buttons -->
-        <div class="flex space-x-3">
-          <button 
-            type="button"
-            @click="mostrarModalConfirmacion = false"
-            class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button 
-            type="button"
-            @click="ejecutarAccionConfirmada"
-            class="flex-1 py-2 px-4 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
-          >
-            Confirmar
-          </button>
-        </div>
-      </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">
+                {{ servicioEditando ? 'Editar Servicio' : 'Nuevo Servicio' }}
+              </h3>
+              <button @click="cerrarModalServicio" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4">
+            <form @submit.prevent="guardarServicio" class="space-y-4">
+              <div>
+                <label for="nombre" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nombre del servicio <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="nombre"
+                  v-model="formServicio.nombre"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: Reparación eléctrica">
+              </div>
+              
+              <div>
+                <label for="descripcion" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  id="descripcion"
+                  v-model="formServicio.descripcion"
+                  rows="3"
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="Descripción detallada del servicio"></textarea>
+              </div>
+              
+              <div class="flex items-center">
+                <input
+                  id="estado"
+                  v-model="formServicio.estado"
+                  type="checkbox"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded">
+                <label for="estado" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  Activo
+                </label>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  @click="cerrarModalServicio"
+                  class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  :disabled="guardandoServicio"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="guardandoServicio"
+                  class="flex-1 py-2 px-4 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-50"
+                >
+                  <svg v-if="guardandoServicio" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {{ guardandoServicio ? 'Guardando...' : (servicioEditando ? 'Actualizar' : 'Crear') }}
+                </button>
+              </div>
+            </form>
+          </div>
+          </div>
+        </Transition>
       </div>
     </Transition>
-  </div>
-</Transition>
+
+    <!-- Modal para crear/editar beneficio -->
+    <Transition name="fade">
+      <div v-if="mostrarModalNuevoBeneficio" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalBeneficio"></div>
+        <Transition name="modal">
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">
+                {{ beneficioEditando ? 'Editar Beneficio' : 'Nuevo Beneficio' }}
+              </h3>
+              <button @click="cerrarModalBeneficio" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4">
+            <form @submit.prevent="guardarBeneficio" class="space-y-4">
+              <div>
+                <label for="mes_requerido" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Mes requerido <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="mes_requerido"
+                  v-model.number="formBeneficio.mes_requerido"
+                  type="number"
+                  min="1"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
+                  placeholder="1">
+              </div>
+
+              <div>
+                <label for="tipo_beneficio" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tipo de beneficio <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="tipo_beneficio"
+                  v-model="formBeneficio.tipo_beneficio"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: Visita técnica gratis">
+              </div>
+              
+              <div>
+                <label for="descripcion_beneficio" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Descripción <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="descripcion_beneficio"
+                  v-model="formBeneficio.descripcion"
+                  rows="3"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white"
+                  placeholder="Descripción detallada del beneficio"></textarea>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  @click="cerrarModalBeneficio"
+                  class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  :disabled="guardandoBeneficio"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="guardandoBeneficio"
+                  class="flex-1 py-2 px-4 bg-emerald-600 text-white font-medium text-sm rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center disabled:opacity-50"
+                >
+                  <svg v-if="guardandoBeneficio" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {{ guardandoBeneficio ? 'Guardando...' : (beneficioEditando ? 'Actualizar' : 'Crear') }}
+                </button>
+              </div>
+            </form>
+          </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Modal para crear/editar cuenta bancaria -->
+    <Transition name="fade">
+      <div v-if="mostrarModalNuevaCuenta" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalCuenta"></div>
+        <Transition name="modal">
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">
+                {{ cuentaEditando ? 'Editar Cuenta' : 'Nueva Cuenta' }}
+              </h3>
+              <button @click="cerrarModalCuenta" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4">
+            <form @submit.prevent="guardarCuenta" class="space-y-4">
+              <div>
+                <label for="banco" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Banco <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="banco"
+                  v-model="formCuenta.banco"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: BAC, BANPAIS, FICOHSA">
+              </div>
+
+              <div>
+                <label for="beneficiario" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Beneficiario (ID) <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="beneficiario"
+                  v-model="formCuenta.beneficiario"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: 1101200100595">
+              </div>
+              
+              <div>
+                <label for="num_cuenta" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Número de Cuenta <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="num_cuenta"
+                  v-model="formCuenta.num_cuenta"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: 34567887">
+              </div>
+
+              <div>
+                <label for="tipo" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tipo de Cuenta <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="tipo"
+                  v-model="formCuenta.tipo"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: Ahorro, Cheques, Dólares">
+              </div>
+              
+              <div class="flex items-center">
+                <input
+                  id="activo_cuenta"
+                  v-model="formCuenta.activo"
+                  type="checkbox"
+                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 dark:border-gray-600 rounded">
+                <label for="activo_cuenta" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  Cuenta activa
+                </label>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  @click="cerrarModalCuenta"
+                  class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  :disabled="guardandoCuenta"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="guardandoCuenta"
+                  class="flex-1 py-2 px-4 bg-teal-600 text-white font-medium text-sm rounded-lg hover:bg-teal-700 transition-colors flex items-center justify-center disabled:opacity-50"
+                >
+                  <svg v-if="guardandoCuenta" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {{ guardandoCuenta ? 'Guardando...' : (cuentaEditando ? 'Actualizar' : 'Crear') }}
+                </button>
+              </div>
+            </form>
+          </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Modal para ver detalles de cuenta bancaria -->
+    <Transition name="fade">
+      <div v-if="mostrarModalDetallesCuenta" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarDetallesCuenta"></div>
+        <Transition name="modal">
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-md max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">
+                Detalles de la Cuenta
+              </h3>
+              <button @click="cerrarDetallesCuenta" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4" v-if="cuentaSeleccionada">
+            <!-- Información de la cuenta -->
+            <div class="space-y-4 mb-6">
+              <div class="flex items-center justify-center mb-4">
+                <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900 rounded-full flex items-center justify-center">
+                  <span class="text-2xl">🏦</span>
+                </div>
+              </div>
+              
+              <div class="text-center mb-6">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ cuentaSeleccionada.banco }}</h4>
+                <span 
+                  :class="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': cuentaSeleccionada.activo,
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !cuentaSeleccionada.activo
+                  }" 
+                  class="px-3 py-1 rounded-full text-xs font-medium">
+                  {{ cuentaSeleccionada.activo ? 'Activa' : 'Inactiva' }}
+                </span>
+              </div>
+
+              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Beneficiario (ID)</label>
+                  <p class="text-sm font-mono text-gray-900 dark:text-white">{{ cuentaSeleccionada.beneficiario }}</p>
+                </div>
+                
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Número de Cuenta</label>
+                  <p class="text-sm font-mono text-gray-900 dark:text-white">{{ cuentaSeleccionada.num_cuenta }}</p>
+                </div>
+                
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Tipo de Cuenta</label>
+                  <p class="text-sm text-gray-900 dark:text-white">{{ cuentaSeleccionada.tipo }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex space-x-3">
+              <button
+                @click="editarCuenta(cuentaSeleccionada)"
+                class="flex-1 py-2 px-4 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Editar
+              </button>
+              <button
+                @click="confirmarEliminarCuenta(cuentaSeleccionada)"
+                class="flex-1 py-2 px-4 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar
+              </button>
+            </div>
+          </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Modal de Confirmación -->
+    <Transition name="fade">
+      <div v-if="mostrarModalConfirmacion" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="mostrarModalConfirmacion = false"></div>
+        <Transition name="modal">
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">{{ tituloConfirmacion }}</h3>
+              <button @click="mostrarModalConfirmacion = false" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4">
+            <div class="text-center mb-6">
+              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 mb-4">
+                <svg class="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                {{ mensajeConfirmacion }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Esta acción no se puede deshacer.
+              </p>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="flex space-x-3">
+              <button 
+                type="button"
+                @click="mostrarModalConfirmacion = false"
+                class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button"
+                @click="ejecutarAccionConfirmada"
+                class="flex-1 py-2 px-4 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
   </div>
 
   <!-- Modal de búsqueda de usuario -->
@@ -1317,6 +1653,23 @@ const formBeneficio = ref({
 });
 const filtroBusquedaBeneficios = ref('')
 
+// Estados para gestión de cuentas bancarias
+const cuentas = ref([]);
+const cuentasCargando = ref(false);
+const cuentaEditando = ref(null);
+const mostrarModalNuevaCuenta = ref(false);
+const mostrarModalDetallesCuenta = ref(false);
+const guardandoCuenta = ref(false);
+const cuentaSeleccionada = ref(null);
+const formCuenta = ref({
+  banco: '',
+  beneficiario: '',
+  num_cuenta: '',
+  tipo: '',
+  activo: true
+});
+const filtroBusquedaCuentas = ref('')
+
 // Paginación
 const paginacion = ref({
   paginaActual: 1,
@@ -1332,6 +1685,17 @@ const paginacion = ref({
 const paginacionBeneficios = ref({
   paginaActual: 1,
   porPagina: 3,
+  total: 0,
+  totalPaginas: 1,
+  paginas: [],
+  desde: 0,
+  hasta: 0
+})
+
+// Paginación para cuentas
+const paginacionCuentas = ref({
+  paginaActual: 1,
+  porPagina: 4, // Mostrar 4 cuentas por página (2x2)
   total: 0,
   totalPaginas: 1,
   paginas: [],
@@ -1393,6 +1757,24 @@ const beneficiosFiltrados = computed(() => {
     resultado = resultado.filter(beneficio => 
       beneficio.tipo_beneficio.toLowerCase().includes(busqueda) || 
       (beneficio.descripcion && beneficio.descripcion.toLowerCase().includes(busqueda))
+    )
+  }
+  
+  return resultado
+})
+
+// Computed para cuentas filtradas
+const cuentasFiltradas = computed(() => {
+  let resultado = [...cuentas.value]
+  
+  // Aplicar filtro de búsqueda
+  if (filtroBusquedaCuentas.value) {
+    const busqueda = filtroBusquedaCuentas.value.toLowerCase()
+    resultado = resultado.filter(cuenta => 
+      cuenta.banco.toLowerCase().includes(busqueda) || 
+      cuenta.beneficiario.toLowerCase().includes(busqueda) ||
+      cuenta.num_cuenta.toLowerCase().includes(busqueda) ||
+      (cuenta.tipo && cuenta.tipo.toLowerCase().includes(busqueda))
     )
   }
   
@@ -1463,6 +1845,37 @@ const paginacionBeneficiosCalculada = computed(() => {
   }
 })
 
+// Computed para la paginación de cuentas
+const paginacionCuentasCalculada = computed(() => {
+  const total = cuentasFiltradas.value.length
+  const totalPaginas = Math.ceil(total / paginacionCuentas.value.porPagina) || 1
+  const paginaActual = Math.min(paginacionCuentas.value.paginaActual, totalPaginas || 1)
+  
+  const inicio = (paginaActual - 1) * paginacionCuentas.value.porPagina
+  const fin = inicio + paginacionCuentas.value.porPagina
+  
+  let paginas = []
+  if (totalPaginas > 0) {
+    let paginaInicial = Math.max(1, paginaActual - 2)
+    if (totalPaginas - paginaActual < 2) {
+      paginaInicial = Math.max(1, totalPaginas - 4)
+    }
+    paginas = Array.from(
+      { length: Math.min(5, totalPaginas) },
+      (_, i) => Math.min(paginaInicial + i, totalPaginas)
+    ).filter((pagina, index, array) => !index || pagina > array[index - 1])
+  }
+  
+  return {
+    total,
+    totalPaginas,
+    paginaActual,
+    desde: total > 0 ? inicio + 1 : 0,
+    hasta: Math.min(fin, total),
+    paginas
+  }
+})
+
 // Servicios paginados
 const serviciosPaginados = computed(() => {
   const inicio = (paginacionCalculada.value.paginaActual - 1) * paginacion.value.porPagina
@@ -1477,6 +1890,13 @@ const beneficiosPaginados = computed(() => {
   return beneficiosFiltrados.value.slice(inicio, fin)
 })
 
+// Cuentas paginadas
+const cuentasPaginadas = computed(() => {
+  const inicio = (paginacionCuentasCalculada.value.paginaActual - 1) * paginacionCuentas.value.porPagina
+  const fin = inicio + paginacionCuentas.value.porPagina
+  return cuentasFiltradas.value.slice(inicio, fin)
+})
+
 // Watchers para reiniciar la paginación cuando cambian los filtros
 watch([filtroBusqueda, filtroEstado], () => {
   paginacion.value.paginaActual = 1
@@ -1484,6 +1904,10 @@ watch([filtroBusqueda, filtroEstado], () => {
 
 watch([filtroBusquedaBeneficios], () => {
   paginacionBeneficios.value.paginaActual = 1
+})
+
+watch([filtroBusquedaCuentas], () => {
+  paginacionCuentas.value.paginaActual = 1
 })
 
 // ===== TOAST NOTIFICATION =====
@@ -1509,6 +1933,231 @@ const tipoIcono = {
   'advertencia': '⚠️',
   'urgente': '🚨',
   'mantenimiento': '🔧'
+}
+
+// ===== FUNCIONES PARA CUENTAS BANCARIAS =====
+const cargarCuentas = async () => {
+  cuentasCargando.value = true;
+  try {
+    const response = await $api('/cuentas/todas', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (Array.isArray(response)) {
+      cuentas.value = response.map(cuenta => ({
+        ...cuenta,
+        // Asegurar que activo sea booleano
+        activo: Boolean(cuenta.activo)
+      }));
+    } else {
+      showToastMessage('Error al cargar las cuentas bancarias', 'error');
+    }
+  } catch (error) {
+    console.error('Error al cargar cuentas:', error);
+    showToastMessage('Error al cargar las cuentas bancarias', 'error');
+  } finally {
+    cuentasCargando.value = false;
+  }
+}
+
+const abrirDetallesCuenta = (cuenta) => {
+  cuentaSeleccionada.value = cuenta;
+  mostrarModalDetallesCuenta.value = true;
+}
+
+const cerrarDetallesCuenta = () => {
+  mostrarModalDetallesCuenta.value = false;
+  setTimeout(() => {
+    cuentaSeleccionada.value = null;
+  }, 300);
+}
+
+const editarCuenta = (cuenta) => {
+  // Cerrar modal de detalles si está abierto
+  mostrarModalDetallesCuenta.value = false;
+  
+  // Usar nextTick para asegurarnos que el modal se cierre antes de abrir el de edición
+  nextTick(() => {
+    cuentaEditando.value = cuenta.id_cuenta;
+    formCuenta.value = {
+      banco: cuenta.banco,
+      beneficiario: cuenta.beneficiario,
+      num_cuenta: cuenta.num_cuenta,
+      tipo: cuenta.tipo,
+      activo: cuenta.activo
+    };
+    mostrarModalNuevaCuenta.value = true;
+  });
+}
+
+const cerrarModalCuenta = () => {
+  mostrarModalNuevaCuenta.value = false;
+  setTimeout(() => {
+    cuentaEditando.value = null;
+    formCuenta.value = {
+      banco: '',
+      beneficiario: '',
+      num_cuenta: '',
+      tipo: '',
+      activo: true
+    };
+  }, 300);
+}
+
+const crearCuenta = async () => {
+  try {
+    const response = await $api('/cuentas', {
+      method: 'POST',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        banco: formCuenta.value.banco,
+        beneficiario: formCuenta.value.beneficiario,
+        num_cuenta: formCuenta.value.num_cuenta,
+        tipo: formCuenta.value.tipo,
+        activo: formCuenta.value.activo ? 1 : 0
+      })
+    });
+
+    showToastMessage('Cuenta bancaria creada correctamente', 'success');
+    return true;
+  } catch (error) {
+    console.error('Error al crear cuenta:', error);
+    const errorMessage = error.data?.message || 'Error al crear la cuenta bancaria. Por favor, inténtalo de nuevo.';
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+};
+
+const actualizarCuenta = async () => {
+  try {
+    if (!cuentaEditando.value) {
+      throw new Error('No se ha especificado la cuenta a actualizar');
+    }
+
+    const datosEnviar = {
+      banco: formCuenta.value.banco,
+      beneficiario: formCuenta.value.beneficiario,
+      num_cuenta: formCuenta.value.num_cuenta,
+      tipo: formCuenta.value.tipo,
+      activo: formCuenta.value.activo ? 1 : 0
+    };
+
+    console.log('Datos enviados al backend:', JSON.stringify(datosEnviar, null, 2));
+
+    const response = await $api(`/cuentas/${cuentaEditando.value}`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify(datosEnviar)
+    }); 
+
+    console.log('Respuesta del servidor:', response);
+    showToastMessage('Cuenta bancaria actualizada correctamente', 'success');
+    return true;
+  } catch (error) {
+    console.error('Error al actualizar cuenta:', error);
+    const errorMessage = error.data?.message || 'Error al actualizar la cuenta bancaria. Por favor, inténtalo de nuevo.';
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+};
+
+const guardarCuenta = async () => {
+  guardandoCuenta.value = true;
+  
+  try {
+    const esEdicion = !!cuentaEditando.value;
+    
+    const resultado = esEdicion 
+      ? await actualizarCuenta() 
+      : await crearCuenta();
+    
+    if (resultado) {
+      await cargarCuentas();
+      cerrarModalCuenta();
+    }
+    
+    return resultado;
+  } catch (error) {
+    console.error('Error en guardarCuenta:', error);
+    showToastMessage('Ocurrió un error inesperado', 'error');
+    return false;
+  } finally {
+    guardandoCuenta.value = false;
+  }
+}
+
+const confirmarEliminarCuenta = (cuenta) => {
+  // Cerrar modal de detalles si está abierto
+  mostrarModalDetallesCuenta.value = false;
+  
+  servicioSeleccionado.value = cuenta.id_cuenta;
+  tituloConfirmacion.value = 'Eliminar Cuenta Bancaria';
+  mensajeConfirmacion.value = `¿Estás seguro de que deseas eliminar la cuenta ${cuenta.banco} - ${cuenta.num_cuenta}? Esta acción no se puede deshacer.`;
+  accionConfirmar.value = () => eliminarCuenta(cuenta.id_cuenta);
+  mostrarModalConfirmacion.value = true;
+}
+
+const eliminarCuenta = async (cuentaId) => {
+  if (!cuentaId) {
+    console.error('ID de cuenta no válido');
+    showToastMessage('Error: No se pudo identificar la cuenta a eliminar', 'error');
+    return false;
+  }
+  
+  try {
+    const response = await $api(`/cuentas/${cuentaId}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    showToastMessage('Cuenta bancaria eliminada correctamente', 'success');
+    await cargarCuentas();
+    return true;
+  } catch (error) {
+    console.error('Error al eliminar cuenta:', error);
+    const errorMessage = error.data?.message || error.message || 'Error al eliminar la cuenta bancaria';
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+}
+
+const cambiarPaginaCuentas = (nuevaPagina, event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  if (nuevaPagina < 1 || nuevaPagina > paginacionCuentasCalculada.value.totalPaginas) {
+    return false;
+  }
+  
+  paginacionCuentas.value.paginaActual = nuevaPagina;
+  
+  const cuentasContainer = document.querySelector('.grid.grid-cols-2');
+  if (cuentasContainer) {
+    cuentasContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  return false;
 }
 
 // ===== FUNCIONES PARA CONFIGURACIONES =====
@@ -2566,6 +3215,10 @@ onMounted(async () => {
   try {
     await Promise.all([
       cargarConfiguraciones(),
+      cargarCuentas().catch(error => {
+        console.error('Error al cargar cuentas:', error);
+        showToastMessage('Error al cargar las cuentas bancarias', 'error');
+      }),
       cargarBeneficios().catch(error => {
         console.error('Error al cargar beneficios:', error);
         showToastMessage('Error al cargar los beneficios', 'error');

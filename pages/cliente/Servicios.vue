@@ -2952,12 +2952,13 @@ const rejectQuotation = async () => {
     isProcessingQuotation.value = false
   }
 }
-
-// =========================
 // FUNCIONES DE PROCESAMIENTO
 // =========================
 
 const processVisitPayment = async () => {
+  // Prevenir múltiples envíos
+  if (isProcessingPayment.value) return;
+  
   if (!selectedAccount.value) {
     showError('Por favor selecciona una cuenta bancaria');
     return;
@@ -3083,6 +3084,21 @@ const processVisitPayment = async () => {
 // FUNCIONES DE PAGO
 // =========================
 const processPayment = async () => { 
+  // Prevenir múltiples envíos
+  if (isProcessingPayment.value) return;
+  
+  if (!selectedAccount.value) {
+    showError('Por favor selecciona una cuenta bancaria');
+    return;
+  }
+  
+  if (!comprobante.value?.trim()) {
+    showError('Por favor ingresa el número de comprobante');
+    return;
+  }
+  
+  isProcessingPayment.value = true;
+  
   const payload = {
     id_cotizacion: Number(quotationData.value.id_cotizacion),
     id_solicitud: Number(selectedService.value.id),

@@ -27,7 +27,7 @@ export default defineNuxtPlugin(() => {
       headers: { ...options.headers },
     };
 
-    const excludedPaths = ['/auth/login', '/auth/refresh-token', '/auth/logout', '/auth/register'];
+    const excludedPaths = ['/registro', '/auth', '/usuario-deshabilitado','/reset-password', '/forgot-password'];
     const isExcluded = excludedPaths.some(path => url.includes(path));
     
     if (authStore.token) {

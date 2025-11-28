@@ -893,18 +893,28 @@ const clearOldCache = () => {
 }
 
 // Limpiar caché de movimientos
-const clearMovementsCache = (userId, movementType = 'retiros') => {
+const clearMovementsCache = (userId = null, movementType = null) => {
   try {
-    // Eliminar todas las entradas de caché para el tipo de movimiento
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith(`${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}`)) {
-        localStorage.removeItem(key);
-      }
+    const user = userId || userCookie.value?.id_usuario;
+    if (!user) return;
+
+    // Si no se especifica el tipo, limpiar ambos
+    const types = movementType ? [movementType] : ['ingresos', 'retiros'];
+    
+    types.forEach(type => {
+      // Eliminar todas las entradas de caché para el tipo de movimiento
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(`${MOVEMENTS_CACHE_KEY}_${user}_${type}`)) {
+          localStorage.removeItem(key);
+        }
+      });
     });
+    
+    console.log('Caché de movimientos limpiado correctamente');
   } catch (error) {
     console.error('Error al limpiar la caché de movimientos:', error);
   }
-}
+};
 
 // ===== FUNCIONES DE CARGA DE DATOS =====
 const loadMovements = async (page = 1, forceRefresh = false) => {
@@ -1037,12 +1047,17 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
 };
 
 // Función para forzar la recarga de datos
-const refreshMovements = () => {
-  // Actualizar el timestamp para invalidar el caché
-  localStorage.setItem('movements_cache_timestamp', Date.now().toString());
-  // Forzar recarga
-  loadMovements(1, true);
-}; 
+const refreshMovements = async () => {
+  try {
+    // Limpiar caché primero
+    await clearMovementsCache();
+    // Luego cargar datos frescos
+    await loadMovements(1, true);
+  } catch (error) {
+    console.error('Error al refrescar movimientos:', error);
+    showError('Error al actualizar los movimientos. Por favor, intente de nuevo.');
+  }
+};
 
 // Eliminar loadMoreEarnings y loadMoreWithdrawals ya que ahora usamos paginación
 
@@ -1399,19 +1414,49 @@ const loadMonthlyServices = async () => {
 
 // ===== FUNCIONES DE GRÁFICOS =====
 const createChart = () => {
-  if (!selectedChart.value) return
-  
-  if (window.currentChart) {
-    window.currentChart.destroy()
+  try {
+    if (!selectedChart.value) {
+      console.warn('No se ha seleccionado ningún gráfico')
+      return
+    }
+
+    // Destruir el gráfico anterior si existe
+    if (window.currentChart) {
+      try {
+        window.currentChart.destroy()
+      } catch (e) {
+        console.warn('Error al destruir el gráfico anterior:', e)
+      }
+      window.currentChart = null
+    }
+
+    // Obtener el elemento canvas
+    const canvas = document.getElementById(`chart-${selectedChart.value}`)
+    if (!canvas) {
+      console.warn(`No se encontró el elemento canvas con ID: chart-${selectedChart.value}`)
+      return
+    }
+
+    // Obtener el contexto 2D
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      console.error('No se pudo obtener el contexto 2D del canvas')
+      return
+    }
+
+    // Verificar si el canvas es visible
+    if (canvas.offsetParent === null) {
+      console.warn('El canvas no es visible en el DOM')
+      return
+    }
+  } catch (error) {
+    console.error('Error al crear el gráfico:', error);
+    showError('No se pudo crear el gráfico. Por favor, intente de nuevo.');
+    return;
   }
-  
-  const canvas = document.getElementById(`chart-${selectedChart.value}`)
-  if (!canvas) return
 
-  const ctx = canvas.getContext('2d')
-  const isDark = document.documentElement.classList.contains('dark')
-
-  let config = {}
+    const isDark = document.documentElement.classList.contains('dark')
+    let config = {}
   
   switch (selectedChart.value) {
     case 'earnings':
@@ -1686,7 +1731,32 @@ const createChart = () => {
       break
   }
 
-  window.currentChart = new Chart(ctx, config)
+  // Crear el nuevo gráfico
+  try {
+    window.currentChart = new Chart(ctx, config)
+    
+    // Manejar el redimensionamiento de la ventana
+    const handleResize = () => {
+      if (window.currentChart) {
+        try {
+          window.currentChart.resize()
+        } catch (e) {
+          console.warn('Error al redimensionar el gráfico:', e)
+        }
+      }
+    }
+    
+    // Limpiar listener anterior y agregar uno nuevo
+    window.removeEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResize)
+    
+    // Forzar un redimensionamiento inicial
+    setTimeout(handleResize, 100)
+    
+  } catch (error) {
+    console.error('Error al crear el gráfico:', error)
+    window.currentChart = null
+  }
 }
 
 // ===== FUNCIONES DE MODAL =====
@@ -1844,30 +1914,52 @@ watch(selectedChart, (newVal, oldVal) => {
 
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
-  Chart.register(...registerables)
-  await Promise.all([
-    loadMonthlyIncomes(),
-    loadMonthlyServices(),
-    loadServicesByType(),
-    loadEstadisticasGenerales(),
-    loadMovements(),
-    loadReviews(),
-    // Limpiar caché al montar el componente
-    clearMovementsCache(),
-    // Cargar datos frescos
-    refreshMovements()
-  ])
-  
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.classList.add('dark')
-  }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-    if (event.matches) {
+  try {
+    // Registrar componentes de Chart.js
+    Chart.register(...registerables)
+    
+    // Limpiar caché primero
+    clearMovementsCache();
+    
+    // Cargar datos iniciales
+    await Promise.all([
+      loadMonthlyIncomes(),
+      loadMonthlyServices(),
+      loadServicesByType(),
+      loadEstadisticasGenerales(),
+      loadReviews()
+    ]);
+    
+    // Cargar movimientos después de limpiar el caché
+    await refreshMovements();
+    
+    // Configurar tema oscuro
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
     }
-  }) 
+    
+    // Escuchar cambios en el tema
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      if (event.matches) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    });
+    
+    // Forzar una actualización del gráfico después de que todo esté cargado
+    await nextTick();
+    if (selectedChart.value) {
+      // Pequeño retraso para asegurar que el DOM esté listo
+      setTimeout(() => {
+        createChart();
+      }, 100);
+    }
+    
+  } catch (error) {
+    console.error('Error durante la inicialización:', error);
+    showError('Ocurrió un error al cargar los datos. Por favor, recarga la página.');
+  }
 })
 
 </script>

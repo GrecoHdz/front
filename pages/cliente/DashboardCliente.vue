@@ -1227,8 +1227,8 @@ const handleRequestService = async () => {
     showToast(
       '¡Solicitud enviada!', 
       tieneMembresiaActiva 
-        ? 'Solicitud Enviada! Pronto se le asignará un técnico.' 
-        : 'Solicitud Enviada! Ya puedes pagar la visita.',
+        ? 'Pronto se le asignará un técnico.' 
+        : 'Ya puedes pagar la visita.',
       'success'
     )
     

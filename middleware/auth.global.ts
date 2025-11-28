@@ -22,7 +22,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     '/', 
     '/registro', 
     '/auth', 
-    '/acceso-denegado', 
     '/usuario-deshabilitado',
     '/reset-password',
     '/forgot-password'
