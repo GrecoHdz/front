@@ -102,7 +102,7 @@
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
               <p class="text-gray-500 dark:text-gray-400 mb-1">Nombre</p>
               <p class="font-medium text-gray-900 dark:text-white">
-                {{ selectedPayment.usuario?.nombre || selectedPayment?.cliente?.nombre || 'N/A' }}
+                {{ selectedPayment.cliente?.nombre || selectedPayment.solicitud?.cliente?.nombre || selectedPayment.usuario?.nombre || 'N/A' }}
               </p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
@@ -361,8 +361,8 @@
             <div>
               <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Información del Cliente</h4>
               <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                <p class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ selectedPayment?.cliente?.nombre || 'Cliente no disponible' }}</p>
-                <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">{{ selectedPayment?.cliente?.telefono || '' }}</p>
+                <p class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ selectedService?.cliente?.nombre || selectedPayment?.cliente?.nombre }}</p>
+                <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">{{ selectedPayment?.cliente?.telefono || selectedPayment.solicitud?.cliente?.telefono || '' }}</p>
               </div>
             </div>
 
@@ -844,13 +844,13 @@
                      class="rounded-lg p-2 shadow-sm border text-[11px]">
                   <div class="mb-2">
                     <div class="flex items-center justify-between mb-1">
-                      <div class="flex items-center space-x-1.5">
-                        <div :class="getItemIconClass(item.status || item.estado)" class="w-5 h-5 rounded flex items-center justify-center">
+                      <div class="flex items-center space-x-1.5 flex-1 min-w-0">
+                        <div :class="getItemIconClass(item.status || item.estado)" class="w-5 h-5 rounded flex items-center justify-center flex-shrink-0">
                           <span :class="getItemIconTextClass(item.status || item.estado)" class="text-[10px]">{{ getItemIcon() }}</span>
                         </div>
-                        <h3 class="font-bold text-gray-900 dark:text-white text-[10px] truncate">{{ getItemTitle(item) }}</h3>
+                        <h3 class="font-bold text-gray-900 dark:text-white text-[10px] truncate flex-1 min-w-0">{{ getItemTitle(item) }}</h3>
                       </div>
-                      <p :class="getItemAmountClass(item.status || item.estado)" class="font-bold text-[10px] whitespace-nowrap">{{ formatCurrency(item.amount || item.monto || item.monto_total || 0) }}</p>
+                      <p :class="getItemAmountClass(item.status || item.estado)" class="font-bold text-[9px] whitespace-nowrap flex-shrink-0 ml-1">{{ formatCurrency(item.amount || item.monto || item.monto_total || 0) }}</p>
                     </div> 
                   </div>
                   <button @click="showItemDetails(item)" 
@@ -2376,11 +2376,13 @@ const getTransactionSubtitle = (transaction) => {
         if (transaction.colonia) parts.push(transaction.colonia);
         break;
       case 'ingreso_referido':
-        return transaction.id_usuario || transaction.nombre_usuario || 'Usuario referido';
+        const nombreReferido = transaction.id_usuario || transaction.nombre_usuario || 'Usuario referido';
+        return nombreReferido.length > 17 ? nombreReferido.substring(0, 15) + '...' : nombreReferido;
     }
     
     if (parts.length === 0 && transaction.nombre_usuario && transaction.nombre_usuario !== 'Usuario') {
-      parts.push(transaction.nombre_usuario);
+      const nombre = transaction.nombre_usuario;
+      parts.push(nombre.length > 17 ? nombre.substring(0, 15) + '...' : nombre);
     }
     
     return parts.join(' • ');
