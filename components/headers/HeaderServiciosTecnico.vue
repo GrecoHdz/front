@@ -134,6 +134,8 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const isLoading = ref(false)
+const { $api } = useNuxtApp();
+
 
 // Filtros de servicio
 const serviceFilters = [
@@ -217,7 +219,7 @@ const onNotificationClick = async (notification) => {
   });
 
   try {
-    const response = await $fetch('/notificaciones/marcar/individual', {
+    const response = await $api('/notificaciones/marcar/individual', {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {

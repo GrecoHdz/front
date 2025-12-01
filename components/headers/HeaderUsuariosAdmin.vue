@@ -50,6 +50,8 @@ const config = useRuntimeConfig()
 const auth = useAuthStore()
 const user = computed(() => auth.user || {});
 const isLoading = ref(false) 
+const { $api } = useNuxtApp();
+
 
 defineEmits(['toggle-notifications']);
 
@@ -72,7 +74,7 @@ const onNotificationClick = async (notification) => {
   });
 
   try {
-    const response = await $fetch('/notificaciones/marcar/individual', {
+    const response = await $api('/notificaciones/marcar/individual', {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {

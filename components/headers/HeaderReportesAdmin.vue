@@ -60,6 +60,7 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const isLoading = ref(false)
+const { $api } = useNuxtApp();
 
 // Toast state
 const toast = reactive({
@@ -96,7 +97,7 @@ const onNotificationClick = async (notification) => {
   });
 
   try {
-    const response = await $fetch('/notificaciones/marcar/individual', {
+    const response = await $api('/notificaciones/marcar/individual', {
       baseURL: config.public.apiBase,
       method: 'PUT',
       headers: {

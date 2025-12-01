@@ -561,8 +561,7 @@
         </button>
 
         <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Última actualización: {{ new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
         </div>
 
         <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
@@ -694,8 +693,7 @@
         </button>
 
         <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Política de Privacidad</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Última actualización: {{ new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Política de Privacidad</h3> 
         </div>
 
         <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
