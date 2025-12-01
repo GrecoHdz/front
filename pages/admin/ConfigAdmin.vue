@@ -726,7 +726,123 @@
           </div>
         </div>
 
-        <!-- Card 7: Gestión de Notificaciones -->
+        <!-- Card 7: Gestión de Ciudades -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-cyan-100 dark:bg-cyan-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">🏙️</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  Gestión de Ciudades
+                </h3>
+                <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                  Administra las ciudades disponibles en el sistema
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="mostrarModalNuevaCiudad = true; cargarCiudades()"
+              class="px-4 py-2 text-sm bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors">
+              + Nueva Ciudad
+            </button>
+          </div>
+
+          <!-- Filtros y búsqueda -->
+          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4">
+            <div class="relative flex-1 min-w-0">
+              <input
+                v-model="filtroBusquedaCiudades"
+                type="text"
+                placeholder="Buscar ciudades..."
+                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-sm sm:text-base transition-all"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista de ciudades -->
+          <div class="space-y-3">
+            <div v-if="ciudadesCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+              <p>Cargando ciudades...</p>
+            </div>
+            
+            <div v-else-if="ciudadesFiltradas.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <span class="text-4xl mb-2 block">🏙️</span>
+              <p>No se encontraron ciudades</p>
+            </div>
+            
+            <div v-for="ciudad in ciudadesPaginadas" :key="ciudad.id_ciudad" 
+                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-lg">🏙️</span>
+                  <div>
+                    <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">{{ ciudad.nombre }}</h5>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
+                <button 
+                  @click="editarCiudad(ciudad)"
+                  class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Editar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="confirmarEliminarCiudad(ciudad)"
+                  class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Eliminar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación para ciudades -->
+          <div v-if="ciudadesFiltradas.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Página {{ paginacionCiudades.paginaActual }} de {{ paginacionCiudadesCalculada.totalPaginas }}
+              </div>
+              <div class="flex items-center space-x-1">
+                <button 
+                  @click="$event => cambiarPaginaCiudades(paginacionCiudades.paginaActual - 1, $event)" 
+                  :disabled="paginacionCiudades.paginaActual === 1 || ciudadesCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {{ paginacionCiudades.paginaActual }} / {{ paginacionCiudadesCalculada.totalPaginas }}
+                </span>
+                <button 
+                  @click="$event => cambiarPaginaCiudades(paginacionCiudades.paginaActual + 1, $event)" 
+                  :disabled="paginacionCiudades.paginaActual >= paginacionCiudadesCalculada.totalPaginas || ciudadesCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 8: Gestión de Notificaciones -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="flex items-center">
@@ -1157,6 +1273,72 @@
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   {{ guardandoBeneficio ? 'Guardando...' : (beneficioEditando ? 'Actualizar' : 'Crear') }}
+                </button>
+              </div>
+            </form>
+          </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Modal para crear/editar ciudad -->
+    <Transition name="fade">
+      <div v-if="mostrarModalNuevaCiudad" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalCiudad"></div>
+        <Transition name="modal">
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">
+                {{ ciudadEditando ? 'Editar Ciudad' : 'Nueva Ciudad' }}
+              </h3>
+              <button @click="cerrarModalCiudad" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4">
+            <form @submit.prevent="guardarCiudad" class="space-y-4">
+              <div>
+                <label for="nombre" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nombre de la ciudad <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="nombre"
+                  v-model="formCiudad.nombre"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: Tegucigalpa">
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  @click="cerrarModalCiudad"
+                  class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  :disabled="guardandoCiudad"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="guardandoCiudad"
+                  class="flex-1 py-2 px-4 bg-cyan-600 text-white font-medium text-sm rounded-lg hover:bg-cyan-700 transition-colors flex items-center justify-center disabled:opacity-50"
+                >
+                  <svg v-if="guardandoCiudad" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {{ guardandoCiudad ? 'Guardando...' : (ciudadEditando ? 'Actualizar' : 'Crear') }}
                 </button>
               </div>
             </form>
@@ -1670,6 +1852,17 @@ const formCuenta = ref({
 });
 const filtroBusquedaCuentas = ref('')
 
+// Estados para gestión de ciudades
+const ciudades = ref([]);
+const ciudadesCargando = ref(false);
+const ciudadEditando = ref(null);
+const mostrarModalNuevaCiudad = ref(false);
+const guardandoCiudad = ref(false);
+const formCiudad = ref({
+  nombre: ''
+});
+const filtroBusquedaCiudades = ref('')
+
 // Paginación
 const paginacion = ref({
   paginaActual: 1,
@@ -1696,6 +1889,17 @@ const paginacionBeneficios = ref({
 const paginacionCuentas = ref({
   paginaActual: 1,
   porPagina: 4, // Mostrar 4 cuentas por página (2x2)
+  total: 0,
+  totalPaginas: 1,
+  paginas: [],
+  desde: 0,
+  hasta: 0
+})
+
+// Paginación para ciudades
+const paginacionCiudades = ref({
+  paginaActual: 1,
+  porPagina: 3, // Mostrar 3 ciudades por página
   total: 0,
   totalPaginas: 1,
   paginas: [],
@@ -1845,6 +2049,52 @@ const paginacionBeneficiosCalculada = computed(() => {
   }
 })
 
+// Computed para ciudades filtradas
+const ciudadesFiltradas = computed(() => {
+  let resultado = [...ciudades.value]
+  
+  // Aplicar filtro de búsqueda
+  if (filtroBusquedaCiudades.value) {
+    const busqueda = filtroBusquedaCiudades.value.toLowerCase()
+    resultado = resultado.filter(ciudad => 
+      ciudad.nombre.toLowerCase().includes(busqueda)
+    )
+  }
+  
+  return resultado
+})
+
+// Computed para la paginación de ciudades
+const paginacionCiudadesCalculada = computed(() => {
+  const total = ciudadesFiltradas.value.length
+  const totalPaginas = Math.ceil(total / paginacionCiudades.value.porPagina) || 1
+  const paginaActual = Math.min(paginacionCiudades.value.paginaActual, totalPaginas || 1)
+  
+  const inicio = (paginaActual - 1) * paginacionCiudades.value.porPagina
+  const fin = inicio + paginacionCiudades.value.porPagina
+  
+  let paginas = []
+  if (totalPaginas > 0) {
+    let paginaInicial = Math.max(1, paginaActual - 2)
+    if (totalPaginas - paginaActual < 2) {
+      paginaInicial = Math.max(1, totalPaginas - 4)
+    }
+    paginas = Array.from(
+      { length: Math.min(5, totalPaginas) },
+      (_, i) => Math.min(paginaInicial + i, totalPaginas)
+    ).filter((pagina, index, array) => !index || pagina > array[index - 1])
+  }
+  
+  return {
+    total,
+    totalPaginas,
+    paginaActual,
+    desde: total > 0 ? inicio + 1 : 0,
+    hasta: Math.min(fin, total),
+    paginas
+  }
+})
+
 // Computed para la paginación de cuentas
 const paginacionCuentasCalculada = computed(() => {
   const total = cuentasFiltradas.value.length
@@ -1897,6 +2147,13 @@ const cuentasPaginadas = computed(() => {
   return cuentasFiltradas.value.slice(inicio, fin)
 })
 
+// Ciudades paginadas
+const ciudadesPaginadas = computed(() => {
+  const inicio = (paginacionCiudadesCalculada.value.paginaActual - 1) * paginacionCiudades.value.porPagina
+  const fin = inicio + paginacionCiudades.value.porPagina
+  return ciudadesFiltradas.value.slice(inicio, fin)
+})
+
 // Watchers para reiniciar la paginación cuando cambian los filtros
 watch([filtroBusqueda, filtroEstado], () => {
   paginacion.value.paginaActual = 1
@@ -1908,6 +2165,10 @@ watch([filtroBusquedaBeneficios], () => {
 
 watch([filtroBusquedaCuentas], () => {
   paginacionCuentas.value.paginaActual = 1
+})
+
+watch([filtroBusquedaCiudades], () => {
+  paginacionCiudades.value.paginaActual = 1
 })
 
 // ===== TOAST NOTIFICATION =====
@@ -1933,6 +2194,151 @@ const tipoIcono = {
   'advertencia': '⚠️',
   'urgente': '🚨',
   'mantenimiento': '🔧'
+}
+
+// ===== FUNCIONES PARA CIUDADES =====
+const cargarCiudades = async () => {
+  ciudadesCargando.value = true;
+  try {
+    const response = await $api('/ciudad', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (response && Array.isArray(response)) {
+      ciudades.value = response.map(ciudad => ({
+        ...ciudad,
+        nombre: ciudad.nombre_ciudad // Mapear nombre_ciudad a nombre
+      }));
+    } else {
+      showToastMessage('Error al cargar las ciudades', 'error');
+    }
+  } catch (error) {
+    console.error('Error al cargar ciudades:', error);
+    showToastMessage('Error al cargar las ciudades', 'error');
+  } finally {
+    ciudadesCargando.value = false;
+  }
+}
+
+const editarCiudad = (ciudad) => {
+  // Primero cerramos el modal si está abierto
+  mostrarModalNuevaCiudad.value = false;
+  
+  // Usamos nextTick para asegurarnos que el modal se cierre antes de abrirlo de nuevo
+  nextTick(() => {
+    ciudadEditando.value = ciudad.id_ciudad;
+    formCiudad.value = {
+      nombre: ciudad.nombre
+    };
+    // Abrimos el modal después de actualizar los datos
+    mostrarModalNuevaCiudad.value = true;
+  });
+}
+
+const cerrarModalCiudad = () => {
+  mostrarModalNuevaCiudad.value = false;
+  // Usamos setTimeout para limpiar los datos después de que se cierre la animación del modal
+  setTimeout(() => {
+    ciudadEditando.value = null;
+    formCiudad.value = {
+      nombre: ''
+    };
+  }, 300);
+}
+
+const guardarCiudad = async () => {
+  guardandoCiudad.value = true;
+  try {
+    let response;
+    
+    if (ciudadEditando.value) {
+      // Actualizar ciudad existente
+      response = await $api(`/ciudad/${ciudadEditando.value}`, {
+        baseURL: config.public.apiBase,
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({ nombre_ciudad: formCiudad.value.nombre })
+      });
+      
+      if (response) {
+        showToastMessage('Ciudad actualizada exitosamente', 'success');
+      }
+    } else {
+      // Crear nueva ciudad
+      response = await $api('/ciudad', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({ nombre_ciudad: formCiudad.value.nombre })
+      });
+      
+      if (response) {
+        showToastMessage('Ciudad creada exitosamente', 'success');
+      }
+    }
+
+    // Cerrar modal y recargar lista
+    cerrarModalCiudad();
+    await cargarCiudades();
+    
+  } catch (error) {
+    console.error('Error al guardar ciudad:', error);
+    showToastMessage('Error al guardar la ciudad', 'error');
+  } finally {
+    guardandoCiudad.value = false;
+  }
+}
+
+const confirmarEliminarCiudad = (ciudad) => {
+  if (confirm(`¿Estás seguro de que deseas eliminar la ciudad "${ciudad.nombre}"? Esta acción no se puede deshacer.`)) {
+    eliminarCiudad(ciudad.id_ciudad);
+  }
+}
+
+const eliminarCiudad = async (idCiudad) => {
+  try {
+    await $api(`/ciudad/${idCiudad}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    showToastMessage('Ciudad eliminada exitosamente', 'success');
+    await cargarCiudades();
+  } catch (error) {
+    console.error('Error al eliminar ciudad:', error);
+    showToastMessage('Error al eliminar la ciudad', 'error');
+  }
+}
+
+const cambiarPaginaCiudades = (pagina, event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  // Validar que la página esté en el rango correcto
+  if (pagina < 1 || pagina > paginacionCiudadesCalculada.value.totalPaginas) {
+    return;
+  }
+  
+  paginacionCiudades.value.paginaActual = pagina;
 }
 
 // ===== FUNCIONES PARA CUENTAS BANCARIAS =====
@@ -3226,6 +3632,10 @@ onMounted(async () => {
       cargarServicios().catch(error => {
         console.error('Error en cargarServicios:', error);
         showToastMessage('Error al cargar los servicios', 'error');
+      }),
+      cargarCiudades().catch(error => {
+        console.error('Error al cargar ciudades:', error);
+        showToastMessage('Error al cargar las ciudades', 'error');
       }),
       cargarNotificaciones().catch(error => {
         console.error('Error al cargar notificaciones:', error);

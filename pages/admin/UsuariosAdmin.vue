@@ -764,7 +764,7 @@
                   </div>
                 </div>
               </div> 
-                
+
                 <!-- Rol y Estado en una línea -->
                 <div class="grid grid-cols-2 gap-3">
                   <!-- Rol -->
@@ -841,8 +841,18 @@
                     </multiselect>
                   </div>
                 </div>
-              
 
+              <!-- Progreso de Membresía -->
+              <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Membresía:</span>
+                  <div v-if="loadingMembresiaProgreso" class="w-3 h-3 border border-gray-300 border-t-transparent rounded-full animate-spin"></div>
+                  <span v-else-if="membresiaProgreso.status === 'success'" class="text-sm font-semibold text-gray-900 dark:text-white">
+                    {{ membresiaProgreso.mesesProgreso }} {{ membresiaProgreso.mesesProgreso === 1 ? 'mes pagado' : 'meses pagados' }}
+                  </span>
+                  <span v-else class="text-xs text-gray-500">-</span>
+                </div>
+              </div>
               <!-- Botón de cambio de contraseña -->
               <div class="pt-2">
                 <button 
@@ -876,6 +886,7 @@
               </div>
             </form>
           </div>
+          
         </div>
       </div>
     </Transition>
@@ -2296,6 +2307,15 @@ const totalCreditsCount = ref(0)
 // Variables para el modal de cotización
 const showQuoteModal = ref(false)
 const currentQuote = ref(null)
+
+// Variables para el progreso de membresía
+const membresiaProgreso = ref({
+  status: '',
+  mesesProgreso: 0,
+  montoTotal: 0,
+  valorMembresia: '0'
+})
+const loadingMembresiaProgreso = ref(false)
 const quoteLoading = ref(false)
 
 // Cargar detalles de la cotización
@@ -3480,6 +3500,38 @@ watch(() => userForm.value.rol, (newRole) => {
   }
 }, { deep: true })
 
+const loadMembresiaProgreso = async (idUsuario) => {
+  try {
+    loadingMembresiaProgreso.value = true
+    const response = await $api(`/membresia/progreso/${idUsuario}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response.status === 'success') {
+      membresiaProgreso.value = {
+        status: response.status,
+        mesesProgreso: response.mesesProgreso,
+        montoTotal: response.montoTotal,
+        valorMembresia: response.valorMembresia
+      }
+    }
+  } catch (error) {
+    console.error('Error cargando progreso de membresía:', error)
+    membresiaProgreso.value = {
+      status: 'error',
+      mesesProgreso: 0,
+      montoTotal: 0,
+      valorMembresia: '0'
+    }
+  } finally {
+    loadingMembresiaProgreso.value = false
+  }
+}
+
 const editUser = (user) => {
 
   // Find the role by name since we have the role name but not the ID in the user object
@@ -3517,6 +3569,12 @@ const editUser = (user) => {
   }
 
   showEditModal.value = true
+  
+  // Cargar progreso de membresía si el usuario tiene rol de cliente
+  const userId = user.id_usuario || user.id
+  if (userId) {
+    loadMembresiaProgreso(userId)
+  }
 }
 
 const saveUser = async () => {

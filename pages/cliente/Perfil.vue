@@ -321,7 +321,9 @@
         <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3">Legal y más</h3>
         
         <div class="space-y-2">
-          <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
+          <button 
+            @click="isTerminosModalOpen = true"
+            class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
           </button>
           <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
@@ -539,6 +541,115 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Modal de Términos y Condiciones -->
+    <div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+        <button 
+          @click="isTerminosModalOpen = false"
+          type="button"
+          class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+          aria-label="Cerrar modal"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Última actualización: {{ new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+        </div>
+
+        <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
+            <p>Al utilizar los servicios de HogarSeguro, usted acepta y se compromete a cumplir con estos términos y condiciones. Si no está de acuerdo con alguno de estos términos, por favor no utilice nuestra plataforma.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
+            <p>HogarSeguro es una plataforma tecnológica que conecta a usuarios con técnicos profesionales para servicios de reparación y mantenimiento a domicilio. Nos comprometemos a facilitar la conexión entre clientes y técnicos calificados.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Responsabilidades del Usuario</h4>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Proporcionar información veraz y actualizada</li>
+              <li>Mantener un ambiente seguro y respetuoso para los técnicos</li>
+              <li>Pagar los servicios acordados en tiempo y forma</li>
+              <li>Reportar cualquier problema o incidencia de manera oportuna</li>
+              <li>No solicitar servicios ilegales o peligrosos</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Responsabilidades del Técnico</h4>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Contar con la capacitación y herramientas necesarias</li>
+              <li>Realizar los servicios con profesionalismo y calidad</li>
+              <li>Respetar la privacidad y propiedad del cliente</li>
+              <li>Proporcionar presupuestos claros y detallados</li>
+              <li>Garantizar la seguridad durante la prestación del servicio</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresía y Pagos</h4>
+            <p>La membresía premium de HogarSeguro ofrece beneficios adicionales como descuentos especiales y prioridad en la atención. Los pagos se procesan de forma segura a través de nuestras plataformas autorizadas. La membresía tiene una duración de 30 días y debe renovarse para mantener los beneficios.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Cancelación y Reembolsos</h4>
+            <p>Los usuarios pueden cancelar servicios hasta 2 horas antes de la cita programada sin penalización. En caso de cancelación por parte del técnico, se ofrecerá un reembolso completo o la reprogramación del servicio. Los reembolsos se procesarán dentro de un plazo de 5-7 días hábiles.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Privacidad y Protección de Datos</h4>
+            <p>Respetamos su privacidad y protegemos sus datos personales de acuerdo con nuestra Política de Privacidad. La información proporcionada se utilizará exclusivamente para la prestación de servicios y mejora de nuestra plataforma.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Limitación de Responsabilidad</h4>
+            <p>HogarSeguro actúa como intermediario entre usuarios y técnicos. No nos hacemos responsables por daños directos o indirectos resultantes de la prestación de servicios técnicos. Recomendamos verificar las credenciales y referencias de los técnicos contratados.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Propiedad Intelectual</h4>
+            <p>Todo el contenido de la plataforma HogarSeguro, incluyendo但不限于 texto, gráficos, logotipos, imágenes y software, es propiedad de HogarSeguro y está protegido por las leyes de propiedad intelectual.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Modificaciones de los Términos</h4>
+            <p>Podemos modificar estos términos y condiciones en cualquier momento. Las modificaciones entrarán en vigor desde su publicación en la plataforma. Se notificará a los usuarios sobre cambios importantes a través de los medios de contacto proporcionados.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Ley Aplicable y Jurisdicción</h4>
+            <p>Estos términos se rigen por las leyes de Honduras. Cualquier disputa será resuelta en los tribunales competentes de Tegucigalpa, Francisco Morazán.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Contacto</h4>
+            <p>Para cualquier pregunta o duda sobre estos términos y condiciones, puede contactarnos a través de:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Correo electrónico: soporte@hogarseguro.hn</li>
+              <li>Teléfono: +504 9999-9999</li>
+              <li>Dirección: Tegucigalpa, Honduras</li>
+            </ul>
+          </section>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button 
+            @click="isTerminosModalOpen = false"
+            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
   </div> 
 </template>
 <style scoped>
@@ -699,6 +810,7 @@ const confirmPassword = ref('')
 const isPasswordModalOpen = ref(false)
 const isUpdatingPassword = ref(false) 
 const ciudades = ref([])
+const isTerminosModalOpen = ref(false)
 
 // Cargar ciudades desde la API
 const cargarCiudades = async () => {

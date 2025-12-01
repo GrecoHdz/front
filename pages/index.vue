@@ -320,7 +320,7 @@
 
 <!-- Modal de Login/Registro -->
 <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto relative">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto relative">
         <button 
           @click="showLoginModal = false" 
           class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 z-10"
@@ -393,25 +393,39 @@
               />
             </div>
 
-            <div v-if="!isLogin" class="space-y-1">
-              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">Ciudad</label>
-              <div class="relative">
-                <select
-                  v-model="form.ciudad"
-                  class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none pr-8 text-base"
-                  required
-                >
-                  <option value="" disabled>Selecciona una ciudad</option>
-                  <option v-for="ciudad in ciudades" :key="ciudad.id" :value="ciudad.nombre">
-                    {{ ciudad.nombre }}
-                  </option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                  <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                  </svg>
-                </div>
-              </div>
+            <div v-if="!isLogin">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Ciudad
+              </label>
+              <multiselect
+                v-model="form.ciudad"
+                :options="ciudades"
+                :searchable="false"
+                :close-on-select="true"
+                :show-labels="false"
+                placeholder="Seleccionar ciudad"
+                label="nombre"
+                track-by="id"
+                class="multiselect-custom"
+                :class="{ 'multiselect--active': form.ciudad }"
+                :select-label="''"
+                :deselect-label="''"
+                :selected-label="''"
+                :no-options="loadingCiudades ? 'Cargando ciudades...' : 'No hay ciudades disponibles'"
+                :no-result="'No se encontraron resultados'"
+                :loading="loadingCiudades"
+                :disabled="loadingCiudades || !ciudades.length"
+                :custom-label="getCityLabel"
+                @search-change="$event && $event.stopPropagation()"
+                @search-focus="(e) => e && e.target && e.target.blur()"
+                @touchstart.native.stop
+                @click.native.stop
+                :options-limit="100"
+              >
+                <template #singleLabel="{ option }">
+                  <span class="text-xs truncate">{{ getCityLabel(option) }}</span>
+                </template>
+              </multiselect>
             </div>
 
             <div>
@@ -682,6 +696,154 @@ html {
   box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
 }
 
+/* Multiselect styles - Exact match to UsuariosAdmin.vue */
+.multiselect-custom {
+  min-width: 140px !important;
+  font-size: 0.75rem !important;
+}
+
+.multiselect-custom .multiselect__tags {
+  min-height: 36px !important;
+  background-color: rgb(249 250 251) !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.5rem !important;
+  padding: 6px 30px 6px 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .multiselect-custom .multiselect__tags {
+  background-color: rgb(55 65 81) !important;
+  border-color: rgb(75 85 99) !important;
+}
+
+.multiselect-custom .multiselect__tags:focus-within {
+  border-color: rgb(16 185 129) !important;
+  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+}
+
+.dark .multiselect-custom .multiselect__tags:focus-within {
+  border-color: rgb(16 185 129) !important;
+  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+}
+
+.multiselect-custom .multiselect__single {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__single {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__input {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.75rem !important;
+  min-height: 20px !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__input {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__input::placeholder {
+  color: rgb(156 163 175) !important;
+}
+
+.multiselect-custom .multiselect__placeholder {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: rgb(156 163 175) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+  margin-top: 1px !important;
+}
+
+.multiselect-custom .multiselect__select {
+  height: 100% !important;
+  width: 1.5rem !important;
+  right: 0 !important;
+  top: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.multiselect-custom .multiselect__select:before {
+  border-color: rgb(156 163 175) transparent transparent !important;
+  border-style: solid !important;
+  border-width: 5px 5px 0 !important;
+  margin-top: 0 !important;
+  top: 55% !important;
+}
+
+.dark .multiselect-custom .multiselect__select:before {
+  border-color: rgb(156 163 175) transparent transparent !important;
+}
+
+.multiselect-custom .multiselect__content-wrapper {
+  background-color: white !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 0.25rem !important;
+  z-index: 50 !important;
+  min-width: 100% !important;
+  width: auto !important;
+}
+
+.dark .multiselect-custom .multiselect__content-wrapper {
+  background-color: rgb(31 41 55) !important;
+  border-color: rgb(55 65 81) !important;
+}
+
+.multiselect-custom .multiselect__option {
+  font-size: 0.75rem !important;
+  color: rgb(17 24 39) !important;
+  padding: 8px 12px !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__option {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--highlight {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--highlight {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--selected {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--selected {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
+  color: rgb(243 244 246) !important;
+}
+
 #app {
   min-height: 100vh;
 }
@@ -694,6 +856,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
+import Multiselect from 'vue-multiselect'
 
 // API base URL
 const config = useRuntimeConfig()
@@ -754,9 +917,16 @@ const phoneNumber = ref('')
 
 // Referencia reactiva para almacenar las ciudades
 const ciudades = ref([])
+const loadingCiudades = ref(false)
+
+// Función para obtener el label de la ciudad
+const getCityLabel = (ciudad) => {
+  return ciudad ? ciudad.nombre : ''
+}
 
 // Cargar ciudades desde la API
 const cargarCiudades = async () => {
+  loadingCiudades.value = true
   try {
     const data = await $fetch('/ciudad', {
       baseURL: config.public.apiBase,
@@ -774,6 +944,8 @@ const cargarCiudades = async () => {
       }))
     }
   } catch (error) { 
+  } finally {
+    loadingCiudades.value = false
   }
 } 
 
@@ -865,7 +1037,7 @@ const form = ref({
   identidad: '',
   password: '',
   confirmPassword: '',
-  ciudad: ''
+  ciudad: null
 })
 
 // Mock data for login
@@ -1257,7 +1429,7 @@ const handleAuth = async () => {
           telefono: form.value.telefono,
           identidad: form.value.identidad,
           password_hash: form.value.password,
-          id_ciudad: ciudades.value.find(c => c.nombre === form.value.ciudad)?.id,
+          id_ciudad: form.value.ciudad?.id,
           es_tecnico: registerAsTechnician.value ? 1 : 0
         }; 
         

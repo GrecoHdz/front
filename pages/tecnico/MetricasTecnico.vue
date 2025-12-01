@@ -1414,321 +1414,322 @@ const loadMonthlyServices = async () => {
 
 // ===== FUNCIONES DE GRÁFICOS =====
 const createChart = () => {
-  try {
-    if (!selectedChart.value) {
-      console.warn('No se ha seleccionado ningún gráfico')
-      return
-    }
-
-    // Destruir el gráfico anterior si existe
-    if (window.currentChart) {
-      try {
-        window.currentChart.destroy()
-      } catch (e) {
-        console.warn('Error al destruir el gráfico anterior:', e)
-      }
-      window.currentChart = null
-    }
-
-    // Obtener el elemento canvas
-    const canvas = document.getElementById(`chart-${selectedChart.value}`)
-    if (!canvas) {
-      console.warn(`No se encontró el elemento canvas con ID: chart-${selectedChart.value}`)
-      return
-    }
-
-    // Obtener el contexto 2D
-    const ctx = canvas.getContext('2d')
-    if (!ctx) {
-      console.error('No se pudo obtener el contexto 2D del canvas')
-      return
-    }
-
-    // Verificar si el canvas es visible
-    if (canvas.offsetParent === null) {
-      console.warn('El canvas no es visible en el DOM')
-      return
-    }
-  } catch (error) {
-    console.error('Error al crear el gráfico:', error);
-    showError('No se pudo crear el gráfico. Por favor, intente de nuevo.');
-    return;
+  // Validación inicial
+  if (!selectedChart.value) {
+    console.warn('No se ha seleccionado ningún gráfico')
+    return
   }
 
-    const isDark = document.documentElement.classList.contains('dark')
-    let config = {}
+  // Destruir el gráfico anterior si existe
+  if (window.currentChart) {
+    try {
+      window.currentChart.destroy()
+    } catch (e) {
+      console.warn('Error al destruir el gráfico anterior:', e)
+    }
+    window.currentChart = null
+  }
+
+  // Obtener el elemento canvas
+  const canvas = document.getElementById(`chart-${selectedChart.value}`)
+  if (!canvas) {
+    console.warn(`No se encontró el elemento canvas con ID: chart-${selectedChart.value}`)
+    return
+  }
+
+  // Obtener el contexto 2D
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    console.error('No se pudo obtener el contexto 2D del canvas')
+    return
+  }
+
+  // Verificar si el canvas es visible
+  if (canvas.offsetParent === null) {
+    console.warn('El canvas no es visible en el DOM')
+    return
+  }
+
+  // Configuración del tema
+  const isDark = document.documentElement.classList.contains('dark')
   
-  switch (selectedChart.value) {
-    case 'earnings':
-      config = {
-        type: 'bar',
-        data: earningsData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: isDark ? '#ffffff' : '#374151',
-                font: {
-                  size: 14
-                }
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return `L. ${context.raw.toLocaleString('es-HN')}`
-                }
-              }
-            },
-            datalabels: {
-              display: true,
-              color: function(context) {
-                return '#ffffff';
-              },
-              anchor: 'center',
-              align: 'center',
-              formatter: (value) => compactNumber(value),
-              font: {
-                weight: 'bold',
-                size: 12
-              },
-              textShadowColor: 'rgba(0, 0, 0, 0.8)',
-              textShadowBlur: 3,
-              textStrokeColor: 'rgba(0, 0, 0, 0.5)',
-              textStrokeWidth: 1,
-              clamp: true,
-              clip: false,
-              offset: 0,
-              display: function(context) {
-                return context.dataset.data[context.dataIndex] > 0;
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                callback: function(value) {
-                  const isMobile = window.innerWidth < 640;
-                  return isMobile ? `L. ${compactNumber(value)}` : `L. ${value.toLocaleString('es-HN')}`
+  // Función para obtener configuración del gráfico
+  const getChartConfig = () => {
+    switch (selectedChart.value) {
+      case 'earnings':
+        return {
+          type: 'bar',
+          data: earningsData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                  color: isDark ? '#ffffff' : '#374151',
+                  font: { size: 14 }
                 }
               },
-              grid: {
-                color: isDark ? '#374151' : '#E5E7EB'
-              }
-            },
-            x: {
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280'
-              },
-              grid: {
-                display: false
-              }
-            }
-          },
-          animation: {
-            duration: 1000
-          },
-          layout: {
-            padding: {
-              top: 10,
-              right: 20,
-              bottom: 10,
-              left: 10
-            }
-          }
-        },
-        plugins: [ChartDataLabels]
-      }
-      break
-
-    case 'serviceTypes':
-      const totalServices = serviceTypesData.datasets[0]?.data.reduce((a, b) => a + b, 0) || 0;
-      
-      const percentages = serviceTypesData.datasets[0]?.data.map(value => {
-        return totalServices > 0 ? Math.round((value / totalServices) * 100) + '%' : '0%';
-      }) || [];
-      
-      config = {
-        type: 'doughnut',
-        data: serviceTypesData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '60%',
-          layout: {
-            padding: 0
-          },
-          plugins: {
-            legend: {
-              position: 'left',
-              align: 'center',
-              labels: {
-                color: '#ffffff',
-                padding: 12,
-                font: {
-                  size: 13,
-                  weight: 'bold',
-                  color: '#ffffff',
-                  family: 'sans-serif'
-                },
-                usePointStyle: true,
-                pointStyle: 'circle',
-                boxWidth: 8,
-                boxHeight: 8,
-                color: (context) => '#ffffff',
-                generateLabels: function(chart) {
-                  const data = chart.data;
-                  if (data.labels.length && data.datasets.length) {
-                    return data.labels.map((label, i) => {
-                      const value = data.datasets[0].data[i];
-                      const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                      const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                      
-                      return {
-                        text: `${label}: ${value}`,
-                        fillStyle: data.datasets[0].backgroundColor[i],
-                        strokeStyle: 'transparent',
-                        lineWidth: 0,
-                        hidden: isNaN(value) || value === 0,
-                        index: i,
-                        value: value,
-                        fontColor: '#ffffff',
-                        draw: function(ctx) {
-                          ctx.save();
-                          ctx.fillStyle = '#ffffff';
-                          ctx.font = 'bold 13px sans-serif';
-                          ctx.textAlign = 'left';
-                          ctx.textBaseline = 'middle';
-                          
-                          const size = 8;
-                          ctx.fillStyle = this.fillStyle;
-                          ctx.beginPath();
-                          ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
-                          ctx.fill();
-                          
-                          ctx.fillStyle = '#ffffff';
-                          ctx.fillText(this.text, size * 1.5, size/2 + 1);
-                          
-                          ctx.restore();
-                        }
-                      };
-                    });
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `L. ${context.raw.toLocaleString('es-HN')}`
                   }
-                  return [];
                 }
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const label = context.label || ''
-                  const value = context.raw || 0
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                  const percentage = Math.round((value / total) * 100) || 0
-                  return `${label}: ${value} (${percentage}%)`
-                }
-              }
-            },
-            datalabels: {
-              formatter: (value, context) => {
-                return percentages[context.dataIndex];
               },
-              color: '#ffffff',
-              font: {
-                weight: 'bold',
-                size: 14
-              },
-              anchor: 'center',
-              align: 'center',
-              offset: 0,
-              textAlign: 'center',
-              textStrokeColor: 'rgba(0, 0, 0, 0.5)',
-              textStrokeWidth: 2,
-              textShadowBlur: 5,
-              textShadowColor: 'rgba(0, 0, 0, 0.8)'
-            }
-          },
-          animation: {
-            animateScale: true,
-            animateRotate: true
-          },
-          elements: {
-            arc: {
-              borderWidth: 0
-            }
-          }
-        },
-        plugins: [ChartDataLabels]
-      }
-      break
-
-    case 'services':
-      config = {
-        type: 'line',
-        data: servicesData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: isDark ? '#ffffff' : '#374151',
+              datalabels: {
+                display: true,
+                color: function(context) {
+                  return '#ffffff';
+                },
+                anchor: 'center',
+                align: 'center',
+                formatter: (value) => compactNumber(value),
                 font: {
+                  weight: 'bold',
+                  size: 12
+                },
+                textShadowColor: 'rgba(0, 0, 0, 0.8)',
+                textShadowBlur: 3,
+                textStrokeColor: 'rgba(0, 0, 0, 0.5)',
+                textStrokeWidth: 1,
+                clamp: true,
+                clip: false,
+                offset: 0,
+                display: function(context) {
+                  return context.dataset.data[context.dataIndex] > 0;
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  color: isDark ? '#9CA3AF' : '#6B7280',
+                  callback: function(value) {
+                    const isMobile = window.innerWidth < 640;
+                    return isMobile ? `L. ${compactNumber(value)}` : `L. ${value.toLocaleString('es-HN')}`
+                  }
+                },
+                grid: {
+                  color: isDark ? '#374151' : '#E5E7EB'
+                }
+              },
+              x: {
+                ticks: {
+                  color: isDark ? '#9CA3AF' : '#6B7280'
+                },
+                grid: {
+                  display: false
+                }
+              }
+            },
+            animation: {
+              duration: 1000
+            },
+            layout: {
+              padding: {
+                top: 10,
+                right: 20,
+                bottom: 10,
+                left: 10
+              }
+            }
+          },
+          plugins: [ChartDataLabels]
+        }
+
+      case 'serviceTypes':
+        const totalServices = serviceTypesData.datasets[0]?.data.reduce((a, b) => a + b, 0) || 0;
+        const percentages = serviceTypesData.datasets[0]?.data.map(value => {
+          return totalServices > 0 ? Math.round((value / totalServices) * 100) + '%' : '0%';
+        }) || [];
+        
+        return {
+          type: 'doughnut',
+          data: serviceTypesData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            layout: {
+              padding: 0
+            },
+            plugins: {
+              legend: {
+                position: 'left',
+                align: 'center',
+                labels: {
+                  color: '#ffffff',
+                  padding: 12,
+                  font: {
+                    size: 13,
+                    weight: 'bold',
+                    color: '#ffffff',
+                    family: 'sans-serif'
+                  },
+                  usePointStyle: true,
+                  pointStyle: 'circle',
+                  boxWidth: 8,
+                  boxHeight: 8,
+                  color: (context) => '#ffffff',
+                  generateLabels: function(chart) {
+                    const data = chart.data;
+                    if (data.labels.length && data.datasets.length) {
+                      return data.labels.map((label, i) => {
+                        const value = data.datasets[0].data[i];
+                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                        
+                        return {
+                          text: `${label}: ${value}`,
+                          fillStyle: data.datasets[0].backgroundColor[i],
+                          strokeStyle: 'transparent',
+                          lineWidth: 0,
+                          hidden: isNaN(value) || value === 0,
+                          index: i,
+                          value: value,
+                          fontColor: '#ffffff',
+                          draw: function(ctx) {
+                            ctx.save();
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = 'bold 13px sans-serif';
+                            ctx.textAlign = 'left';
+                            ctx.textBaseline = 'middle';
+                            
+                            const size = 8;
+                            ctx.fillStyle = this.fillStyle;
+                            ctx.beginPath();
+                            ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillText(this.text, size * 1.5, size/2 + 1);
+                            
+                            ctx.restore();
+                          }
+                        };
+                      });
+                    }
+                    return [];
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || ''
+                    const value = context.raw || 0
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0)
+                    const percentage = Math.round((value / total) * 100) || 0
+                    return `${label}: ${value} (${percentage}%)`
+                  }
+                }
+              },
+              datalabels: {
+                formatter: (value, context) => {
+                  return percentages[context.dataIndex];
+                },
+                color: '#ffffff',
+                font: {
+                  weight: 'bold',
                   size: 14
-                }
+                },
+                anchor: 'center',
+                align: 'center',
+                offset: 0,
+                textAlign: 'center',
+                textStrokeColor: 'rgba(0, 0, 0, 0.5)',
+                textStrokeWidth: 2,
+                textShadowBlur: 5,
+                textShadowColor: 'rgba(0, 0, 0, 0.8)'
               }
             },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return `${context.raw} servicio${context.raw !== 1 ? 's' : ''}`
-                }
+            animation: {
+              animateScale: true,
+              animateRotate: true
+            },
+            elements: {
+              arc: {
+                borderWidth: 0
               }
             }
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280',
-                stepSize: 1,
-                precision: 0
+          plugins: [ChartDataLabels]
+        }
+
+      case 'services':
+        return {
+          type: 'line',
+          data: servicesData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                  color: isDark ? '#ffffff' : '#374151',
+                  font: { size: 14 }
+                }
               },
-              grid: {
-                color: isDark ? '#374151' : '#E5E7EB'
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.raw} servicio${context.raw !== 1 ? 's' : ''}`
+                  }
+                }
               }
             },
-            x: {
-              ticks: {
-                color: isDark ? '#9CA3AF' : '#6B7280'
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  color: isDark ? '#9CA3AF' : '#6B7280',
+                  stepSize: 1,
+                  precision: 0
+                },
+                grid: {
+                  color: isDark ? '#374151' : '#E5E7EB'
+                }
               },
-              grid: {
-                display: false
+              x: {
+                ticks: {
+                  color: isDark ? '#9CA3AF' : '#6B7280'
+                },
+                grid: {
+                  display: false
+                }
               }
-            }
-          },
-          animation: {
-            duration: 1000
-          },
-          layout: {
-            padding: {
-              top: 10,
-              right: 20,
-              bottom: 10,
-              left: 10
+            },
+            animation: {
+              duration: 1000
+            },
+            layout: {
+              padding: {
+                top: 10,
+                right: 20,
+                bottom: 10,
+                left: 10
+              }
             }
           }
         }
-      }
-      break
+
+      default:
+        console.error('Tipo de gráfico no soportado:', selectedChart.value)
+        return null
+    }
+  }
+
+  // Obtener configuración del gráfico
+  const config = getChartConfig()
+  if (!config) {
+    console.error('No se pudo obtener la configuración del gráfico')
+    return
   }
 
   // Crear el nuevo gráfico
@@ -1753,8 +1754,11 @@ const createChart = () => {
     // Forzar un redimensionamiento inicial
     setTimeout(handleResize, 100)
     
+    console.log('Gráfico creado exitosamente:', selectedChart.value)
+    
   } catch (error) {
     console.error('Error al crear el gráfico:', error)
+    showError('No se pudo crear el gráfico. Por favor, intente de nuevo.')
     window.currentChart = null
   }
 }
