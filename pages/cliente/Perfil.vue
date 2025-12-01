@@ -326,10 +326,14 @@
             class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
           </button>
-          <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
+          <button 
+            @click="isPrivacidadModalOpen = true"
+            class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Política de privacidad</p>
           </button>
-          <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
+          <button 
+            @click="isAcercaModalOpen = true"
+            class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de HogarSeguro</p>
           </button>
           <button 
@@ -595,13 +599,43 @@
           </section>
 
           <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresía y Pagos</h4>
-            <p>La membresía premium de HogarSeguro ofrece beneficios adicionales como descuentos especiales y prioridad en la atención. Los pagos se procesan de forma segura a través de nuestras plataformas autorizadas. La membresía tiene una duración de 30 días y debe renovarse para mantener los beneficios.</p>
-          </section>
-
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresía y Beneficios</h4>
+            <p>
+            La membresía de HogarSeguro ofrece beneficios adicionales como descuentos especiales y crédito al pagar servicios.
+            Pagos realizados a cuentas no autorizadas no serán reconocidos ni generarán derecho a activación o reclamos. 
+            La membresía tiene una duración de 30 días y debe renovarse para mantener los beneficios. 
+            Si la membresía vence y no se renueva dentro del período de gracia establecido, el crédito acumulado será reseteado a 0. 
+            Este proceso es irreversible.
+            </p>
+          </section> 
+        
           <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Cancelación y Reembolsos</h4>
-            <p>Los usuarios pueden cancelar servicios hasta 2 horas antes de la cita programada sin penalización. En caso de cancelación por parte del técnico, se ofrecerá un reembolso completo o la reprogramación del servicio. Los reembolsos se procesarán dentro de un plazo de 5-7 días hábiles.</p>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pagos y Retiros</h4>
+            <p>
+            <strong>Pagos autorizados:</strong><br>
+            HogarSeguro solo acepta pagos mediante transferencia bancaria a las cuentas oficiales proporcionadas por la plataforma. 
+            Cualquier pago realizado en efectivo a técnicos, terceros o a cuentas no autorizadas no será reconocido, no generará crédito, 
+            activación de servicios ni derecho a reclamos.
+            <br><br> 
+
+            <strong>Créditos acumulados:</strong><br>
+            El crédito de los técnicos proviene exclusivamente de la mano de obra correspondiente a los servicios realizados y pagados por el cliente 
+            según la cotización aceptada.  
+            HogarSeguro únicamente cobra una comisión sobre dicha mano de obra definida por el técnico.
+            El crédito de los clientes proviene de los pagos mensuales de su membresía y de un porcentaje generado por los servicios contratados 
+            por todos sus referidos.
+            <br><br>
+
+            <strong>Solicitudes de retiro:</strong><br>
+            Tanto técnicos como clientes pueden solicitar el retiro de su crédito acumulado en cualquier momento.  
+            Los retiros serán enviados únicamente a la cuenta bancaria registrada por el usuario y podrán tardar un máximo de 5 días laborales.
+            <br><br>
+
+            <strong>Retiros para clientes:</strong><br>
+            Los clientes solo pueden retirar los ingresos obtenidos por referidos.  
+            Del monto solicitado, un porcentaje será depositado a la cuenta bancaria registrada y el porcentaje restante será dirigido 
+            a su crédito acumulable, el cual podrá usarse como crédito al pagar un servicio dentro de la plataforma.
+            </p>
           </section>
 
           <section>
@@ -611,12 +645,16 @@
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Limitación de Responsabilidad</h4>
-            <p>HogarSeguro actúa como intermediario entre usuarios y técnicos. No nos hacemos responsables por daños directos o indirectos resultantes de la prestación de servicios técnicos. Recomendamos verificar las credenciales y referencias de los técnicos contratados.</p>
+            <p>
+              La mayoría de los servicios ofrecidos a través de HogarSeguro son ejecutados por técnicos verificados que forman parte de nuestra plataforma y cuentan con garantía conforme a las condiciones establecidas por HogarSeguro. En situaciones específicas, HogarSeguro podrá actuar únicamente como intermediario, facilitando la conexión entre el usuario y técnicos o proveedores externos. En estos casos, la responsabilidad, calidad y garantía del trabajo recaen exclusivamente en dicho proveedor externo.
+              
+              Aunque realizamos procesos de verificación para ofrecer servicios confiables, HogarSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio, salvo en los casos en que la ley aplicable lo permita o exija. Recomendamos a los usuarios revisar la información y condiciones del técnico asignado antes de aceptar el servicio.
+            </p>
           </section>
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Propiedad Intelectual</h4>
-            <p>Todo el contenido de la plataforma HogarSeguro, incluyendo但不限于 texto, gráficos, logotipos, imágenes y software, es propiedad de HogarSeguro y está protegido por las leyes de propiedad intelectual.</p>
+            <p>Todo el contenido de la plataforma HogarSeguro, incluyendo texto, gráficos, logotipos e imágenes, son propiedad de HogarSeguro y está protegido por las leyes de propiedad intelectual.</p>
           </section>
 
           <section>
@@ -626,17 +664,7 @@
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Ley Aplicable y Jurisdicción</h4>
-            <p>Estos términos se rigen por las leyes de Honduras. Cualquier disputa será resuelta en los tribunales competentes de Tegucigalpa, Francisco Morazán.</p>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Contacto</h4>
-            <p>Para cualquier pregunta o duda sobre estos términos y condiciones, puede contactarnos a través de:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Correo electrónico: soporte@hogarseguro.hn</li>
-              <li>Teléfono: +504 9999-9999</li>
-              <li>Dirección: Tegucigalpa, Honduras</li>
-            </ul>
+            <p>Estos términos se rigen por las leyes de Honduras. Cualquier disputa será resuelta en los tribunales competentes de San Pedro Sula, Cortés.</p>
           </section>
         </div>
 
@@ -650,6 +678,254 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Política de Privacidad -->
+    <div v-if="isPrivacidadModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+        <button 
+          @click="isPrivacidadModalOpen = false"
+          type="button"
+          class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+          aria-label="Cerrar modal"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Política de Privacidad</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Última actualización: {{ new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+        </div>
+
+        <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Información que Recopilamos</h4>
+            <p>Recopilamos información personal que usted nos proporciona voluntariamente al registrarse y utilizar nuestros servicios. Esta información incluye:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Nombre completo y datos de contacto (teléfono, email)</li>
+              <li>Dirección y ubicación para facilitar los servicios</li>
+              <li>Información de pago para procesar transacciones</li>
+              <li>Historial de servicios solicitados y realizados</li>
+              <li>Comentarios y calificaciones sobre los servicios</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Uso de la Información</h4>
+            <p>Utilizamos su información personal para:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Facilitar la conexión con técnicos calificados</li>
+              <li>Procesar pagos y gestionar su membresía</li>
+              <li>Mejorar la calidad de nuestros servicios</li>
+              <li>Enviar notificaciones importantes sobre su cuenta</li>
+              <li>Proporcionar soporte técnico y atención al cliente</li>
+              <li>Cumplir con obligaciones legales y regulatorias</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Compartir Información</h4>
+            <p>Compartimos su información únicamente en las siguientes circunstancias:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Con técnicos asignados para realizar los servicios solicitados</li>
+              <li>Con instituciones financieras para procesar pagos</li>
+              <li>Con autoridades gubernamentales cuando sea requerido por ley</li>
+              <li>Con proveedores de servicios que nos ayudan a operar la plataforma</li>
+            </ul>
+            <p class="mt-2">Nunca vendemos ni alquilamos su información personal a terceros con fines comerciales.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Seguridad de los Datos</h4>
+            <p>Implementamos medidas de seguridad técnicas y organizativas para proteger su información personal contra acceso no autorizado, pérdida, alteración o destrucción. Estas incluyen:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Encriptación de datos sensibles</li>
+              <li>Acceso restringido a la información personal</li>
+              <li>Monitoreo constante de nuestras systems</li>
+              <li>Capacitación regular de nuestro personal en seguridad</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Derechos del Usuario</h4>
+            <p>Usted tiene derecho a:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Acceder a su información personal que poseemos</li>
+              <li>Corregir información inexacta o incompleta</li>
+              <li>Solicitar la eliminación de sus datos personales</li>
+              <li>Limitar el uso de su información</li>
+              <li>Portar sus datos a otro proveedor de servicios</li>
+              <li>Presentar quejas ante autoridades de protección de datos</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Cookies y Tecnologías Similares</h4>
+            <p>Utilizamos cookies y tecnologías similares para mejorar su experiencia en nuestra plataforma. Estas nos permiten:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Mantener su sesión activa</li>
+              <li>Recordar sus preferencias</li>
+              <li>Analizar el uso de nuestra plataforma</li>
+              <li>Personalizar contenido y publicidad</li>
+            </ul>
+            <p class="mt-2">Puede configurar su navegador para rechazar cookies, aunque esto puede afectar algunas funcionalidades de la plataforma.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Retención de Datos</h4>
+            <p>Conservamos su información personal solo durante el tiempo necesario para cumplir con los propósitos para los cuales fue recopilada, incluyendo:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>El período necesario para proporcionar nuestros servicios</li>
+              <li>El tiempo requerido por obligaciones legales</li>
+              <li>El período necesario para resolver disputas o reclamaciones</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Menores de Edad</h4>
+            <p>Nuestros servicios no están dirigidos a menores de 18 años. No recopilamos intencionalmente información personal de menores. Si somos conscientes de haber recopilado información de un menor, tomaremos medidas para eliminarla inmediatamente.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Cambios a esta Política</h4>
+            <p>Podemos actualizar esta política de privacidad periódicamente para reflejar cambios en nuestras prácticas o por requisitos legales. Le notificaremos cualquier cambio significativo mediante:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Notificaciones en nuestra plataforma</li>
+              <li>Comunicación por correo electrónico</li>
+              <li>Avisos destacados en nuestro sitio web</li>
+            </ul>
+          </section> 
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button 
+            @click="isPrivacidadModalOpen = false"
+            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Acerca de HogarSeguro -->
+    <div v-if="isAcercaModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+        <button 
+          @click="isAcercaModalOpen = false"
+          type="button"
+          class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+          aria-label="Cerrar modal"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acerca de HogarSeguro</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Tu plataforma de confianza para servicios del hogar</p>
+        </div>
+
+        <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+          <section class="text-center">
+            <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-3xl text-white mb-4 shadow-lg mx-auto">
+              🏠
+            </div>
+            <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">HogarSeguro</h4>
+            <p class="text-gray-600 dark:text-gray-400">Conectando hogares con profesionales de confianza</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestra Misión</h4>
+            <p>En HogarSeguro, nos dedicamos a facilitar el acceso a servicios técnicos de alta calidad para el hogar, conectando a clientes con profesionales verificados y confiables. Buscamos convertir cada experiencia de servicio en una solución satisfactoria y segura.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestra Visión</h4>
+            <p>Ser la plataforma líder en Honduras para servicios del hogar, reconocida por nuestra excelencia en el servicio, la confianza generada en nuestros usuarios y el impacto positivo en la vida de las familias y profesionales técnicos.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">¿Qué Hacemos?</h4>
+            <p>HogarSeguro es una plataforma tecnológica que:</p>
+            <ul class="list-disc pl-5 space-y-1 mt-2">
+              <li>Conecta a clientes con técnicos profesionales calificados</li>
+              <li>Verifica la identidad y experiencia de todos nuestros técnicos</li>
+              <li>Facilita el proceso de cotización y pago de servicios</li>
+              <li>Ofrece un sistema de membresía con beneficios exclusivos</li>
+              <li>Proporciona garantía en los servicios realizados</li>
+              <li>Brinda soporte continuo a clientes y técnicos</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestros Valores</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• Confianza</h5>
+                <p class="text-gray-700 dark:text-gray-300 text-xs">Construimos relaciones basadas en la honestidad y transparencia.</p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• Calidad</h5>
+                <p class="text-gray-700 dark:text-gray-300 text-xs">Comprometidos con la excelencia en cada servicio.</p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• Seguridad</h5>
+                <p class="text-gray-700 dark:text-gray-300 text-xs">Priorizamos la protección de nuestros usuarios.</p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• Innovación</h5>
+                <p class="text-gray-700 dark:text-gray-300 text-xs">Mejoramos constantemente nuestra tecnología.</p>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Servicios que Ofrecemos</h4>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Reparaciones eléctricas y plomería</li>
+              <li>Servicios de aire acondicionado y refrigeración</li>
+              <li>Mantenimiento de electrodomésticos</li>
+              <li>Instalaciones y reparaciones generales</li>
+              <li>Limpieza y mantenimiento de espacios</li> 
+              <li>Y mucho más</li>
+            </ul>
+          </section> 
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestro Equipo</h4>
+            <p>Somos un equipo apasionado de profesionales comprometidos con transformar la forma en que los hogares acceden a servicios técnicos. Contamos con expertos en tecnología, atención al cliente y desarrollo de negocios trabajando juntos para ofrecer la mejor experiencia posible.</p>
+          </section>
+
+          <section>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Contacto</h4>
+            <p>¿Necesitas ayuda? Estamos aquí para asistirte:</p>
+            <div class="space-y-2 mt-2">
+              <div class="flex items-center space-x-2">
+                <span class="text-blue-600 dark:text-blue-400">📧</span>
+                <span class="text-sm">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@hogarseguro.com' }}</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-green-600 dark:text-green-400">📱</span>
+                <span class="text-sm">{{ contactInfo.find(c => c.type === 'phone')?.value || '+504 1234-5678' }}</span>
+              </div> 
+            </div>
+          </section> 
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button 
+            @click="isAcercaModalOpen = false"
+            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div> 
 </template>
 <style scoped>
@@ -811,6 +1087,70 @@ const isPasswordModalOpen = ref(false)
 const isUpdatingPassword = ref(false) 
 const ciudades = ref([])
 const isTerminosModalOpen = ref(false)
+const isPrivacidadModalOpen = ref(false)
+const isAcercaModalOpen = ref(false)
+
+// Información de contacto de la empresa
+const contactInfo = ref([
+  {
+    type: 'email',
+    value: 'cargando...',
+    configKey: 'correo_empresa'
+  },
+  {
+    type: 'phone',
+    value: 'cargando...',
+    configKey: 'numero_empresa'
+  }
+])
+
+// Función para actualizar un valor específico de contactInfo
+const updateContactInfo = (type, newValue) => {
+  const index = contactInfo.value.findIndex(item => item.type === type)
+  if (index !== -1) {
+    contactInfo.value[index].value = newValue
+  }
+}
+
+// Obtener información de contacto de la empresa
+const fetchContactInfo = async () => {
+  try {
+    // Usar Promise.all para hacer las peticiones en paralelo
+    const requests = contactInfo.value.map(async (contact) => {
+      try {
+        const response = await $api(`/config/valor/${contact.configKey}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        })
+        
+        // Actualizar el valor correspondiente
+        if (response?.valor) {
+          updateContactInfo(contact.type, response.valor)
+        }
+      } catch (error) {
+        console.error(`Error al obtener ${contact.type}:`, error)
+        // Mostrar un mensaje de error específico para cada campo
+        if (contact.type === 'email') {
+          updateContactInfo('email', 'soporte@hogarseguro.com')
+        } else if (contact.type === 'phone') {
+          updateContactInfo('phone', '+504 1234-5678')
+        }
+      }
+    })
+    
+    await Promise.all(requests)
+    
+  } catch (error) {
+    console.error('Error general al obtener información de contacto:', error)
+    // Establecer valores por defecto en caso de error general
+    updateContactInfo('email', 'soporte@hogarseguro.com')
+    updateContactInfo('phone', '+504 1234-5678')
+  }
+}
 
 // Cargar ciudades desde la API
 const cargarCiudades = async () => {
@@ -969,7 +1309,10 @@ watch(() => user.value.id_ciudad, (newId) => {
 
 // Cargar datos al montar el componente
 onMounted(async () => {
-  await cargarDatosPerfil();
+  await Promise.all([
+    cargarDatosPerfil(),
+    fetchContactInfo()
+  ]);
   // Guardar una copia de los datos originales
   if (user.value) {
     originalUserData.value = { ...user.value };

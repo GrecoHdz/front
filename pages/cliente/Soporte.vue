@@ -139,7 +139,7 @@
             <div>
               <h3 class="font-medium text-gray-900 dark:text-white text-sm">Correo Electrónico</h3>
               <p class="text-gray-600 dark:text-gray-300 text-sm">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@prohogar.hn' }}</p>
-              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Respuesta en 24 horas</p>
+              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Respuesta en 24-48 horas</p>
             </div>
           </div>
           
@@ -152,7 +152,7 @@
             <div>
               <h3 class="font-medium text-gray-900 dark:text-white text-sm">Teléfono</h3>
               <p class="text-gray-600 dark:text-gray-300 text-sm">{{ contactInfo.find(c => c.type === 'phone')?.value || '+504 2234-5678' }}</p>
-              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Lunes a Viernes, 8:00 AM - 5:00 PM</p>
+              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Lunes a Domingo, 7:00 AM - 5:00 PM</p>
             </div>
           </div>
            
@@ -317,12 +317,6 @@ const toast = ref({
 })
 
 // =========================
-// COMPUTED PROPERTIES
-// =========================
-
-// No hay computed properties específicas para esta página
-
-// =========================
 // FUNCIONES UTILITARIAS
 // =========================
 
@@ -386,21 +380,7 @@ const fetchContactInfo = async () => {
     updateContactInfo('email', 'soporte@prohogar.hn')
     updateContactInfo('phone', '+504 2234-5678')
   }
-}
-
-const checkAuth = async () => {
-  try {
-    if (!tokenCookie.value) {
-      router.push('/auth/login')
-      return false
-    }
-    return true
-  } catch (error) {
-    console.error('Error al verificar autenticación:', error)
-    router.push('/auth/login')
-    return false
-  }
-}
+} 
 
 const cargarServiciosFinalizados = async () => {
   const userCookie = useCookie('user').value
@@ -570,8 +550,7 @@ const showError = (message) => {
 // =========================
 
 onMounted(async () => {
-  try {
-    await checkAuth()
+  try { 
     await Promise.all([
       cargarServiciosFinalizados(),
       fetchContactInfo()
@@ -598,10 +577,7 @@ watch(() => form.subject, async (newVal) => {
 // INICIALIZACIÓN
 // =========================
 
-onMounted(async () => {
-  const isAuthenticated = await checkAuth()
-  
-  if (isAuthenticated) {
+onMounted(async () => {  
     // Verificar si hay un hash #problemaServicio
     if (process.client && window.location.hash === '#problemaServicio') {
       // Establecer el asunto como 'Problema con un Servicio Completado' de inmediato
@@ -644,7 +620,7 @@ onMounted(async () => {
     
     // Marcar como cargado
     isLoading.value = false
-  }
+  
 })
  
 
