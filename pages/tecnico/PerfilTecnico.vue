@@ -88,20 +88,35 @@
           <div class="space-y-1.5 sm:space-y-2">
             <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Ciudad</label>
             <div class="relative">
-              <select
-                v-model="user.id_ciudad"
-                class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none pr-8 sm:pr-10"
+              <multiselect
+                v-model="user.ciudadSeleccionada"
+                :options="ciudades"
+                :searchable="false"
+                :close-on-select="true"
+                :show-labels="false"
+                placeholder="Seleccionar ciudad"
+                label="nombre"
+                track-by="id_ciudad"
+                class="multiselect-custom"
+                :class="{ 'multiselect--active': user.ciudadSeleccionada }"
+                :select-label="''"
+                :deselect-label="''"
+                :selected-label="''"
+                :no-options="loadingCiudades ? 'Cargando ciudades...' : 'No hay ciudades disponibles'"
+                :no-result="'No se encontraron resultados'"
+                :loading="loadingCiudades"
+                :disabled="loadingCiudades || !ciudades.length"
+                :custom-label="getCityLabel"
+                @search-change="$event && $event.stopPropagation()"
+                @search-focus="(e) => e && e.target && e.target.blur()"
+                @touchstart.native.stop
+                @click.native.stop
+                :options-limit="100"
               >
-                <option :value="null" disabled>Selecciona una ciudad</option>
-                <option v-for="ciudad in ciudades" :key="ciudad.id_ciudad" :value="ciudad.id_ciudad" :selected="user.id_ciudad === ciudad.id_ciudad">
-                  {{ ciudad.nombre }}
-                </option>
-              </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                <svg class="fill-current h-3.5 w-3.5 sm:h-4 sm:w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                </svg>
-              </div>
+                <template #singleLabel="{ option }">
+                  <span class="text-xs truncate">{{ getCityLabel(option) }}</span>
+                </template>
+              </multiselect>
             </div>
           </div>
           
@@ -251,6 +266,7 @@ import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import Multiselect from 'vue-multiselect'
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
@@ -282,6 +298,7 @@ const confirmPassword = ref('')
 
 // Datos
 const ciudades = ref([])
+const loadingCiudades = ref(false)
 const originalUserData = ref(null)
 
 // Datos del usuario con valores por defecto seguros
@@ -292,6 +309,7 @@ const user = ref({
   telefono: '',
   id_ciudad: null,
   ciudad: '',
+  ciudadSeleccionada: null,
   fecha_registro: new Date().toISOString(),
   id_rol: null,
   role: 'usuario',
@@ -382,6 +400,7 @@ const showError = (title, message) => {
 // ===== FUNCIONES DE CARGA DE DATOS =====
 const cargarCiudades = async () => {
   try {
+    loadingCiudades.value = true
     const data = await $api('/ciudad', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -400,7 +419,15 @@ const cargarCiudades = async () => {
   } catch (error) {
     console.error('Error al cargar las ciudades:', error)
     showError('Error', 'No se pudieron cargar las ciudades')
+  } finally {
+    loadingCiudades.value = false
   }
+}
+
+// Función para obtener la etiqueta de la ciudad
+const getCityLabel = (option) => {
+  if (!option) return ''
+  return option.nombre || ''
 }
 
 const fetchUserData = async () => {
@@ -619,13 +646,27 @@ const handleLogout = async () => {
 }
 
 // ===== WATCHERS =====
+// Watch para sincronizar id_ciudad con ciudadSeleccionada
 watch(() => user.value.id_ciudad, (newId) => {
-  if (newId) {
+  if (newId && ciudades.value.length > 0) {
     const ciudadSeleccionada = ciudades.value.find(c => c.id_ciudad === newId);
     if (ciudadSeleccionada) {
+      user.value.ciudadSeleccionada = ciudadSeleccionada;
       user.value.ciudad = ciudadSeleccionada.nombre;
     }
   } else {
+    user.value.ciudadSeleccionada = null;
+    user.value.ciudad = null;
+  }
+});
+
+// Watch para sincronizar ciudadSeleccionada con id_ciudad
+watch(() => user.value.ciudadSeleccionada, (newCiudad) => {
+  if (newCiudad) {
+    user.value.id_ciudad = newCiudad.id_ciudad;
+    user.value.ciudad = newCiudad.nombre;
+  } else {
+    user.value.id_ciudad = null;
     user.value.ciudad = null;
   }
 });
@@ -753,5 +794,155 @@ button:hover {
 /* Dark mode adjustments */
 .dark .shadow-2xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos personalizados para Multiselect - Exact match to index.vue */
+.multiselect-custom {
+  min-width: 140px !important;
+  font-size: 0.75rem !important;
+}
+
+.multiselect-custom .multiselect__tags {
+  min-height: 36px !important;
+  background-color: rgb(249 250 251) !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.5rem !important;
+  padding: 6px 30px 6px 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .multiselect-custom .multiselect__tags {
+  background-color: rgb(55 65 81) !important;
+  border-color: rgb(75 85 99) !important;
+}
+
+.multiselect-custom .multiselect__tags:focus-within {
+  border-color: rgb(16 185 129) !important;
+  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+}
+
+.dark .multiselect-custom .multiselect__tags:focus-within {
+  border-color: rgb(16 185 129) !important;
+  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+}
+
+.multiselect-custom .multiselect__single {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__single {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__input {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.75rem !important;
+  min-height: 20px !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__input {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__input::placeholder {
+  color: rgb(156 163 175) !important;
+}
+
+.multiselect-custom .multiselect__placeholder {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: rgb(156 163 175) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+  margin-top: 1px !important;
+}
+
+.multiselect-custom .multiselect__select {
+  height: 100% !important;
+  width: 1.5rem !important;
+  right: 0 !important;
+  top: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.multiselect-custom .multiselect__select:before {
+  border-color: rgb(156 163 175) transparent transparent !important;
+  border-style: solid !important;
+  border-width: 5px 5px 0 !important;
+  margin-top: 0 !important;
+  top: 55% !important;
+}
+
+.dark .multiselect-custom .multiselect__select:before {
+  border-color: rgb(156 163 175) transparent transparent !important;
+}
+
+.multiselect-custom .multiselect__content-wrapper {
+  background-color: white !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 0.25rem !important;
+  z-index: 50 !important;
+  min-width: 100% !important;
+  width: auto !important;
+}
+
+.dark .multiselect-custom .multiselect__content-wrapper {
+  background-color: rgb(31 41 55) !important;
+  border-color: rgb(55 65 81) !important;
+}
+
+.multiselect-custom .multiselect__option {
+  font-size: 0.75rem !important;
+  color: rgb(17 24 39) !important;
+  padding: 8px 12px !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__option {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--highlight {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--highlight {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--selected {
+    background-color: #4b5563;
+    color: #f9fafb;
+}
+
+.dark .multiselect-custom .multiselect__option--selected {
+    background-color: #4b5563;
+    color: #f9fafb;
+}
+
+.multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
+    background-color: #4b5563;
+    color: #f9fafb;
+}
+
+.dark .multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
+    background-color: #4b5563;
+    color: #f9fafb;
 }
 </style>

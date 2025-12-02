@@ -296,30 +296,43 @@
                     <!-- Fila de Filtros -->
                     <div class="grid grid-cols-2 gap-2">
                       <!-- Status Filter -->
-                      <select
-                        v-model="selectedStatus"
-                        class="w-full px-3 py-2.5 text-[7px] sm:text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none h-10"
+                      <multiselect
+                        v-model="selectedStatusObject"
+                        :options="statusOptions"
+                        :searchable="false"
+                        :close-on-select="true"
+                        :show-labels="false"
+                        placeholder="Todos los estados"
+                        label="label"
+                        track-by="value"
+                        class="multiselect-admin-filter"
+                        :custom-label="getStatusLabel"
+                        :options-limit="100"
                       >
-                        <option value="">Todos los estados</option>
-                        <option value="asignado">Asignado</option>
-                        <option value="pendiente_cotizacion">Pend. Cotización</option>
-                        <option value="en_proceso">En Proceso</option>
-                        <option value="pendiente_pagoservicio">Pend. Pago</option>
-                        <option value="finalizado">Finalizado</option>
-                        <option value="calificado">Calificado</option>
-                        <option value="cancelado">Cancelado</option>
-                      </select>
+                        <template #singleLabel="{ option }">
+                          <span class="text-[9px] sm:text-xs truncate">{{ getStatusLabel(option) }}</span>
+                        </template>
+                      </multiselect>
                       
                       <!-- Service Type Filter -->
-                      <select
-                        v-model="selectedServiceType"
-                        class="w-full px-3 py-2.5 text-[9px] sm:text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none h-10"
+                      <multiselect
+                        v-model="selectedServiceTypeObject"
+                        :options="catalogoServicios"
+                        :searchable="false"
+                        :close-on-select="true"
+                        :show-labels="false"
+                        placeholder="Todos los tipos"
+                        label="nombre"
+                        track-by="id_servicio"
+                        class="multiselect-admin-filter"
+                        :custom-label="getServiceTypeLabel"
+                        :options-limit="100"
+                        :disabled="catalogoServicios.length === 0"
                       >
-                        <option value="">Todos los tipos</option>
-                        <option v-for="servicio in catalogoServicios" :key="servicio.id_servicio" :value="servicio.id_servicio">
-                          {{ servicio.nombre }}
-                        </option>
-                      </select>
+                        <template #singleLabel="{ option }">
+                          <span class="text-[9px] sm:text-xs truncate">{{ getServiceTypeLabel(option) }}</span>
+                        </template>
+                      </multiselect>
                     </div>
                     
                     <!-- Clear Filters -->
@@ -594,45 +607,45 @@
         
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-[320px] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
           <!-- Header -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center space-x-2">
-                <div class="w-7 h-7 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-sm">
-                  👷
-                </div>
-                <h3 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Asignar Técnico</h3>
+          <div class="flex items-center justify-between p-2 sm:p-3 pb-0 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center space-x-3">
+              <div class="w-7 h-7 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-sm">
+                👷
               </div>
-              <button 
-                @click="showAssignmentModal = false" 
-                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
-                aria-label="Cerrar modal"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
+              <h3 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Asignar Técnico</h3>
             </div>
+            <button 
+              @click="showAssignmentModal = false" 
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
+              aria-label="Cerrar modal"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
             
             <!-- Filtro por ciudad -->
-            <div class="mt-2">
+            <div class="px-2">
               <label for="cityFilter" class="sr-only">Filtrar por ciudad</label>
-              <div class="relative">
-                <select 
-                  id="cityFilter"
-                  v-model="selectedTechCity"
-                  class="w-full px-3 py-2.5 pr-8 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:focus:ring-green-500 dark:focus:border-green-500 text-gray-900 dark:text-white appearance-none cursor-pointer"
-                >
-                  <option value="">Todas las ciudades</option>
-                  <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                  </svg>
-                </div>
-              </div>
+              <multiselect 
+                id="cityFilter"
+                v-model="selectedTechCityObject"
+                :options="availableCities"
+                :searchable="false"
+                :close-on-select="true"
+                :show-labels="false"
+                placeholder="Todas las ciudades"
+                class="multiselect-admin-filter"
+                :custom-label="getTechCityLabel"
+                :options-limit="100"
+                :disabled="availableCities.length === 0"
+              >
+                <template #singleLabel="{ option }">
+                  <span class="text-sm truncate">{{ getTechCityLabel(option) }}</span>
+                </template>
+              </multiselect>
             </div>
-          </div>
 
           <!-- Technicians List -->
           <div class="p-3">
@@ -1234,6 +1247,133 @@
   .animate-bounce-soft {
     animation: bounce-soft 1.5s ease-in-out infinite;
   }
+
+  /* Estilos para vue-multiselect en filtros de admin */
+  .multiselect-admin-filter {
+    position: relative;
+    z-index: 10;
+  }
+
+  .multiselect-admin-filter .multiselect__tags {
+    min-height: 36px;
+    padding: 4px 40px 4px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #f9fafb;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    color: #111827;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__tags {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .multiselect-admin-filter .multiselect__tags:hover {
+    border-color: #3b82f6;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__tags:hover {
+    border-color: #60a5fa;
+  }
+
+  .multiselect-admin-filter.multiselect--active .multiselect__tags {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+
+  .dark .multiselect-admin-filter.multiselect--active .multiselect__tags {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+  }
+
+  .multiselect-admin-filter .multiselect__placeholder {
+    margin-bottom: 0;
+    padding: 0;
+    color: #6b7280;
+    font-size: 10px;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__placeholder {
+    color: #9ca3af;
+  }
+
+  .multiselect-admin-filter .multiselect__single {
+    margin-bottom: 0;
+    padding: 0;
+    color: #111827;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__single {
+    color: #f9fafb;
+  }
+
+  .multiselect-admin-filter .multiselect__select {
+    padding: 6px 12px;
+  }
+
+  .multiselect-admin-filter .multiselect__select::before {
+    border-color: #6b7280 transparent transparent;
+    top: 65%;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__select::before {
+    border-color: #9ca3af transparent transparent;
+  }
+
+  .multiselect-admin-filter .multiselect__content-wrapper {
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 2px;
+    z-index: 50;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__content-wrapper {
+    background-color: #374151;
+    border-color: #4b5563;
+  }
+
+  .multiselect-admin-filter .multiselect__option {
+    padding: 8px 12px;
+    min-height: 32px;
+    font-size: 10px;
+    cursor: pointer;
+    color: #111827;
+    transition: all 0.2s ease;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__option {
+    color: #f9fafb;
+  }
+
+  .multiselect-admin-filter .multiselect__option:hover {
+    background-color: #f3f4f6;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__option:hover {
+    background-color: #4b5563;
+  }
+
+  .multiselect-admin-filter .multiselect__option--selected {
+    background-color: #dbeafe;
+    color: #1e40af;
+    font-weight: 600;
+  }
+
+  .dark .multiselect-admin-filter .multiselect__option--selected {
+    background-color: #4b5563;
+    color: #f9fafb;
+  } 
+
+  .multiselect-admin-filter .multiselect__option--highlight::after {
+    content: '';
+  }
 </style>
 
 <script setup>
@@ -1243,6 +1383,7 @@ import { useAuthStore } from '~/middleware/auth.store'
 import { useRouter, useRoute } from 'vue-router';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
+import Multiselect from 'vue-multiselect'
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
@@ -1282,6 +1423,39 @@ const selectedServiceType = ref('')
 const selectedCity = ref('')
 const selectedTechCity = ref('')
 const selectedMonth = ref(new Date().toISOString().slice(0, 7)) // Formato YYYY-MM
+
+// Objetos seleccionados para multiselect
+const selectedStatusObject = ref(null)
+const selectedServiceTypeObject = ref(null)
+const selectedTechCityObject = ref(null)
+
+// Listas de opciones para multiselect
+const statusOptions = [
+  { value: '', label: 'Todos los estados' },
+  { value: 'asignado', label: 'Asignado' },
+  { value: 'pendiente_cotizacion', label: 'Pend. Cotización' },
+  { value: 'en_proceso', label: 'En Proceso' },
+  { value: 'pendiente_pagoservicio', label: 'Pend. Pago' },
+  { value: 'finalizado', label: 'Finalizado' },
+  { value: 'calificado', label: 'Calificado' },
+  { value: 'cancelado', label: 'Cancelado' }
+]
+
+// Funciones para etiquetar
+const getStatusLabel = (option) => {
+  if (!option) return ''
+  return option.label
+}
+
+const getServiceTypeLabel = (option) => {
+  if (!option) return ''
+  return option.nombre
+}
+
+const getTechCityLabel = (option) => {
+  if (!option) return ''
+  return option
+}
 
 // Paginación para Pendientes
 const pendingItemsPerPage = 4
@@ -2341,6 +2515,69 @@ watch(searchQuery, () => {
     isSearching.value = false
   }, 2000)
 })
+
+// Watch para sincronizar selectedStatus con selectedStatusObject
+watch(() => selectedStatus.value, (newValue) => {
+  if (newValue !== null && newValue !== undefined) {
+    const statusObject = statusOptions.find(option => option.value === newValue);
+    if (statusObject) {
+      selectedStatusObject.value = statusObject;
+    }
+  } else {
+    selectedStatusObject.value = statusOptions[0]; // "Todos los estados"
+  }
+});
+
+// Watch para sincronizar selectedStatusObject con selectedStatus
+watch(() => selectedStatusObject.value, (newObject) => {
+  if (newObject && newObject.value !== undefined) {
+    selectedStatus.value = newObject.value;
+  } else {
+    selectedStatus.value = '';
+  }
+});
+
+// Watch para sincronizar selectedServiceType con selectedServiceTypeObject
+watch(() => selectedServiceType.value, (newValue) => {
+  if (newValue && catalogoServicios.value.length > 0) {
+    const serviceObject = catalogoServicios.value.find(service => service.id_servicio === newValue);
+    if (serviceObject) {
+      selectedServiceTypeObject.value = serviceObject;
+    }
+  } else {
+    selectedServiceTypeObject.value = null;
+  }
+});
+
+// Watch para sincronizar selectedServiceTypeObject con selectedServiceType
+watch(() => selectedServiceTypeObject.value, (newObject) => {
+  if (newObject && newObject.id_servicio !== undefined) {
+    selectedServiceType.value = newObject.id_servicio;
+  } else {
+    selectedServiceType.value = '';
+  }
+});
+
+// Watch para sincronizar selectedTechCity con selectedTechCityObject
+watch(() => selectedTechCity.value, (newValue) => {
+  if (newValue && availableCities.value.length > 0) {
+    const cityObject = availableCities.value.find(city => city === newValue);
+    if (cityObject) {
+      selectedTechCityObject.value = cityObject;
+    }
+  } else {
+    selectedTechCityObject.value = null;
+  }
+});
+
+// Watch para sincronizar selectedTechCityObject con selectedTechCity
+watch(() => selectedTechCityObject.value, (newCity) => {
+  if (newCity) {
+    selectedTechCity.value = newCity;
+  } else {
+    selectedTechCity.value = '';
+  }
+});
 
 // Watch para los demás filtros (sin debounce, se ejecutan inmediatamente)
 watch([selectedStatus, selectedServiceType, selectedMonth], () => {

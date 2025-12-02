@@ -183,20 +183,28 @@
           <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ciudad</label>
             <div class="relative">
-              <select
-                v-model="user.id_ciudad"
-                class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white appearance-none pr-8 text-base"
+              <multiselect
+                v-model="selectedCiudadObject"
+                :options="ciudades"
+                :searchable="false"
+                :close-on-select="true"
+                :show-labels="false"
+                placeholder="Selecciona una ciudad"
+                label="nombre"
+                track-by="id_ciudad"
+                class="multiselect-custom"
+                :class="{ 'multiselect--active': selectedCiudadObject }"
+                :select-label="''"
+                :deselect-label="''"
+                :selected-label="''"
+                :custom-label="getCiudadLabel"
+                :options-limit="100"
+                :disabled="ciudades.length === 0"
               >
-                <option :value="null" disabled>Selecciona una ciudad</option>
-                <option v-for="ciudad in ciudades" :key="ciudad.id_ciudad" :value="ciudad.id_ciudad" :selected="user.id_ciudad === ciudad.id_ciudad">
-                  {{ ciudad.nombre }}
-                </option>
-              </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                </svg>
-              </div>
+                <template #singleLabel="{ option }">
+                  <span class="text-xs truncate">{{ getCiudadLabel(option) }}</span>
+                </template>
+              </multiselect>
             </div>
           </div>
           
@@ -433,22 +441,22 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
                   </div>
                   <div v-else class="space-y-3">
-                    <select
+                    <multiselect
                       id="bank-account"
-                      v-model="selectedAccount"
-                      class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
+                      v-model="selectedAccountObject"
+                      :options="bankAccounts"
+                      :searchable="false"
+                      placeholder="Selecciona una cuenta"
+                      label="banco"
+                      track-by="id_cuenta"
+                      class="multiselect-custom"
+                      :custom-label="getAccountLabel"
                       :disabled="bankAccounts.length === 0"
                     >
-                      <option v-if="bankAccounts.length === 0" value="" disabled>No hay cuentas registradas</option>
-                      <option value="" selected disabled>Selecciona una cuenta</option>
-                      <option 
-                        v-for="account in bankAccounts" 
-                        :key="account.id_cuenta" 
-                        :value="account.id_cuenta"
-                      >
-                        🏦 {{ account.banco }}
-                      </option>
-                    </select>
+                      <template #singleLabel="{ option }">
+                        <span>{{ getAccountLabel(option) }}</span>
+                      </template>
+                    </multiselect>
                     
                     <!-- Detalles de la cuenta seleccionada con animación -->
                     <Transition
@@ -1040,6 +1048,154 @@ button:hover {
 .dark .shadow-2xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
+
+/* Estilos para vue-multiselect */
+.multiselect-custom {
+  position: relative;
+  z-index: 10;
+}
+
+.multiselect-custom .multiselect__tags {
+  min-height: 44px;
+  padding: 8px 40px 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background-color: #f9fafb;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .multiselect-custom .multiselect__tags {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: white;
+}
+
+.multiselect-custom .multiselect__tags:hover {
+  border-color: #d1d5db;
+}
+
+.dark .multiselect-custom .multiselect__tags:hover {
+  border-color: #6b7280;
+}
+
+.multiselect-custom.multiselect--active .multiselect__tags {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.multiselect-custom .multiselect__placeholder {
+  margin-bottom: 0;
+  padding: 0;
+  color: #9ca3af;
+  font-size: 16px;
+}
+
+.dark .multiselect-custom .multiselect__placeholder {
+  color: #6b7280;
+}
+
+.multiselect-custom .multiselect__single {
+  margin-bottom: 0;
+  padding: 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.dark .multiselect-custom .multiselect__single {
+  color: white;
+}
+
+.multiselect-custom .multiselect__select {
+  padding: 8px 12px;
+}
+
+.multiselect-custom .multiselect__select::before {
+  border-color: #6b7280 transparent transparent;
+  top: 65%;
+}
+
+.dark .multiselect-custom .multiselect__select::before {
+  border-color: #9ca3af transparent transparent;
+}
+
+.multiselect-custom .multiselect__content-wrapper {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+  z-index: 50;
+}
+
+.dark .multiselect-custom .multiselect__content-wrapper {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.multiselect-custom .multiselect__content {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.multiselect-custom .multiselect__element {
+  padding: 0;
+}
+
+.multiselect-custom .multiselect__option {
+  padding: 12px 16px;
+  min-height: 44px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.dark .multiselect-custom .multiselect__option {
+  color: #e5e7eb;
+}
+
+.multiselect-custom .multiselect__option:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.dark .multiselect-custom .multiselect__option:hover {
+  background-color: #374151;
+  color: white;
+}
+
+.multiselect-custom .multiselect__option--selected {
+  background-color: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.dark .multiselect-custom .multiselect__option--selected {
+    background-color: #4b5563;
+    color: #f9fafb;
+}
+
+.multiselect-custom .multiselect__option--highlight {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.multiselect-custom .multiselect__option--highlight::after {
+  content: '';
+}
+
+.multiselect-custom .multiselect__spinner {
+  background: transparent;
+}
+
+.multiselect-custom .multiselect__spinner::before,
+.multiselect-custom .multiselect__spinner::after {
+  border-color: #3b82f6 transparent transparent;
+}
 </style>
 
 <script setup>
@@ -1048,6 +1204,7 @@ import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import Multiselect from 'vue-multiselect'
 const config = useRuntimeConfig()
 const { $api } = useNuxtApp();
 
@@ -1074,6 +1231,7 @@ const isLoadingAccounts = ref(false)
 const showRenewalModal = ref(false);
 const isRenewing = ref(false);
 const selectedAccount = ref('');
+const selectedAccountObject = ref(null);
 const comprobante = ref('');
 const showComprobanteInput = ref(false);
 const membershipCost = ref(0);  
@@ -1084,6 +1242,7 @@ const confirmPassword = ref('')
 const isPasswordModalOpen = ref(false)
 const isUpdatingPassword = ref(false) 
 const ciudades = ref([])
+const selectedCiudadObject = ref(null)
 const isTerminosModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
@@ -1108,6 +1267,18 @@ const updateContactInfo = (type, newValue) => {
   if (index !== -1) {
     contactInfo.value[index].value = newValue
   }
+}
+
+// Función para obtener la etiqueta de la ciudad
+const getCiudadLabel = (option) => {
+  if (!option) return ''
+  return option.nombre
+}
+
+// Función para obtener la etiqueta de la cuenta bancaria
+const getAccountLabel = (option) => {
+  if (!option) return ''
+  return `🏦 ${option.banco}`
 }
 
 // Obtener información de contacto de la empresa
@@ -1293,15 +1464,49 @@ const hasChanges = computed(() => {
   );
 });
 
-// Actualizar el nombre de la ciudad cuando cambie el id_ciudad
+// Watch para sincronizar user.id_ciudad con selectedCiudadObject
 watch(() => user.value.id_ciudad, (newId) => {
-  if (newId) {
-    const ciudadSeleccionada = ciudades.value.find(c => c.id_ciudad === newId);
-    if (ciudadSeleccionada) {
-      user.value.ciudad = ciudadSeleccionada.nombre;
+  if (newId && ciudades.value.length > 0) {
+    const ciudadObject = ciudades.value.find(c => c.id_ciudad === newId);
+    if (ciudadObject) {
+      selectedCiudadObject.value = ciudadObject;
+      user.value.ciudad = ciudadObject.nombre;
     }
   } else {
+    selectedCiudadObject.value = null;
     user.value.ciudad = null;
+  }
+});
+
+// Watch para sincronizar selectedCiudadObject con user.id_ciudad
+watch(() => selectedCiudadObject.value, (newCiudad) => {
+  if (newCiudad) {
+    user.value.id_ciudad = newCiudad.id_ciudad;
+    user.value.ciudad = newCiudad.nombre;
+  } else {
+    user.value.id_ciudad = null;
+    user.value.ciudad = null;
+  }
+});
+
+// Watch para sincronizar selectedAccount con selectedAccountObject
+watch(() => selectedAccount.value, (newId) => {
+  if (newId && bankAccounts.value.length > 0) {
+    const accountObject = bankAccounts.value.find(acc => acc.id_cuenta === newId);
+    if (accountObject) {
+      selectedAccountObject.value = accountObject;
+    }
+  } else {
+    selectedAccountObject.value = null;
+  }
+});
+
+// Watch para sincronizar selectedAccountObject con selectedAccount
+watch(() => selectedAccountObject.value, (newAccount) => {
+  if (newAccount) {
+    selectedAccount.value = newAccount.id_cuenta;
+  } else {
+    selectedAccount.value = '';
   }
 });
 

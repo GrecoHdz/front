@@ -286,16 +286,25 @@
             
             <form @submit.prevent="handleRequestService" class="space-y-3">
               <div>
-                <select v-model="serviceFormData.type" 
-                        :disabled="isLoadingServices"
-                        class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-70 disabled:cursor-not-allowed">
-                  <option value="" disabled class="text-gray-900">
-                    {{ isLoadingServices ? 'Cargando servicios...' : 'Selecciona un servicio' }}
-                  </option>
-                  <option v-for="service in servicesList" :key="`service-${service.id}`" :value="service.name" class="text-gray-900">
-                    {{ service.icon }} {{ service.name }}
-                  </option>
-                </select>
+                <div class="multiselect-service-wrapper">
+                <multiselect v-model="selectedServiceObject" 
+                        :options="servicesList"
+                        :searchable="false"
+                        :close-on-select="true"
+                        :show-labels="false"
+                        placeholder="Selecciona un servicio"
+                        label="name"
+                        track-by="id"
+                        class="multiselect-transparent"
+                        :custom-label="getServiceLabel"
+                        :options-limit="100"
+                        :disabled="isLoadingServices || servicesList.length === 0"
+                        :loading="isLoadingServices">
+                  <template #singleLabel="{ option }">
+                    <span class="truncate">{{ getServiceLabel(option) }}</span>
+                  </template>
+                </multiselect>
+              </div>
               </div>
               
               <div>
@@ -456,14 +465,236 @@ html {
 .hover\:scale-105:hover {
   transform: scale(1.05);
 }
+
+/* Estilos para vue-multiselect */
+.multiselect-custom {
+  position: relative;
+  z-index: 10;
+}
+
+/* Estilos para vue-multiselect - Máxima especificidad */
+.multiselect-custom.multiselect__tags {
+  min-height: 44px !important;
+  padding: 8px 40px 8px 12px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 0.75rem !important;
+  background: linear-gradient(to bottom right, #4f46e5, #2563eb, #0891b2) !important;
+  backdrop-filter: blur(8px) !important;
+  font-size: 16px !important;
+  transition: all 0.2s ease !important;
+  color: white !important;
+}
+
+.dark .multiselect-custom.multiselect__tags {
+  background: linear-gradient(to bottom right, #4f46e5, #2563eb, #0891b2) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+}
+
+/* Forzar estilos sobre clases globales */
+.multiselect-custom .multiselect__tags,
+.dark .multiselect-custom .multiselect__tags,
+body .multiselect-custom .multiselect__tags,
+html .multiselect-custom .multiselect__tags {
+  background: linear-gradient(to bottom right, #4f46e5, #2563eb, #0891b2) !important;
+  color: white !important;
+}
+
+/* Enfoque 3: Contenedor wrapper con multiselect transparente */
+.multiselect-service-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 40px 8px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.multiselect-service-wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.multiselect-service-wrapper.active {
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.multiselect-transparent .multiselect__tags {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  min-height: auto !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.multiselect-transparent .multiselect__placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 16px;
+}
+
+.multiselect-transparent .multiselect__single {
+  color: white !important;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.multiselect-transparent .multiselect__select {
+  padding: 0 !important;
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+.multiselect-transparent .multiselect__select::before {
+  border-color: white transparent transparent;
+}
+
+.multiselect-transparent .multiselect__content-wrapper {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+  z-index: 50;
+}
+
+.multiselect-transparent .multiselect__option {
+  padding: 12px 16px;
+  min-height: 44px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.multiselect-transparent .multiselect__option:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.multiselect-transparent .multiselect__option--selected {
+  background-color: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.multiselect-transparent .multiselect__option--highlight {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.multiselect-custom .multiselect__tags:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.multiselect-custom.multiselect--active .multiselect__tags {
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.multiselect-custom .multiselect__placeholder {
+  margin-bottom: 0;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 16px;
+}
+
+.dark .multiselect-custom .multiselect__placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.multiselect-custom .multiselect__single {
+  margin-bottom: 0;
+  padding: 0;
+  color: white !important;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.dark .multiselect-custom .multiselect__single {
+  color: white !important;
+}
+
+.multiselect-custom .multiselect__select {
+  padding: 8px 12px;
+}
+
+.multiselect-custom .multiselect__select::before {
+  border-color: white transparent transparent;
+  top: 65%;
+}
+
+.multiselect-custom .multiselect__content-wrapper {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+  z-index: 50;
+}
+
+.multiselect-custom .multiselect__content {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.multiselect-custom .multiselect__element {
+  padding: 0;
+}
+
+.multiselect-custom .multiselect__option {
+  padding: 12px 16px;
+  min-height: 44px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.multiselect-custom .multiselect__option:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.multiselect-custom .multiselect__option--selected {
+  background-color: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.multiselect-custom .multiselect__option--highlight {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.multiselect-custom .multiselect__option--highlight::after {
+  content: '';
+}
+
+.multiselect-custom .multiselect__spinner {
+  background: transparent;
+}
+
+.multiselect-custom .multiselect__spinner::before,
+.multiselect-custom .multiselect__spinner::after {
+  border-color: white transparent transparent;
+}
 </style>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
-import LoadingSpinner from '~/components/ui/LoadingSpinner.vue' 
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import Multiselect from 'vue-multiselect' 
 
 // =========================
 // CONFIGURACIÓN Y SETUP
@@ -579,6 +810,14 @@ const serviceFormData = ref({
   colonia: '',
   direccion: ''
 })
+
+const selectedServiceObject = ref(null)
+
+// Función para obtener la etiqueta del servicio
+const getServiceLabel = (option) => {
+  if (!option) return ''
+  return `${option.icon} ${option.name}`
+}
 
 // Estados de notificaciones
 const toast = ref({
@@ -1344,6 +1583,27 @@ userData.value.name = userData.value.nombre || userData.value.name
 
 // Estado reactivo para el crédito del usuario
 const userCredit = ref(0)
+
+// Watch para sincronizar serviceFormData.type con selectedServiceObject
+watch(() => serviceFormData.value.type, (newType) => {
+  if (newType && servicesList.value.length > 0) {
+    const serviceObject = servicesList.value.find(s => s.name === newType);
+    if (serviceObject) {
+      selectedServiceObject.value = serviceObject;
+    }
+  } else {
+    selectedServiceObject.value = null;
+  }
+});
+
+// Watch para sincronizar selectedServiceObject con serviceFormData.type
+watch(() => selectedServiceObject.value, (newService) => {
+  if (newService) {
+    serviceFormData.value.type = newService.name;
+  } else {
+    serviceFormData.value.type = '';
+  }
+});
 
 // Verificar autenticación al cargar el componente
 onMounted(async () => { 

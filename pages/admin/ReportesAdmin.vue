@@ -573,12 +573,23 @@
       <section class="px-3 sm:px-4 mb-3 sm:mb-4">
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Análisis de Datos</h2>
-          <select v-model="selectedChart" 
-                  class="px-2 sm:px-3 py-1.5 sm:py-2 text-base bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-            <option v-for="chart in availableCharts" :key="chart.id" :value="chart.id">
-              {{ chart.name }}
-            </option>
-          </select>
+          <multiselect 
+            v-model="selectedChartObject"
+            :options="availableCharts"
+            :searchable="false"
+            :close-on-select="true"
+            :show-labels="false"
+            placeholder="Seleccionar gráfico"
+            label="name"
+            track-by="id"
+            class="multiselect-admin-filter w-48"
+            :custom-label="getChartLabel"
+            :options-limit="100"
+          >
+            <template #singleLabel="{ option }">
+              <span class="text-[9px] sm:text-xs truncate">{{ getChartLabel(option) }}</span>
+            </template>
+          </multiselect>
         </div>
       </section>
 
@@ -954,6 +965,7 @@ import { useAuthStore } from '~/middleware/auth.store';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels'; 
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import Toast from '~/components/ui/Toast.vue'; 
+import Multiselect from 'vue-multiselect';
 
 // Configuración 
 const { $pdf } = useNuxtApp();
@@ -978,6 +990,15 @@ const isLoading = ref(false);
 const isLoadingData = ref(false);
 const isLoadingTransactions = ref(false);
 const selectedChart = ref('earnings');
+const selectedChartObject = ref(null);
+
+// Inicializar selectedChartObject con la primera opción
+const initializeChartObject = () => {
+  if (availableCharts.length > 0) {
+    selectedChartObject.value = availableCharts[0];
+  }
+};
+
 const activeTab = ref('membership');
 const selectedMonthTransactions = ref('');
 const selectedMonthPayments = ref('');
@@ -2520,6 +2541,12 @@ const availableCharts = [
   { id: 'users', name: '👥 Crecimiento de Usuarios' },
   { id: 'cities', name: '🏙️ Servicios por Ciudad' }
 ];
+
+// Función para etiquetar gráficos
+const getChartLabel = (option) => {
+  if (!option) return ''
+  return option.name
+}
 
 const generateMonthLabels = () => {
   try {
@@ -4163,6 +4190,28 @@ const showToast = (message, type = 'info') => {
 };
 
 // ===== WATCHERS =====
+
+// Watch para sincronizar selectedChart con selectedChartObject
+watch(() => selectedChart.value, (newValue) => {
+  if (newValue && availableCharts.length > 0) {
+    const chartObject = availableCharts.find(chart => chart.id === newValue);
+    if (chartObject) {
+      selectedChartObject.value = chartObject;
+    }
+  } else {
+    selectedChartObject.value = availableCharts[0]; // Primer gráfico por defecto
+  }
+});
+
+// Watch para sincronizar selectedChartObject con selectedChart
+watch(() => selectedChartObject.value, (newObject) => {
+  if (newObject && newObject.id !== undefined) {
+    selectedChart.value = newObject.id;
+  } else {
+    selectedChart.value = 'earnings'; // Valor por defecto
+  }
+});
+
 watch(selectedChart, async (newVal) => { 
   try {
     await nextTick();
@@ -4186,6 +4235,9 @@ watch(initialStats, (newVal) => {
 onMounted(async () => {
   try {
     Chart.register(...registerables, DataLabelsPlugin);
+    
+    // Inicializar selectedChartObject con la primera opción
+    initializeChartObject();
     
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.documentElement.classList.add('dark');
@@ -4247,5 +4299,72 @@ onMounted(async () => {
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
+}
+
+/* Estilos para vue-multiselect en filtros de admin */
+.multiselect-admin-filter {
+  position: relative;
+  z-index: 50;
+}
+
+.multiselect-admin-filter .multiselect__tags {
+  min-height: 36px;
+  padding: 4px 40px 4px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  color: #111827;
+}
+
+.dark .multiselect-admin-filter .multiselect__tags {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.multiselect-admin-filter .multiselect__content-wrapper {
+  position: absolute;
+  z-index: 9999;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+}
+
+.dark .multiselect-admin-filter .multiselect__content-wrapper {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.multiselect-admin-filter .multiselect__content {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.multiselect-admin-filter .multiselect__element {
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.multiselect-admin-filter .multiselect__element:hover {
+  background-color: #f3f4f6;
+}
+
+.dark .multiselect-admin-filter .multiselect__element:hover {
+  background-color: #4b5563;
+}
+
+.multiselect-admin-filter .multiselect__element--selected {
+  background-color: #2563eb;
+  color: white;
+}
+
+.multiselect-admin-filter .multiselect__element--selected:hover {
+  background-color: #2563eb;
 }
 </style>

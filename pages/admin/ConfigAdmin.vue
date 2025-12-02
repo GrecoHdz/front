@@ -608,13 +608,23 @@
               </div>
             </div>
             
-            <select 
-              v-model="filtroEstado"
-              class="w-32 sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base transition-all">
-              <option value="">Todos</option>
-              <option value="1">Activos</option>
-              <option value="0">Inactivos</option>
-            </select>
+            <multiselect 
+              v-model="filtroEstadoObject"
+              :options="estadoOptions"
+              :searchable="false"
+              :close-on-select="true"
+              :show-labels="false"
+              placeholder="Todos"
+              label="label"
+              track-by="value"
+              class="multiselect-admin-filter w-32"
+              :custom-label="getEstadoLabel"
+              :options-limit="100"
+            >
+              <template #singleLabel="{ option }">
+                <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
+              </template>
+            </multiselect>
           </div>
 
           <!-- Lista de servicios -->
@@ -965,21 +975,30 @@
               
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Destinatario
                   </label>
-                  <select 
-                    v-model="tipoEnvio"
-                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  <multiselect 
+                    v-model="tipoEnvioObject"
+                    :options="tipoEnvioOptions"
+                    :searchable="false"
+                    :close-on-select="true"
+                    :show-labels="false"
+                    placeholder="Seleccionar tipo"
+                    label="label"
+                    track-by="value"
+                    class="multiselect-admin-filter"
+                    :custom-label="getTipoEnvioLabel"
+                    :options-limit="100"
                   >
-                    <option value="usuario">Usuario específico</option>
-                    <option value="rol">Por rol</option>
-                    <option value="global">Todos los usuarios</option>
-                  </select>
+                    <template #singleLabel="{ option }">
+                      <span class="text-[11px] truncate">{{ getTipoEnvioLabel(option) }}</span>
+                    </template>
+                  </multiselect>
                 </div>
 
                 <div v-if="tipoEnvio === 'usuario'">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     ID de Usuario
                   </label>
                   <input
@@ -992,17 +1011,26 @@
                 </div>
 
                 <div v-if="tipoEnvio === 'rol'">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Rol
                   </label>
-                  <select 
-                    v-model="nombreRolDestino"
-                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  <multiselect 
+                    v-model="nombreRolDestinoObject"
+                    :options="rolOptions"
+                    :searchable="false"
+                    :close-on-select="true"
+                    :show-labels="false"
+                    placeholder="Seleccionar rol"
+                    label="label"
+                    track-by="value"
+                    class="multiselect-admin-filter"
+                    :custom-label="getRolLabel"
+                    :options-limit="100"
                   >
-                    <option value="cliente">Cliente</option>
-                    <option value="tecnico">Técnico</option>
-                    <option value="admin">Administrador</option>
-                  </select>
+                    <template #singleLabel="{ option }">
+                      <span class="text-[11px] truncate">{{ getRolLabel(option) }}</span>
+                    </template>
+                  </multiselect>
                 </div>
               </div>
 
@@ -1702,7 +1730,8 @@ const route = useRoute();
 
 // Componentes 
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
-import Toast from '~/components/ui/Toast.vue' 
+import Toast from '~/components/ui/Toast.vue'
+import Multiselect from 'vue-multiselect' 
 
 // SEO y Meta
 useHead({
@@ -1794,8 +1823,36 @@ const nuevaNotificacion = ref({
 const mostrarModalEnvio = ref(false)
 const notificacionAEnviar = ref(null)
 const tipoEnvio = ref('')
+const tipoEnvioObject = ref(null)
+
+// Opciones para el selector de tipo de envío
+const tipoEnvioOptions = [
+  { value: 'usuario', label: 'Usuario específico' },
+  { value: 'rol', label: 'Por rol' },
+  { value: 'global', label: 'Todos los usuarios' }
+]
+
+// Función para etiquetar tipo de envío
+const getTipoEnvioLabel = (option) => {
+  if (!option) return ''
+  return option.label
+}
 const idUsuarioDestino = ref(null)
 const nombreRolDestino = ref('')
+const nombreRolDestinoObject = ref(null)
+
+// Opciones para el selector de rol
+const rolOptions = [
+  { value: 'usuario', label: 'Clientes' },
+  { value: 'tecnico', label: 'Técnicos' },
+  { value: 'admin', label: 'Administradores' }
+]
+
+// Función para etiquetar roles
+const getRolLabel = (option) => {
+  if (!option) return ''
+  return option.label
+}
 const isSendingNotification = ref(false)
 
 // Estados para los modales de confirmación
@@ -1821,6 +1878,20 @@ const formServicio = ref({
 });
 const filtroBusqueda = ref('')
 const filtroEstado = ref('')
+const filtroEstadoObject = ref(null)
+
+// Opciones para el filtro de estado
+const estadoOptions = [
+  { value: '', label: 'Todos' },
+  { value: '1', label: 'Activos' },
+  { value: '0', label: 'Inactivos' }
+]
+
+// Función para etiquetar estados
+const getEstadoLabel = (option) => {
+  if (!option) return ''
+  return option.label
+}
 
 // Estados para gestión de beneficios
 const beneficios = ref([]);
@@ -2155,6 +2226,70 @@ const ciudadesPaginadas = computed(() => {
 })
 
 // Watchers para reiniciar la paginación cuando cambian los filtros
+
+// Watch para sincronizar filtroEstado con filtroEstadoObject
+watch(() => filtroEstado.value, (newValue) => {
+  if (newValue !== undefined && newValue !== null) {
+    const estadoObject = estadoOptions.find(option => option.value === newValue);
+    if (estadoObject) {
+      filtroEstadoObject.value = estadoObject;
+    }
+  } else {
+    filtroEstadoObject.value = estadoOptions[0]; // "Todos" por defecto
+  }
+});
+
+// Watch para sincronizar filtroEstadoObject con filtroEstado
+watch(() => filtroEstadoObject.value, (newObject) => {
+  if (newObject && newObject.value !== undefined) {
+    filtroEstado.value = newObject.value;
+  } else {
+    filtroEstado.value = ''; // Valor por defecto
+  }
+});
+
+// Watch para sincronizar nombreRolDestino con nombreRolDestinoObject
+watch(() => nombreRolDestino.value, (newValue) => {
+  if (newValue && rolOptions.length > 0) {
+    const rolObject = rolOptions.find(option => option.value === newValue);
+    if (rolObject) {
+      nombreRolDestinoObject.value = rolObject;
+    }
+  } else {
+    nombreRolDestinoObject.value = null;
+  }
+});
+
+// Watch para sincronizar nombreRolDestinoObject con nombreRolDestino
+watch(() => nombreRolDestinoObject.value, (newObject) => {
+  if (newObject && newObject.value !== undefined) {
+    nombreRolDestino.value = newObject.value;
+  } else {
+    nombreRolDestino.value = ''; // Valor por defecto
+  }
+});
+
+// Watch para sincronizar tipoEnvio con tipoEnvioObject
+watch(() => tipoEnvio.value, (newValue) => {
+  if (newValue && tipoEnvioOptions.length > 0) {
+    const tipoObject = tipoEnvioOptions.find(option => option.value === newValue);
+    if (tipoObject) {
+      tipoEnvioObject.value = tipoObject;
+    }
+  } else {
+    tipoEnvioObject.value = null;
+  }
+});
+
+// Watch para sincronizar tipoEnvioObject con tipoEnvio
+watch(() => tipoEnvioObject.value, (newObject) => {
+  if (newObject && newObject.value !== undefined) {
+    tipoEnvio.value = newObject.value;
+  } else {
+    tipoEnvio.value = ''; // Valor por defecto
+  }
+});
+
 watch([filtroBusqueda, filtroEstado], () => {
   paginacion.value.paginaActual = 1
 })
@@ -3147,6 +3282,9 @@ const cerrarModalEnvio = () => {
 const resetearFormularioEnvio = () => {
   idUsuarioDestino.value = null
   nombreRolDestino.value = ''
+  nombreRolDestinoObject.value = null
+  tipoEnvio.value = ''
+  tipoEnvioObject.value = null
 }
 
 const enviarNotificacion = async () => {
@@ -3619,6 +3757,9 @@ const cargarReferidorPredeterminado = async () => {
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
+    // Inicializar filtroEstadoObject con la primera opción
+    filtroEstadoObject.value = estadoOptions[0];
+    
     await Promise.all([
       cargarConfiguraciones(),
       cargarCuentas().catch(error => {
@@ -3732,5 +3873,74 @@ input, select, textarea {
   .space-y-5 > :not([hidden]) ~ :not([hidden]) {
     margin-top: 1.25rem;
   }
+}
+
+/* Estilos para vue-multiselect en filtros de admin */
+.multiselect-admin-filter {
+  position: relative;
+  z-index: 50;
+}
+
+.multiselect-admin-filter .multiselect__tags {
+  min-height: 44px;
+  padding: 1px 40px 1px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  color: #111827;
+  display: flex;
+  align-items: center;
+}
+
+.dark .multiselect-admin-filter .multiselect__tags {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.multiselect-admin-filter .multiselect__content-wrapper {
+  position: absolute;
+  z-index: 9999;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+}
+
+.dark .multiselect-admin-filter .multiselect__content-wrapper {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.multiselect-admin-filter .multiselect__content {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.multiselect-admin-filter .multiselect__element {
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.multiselect-admin-filter .multiselect__element:hover {
+  background-color: #f3f4f6;
+}
+
+.dark .multiselect-admin-filter .multiselect__element:hover {
+  background-color: #4b5563;
+}
+
+.multiselect-admin-filter .multiselect__element--selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.multiselect-admin-filter .multiselect__element--selected:hover {
+  background-color: #2563eb;
 }
 </style>

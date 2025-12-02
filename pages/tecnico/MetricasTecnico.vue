@@ -105,20 +105,66 @@
       <section class="px-3 sm:px-4 mb-3 sm:mb-4">
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Análisis de Datos</h2>
-          <select v-model="selectedChart" 
-                  class="px-2 sm:px-3 py-1.5 sm:py-2 text-base bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-            <option v-for="chart in availableCharts" :key="chart.id" :value="chart.id">
-              {{ chart.name }}
-            </option>
-          </select>
+          <multiselect
+            v-model="selectedChartObject"
+            :options="availableCharts"
+            :searchable="false"
+            :close-on-select="true"
+            :show-labels="false"
+            placeholder="Seleccionar gráfico"
+            label="name"
+            track-by="id"
+            class="multiselect-custom"
+            :class="{ 'multiselect--active': selectedChartObject }"
+            :select-label="''"
+            :deselect-label="''"
+            :selected-label="''"
+            :custom-label="getChartLabel"
+            @search-change="$event && $event.stopPropagation()"
+            @search-focus="(e) => e && e.target && e.target.blur()"
+            @touchstart.native.stop
+            @click.native.stop
+            :options-limit="100"
+          >
+            <template #singleLabel="{ option }">
+              <span class="text-xs truncate">{{ getChartLabel(option) }}</span>
+            </template>
+          </multiselect>
         </div>
       </section>
 
       <!-- Gráfico Dinámico -->
       <section class="px-3 sm:px-4 mb-4 sm:mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-          <div class="h-56 sm:h-64">
-            <canvas :id="'chart-' + selectedChart" class="w-full h-full"></canvas>
+        <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700 relative">
+          <div class="h-56 sm:h-64 relative">
+            <!-- Mensaje cuando no hay servicios -->
+            <div 
+              v-if="selectedChart === 'serviceTypes' && serviceTypesData.labels.length === 1 && 
+                   (serviceTypesData.labels[0] === 'Sin servicios' || serviceTypesData.labels[0] === 'Error al cargar' || serviceTypesData.labels[0] === 'Sin datos')"
+              class="absolute inset-0 flex items-center justify-center"
+            >
+              <div class="text-center">
+                <div class="text-gray-400 dark:text-gray-500 mb-2">
+                  <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </div>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">
+                  {{ serviceTypesData.labels[0] === 'Sin servicios' ? 'No tienes servicios registrados' : 
+                     serviceTypesData.labels[0] === 'Error al cargar' ? 'Error al cargar datos' : 'No hay datos disponibles' }}
+                </p>
+                <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">
+                  {{ serviceTypesData.labels[0] === 'Sin servicios' ? 'Los servicios que realices aparecerán aquí' : '' }}
+                </p>
+              </div>
+            </div>
+            <!-- Canvas del gráfico -->
+            <canvas 
+              :id="'chart-' + selectedChart" 
+              class="w-full h-full"
+              :class="{ 'opacity-0': selectedChart === 'serviceTypes' && serviceTypesData.labels.length === 1 && 
+                       (serviceTypesData.labels[0] === 'Sin servicios' || serviceTypesData.labels[0] === 'Error al cargar' || serviceTypesData.labels[0] === 'Sin datos') }"
+            ></canvas>
           </div>
         </div>
       </section>
@@ -540,6 +586,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useAuthStore } from '~/middleware/auth.store';
 import Toast from '~/components/ui/Toast.vue';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
+import Multiselect from 'vue-multiselect'
 
 // SEO and Meta
 useHead({
@@ -572,7 +619,14 @@ const selectedWithdrawMonth = ref(currentMonth)
 // UI State
 const activeTab = ref('ingresos')
 const selectedChart = ref('earnings')
+const selectedChartObject = ref(null)
 const reviews = ref([])
+
+// Función para obtener la etiqueta del gráfico
+const getChartLabel = (option) => {
+  if (!option) return ''
+  return option.name || ''
+}
 
 // Visible items for earnings and withdrawals
 const visibleEarningsCount = ref(3)
@@ -1279,7 +1333,18 @@ const loadEstadisticasGenerales = async () => {
 
 const loadServicesByType = async () => {
   try {
-    const data = await $api(`/movimientos/servicios/tipo/${userCookie.value.id_usuario}`, {
+    console.log('Cargando servicios por tipo para usuario:', userCookie.value.id_usuario);
+    
+    // Verificar si tenemos el ID de usuario
+    if (!userCookie.value?.id_usuario) {
+      console.error('No se encontró ID de usuario en userCookie');
+      // Datos de ejemplo para fallback
+      serviceTypesData.labels = ['Sin datos'];
+      serviceTypesData.datasets[0].data = [1];
+      return;
+    }
+    
+    const response = await $api(`/movimientos/servicios/tipo/${userCookie.value.id_usuario}`, {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1288,15 +1353,46 @@ const loadServicesByType = async () => {
       }
     })
 
-    serviceTypesData.labels = data.map(item => item.tipo)
-    serviceTypesData.datasets[0].data = data.map(item => item.cantidad)
+    console.log('Respuesta completa del API servicios por tipo:', response);
+
+    // Extraer los datos del array anidado
+    const data = response.data || [];
+    console.log('Datos extraídos:', data);
+
+    // Verificar si hay datos
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      console.log('No hay servicios registrados para este usuario');
+      // Mostrar mensaje de "sin datos" en lugar de datos de ejemplo
+      serviceTypesData.labels = ['Sin servicios'];
+      serviceTypesData.datasets[0].data = [1];
+      serviceTypesData.datasets[0].backgroundColor = ['#E5E7EB'];
+    } else {
+      serviceTypesData.labels = data.map(item => item.tipo || 'Sin nombre');
+      serviceTypesData.datasets[0].data = data.map(item => item.cantidad || 0);
+      // Restaurar colores originales si hay datos
+      serviceTypesData.datasets[0].backgroundColor = ['#3B82F6', '#EF4444', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899'];
+    }
+    
+    console.log('serviceTypesData final:', {
+      labels: serviceTypesData.labels,
+      data: serviceTypesData.datasets[0].data,
+      colors: serviceTypesData.datasets[0].backgroundColor
+    });
     
     if (selectedChart.value === 'serviceTypes') {
       createChart()
     }
   } catch (error) {
     console.error('Error al cargar servicios por tipo:', error)
-    showError('No se pudieron cargar los servicios por tipo')
+    console.warn('Mostrando mensaje de sin datos debido al error');
+    // Mostrar mensaje de "sin datos" en lugar de datos de ejemplo
+    serviceTypesData.labels = ['Error al cargar'];
+    serviceTypesData.datasets[0].data = [1];
+    serviceTypesData.datasets[0].backgroundColor = ['#EF4444'];
+    
+    if (selectedChart.value === 'serviceTypes') {
+      createChart()
+    }
   }
 }
 
@@ -1542,10 +1638,23 @@ const createChart = () => {
         }
 
       case 'serviceTypes':
+        console.log('Creando gráfico de serviceTypes');
+        console.log('Datos actuales de serviceTypesData:', serviceTypesData);
+        
+        // Si no hay servicios, no crear el gráfico (el HTML mostrará el mensaje)
+        if (serviceTypesData.labels.length === 1 && 
+            (serviceTypesData.labels[0] === 'Sin servicios' || serviceTypesData.labels[0] === 'Error al cargar' || serviceTypesData.labels[0] === 'Sin datos')) {
+          console.log('No hay servicios, omitiendo creación del gráfico');
+          return null;
+        }
+        
         const totalServices = serviceTypesData.datasets[0]?.data.reduce((a, b) => a + b, 0) || 0;
         const percentages = serviceTypesData.datasets[0]?.data.map(value => {
           return totalServices > 0 ? Math.round((value / totalServices) * 100) + '%' : '0%';
         }) || [];
+        
+        console.log('Total servicios:', totalServices);
+        console.log('Percentages:', percentages);
         
         return {
           type: 'doughnut',
@@ -1728,7 +1837,7 @@ const createChart = () => {
   // Obtener configuración del gráfico
   const config = getChartConfig()
   if (!config) {
-    console.error('No se pudo obtener la configuración del gráfico')
+    console.log('No hay configuración de gráfico (probablemente no hay datos)')
     return
   }
 
@@ -1908,6 +2017,27 @@ watch(activeTab, (newTab) => {
   }
 })
 
+// Watch para sincronizar selectedChart con selectedChartObject
+watch(() => selectedChart.value, (newId) => {
+  if (newId && availableCharts.length > 0) {
+    const chartObject = availableCharts.find(c => c.id === newId);
+    if (chartObject) {
+      selectedChartObject.value = chartObject;
+    }
+  } else {
+    selectedChartObject.value = null;
+  }
+});
+
+// Watch para sincronizar selectedChartObject con selectedChart
+watch(() => selectedChartObject.value, (newChart) => {
+  if (newChart) {
+    selectedChart.value = newChart.id;
+  } else {
+    selectedChart.value = null;
+  }
+});
+
 watch(selectedChart, (newVal, oldVal) => {
   if (newVal !== oldVal) {
     nextTick(() => {
@@ -1921,6 +2051,14 @@ onMounted(async () => {
   try {
     // Registrar componentes de Chart.js
     Chart.register(...registerables)
+    
+    // Inicializar selectedChartObject con el valor por defecto
+    if (selectedChart.value && availableCharts.length > 0) {
+      const defaultChart = availableCharts.find(c => c.id === selectedChart.value);
+      if (defaultChart) {
+        selectedChartObject.value = defaultChart;
+      }
+    }
     
     // Limpiar caché primero
     clearMovementsCache();
@@ -2012,5 +2150,153 @@ button:hover {
 
 button:active {
   transform: translateY(0);
+}
+
+/* Estilos personalizados para Multiselect - Exact match to index.vue */
+.multiselect-custom {
+  min-width: 140px !important;
+  font-size: 0.75rem !important;
+}
+
+.multiselect-custom .multiselect__tags {
+  min-height: 36px !important;
+  background-color: rgb(249 250 251) !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.5rem !important;
+  padding: 6px 30px 6px 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .multiselect-custom .multiselect__tags {
+  background-color: rgb(55 65 81) !important;
+  border-color: rgb(75 85 99) !important;
+}
+
+.multiselect-custom .multiselect__tags:focus-within {
+  border-color: rgb(16 185 129) !important;
+  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+}
+
+.dark .multiselect-custom .multiselect__tags:focus-within {
+  border-color: rgb(16 185 129) !important;
+  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+}
+
+.multiselect-custom .multiselect__single {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__single {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__input {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.75rem !important;
+  min-height: 20px !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__input {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__input::placeholder {
+  color: rgb(156 163 175) !important;
+}
+
+.multiselect-custom .multiselect__placeholder {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: rgb(156 163 175) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+  margin-top: 1px !important;
+}
+
+.multiselect-custom .multiselect__select {
+  height: 100% !important;
+  width: 1.5rem !important;
+  right: 0 !important;
+  top: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.multiselect-custom .multiselect__select:before {
+  border-color: rgb(156 163 175) transparent transparent !important;
+  border-style: solid !important;
+  border-width: 5px 5px 0 !important;
+  margin-top: 0 !important;
+  top: 55% !important;
+}
+
+.dark .multiselect-custom .multiselect__select:before {
+  border-color: rgb(156 163 175) transparent transparent !important;
+}
+
+.multiselect-custom .multiselect__content-wrapper {
+  background-color: white !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 0.25rem !important;
+  z-index: 50 !important;
+  min-width: 100% !important;
+  width: auto !important;
+}
+
+.dark .multiselect-custom .multiselect__content-wrapper {
+  background-color: rgb(31 41 55) !important;
+  border-color: rgb(55 65 81) !important;
+}
+
+.multiselect-custom .multiselect__option {
+  font-size: 0.75rem !important;
+  color: rgb(17 24 39) !important;
+  padding: 8px 12px !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__option {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--highlight {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--highlight {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--selected {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--selected {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
+  color: rgb(243 244 246) !important;
 }
 </style>

@@ -514,22 +514,34 @@
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
                 </div>
                 <div v-else class="space-y-3">
-                  <select
+                  <multiselect
                     id="bank-account"
-                    v-model="selectedAccount"
-                    class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
+                    v-model="selectedAccountObject"
+                    :options="bankAccounts"
+                    :searchable="false"
+                    :close-on-select="true"
+                    :show-labels="false"
+                    placeholder="Selecciona una cuenta"
+                    label="banco"
+                    track-by="id_cuenta"
+                    class="multiselect-custom"
+                    :class="{ 'multiselect--active': selectedAccountObject }"
+                    :select-label="''"
+                    :deselect-label="''"
+                    :selected-label="''"
+                    :custom-label="getAccountLabel"
+                    @search-change="$event && $event.stopPropagation()"
+                    @search-focus="(e) => e && e.target && e.target.blur()"
+                    @touchstart.native.stop
+                    @click.native.stop
+                    :options-limit="100"
                     :disabled="bankAccounts.length === 0"
+                    :loading="isLoadingAccounts"
                   >
-                    <option value="" disabled selected>Selecciona una cuenta</option>
-                    <option 
-                      v-for="account in bankAccounts" 
-                      :key="account.id_cuenta" 
-                      :value="account.id_cuenta"
-                      class="py-2"
-                    >
-                      🏦 {{ account.banco }}
-                    </option>
-                  </select>
+                    <template #singleLabel="{ option }">
+                      <span class="text-xs truncate">{{ getAccountLabel(option) }}</span>
+                    </template>
+                  </multiselect>
 
                   <!-- Detalles de la cuenta seleccionada -->
                   <div 
@@ -759,24 +771,34 @@
             </div>
 
             <div v-else class="space-y-3">
-
-              <select
+              <multiselect
                 id="bank-account"
-                v-model="selectedAccount"
-                class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200
-                       dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500
-                       text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
+                v-model="selectedAccountObject"
+                :options="bankAccounts"
+                :searchable="false"
+                :close-on-select="true"
+                :show-labels="false"
+                placeholder="Selecciona una cuenta"
+                label="banco"
+                track-by="id_cuenta"
+                class="multiselect-custom"
+                :class="{ 'multiselect--active': selectedAccountObject }"
+                :select-label="''"
+                :deselect-label="''"
+                :selected-label="''"
+                :custom-label="getAccountLabel"
+                @search-change="$event && $event.stopPropagation()"
+                @search-focus="(e) => e && e.target && e.target.blur()"
+                @touchstart.native.stop
+                @click.native.stop
+                :options-limit="100"
+                :disabled="bankAccounts.length === 0"
+                :loading="isLoadingAccounts"
               >
-                <option value="" disabled selected>Selecciona una cuenta</option>
-                <option 
-                  v-for="account in bankAccounts" 
-                  :key="account.id_cuenta" 
-                  :value="account.id_cuenta"
-                  class="py-2"
-                >
-                  {{ account.banco }}
-                </option>
-              </select>
+                <template #singleLabel="{ option }">
+                  <span class="text-xs truncate">{{ getAccountLabel(option) }}</span>
+                </template>
+              </multiselect>
 
               <!-- Detalles -->
               <div 
@@ -1589,6 +1611,155 @@ body {
   justify-content: center;
   align-items: center;
 }
+
+/* Estilos para vue-multiselect */
+.multiselect-custom {
+  position: relative;
+  z-index: 10;
+}
+
+.multiselect-custom .multiselect__tags {
+  min-height: 44px;
+  padding: 8px 40px 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .multiselect-custom .multiselect__tags {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: white;
+}
+
+.multiselect-custom .multiselect__tags:hover {
+  border-color: #d1d5db;
+}
+
+.dark .multiselect-custom .multiselect__tags:hover {
+  border-color: #6b7280;
+}
+
+.multiselect-custom.multiselect--active .multiselect__tags {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.multiselect-custom .multiselect__placeholder {
+  margin-bottom: 0;
+  padding: 0;
+  color: #9ca3af;
+  font-size: 16px;
+}
+
+.dark .multiselect-custom .multiselect__placeholder {
+  color: #6b7280;
+}
+
+.multiselect-custom .multiselect__single {
+  margin-bottom: 0;
+  padding: 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.dark .multiselect-custom .multiselect__single {
+  color: white;
+}
+
+.multiselect-custom .multiselect__select {
+  padding: 8px 12px;
+}
+
+.multiselect-custom .multiselect__select::before {
+  border-color: #6b7280 transparent transparent;
+  top: 65%;
+}
+
+.dark .multiselect-custom .multiselect__select::before {
+  border-color: #9ca3af transparent transparent;
+}
+
+.multiselect-custom .multiselect__content-wrapper {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+  z-index: 50;
+}
+
+.dark .multiselect-custom .multiselect__content-wrapper {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.multiselect-custom .multiselect__content {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.multiselect-custom .multiselect__element {
+  padding: 0;
+}
+
+.multiselect-custom .multiselect__option {
+  padding: 12px 16px;
+  min-height: 44px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.dark .multiselect-custom .multiselect__option {
+  color: #e5e7eb;
+}
+
+.multiselect-custom .multiselect__option:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.dark .multiselect-custom .multiselect__option:hover {
+  background-color: #374151;
+  color: white;
+}
+
+.multiselect-custom .multiselect__option--selected {
+  background-color: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.dark .multiselect-custom .multiselect__option--selected {
+    background-color: #4b5563;
+    color: #f9fafb;
+}
+
+.multiselect-custom .multiselect__option--highlight {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.multiselect-custom .multiselect__option--highlight::after {
+  content: '';
+}
+
+.multiselect-custom .multiselect__spinner {
+  background: transparent;
+}
+
+.multiselect-custom .multiselect__spinner::before,
+.multiselect-custom .multiselect__spinner::after {
+  border-color: #3b82f6 transparent transparent;
+}
+
 </style>
 
 <script setup>
@@ -1597,6 +1768,7 @@ import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
+import Multiselect from 'vue-multiselect'
 
 // =========================
 // CONFIGURACIÓN Y SETUP
@@ -1740,19 +1912,24 @@ const isCancelling = ref(false)
 const isLoadingAccounts = ref(false)
 const bankAccounts = ref([])
 const selectedAccount = ref('')
+const selectedAccountObject = ref(null)
 const comprobante = ref('')
 const isProcessingPayment = ref(false)
 const isProcessingVisitPayment = ref(false) // Estado para el procesamiento del pago de visita
 const membresiaProgreso = ref(null)
 const isLoadingMembresia = ref(false)
 const visitCost = ref(0)
-
-// Estados de notificaciones
 const toast = ref({
   show: false,
   message: '',
   type: 'success'
 })
+
+// Función para obtener la etiqueta de la cuenta bancaria
+const getAccountLabel = (option) => {
+  if (!option) return ''
+  return `🏦 ${option.banco}`
+}
 
 // =========================
 // COMPUTED PROPERTIES
@@ -3333,9 +3510,10 @@ const calcularTotal = () => {
     membresiaProgreso.value.monto_credito_mostrado = montoCreditoAplicado
   }
   
-  const total = Math.max(0, montoDespuesDescuento - montoCreditoAplicado);
-    
-  return total;
+  // Calcular el total final
+  const totalFinal = montoDespuesDescuento - montoCreditoAplicado
+  
+  return Math.max(0, totalFinal) // Asegurar que el total no sea negativo
 }
 
 // Actualizar el total cuando cambien los datos relevantes
@@ -3346,6 +3524,27 @@ watch([() => quotationData.value?.monto_manodeobra,
       () => membresiaBeneficios.value], () => {
   totalAPagar.value = calcularTotal()
 }, { immediate: true })
+
+// Watch para sincronizar selectedAccount con selectedAccountObject
+watch(() => selectedAccount.value, (newId) => {
+  if (newId && bankAccounts.value.length > 0) {
+    const accountObject = bankAccounts.value.find(acc => acc.id_cuenta === newId);
+    if (accountObject) {
+      selectedAccountObject.value = accountObject;
+    }
+  } else {
+    selectedAccountObject.value = null;
+  }
+});
+
+// Watch para sincronizar selectedAccountObject con selectedAccount
+watch(() => selectedAccountObject.value, (newAccount) => {
+  if (newAccount) {
+    selectedAccount.value = newAccount.id_cuenta;
+  } else {
+    selectedAccount.value = '';
+  }
+});
 
 // Obtener calificación del técnico - solo para servicios calificados
 const fetchTecnicoRating = async (idTecnico) => {

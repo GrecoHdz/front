@@ -28,40 +28,64 @@
         <form @submit.prevent="submitForm" class="space-y-3">
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asunto</label>
-            <select 
-              v-model="form.subject" 
-              class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
-              required
+            <multiselect
+              v-model="form.subjectObject"
+              :options="subjectOptions"
+              :searchable="false"
+              :close-on-select="true"
+              :show-labels="false"
+              placeholder="Selecciona un asunto"
+              label="label"
+              track-by="value"
+              class="multiselect-custom"
+              :class="{ 'multiselect--active': form.subjectObject }"
+              :select-label="''"
+              :deselect-label="''"
+              :selected-label="''"
+              :custom-label="getSubjectLabel"
+              @search-change="$event && $event.stopPropagation()"
+              @search-focus="(e) => e && e.target && e.target.blur()"
+              @touchstart.native.stop
+              @click.native.stop
+              :options-limit="100"
             >
-              <option value="" disabled selected>Selecciona un asunto</option>
-              <option value="falla">Problema con un Servicio Completado</option>
-              <option value="duda">Duda con Servicios Ofrecidos</option>
-              <option value="queja">Queja sobre Técnico</option> 
-              <option value="pago">Duda sobre Pagos</option>
-              <option value="otro">Otro</option>
-            </select>
+              <template #singleLabel="{ option }">
+                <span class="text-xs truncate">{{ getSubjectLabel(option) }}</span>
+              </template>
+            </multiselect>
           </div>
           
-          <!-- Selector de servicio (solo visible cuando se selecciona 'Problema con un Servicio Completado') -->
-          <div v-if="form.subject === 'falla'">
+          <!-- Selector de servicio (solo visible cuando se selecciona 'Problema con un Servicio Completado' y hay servicios disponibles) -->
+          <div v-if="form.subject === 'falla' && serviciosFinalizados.length > 0">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Servicio con problema</label>
             <div class="relative">
-              <select 
-                ref="servicioSelect"
-                v-model="form.servicio_id"
-                class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white relative z-10 text-base"
-                required
+              <multiselect
+                v-model="form.servicioObject"
+                :options="serviciosFinalizados"
+                :searchable="true"
+                :close-on-select="true"
+                :show-labels="false"
+                placeholder="Selecciona un servicio"
+                label="descripcion"
+                track-by="id_solicitud"
+                class="multiselect-custom"
+                :class="{ 'multiselect--active': form.servicioObject }"
+                :select-label="''"
+                :deselect-label="''"
+                :selected-label="''"
+                :custom-label="getServicioLabel"
+                @search-change="$event && $event.stopPropagation()"
+                @search-focus="(e) => e && e.target && e.target.blur()"
+                @touchstart.native.stop
+                @click.native.stop
+                :options-limit="100"
                 :disabled="cargandoServicios"
+                :loading="cargandoServicios"
               >
-                <option value="" disabled selected>Selecciona un servicio</option>
-                <option 
-                  v-for="servicio in serviciosFinalizados" 
-                  :key="servicio.id_solicitud" 
-                  :value="servicio.id_solicitud"
-                >
-                  {{ limitarTexto(servicio.descripcion) }} - {{ servicio.colonia }} - {{ formatDate(servicio.fecha_solicitud) }}
-                </option>
-              </select>
+                <template #singleLabel="{ option }">
+                  <span class="text-xs truncate">{{ getServicioLabel(option) }}</span>
+                </template>
+              </multiselect>
               <!-- Indicador de pulso -->
               <div 
                 v-if="showPulse" 
@@ -70,7 +94,14 @@
             </div>
             <p v-if="cargandoServicios" class="text-sm text-blue-600 dark:text-blue-400 mt-1">Cargando servicios finalizados...</p>
             <p v-if="errorCargaServicios" class="text-sm text-red-600 dark:text-red-400 mt-1">{{ errorCargaServicios }}</p>
-            <p v-if="!cargandoServicios && serviciosFinalizados.length === 0 && !errorCargaServicios" class="text-sm text-gray-500 dark:text-gray-400 mt-1">No tienes servicios finalizados</p>
+          </div>
+          
+          <!-- Mensaje cuando no hay servicios finalizados -->
+          <div v-if="form.subject === 'falla' && !cargandoServicios && serviciosFinalizados.length === 0 && !errorCargaServicios">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Servicio con problema</label>
+            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+              <p class="text-sm text-gray-500 dark:text-gray-400">No tienes servicios finalizados</p>
+            </div>
           </div>
 
           <div>
@@ -180,6 +211,156 @@
 .animate-pulse {
   animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Estilos personalizados para Multiselect - Exact match to index.vue */
+.multiselect-custom {
+  min-width: 140px !important;
+  font-size: 0.75rem !important;
+}
+
+.multiselect-custom .multiselect__tags {
+  min-height: 36px !important;
+  background-color: rgb(249 250 251) !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.5rem !important;
+  padding: 6px 30px 6px 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .multiselect-custom .multiselect__tags {
+  background-color: rgb(55 65 81) !important;
+  border-color: rgb(75 85 99) !important;
+}
+
+.multiselect-custom .multiselect__tags:focus-within {
+  border-color: rgb(16 185 129) !important;
+  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+}
+
+.dark .multiselect-custom .multiselect__tags:focus-within {
+  border-color: rgb(16 185 129) !important;
+  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+}
+
+.multiselect-custom .multiselect__single {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__single {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__input {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.75rem !important;
+  min-height: 20px !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__input {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__input::placeholder {
+  color: rgb(156 163 175) !important;
+}
+
+.multiselect-custom .multiselect__placeholder {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: rgb(156 163 175) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+  margin-top: 1px !important;
+}
+
+.multiselect-custom .multiselect__select {
+  height: 100% !important;
+  width: 1.5rem !important;
+  right: 0 !important;
+  top: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.multiselect-custom .multiselect__select:before {
+  border-color: rgb(156 163 175) transparent transparent !important;
+  border-style: solid !important;
+  border-width: 5px 5px 0 !important;
+  margin-top: 0 !important;
+  top: 55% !important;
+}
+
+.dark .multiselect-custom .multiselect__select:before {
+  border-color: rgb(156 163 175) transparent transparent !important;
+}
+
+.multiselect-custom .multiselect__content-wrapper {
+  background-color: white !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 0.25rem !important;
+  z-index: 50 !important;
+  min-width: 100% !important;
+  width: auto !important;
+}
+
+.dark .multiselect-custom .multiselect__content-wrapper {
+  background-color: rgb(31 41 55) !important;
+  border-color: rgb(55 65 81) !important;
+}
+
+.multiselect-custom .multiselect__option {
+  font-size: 0.75rem !important;
+  color: rgb(17 24 39) !important;
+  padding: 8px 12px !important;
+  line-height: 1.25rem !important;
+}
+
+.dark .multiselect-custom .multiselect__option {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--highlight {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--highlight {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom .multiselect__option--selected {
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom .multiselect__option--selected {
+    background-color: #4b5563;
+    color: #f9fafb;
+}
+
+.multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
+    background-color: #4b5563;
+    color: #f9fafb;
+}
+
+.dark .multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
+    background-color: #4b5563;
+    color: #f9fafb;
+}
 </style>
 
 <script setup>
@@ -188,6 +369,7 @@ import { useHead, useCookie, useRouter, useRuntimeConfig } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
+import Multiselect from 'vue-multiselect'
 
 // =========================
 // CONFIGURACIÓN Y SETUP
@@ -301,9 +483,23 @@ const showPulse = ref(false)
 // Formulario
 const form = ref({
   subject: '',
+  subjectObject: null,
   message: '',
-  servicio_id: ''
+  servicio_id: '',
+  servicioObject: null
 })
+
+// Función para obtener la etiqueta del asunto
+const getSubjectLabel = (option) => {
+  if (!option) return ''
+  return option.label || ''
+}
+
+// Función para obtener la etiqueta del servicio
+const getServicioLabel = (option) => {
+  if (!option) return ''
+  return `${limitarTexto(option.descripcion)} - ${option.colonia} - ${formatDate(option.fecha_solicitud)}`
+}
 
 // Referencia al select de servicios
 const servicioSelect = ref(null)
@@ -565,13 +761,55 @@ onMounted(async () => {
 // WATCHERS
 // =========================
 
-// Observar cambios en el select de asunto
+// Watch para sincronizar subject con subjectObject
+watch(() => form.value.subject, (newVal) => {
+  if (newVal && subjectOptions.length > 0) {
+    const subjectObject = subjectOptions.find(s => s.value === newVal);
+    if (subjectObject) {
+      form.value.subjectObject = subjectObject;
+    }
+  } else {
+    form.value.subjectObject = null;
+  }
+});
+
+// Watch para sincronizar subjectObject con subject
+watch(() => form.value.subjectObject, (newSubject) => {
+  if (newSubject) {
+    form.value.subject = newSubject.value;
+  } else {
+    form.value.subject = '';
+  }
+});
+
+// Watch para cargar servicios cuando se selecciona "Problema con un Servicio Completado"
 watch(() => form.subject, async (newVal) => {
   // Si se selecciona "Problema con un Servicio Completado", cargar los servicios
   if (newVal === 'falla') {
     await cargarServiciosFinalizados()
   }
 })
+
+// Watch para sincronizar servicio_id con servicioObject
+watch(() => form.value.servicio_id, (newId) => {
+  if (newId && serviciosFinalizados.value.length > 0) {
+    const servicioObject = serviciosFinalizados.value.find(s => s.id_solicitud === newId);
+    if (servicioObject) {
+      form.value.servicioObject = servicioObject;
+    }
+  } else {
+    form.value.servicioObject = null;
+  }
+});
+
+// Watch para sincronizar servicioObject con servicio_id
+watch(() => form.value.servicioObject, (newServicio) => {
+  if (newServicio) {
+    form.value.servicio_id = newServicio.id_solicitud;
+  } else {
+    form.value.servicio_id = '';
+  }
+});
 
 // =========================
 // INICIALIZACIÓN
