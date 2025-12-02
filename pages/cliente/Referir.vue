@@ -642,6 +642,7 @@ useHead({
   meta: [
     { name: 'description', content: 'Gana dinero refiriendo amigos a HogarSeguro - Programa de referidos' },
     { name: 'keywords', content: 'HogarSeguro, Programa de Referidos, Referir, Referidos' }, 
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
 

@@ -550,7 +550,7 @@
             <textarea v-model="withdrawForm.bankDetails" 
                       rows="4" 
                       class="w-full px-2 sm:px-3 py-2 sm:py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white" 
-                      placeholder="Ingresa tus datos bancarios completos:&#10;Banco: Nombre del banco&#10;Cuenta: Número de cuenta&#10;Titular: Nombre completo&#10;Tipo: Ahorros/Corriente"></textarea>
+                      placeholder="Ingresa donde deseas recibir tu retiro: Banco, Número de Cuenta, Titular, Tipo de cuenta"></textarea>
           </div>
 
           <!-- Botón de confirmar -->

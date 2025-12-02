@@ -469,7 +469,7 @@ useHead({
   title: 'HogarSeguro - Panel Administrativo',
   meta: [
     { name: 'description', content: 'Panel de administración de HogarSeguro - Gestión completa del sistema' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' }
   ]
 })
 

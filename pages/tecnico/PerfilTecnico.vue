@@ -281,6 +281,7 @@ useHead({
   meta: [
     { name: 'description', content: 'Perfil de usuario de HogarSeguro - Gestiona tus servicios y membresía' },
     { name: 'keywords', content: 'Perfil, usuario, servicios, membresía' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
 

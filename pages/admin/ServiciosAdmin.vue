@@ -1402,7 +1402,7 @@ useHead({
   title: 'HogarSeguro - Gestión de Servicios',
   meta: [
     { name: 'description', content: 'Gestión de servicios del sistema HogarSeguro - Administrar solicitudes, asignaciones y seguimiento' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no'}
   ]
 })
 
