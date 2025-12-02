@@ -1,14 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Toast Notification -->
-    <Toast 
-      v-if="toast.show"
-      :key="toast.message + Date.now()"
-      :message="toast.message" 
-      :type="toast.type"
-      :duration="toast.duration"
-      @close="toast.show = false"
-    />
     <!-- Loading Spinner -->
     <LoadingSpinner 
       :loading="isLoading"  
@@ -16,29 +7,38 @@
 
     <!-- Contenido principal (oculto hasta completar autenticación) -->
     <div v-if="!isLoading">
-     
-     <HeadersHeaderServicios 
-       :total-services="totalServices"
-       :show-filters="showFilters"
-       :service-filters="serviceFilters"
-       :service-types="serviceTypes"
-       :date-periods="datePeriods"
-       :current-filter="currentFilter"
-       :current-date-filter="currentDateFilter" 
-       :all-services="allServices"
-       :is-loading="isLoading"
-       @toggle-filters="showFilters = !showFilters"
-       @filter-change="currentFilter = $event"
-       @service-type-toggle="toggleServiceTypeFilter($event)"
-       @date-filter-change="currentDateFilter = $event"
-     />
+      <!-- Toast Notification -->
+      <Toast 
+        v-if="toast.show"
+        :key="toast.message + Date.now()"
+        :message="toast.message" 
+        :type="toast.type"
+        :duration="toast.duration"
+        @close="toast.show = false"
+      />
 
-    <!-- Content Container with max-w-2xl -->
-    <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative">
-      <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
-      <div class="pb-20">
-        <!-- Main Content -->
-        <main class="pb-4">
+      <HeadersHeaderServicios 
+        :total-services="totalServices"
+        :show-filters="showFilters"
+        :service-filters="serviceFilters"
+        :service-types="serviceTypes"
+        :date-periods="datePeriods"
+        :current-filter="currentFilter"
+        :current-date-filter="currentDateFilter"
+        :selected-service-types="selectedServiceTypes"
+        :is-loading-service-types="isLoadingServiceTypes"
+        @toggle-filters="showFilters = !showFilters"
+        @filter-change="currentFilter = $event"
+        @service-type-toggle="toggleServiceTypeFilter($event)"
+        @date-filter-change="currentDateFilter = $event"
+      />
+
+      <!-- Content Container with max-w-2xl -->
+      <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 relative">
+        <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
+      <div class="pb-4">
+          <!-- Main Content -->
+          <main class="pb-4">
           
           <!-- Stats Overview -->
           <section class="px-4 py-3">

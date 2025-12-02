@@ -22,6 +22,22 @@
     <Transition
       enter-active-class="transition duration-200 ease-out"
       leave-active-class="transition duration-150 ease-in"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <!-- Backdrop para el dropdown -->
+      <div 
+        v-if="showNotifications" 
+        style="position: fixed; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.2); z-index: 999999;"
+        @click="closeDropdown"
+      />
+    </Transition>
+    
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      leave-active-class="transition duration-150 ease-in"
       enter-from-class="opacity-0 translate-y-1 scale-95"
       enter-to-class="opacity-100 translate-y-0 scale-100"
       leave-from-class="opacity-100 translate-y-0 scale-100"
@@ -29,7 +45,7 @@
     >
       <div 
         v-if="showNotifications" 
-        class="fixed right-4 mt-2 w-80 bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all duration-200 ease-in-out z-50"
+        style="position: fixed; right: 16px; top: 64px; left: auto; width: 320px; background-color: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; transform: transition: all 0.2s ease-in-out; z-index: 1000000;"
       >
         <!-- Encabezado -->
         <div class="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
@@ -92,8 +108,7 @@
                 'bg-emerald-50': !notif.leido,
                 'hover:bg-gray-50': notif.leido,
                 'border-l-4 border-emerald-500': !notif.leido
-              }"
-              @click="onNotificationClick(notif)"
+              }" 
             >
               <div class="flex items-start">
                 <div class="flex-shrink-0 mt-0.5">
@@ -491,23 +506,6 @@ const marcarTodasComoLeidas = async () => {
   } finally {
     loading.value = false;
   }
-};
-
-const onNotificationClick = (notification) => {
-  // Marcar como leída si no lo está
-  if (!notification.leido) {
-    // Actualización optimista
-    notification.leido = true;
-    if (unreadCount.value > 0) {
-      unreadCount.value--;
-    }
-  }
-  
-  // Emitir evento al componente padre para navegación
-  emit('notification-click', notification);
-  
-  // Cerrar el dropdown
-  closeDropdown();
 };
 
 const nextPage = async () => {
