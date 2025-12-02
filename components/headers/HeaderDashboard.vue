@@ -44,7 +44,7 @@
         />
       </div>
     </div>
-  </header>
+  </header> 
 </template>
 
 <script setup>
@@ -83,21 +83,7 @@ const showToast = (message, type = 'success', duration = 3000) => {
 
 // Manejar clic en notificación
 const onNotificationClick = async (notification) => {
-  // Activar loading spinner
   isLoading.value = true;
-  
-  // Log del objeto notificación recibido
-  console.log('🔔 Notificación clickeada:', notification);
-
-  // Log de lo que se enviará al backend
-  console.log('📤 Datos enviados al backend:', {
-    url: `${config.public.apiBase}/notificaciones/marcar/individual`,
-    method: 'PUT',
-    body: {
-      id_destinatario_notificacion: notification.id
-    },
-    token: auth.token ? 'TOKEN_PRESENTE' : 'SIN_TOKEN'
-  });
 
   try {
     const response = await $api('/notificaciones/marcar/individual', {
@@ -108,21 +94,10 @@ const onNotificationClick = async (notification) => {
       }
     });
 
-    // Log de la respuesta del backend
-    console.log('📥 Respuesta del backend (marcar notificación):', response);
-
   } catch (error) {
-    // Log del error completo
-    console.error('❌ Error al marcar notificación:', {
-      message: error.message,
-      error
-    });
-
     showToast('Error al marcar notificación', 'error', 3000);
-    
-    // Desactivar loading en caso de error
     isLoading.value = false;
-    return; // Salir de la función si hay error
+    return;
   }
 
   // Navegación por tipo de notificación
@@ -135,7 +110,6 @@ const onNotificationClick = async (notification) => {
       await navigateTo('/cliente/Servicios');
     }
   } finally {
-    // Asegurarse de que el loading siempre se desactive
     isLoading.value = false;
   }
 };

@@ -11,8 +11,7 @@
     />
     <!-- Loading Spinner -->
     <LoadingSpinner 
-      :loading="isLoading" 
-      :message="'Cargando Servicios...'"
+      :loading="isLoading"  
     />
 
     <!-- Contenido principal (oculto hasta completar autenticación) -->
@@ -25,9 +24,9 @@
        :service-types="serviceTypes"
        :date-periods="datePeriods"
        :current-filter="currentFilter"
-       :current-date-filter="currentDateFilter"
-       :selected-service-types="selectedServiceTypes"
-       :is-loading-service-types="isLoadingServiceTypes"
+       :current-date-filter="currentDateFilter" 
+       :all-services="allServices"
+       :is-loading="isLoading"
        @toggle-filters="showFilters = !showFilters"
        @filter-change="currentFilter = $event"
        @service-type-toggle="toggleServiceTypeFilter($event)"
@@ -146,8 +145,8 @@
           </div>
         </section>
         </main>
-      </div> <!-- Close pb-24 div -->
-    </div> <!-- Close max-w-2xl container -->
+      </div> 
+    </div> 
 
     <FootersFooter /> 
   </div>
@@ -1702,7 +1701,7 @@ const showPaymentModal = ref(false)
 const showVisitPaymentModal = ref(false)
 const showCancelModal = ref(false)
 const showQuotationModal = ref(false)
-const showRatingModal = ref(false)
+const showRatingModal = ref(false) 
 
 // Estados para calificación
 const rating = ref(0)
@@ -1853,31 +1852,24 @@ const shouldShowDiscountBenefit = computed(() => {
   return membresiaProgreso.value.mesesProgreso >= discountBenefit.mes_requerido;
 });
 
-const shouldShowCreditBenefit = computed(() => {
-  console.log('membresiaBeneficios:', JSON.parse(JSON.stringify(membresiaBeneficios.value)));
-  console.log('membresiaProgreso:', JSON.parse(JSON.stringify(membresiaProgreso.value)));
+const shouldShowCreditBenefit = computed(() => { 
   
-  if (!membresiaBeneficios.value.length || !membresiaProgreso.value) {
-    console.log('No hay beneficios o progreso de membresía');
+  if (!membresiaBeneficios.value.length || !membresiaProgreso.value) { 
     return false;
   }
   
   const creditBenefit = membresiaBeneficios.value.find(
     beneficio => beneficio.tipo_beneficio === 'Crédito acumulable activado'
-  );
+  ); 
   
-  console.log('Beneficio de crédito encontrado:', creditBenefit);
-  
-  if (!creditBenefit) {
-    console.log('No se encontró beneficio de tipo Crédito acumulable activado');
+  if (!creditBenefit) { 
     return false;
   }
   
   const cumpleRequisito = membresiaProgreso.value.mesesProgreso >= creditBenefit.mes_requerido;
-  console.log(`Meses de progreso: ${membresiaProgreso.value.mesesProgreso}, Mes requerido: ${creditBenefit.mes_requerido}, Cumple: ${cumpleRequisito}`);
   
   return cumpleRequisito;
-});
+}); 
 
 // =========================
 // FUNCIONES UTILITARIAS
@@ -2060,14 +2052,10 @@ const fetchMembresiaBeneficios = async () => {
         'Accept': 'application/json'
       }
     });
+     
     
-    console.log('Respuesta de la API de beneficios:', response);
-    
-    if (response && response.beneficios) {
-      console.log('Beneficios encontrados:', response.beneficios);
-      console.log('Buscando beneficio de tipo "Crédito acumulativo"...');
-      const creditoBeneficio = response.beneficios.find(b => b.tipo_beneficio === 'Crédito acumulativo');
-      console.log('Beneficio de crédito encontrado en la respuesta:', creditoBeneficio);
+    if (response && response.beneficios) { 
+      const creditoBeneficio = response.beneficios.find(b => b.tipo_beneficio === 'Crédito acumulativo'); 
       
       membresiaBeneficios.value = response.beneficios;
     } else {
@@ -3126,11 +3114,7 @@ const processPayment = async () => {
       body: JSON.stringify(payload)
     });
     
-    // Notificar a los administradores sobre el pago de servicio recibido
-    console.log('Enviando notificación a administradores:', {
-      titulo: 'Pago de servicio recibido',
-      nombre_rol: 'admin'
-    });
+    // Notificar a los administradores sobre el pago de servicio recibido 
     try {
       const responseAdmin = await $api('/notificaciones/enviar', {
         baseURL: config.public.apiBase,
@@ -3144,16 +3128,11 @@ const processPayment = async () => {
           titulo: 'Pago de servicio recibido',
           nombre_rol: 'admin'
         })
-      });
-      console.log('Notificación a administradores enviada:', responseAdmin);
+      }); 
     } catch (error) {
       console.error('Error al enviar notificación a administradores:', error);
     }  
-
-    console.log('Enviando notificación a SA:', {
-      titulo: 'Pago de servicio recibido',
-      nombre_rol: 'sa'
-    });
+    
     try {
       const responseSA = await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
@@ -3167,8 +3146,7 @@ const processPayment = async () => {
             titulo: 'Pago de servicio recibido',
             nombre_rol: 'sa'
           })
-        });
-      console.log('Notificación a SA enviada:', responseSA);
+        }); 
     } catch (error) {
       console.error('Error al enviar notificación a SA:', error);
     }  
@@ -3447,7 +3425,7 @@ const showError = (message) => {
     type: 'error',
     duration: 8000
   });
-};
+}; 
 
 // =========================
 // INICIALIZACIÓN

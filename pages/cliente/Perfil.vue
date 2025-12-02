@@ -25,7 +25,7 @@
     <div class="max-w-2xl mx-auto px-4 pb-4">
       <!-- Profile Card -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4">
-        <div class="flex flex-col items-center text-center mb-4">
+        <div class="flex flex-col items-center text-center mb-6">
           <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-3xl text-white mb-3 shadow-lg">
             {{ userInitials }}
           </div>
@@ -412,7 +412,7 @@
                 <p class="text-gray-600 dark:text-gray-300 text-sm">Selecciona una cuenta para realizar el pago</p>
               </div>
 
-              <div class="space-y-4">
+              <div class="space-y-4 mb-2">
                 <!-- Costo de la membresía mejorado -->
                 <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800">
                   <div class="flex justify-between items-center">
