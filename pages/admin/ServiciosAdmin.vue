@@ -640,6 +640,10 @@
                 :custom-label="getTechCityLabel"
                 :options-limit="100"
                 :disabled="availableCities.length === 0"
+                :loading="cities.length === 0"
+                @open="onMultiselectOpen"
+                @select="onCitySelect"
+                :tabindex="0"
               >
                 <template #singleLabel="{ option }">
                   <span class="text-sm truncate">{{ getTechCityLabel(option) }}</span>
@@ -1454,7 +1458,7 @@ const getServiceTypeLabel = (option) => {
 
 const getTechCityLabel = (option) => {
   if (!option) return ''
-  return option
+  return option.nombre_ciudad || option
 }
 
 // Paginación para Pendientes
@@ -1471,7 +1475,8 @@ const currentHistoryPage = ref(1)
 
 // Paginación de técnicos
 const currentTechPage = ref(1)
-const techsPerPage = 5
+const techsPerPage = 4
+const totalTechPages = ref(1)
 
 // Servicios en edición/asignación/pago
 const selectedService = ref(null)
@@ -1518,7 +1523,7 @@ const toast = ref({
 
 // ===== API FUNCTIONS =====
 // Función para obtener técnicos desde la API
-const fetchTechnicians = async (cityId = null, limit = 6, offset = 0) => {
+const fetchTechnicians = async (cityId = null, limit = 4, offset = 0) => {
   try {
     let url = `/usuarios/tecnicos?limit=${limit}&offset=${offset}`
     if (cityId) {
@@ -1534,15 +1539,28 @@ const fetchTechnicians = async (cityId = null, limit = 6, offset = 0) => {
       }
     })
 
-    // La respuesta ya tiene la estructura correcta
-    availableTechnicians.value = response.tecnicos
-    techniciansTotal.value = response.total
+    // Actualizar con la nueva estructura de respuesta
+    availableTechnicians.value = response.data || []
+    techniciansTotal.value = response.total || 0
+    currentTechPage.value = response.page || 1
+    totalTechPages.value = response.totalPages || 1
 
     return response
   } catch (error) {
     console.error('Error al obtener técnicos:', error)
     showError('No se pudieron cargar los técnicos')
-    return { tecnicos: [], total: 0 }
+    // Resetear valores en caso de error
+    availableTechnicians.value = []
+    techniciansTotal.value = 0
+    currentTechPage.value = 1
+    totalTechPages.value = 1
+    return { 
+      data: [], 
+      total: 0,
+      page: 1,
+      totalPages: 1,
+      hasMore: false
+    }
   }
 }
 
@@ -1843,7 +1861,10 @@ const fetchCities = async () => {
         'Accept': 'application/json'
       }
     })
-    cities.value = data.map(city => city.nombre_ciudad).sort()
+    cities.value = data.map(city => ({
+      id_ciudad: city.id_ciudad,
+      nombre_ciudad: city.nombre_ciudad
+    })).sort((a, b) => a.nombre_ciudad.localeCompare(b.nombre_ciudad))
   } catch (error) {
     console.error('Error al obtener las ciudades:', error)
     showError('No se pudieron cargar las ciudades')
@@ -1860,26 +1881,27 @@ const selectedServiceName = computed(() => {
   return servicio ? servicio.nombre : ''
 })
 
-// Técnicos filtrados por ciudad
+// Técnicos filtrados por ciudad (ahora el filtrado se hace en el backend)
 const filteredTechnicians = computed(() => {
-  let filtered = availableTechnicians.value
-  if (selectedTechCity.value) {
-    filtered = filtered.filter(tech => tech.ciudad?.nombre_ciudad === selectedTechCity.value)
-  }
-  return filtered
+  // Ya no filtramos aquí porque el backend hace el filtrado
+  return availableTechnicians.value || []
 })
 
 // Técnicos paginados
 const paginatedTechnicians = computed(() => {
-  const start = (currentTechPage.value - 1) * techsPerPage
-  const end = start + techsPerPage
-  return filteredTechnicians.value.slice(start, end)
+  // Usar directamente los técnicos recibidos del backend (ya están paginados)
+  return availableTechnicians.value || []
 })
 
-// Total de páginas de técnicos
-const totalTechPages = computed(() => {
-  return Math.ceil(techniciansTotal.value / techsPerPage)
-})
+
+// Función para cambiar de página de técnicos
+const changeTechPage = async (page) => {
+  if (page < 1 || page > totalTechPages.value) return
+  
+  currentTechPage.value = page
+  const offset = (page - 1) * techsPerPage
+  await fetchTechnicians(selectedTechCityObject.value?.id_ciudad, techsPerPage, offset)
+}
 
 const hasActiveFilters = computed(() => {
   return !!(searchQuery.value || selectedStatus.value || selectedServiceType.value || selectedMonth.value)
@@ -2060,19 +2082,39 @@ const openAmountDetails = (type, service) => {
   showAmountDetailsModal.value = true;
 }
 
-const assignTechnician = (service) => {
+// Función para manejar la apertura del multiselect
+const onMultiselectOpen = async () => {
+  // Asegurarse de que las ciudades estén cargadas cuando se abra el multiselect
+  if (cities.value.length === 0) {
+    await fetchCities()
+  }
+}
+
+// Función para manejar la selección de ciudad
+const onCitySelect = async (selectedOption) => {
+  // La selección se maneja en el watch de selectedTechCityObject
+  console.log('Ciudad seleccionada:', selectedOption)
+}
+
+const assignTechnician = async (service) => {
   serviceToAssign.value = service
   selectedTechCity.value = ''
+  selectedTechCityObject.value = null
   currentTechPage.value = 1
+  
+  // Asegurarse de que las ciudades estén cargadas antes de abrir el modal
+  if (cities.value.length === 0) {
+    await fetchCities()
+  }
+  
   showAssignmentModal.value = true
+  
+  // Cargar técnicos iniciales después de que el modal esté visible
+  await nextTick()
+  await fetchTechnicians(null, techsPerPage, 0)
 }
 
 // Cambiar página de técnicos
-const changeTechPage = (page) => {
-  if (page < 1) page = 1
-  if (page > totalTechPages.value) page = totalTechPages.value
-  currentTechPage.value = page
-}
 
 const confirmPaymentVisit = (service) => {
   serviceToPayment.value = service
@@ -2561,7 +2603,7 @@ watch(() => selectedServiceTypeObject.value, (newObject) => {
 // Watch para sincronizar selectedTechCity con selectedTechCityObject
 watch(() => selectedTechCity.value, (newValue) => {
   if (newValue && availableCities.value.length > 0) {
-    const cityObject = availableCities.value.find(city => city === newValue);
+    const cityObject = availableCities.value.find(city => city.nombre_ciudad === newValue);
     if (cityObject) {
       selectedTechCityObject.value = cityObject;
     }
@@ -2571,12 +2613,15 @@ watch(() => selectedTechCity.value, (newValue) => {
 });
 
 // Watch para sincronizar selectedTechCityObject con selectedTechCity
-watch(() => selectedTechCityObject.value, (newCity) => {
+watch(() => selectedTechCityObject.value, async (newCity) => {
   if (newCity) {
-    selectedTechCity.value = newCity;
+    selectedTechCity.value = newCity.nombre_ciudad;
   } else {
     selectedTechCity.value = '';
   }
+  // Resetear paginación y volver a cargar técnicos
+  currentTechPage.value = 1;
+  await fetchTechnicians(newCity?.id_ciudad, techsPerPage, 0);
 });
 
 // Watch para los demás filtros (sin debounce, se ejecutan inmediatamente)
