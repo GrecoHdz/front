@@ -842,8 +842,8 @@
                   </div>
                 </div>
 
-              <!-- Progreso de Membresía -->
-              <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-2">
+              <!-- Progreso de Membresía (solo para no técnicos) -->
+              <div v-if="!isTechnician" class="border border-gray-200 dark:border-gray-600 rounded-lg p-2">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Membresía:</span>
                   <div v-if="loadingMembresiaProgreso" class="w-3 h-3 border border-gray-300 border-t-transparent rounded-full animate-spin"></div>
@@ -2696,7 +2696,15 @@ const updatePassword = async () => {
 
 // Verificar si el usuario seleccionado es un técnico
 const isTechnician = computed(() => {
-  return selectedUser.value?.role === 'technician'
+  if (!selectedUser.value) return false;
+  
+  // Verificar diferentes formatos de rol
+  const roleName = selectedUser.value.rol?.nombre_rol?.toLowerCase() || 
+                  selectedUser.value.rol?.toLowerCase() || 
+                  selectedUser.value.role?.toLowerCase() || 
+                  '';
+  
+  return roleName.includes('tecnico') || roleName.includes('técnico');
 })
 
 // ===== FUNCIONES DE UTILIDAD =====
@@ -3532,8 +3540,10 @@ const loadMembresiaProgreso = async (idUsuario) => {
 }
 
 const editUser = (user) => {
-
-  // Find the role by name since we have the role name but not the ID in the user object
+  // Establecer el usuario seleccionado primero
+  selectedUser.value = user;
+  
+  // Encontrar el rol por nombre
   const roleName = user.rol?.nombre_rol || user.rol
   let userRole = null
   
