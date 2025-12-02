@@ -2909,10 +2909,9 @@ const filterCredits = async () => {
           delete creditsCache.value[key]
         }
       })
-      
-      // Make a fresh API call to get the latest balance
+       
       try {
-        const response = await $api(`/movimientos/creditos/${selectedUser.value.id_usuario}?page=1&limit=${modalItemsPerPage}`, {
+        const response = await $api(`/movimientos/creditos/${selectedUser.value.id_usuario}?page=${creditsCurrentPage.value}&limit=${modalItemsPerPage}`, {
           baseURL: config.public.apiBase,
           method: 'GET',
           headers: {
