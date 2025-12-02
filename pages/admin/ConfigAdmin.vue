@@ -369,7 +369,11 @@
           <div v-else class="grid grid-cols-2 gap-3 sm:gap-4">
             <div v-for="cuenta in cuentasPaginadas" :key="cuenta.id_cuenta" 
                  @click="abrirDetallesCuenta(cuenta)"
-                 class="cursor-pointer bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg hover:border-teal-300 dark:hover:border-teal-600 transition-all duration-200 min-h-[120px] sm:min-h-[140px] flex flex-col justify-between">
+                 :class="{
+                   'bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 hover:border-green-300 dark:hover:border-green-600': cuenta.activo,
+                   'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:border-red-300 dark:hover:border-pink-600': !cuenta.activo
+                 }"
+                 class="cursor-pointer rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all duration-200 min-h-[120px] sm:min-h-[140px] flex flex-col justify-between">
               
               <!-- Header de la tarjeta -->
               <div class="flex items-start justify-between mb-2">
@@ -383,14 +387,7 @@
                     </h5>
                   </div>
                 </div>
-                <span 
-                  :class="{
-                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': cuenta.activo,
-                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !cuenta.activo
-                  }" 
-                  class="px-1.5 py-0.5 rounded-full text-xs font-medium">
-                  {{ cuenta.activo ? 'Activa' : 'Inactiva' }}
-                </span>
+               
               </div>
 
               <!-- Información de la cuenta -->
