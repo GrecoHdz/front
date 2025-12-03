@@ -747,16 +747,22 @@ const showError = (message) => {
 
 onMounted(async () => {
   try { 
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
+    
     await Promise.all([
       cargarServiciosFinalizados(),
       fetchContactInfo()
     ])
   } catch (error) {
-    console.error('Error al cargar datos iniciales:', error)
-    showError('Ocurrió un error al cargar los datos. Por favor, recarga la página.')
+    window.location.reload()
   }
 })
-
 // =========================
 // WATCHERS
 // =========================

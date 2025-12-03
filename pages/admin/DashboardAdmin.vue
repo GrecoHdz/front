@@ -128,10 +128,7 @@
             <!-- Soporte Técnico -->
             <section class="px-2 sm:px-4 mb-3 sm:mb-5">
               <div class="flex items-center justify-between mb-2 sm:mb-3">
-                <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Soporte Técnico</h2>
-                <button @click="refreshSupportTickets" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline flex items-center">
-                  <span class="mr-1">🔄</span> Actualizar
-                </button>
+                <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Soporte Técnico</h2> 
               </div>
               
               <!-- Tickets Pendientes -->
@@ -258,10 +255,7 @@
             <!-- Actividad Reciente -->
             <section class="px-2 sm:px-4 mb-3 sm:mb-5">
               <div class="flex items-center justify-between mb-2 sm:mb-3">
-                <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Actividad Reciente</h2>
-                <button @click="refreshPendingItems" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline flex items-center">
-                  <span class="mr-1">🔄</span> Actualizar
-                </button>
+                <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Actividad Reciente</h2> 
               </div>
               <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md border border-gray-100 dark:border-gray-700">
                 <div v-if="recentActivities.length === 0" class="text-center py-4 sm:py-5">
@@ -503,15 +497,36 @@ onBeforeUnmount(() => {
 const isLoading = ref(true)
 const startDate = ref('')
 const endDate = ref('')
+const recentActivities = ref([])
+ 
+// ===== INICIALIZACIÓN =====
+onMounted(async () => {
+  try {
+    // Verificar autenticación
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
 
-// Inicializar fechas vacías
-onMounted(() => {
-  // No establecer fechas por defecto
-  startDate.value = ''
-  endDate.value = ''
-  
-  // Cargar estadísticas sin filtro de fecha
-  fetchStatistics()
+    // Inicializar fechas vacías
+    startDate.value = ''
+    endDate.value = ''
+
+    // Cargar datos en paralelo
+    await Promise.all([
+      fetchSupportTickets(),
+      fetchStatistics(),
+      refreshPendingItems()
+    ])
+    
+  } catch (error) {
+    window.location.reload()
+  } finally {
+    isLoading.value = false
+  }
 })
 
 // Función para obtener estadísticas del servidor
@@ -613,17 +628,7 @@ const verificationData = ref({
 const selectedTechCity = ref('')
 const currentTechPage = ref(1)
 const techsPerPage = 5
-
-// Datos de ejemplo de técnicos (deberías reemplazarlos con datos reales de tu API)
-const technicians = ref([
-  { id: 1, name: 'Juan Pérez', city: 'Ciudad de México', available: true, rating: 4.8 },
-  { id: 2, name: 'María García', city: 'Guadalajara', available: true, rating: 4.9 },
-  { id: 3, name: 'Carlos López', city: 'Monterrey', available: false, rating: 4.7 },
-  { id: 4, name: 'Ana Martínez', city: 'Puebla', available: true, rating: 4.6 },
-  { id: 5, name: 'Pedro Sánchez', city: 'Ciudad de México', available: true, rating: 4.5 },
-  { id: 6, name: 'Laura Ramírez', city: 'Guadalajara', available: false, rating: 4.9 },
-  { id: 7, name: 'Jorge Torres', city: 'Monterrey', available: true, rating: 4.7 },
-])
+ 
 
 // ===== VARIABLES DE DATOS =====
 // Estadísticas principales
@@ -693,60 +698,7 @@ const quickActions = computed(() => {
       pulseColor: ''
     }
   ];
-});
-
-// Membresías pendientes
-const pendingMemberships = ref([
-  {
-    id: 1,
-    userName: 'Juan Pérez',
-    voucher: 'TXN123456',
-    amount: 199,
-    date: '2024-12-18T10:30:00Z'
-  },
-  {
-    id: 2,
-    userName: 'María García',
-    voucher: 'TXN789012',
-    amount: 199,
-    date: '2024-12-18T09:15:00Z'
-  },
-  {
-    id: 3,
-    userName: 'Carlos López',
-    voucher: 'TXN345678',
-    amount: 199,
-    date: '2024-12-17T16:45:00Z'
-  }
-])
-
-// Servicios pendientes
-const pendingServices = ref([
-  {
-    id: 1,
-    type: 'Reparación de Plomería',
-    client: 'Pedro Sánchez',
-    location: 'Col. Palmira',
-    date: '2024-12-18T08:00:00Z',
-    icon: '🚰'
-  },
-  {
-    id: 2,
-    type: 'Instalación Eléctrica',
-    client: 'Carmen Flores',
-    location: 'Col. Lomas del Mayab',
-    date: '2024-12-18T07:30:00Z',
-    icon: '💡'
-  },
-  {
-    id: 3,
-    type: 'Aire Acondicionado',
-    client: 'Roberto Silva',
-    location: 'Col. San Rafael',
-    date: '2024-12-17T19:45:00Z',
-    icon: '❄️'
-  }
-])
+}); 
 
 // Actividades recientes
 // Datos para la sección de soporte
@@ -757,21 +709,29 @@ const pendingTickets = ref([])
 const fetchSupportTickets = async () => {
   try {
     isLoading.value = true
-    const { data, error } = await useFetch('/soporte', {
+    
+    // Obtener el token del store de autenticación
+    const token = auth.token || useCookie('auth:token')?.value
+    if (!token) {
+      throw new Error('No se encontró el token de autenticación')
+    }
+    
+    // Realizar la petición a la API
+    const response = await $api('/soporte', {
       baseURL: config.public.apiBase,
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
+        'Authorization': `Bearer ${token}`
       }
-    })
-
-    if (error.value) {
-      throw new Error(error.value.data?.message || 'Error al cargar los tickets de soporte')
-    }
-
-    if (data.value?.success && data.value.data) {
-      // Transform API data to match our UI structure
-      pendingTickets.value = data.value.data.map(ticket => {
+    }) 
+    
+    // Obtener los datos de la respuesta
+    const ticketsData = response.data || []
+    
+    // Transformar los datos para la UI
+    if (ticketsData.length > 0) {
+      pendingTickets.value = ticketsData.map(ticket => {
         const history = [
           { 
             action: 'Ticket creado', 
@@ -811,13 +771,6 @@ const fetchSupportTickets = async () => {
   }
 }
 
-// Estadísticas de soporte
-const supportStats = ref({
-  openTickets: 12,
-  pendingResponse: 5,
-  resolvedToday: 8,
-  averageResponseTime: 2.5
-});
 
 // Tipos de ticket y sus iconos
 const ticketTypes = {
@@ -917,137 +870,84 @@ const refreshSupportTickets = async () => {
   } catch (error) {
     showError(error.message || 'Error al actualizar los tickets')
   }
-}
-
-const recentActivities = ref([
-  {
-    id: 1,
-    title: 'Nuevo usuario registrado',
-    description: 'María González se registró en la plataforma',
-    timestamp: new Date(Date.now() - 15 * 60 * 1000),
-    icon: '👤',
-    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400'
-  },
-  {
-    id: 2,
-    title: 'Servicio completado',
-    description: 'Reparación de plomería en Col. Palmira finalizada',
-    timestamp: new Date(Date.now() - 45 * 60 * 1000),
-    icon: '✅',
-    iconBg: 'bg-green-100 dark:bg-green-900/30',
-    iconColor: 'text-green-600 dark:text-green-400'
-  },
-  {
-    id: 3,
-    title: 'Membresía aprobada',
-    description: 'Pago de Carlos Rodríguez verificado y aprobado',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    icon: '💳',
-    iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
-    iconColor: 'text-yellow-600 dark:text-yellow-400'
-  },
-  {
-    id: 4,
-    title: 'Ticket de soporte resuelto',
-    description: 'Consulta sobre facturación fue atendida',
-    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-    icon: '🎫',
-    iconBg: 'bg-purple-100 dark:bg-purple-900/30',
-    iconColor: 'text-purple-600 dark:text-purple-400'
-  },
-  {
-    id: 5,
-    title: 'Nuevo técnico registrado',
-    description: 'Jorge Torres se unió al equipo',
-    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-    icon: '👷',
-    iconBg: 'bg-orange-100 dark:bg-orange-900/30',
-    iconColor: 'text-orange-600 dark:text-orange-400'
-  },
-  {
-    id: 6,
-    title: 'Pago procesado',
-    description: 'Membresía de Ana López procesada correctamente',
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    icon: '💰',
-    iconBg: 'bg-green-100 dark:bg-green-900/30',
-    iconColor: 'text-green-600 dark:text-green-400'
-  }
-])
+} 
 
 // Configuración de paginación para actividades
 const currentActivityPage = ref(1);
+const totalActivityPages = ref(1);
 const activityItemsPerPage = 5;
-
-// Calcular el total de páginas para actividades
-const totalActivityPages = computed(() => {
-  return Math.ceil(recentActivities.value.length / activityItemsPerPage);
-});
 
 // Calcular las actividades a mostrar en la página actual
 const displayedActivities = computed(() => {
-  const start = (currentActivityPage.value - 1) * activityItemsPerPage;
-  const end = start + activityItemsPerPage;
-  return recentActivities.value.slice(start, end);
+  // Ya no necesitamos calcular el slice aquí ya que el servidor maneja la paginación
+  return recentActivities.value;
 });
 
+// Función para cargar notificaciones con paginación sin mostrar loading global
+const loadNotifications = async () => {
+  try {
+    const config = useRuntimeConfig()
+    const auth = useAuthStore()
+    
+    const response = await $api(`/notificaciones?page=${currentActivityPage.value}&limit=5`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include'
+    })
+    
+    if (response.success && response.data) {
+      recentActivities.value = response.data.map(notif => ({
+        id: notif.id || Math.random().toString(36).substr(2, 9),
+        title: notif.titulo,
+        date: notif.fecha,
+        read: notif.leido === 1,
+        readDate: notif.fechaLeido,
+        user: notif.nombreUsuario,
+        icon: getNotificationIcon(notif.titulo)
+      }))
+      
+      if (response.pagination) {
+        totalActivityPages.value = response.pagination.pages
+      }
+    }
+  } catch (error) {
+    console.error('Error al cargar notificaciones:', error)
+    showError('Error al cargar las actividades recientes')
+  }
+};
+
+// Función para cargar notificaciones con loading (para inicialización)
+const refreshPendingItems = async () => {
+  isLoading.value = true
+  try {
+    await loadNotifications()
+  } catch (error) {
+    console.error('Error al cargar notificaciones:', error)
+    showError('Error al cargar las actividades recientes')
+  } finally {
+    isLoading.value = false
+  }
+};
+
 // Ir a la página anterior de actividades
-const prevActivityPage = () => {
+const prevActivityPage = async () => {
   if (currentActivityPage.value > 1) {
     currentActivityPage.value--;
+    await loadNotifications();
   }
 };
 
 // Ir a la página siguiente de actividades
-const nextActivityPage = () => {
+const nextActivityPage = async () => {
   if (currentActivityPage.value < totalActivityPages.value) {
     currentActivityPage.value++;
+    await loadNotifications();
   }
 };
-
-// Las notificaciones ahora se manejan a través del componente NotificationsDropdown
-
-// Técnicos disponibles
-const availableTechnicians = ref([
-  {
-    id: 1,
-    name: 'Carlos Rodríguez',
-    speciality: 'Plomería y Electricidad',
-    available: true,
-    rating: 4.8
-  },
-  {
-    id: 2,
-    name: 'Ana López',
-    speciality: 'Aire Acondicionado',
-    available: true,
-    rating: 4.9
-  },
-  {
-    id: 3,
-    name: 'Miguel Torres',
-    speciality: 'Carpintería',
-    available: false,
-    rating: 4.7
-  }
-])
-
-// Métricas de rendimiento
-const performanceMetrics = ref([
-  { name: 'CPU', value: 45 },
-  { name: 'Memoria', value: 62 },
-  { name: 'Almacenamiento', value: 78 },
-  { name: 'Red', value: 91 }
-])
-
-// Resumen diario
-const dailySummary = ref([
-  { icon: '👥', label: 'Nuevos usuarios', value: '12' },
-  { icon: '🔧', label: 'Servicios completados', value: '28' },
-  { icon: '💰', label: 'Ingresos', value: 'L. 15,420' },
-  { icon: '⭐', label: 'Calificación promedio', value: '4.8' }
-])
 
 // Toast notification
 const toast = ref({
@@ -1335,49 +1235,8 @@ const rejectMembership = async (membershipId) => {
   }
 } 
  
-
 const viewServiceDetails = (serviceId) => {
   showInfo(`Ver detalles del servicio #${serviceId}`)
-}
-
-const refreshPendingItems = async () => {
-  isLoading.value = true
-  try {
-    const config = useRuntimeConfig()
-    const auth = useAuthStore()
-    
-    const response = await $api(`${config.public.apiBase}/notificaciones`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include'
-    })
-    
-    if (response.success && Array.isArray(response.data)) {
-      // Mapear la respuesta al formato esperado por el componente
-      recentActivities.value = response.data.map(notif => ({
-        id: notif.id || Math.random().toString(36).substr(2, 9),
-        title: notif.titulo,
-        date: notif.fecha,
-        read: notif.leido === 1,
-        readDate: notif.fechaLeido,
-        user: notif.nombreUsuario,
-        icon: getNotificationIcon(notif.titulo)
-      }))
-      
-      // Actualizar contadores de notificaciones no leídas si es necesario
-      const unreadCount = recentActivities.value.filter(a => !a.read).length 
-    } else {
-      throw new Error('Formato de respuesta inesperado')
-    }
-  } catch (error) {
-    console.error('Error al cargar notificaciones:', error)
-    showError('Error al cargar las actividades recientes')
-  } finally {
-    isLoading.value = false
-  }
 }
 
 // Función auxiliar para obtener iconos según el tipo de notificación
@@ -1469,8 +1328,7 @@ const handleResolveClick = async () => {
 }
 
 // ===== INICIALIZACIÓN =====
-const isInitialized = ref(false)
-const isMounted = ref(false)
+const isInitialized = ref(false) 
 const initPromise = ref(null)
 
 const initializeDashboard = async () => {
@@ -1501,20 +1359,6 @@ const initializeDashboard = async () => {
   
   return initPromise.value
 }
-
-// Usar onMounted solo para marcar que el componente está montado
-onMounted(() => {
-  isMounted.value = true
-  initializeDashboard()
-})
-
-// Usar onBeforeMount para cargar datos solo en el cliente
-onBeforeMount(() => {
-  if (process.client) {
-    initializeDashboard()
-  }
-})
-
 </script>
 
 <style scoped>

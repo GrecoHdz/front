@@ -1606,8 +1606,16 @@ watch(() => selectedServiceObject.value, (newService) => {
 });
 
 // Verificar autenticación al cargar el componente
-onMounted(async () => { 
+onMounted(async () => {
   try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
+
     // Primero cargar los datos de la membresía
     await fetchMembershipData()
     
@@ -1620,28 +1628,9 @@ onMounted(async () => {
       fetchUserCredit()
     ])
   } catch (error) {
-    if (error?.response?._data?.status !== 'not_found') {
-      console.error('Error al cargar datos de membresía:', error)
-    }
+    window.location.reload()
   } finally {
     isLoading.value = false
   }
 })
-
-// Dark mode support - wrapped in ClientOnly to avoid hydration issues
-onMounted(() => {
-  if (process.client) {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.classList.add('dark')
-    }
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-      if (event.matches) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    })
-  }
-})
-
 </script> 

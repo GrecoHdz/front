@@ -4234,24 +4234,18 @@ watch(initialStats, (newVal) => {
 
 onMounted(async () => {
   try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
+
     Chart.register(...registerables, DataLabelsPlugin);
     
     // Inicializar selectedChartObject con la primera opción
-    initializeChartObject();
-    
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
-      if (event.matches) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    });
+    initializeChartObject();  
 
     await loadTabData();
     createChart();
@@ -4269,10 +4263,9 @@ onMounted(async () => {
       };
     }    
     await loadTransactions();
-    
-    isLoading.value = false;
   } catch (error) {
-    console.error('Error en onMounted:', error);
+    window.location.reload()
+  } finally {
     isLoading.value = false;
   }
 });

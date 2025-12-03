@@ -1594,10 +1594,28 @@ const initializeDarkMode = () => {
 }
 
 // ===== INICIALIZACIÓN =====
+const checkAuthAndLoad = async () => {
+  try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) { 
+      window.location.reload()
+      return
+    }
+    
+    initializeDarkMode()
+    await Promise.all([
+      loadServices(),
+      loadServiceTypes()
+    ])
+  } catch (error) { 
+    window.location.reload() 
+  }
+}
+
 onMounted(() => {
-  initializeDarkMode()
-  loadServices()
-  loadServiceTypes()
+  checkAuthAndLoad()
 })
 
 </script>

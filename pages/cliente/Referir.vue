@@ -1438,32 +1438,23 @@ watch([selectedMonth, selectedWithdrawMonth], async ([newMonth, newWithdrawMonth
 // =========================
 // INICIALIZACIÓN
 // =========================
-
 onMounted(async () => {
   try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
+
     await loadReferralData()
     await loadMovements('ingreso_referido')
   } catch (error) {
-    console.error('Error al cargar datos iniciales:', error)
-    showError('Error al cargar los datos. Por favor, recargue la página.')
+    window.location.reload()
   } finally {
     isLoading.value = false
   }
 })
-
-// Dark mode support
-onMounted(() => {
-  if (process.client) {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.classList.add('dark')
-    }
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-      if (event.matches) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    })
-  }
-}) 
+ 
 </script>

@@ -616,12 +616,30 @@ const changePage = (page) => {
 }
 
 // ===== INICIALIZACIÓN =====
-onMounted(() => { 
-  // Forzar la carga de la primera página
-  currentPage.value = 1
-  fetchServices(1)
-  fetchAvailability()
-  fetchReviews()
+const initializeDashboard = async () => {
+  try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) { 
+      window.location.reload()
+      return
+    }
+    
+    // Forzar la carga de la primera página
+    currentPage.value = 1
+    await Promise.all([
+      fetchServices(1),
+      fetchAvailability(),
+      fetchReviews()
+    ])
+  } catch (error) { 
+    window.location.reload() 
+  }
+}
+
+onMounted(() => {
+  initializeDashboard()
 })
 </script>
 

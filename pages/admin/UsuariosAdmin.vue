@@ -4082,6 +4082,14 @@ const fetchStatistics = async () => {
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
+
     await Promise.all([
       loadRoles(),
       loadUsers(),
@@ -4091,8 +4099,7 @@ onMounted(async () => {
       fetchStatistics()
     ])
   } catch (error) {
-    console.error('Error al cargar datos iniciales:', error)
-    showError('Error al cargar los datos iniciales. Por favor, recarga la página.')
+    window.location.reload()
   } finally {
     isLoading.value = false
   }

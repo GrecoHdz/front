@@ -3628,10 +3628,17 @@ const showError = (message) => {
 
 // =========================
 // INICIALIZACIÓN
-// =========================
-// Cargar datos iniciales al montar el componente
+// ========================= 
 onMounted(async () => {
   try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
+
     // Cargar datos de configuración primero
     await Promise.all([
       fetchDiscountPercentage(),
@@ -3651,12 +3658,7 @@ onMounted(async () => {
       await fetchMembresiaProgreso(auth.user.id);
     }
   } catch (error) {
-    console.error('Error al cargar datos iniciales:', error);
-    showToast({
-      message: 'Error al cargar los datos. Por favor, recarga la página.',
-      type: 'error',
-      duration: 5000
-    });
+    window.location.reload()
   } finally {
     isLoading.value = false;
   }

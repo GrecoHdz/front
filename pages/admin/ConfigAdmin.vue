@@ -3754,43 +3754,33 @@ const cargarReferidorPredeterminado = async () => {
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
+    // Verificar autenticación
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
+
     // Inicializar filtroEstadoObject con la primera opción
-    filtroEstadoObject.value = estadoOptions[0];
+    filtroEstadoObject.value = estadoOptions[0]
     
     await Promise.all([
       cargarConfiguraciones(),
-      cargarCuentas().catch(error => {
-        console.error('Error al cargar cuentas:', error);
-        showToastMessage('Error al cargar las cuentas bancarias', 'error');
-      }),
-      cargarBeneficios().catch(error => {
-        console.error('Error al cargar beneficios:', error);
-        showToastMessage('Error al cargar los beneficios', 'error');
-      }),
-      cargarServicios().catch(error => {
-        console.error('Error en cargarServicios:', error);
-        showToastMessage('Error al cargar los servicios', 'error');
-      }),
-      cargarCiudades().catch(error => {
-        console.error('Error al cargar ciudades:', error);
-        showToastMessage('Error al cargar las ciudades', 'error');
-      }),
-      cargarNotificaciones().catch(error => {
-        console.error('Error al cargar notificaciones:', error);
-        showToastMessage('Error al cargar las notificaciones', 'error');
-      }),
-      cargarReferidorPredeterminado().catch(error => {
-        console.error('Error al cargar el referidor predeterminado:', error);
-        showToastMessage('Error al cargar el referidor predeterminado', 'error');
-      })
-    ]);
+      cargarCuentas().catch(() => showToastMessage('Error al cargar las cuentas bancarias', 'error')),
+      cargarBeneficios().catch(() => showToastMessage('Error al cargar los beneficios', 'error')),
+      cargarServicios().catch(() => showToastMessage('Error al cargar los servicios', 'error')),
+      cargarCiudades().catch(() => showToastMessage('Error al cargar las ciudades', 'error')),
+      cargarNotificaciones().catch(() => showToastMessage('Error al cargar las notificaciones', 'error')),
+      cargarReferidorPredeterminado().catch(() => showToastMessage('Error al cargar el referidor predeterminado', 'error'))
+    ])
   } catch (error) {
-    console.error('Error inesperado al cargar datos iniciales:', error);
-    showToastMessage('Error inesperado al cargar los datos', 'error');
+    window.location.reload()
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-});
+})
 
 </script>
 

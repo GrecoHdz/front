@@ -673,11 +673,28 @@ watch(() => user.value.ciudadSeleccionada, (newCiudad) => {
 });
 
 // ===== INICIALIZACIÓN =====
-onMounted(async () => {
-  await cargarDatosPerfil();
-  if (user.value) {
-    originalUserData.value = { ...user.value };
+const checkAuthAndLoad = async () => {
+  try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) { 
+      window.location.reload()
+      return
+    }
+    
+    await cargarDatosPerfil()
+    
+    if (user.value) {
+      originalUserData.value = { ...user.value }
+    }
+  } catch (error) { 
+    window.location.reload() 
   }
+}
+
+onMounted(() => {
+  checkAuthAndLoad()
 })
 
 </script>

@@ -2633,6 +2633,14 @@ watch([selectedStatus, selectedServiceType, selectedMonth], () => {
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
   try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) {
+      window.location.reload()
+      return
+    }
+
     // Cargar datos iniciales
     await Promise.all([ 
       fetchCatalogoServicios(),
@@ -2641,10 +2649,8 @@ onMounted(async () => {
       loadPendingServices(),
       loadHistoryServices()
     ])
-    isLoading.value = false
   } catch (error) {
-    console.error('Error al inicializar:', error)
-    showError('Error al cargar la página')
+    window.location.reload()
   } finally {
     isLoading.value = false
   }

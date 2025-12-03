@@ -1512,15 +1512,29 @@ watch(() => selectedAccountObject.value, (newAccount) => {
 
 // Cargar datos al montar el componente
 onMounted(async () => {
-  await Promise.all([
-    cargarDatosPerfil(),
-    fetchContactInfo()
-  ]);
-  // Guardar una copia de los datos originales
-  if (user.value) {
-    originalUserData.value = { ...user.value };
+  try {
+    const token = useCookie('token')
+    const userCookie = useCookie('user')
+    
+    if (!token.value || !userCookie.value) {
+      window.location.reload()
+      return
+    }
+
+    await Promise.all([
+      cargarDatosPerfil(),
+      fetchContactInfo(), 
+      fetchMembershipData()
+    ])
+    
+    // Guardar una copia de los datos originales
+    if (user.value) {
+      originalUserData.value = { ...user.value }
+    }
+  } catch (error) {
+    window.location.reload()
   }
-}) 
+})
 
 // Función para manejar el cierre de sesión
 const handleLogout = async () => {
@@ -2196,14 +2210,7 @@ const isMembershipInactive = computed(() => {
 const membershipProgress = computed(() => membershipData.value.progress);
 
 // Dark mode toggle
-const darkMode = ref(false)
-
-// Cargar datos de membresía cuando el componente se monte
-onMounted(() => {
-  if (user.value?.id_usuario) {
-    fetchMembershipData();
-  }
-});
+const darkMode = ref(false) 
 
 // Watch for dark mode changes
 watch(darkMode, (newVal) => {

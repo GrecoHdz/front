@@ -2047,8 +2047,16 @@ watch(selectedChart, (newVal, oldVal) => {
 }, { immediate: true })
 
 // ===== INICIALIZACIÓN =====
-onMounted(async () => {
+const initializeApp = async () => {
   try {
+    const token = useCookie('token')
+    const user = useCookie('user')
+    
+    if (!token.value || !user.value) { 
+      window.location.reload()
+      return
+    }
+
     // Registrar componentes de Chart.js
     Chart.register(...registerables)
     
@@ -2100,8 +2108,12 @@ onMounted(async () => {
     
   } catch (error) {
     console.error('Error durante la inicialización:', error);
-    showError('Ocurrió un error al cargar los datos. Por favor, recarga la página.');
+    window.location.reload();
   }
+}
+
+onMounted(() => {
+  initializeApp();
 })
 
 </script>
