@@ -189,7 +189,6 @@
                 :searchable="false"
                 :close-on-select="true"
                 :show-labels="false"
-                placeholder="Selecciona una ciudad"
                 label="nombre"
                 track-by="id_ciudad"
                 class="multiselect-custom"
@@ -202,21 +201,12 @@
                 :disabled="ciudades.length === 0"
               >
                 <template #singleLabel="{ option }">
-                  <span class="text-xs truncate">{{ getCiudadLabel(option) }}</span>
+                  <span class="text-sm truncate">{{ getCiudadLabel(option) }}</span>
                 </template>
               </multiselect>
             </div>
           </div>
           
-          <div class="space-y-1">
-            <button 
-              @click="isPasswordModalOpen = true"
-              type="button"
-              class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl transition-colors duration-200 text-gray-700 dark:text-gray-300"
-            >
-              <p class="text-sm font-medium">Cambiar Contraseña</p>
-            </button>
-          </div>
           
           <!-- Modal de Cambio de Contraseña -->
           <div v-if="isPasswordModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
@@ -314,9 +304,9 @@
             </button>
             
             <button 
-              v-if="newPassword || currentPassword || confirmPassword"
-              @click="updatePassword"
-              class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+              @click="isPasswordModalOpen = true"
+              type="button"
+              class="w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
             >
               Cambiar Contraseña
             </button>

@@ -50,7 +50,7 @@
               :options-limit="100"
             >
               <template #singleLabel="{ option }">
-                <span class="text-xs truncate">{{ getSubjectLabel(option) }}</span>
+                <span class="text-sm truncate">{{ getSubjectLabel(option) }}</span>
               </template>
             </multiselect>
           </div>
@@ -686,7 +686,7 @@ const submitForm = async () => {
     
     showSuccess(
       '¡Ticket enviado!',
-      '¡Ticket enviado! Pronto te contactaremos.'
+      'Pronto te contactaremos por WhatsApp.'
     )
     
     // Resetear formulario
