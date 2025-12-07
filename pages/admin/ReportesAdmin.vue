@@ -3200,6 +3200,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       ['Membresías', formatCurrency(membershipData.total), calcPorcentaje(membershipData.total)],
       ['Visitas Técnicas', formatCurrency(visitData.total), calcPorcentaje(visitData.total)],
       ['Servicios', formatCurrency(serviceData.total), calcPorcentaje(serviceData.total)],
+      ['Ingresos', formatCurrency(totalIngresos), '-'],
       ['Retiros', formatCurrency(withdrawalsData.total), '-'],
       ['Balance Neto', formatCurrency(balanceNeto), '-']
     ],
