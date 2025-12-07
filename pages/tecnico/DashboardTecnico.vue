@@ -123,7 +123,7 @@
                           </span>
                           <span class="text-gray-300 dark:text-gray-600 hidden xs:inline">•</span>
                           <span class="text-[11px] xs:text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                            {{ formatRelativeDate(service.date) }}
+                            • {{ formatRelativeDate(service.date) }}
                           </span>
                         </div>
                       </div>
@@ -314,14 +314,19 @@ const formatRelativeDate = (dateString) => {
   
   const now = new Date()
   const diffInMs = now - date
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
   
-  if (diffInDays === 0) {
-    return 'Hoy'
-  } else if (diffInDays === 1) {
-    return 'Ayer'
-  } else if (diffInDays < 7) {
-    return `Hace ${diffInDays} días`
+  // Calcular horas
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
+  if (diffInHours < 1) {
+    return 'Ahora'
+  } else if (diffInHours < 24) {
+    return `Hace ${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'}`
+  }
+  
+  // Calcular días
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+  if (diffInDays < 7) {
+    return `Hace ${diffInDays} ${diffInDays === 1 ? 'día' : 'días'}`
   } else if (diffInDays < 30) {
     const weeks = Math.floor(diffInDays / 7)
     return `Hace ${weeks} ${weeks === 1 ? 'semana' : 'semanas'}`
@@ -329,11 +334,8 @@ const formatRelativeDate = (dateString) => {
     const months = Math.floor(diffInDays / 30)
     return `Hace ${months} ${months === 1 ? 'mes' : 'meses'}`
   } else {
-    return date.toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    const years = Math.floor(diffInDays / 365)
+    return `Hace ${years} ${years === 1 ? 'año' : 'años'}`
   }
 }
 

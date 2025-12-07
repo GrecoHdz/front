@@ -188,7 +188,7 @@
                 :options="ciudades"
                 :searchable="false"
                 :close-on-select="true"
-                :show-labels="false"
+                :show-labels="true"
                 label="nombre"
                 track-by="id_ciudad"
                 class="multiselect-custom"

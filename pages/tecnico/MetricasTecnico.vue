@@ -197,14 +197,12 @@
 
           <!-- Selector de fecha tipo mes -->
           <div class="flex items-center space-x-2">
-            <div class="relative">
-              <input 
-                type="date"
-                :value="(activeTab === 'ingresos' ? selectedMonth : selectedWithdrawMonth) + '-01'"
-                @change="(e) => handleMonthChange(e, activeTab)"
-                class="bg-gray-800 border border-gray-700 text-white text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-2 sm:pl-3 pr-8 sm:pr-10 py-1 sm:py-1.5"
-              />
-            </div>
+            <input 
+              type="month"
+              v-model="currentMonthValue"
+              @change="handleMonthChange($event, activeTab)"
+              class="bg-gray-800 border border-gray-700 text-white text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 px-2 py-1.5 sm:py-2 w-32"
+            />
           </div>
         </div>
 
@@ -579,7 +577,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -769,6 +767,21 @@ const visibleWithdrawals = computed(() => {
   return withdrawals.value.slice(0, visibleWithdrawalsCount.value)
 })
 
+// Computed properties para el selector de fecha
+const currentMonthValue = computed({
+  get() {
+    const value = activeTab.value === 'ingresos' ? selectedMonth.value : selectedWithdrawMonth.value;
+    return value || currentMonth.value;
+  },
+  set(newValue) {
+    if (activeTab.value === 'ingresos') {
+      selectedMonth.value = newValue;
+    } else {
+      selectedWithdrawMonth.value = newValue;
+    }
+  }
+});
+
 // ===== FUNCIONES DE UTILIDAD =====
 const formatCurrency = (value) => {
   if (value === undefined || value === null) return '0.00'
@@ -777,7 +790,7 @@ const formatCurrency = (value) => {
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
-  const options = { day: '2-digit', month: 'short', year: 'numeric' }
+  const options = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }
   return new Date(dateString).toLocaleDateString('es-ES', options)
 }
 
@@ -992,6 +1005,16 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
     }
 
     const tipoMovimiento = movementType === 'ingresos' ? 'ingresos' : 'retiro';
+    const endpoint = `/movimientos/${userId}`;
+    const params = { 
+      mes: monthNum, 
+      tipo: tipoMovimiento,
+      page: typeof page === 'string' ? 1 : page,
+      limit: itemsPerPage
+    };
+    
+    console.log('Petición API - Endpoint:', endpoint);
+    console.log('Petición API - Parámetros:', params);
     
     // Crear clave de caché sin timestamp para reutilización
     const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}`;
@@ -1035,18 +1058,15 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       },
-      params: { 
-        mes: monthNum, 
-        tipo: tipoMovimiento,
-        page: page,
-        limit: itemsPerPage,
-        _t: forceRefresh ? Date.now() : undefined // Forzar recarga solo cuando sea necesario
-      },
-      // Asegurarse de no usar caché del navegador
-      headers: forceRefresh ? { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } : {}
+      params: params
     });
     
+    console.log('Respuesta de la API al seleccionar fecha:', response);
+    
     if (response) {
+      // Asignar el resumen
+      movementSummary.value = response.summary || null;
+      
       const items = response.data.map(item => ({
         id_movimiento: item.id_movimiento,
         monto: parseFloat(item.monto) || 0,
@@ -1355,8 +1375,8 @@ const loadServicesByType = async () => {
 
     console.log('Respuesta completa del API servicios por tipo:', response);
 
-    // Extraer los datos del array anidado
-    const data = response.data || [];
+    // La API devuelve el array directamente, no anidado en .data
+    const data = Array.isArray(response) ? response : response.data || [];
     console.log('Datos extraídos:', data);
 
     // Verificar si hay datos
@@ -1964,13 +1984,111 @@ const processWithdraw = async () => {
   }
 }
 
+const getFormattedMonth = (monthValue) => {
+  if (!monthValue) return 'Seleccionar mes';
+  
+  const [year, month] = monthValue.split('-');
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+  
+  return `${monthNames[parseInt(month) - 1]} ${year}`;
+}
+
+const showCalendarPicker = (tabType) => {
+  const currentMonth = tabType === 'ingresos' ? selectedMonth.value : selectedWithdrawMonth.value;
+  const [currentYear, currentMonthNum] = currentMonth ? currentMonth.split('-') : 
+    [new Date().getFullYear().toString(), (new Date().getMonth() + 1).toString().padStart(2, '0')];
+  
+  // Crear un input date temporal centrado
+  const tempInput = document.createElement('input');
+  tempInput.type = 'month';
+  tempInput.value = currentMonth || `${currentYear}-${currentMonthNum}`;
+  
+  // Posicionar en el centro de la pantalla
+  tempInput.style.position = 'fixed';
+  tempInput.style.top = '50%';
+  tempInput.style.left = '50%';
+  tempInput.style.transform = 'translate(-50%, -50%)';
+  tempInput.style.zIndex = '9999';
+  tempInput.style.opacity = '0';
+  tempInput.style.pointerEvents = 'none';
+  
+  document.body.appendChild(tempInput);
+  
+  // Forzar el foco y mostrar el picker
+  tempInput.focus();
+  setTimeout(() => {
+    tempInput.showPicker?.();
+  }, 100);
+  
+  tempInput.onchange = async (e) => {
+    const selectedDate = e.target.value;
+    if (selectedDate) {
+      const [year, month] = selectedDate.split('-');
+      const formattedDate = `${year}-${month}`;
+      
+      if (tabType === 'ingresos') {
+        selectedMonth.value = formattedDate;
+      } else {
+        selectedWithdrawMonth.value = formattedDate;
+      }
+      
+      console.log('Fecha seleccionada del calendario:', formattedDate);
+      
+      try {
+        await loadMovements(1, true);
+      } catch (error) {
+        console.error('Error al cargar movimientos:', error);
+        showError('No se pudieron cargar los movimientos');
+      }
+    }
+    document.body.removeChild(tempInput);
+  };
+  
+  tempInput.oncancel = () => {
+    document.body.removeChild(tempInput);
+  };
+  
+  // Si el usuario hace clic fuera, cerrar
+  setTimeout(() => {
+    const handleClickOutside = (event) => {
+      if (event.target !== tempInput) {
+        if (document.body.contains(tempInput)) {
+          document.body.removeChild(tempInput);
+        }
+        document.removeEventListener('click', handleClickOutside);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+  }, 200);
+}
+
+const handleManualDateInput = (event, tabType) => {
+  // Esta función es para input manual si se necesita en el futuro
+  event.preventDefault();
+}
+
 // ===== FUNCIONES DE NAVEGACIÓN =====
-const handleMonthChange = async (event, tabType) => {
-  const selectedDate = event.target.value;
+const handleCustomMonthChange = async (event, type, tabType) => {
+  const currentValue = event.target.value;
   
-  if (!selectedDate) return;
+  let year, month;
+  if (type === 'month') {
+    // Obtener el año actual del selector correspondiente
+    year = tabType === 'ingresos' ? selectedMonth.value?.split('-')[0] : selectedWithdrawMonth.value?.split('-')[0];
+    month = currentValue;
+  } else {
+    // Es año
+    year = currentValue;
+    month = tabType === 'ingresos' ? selectedMonth.value?.split('-')[1] : selectedWithdrawMonth.value?.split('-')[1];
+  }
   
-  const [year, month] = selectedDate.split('-');
+  // Si no hay valores, usar defaults
+  if (!year) year = new Date().getFullYear().toString();
+  if (!month) month = (new Date().getMonth() + 1).toString().padStart(2, '0');
+  
   const formattedDate = `${year}-${month}`;
   
   if (tabType === 'ingresos') {
@@ -1979,8 +2097,31 @@ const handleMonthChange = async (event, tabType) => {
     selectedWithdrawMonth.value = formattedDate;
   }
   
+  console.log('Nueva fecha seleccionada:', formattedDate);
+  
   try {
-    await loadMovements(formattedDate);
+    await loadMovements(1, true); // Cargar página 1 forzando recarga
+  } catch (error) {
+    console.error('Error al cargar movimientos:', error);
+    showError('No se pudieron cargar los movimientos');
+  }
+}
+
+const handleMonthChange = async (event, tabType) => {
+  const selectedDate = event.target.value;
+  
+  if (!selectedDate) return;
+  
+  if (tabType === 'ingresos') {
+    selectedMonth.value = selectedDate;
+  } else {
+    selectedWithdrawMonth.value = selectedDate;
+  }
+  
+  console.log('Fecha seleccionada:', selectedDate);
+  
+  try {
+    await loadMovements(1, true); // Cargar página 1 forzando recarga
   } catch (error) {
     console.error('Error al cargar movimientos:', error);
     showError('No se pudieron cargar los movimientos');
@@ -2033,6 +2174,18 @@ watch(() => selectedChart.value, (newId) => {
 watch(() => selectedChartObject.value, (newChart) => {
   if (newChart) {
     selectedChart.value = newChart.id;
+    
+    // Cargar datos específicos según el tipo de gráfico
+    if (newChart.id === 'serviceTypes') {
+      console.log('Cargando datos de serviceTypes...');
+      loadServicesByType();
+    } else if (newChart.id === 'earnings') {
+      console.log('Cargando datos de earnings...');
+      loadMonthlyIncomes();
+    } else if (newChart.id === 'services') {
+      console.log('Cargando datos de services...');
+      loadMonthlyServices();
+    }
   } else {
     selectedChart.value = null;
   }

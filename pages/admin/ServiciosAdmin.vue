@@ -627,7 +627,6 @@
             
             <!-- Filtro por ciudad -->
             <div class="px-2">
-              <label for="cityFilter" class="sr-only">Filtrar por ciudad</label>
               <multiselect 
                 id="cityFilter"
                 v-model="selectedTechCityObject"
@@ -635,7 +634,7 @@
                 :searchable="false"
                 :close-on-select="true"
                 :show-labels="false"
-                placeholder="Todas las ciudades"
+                placeholder="Buscar por ciudad"
                 class="multiselect-admin-filter"
                 :custom-label="getTechCityLabel"
                 :options-limit="100"
@@ -646,7 +645,7 @@
                 :tabindex="0"
               >
                 <template #singleLabel="{ option }">
-                  <span class="text-sm truncate">{{ getTechCityLabel(option) }}</span>
+                  <span class="text-xs truncate">{{ getTechCityLabel(option) }}</span>
                 </template>
               </multiselect>
             </div>

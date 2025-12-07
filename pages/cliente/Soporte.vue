@@ -62,7 +62,7 @@
               <multiselect
                 v-model="form.servicioObject"
                 :options="serviciosFinalizados"
-                :searchable="true"
+                :searchable="false"
                 :close-on-select="true"
                 :show-labels="false"
                 placeholder="Selecciona un servicio"
@@ -83,7 +83,7 @@
                 :loading="cargandoServicios"
               >
                 <template #singleLabel="{ option }">
-                  <span class="text-xs truncate">{{ getServicioLabel(option) }}</span>
+                  <span class="text-sm truncate">{{ getServicioLabel(option) }}</span>
                 </template>
               </multiselect>
               <!-- Indicador de pulso -->
@@ -608,7 +608,7 @@ const cargarServiciosFinalizados = async () => {
     
     serviciosFinalizados.value = servicios.filter(servicio => 
       servicio && servicio.estado && 
-      (servicio.estado.toLowerCase() === 'finalizado' || servicio.estado.toLowerCase() === 'completado')
+      (servicio.estado.toLowerCase() === 'finalizado' || servicio.estado.toLowerCase() === 'calificado')
     )
      
   } catch (error) {
