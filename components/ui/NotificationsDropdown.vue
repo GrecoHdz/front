@@ -109,6 +109,7 @@
                 'hover:bg-gray-50': notif.leido,
                 'border-l-4 border-emerald-500': !notif.leido
               }" 
+               @click="onNotificationClick(notif)"
             >
               <div class="flex items-start">
                 <div class="flex-shrink-0 mt-0.5">
@@ -369,6 +370,14 @@ const dropdownContainer = ref(null);
 
 const closeDropdown = () => {
   showNotifications.value = false;
+};
+
+const onNotificationClick = (notification) => {  
+  // Emitir evento al componente padre para navegación
+  emit('notification-click', notification);
+  
+  // Cerrar el dropdown
+  closeDropdown();
 };
 
 const handleClickOutside = (event) => {

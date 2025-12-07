@@ -1526,7 +1526,7 @@ const handleAuth = async () => {
         }
         
         // Mostrar mensaje de éxito
-        showToast('¡Registro exitoso! Por favor inicia sesión.', 'success');
+        showToast('¡Registro exitoso! Ya puedes iniciar sesión.', 'success');
         
         // Enviar notificación a administradores
         try {

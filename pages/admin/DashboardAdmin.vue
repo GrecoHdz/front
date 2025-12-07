@@ -8,7 +8,7 @@
       :type="toast.type"
       :duration="toast.duration"
       @close="toast.show = false"
-    />
+    /> 
     
     <!-- Loading Spinner -->
     <LoadingSpinner 
@@ -128,7 +128,7 @@
             <!-- Soporte Técnico -->
             <section class="px-2 sm:px-4 mb-3 sm:mb-5">
               <div class="flex items-center justify-between mb-2 sm:mb-3">
-                <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Soporte Técnico</h2> 
+                <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Soporte Técnico</h2>
               </div>
               
               <!-- Tickets Pendientes -->
@@ -443,7 +443,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie } from '#imports'
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '~/middleware/auth.store'
@@ -916,7 +916,7 @@ const loadNotifications = async () => {
     }
   } catch (error) {
     console.error('Error al cargar notificaciones:', error)
-    showError('Error al cargar las actividades recientes')
+    showError(error) // Pasar el objeto error completo
   }
 };
 
@@ -927,7 +927,7 @@ const refreshPendingItems = async () => {
     await loadNotifications()
   } catch (error) {
     console.error('Error al cargar notificaciones:', error)
-    showError('Error al cargar las actividades recientes')
+    showError(error) // Pasar el objeto error completo
   } finally {
     isLoading.value = false
   }
@@ -956,7 +956,25 @@ const toast = ref({
   type: 'info',
   duration: 5000,
   id: null
-})
+}) 
+
+// Variable global para controlar rate limit
+const hasRateLimitError = ref(false)
+
+// Función global para manejar errores 429
+const handleRateLimitError = (error) => {
+  if (error && typeof error === 'object' && error.response?.status === 429) {
+    console.log('Detectado error 429')
+    showToast({
+      message: 'Has alcanzado el límite de peticiones permitidas por usuario. Espera 2 minutos.',
+      type: 'warning',
+      duration: 120000 // 2 minutos
+    })
+    hasRateLimitError.value = true
+    return true
+  }  
+  return false
+}
 
 // ===== COMPUTED PROPERTIES =====
 const adminName = computed(() => {
@@ -1080,8 +1098,14 @@ const showSuccess = (title, message) => {
 }
 
 const showError = (message) => {
-  console.error('Error:', message)
+  console.error('Error completo:', message)
   
+  // Primero intentar manejar como error 429
+  if (handleRateLimitError(message)) {
+    return // Si es 429, ya se mostró la alerta
+  }
+  
+  // Para otros errores, mostrar toast normal
   showToast({
     message: typeof message === 'string' ? message : 'Ocurrió un error inesperado',
     type: 'error',
