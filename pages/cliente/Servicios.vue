@@ -507,7 +507,7 @@
               <!-- Cuenta Bancaria -->
               <div class="space-y-2 mb-3">
                 <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Transferencia
+                  Transferencia Bancaria
                 </label>
                 <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
                   <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
@@ -2836,6 +2836,44 @@ const submitRating = async () => {
         // No mostrar error al usuario para no afectar su experiencia
       }
 
+      // Notificar a los admins sobre la calificación
+      try {
+        await $api('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Calificacion Recibida',
+            nombre_rol: 'admin'
+          })
+        });
+      } catch (error) {
+        console.error('Error al enviar notificación a los admin:', error);
+        // No mostrar error al usuario para no afectar su experiencia
+      }
+      try {
+        await $api('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Calificacion Recibida',
+            nombre_rol: 'sa'
+          })
+        });
+      } catch (error) {
+        console.error('Error al enviar notificación a los admin:', error);
+        // No mostrar error al usuario para no afectar su experiencia
+      }
+
       // Actualizar el estado local
       const serviceIndex = allServices.value.findIndex(s => s.id === currentService.id)
       if (serviceIndex !== -1) {
@@ -3529,22 +3567,22 @@ watch([() => quotationData.value?.monto_manodeobra,
 watch(() => selectedAccount.value, (newId) => {
   if (newId && bankAccounts.value.length > 0) {
     const accountObject = bankAccounts.value.find(acc => acc.id_cuenta === newId);
-    if (accountObject) {
+    if (accountObject && accountObject !== selectedAccountObject.value) {
       selectedAccountObject.value = accountObject;
     }
-  } else {
+  } else if (!newId) {
     selectedAccountObject.value = null;
   }
-});
+}, { immediate: true });
 
 // Watch para sincronizar selectedAccountObject con selectedAccount
 watch(() => selectedAccountObject.value, (newAccount) => {
-  if (newAccount) {
+  if (newAccount && newAccount.id_cuenta !== selectedAccount.value) {
     selectedAccount.value = newAccount.id_cuenta;
-  } else {
+  } else if (!newAccount) {
     selectedAccount.value = '';
   }
-});
+}, { immediate: true });
 
 // Obtener calificación del técnico - solo para servicios calificados
 const fetchTecnicoRating = async (idTecnico) => {

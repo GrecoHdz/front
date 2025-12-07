@@ -1,10 +1,13 @@
 <template>
-    <div>
-      <!-- Este es el layout que puedes personalizar -->
+    <div> 
       <NuxtPage />
     </div>
   </template>
   
-  <script setup>
-  // Basic layout configuration
+  <script setup> 
+import { useRouter, useRoute } from 'vue-router'; 
+
+// ===== VARIABLES DE CONFIGURACIÓN ===== 
+const router = useRouter();
+const route = useRoute();
   </script>
