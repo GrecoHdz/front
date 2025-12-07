@@ -3907,11 +3907,11 @@ const loadTechnicians = async (page = 1) => {
 
     // Guardar en caché
     techniciansCache[cacheKey] = {
-      tecnicos: response.tecnicos || [],
+      tecnicos: response.data || [],
       total: response.total || 0
     }
 
-    technicians.value = response.tecnicos || []
+    technicians.value = response.data || []
     totalTechnicians.value = response.total || 0
     techniciansCurrentPage.value = page
     return response
