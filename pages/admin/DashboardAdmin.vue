@@ -515,12 +515,8 @@ onMounted(async () => {
     startDate.value = ''
     endDate.value = ''
 
-    // Cargar datos en paralelo
-    await Promise.all([
-      fetchSupportTickets(),
-      fetchStatistics(),
-      refreshPendingItems()
-    ])
+    // Usar initializeDashboard que respeta la caché
+    await initializeDashboard()
     
   } catch (error) {
     window.location.reload()
@@ -631,6 +627,9 @@ const techsPerPage = 5
  
 
 // ===== VARIABLES DE DATOS =====
+// Cache para almacenar páginas ya cargadas de actividades
+const activitiesCache = {}
+
 // Estadísticas principales
 const stats = ref({
   totalUsers: 0,
@@ -879,13 +878,25 @@ const activityItemsPerPage = 5;
 
 // Calcular las actividades a mostrar en la página actual
 const displayedActivities = computed(() => {
-  // Ya no necesitamos calcular el slice aquí ya que el servidor maneja la paginación
   return recentActivities.value;
 });
 
-// Función para cargar notificaciones con paginación sin mostrar loading global
+// Función para cargar notificaciones con caché (estilo UsuariosAdmin)
 const loadNotifications = async () => {
   try {
+    const cacheKey = currentActivityPage.value.toString()
+    
+    // Verificar si ya tenemos la página en caché
+    if (activitiesCache[cacheKey]) {
+      const cachedData = activitiesCache[cacheKey]
+      recentActivities.value = cachedData.activities
+      totalActivityPages.value = cachedData.totalPages
+      console.log('Actividades cargadas desde caché:', cachedData.activities.length, 'elementos')
+      return cachedData
+    }
+    
+    console.log('Cargando actividades desde API...')
+    
     const config = useRuntimeConfig()
     const auth = useAuthStore()
     
@@ -900,7 +911,7 @@ const loadNotifications = async () => {
     })
     
     if (response.success && response.data) {
-      recentActivities.value = response.data.map(notif => ({
+      const activities = response.data.map(notif => ({
         id: notif.id || Math.random().toString(36).substr(2, 9),
         title: notif.titulo,
         date: notif.fecha,
@@ -910,24 +921,43 @@ const loadNotifications = async () => {
         icon: getNotificationIcon(notif.titulo)
       }))
       
+      recentActivities.value = activities
+      
       if (response.pagination) {
         totalActivityPages.value = response.pagination.pages
+        // Guardar en caché con la página como clave
+        activitiesCache[cacheKey] = {
+          activities: activities,
+          totalPages: response.pagination.pages
+        }
+      } else {
+        // Guardar en caché sin paginación
+        activitiesCache[cacheKey] = {
+          activities: activities,
+          totalPages: 1
+        }
       }
+      
+      console.log('Actividades cargadas desde API y guardadas en caché:', activities.length, 'elementos')
     }
   } catch (error) {
     console.error('Error al cargar notificaciones:', error)
-    showError(error) // Pasar el objeto error completo
+    showError(error)
   }
 };
 
 // Función para cargar notificaciones con loading (para inicialización)
-const refreshPendingItems = async () => {
+const refreshPendingItems = async (forceRefresh = false) => {
   isLoading.value = true
   try {
+    // Limpiar caché solo si se fuerza la recarga
+    if (forceRefresh) {
+      Object.keys(activitiesCache).forEach(key => delete activitiesCache[key])
+    }
     await loadNotifications()
   } catch (error) {
     console.error('Error al cargar notificaciones:', error)
-    showError(error) // Pasar el objeto error completo
+    showError(error)
   } finally {
     isLoading.value = false
   }
@@ -1370,8 +1400,8 @@ const initializeDashboard = async () => {
       // Cargar estadísticas u otros datos necesarios
       await fetchStatistics()
       
-      // Cargar actividades recientes
-      await refreshPendingItems()
+      // Cargar actividades recientes (usará caché si está disponible, sin forzar recarga)
+      await refreshPendingItems(false)
       
     } catch (error) {
       console.error('Error al cargar el dashboard:', error)
@@ -1383,6 +1413,12 @@ const initializeDashboard = async () => {
   
   return initPromise.value
 }
+
+// Limpiar caché al salir de la página (opcional)
+onBeforeUnmount(() => {
+  // Opcional: limpiar caché si se desea liberar memoria
+  // Object.keys(activitiesCache).forEach(key => delete activitiesCache[key])
+})
 </script>
 
 <style scoped>
