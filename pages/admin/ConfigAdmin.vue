@@ -590,7 +590,7 @@
           </div>
 
           <!-- Filtros y búsqueda -->
-          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4">
+          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4 relative z-20">
             <div class="relative flex-1 min-w-0">
               <input
                 v-model="filtroBusqueda"
@@ -3888,12 +3888,12 @@ input, select, textarea {
 }
 
 .multiselect-admin-filter .multiselect__content-wrapper {
-  position: absolute;
-  z-index: 9999;
+  position: absolute; 
+  z-index: 30;
   background: white;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   margin-top: 4px;
 }
 

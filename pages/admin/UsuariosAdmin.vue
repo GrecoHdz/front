@@ -126,7 +126,10 @@
                         :options-limit="100"
                       >
                         <template #singleLabel="{ option }">
-                          <span class="text-xs truncate">{{ option.label }}</span>
+                          <span class="text-[12px] truncate">{{ option.label }}</span>
+                        </template>
+                        <template #option="{ option }">
+                          <span class="text-[12px]">{{ option.label }}</span>
                         </template>
                       </multiselect>
                     </div>
@@ -138,7 +141,7 @@
                         :searchable="false"
                         :close-on-select="true"
                         :show-labels="false"
-                        placeholder="Todas las ciudades"
+                        placeholder="Ciudad"
                         label="label"
                         track-by="id"
                         class="multiselect-custom"
@@ -156,7 +159,10 @@
                         :options-limit="100"
                       >
                         <template #singleLabel="{ option }">
-                          <span class="text-xs truncate">{{ option.value || 'Ciudad' }}</span>
+                          <span class="text-[12px] truncate">{{ option.value || 'Ciudad' }}</span>
+                        </template>
+                        <template #option="{ option }">
+                          <span class="text-[12px]">{{ option.value || 'Ciudad' }}</span>
                         </template>
                       </multiselect>
                     </div>
@@ -224,7 +230,7 @@
                       @click="editUser(user)"
                       class="group rounded-lg p-2 transition-all duration-200 cursor-pointer border"
                       :class="{
-                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50': user.estado === 'deshabilitado',
+                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50': user.estado === 'deshabilitado' || user.estado === 'inactivo',
                         'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-md': user.estado === 'activo'
                       }"
                     >
@@ -232,7 +238,7 @@
                       <div class="flex items-start justify-between w-full">
                         <div class="flex items-center space-x-2">
                           <div class="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-sm"
-                               :class="user.estado === 'deshabilitado' ? 'bg-red-500' : 'bg-green-500'">
+                               :class="user.estado === 'deshabilitado' || user.estado === 'inactivo' ? 'bg-red-500' : 'bg-green-500'">
                             {{ getUserInitial(user.nombre) }}
                           </div>
                           <div class="min-w-0">
@@ -241,7 +247,7 @@
                             </h3>
                             <div class="flex">
                               <span class="text-[7px] px-1.5 py-0.5 rounded-full font-medium"
-                                    :class="user.estado === 'deshabilitado' 
+                                    :class="user.estado === 'deshabilitado' || user.estado === 'inactivo'
                                       ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' 
                                       : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'">
                                 {{ getStatusText(user.estado) }}
@@ -254,7 +260,7 @@
                             @click.stop="showServiceHistory(user)"
                             class="text-gray-400 hover:text-blue-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :class="{
-                              'text-red-400 hover:text-red-500': user.estado === 'deshabilitado',
+                              'text-red-400 hover:text-red-500': user.estado === 'deshabilitado' || user.estado === 'inactivo',
                               'text-gray-400 hover:text-blue-500': user.estado === 'activo'
                             }"
                             title="Historial"
@@ -267,7 +273,7 @@
                             @click.stop="editUser(user)"
                             class="text-gray-400 hover:text-blue-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :class="{
-                              'text-red-400 hover:text-red-500': user.estado === 'deshabilitado',
+                              'text-red-400 hover:text-red-500': user.estado === 'deshabilitado' || user.estado === 'inactivo',
                               'text-gray-400 hover:text-blue-500': user.estado === 'activo'
                             }"
                             title="Editar"
@@ -287,7 +293,7 @@
                             @click.stop="user.total_referidos >= 0 ? showReferrals(user) : null"
                             :class="{
                               'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': user.total_referidos > 0,
-                              'bg-red-50 dark:bg-red-900/20': user.estado === 'deshabilitado',
+                              'bg-red-50 dark:bg-red-900/20': user.estado === 'deshabilitado' || user.estado === 'inactivo',
                               'bg-gray-50 dark:bg-gray-700/50': user.estado === 'activo'
                             }"
                             class="rounded-lg p-1 text-center transition-colors"
@@ -296,7 +302,7 @@
                             <div class="flex items-center justify-center space-x-1">
                               <span 
                                 class="text-xs font-medium"
-                                :class="user.estado === 'deshabilitado' ? 'text-red-500 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'"
+                                :class="user.estado === 'deshabilitado' || user.estado === 'inactivo' ? 'text-red-500 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'"
                               >
                                 {{ user.total_referidos || 0 }}
                               </span>
@@ -308,7 +314,7 @@
                             @click.stop="(user.credito?.monto || 0) > 0 ? showCredits(user) : null"
                             :class="{
                               'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30': (user.credito?.monto || 0) > 0,
-                              'bg-red-50 dark:bg-red-900/20': user.estado === 'deshabilitado',
+                              'bg-red-50 dark:bg-red-900/20': user.estado === 'deshabilitado' || user.estado === 'inactivo',
                               'bg-gray-50 dark:bg-gray-700/50': user.estado === 'activo'
                             }"
                             class="rounded-lg p-1 text-center transition-colors"
@@ -316,7 +322,7 @@
                             <div class="text-[9px] text-gray-500 dark:text-gray-400">Ver Créditos</div>
                             <div class="flex items-center justify-center space-x-1">
                               <span class="text-xs font-medium"
-                                    :class="user.estado === 'deshabilitado' ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
+                                    :class="user.estado === 'deshabilitado' || user.estado === 'inactivo' ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
                                 L {{ formatCompactCurrency(user.credito?.monto || 0) }}
                               </span>
                             </div>
@@ -798,7 +804,10 @@
                       :options-limit="100"
                     >
                       <template #singleLabel="{ option }">
-                        <span class="text-xs truncate">{{ getRoleLabel(option) }}</span>
+                        <span class="text-[12px] md:text-base truncate">{{ getRoleLabel(option) }}</span>
+                      </template>
+                      <template #option="{ option }">
+                        <span class="text-[12px]">{{ getRoleLabel(option) }}</span>
                       </template>
                     </multiselect>
                   </div>
@@ -836,7 +845,10 @@
                       :options-limit="100"
                     >
                       <template #singleLabel="{ option }">
-                        <span class="text-xs truncate">{{ getStatusLabel(option) }}</span>
+                        <span class="text-[12px] truncate">{{ getStatusLabel(option) }}</span>
+                      </template>
+                      <template #option="{ option }">
+                        <span class="text-[12px]">{{ getStatusLabel(option) }}</span>
                       </template>
                     </multiselect>
                   </div>

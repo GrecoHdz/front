@@ -1102,6 +1102,14 @@ const formatCurrency = (value) => {
 const formatDate = (dateString) => {
   try {
     if (!dateString) return 'N/A';
+    // Si está en formato YYYY-MM-DD, parsear manualmente para evitar problemas de zona horaria
+    if (dateString.includes('-') && dateString.length === 10) {
+      const [year, month, day] = dateString.split('-');
+      const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      const monthName = months[parseInt(month) - 1];
+      return `${parseInt(day)} ${monthName} ${year}`;
+    }
+    // Para otros formatos, usar el método tradicional
     const options = { day: '2-digit', month: 'short', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('es-ES', options);
   } catch (error) {

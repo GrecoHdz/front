@@ -2516,8 +2516,8 @@ const openServiceModal = async (service) => {
   // Crear una copia del servicio para no modificar el original
   const serviceCopy = { ...service };
   
-  // Si hay un técnico asignado y el estado es 'calificado', cargar su calificación
-  if (service.technician && service.rawStatus === 'calificado') {
+  // Si hay un técnico asignado cargar su calificación
+  if (service.technician) {
     // Usar el nombre del técnico si ya está disponible
     if (service.technicianName) {
       serviceCopy.technicianName = service.technicianName;
@@ -2526,8 +2526,7 @@ const openServiceModal = async (service) => {
     } else {
       serviceCopy.technicianName = `Técnico #${service.technician}`;
     }
-    
-    // Cargar la calificación del técnico solo si el estado es 'calificado'
+     
     await fetchTecnicoRating(service.technician);
   }
 
@@ -3445,7 +3444,6 @@ const cancelarSolicitud = async () => {
             id_usuario: currentService.technician
           })
         });
-      } else {
         // Notificar a los administradores cuando no hay técnico asignado
         await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
@@ -3456,7 +3454,7 @@ const cancelarSolicitud = async () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            titulo: 'Servicio Cancelado - Sin Técnico Asignado',
+            titulo: 'Servicio Cancelado',
             nombre_rol: 'admin'
           })
         });
@@ -3469,7 +3467,35 @@ const cancelarSolicitud = async () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            titulo: 'Servicio Cancelado - Sin Técnico Asignado',
+            titulo: 'Servicio Cancelado',
+            nombre_rol: 'sa'
+          })
+        });
+      } else {
+        // Notificar a los administradores cuando no hay técnico asignado
+        await $api('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Servicio Cancelado',
+            nombre_rol: 'admin'
+          })
+        });
+         await $api('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Servicio Cancelado',
             nombre_rol: 'sa'
           })
         });
@@ -3585,7 +3611,7 @@ watch(() => selectedAccountObject.value, (newAccount) => {
 }, { immediate: true });
 
 // Obtener calificación del técnico - solo para servicios calificados
-const fetchTecnicoRating = async (idTecnico) => {
+const fetchTecnicoRating = async (idTecnico) => { 
   if (!idTecnico) return
   
   try {
@@ -3598,15 +3624,19 @@ const fetchTecnicoRating = async (idTecnico) => {
       headers: {
         'Authorization': `Bearer ${token}`
       }
-    })
+    }) 
     
-    // Asumimos que el endpoint devuelve un objeto con la calificación promedio
-    if (response && response.promedio) {
+    // La API devuelve el número directamente (sin success wrapper)
+    if (response && typeof response === 'number') {
+      tecnicoRating.value = response
+    } else if (response && response.promedio) {
       tecnicoRating.value = response.promedio
     } else if (response && response.data?.length > 0) {
       // Si el endpoint devuelve un array de calificaciones, calcular el promedio
       const suma = response.data.reduce((acc, cal) => acc + cal.calificacion, 0)
       tecnicoRating.value = suma / response.data.length
+    } else {
+      tecnicoRating.value = 0
     }
   } catch (error) {
     console.error('Error al obtener calificación del técnico:', error)
