@@ -257,7 +257,7 @@
                   </div>
 
                   <!-- Filtros del Historial -->
-                  <div class="flex flex-col space-y-3">
+                  <div class="flex flex-col">
                     <!-- Fila de Búsqueda y Fecha -->
                     <div class="flex flex-row gap-2 w-full">
                       <!-- Búsqueda -->
@@ -336,7 +336,7 @@
                     </div>
                     
                     <!-- Clear Filters -->
-                    <div v-if="hasActiveFilters" class="mt-1">
+                    <div v-if="hasActiveFilters" class="mt-0">
                       <button 
                         @click="clearFilters"
                         class="text-blue-600 dark:text-blue-400 text-[9px] sm:text-xs font-medium hover:underline flex items-center"
@@ -1522,11 +1522,14 @@ const toast = ref({
 
 // ===== API FUNCTIONS =====
 // Función para obtener técnicos desde la API
-const fetchTechnicians = async (cityId = null, limit = 4, offset = 0) => {
+const fetchTechnicians = async (cityId = null, limit = 4, offset = 0, serviceId = null) => {
   try {
     let url = `/usuarios/tecnicos?limit=${limit}&offset=${offset}`
     if (cityId) {
       url += `&id_ciudad=${cityId}`
+    }
+    if (serviceId) {
+      url += `&id_servicio=${serviceId}`
     }
 
     const response = await $api(url, {
@@ -1895,11 +1898,9 @@ const paginatedTechnicians = computed(() => {
 
 // Función para cambiar de página de técnicos
 const changeTechPage = async (page) => {
-  if (page < 1 || page > totalTechPages.value) return
-  
   currentTechPage.value = page
   const offset = (page - 1) * techsPerPage
-  await fetchTechnicians(selectedTechCityObject.value?.id_ciudad, techsPerPage, offset)
+  await fetchTechnicians(selectedTechCityObject.value?.id_ciudad, techsPerPage, offset, serviceToAssign.value?.id_servicio)
 }
 
 const hasActiveFilters = computed(() => {
@@ -2110,7 +2111,7 @@ const assignTechnician = async (service) => {
   
   // Cargar técnicos iniciales después de que el modal esté visible
   await nextTick()
-  await fetchTechnicians(null, techsPerPage, 0)
+  await fetchTechnicians(null, techsPerPage, 0, service.id_servicio)
 }
 
 // Cambiar página de técnicos
@@ -2620,7 +2621,7 @@ watch(() => selectedTechCityObject.value, async (newCity) => {
   }
   // Resetear paginación y volver a cargar técnicos
   currentTechPage.value = 1;
-  await fetchTechnicians(newCity?.id_ciudad, techsPerPage, 0);
+  await fetchTechnicians(newCity?.id_ciudad, techsPerPage, 0, serviceToAssign.value?.id_servicio);
 });
 
 // Watch para los demás filtros (sin debounce, se ejecutan inmediatamente)

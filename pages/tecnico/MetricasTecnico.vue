@@ -104,7 +104,7 @@
       <!-- Selector de Gráficos -->
       <section class="px-3 sm:px-4 mb-3 sm:mb-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Análisis de Datos</h2>
+          <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">Análisis de Datos</h2>
           <multiselect
             v-model="selectedChartObject"
             :options="availableCharts"
@@ -127,7 +127,10 @@
             :options-limit="100"
           >
             <template #singleLabel="{ option }">
-              <span class="text-xs truncate">{{ getChartLabel(option) }}</span>
+              <span class="text-[12px] sm:text-[14px] truncate">{{ getChartLabel(option) }}</span>
+            </template>
+            <template #option="{ option }">
+              <span class="text-[12px] sm:text-[14px] truncate">{{ getChartLabel(option) }}</span>
             </template>
           </multiselect>
         </div>
@@ -975,9 +978,7 @@ const clearMovementsCache = (userId = null, movementType = null) => {
           localStorage.removeItem(key);
         }
       });
-    });
-    
-    console.log('Caché de movimientos limpiado correctamente');
+    }); 
   } catch (error) {
     console.error('Error al limpiar la caché de movimientos:', error);
   }
@@ -1011,10 +1012,7 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
       tipo: tipoMovimiento,
       page: typeof page === 'string' ? 1 : page,
       limit: itemsPerPage
-    };
-    
-    console.log('Petición API - Endpoint:', endpoint);
-    console.log('Petición API - Parámetros:', params);
+    }; 
     
     // Crear clave de caché sin timestamp para reutilización
     const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}`;
@@ -1059,9 +1057,7 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
         'Authorization': `Bearer ${auth.token}`
       },
       params: params
-    });
-    
-    console.log('Respuesta de la API al seleccionar fecha:', response);
+    }); 
     
     if (response) {
       // Asignar el resumen
@@ -1352,8 +1348,7 @@ const loadEstadisticasGenerales = async () => {
 };
 
 const loadServicesByType = async () => {
-  try {
-    console.log('Cargando servicios por tipo para usuario:', userCookie.value.id_usuario);
+  try { 
     
     // Verificar si tenemos el ID de usuario
     if (!userCookie.value?.id_usuario) {
@@ -1371,17 +1366,13 @@ const loadServicesByType = async () => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       }
-    })
-
-    console.log('Respuesta completa del API servicios por tipo:', response);
+    }) 
 
     // La API devuelve el array directamente, no anidado en .data
-    const data = Array.isArray(response) ? response : response.data || [];
-    console.log('Datos extraídos:', data);
+    const data = Array.isArray(response) ? response : response.data || []; 
 
     // Verificar si hay datos
     if (!data || !Array.isArray(data) || data.length === 0) {
-      console.log('No hay servicios registrados para este usuario');
       // Mostrar mensaje de "sin datos" en lugar de datos de ejemplo
       serviceTypesData.labels = ['Sin servicios'];
       serviceTypesData.datasets[0].data = [1];
@@ -1391,13 +1382,7 @@ const loadServicesByType = async () => {
       serviceTypesData.datasets[0].data = data.map(item => item.cantidad || 0);
       // Restaurar colores originales si hay datos
       serviceTypesData.datasets[0].backgroundColor = ['#3B82F6', '#EF4444', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899'];
-    }
-    
-    console.log('serviceTypesData final:', {
-      labels: serviceTypesData.labels,
-      data: serviceTypesData.datasets[0].data,
-      colors: serviceTypesData.datasets[0].backgroundColor
-    });
+    } 
     
     if (selectedChart.value === 'serviceTypes') {
       createChart()
@@ -1657,24 +1642,18 @@ const createChart = () => {
           plugins: [ChartDataLabels]
         }
 
-      case 'serviceTypes':
-        console.log('Creando gráfico de serviceTypes');
-        console.log('Datos actuales de serviceTypesData:', serviceTypesData);
+      case 'serviceTypes': 
         
         // Si no hay servicios, no crear el gráfico (el HTML mostrará el mensaje)
         if (serviceTypesData.labels.length === 1 && 
             (serviceTypesData.labels[0] === 'Sin servicios' || serviceTypesData.labels[0] === 'Error al cargar' || serviceTypesData.labels[0] === 'Sin datos')) {
-          console.log('No hay servicios, omitiendo creación del gráfico');
           return null;
         }
         
         const totalServices = serviceTypesData.datasets[0]?.data.reduce((a, b) => a + b, 0) || 0;
         const percentages = serviceTypesData.datasets[0]?.data.map(value => {
           return totalServices > 0 ? Math.round((value / totalServices) * 100) + '%' : '0%';
-        }) || [];
-        
-        console.log('Total servicios:', totalServices);
-        console.log('Percentages:', percentages);
+        }) || []; 
         
         return {
           type: 'doughnut',
@@ -1857,7 +1836,6 @@ const createChart = () => {
   // Obtener configuración del gráfico
   const config = getChartConfig()
   if (!config) {
-    console.log('No hay configuración de gráfico (probablemente no hay datos)')
     return
   }
 
@@ -1881,9 +1859,7 @@ const createChart = () => {
     window.addEventListener('resize', handleResize)
     
     // Forzar un redimensionamiento inicial
-    setTimeout(handleResize, 100)
-    
-    console.log('Gráfico creado exitosamente:', selectedChart.value)
+    setTimeout(handleResize, 100) 
     
   } catch (error) {
     console.error('Error al crear el gráfico:', error)
@@ -2033,9 +2009,7 @@ const showCalendarPicker = (tabType) => {
         selectedMonth.value = formattedDate;
       } else {
         selectedWithdrawMonth.value = formattedDate;
-      }
-      
-      console.log('Fecha seleccionada del calendario:', formattedDate);
+      } 
       
       try {
         await loadMovements(1, true);
@@ -2097,8 +2071,6 @@ const handleCustomMonthChange = async (event, type, tabType) => {
     selectedWithdrawMonth.value = formattedDate;
   }
   
-  console.log('Nueva fecha seleccionada:', formattedDate);
-  
   try {
     await loadMovements(1, true); // Cargar página 1 forzando recarga
   } catch (error) {
@@ -2116,9 +2088,7 @@ const handleMonthChange = async (event, tabType) => {
     selectedMonth.value = selectedDate;
   } else {
     selectedWithdrawMonth.value = selectedDate;
-  }
-  
-  console.log('Fecha seleccionada:', selectedDate);
+  } 
   
   try {
     await loadMovements(1, true); // Cargar página 1 forzando recarga
@@ -2177,13 +2147,10 @@ watch(() => selectedChartObject.value, (newChart) => {
     
     // Cargar datos específicos según el tipo de gráfico
     if (newChart.id === 'serviceTypes') {
-      console.log('Cargando datos de serviceTypes...');
       loadServicesByType();
     } else if (newChart.id === 'earnings') {
-      console.log('Cargando datos de earnings...');
       loadMonthlyIncomes();
     } else if (newChart.id === 'services') {
-      console.log('Cargando datos de services...');
       loadMonthlyServices();
     }
   } else {
@@ -2319,8 +2286,8 @@ button:active {
 
 /* Estilos personalizados para Multiselect - Exact match to index.vue */
 .multiselect-custom {
-  min-width: 140px !important;
-  font-size: 0.75rem !important;
+  min-width: 120px !important;
+  font-size: 0.65rem !important;
 }
 
 .multiselect-custom .multiselect__tags {
@@ -2352,7 +2319,7 @@ button:active {
   padding: 0 !important;
   background-color: transparent !important;
   color: rgb(17 24 39) !important;
-  font-size: 0.75rem !important;
+  font-size: 0.65rem !important;
   line-height: 1.25rem !important;
 }
 
@@ -2428,7 +2395,7 @@ button:active {
 }
 
 .multiselect-custom .multiselect__option {
-  font-size: 0.75rem !important;
+  font-size: 0.65rem !important;
   color: rgb(17 24 39) !important;
   padding: 8px 12px !important;
   line-height: 1.25rem !important;

@@ -118,17 +118,7 @@
                 </template>
               </multiselect>
             </div>
-          </div>
-          
-          <div class="space-y-1.5 sm:space-y-2">
-            <button 
-              @click="isPasswordModalOpen = true"
-              type="button"
-              class="w-full text-left p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg sm:rounded-xl transition-colors duration-200 text-gray-700 dark:text-gray-300"
-            >
-              <p class="text-xs sm:text-sm font-medium">Cambiar Contraseña</p>
-            </button>
-          </div>
+          </div> 
           
           <!-- Modal de Cambio de Contraseña -->
           <div v-if="isPasswordModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
@@ -224,13 +214,117 @@
               <span v-if="isSaving">Guardando...</span>
               <span v-else>Actualizar Perfil</span>
             </button>
+              <button 
+              @click="isPasswordModalOpen = true"
+              type="button"
+              class="w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+            >
+              Cambiar Contraseña
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gestión de Servicios -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow border border-gray-200 dark:border-gray-700 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Mis Servicios</h3>
+          <button 
+            @click="showServiceModal = !showServiceModal"
+            class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {{ showServiceModal ? 'Cerrar' : 'Agregar' }}
+          </button>
+        </div>
+        
+        <!-- Servicios asignados -->
+        <div class="mb-4">
+          <div v-if="loadingServices" class="text-center py-4">
+            <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+          </div>
+          
+          <div v-else-if="technicianServices.length === 0" class="text-center py-6 text-gray-500">
+            <p class="text-sm">No tienes servicios asignados</p>
+            <button 
+              @click="showServiceModal = true"
+              class="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Agregar servicios
+            </button>
+          </div>
+          
+          <div v-else class="space-y-2">
+            <div 
+              v-for="service in technicianServices" 
+              :key="service.id_servicio"
+              class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ service.nombre }}</p>
+                </div>
+              </div>
+              <button 
+                @click="removeServiceFromTechnician(service.id_tecnico_servicio)"
+                class="text-gray-400 hover:text-red-500 transition-colors"
+                title="Eliminar servicio"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Panel para agregar servicios -->
+        <div v-if="showServiceModal" class="border-t pt-4 dark:border-gray-700">
+          <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Agregar nuevos servicios</h4>
+          
+          <div v-if="loadingServices" class="text-center py-4">
+            <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+          </div>
+          
+          <div v-else-if="availableServices.length === 0" class="text-center py-4 text-gray-500">
+            <p class="text-sm">No hay servicios disponibles</p>
+          </div>
+          
+          <div v-else class="space-y-2 max-h-60 overflow-y-auto">
+            <div 
+              v-for="service in availableServices" 
+              :key="service.id_servicio"
+              class="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors"
+            >
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ service.nombre }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ service.descripcion }}</p>
+              </div>
+              <button 
+                v-if="!isServiceAssigned(service.id_servicio)"
+                @click="assignServiceToTechnician(service.id_servicio)"
+                class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              >
+                Agregar
+              </button>
+              <span 
+                v-else
+                class="px-3 py-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded"
+              >
+                Ya asignado
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Legal & About -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 dark:border-gray-700">
-        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Legal y más</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Legal y más</h3>
         
         <div class="space-y-2 sm:space-y-3">
           <button class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
@@ -291,6 +385,12 @@ const isLoggingOut = ref(false)
 const isSaving = ref(false)
 const isUpdatingPassword = ref(false)
 const isPasswordModalOpen = ref(false)
+
+// Variables para gestión de servicios
+const availableServices = ref([])
+const technicianServices = ref([])
+const loadingServices = ref(false)
+const showServiceModal = ref(false)
 
 // Campos de contraseña
 const currentPassword = ref('')
@@ -425,6 +525,129 @@ const cargarCiudades = async () => {
   }
 }
 
+// Funciones para gestión de servicios del técnico
+const fetchAvailableServices = async () => {
+  try {
+    loadingServices.value = true
+    const response = await $api('/servicios/activos', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response.success && response.data) {
+      availableServices.value = response.data
+    } else if (Array.isArray(response)) {
+      availableServices.value = response
+    }
+  } catch (error) {
+    console.error('Error al cargar servicios disponibles:', error)
+    showError('Error', 'No se pudieron cargar los servicios disponibles.')
+  } finally {
+    loadingServices.value = false
+  }
+}
+
+const fetchTechnicianServices = async () => {
+  try {
+    const userId = auth.user?.id_usuario || userCookie.value?.id_usuario
+    if (!userId) return
+    
+    const response = await $api(`/tecnicoServicio/${userId}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response.success && response.data) {
+      technicianServices.value = response.data
+    } else if (Array.isArray(response)) {
+      technicianServices.value = response
+    }
+  } catch (error) {
+    console.error('Error al cargar servicios del técnico:', error)
+    showError('Error', 'No se pudieron cargar tus servicios asignados.')
+  }
+}
+
+// Función para asignar un servicio al técnico
+const assignServiceToTechnician = async (serviceId) => {
+  try {
+    const userId = auth.user?.id_usuario || userCookie.value?.id_usuario
+    if (!userId) {
+      showError('Error', 'No se pudo obtener tu ID de usuario.')
+      return
+    }
+    
+    const response = await $api('/tecnicoServicio', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        id_tecnico: userId,
+        id_servicio: serviceId
+      })
+    })
+    
+    if (response.success) {
+      showSuccess('¡Éxito!', 'Servicio asignado correctamente.')
+      // Cerrar el panel automáticamente
+      showServiceModal.value = false
+      // Recargar los servicios del técnico
+      await fetchTechnicianServices()
+      // Actualizar la lista de servicios disponibles
+      await fetchAvailableServices()
+    } else {
+      showError('Error', response.error || 'Error al asignar el servicio.')
+    }
+  } catch (error) {
+    console.error('Error al asignar servicio:', error)
+    showError('Error', 'Error al asignar el servicio. Intente de nuevo.')
+  }
+}
+
+// Función para eliminar un servicio asignado
+const removeServiceFromTechnician = async (tecnicoServicioId) => {
+  try {
+    const response = await $api(`/tecnicoServicio/${tecnicoServicioId}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    if (response.success) {
+      showSuccess('¡Éxito!', 'Servicio eliminado correctamente.')
+      // Recargar los servicios del técnico
+      await fetchTechnicianServices()
+      // Actualizar la lista de servicios disponibles
+      await fetchAvailableServices()
+    } else {
+      showError('Error', response.error || 'Error al eliminar el servicio.')
+    }
+  } catch (error) {
+    console.error('Error al eliminar servicio:', error)
+    showError('Error', 'Error al eliminar el servicio. Intente de nuevo.')
+  }
+}
+
+// Función para verificar si un servicio está asignado
+const isServiceAssigned = (serviceId) => {
+  return technicianServices.value.some(ts => ts.id_servicio === serviceId)
+}
+
 // Función para obtener la etiqueta de la ciudad
 const getCityLabel = (option) => {
   if (!option) return ''
@@ -486,7 +709,9 @@ const cargarDatosPerfil = async () => {
   try {
     await Promise.all([
       cargarCiudades(),
-      fetchUserData()
+      fetchUserData(),
+      fetchAvailableServices(),
+      fetchTechnicianServices()
     ])
     
     return true
