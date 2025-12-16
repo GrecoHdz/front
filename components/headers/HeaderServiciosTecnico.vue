@@ -136,7 +136,6 @@ const auth = useAuthStore()
 const isLoading = ref(false)
 const { $api } = useNuxtApp();
 
-
 // Filtros de servicio
 const serviceFilters = [
   { key: 'all', label: 'Todos', icon: '📋' },
@@ -184,6 +183,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  technicianStatus: {
+    type: String,
+    default: 'available'
+  }
 
 });
  
@@ -192,7 +195,9 @@ const emit = defineEmits([
   'update:currentFilter',
   'search',
   'refresh',
-  'service-type-toggle'
+  'service-type-toggle',
+  'filterChange',
+  'dateFilterChange'
 ]);
 
 // Computed para el estado de disponibilidad

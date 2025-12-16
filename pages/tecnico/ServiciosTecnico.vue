@@ -661,6 +661,9 @@ import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 
+// Definir eventos personalizados del componente
+const emit = defineEmits(['filterChange', 'dateFilterChange'])
+
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
@@ -755,16 +758,31 @@ const toast = ref({
 // ===== COMPUTED PROPERTIES =====
 const totalServices = computed(() => apiResponse.value.total)
 
-const stats = computed(() => ({
-  total: apiResponse.value.total,
-  activas: apiResponse.value.activas,
-  finalizadas: apiResponse.value.finalizadas
-}))
+const stats = computed(() => {
+  const solicitudes = apiResponse.value.solicitudes || []
+  const asignados = solicitudes.filter(s => 
+    s.estado === 'asignado' || 
+    s.estado === 'pendiente_cotizacion' || 
+    s.estado === 'en_proceso'
+  ).length
+  
+  const finalizadas = solicitudes.filter(s => 
+    s.estado === 'finalizado' || 
+    s.estado === 'calificado' || 
+    s.estado === 'pendiente_pagoservicio' || 
+    s.estado === 'verificando_pagoservicio'
+  ).length
+  
+  return {
+    total: solicitudes.length,
+    activas: asignados,
+    finalizadas: finalizadas
+  }
+})
 
 const filteredServices = computed(() => {
   let solicitudes = [...(apiResponse.value.solicitudes || [])]
   
-  // Aplicar filtro de estado
   if (currentFilter.value === 'asignado') {
     solicitudes = solicitudes.filter(s => 
       s.estado === 'asignado' || 
