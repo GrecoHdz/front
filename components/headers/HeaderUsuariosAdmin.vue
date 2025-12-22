@@ -58,20 +58,7 @@ defineEmits(['toggle-notifications']);
 // Manejar clic en notificación
 const onNotificationClick = async (notification) => {
   // Activar loading spinner
-  isLoading.value = true;
-  
-  // Log del objeto notificación recibido
-  console.log('🔔 Notificación clickeada:', notification);
-
-  // Log de lo que se enviará al backend
-  console.log('📤 Datos enviados al backend:', {
-    url: `${config.public.apiBase}/notificaciones/marcar/individual`,
-    method: 'PUT',
-    body: {
-      id_destinatario_notificacion: notification.id
-    },
-    token: auth.token ? 'TOKEN_PRESENTE' : 'SIN_TOKEN'
-  });
+  isLoading.value = true; 
 
   try {
     const response = await $api('/notificaciones/marcar/individual', {
@@ -84,10 +71,7 @@ const onNotificationClick = async (notification) => {
       body: {
         id_destinatario_notificacion: notification.id
       }
-    });
-
-    // Log de la respuesta del backend
-    console.log('📥 Respuesta del backend (marcar notificación):', response);
+    }); 
 
   } catch (error) {
     // Log del error completo

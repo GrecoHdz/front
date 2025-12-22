@@ -2588,9 +2588,7 @@ const actualizarCuenta = async () => {
       num_cuenta: formCuenta.value.num_cuenta,
       tipo: formCuenta.value.tipo,
       activo: formCuenta.value.activo ? 1 : 0
-    };
-
-    console.log('Datos enviados al backend:', JSON.stringify(datosEnviar, null, 2));
+    }; 
 
     const response = await $api(`/cuentas/${cuentaEditando.value}`, {
       method: 'PUT',
@@ -2603,7 +2601,6 @@ const actualizarCuenta = async () => {
       body: JSON.stringify(datosEnviar)
     }); 
 
-    console.log('Respuesta del servidor:', response);
     showToastMessage('Cuenta bancaria actualizada correctamente', 'success');
     return true;
   } catch (error) {

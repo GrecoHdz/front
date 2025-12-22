@@ -640,8 +640,7 @@
                 :options-limit="100"
                 :disabled="availableCities.length === 0"
                 :loading="cities.length === 0"
-                @open="onMultiselectOpen"
-                @select="onCitySelect"
+                @open="onMultiselectOpen" 
                 :tabindex="0"
               >
                 <template #singleLabel="{ option }">
@@ -1691,12 +1690,6 @@ const loadPendingServices = async (page = 1, resetList = false) => {
     hasMorePendingPages.value = result.hasMore;
     totalPendingItems.value = result.total || 0; // Asegurar que siempre tengamos un número
     
-    console.log('Pendientes cargados:', {
-      page,
-      items: result.data.length,
-      total: totalPendingItems.value,
-      hasMore: hasMorePendingPages.value
-    });
   } catch (error) {
     console.error('Error al cargar servicios pendientes:', error);
     showError('Error al cargar servicios pendientes');
@@ -1721,7 +1714,6 @@ const historyCache = {};
 const loadHistoryServices = async (page = 1, resetList = false) => {
   try {
     loadingHistory.value = true;
-    console.log('Cargando historial - Página:', page, 'Reset:', resetList);
     
     const targetPage = page;
     const cacheKey = getCacheKey();
@@ -1730,7 +1722,6 @@ const loadHistoryServices = async (page = 1, resetList = false) => {
     
     // Clear cache if it's a refresh
     if (resetList) {
-      console.log('Reseteando caché para los filtros actuales');
       if (historyCache[cacheKey]) {
         delete historyCache[cacheKey];
       }
@@ -1741,7 +1732,6 @@ const loadHistoryServices = async (page = 1, resetList = false) => {
     const isCacheValid = cachedData && (now - cachedData.timestamp < CACHE_EXPIRY);
     
     if (isCacheValid) {
-      console.log(`Usando datos en caché para la página ${targetPage} con clave:`, cacheKey);
       historyServices.value = [...cachedData.data];
       currentHistoryPage.value = targetPage;
       hasMoreHistoryPages.value = cachedData.hasMore;
@@ -1756,27 +1746,14 @@ const loadHistoryServices = async (page = 1, resetList = false) => {
       serviceType: selectedServiceType.value,
       month: selectedMonth.value,
       excludeStatus: 'pendiente_asignacion,verificando_pagovisita,verificando_pagoservicio'
-    };
-    
-    console.log('Solicitando datos de la API con filtros:', {
-      page: targetPage,
-      itemsPerPage: historyItemsPerPage,
-      filters: filters
-    });
+    }; 
     
     // Load history services with pagination
     const result = await fetchServices(targetPage, historyItemsPerPage, 'history', filters);
     
     if (!result || !Array.isArray(result.data)) {
       throw new Error('Respuesta inválida de la API');
-    }
-    
-    console.log('Respuesta de la API:', {
-      page: targetPage,
-      items: result.data.length,
-      total: result.total,
-      hasMore: result.hasMore
-    });
+    } 
     
     // Create a deep copy of the data
     const servicesData = JSON.parse(JSON.stringify(result.data));
@@ -1786,13 +1763,6 @@ const loadHistoryServices = async (page = 1, resetList = false) => {
     currentHistoryPage.value = targetPage;
     hasMoreHistoryPages.value = result.hasMore;
     totalHistoryItems.value = result.total || 0;
-    
-    console.log('Datos actualizados en la interfaz:', {
-      page: targetPage,
-      items: servicesData.length,
-      total: result.total,
-      hasMore: result.hasMore
-    });
     
     // Initialize cache for this filter set if it doesn't exist
     if (!historyCache[cacheKey]) {
@@ -2089,12 +2059,7 @@ const onMultiselectOpen = async () => {
     await fetchCities()
   }
 }
-
-// Función para manejar la selección de ciudad
-const onCitySelect = async (selectedOption) => {
-  // La selección se maneja en el watch de selectedTechCityObject
-  console.log('Ciudad seleccionada:', selectedOption)
-}
+ 
 
 const assignTechnician = async (service) => {
   serviceToAssign.value = service
@@ -2191,9 +2156,7 @@ const confirmTechnicianAssignment = async () => {
   }
 }
 
-const verifyPayment = async (isApproved) => {
-  console.log('🚀 Iniciando verifyPayment con isApproved:', isApproved);
-  console.log('🔍 serviceToPayment inicial:', JSON.parse(JSON.stringify(serviceToPayment?.value || {})));
+const verifyPayment = async (isApproved) => { 
   
   // Validar que se haya marcado el checkbox de verificación si se está aprobando
   if (isApproved && !paymentDetails.verified) {
@@ -2251,20 +2214,13 @@ const verifyPayment = async (isApproved) => {
     const isVisitPayment = paymentType.value === 'visit'
     
     if (isApproved) {
-      // APROBAR PAGO
-      console.log('🔵 Iniciando proceso de aprobación de pago');
-      console.log('🔵 isVisitPayment:', isVisitPayment);
-      console.log('🔵 solicitudId:', solicitudId);
-      console.log('🔵 cotizacionId:', cotizacionId);
+      // APROBAR PAGO 
       
       const endpoint = isVisitPayment ? '/pagovisita/confirmar' : '/pagoservicio/aceptar'
       const paymentPayload = { 
         id_solicitud: solicitudId,
         id_cotizacion: cotizacionId
-      } 
-      
-      console.log('🔵 Endpoint:', endpoint);
-      console.log('🔵 Payload:', paymentPayload);
+      }  
       
       try {
         const response = await $api(endpoint, {
@@ -2277,8 +2233,6 @@ const verifyPayment = async (isApproved) => {
           },
           body: JSON.stringify(paymentPayload)
         });
-        
-        console.log('✅ Pago aprobado exitosamente.');
         
         // Si es una visita, notificar a los administradores
         if (isVisitPayment && response?.success) {
@@ -2319,18 +2273,12 @@ const verifyPayment = async (isApproved) => {
             console.error('❌ Error al enviar notificación a los administradores:', notificationError);
             // No interrumpir el flujo si falla la notificación
           }
-        }
-        
-        // Notificar al cliente sobre el pago aprobado
-        console.log('🔵 Iniciando notificación de pago aprobado');
-        console.log('🔍 serviceToPayment:', JSON.parse(JSON.stringify(serviceToPayment?.value || {})));
+        } 
         
         // Obtener el ID del cliente de múltiples ubicaciones posibles
         const idUsuario = serviceToPayment.value?.cliente?.id_cliente ||
                          serviceToPayment.value?.id_cliente ||
-                         serviceToPayment.value?.usuario?.id_cliente;
-        
-        console.log('🔵 ID de usuario obtenido para notificación:', idUsuario);
+                         serviceToPayment.value?.usuario?.id_cliente; 
                          
         if (!idUsuario) {
           const errorMsg = '⚠️ No se encontró el ID del cliente en el servicio.';
@@ -2374,13 +2322,7 @@ const verifyPayment = async (isApproved) => {
       });
       
       // Notificar al cliente sobre el pago rechazado
-      try {
-        console.log('🆔 ID de usuario para notificación de pago rechazado:', id_usuario);
-        console.log('📝 Datos de la notificación:', {
-          titulo: 'Pago de Servicio Rechazado',
-          id_usuario: id_usuario,
-          token: token ? 'Token presente' : '❌ Token no encontrado'
-        });
+      try { 
         
         await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
@@ -2479,14 +2421,7 @@ const changeHistoryPage = async (page) => {
   if (page < 1 || page > totalPages) {
     console.warn(`Página ${page} fuera de rango. Total de páginas: ${totalPages}`);
     return;
-  }
-  
-  if (loadingHistory.value) {
-    console.log('Ya hay una carga en curso, ignorando solicitud de cambio de página');
-    return;
-  }
-  
-  console.log(`Cambiando a página ${page} de ${totalPages}`);
+  } 
   
   try {
     // Forzar una actualización de la interfaz para mostrar el estado de carga

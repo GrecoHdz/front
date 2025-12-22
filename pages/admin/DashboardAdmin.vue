@@ -890,12 +890,9 @@ const loadNotifications = async () => {
     if (activitiesCache[cacheKey]) {
       const cachedData = activitiesCache[cacheKey]
       recentActivities.value = cachedData.activities
-      totalActivityPages.value = cachedData.totalPages
-      console.log('Actividades cargadas desde caché:', cachedData.activities.length, 'elementos')
+      totalActivityPages.value = cachedData.totalPages 
       return cachedData
-    }
-    
-    console.log('Cargando actividades desde API...')
+    } 
     
     const config = useRuntimeConfig()
     const auth = useAuthStore()
@@ -938,7 +935,6 @@ const loadNotifications = async () => {
         }
       }
       
-      console.log('Actividades cargadas desde API y guardadas en caché:', activities.length, 'elementos')
     }
   } catch (error) {
     console.error('Error al cargar notificaciones:', error)
@@ -993,8 +989,7 @@ const hasRateLimitError = ref(false)
 
 // Función global para manejar errores 429
 const handleRateLimitError = (error) => {
-  if (error && typeof error === 'object' && error.response?.status === 429) {
-    console.log('Detectado error 429')
+  if (error && typeof error === 'object' && error.response?.status === 429) { 
     showToast({
       message: 'Has alcanzado el límite de peticiones permitidas por usuario. Espera 2 minutos.',
       type: 'warning',

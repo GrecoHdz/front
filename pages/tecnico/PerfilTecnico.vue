@@ -375,108 +375,154 @@
           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
         </div>
 
-        <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
-            <p>Al utilizar los servicios de HogarSeguro, usted acepta y se compromete a cumplir con estos términos y condiciones. Si no está de acuerdo con alguno de estos términos, por favor no utilice nuestra plataforma.</p>
-          </section>
+                <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
-            <p>HogarSeguro es una plataforma tecnológica que conecta a usuarios con técnicos profesionales para servicios de reparación y mantenimiento a domicilio. Nos comprometemos a facilitar la conexión entre clientes y técnicos calificados.</p>
-          </section>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
+          <p>
+          Al registrarse y utilizar la plataforma HogarSeguro, el usuario (cliente o técnico) acepta de forma expresa
+          estos Términos y Condiciones. Si no está de acuerdo con alguno de ellos, deberá abstenerse de utilizar la plataforma.
+          </p>
+        </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Responsabilidades del Usuario</h4>
-            <ul class="list-disc pl-5 space-y-1">
-              <li>Proporcionar información veraz y actualizada</li>
-              <li>Mantener un ambiente seguro y respetuoso para los técnicos</li>
-              <li>Pagar los servicios acordados en tiempo y forma</li>
-              <li>Reportar cualquier problema o incidencia de manera oportuna</li>
-              <li>No solicitar servicios ilegales o peligrosos</li>
-            </ul>
-          </section>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
+          <p>
+          HogarSeguro es una plataforma tecnológica que facilita la conexión entre clientes y técnicos independientes
+          para la prestación de servicios de mantenimiento y reparación a domicilio.
+          </p>
+          <p class="mt-2">
+          <strong>Importante:</strong> HogarSeguro no presta directamente los servicios técnicos, no emplea a los técnicos
+          y no asume una relación laboral con ellos. Los técnicos actúan de manera independiente y bajo su propia responsabilidad.
+          </p>
+        </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Responsabilidades del Técnico</h4>
-            <ul class="list-disc pl-5 space-y-1">
-              <li>Contar con la capacitación y herramientas necesarias</li>
-              <li>Realizar los servicios con profesionalismo y calidad</li>
-              <li>Respetar la privacidad y propiedad del cliente</li>
-              <li>Proporcionar presupuestos claros y detallados</li>
-              <li>Garantizar la seguridad durante la prestación del servicio</li>
-            </ul>
-          </section>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Modelo de Cobro y Pago Centralizado</h4>
+          <p>
+          Por razones operativas, de seguridad y control, todos los pagos de los servicios solicitados a través de la plataforma
+          deberán realizarse exclusivamente mediante transferencia bancaria o medios electrónicos autorizados
+          a las cuentas oficiales de HogarSeguro.
+          </p>
+          <p class="mt-2">
+          HogarSeguro actúa como intermediario tecnológico en la gestión de pagos, factura únicamente sus comisiones y cargos 
+          propios, y posteriormente liquida al técnico independiente el valor correspondiente a la mano de obra por él prestada.
+        </p>
+        </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresía y Beneficios</h4>
-            <p>
-            La membresía de HogarSeguro ofrece beneficios adicionales como descuentos especiales y crédito al pagar servicios.
-            Pagos realizados a cuentas no autorizadas no serán reconocidos ni generarán derecho a activación o reclamos. 
-            La membresía tiene una duración de 30 días y debe renovarse para mantener los beneficios. 
-            Si la membresía vence y no se renueva dentro del período de gracia establecido, el crédito acumulado será reseteado a 0. 
-            Este proceso es irreversible.
-            </p>
-          </section> 
-        
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pagos y Retiros</h4>
-            <p>
-            <strong>Pagos autorizados:</strong><br>
-            HogarSeguro solo acepta pagos mediante transferencia bancaria a las cuentas oficiales proporcionadas por la plataforma. 
-            Cualquier pago realizado en efectivo a técnicos, terceros o a cuentas no autorizadas no será reconocido, no generará crédito, 
-            activación de servicios ni derecho a reclamos.
-            <br><br> 
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio y Distribución</h4>
+          <p>
+          El precio de la mano de obra es definido directamente por el técnico y aceptado por el cliente antes
+          de la ejecución del servicio.
+          </p>
+          <p class="mt-2">
+          La distribución del pago entre el técnico y HogarSeguro es <strong>variable</strong> y será determinada
+          por la plataforma según el tipo de servicio, categoría, promociones u otros criterios operativos,
+          los cuales serán informados al técnico previo a la aceptación del trabajo.
+          </p>
+          <p class="mt-2">
+          La comisión de HogarSeguro se calcula sobre el valor total de la mano de obra acordada,
+          independientemente de descuentos, créditos o beneficios aplicados al cliente.
+          </p>
+        </section>
 
-            <strong>Créditos acumulados:</strong><br>
-            El crédito de los técnicos proviene exclusivamente de la mano de obra correspondiente a los servicios realizados y pagados por el cliente 
-            según la cotización aceptada.  
-            HogarSeguro únicamente cobra una comisión sobre dicha mano de obra definida por el técnico.
-            El crédito de los clientes proviene de los pagos mensuales de su membresía y de un porcentaje generado por los servicios contratados 
-            por todos sus referidos.
-            <br><br>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresías y Créditos</h4>
+          <p>
+          HogarSeguro ofrece membresías mensuales que otorgan beneficios, entre ellos la acumulación de crédito
+          utilizable como descuento al momento de pagar servicios dentro de la plataforma.
+          </p>
+          <p class="mt-2">
+          El crédito acumulado:
+          </p>
+          <ul class="list-disc pl-5 space-y-1">
+          <li>No es dinero en efectivo</li>
+          <li>No es transferible</li>
+          <li>Solo puede utilizarse para pagar servicios dentro de HogarSeguro</li>
+          </ul>
+          <p class="mt-2">
+          El uso del crédito reduce únicamente el monto a pagar por el cliente,
+          pero no afecta el valor total de la mano de obra ni el pago correspondiente al técnico.
+          </p>
+          <p class="mt-2">
+            La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
+            el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
+          </p>
+        </section>
 
-            <strong>Solicitudes de retiro:</strong><br>
-            Tanto técnicos como clientes pueden solicitar el retiro de su crédito acumulado en cualquier momento.  
-            Los retiros serán enviados únicamente a la cuenta bancaria registrada por el usuario y podrán tardar un máximo de 5 días laborales.
-            <br><br>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
+          <p>
+          En caso de que el cliente no cuente con una membresía activa, se cobrará una tarifa fija por visita técnica,
+          cuyo valor será informado previamente al cliente.
+          </p>
+          <p class="mt-2">
+          Esta tarifa corresponde exclusivamente a HogarSeguro y no forma parte del ingreso del técnico.
+          </p>
+        </section>
 
-            <strong>Retiros para clientes:</strong><br>
-            Los clientes solo pueden retirar los ingresos obtenidos por referidos.  
-            Del monto solicitado, un porcentaje será depositado a la cuenta bancaria registrada y el porcentaje restante será dirigido 
-            a su crédito acumulable, el cual podrá usarse como crédito al pagar un servicio dentro de la plataforma.
-            </p>
-          </section>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Pagos al Técnico</h4>
+          <p>
+            HogarSeguro realizará el pago al técnico independiente una vez confirmado el pago del cliente
+            y finalizado el servicio, descontando la comisión correspondiente.
+          </p>
+          <p class="mt-2">
+            Los pagos se efectuarán únicamente a la cuenta bancaria registrada por el técnico en la plataforma
+            y podrán tardar hasta cinco (5) días hábiles.
+          </p>
+          <p class="mt-2">
+            El técnico es responsable de cumplir con sus obligaciones fiscales, tributarias y legales
+            ante las autoridades correspondientes.
+          </p>
+        </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Privacidad y Protección de Datos</h4>
-            <p>Respetamos su privacidad y protegemos sus datos personales de acuerdo con nuestra Política de Privacidad. La información proporcionada se utilizará exclusivamente para la prestación de servicios y mejora de nuestra plataforma.</p>
-          </section>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Pagos No Autorizados</h4>
+          <p>
+            Cualquier pago realizado fuera de la plataforma, en efectivo, a cuentas no autorizadas
+            o directamente al técnico, no será reconocido por HogarSeguro y no generará derechos de reclamo,
+            garantía, crédito o soporte.
+          </p>
+        </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Limitación de Responsabilidad</h4>
-            <p>
-              La mayoría de los servicios ofrecidos a través de HogarSeguro son ejecutados por técnicos verificados que forman parte de nuestra plataforma y cuentan con garantía conforme a las condiciones establecidas por HogarSeguro. En situaciones específicas, HogarSeguro podrá actuar únicamente como intermediario, facilitando la conexión entre el usuario y técnicos o proveedores externos. En estos casos, la responsabilidad, calidad y garantía del trabajo recaen exclusivamente en dicho proveedor externo.
-              
-              Aunque realizamos procesos de verificación para ofrecer servicios confiables, HogarSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio, salvo en los casos en que la ley aplicable lo permita o exija. Recomendamos a los usuarios revisar la información y condiciones del técnico asignado antes de aceptar el servicio.
-            </p>
-          </section>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Limitación de Responsabilidad</h4>
+          <p>
+            Los servicios son prestados por técnicos independientes. HogarSeguro no garantiza el resultado final del servicio,
+            salvo en los casos expresamente establecidos por la plataforma.
+          </p>
+          <p class="mt-2">
+            HogarSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio,
+            excepto cuando la legislación aplicable disponga lo contrario.
+          </p>
+        </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Propiedad Intelectual</h4>
-            <p>Todo el contenido de la plataforma HogarSeguro, incluyendo texto, gráficos, logotipos e imágenes, son propiedad de HogarSeguro y está protegido por las leyes de propiedad intelectual.</p>
-          </section>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Privacidad y Protección de Datos</h4>
+          <p>
+            Los datos personales serán tratados conforme a la Política de Privacidad de HogarSeguro
+            y utilizados únicamente para la operación y mejora de la plataforma.
+          </p>
+        </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Modificaciones de los Términos</h4>
-            <p>Podemos modificar estos términos y condiciones en cualquier momento. Las modificaciones entrarán en vigor desde su publicación en la plataforma. Se notificará a los usuarios sobre cambios importantes a través de los medios de contacto proporcionados.</p>
-          </section>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Modificaciones</h4>
+          <p>
+            HogarSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
+            Las modificaciones entrarán en vigor desde su publicación en la plataforma.
+          </p>
+        </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Ley Aplicable y Jurisdicción</h4>
-            <p>Estos términos se rigen por las leyes de Honduras. Cualquier disputa será resuelta en los tribunales competentes de San Pedro Sula, Cortés.</p>
-          </section>
-        </div>
+        <section>
+          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Ley Aplicable y Jurisdicción</h4>
+          <p>
+            Estos Términos se rigen por las leyes de la República de Honduras.
+            Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
+          </p>
+        </section>
+</div>
 
         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <button 

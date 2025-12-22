@@ -1221,7 +1221,6 @@
           <div class="p-3">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-black text-gray-900 dark:text-white">
-                {{ console.log('Rol del usuario:', selectedUser?.rol?.nombre_rol) || '' }}
                 {{ selectedUser?.rol?.nombre_rol === 'usuario' ? '📋' : '🔧' }} 
                 {{ selectedUser?.rol?.nombre_rol === 'usuario' ? 'Historial de ' : 'Servicios de ' }}
                 {{ selectedUser?.nombre }}
