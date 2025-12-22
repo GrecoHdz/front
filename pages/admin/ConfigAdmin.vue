@@ -953,6 +953,161 @@
             </div>
           </div>
         </div>
+
+        <!-- Card 9: Gestión de Correlativos de Facturación -->
+<div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+  <div class="flex items-center justify-between mb-4 sm:mb-6">
+    <div class="flex items-center">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-pink-100 dark:bg-pink-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+        <span class="text-lg sm:text-2xl">🔢</span>
+      </div>
+      <div class="min-w-0 flex-1">
+        <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+          Gestión de Correlativos de Facturación
+        </h3>
+        <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+          Administra los rangos de facturación y CAI
+        </p>
+      </div>
+    </div>
+    <button 
+      @click="abrirModalNuevoCorrelativo"
+      class="px-3 sm:px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Nuevo Correlativo
+    </button>
+  </div>
+
+  <!-- Filtros y búsqueda -->
+  <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3">
+    <div class="flex-1 relative">
+      <input
+        v-model="filtroBusquedaCorrelativos"
+        type="text"
+        placeholder="Buscar por CAI o rango..."
+        class="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white">
+      <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+    </div>
+    <div class="w-full sm:w-48">
+      <select 
+        v-model="filtroEstadoCorrelativo"
+        class="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white">
+        <option value="">Todos los estados</option>
+        <option value="ACTIVO">Activo</option>
+        <option value="INACTIVO">Inactivo</option>
+        <option value="AGOTADO">Agotado</option>
+        <option value="VENCIDO">Vencido</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Lista de correlativos -->
+  <div class="space-y-3">
+    <div v-if="correlativosCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-4"></div>
+      <p>Cargando correlativos...</p>
+    </div>
+    <div v-else-if="correlativosFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+      <span class="text-4xl mb-2 block">📭</span>
+      <p>No se encontraron correlativos</p>
+    </div>
+    <template v-else>
+      <div v-for="correlativo in correlativosPaginados" :key="correlativo.id" 
+           :class="getCorrelativoCardColor(correlativo)"
+           class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border transition-colors">
+        <div class="flex-1 mb-3 sm:mb-0">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-lg">🔢</span>
+            <div>
+              <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">
+                CAI: {{ correlativo.cai }}
+              </h5>
+              <p class="text-[12px] sm:text-xs md:text-base text-gray-500 dark:text-gray-400">
+                Rango: {{ correlativo.rango_inicio }} - {{ correlativo.rango_fin }} • 
+                Actual: {{ correlativo.correlativo_actual || correlativo.rango_inicio - 1 }}
+              </p>
+              <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Válido hasta: {{ formatDate(correlativo.fecha_vencimiento) }} • 
+                <span :class="{
+                  'text-green-600 dark:text-green-400': correlativo.estado === 'ACTIVO',
+                  'text-yellow-600 dark:text-yellow-400': correlativo.estado === 'AGOTADO',
+                  'text-red-600 dark:text-red-400': correlativo.estado === 'VENCIDO',
+                  'text-gray-600 dark:text-gray-400': correlativo.estado === 'INACTIVO'
+                }">
+                  {{ getEstadoCorrelativoLabel(correlativo.estado) }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <button 
+            @click.stop="editarCorrelativo(correlativo)"
+            class="px-3 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Editar
+          </button>
+          <button 
+            @click.stop="confirmarEliminarCorrelativo(correlativo)"
+            class="px-3 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <!-- Paginación -->
+  <div v-if="correlativosFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        Mostrando {{ paginacionCorrelativosCalculada.desde }} a {{ paginacionCorrelativosCalculada.hasta }} de {{ paginacionCorrelativosCalculada.total }} registros
+      </div>
+      <div class="flex items-center gap-1">
+        <button
+          @click="cambiarPaginaCorrelativos(paginacionCorrelativos.paginaActual - 1, $event)"
+          :disabled="paginacionCorrelativos.paginaActual === 1"
+          class="px-3 py-1 text-sm rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Anterior
+        </button>
+        
+        <template v-for="pagina in paginacionCorrelativosCalculada.paginas" :key="pagina">
+          <button
+            @click="cambiarPaginaCorrelativos(pagina, $event)"
+            :class="{
+              'bg-pink-500 text-white': pagina === paginacionCorrelativos.paginaActual,
+              'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700': pagina !== paginacionCorrelativos.paginaActual
+            }"
+            class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium"
+          >
+            {{ pagina }}
+          </button>
+        </template>
+        
+        <button
+          @click="cambiarPaginaCorrelativos(paginacionCorrelativos.paginaActual + 1, $event)"
+          :disabled="paginacionCorrelativos.paginaActual === paginacionCorrelativosCalculada.totalPaginas"
+          class="px-3 py-1 text-sm rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
     </div>
     
@@ -1709,6 +1864,162 @@
       </div>
     </div>
   </Transition>
+
+  <!-- Modal para crear/editar correlativo -->
+  <Transition name="fade">
+    <div v-if="mostrarModalCorrelativo" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalCorrelativo"></div>
+      <Transition name="modal">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ correlativoEditando ? 'Editar' : 'Nuevo' }} Correlativo
+              </h3>
+              <button 
+                @click="cerrarModalCorrelativo"
+                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+              >
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Formulario -->
+          <div class="p-6">
+            <form @submit.prevent="guardarCorrelativo" class="space-y-4">
+              <!-- CAI -->
+              <div>
+                <label for="cai" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  CAI <span class="text-red-500">*</span>
+                  <span class="text-xs text-gray-500 ml-2">(37 caracteres máximo)</span>
+                </label>
+                <input
+                  id="cai"
+                  v-model="correlativoForm.cai"
+                  type="text"
+                  required
+                  maxlength="37"
+                  minlength="37"
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: 123456-789012-345678-901234-567890-12345-67"
+                  :disabled="guardandoCorrelativo"
+                >
+                <p v-if="correlativoForm.cai && correlativoForm.cai.length !== 37" class="text-xs text-red-500 mt-1">
+                  El CAI debe tener máximo 37 caracteres (actual: {{ correlativoForm.cai.length }})
+                </p>
+              </div>
+
+              <!-- Rango Inicio -->
+              <div>
+                <label for="rango_inicio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Rango Inicial <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="rango_inicio"
+                  v-model.number="correlativoForm.rango_inicio"
+                  type="number"
+                  min="1"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  placeholder="Número inicial del rango"
+                  :disabled="guardandoCorrelativo"
+                >
+              </div>
+
+              <!-- Rango Fin -->
+              <div>
+                <label for="rango_fin" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Rango Final <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="rango_fin"
+                  v-model.number="correlativoForm.rango_fin"
+                  type="number"
+                  min="1"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  placeholder="Número final del rango"
+                  :disabled="guardandoCorrelativo"
+                >
+              </div>
+
+              <!-- Fecha de Autorización -->
+              <div>
+                <label for="fecha_autorizacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Fecha de Autorización <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="fecha_autorizacion"
+                  v-model="correlativoForm.fecha_autorizacion"
+                  type="date"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  :disabled="guardandoCorrelativo"
+                >
+              </div>
+
+              <!-- Fecha de Vencimiento -->
+              <div>
+                <label for="fecha_vencimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Fecha de Vencimiento <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="fecha_vencimiento"
+                  v-model="correlativoForm.fecha_vencimiento"
+                  type="date"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  :disabled="guardandoCorrelativo"
+                >
+              </div>
+
+              <!-- Estado (solo para edición) -->
+              <div v-if="correlativoEditando">
+                <label for="estado" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Estado
+                </label>
+                <select
+                  id="estado"
+                  v-model="correlativoForm.estado"
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  :disabled="guardandoCorrelativo"
+                >
+                  <option value="ACTIVO">Activo</option>
+                  <option value="INACTIVO">Inactivo</option>
+                  <option value="AGOTADO">Agotado</option>
+                  <option value="VENCIDO">Vencido</option>
+                </select>
+              </div>
+
+              <!-- Botones -->
+              <div class="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  @click="cerrarModalCorrelativo"
+                  class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  :disabled="guardandoCorrelativo"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="flex-1 py-2 px-4 bg-pink-500 text-white font-medium text-sm rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center"
+                  :disabled="guardandoCorrelativo || !esFormularioCorrelativoValido"
+                >
+                  <div v-if="guardandoCorrelativo" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {{ guardandoCorrelativo ? 'Guardando...' : (correlativoEditando ? 'Actualizar' : 'Crear') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -1931,6 +2242,23 @@ const formCiudad = ref({
 });
 const filtroBusquedaCiudades = ref('')
 
+// Estados para gestión de correlativos
+const correlativos = ref([]);
+const correlativosCargando = ref(false);
+const correlativoEditando = ref(null);
+const mostrarModalCorrelativo = ref(false);
+const guardandoCorrelativo = ref(false);
+const correlativoForm = ref({
+  cai: '',
+  rango_inicio: 1,
+  rango_fin: 1000,
+  fecha_autorizacion: '',
+  fecha_vencimiento: '',
+  estado: 'ACTIVO'
+});
+const filtroBusquedaCorrelativos = ref('');
+const filtroEstadoCorrelativo = ref('');
+
 // Paginación
 const paginacion = ref({
   paginaActual: 1,
@@ -1968,6 +2296,17 @@ const paginacionCuentas = ref({
 const paginacionCiudades = ref({
   paginaActual: 1,
   porPagina: 3, // Mostrar 3 ciudades por página
+  total: 0,
+  totalPaginas: 1,
+  paginas: [],
+  desde: 0,
+  hasta: 0
+})
+
+// Paginación para correlativos
+const paginacionCorrelativos = ref({
+  paginaActual: 1,
+  porPagina: 10, // Mostrar 10 correlativos por página
   total: 0,
   totalPaginas: 1,
   paginas: [],
@@ -2163,6 +2502,58 @@ const paginacionCiudadesCalculada = computed(() => {
   }
 })
 
+// Computed para correlativos filtrados
+const correlativosFiltrados = computed(() => {
+  let resultado = [...correlativos.value]
+  
+  // Aplicar filtro de búsqueda
+  if (filtroBusquedaCorrelativos.value) {
+    const busqueda = filtroBusquedaCorrelativos.value.toLowerCase()
+    resultado = resultado.filter(correlativo => 
+      correlativo.cai.toLowerCase().includes(busqueda) ||
+      correlativo.id.toString().includes(busqueda)
+    )
+  }
+  
+  // Aplicar filtro de estado
+  if (filtroEstadoCorrelativo.value) {
+    resultado = resultado.filter(correlativo => correlativo.estado === filtroEstadoCorrelativo.value)
+  }
+  
+  return resultado
+})
+
+// Computed para la paginación de correlativos
+const paginacionCorrelativosCalculada = computed(() => {
+  const total = correlativosFiltrados.value.length
+  const totalPaginas = Math.ceil(total / paginacionCorrelativos.value.porPagina) || 1
+  const paginaActual = Math.min(paginacionCorrelativos.value.paginaActual, totalPaginas || 1)
+  
+  const inicio = (paginaActual - 1) * paginacionCorrelativos.value.porPagina
+  const fin = inicio + paginacionCorrelativos.value.porPagina
+  
+  let paginas = []
+  if (totalPaginas > 0) {
+    let paginaInicial = Math.max(1, paginaActual - 2)
+    if (totalPaginas - paginaActual < 2) {
+      paginaInicial = Math.max(1, totalPaginas - 4)
+    }
+    paginas = Array.from(
+      { length: Math.min(5, totalPaginas) },
+      (_, i) => Math.min(paginaInicial + i, totalPaginas)
+    ).filter((pagina, index, array) => !index || pagina > array[index - 1])
+  }
+  
+  return {
+    total,
+    totalPaginas,
+    paginaActual,
+    desde: total > 0 ? inicio + 1 : 0,
+    hasta: Math.min(fin, total),
+    paginas
+  }
+})
+
 // Computed para la paginación de cuentas
 const paginacionCuentasCalculada = computed(() => {
   const total = cuentasFiltradas.value.length
@@ -2221,6 +2612,63 @@ const ciudadesPaginadas = computed(() => {
   const fin = inicio + paginacionCiudades.value.porPagina
   return ciudadesFiltradas.value.slice(inicio, fin)
 })
+
+// Correlativos paginados
+const correlativosPaginados = computed(() => {
+  const inicio = (paginacionCorrelativosCalculada.value.paginaActual - 1) * paginacionCorrelativos.value.porPagina
+  const fin = inicio + paginacionCorrelativos.value.porPagina
+  return correlativosFiltrados.value.slice(inicio, fin)
+})
+
+// Validación del formulario de correlativo
+const esFormularioCorrelativoValido = computed(() => {
+  return correlativoForm.value.cai.trim() !== '' &&
+         correlativoForm.value.cai.length === 37 &&
+         correlativoForm.value.rango_inicio > 0 &&
+         correlativoForm.value.rango_fin > 0 &&
+         correlativoForm.value.rango_inicio < correlativoForm.value.rango_fin &&
+         correlativoForm.value.fecha_autorizacion !== '' &&
+         correlativoForm.value.fecha_vencimiento !== ''
+})
+
+// Helper function for correlativo estado labels
+const getEstadoCorrelativoLabel = (estado) => {
+  const estados = {
+    'ACTIVO': 'Activo',
+    'INACTIVO': 'Inactivo', 
+    'AGOTADO': 'Agotado',
+    'VENCIDO': 'Vencido'
+  }
+  return estados[estado] || estado
+}
+
+// Helper function to determine card color based on state and alerts
+const getCorrelativoCardColor = (correlativo) => {
+  if (correlativo.estado !== 'ACTIVO') {
+    return 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20'
+  }
+  
+  // Check if correlativo has alerts (based on backend logic)
+  const hoy = new Date();
+  const unMesDespues = new Date();
+  unMesDespues.setMonth(unMesDespues.getMonth() + 1);
+  const fechaVencimiento = new Date(correlativo.fecha_vencimiento);
+  
+  // Check range usage
+  const rangoTotal = correlativo.rango_fin - correlativo.rango_inicio + 1;
+  const utilizado = (correlativo.correlativo_actual || correlativo.rango_inicio - 1) - correlativo.rango_inicio + 1;
+  const porcentajeUtilizado = (utilizado / rangoTotal) * 100;
+  
+  // Alert conditions
+  const rangoProximoAgotarse = porcentajeUtilizado >= 70;
+  const fechaProximaVencer = fechaVencimiento <= unMesDespues;
+  
+  if (rangoProximoAgotarse || fechaProximaVencer) {
+    return 'border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20'
+  }
+  
+  return 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700'
+}
 
 // Watchers para reiniciar la paginación cuando cambian los filtros
 
@@ -2301,6 +2749,19 @@ watch([filtroBusquedaCuentas], () => {
 
 watch([filtroBusquedaCiudades], () => {
   paginacionCiudades.value.paginaActual = 1
+})
+
+watch([filtroBusquedaCorrelativos, filtroEstadoCorrelativo], () => {
+  paginacionCorrelativos.value.paginaActual = 1
+})
+
+// Watch para inicializar el formulario cuando se abre el modal de correlativo
+watch(mostrarModalCorrelativo, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      inicializarFormularioCorrelativo();
+    });
+  }
 })
 
 // ===== TOAST NOTIFICATION =====
@@ -2694,6 +3155,236 @@ const cambiarPaginaCuentas = (nuevaPagina, event) => {
   
   return false;
 }
+
+// ===== FUNCIONES PARA CORRELATIVOS =====
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString('es-HN', options);
+}; 
+
+const cargarCorrelativos = async (mostrarExito = false) => {
+  try {
+    correlativosCargando.value = true;
+    const response = await $fetch('/facturas/correlativos', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    if (response.success) {
+      correlativos.value = response.data;
+      
+      // Mostrar alertas de correlativos próximos a vencer si existen
+      if (response.alertas && response.alertas.length > 0) {
+        response.alertas.forEach(alerta => {
+          if (alerta.mensaje && typeof alerta.mensaje === 'string') {
+            showToastMessage(alerta.mensaje, 'warning');
+          }
+        });
+      }
+      
+      if (mostrarExito) {
+        showToastMessage('Correlativos cargados correctamente', 'success');
+      }
+    }
+  } catch (error) {
+    console.error('Error al cargar correlativos:', error);
+    showToastMessage('Error al cargar los correlativos', 'error');
+  } finally {
+    correlativosCargando.value = false;
+  }
+};
+
+const abrirModalNuevoCorrelativo = () => {
+  correlativoEditando.value = null;
+  inicializarFormularioCorrelativo();
+  mostrarModalCorrelativo.value = true;
+};
+
+const editarCorrelativo = (correlativo) => {
+  correlativoEditando.value = { ...correlativo };
+  inicializarFormularioCorrelativo();
+  mostrarModalCorrelativo.value = true;
+};
+
+const cerrarModalCorrelativo = () => {
+  mostrarModalCorrelativo.value = false;
+  correlativoEditando.value = null;
+};
+
+const inicializarFormularioCorrelativo = () => {
+  if (correlativoEditando.value) {
+    // Formatear fechas para el input type="date"
+    const formatearFecha = (fecha) => {
+      if (!fecha) return '';
+      const date = new Date(fecha);
+      return date.toISOString().split('T')[0];
+    };
+    
+    correlativoForm.value = {
+      ...correlativoEditando.value,
+      fecha_autorizacion: formatearFecha(correlativoEditando.value.fecha_autorizacion),
+      fecha_vencimiento: formatearFecha(correlativoEditando.value.fecha_vencimiento)
+    };
+  } else {
+    correlativoForm.value = {
+      cai: '',
+      rango_inicio: 1,
+      rango_fin: 1000,
+      fecha_autorizacion: new Date().toISOString().split('T')[0],
+      fecha_vencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      estado: 'ACTIVO'
+    };
+  }
+};
+
+const guardarCorrelativo = async () => {
+  try {
+    guardandoCorrelativo.value = true;
+    
+    // Validaciones
+    if (!correlativoForm.value.cai) {
+      throw new Error('El CAI es requerido');
+    }
+    
+    if (correlativoForm.value.rango_inicio >= correlativoForm.value.rango_fin) {
+      throw new Error('El rango inicial debe ser menor al rango final');
+    }
+    
+    if (!correlativoForm.value.fecha_autorizacion || !correlativoForm.value.fecha_vencimiento) {
+      throw new Error('Las fechas de autorización y vencimiento son requeridas');
+    }
+    
+    const url = correlativoEditando.value 
+      ? `/facturas/correlativos/${correlativoEditando.value.id}`
+      : '/facturas/correlativos';
+      
+    const method = correlativoEditando.value ? 'PUT' : 'POST';
+    
+    // Log para depuración
+    console.log('=== ENVIANDO CORRELATIVO ===');
+    console.log('URL:', url);
+    console.log('Método:', method);
+    console.log('Datos a enviar:', correlativoForm.value);
+    console.log('CAI length:', correlativoForm.value.cai.length);
+    
+    const response = await $fetch(url, {
+      baseURL: config.public.apiBase,
+      method,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify(correlativoForm.value)
+    });
+    
+    // Log para depuración
+    console.log('=== RESPUESTA RECIBIDA ===');
+    console.log('Response:', response);
+    
+    if (response.success) {
+      showToastMessage(
+        correlativoEditando.value 
+          ? 'Correlativo actualizado correctamente' 
+          : 'Correlativo creado correctamente',
+        'success'
+      );
+      
+      await cargarCorrelativos(true); // Mostrar toast de éxito al recargar
+      cerrarModalCorrelativo();
+    }
+  } catch (error) {
+    console.error('=== ERROR AL GUARDAR CORRELATIVO ===');
+    console.error('Error completo:', error);
+    console.error('Status:', error.response?.status);
+    console.error('StatusText:', error.response?.statusText);
+    console.error('Data:', error.data);
+    console.error('Message:', error.message);
+    
+    // Extraer mensaje de error específico si existe
+    let errorMessage = 'Error al guardar el correlativo';
+    if (error.data?.message) {
+      errorMessage = error.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    showToastMessage(errorMessage, 'error');
+  } finally {
+    guardandoCorrelativo.value = false;
+  }
+};
+
+const confirmarEliminarCorrelativo = (correlativo) => {
+  if (correlativo.estado === 'ACTIVO') {
+    showToastMessage('No se puede eliminar un correlativo activo', 'error');
+    return;
+  }
+  
+  // Validar que el correlativo tenga un ID válido
+  if (!correlativo.id || correlativo.id === undefined || correlativo.id === null) {
+    showToastMessage('Error: No se pudo identificar el correlativo a eliminar', 'error');
+    return;
+  }
+  
+  servicioSeleccionado.value = correlativo.id;
+  tituloConfirmacion.value = 'Eliminar Correlativo';
+  mensajeConfirmacion.value = `¿Estás seguro de que deseas eliminar el correlativo con CAI: ${correlativo.cai}? Esta acción no se puede deshacer.`;
+  accionConfirmar.value = () => eliminarCorrelativo(correlativo.id);
+  mostrarModalConfirmacion.value = true;
+};
+
+const eliminarCorrelativo = async (id) => {
+  // Validar que el ID sea válido
+  if (!id || id === undefined || id === null || id === 'undefined') {
+    console.error('ID de correlativo no válido:', id);
+    showToastMessage('Error: No se pudo identificar el correlativo a eliminar', 'error');
+    return;
+  }
+  
+  try {
+    const response = await $fetch(`/facturas/correlativos/${id}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response.success) {
+      showToastMessage('Correlativo eliminado correctamente', 'success');
+      await cargarCorrelativos(true); // Mostrar toast de éxito al recargar
+    }
+  } catch (error) {
+    console.error('Error al eliminar correlativo:', error);
+    showToastMessage('Error al eliminar el correlativo', 'error');
+  }
+};
+
+const cambiarPaginaCorrelativos = (nuevaPagina, event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  if (nuevaPagina < 1 || nuevaPagina > paginacionCorrelativosCalculada.value.totalPaginas) {
+    return false;
+  }
+  
+  paginacionCorrelativos.value.paginaActual = nuevaPagina;
+  
+  const correlativosContainer = document.querySelector('.bg-amber-50');
+  if (correlativosContainer) {
+    correlativosContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  return false;
+};
 
 // ===== FUNCIONES PARA CONFIGURACIONES =====
 const guardarConfiguraciones = async () => {
@@ -3770,6 +4461,7 @@ onMounted(async () => {
       cargarServicios().catch(() => showToastMessage('Error al cargar los servicios', 'error')),
       cargarCiudades().catch(() => showToastMessage('Error al cargar las ciudades', 'error')),
       cargarNotificaciones().catch(() => showToastMessage('Error al cargar las notificaciones', 'error')),
+      cargarCorrelativos().catch(() => showToastMessage('Error al cargar los correlativos', 'error')),
       cargarReferidorPredeterminado().catch(() => showToastMessage('Error al cargar el referidor predeterminado', 'error'))
     ])
   } catch (error) {
