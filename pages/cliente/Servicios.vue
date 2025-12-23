@@ -453,45 +453,22 @@
             @click.stop
           >
             <!-- Encabezado del modal -->
-            <div class="bg-white dark:bg-gray-800 border-b-2 border-gray-900 dark:border-gray-100 p-3">
-              <div class="flex justify-between items-start mb-2"> 
-              </div>
-              
-              <!-- Información de la Empresa -->
-              <div class="text-center mb-3">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-white">HogarSeguro</h2>
-                <p class="text-xs text-gray-600 dark:text-gray-400">Número: XXXX9451</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">correo: XXXXX@gmail.com</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">RTN: XXXXXXXX</p>
-              </div>
-
-              <!-- Información Fiscal -->
-              <div class="border-t border-b border-gray-300 dark:border-gray-600 py-2 mb-2">
-                <div class="grid grid-cols-1 gap-1 text-xs">
-                  <div class="flex justify-between">
-                    <span class="font-semibold text-gray-700 dark:text-gray-300">CAI:</span>
-                    <span class="text-gray-900 dark:text-white">XXXXX-XXXXX-XXXXX-XXXXX-XXXXX</span>
+            <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-base">
+                    💳
                   </div>
-                  <div class="flex justify-between">
-                    <span class="font-semibold text-gray-700 dark:text-gray-300">Rango Autorizado:</span>
-                    <span class="text-gray-900 dark:text-white">000-001-01-00000001 a 000-001-01-00099999</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-semibold text-gray-700 dark:text-gray-300">Fecha Límite Emisión:</span>
-                    <span class="text-gray-900 dark:text-white">31/12/2025</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-semibold text-gray-700 dark:text-gray-300">No. Correlativo:</span>
-                    <span class="text-gray-900 dark:text-white">xxxxxxxxx</span>
-                  </div>
+                  <div>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Visita</h3> 
+                    <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
+                  </div> 
                 </div>
-              </div>
-
-              <!-- Tipo de Documento y Número -->
-              <div class="text-center">
-                <p class="text-sm font-bold text-gray-900 dark:text-white">FACTURA</p> 
-                <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">Fecha: {{ selectedService.date }}</p>
+                <button @click="closeVisitPaymentModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -499,88 +476,39 @@
             <div class="p-3">
               <!-- Service Summary -->
               <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
-                <div class="flex items-center justify-between">
-                  <label class="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      id="factura-con-rtn"
-                      v-model="facturaConRTN"
-                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <span class="text-sm font-bold text-gray-900 dark:text-white">Factura con RTN</span>
-                  </label>
-                </div>
-                
-                <div v-if="facturaConRTN" class="grid grid-cols-1 gap-2 mt-2">
-                  <input
-                    v-model="clienteNombre"
-                    type="text"
-                    placeholder="Nombre del cliente"
-                    class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  />
-                  <div class="grid grid-cols-2 gap-2">
-                    <input
-                      v-model="clienteRTN"
-                      type="text"
-                      placeholder="RTN"
-                      class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                    />
-                    <textarea
-                      v-model="clienteDireccion"
-                      placeholder="Dirección"
-                      rows="1"
-                      class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-none"
-                    ></textarea>
+                <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Pago de la Visita</h4>
+                <div class="flex items-center space-x-2 mb-2">
+                  <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
+                    {{ selectedService.icon }}
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ selectedService.title }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedService.date }}</p>
                   </div>
                 </div>
               </div>
 
-              <!-- Resumen del Servicio -->
-              <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
-                <table class="w-full text-xs">
-                  <thead>
-                    <tr class="border-b border-gray-300 dark:border-gray-600">
-                      <th class="text-left py-1 font-semibold text-gray-900 dark:text-white">Descripción</th>
-                      <th class="text-right py-1 font-semibold text-gray-900 dark:text-white">Precio</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="py-2 text-gray-700 dark:text-gray-300">
-                        <div class="flex items-center space-x-1">
-                          <span>{{ selectedService.icon }}</span>
-                          <span>{{ selectedService.title }}</span>
-                        </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedService.date }}</p>
-                      </td>
-                      <td class="text-right py-2 font-semibold text-gray-900 dark:text-white">L. {{ visitCost }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Totales -->
-              <div class="border-t border-gray-300 dark:border-gray-600 pt-2 mb-3">
-                <div class="space-y-1 text-xs">
-                  <div class="flex justify-between">
-                    <span class="text-gray-700 dark:text-gray-300">Subtotal:</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">L. {{ visitCost }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-700 dark:text-gray-300">ISV (15%):</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">L. 0.00</span>
-                  </div>
-                  <div class="flex justify-between font-bold text-sm border-t border-gray-300 dark:border-gray-600 pt-1">
-                    <span class="text-gray-900 dark:text-white">TOTAL:</span>
-                    <span class="text-gray-900 dark:text-white">L. {{ visitCost }}</span>
+              <!-- Payment Breakdown -->
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg mb-3">
+                <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between items-center">
+                    <span class="text-blue-700 dark:text-blue-300">Visita del Técnico:</span>
+                    <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ visitCost }}</span>
+                  </div> 
+                  <hr class="border-blue-300 dark:border-blue-700">
+                  <div class="flex justify-between items-center">
+                    <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
+                    <span class="font-bold text-blue-800 dark:text-blue-200 text-base">L. {{ visitCost }}</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Método de Pago -->
+              <!-- Cuenta Bancaria -->
               <div class="space-y-2 mb-3">
-                <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Método de Pago:</h4>
-                <p class="text-xs text-gray-700 dark:text-gray-300 mb-2">Transferencia Bancaria</p>
+                <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Transferencia Bancaria
+                </label>
                 <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
                   <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
@@ -655,24 +583,30 @@
                     </div>
                   </div>
 
-                  <!-- Campo para número de comprobante -->
-                  <div v-if="selectedAccount" class="space-y-2">
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Número de Comprobante:
+                  <!-- Input para el número de comprobante -->
+                  <div class="space-y-1">
+                    <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Número de comprobante
                     </label>
                     <input
+                      id="comprobante"
                       v-model="comprobante"
                       type="text"
+                      class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200 text-base"
                       placeholder="Ingresa el número de comprobante"
-                      class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                      :disabled="isProcessingPayment"
-                    />
+                    >
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Realiza la transferencia a la cuenta seleccionada e ingresa el número de comprobante.
+                    </p>
                   </div>
+                </div>
 
+                <!-- Botón de pago -->
+                <div class="mt-4">
                   <button 
                     @click="processVisitPayment"
                     :disabled="!selectedAccount || !comprobante || isProcessingPayment"
-                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-md hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm border border-blue-700 dark:border-blue-600"
+                    class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
                   >
                     <span v-if="!isProcessingPayment">
                       Procesar Pago - L. {{ visitCost }}
@@ -914,32 +848,23 @@
               </div>
 
               <!-- Comprobante -->
-              <div class="space-y-2 mb-3">
-                <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Datos de la Transacción:</h4>
-                <div class="space-y-2">
-                  <div class="relative">
-                    <label for="comprobante" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Número de Comprobante
-                    </label>
-                    <div class="relative">
-                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span class="text-gray-400 text-sm">#</span>
-                      </div>
-                      <input
-                        id="comprobante"
-                        v-model="comprobante"
-                        type="text"
-                        class="w-full pl-6 pr-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-sm text-gray-900 dark:text-white placeholder-gray-400"
-                        placeholder="Ingresa el número de comprobante"
-                      >
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Realiza la transferencia e ingresa el número de comprobante.
-                    </p>
-                  </div>
-                </div>
+              <div class="space-y-1">
+                <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Número de comprobante
+                </label>
+                <input
+                  id="comprobante"
+                  v-model="comprobante"
+                  type="text"
+                  class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200
+                         dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500
+                         text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200 text-base"
+                  placeholder="Ingresa el número de comprobante"
+                >
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Realiza la transferencia e ingresa el número de comprobante.
+                </p>
               </div>
-
             </div>
 
             <!-- Botón -->
@@ -1994,13 +1919,6 @@ const isProcessingVisitPayment = ref(false) // Estado para el procesamiento del 
 const membresiaProgreso = ref(null)
 const isLoadingMembresia = ref(false)
 const visitCost = ref(0)
-
-// Variables para datos del cliente
-const facturaConRTN = ref(false)
-const clienteNombre = ref('')
-const clienteRTN = ref('')
-const clienteDireccion = ref('')
-
 const toast = ref({
   show: false,
   message: '',
