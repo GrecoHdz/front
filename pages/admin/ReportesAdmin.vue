@@ -161,6 +161,13 @@
           Ver Servicio
         </button>
         <button
+          v-if="selectedPayment.estado === 'aprobado' || selectedPayment.estado === 'Aprobado'"
+          @click="openFacturaModal(selectedPayment)"
+          class="px-3 py-2 font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+        >
+          Mostrar Factura
+        </button>
+        <button
           v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente' || selectedPayment.estado === 'pagado'"
           @click="rejectPayment(selectedPayment.id)"
           class="px-3 py-2 font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
@@ -322,6 +329,235 @@
   </div>
 </Transition>
 
+<!-- Modal de Factura -->
+<Transition
+  name="modal"
+  enter-active-class="modal-enter-active"
+  leave-active-class="modal-leave-active"
+  enter-from-class="modal-enter-from"
+  leave-to-class="modal-leave-to"
+>
+  <div
+    v-if="showFacturaModal && selectedFacturaPayment"
+    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+  >
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeFacturaModal"></div>
+
+    <div
+      class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[90%] sm:w-full max-w-md max-h-[85vh] overflow-y-auto relative z-10 text-[12px] sm:text-xs md:text-base"
+    >
+      <!-- Header -->
+      <div
+        class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl z-10"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2 sm:space-x-3">
+            <div
+              class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-black text-gray-900 dark:text-white">Factura</h3>
+              <p class="text-gray-600 dark:text-gray-400">ID: #{{ selectedFacturaPayment.id || 'N/A' }}</p>
+            </div>
+          </div>
+          <button
+            @click="closeFacturaModal"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-3 sm:p-4">
+        <!-- Información de la Empresa -->
+        <div class="text-center mb-3">
+          <h2 class="text-lg font-bold text-gray-900 dark:text-white">HogarSeguro</h2>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Número: XXXX9451</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Correo: XXXXX@gmail.com</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">RTN: XXXX-XXXX-XXXXXX</p>
+        </div>
+
+        <!-- Información Fiscal -->
+        <div class="border-t border-b border-gray-300 dark:border-gray-600 py-2 mb-2">
+          <div class="grid grid-cols-1 gap-1 text-xs">
+            <div class="flex justify-between">
+              <span class="font-semibold text-gray-700 dark:text-gray-300">CAI:</span>
+              <span class="text-gray-900 dark:text-white">XXXXX-XXXXX-XXXXX-XXXXX-XXXXX</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-semibold text-gray-700 dark:text-gray-300">Rango Autorizado:</span>
+              <span class="text-gray-900 dark:text-white">000-001-01-00000001 a 000-001-01-00099999</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-semibold text-gray-700 dark:text-gray-300">Fecha Límite Emisión:</span>
+              <span class="text-gray-900 dark:text-white">31/12/2025</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-semibold text-gray-700 dark:text-gray-300">Número Correlativo:</span>
+              <span class="text-gray-900 dark:text-white">xxxxxxxxx</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tipo de Documento y Número -->
+        <div class="text-center mb-3">
+          <p class="text-sm font-bold text-gray-900 dark:text-white">FACTURA</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedFacturaPayment.fecha) }}-{{ selectedFacturaPayment.id }}</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
+        </div>
+
+        <!-- Información del Cliente -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
+          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Información del Cliente</h4>
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between">
+              <span class="text-gray-700 dark:text-gray-300">Nombre:</span>
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ selectedFacturaPayment.cliente?.nombre || selectedFacturaPayment.solicitud?.cliente?.nombre || selectedFacturaPayment.usuario?.nombre || 'N/A' }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-700 dark:text-gray-300">RTN:</span>
+              <span class="font-medium text-gray-900 dark:text-white">N/A</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalles del Servicio -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
+          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Detalles del Servicio</h4>
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="border-b border-gray-300 dark:border-gray-600">
+                <th class="text-left py-1 font-semibold text-gray-900 dark:text-white">Descripción</th>
+                <th class="text-right py-1 font-semibold text-gray-900 dark:text-white">Precio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="py-2 text-gray-700 dark:text-gray-300">
+                  <div>Pago de Servicio</div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(selectedFacturaPayment.fecha) }}</p>
+                </td>
+                <td class="text-right py-2 font-semibold text-gray-900 dark:text-white">
+                  {{ formatCurrency(selectedFacturaPayment.amount || selectedFacturaPayment.monto || 0) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totales -->
+        <div class="border-t border-gray-300 dark:border-gray-600 pt-2 mb-3">
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between">
+              <span class="text-gray-700 dark:text-gray-300">Subtotal:</span>
+              <span class="font-semibold text-gray-900 dark:text-white">
+                {{ formatCurrency(selectedFacturaPayment.amount || selectedFacturaPayment.monto || 0) }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-700 dark:text-gray-300">ISV (15%):</span>
+              <span class="font-semibold text-gray-900 dark:text-white">L. 0.00</span>
+            </div>
+            <div class="flex justify-between font-bold text-sm border-t border-gray-300 dark:border-gray-600 pt-1">
+              <span class="text-gray-900 dark:text-white">TOTAL:</span>
+              <span class="text-gray-900 dark:text-white">
+                {{ formatCurrency(selectedFacturaPayment.amount || selectedFacturaPayment.monto || 0) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Método de Pago -->
+        <div class="space-y-2 mb-3">
+          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Método de Pago:</h4>
+          <p class="text-xs text-gray-700 dark:text-gray-300 mb-2">Transferencia Bancaria</p>
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
+            <div class="space-y-1 text-xs">
+              <div class="flex justify-between">
+                <span class="text-gray-700 dark:text-gray-300">Banco:</span>
+                <span class="font-medium text-gray-900 dark:text-white">
+                  {{ selectedFacturaPayment.cuenta?.banco || 'No especificado' }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-700 dark:text-gray-300">Número de Cuenta:</span>
+                <span class="font-medium text-gray-900 dark:text-white">
+                  {{ selectedFacturaPayment.cuenta?.num_cuenta || 'N/A' }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-700 dark:text-gray-300">Beneficiario:</span>
+                <span class="font-medium text-gray-900 dark:text-white">
+                  {{ selectedFacturaPayment.cuenta?.beneficiario || 'N/A' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comprobante -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
+          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Comprobante de Pago</h4>
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between">
+              <span class="text-gray-700 dark:text-gray-300">Número:</span>
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ selectedFacturaPayment.num_comprobante || 'No especificado' }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-700 dark:text-gray-300">Estado:</span>
+              <span
+                :class="getStatusBadgeClass(selectedFacturaPayment.estado)"
+                class="inline-flex items-center px-2 py-0.5 rounded-full font-medium"
+              >
+                {{ selectedFacturaPayment.estado || 'Pendiente' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div
+        class="sticky bottom-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end rounded-b-xl sm:rounded-b-2xl"
+      >
+        <button
+          @click="closeFacturaModal"
+          class="px-3 py-2 font-medium text-gray-700 bg-gray-200 border border-transparent rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</Transition>
 
     <!-- Service Detail Modal -->
     <Transition
@@ -1006,8 +1242,10 @@ const selectedMonthReports = ref(new Date().toISOString().slice(0, 7));
 const statusFilter = ref('all');
 const showDetailsModal = ref(false);
 const showWithdrawalModal = ref(false);
+const showFacturaModal = ref(false);
 const selectedPayment = ref(null);
 const selectedWithdrawal = ref(null);
+const selectedFacturaPayment = ref(null);
 const showServiceDetailModal = ref(false);
 const selectedService = ref(null);
 const initialStats = ref({
@@ -1115,6 +1353,19 @@ const formatDate = (dateString) => {
   } catch (error) {
     console.error('Error formateando fecha:', error);
     return 'Fecha inválida';
+  }
+};
+
+const formatDateDDMMYY = (dateString) => {
+  try {
+    const date = dateString ? new Date(dateString) : new Date();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
+    return `${day}${month}${year}`;
+  } catch (error) {
+    console.error('Error formateando fecha DDMMYY:', error);
+    return 'FechaInválida';
   }
 };
 
@@ -2469,6 +2720,25 @@ const closeDetailsModal = () => {
     selectedPayment.value = null;
   } catch (error) {
     console.error('Error cerrando modal:', error);
+  }
+};
+
+const openFacturaModal = (payment) => {
+  try {
+    if (!payment) return;
+    selectedFacturaPayment.value = payment;
+    showFacturaModal.value = true;
+  } catch (error) {
+    console.error('Error abriendo modal de factura:', error);
+  }
+};
+
+const closeFacturaModal = () => {
+  try {
+    showFacturaModal.value = false;
+    selectedFacturaPayment.value = null;
+  } catch (error) {
+    console.error('Error cerrando modal de factura:', error);
   }
 };
 

@@ -176,6 +176,18 @@
                 placeholder="99866626">
             </div>
 
+            <!-- RTN -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                RTN de Empresa
+              </label>
+              <input
+                v-model="configuracionRTN"
+                type="text"
+                class="w-full px-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                placeholder="XXXX-XXXX-XXXXXX">
+            </div>
+
             <!-- Email -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -2104,6 +2116,7 @@ const configuracionVisita = ref(0)
 const configuracionComision = ref(0)
 const configuracionTelefono = ref('')
 const configuracionEmail = ref('')
+const configuracionRTN = ref('')
 const configuracionDescuento = ref(0)
 const configuracionReferido = ref(0)
 const configuracionRetiro = ref(0)
@@ -2322,6 +2335,7 @@ const hayChanges = computed(() => {
          configuracionTelefono.value !== valoresOriginales.value.numero_empresa ||
          configuracionDiasGracia.value !== valoresOriginales.value.dias_gracia ||
          configuracionEmail.value !== valoresOriginales.value.correo_empresa ||
+         configuracionRTN.value !== valoresOriginales.value.rtn ||
          configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento ||
          configuracionReferido.value !== valoresOriginales.value.porcentaje_referido ||
          configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro ||
@@ -3434,6 +3448,14 @@ const guardarConfiguraciones = async () => {
       })
     }
     
+    if (configuracionRTN.value !== valoresOriginales.value.rtn) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'rtn')?.id_config,
+        tipo_config: 'rtn',
+        valor: configuracionRTN.value
+      })
+    }
+    
     if (configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_descuento')?.id_config,
@@ -3570,6 +3592,9 @@ const cargarConfiguraciones = async () => {
           case 'correo_empresa':
             configuracionEmail.value = item.valor?.toString() || '';
             break;
+          case 'rtn':
+            configuracionRTN.value = item.valor?.toString() || '';
+            break;
           case 'porcentaje_descuento':
             configuracionDescuento.value = Number(item.valor) || 0;
             break;
@@ -3597,6 +3622,7 @@ const cargarConfiguraciones = async () => {
         comision_por_servicio: configuracionComision.value,
         numero_empresa: configuracionTelefono.value,
         correo_empresa: configuracionEmail.value,
+        rtn: configuracionRTN.value,
         porcentaje_descuento: configuracionDescuento.value,
         porcentaje_referido: configuracionReferido.value,
         porcentaje_retiro: configuracionRetiro.value,
