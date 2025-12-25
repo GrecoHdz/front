@@ -15,8 +15,7 @@
 
     <!-- Loading Spinner -->
     <LoadingSpinner 
-      :loading="isLoading" 
-      :message="'Cargando configuraciones...'"
+      :loading="isLoading"  
     />
 
     <!-- Contenido Principal -->
@@ -1042,8 +1041,8 @@
               </h5>
               <p class="text-[12px] sm:text-xs md:text-base text-gray-500 dark:text-gray-400">
                 Rango: {{ correlativo.rango_inicio }} - {{ correlativo.rango_fin }} • 
-                Actual: {{ correlativo.correlativo_actual || correlativo.rango_inicio - 1 }}
-              </p>
+                Actual: {{ correlativo.prefijo }}{{ (correlativo.correlativo_actual || correlativo.rango_inicio).toString().padStart(8, '0') }}
+              </p> 
               <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Válido hasta: {{ formatDate(correlativo.fecha_vencimiento) }} • 
                 <span :class="{
@@ -1902,12 +1901,13 @@
 
           <!-- Formulario -->
           <div class="p-6">
-            <form @submit.prevent="guardarCorrelativo" class="space-y-4">
+            <form @submit.prevent="guardarCorrelativo" @submit="checkFormValidity" class="space-y-4">
+
               <!-- CAI -->
               <div>
                 <label for="cai" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   CAI <span class="text-red-500">*</span>
-                  <span class="text-xs text-gray-500 ml-2">(37 caracteres máximo)</span>
+                  <span class="text-xs text-gray-500 ml-2">(Incluye guiones -)</span>
                 </label>
                 <input
                   id="cai"
@@ -1922,6 +1922,28 @@
                 >
                 <p v-if="correlativoForm.cai && correlativoForm.cai.length !== 37" class="text-xs text-red-500 mt-1">
                   El CAI debe tener máximo 37 caracteres (actual: {{ correlativoForm.cai.length }})
+                </p>
+              </div>
+
+              <!-- Prefijo -->
+              <div>
+                <label for="prefijo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Prefijo <span class="text-red-500">*</span>
+                  <span class="text-xs text-gray-500 ml-2">(Formato: xxx-xxx-xx-)</span>
+                </label>
+                <input
+                  id="prefijo"
+                  v-model="correlativoForm.prefijo"
+                  type="text"
+                  required
+                  maxlength="12"
+                  pattern="[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{2}-"
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: ABC-123-XY-"
+                  :disabled="guardandoCorrelativo"
+                >
+                <p v-if="correlativoForm.prefijo && !/^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{2}-$/.test(correlativoForm.prefijo)" class="text-xs text-red-500 mt-1">
+                  El prefijo debe tener el formato xxx-xxx-xx-
                 </p>
               </div>
 
@@ -1940,6 +1962,9 @@
                   placeholder="Número inicial del rango"
                   :disabled="guardandoCorrelativo"
                 >
+                <p v-if="correlativoForm.rango_inicio && correlativoForm.rango_fin && correlativoForm.rango_inicio >= correlativoForm.rango_fin" class="text-xs text-red-500 mt-1">
+                  El rango inicial debe ser menor al rango final
+                </p>
               </div>
 
               <!-- Rango Fin -->
@@ -1957,6 +1982,9 @@
                   placeholder="Número final del rango"
                   :disabled="guardandoCorrelativo"
                 >
+                <p v-if="correlativoForm.rango_fin && correlativoForm.rango_inicio && correlativoForm.rango_fin <= correlativoForm.rango_inicio" class="text-xs text-red-500 mt-1">
+                  El rango final debe ser mayor al rango inicial
+                </p>
               </div>
 
               <!-- Fecha de Autorización -->
@@ -1972,6 +2000,9 @@
                   class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
                   :disabled="guardandoCorrelativo"
                 >
+                <p v-if="correlativoForm.fecha_autorizacion && correlativoForm.fecha_vencimiento && correlativoForm.fecha_autorizacion !== '' && correlativoForm.fecha_vencimiento !== '' && new Date(correlativoForm.fecha_autorizacion) >= new Date(correlativoForm.fecha_vencimiento)" class="text-xs text-red-500 mt-1">
+                  La fecha de autorización debe ser anterior a la fecha de vencimiento
+                </p>
               </div>
 
               <!-- Fecha de Vencimiento -->
@@ -1987,6 +2018,9 @@
                   class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
                   :disabled="guardandoCorrelativo"
                 >
+                <p v-if="correlativoForm.fecha_vencimiento && correlativoForm.fecha_autorizacion && correlativoForm.fecha_vencimiento !== '' && correlativoForm.fecha_autorizacion !== '' && new Date(correlativoForm.fecha_vencimiento) <= new Date(correlativoForm.fecha_autorizacion)" class="text-xs text-red-500 mt-1">
+                  La fecha de vencimiento debe ser posterior a la fecha de autorización
+                </p>
               </div>
 
               <!-- Estado (solo para edición) -->
@@ -2019,8 +2053,9 @@
                 </button>
                 <button
                   type="submit"
-                  class="flex-1 py-2 px-4 bg-pink-500 text-white font-medium text-sm rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center"
+                  class="flex-1 py-2 px-4 bg-pink-500 text-white font-medium text-sm rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-pink-500"
                   :disabled="guardandoCorrelativo || !esFormularioCorrelativoValido"
+                  @click="!esFormularioCorrelativoValido || guardandoCorrelativo ? $event.preventDefault() : null"
                 >
                   <div v-if="guardandoCorrelativo" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   {{ guardandoCorrelativo ? 'Guardando...' : (correlativoEditando ? 'Actualizar' : 'Crear') }}
@@ -2263,8 +2298,9 @@ const mostrarModalCorrelativo = ref(false);
 const guardandoCorrelativo = ref(false);
 const correlativoForm = ref({
   cai: '',
-  rango_inicio: 1,
-  rango_fin: 1000,
+  prefijo: '',
+  rango_inicio: 0,
+  rango_fin: 0,
   fecha_autorizacion: '',
   fecha_vencimiento: '',
   estado: 'ACTIVO'
@@ -2636,13 +2672,35 @@ const correlativosPaginados = computed(() => {
 
 // Validación del formulario de correlativo
 const esFormularioCorrelativoValido = computed(() => {
-  return correlativoForm.value.cai.trim() !== '' &&
+  // Verificar que los campos básicos no estén vacíos
+  const camposBasicosValidos = correlativoForm.value.cai.trim() !== '' &&
          correlativoForm.value.cai.length === 37 &&
+         correlativoForm.value.prefijo.trim() !== '' &&
+         /^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{2}-$/.test(correlativoForm.value.prefijo) &&
          correlativoForm.value.rango_inicio > 0 &&
          correlativoForm.value.rango_fin > 0 &&
          correlativoForm.value.rango_inicio < correlativoForm.value.rango_fin &&
          correlativoForm.value.fecha_autorizacion !== '' &&
-         correlativoForm.value.fecha_vencimiento !== ''
+         correlativoForm.value.fecha_vencimiento !== '';
+
+  // Si los campos básicos no son válidos, retornar false inmediatamente
+  if (!camposBasicosValidos) return false;
+
+  // Validar fechas solo si los campos básicos son válidos
+  try {
+    const fechaAutorizacion = new Date(correlativoForm.value.fecha_autorizacion);
+    const fechaVencimiento = new Date(correlativoForm.value.fecha_vencimiento);
+    
+    // Verificar que las fechas sean válidas
+    if (isNaN(fechaAutorizacion.getTime()) || isNaN(fechaVencimiento.getTime())) {
+      return false;
+    }
+    
+    // Verificar que la fecha de autorización sea anterior a la de vencimiento
+    return fechaAutorizacion < fechaVencimiento;
+  } catch (error) {
+    return false;
+  }
 })
 
 // Helper function for correlativo estado labels
@@ -3229,6 +3287,15 @@ const cerrarModalCorrelativo = () => {
   correlativoEditando.value = null;
 };
 
+const checkFormValidity = (event) => {
+  if (!esFormularioCorrelativoValido.value || guardandoCorrelativo.value) {
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
+  }
+  return true;
+};
+
 const inicializarFormularioCorrelativo = () => {
   if (correlativoEditando.value) {
     // Formatear fechas para el input type="date"
@@ -3246,10 +3313,11 @@ const inicializarFormularioCorrelativo = () => {
   } else {
     correlativoForm.value = {
       cai: '',
-      rango_inicio: 1,
-      rango_fin: 1000,
-      fecha_autorizacion: new Date().toISOString().split('T')[0],
-      fecha_vencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      prefijo: '',
+      rango_inicio: 0,
+      rango_fin: 0,
+      fecha_autorizacion: '',
+      fecha_vencimiento: '',
       estado: 'ACTIVO'
     };
   }
@@ -3257,11 +3325,24 @@ const inicializarFormularioCorrelativo = () => {
 
 const guardarCorrelativo = async () => {
   try {
+    // Protección adicional: no ejecutar si ya está guardando o el formulario no es válido
+    if (guardandoCorrelativo.value || !esFormularioCorrelativoValido.value) {
+      return;
+    }
+    
     guardandoCorrelativo.value = true;
     
     // Validaciones
     if (!correlativoForm.value.cai) {
       throw new Error('El CAI es requerido');
+    }
+    
+    if (!correlativoForm.value.prefijo) {
+      throw new Error('El prefijo es requerido');
+    }
+    
+    if (!/^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{2}-$/.test(correlativoForm.value.prefijo)) {
+      throw new Error('El prefijo debe tener el formato xxx-xxx-xx-');
     }
     
     if (correlativoForm.value.rango_inicio >= correlativoForm.value.rango_fin) {

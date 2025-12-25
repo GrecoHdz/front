@@ -161,7 +161,7 @@
           Ver Servicio
         </button>
         <button
-          v-if="selectedPayment.estado === 'aprobado' || selectedPayment.estado === 'Aprobado'"
+          v-if="selectedPayment.estado === 'Aprobado' || selectedPayment.estado === 'confirmado' || selectedPayment.estado === 'aprobado'"
           @click="openFacturaModal(selectedPayment)"
           class="px-3 py-2 font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
         >
@@ -395,10 +395,10 @@
       <div class="p-3 sm:p-4">
         <!-- Información de la Empresa -->
         <div class="text-center mb-3">
-          <h2 class="text-lg font-bold text-gray-900 dark:text-white">HogarSeguro</h2>
-          <p class="text-xs text-gray-600 dark:text-gray-400">Número: XXXX9451</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">Correo: XXXXX@gmail.com</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">RTN: XXXX-XXXX-XXXXXX</p>
+          <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ empresaNombre || 'HogarSeguro' }}</h2>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Número: {{ empresaTelefono }}</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">RTN: {{ empresaRTN }}</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Correo: {{ empresaEmail }}</p>
         </div>
 
         <!-- Información Fiscal -->
@@ -406,19 +406,19 @@
           <div class="grid grid-cols-1 gap-1 text-xs">
             <div class="flex justify-between">
               <span class="font-semibold text-gray-700 dark:text-gray-300">CAI:</span>
-              <span class="text-gray-900 dark:text-white">XXXXX-XXXXX-XXXXX-XXXXX-XXXXX</span>
+              <span class="text-gray-900 dark:text-white">{{ empresaCAI }}</span>
             </div>
             <div class="flex justify-between">
               <span class="font-semibold text-gray-700 dark:text-gray-300">Rango Autorizado:</span>
-              <span class="text-gray-900 dark:text-white">000-001-01-00000001 a 000-001-01-00099999</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="font-semibold text-gray-700 dark:text-gray-300">Fecha Límite Emisión:</span>
-              <span class="text-gray-900 dark:text-white">31/12/2025</span>
+              <span class="text-gray-900 dark:text-white">{{ empresaRangoAutorizado }}</span>
             </div>
             <div class="flex justify-between">
               <span class="font-semibold text-gray-700 dark:text-gray-300">Número Correlativo:</span>
-              <span class="text-gray-900 dark:text-white">xxxxxxxxx</span>
+              <span class="text-gray-900 dark:text-white">{{ empresaCorrelativo }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-semibold text-gray-700 dark:text-gray-300">Fecha Límite Emisión:</span>
+              <span class="text-gray-900 dark:text-white">{{ empresaFechaLimite }}</span>
             </div>
           </div>
         </div>
@@ -442,7 +442,7 @@
             </div>
             <div class="flex justify-between">
               <span class="text-gray-700 dark:text-gray-300">RTN:</span>
-              <span class="font-medium text-gray-900 dark:text-white">N/A</span>
+              <span class="font-medium text-gray-900 dark:text-white">{{ selectedFacturaPayment.rtn_cliente || 'N/A' }}</span>
             </div>
           </div>
         </div>
@@ -460,11 +460,14 @@
             <tbody>
               <tr>
                 <td class="py-2 text-gray-700 dark:text-gray-300">
-                  <div>Pago de Servicio</div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(selectedFacturaPayment.fecha) }}</p>
+                  <div>
+                    {{ selectedFacturaPayment.id_membresia ? 'Pago de Membresía' : 
+                       selectedFacturaPayment.id_visita ? 'Pago de Visita Técnica' : 
+                       selectedFacturaPayment.id_servicio ? 'Pago por Servicio' : 'Pago de Servicio' }}
+                  </div> 
                 </td>
                 <td class="text-right py-2 font-semibold text-gray-900 dark:text-white">
-                  {{ formatCurrency(selectedFacturaPayment.amount || selectedFacturaPayment.monto || 0) }}
+                  {{ formatCurrency(selectedFacturaPayment.subtotal || 0) }}
                 </td>
               </tr>
             </tbody>
@@ -477,17 +480,19 @@
             <div class="flex justify-between">
               <span class="text-gray-700 dark:text-gray-300">Subtotal:</span>
               <span class="font-semibold text-gray-900 dark:text-white">
-                {{ formatCurrency(selectedFacturaPayment.amount || selectedFacturaPayment.monto || 0) }}
+                {{ formatCurrency(selectedFacturaPayment.subtotal || 0) }}
               </span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-700 dark:text-gray-300">ISV (15%):</span>
-              <span class="font-semibold text-gray-900 dark:text-white">L. 0.00</span>
+              <span class="font-semibold text-gray-900 dark:text-white">
+                {{ formatCurrency(selectedFacturaPayment.isv || 0) }}
+              </span>
             </div>
             <div class="flex justify-between font-bold text-sm border-t border-gray-300 dark:border-gray-600 pt-1">
               <span class="text-gray-900 dark:text-white">TOTAL:</span>
               <span class="text-gray-900 dark:text-white">
-                {{ formatCurrency(selectedFacturaPayment.amount || selectedFacturaPayment.monto || 0) }}
+                {{ formatCurrency(selectedFacturaPayment.total || 0) }}
               </span>
             </div>
           </div>
@@ -1228,6 +1233,17 @@ const isLoadingTransactions = ref(false);
 const selectedChart = ref('earnings');
 const selectedChartObject = ref(null);
 
+// Variables de datos de empresa
+const empresaNombre = ref('HogarSeguro');
+const empresaTelefono = ref('XXXX9451');
+const empresaEmail = ref('XXXXX@gmail.com');
+const empresaRTN = ref('XXXX-XXXX-XXXXXX');
+const configuracionRTN = ref('')
+const empresaCAI = ref('');
+const empresaRangoAutorizado = ref('');
+const empresaFechaLimite = ref('');
+const empresaCorrelativo = ref('');
+
 // Inicializar selectedChartObject con la primera opción
 const initializeChartObject = () => {
   if (availableCharts.length > 0) {
@@ -1323,6 +1339,53 @@ const toast = reactive({
 });
 
 // ===== FUNCIONES DE UTILIDAD =====
+const loadEmpresaConfig = async () => {
+  try {
+    // Obtener configuraciones básicas de la empresa
+    const [telefonoRes, emailRes, rtnRes] = await Promise.all([
+      $api('/config/valor/numero_empresa', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      }),
+      $api('/config/valor/correo_empresa', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      }),
+      $api('/config/valor/rtn', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      })
+    ]);
+
+    // Asignar valores si existen las respuestas
+    if (telefonoRes?.valor) {
+      empresaTelefono.value = telefonoRes.valor.toString();
+    }
+    if (emailRes?.valor) {
+      empresaEmail.value = emailRes.valor.toString();
+    }
+    if (rtnRes?.valor) {
+      empresaRTN.value = rtnRes.valor.toString();
+    }
+
+  } catch (error) {
+    console.error('Error cargando configuración de empresa:', error);
+    // Mantener valores por defecto si hay error
+  }
+};
+
 const formatCurrency = (value) => {
   try {
     if (value === undefined || value === null || isNaN(value)) return 'L. 0.00';
@@ -2723,13 +2786,124 @@ const closeDetailsModal = () => {
   }
 };
 
-const openFacturaModal = (payment) => {
+const openFacturaModal = async (payment) => {
   try {
-    if (!payment) return;
+    if (!payment) {
+      console.error('No se proporcionó un pago');
+      return;
+    }
+
     selectedFacturaPayment.value = payment;
     showFacturaModal.value = true;
+
+    // Si no tiene id_factura, intentar buscar por el ID del pago
+    if (!payment.id_factura && (payment.id_cotizacion || payment.id_membresia || payment.id_pagovisita)) {
+      try {
+        const params = new URLSearchParams();
+        if (payment.id_cotizacion) params.append('id_cotizacion', payment.id_cotizacion);
+        if (payment.id_membresia) params.append('id_membresia', payment.id_membresia);
+        if (payment.id_pagovisita) params.append('id_pagovisita', payment.id_pagovisita);
+
+        console.log('Buscando factura por pago con parámetros:', params.toString());
+
+        const response = await $api(`/facturas/relaciones/idpago?${params.toString()}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+
+        console.log('Respuesta de búsqueda por pago:', JSON.stringify(response, null, 2));
+
+        if (response?.status === 'success' && response.factura) {
+          const factura = response.factura;
+          const correlativo = response.correlativo;
+          console.log('Datos de la factura encontrados:', factura);
+          console.log('Datos del correlativo encontrados:', correlativo);
+          
+          // Actualizar variables de datos fiscales con los datos de la factura
+          if (factura.cai) empresaCAI.value = factura.cai;
+          if (factura.numero_factura_correlativo) empresaCorrelativo.value = factura.numero_factura_correlativo;
+          
+          // Actualizar con datos del correlativo
+          if (correlativo) {
+            if (correlativo.rango_autorizado) empresaRangoAutorizado.value = correlativo.rango_autorizado;
+            if (correlativo.fecha_limite_emision) empresaFechaLimite.value = correlativo.fecha_limite_emision;
+          }
+          
+          // Actualizar RTN del cliente en selectedFacturaPayment
+          if (factura.rtn_cliente) selectedFacturaPayment.value.rtn_cliente = factura.rtn_cliente;
+          
+          // Actualizar datos financieros en selectedFacturaPayment
+          if (factura.subtotal) selectedFacturaPayment.value.subtotal = factura.subtotal;
+          if (factura.isv) selectedFacturaPayment.value.isv = factura.isv;
+          if (factura.total) selectedFacturaPayment.value.total = factura.total;
+          
+          console.log('Datos actualizados - CAI:', empresaCAI.value, 'Correlativo:', empresaCorrelativo.value, 'Rango:', empresaRangoAutorizado.value, 'Fecha límite:', empresaFechaLimite.value);
+        } else {
+          console.warn('No se encontró factura asociada al pago:', response);
+        }
+      } catch (error) {
+        console.warn('No se pudo cargar la factura asociada al pago:', error);
+        if (error.response) {
+          console.error('Detalles del error:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers
+          });
+        }
+      }
+    } else if (payment.id_factura) {
+      // Obtener datos de la factura específica si hay un ID
+      try {
+        console.log('Solicitando factura con ID:', payment.id_factura);
+        console.log('URL de la API:', `${config.public.apiBase}/facturas/${payment.id_factura}`);
+        
+        const response = await $api(`/facturas/${payment.id_factura}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+
+        console.log('Respuesta del servidor:', JSON.stringify(response, null, 2));
+
+        if (response?.status === 'success' && response.factura) {
+          const factura = response.factura;
+          console.log('Datos de la factura recibidos:', factura);
+          
+          // Actualizar variables de datos fiscales con los datos de la factura
+          if (factura.cai) empresaCAI.value = factura.cai;
+          if (factura.numero_factura_correlativo) empresaCorrelativo.value = factura.numero_factura_correlativo;
+          
+          console.log('Datos actualizados - CAI:', empresaCAI.value, 'Correlativo:', empresaCorrelativo.value);
+        } else {
+          console.warn('La respuesta no contiene datos de factura válidos:', response);
+        }
+      } catch (error) {
+        console.error('Error obteniendo datos de factura:', error);
+        if (error.response) {
+          console.error('Detalles del error:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers
+          });
+        } else if (error.request) {
+          console.error('No se recibió respuesta del servidor:', error.request);
+        } else {
+          console.error('Error al configurar la solicitud:', error.message);
+        }
+      }
+    } else {
+      console.warn('No se proporcionó un ID de factura en el pago ni IDs de pago asociados:', payment);
+    }
+    
   } catch (error) {
-    console.error('Error abriendo modal de factura:', error);
+    console.error('Error inesperado al abrir el modal de factura:', error);
   }
 };
 
@@ -4075,6 +4249,137 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
   });
 };
 
+// ===== FUNCIONES DE CREACIÓN DE FACTURAS =====
+const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado, idCotizacion = null) => {
+  console.log('🚀 INICIO - crearFacturaParaPago');
+  console.log('📋 Datos iniciales:', {
+    idUsuario,
+    tipoPago,
+    idRelacionado,
+    idCotizacion,
+    paymentData: payment
+  });
+
+  try {
+    const config = useRuntimeConfig();
+    const auth = useAuthStore();
+
+    console.log('🔍 Paso 1: Verificando RTN del usuario...');
+    // Verificar si el usuario tiene RTN
+    let rtnResponse;
+    try {
+      console.log(`📡 Haciendo petición a: /usuarios/verificar-rtn/${idUsuario}`);
+      rtnResponse = await $api(`/usuarios/verificar-rtn/${idUsuario}`, {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      });
+      console.log('✅ Respuesta RTN exitosa:', rtnResponse);
+    } catch (error) {
+      console.log(' Error al verificar RTN:', error);
+      console.log(' Usuario no tiene RTN o error al verificar:', error);
+      rtnResponse = { success: false };
+    }
+
+    console.log(' Paso 2: Calculando montos de factura...');
+    // Preparar datos de la factura - payment.monto_total es el total pagado
+    const total = parseFloat(payment.monto_total || payment.monto || 0);
+    const subtotal = total / 1.15; // Subtotal = Total / 1.15 (para revertir el 15% de ISV)
+    const isv = total - subtotal; // ISV = Total - Subtotal
+
+    console.log(' Montos calculados:', {
+      totalPagado: total,
+      subtotal,
+      isv,
+      porcentajeISV: '15%',
+      fuenteDatos: payment.monto_total ? 'monto_total' : payment.monto ? 'monto' : 'default 0'
+    });
+
+    console.log(' Paso 3: Preparando datos de factura...');
+    let facturaData = {
+      tipo_factura: rtnResponse?.success ? 'CON_RTN' : 'CONSUMIDOR_FINAL',
+      subtotal,
+      isv,
+      total
+    };
+
+    console.log('🔍 Tipo de factura determinado:', facturaData.tipo_factura);
+
+    // Agregar datos específicos según tipo de factura
+    if (rtnResponse?.success && rtnResponse.data) {
+      facturaData.rtn_cliente = rtnResponse.data.rtn;
+      facturaData.nombre_cliente = rtnResponse.data.nombre.trim();
+      console.log('📋 Datos de cliente con RTN:', {
+        rtn: rtnResponse.data.rtn,
+        nombre: rtnResponse.data.nombre.trim()
+      });
+    } else {
+      console.log('📋 Factura como consumidor final (sin RTN)');
+    }
+
+    console.log('🔗 Paso 4: Agregando IDs relacionados...');
+    // Agregar ID relacionado según tipo de pago
+    switch (tipoPago) {
+      case 'membership':
+        facturaData.id_membresia = idRelacionado;
+        console.log('📋 ID membresía agregado:', idRelacionado);
+        break;
+      case 'visits':
+        facturaData.id_pagovisita = idRelacionado;
+        console.log('📋 ID pago visita agregado:', idRelacionado);
+        if (idCotizacion) {
+          facturaData.id_cotizacion = idCotizacion;
+          console.log('📋 ID cotización agregado:', idCotizacion);
+        }
+        break;
+      case 'services':
+        facturaData.id_cotizacion = idCotizacion || idRelacionado;
+        console.log('📋 ID cotización servicio agregado:', idCotizacion || idRelacionado);
+        break;
+    }
+
+    console.log('📦 Datos finales de factura:', facturaData);
+
+    console.log('📡 Paso 5: Enviando petición POST a /facturas...');
+    // Crear la factura
+    const facturaResponse = await $api('/facturas', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: facturaData
+    });
+
+    console.log('📬 Respuesta de creación de factura:', facturaResponse);
+
+    if (facturaResponse?.status === 'success') {
+      console.log(`✅ Factura creada exitosamente para ${tipoPago}:`, facturaResponse.data);
+      showToast(`Factura ${facturaData.tipo_factura === 'CON_RTN' ? 'con RTN' : 'consumidor final'} creada correctamente`, 'success');
+    } else {
+      throw new Error('Error al crear la factura');
+    }
+
+    console.log('🎉 FIN - crearFacturaParaPago completado exitosamente');
+
+  } catch (error) {
+    console.error('❌ ERROR en crearFacturaParaPago:', error);
+    console.error('📋 Detalles del error:', {
+      message: error.message,
+      response: error.response?._data,
+      stack: error.stack
+    });
+    showToast('Error al crear la factura: ' + (error.response?._data?.message || error.message), 'error');
+    // No interrumpir el flujo principal si falla la creación de factura
+    console.log('⚠️ Continuando con el flujo principal a pesar del error...');
+  }
+};
+
 // ===== FUNCIONES DE APROBACION o RECHAZO DE PAGOS =====
 const approvePayment = async (id) => {
   try {
@@ -4120,7 +4425,6 @@ const approvePayment = async (id) => {
         });
 
         // Add credit for the user with the membership amount
-
         const creditRequestBody = {
           id_usuario: idUsuario,
           monto_credito: payment.monto
@@ -4135,7 +4439,10 @@ const approvePayment = async (id) => {
             'Authorization': `Bearer ${auth.token}`
           },
           body: creditRequestBody
-        }); 
+        });
+
+        // Crear factura para pago de membresía
+        await crearFacturaParaPago(idUsuario, payment, 'membership', payment.id_membresia || payment.id);
         break;
 
       case 'visits':
@@ -4149,6 +4456,9 @@ const approvePayment = async (id) => {
             id_cotizacion: payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion
           }
         });
+
+        // Crear factura para pago de visita
+        await crearFacturaParaPago(idUsuario, payment, 'visits', payment.id_pagovisita, payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion);
 
         // Notificar al admin de servicio pendiente
         if (response?.success) {
@@ -4208,6 +4518,9 @@ const approvePayment = async (id) => {
             id_cotizacion: cotizacionId
           }
         });
+
+        // Crear factura para pago de servicio
+        await crearFacturaParaPago(idUsuario, payment, 'services', solicitudId, cotizacionId);
 
         // Notificar al técnico sobre el pago recibido
         if (response?.success && payment.solicitud?.tecnico?.id_usuario) {
@@ -4291,6 +4604,7 @@ const approvePayment = async (id) => {
 
     await loadTabData(currentPage);
     await updatePlatformStats();
+    await loadTransactions(); // Actualizar sección de transacciones
 
   } catch (error) {
     console.error('❌ Error aprobando pago:', error);
@@ -4522,6 +4836,9 @@ onMounted(async () => {
     }
 
     Chart.register(...registerables, DataLabelsPlugin);
+    
+    // Cargar configuración de la empresa
+    await loadEmpresaConfig();
     
     // Inicializar selectedChartObject con la primera opción
     initializeChartObject();  
