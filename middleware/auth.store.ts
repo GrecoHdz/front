@@ -1,14 +1,14 @@
 // auth.store.ts 
 import { defineStore } from 'pinia';
-import { ref, computed, useCookie } from '#imports'; 
+import { ref, computed, useCookie } from '#imports';
 
 let _refreshPromise: Promise<boolean> | null = null;
 
 interface User {
   id_usuario: number;
   id_rol?: number;
-  id_ciudad: number;  
-  nombre: string; 
+  id_ciudad: number;
+  nombre: string;
   role: string;
   estado: string;
   [key: string]: any;
@@ -53,7 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
       ...userData,
       role: (userData.rol?.nombre_rol?.toLowerCase() || userData.role || 'usuario'),
       estado: userData.estado || 'activo'
-    }; 
+    };
 
     user.value = normalizedUser;
 
@@ -133,7 +133,7 @@ export const useAuthStore = defineStore('auth', () => {
   // Obtener datos completos del usuario desde /auth/me
   const fetchUser = async (): Promise<User | null> => {
     if (!token.value) return null;
-  
+
     try {
       const config = useRuntimeConfig();
       const response = await $fetch<User>('/auth/me', {
@@ -143,14 +143,14 @@ export const useAuthStore = defineStore('auth', () => {
           Authorization: `Bearer ${token.value}`
         }
       });
-  
+
       // 🔹 Normalizar el rol y estado
       const normalizedUser: User = {
         ...response,
-        role: response.rol?.nombre_rol?.toLowerCase() ||'usuario',
+        role: response.rol?.nombre_rol?.toLowerCase() || 'usuario',
         estado: response.estado
       };
-  
+
       return setUser(normalizedUser);
     } catch (err) {
       console.error('Error al obtener usuario con /auth/me:', err);
@@ -158,14 +158,14 @@ export const useAuthStore = defineStore('auth', () => {
       return null;
     }
   };
-  
+
   const checkAuth = async (): Promise<boolean> => {
     try {
       if (!token.value) {
         console.warn('⚠️ [auth] No hay token, intentando refresh...');
         return await refreshToken();
       }
-  
+
       // Intentar decodificar token
       let tokenPayload: any;
       try {
@@ -174,34 +174,34 @@ export const useAuthStore = defineStore('auth', () => {
         console.warn('⚠️ [auth] Token inválido, intentando refresh...');
         return await refreshToken();
       }
-  
+
       const tokenExpiresIn = tokenPayload.exp * 1000 - Date.now();
-  
+
       // Si el token está por expirar (menos de 2 min) o ya expiró
-      if (tokenExpiresIn <= 0 || tokenExpiresIn < 2 * 60 * 1000) { 
+      if (tokenExpiresIn <= 0 || tokenExpiresIn < 2 * 60 * 1000) {
         const refreshed = await refreshToken();
         if (!refreshed) {
-          clearAuthState(); 
+          clearAuthState();
           return false;
         }
       }
-  
+
       // Obtener usuario actualizado
       const fetchedUser = await fetchUser();
-  
+
       if (!fetchedUser) {
         console.warn('⚠️ [auth] No se pudo obtener usuario. Limpiando estado...');
         clearAuthState();
         return false;
-      } 
-  
+      }
+
       return true;
     } catch (err) {
       console.error('❌ [auth] Error en checkAuth:', err);
-      clearAuthState(); 
+      clearAuthState();
       return false;
     }
-  };  
+  };
 
   const refreshToken = async (): Promise<boolean> => {
     if (_refreshPromise) return _refreshPromise;
@@ -209,12 +209,12 @@ export const useAuthStore = defineStore('auth', () => {
     _refreshPromise = (async () => {
       try {
         const config = useRuntimeConfig();
-        const headers: Record<string, string> = { 
-          'Cache-Control': 'no-cache', 
+        const headers: Record<string, string> = {
+          'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
           'Accept': 'application/json'
         };
-        
+
         // No incluimos el token en el header para el refresh
         const response = await $fetch('/auth/refresh-token', {
           method: 'POST',
@@ -225,7 +225,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         if (response?.token) {
           setToken(response.token);
-          
+
           // Normalizar los datos del usuario
           if (response.user) {
             const normalizedUser = {
@@ -234,11 +234,11 @@ export const useAuthStore = defineStore('auth', () => {
               estado: response.user.estado || 'activo'
             };
             setUser(normalizedUser);
-            
+
             // Forzar una actualización del usuario para asegurar que los datos estén actualizados
             await fetchUser();
           }
-          
+
           return true;
         }
 
@@ -254,10 +254,10 @@ export const useAuthStore = defineStore('auth', () => {
 
     return _refreshPromise;
   };
- 
+
   const userName = computed(() => user.value?.nombre || null);
-  const userId = computed(() => user.value?.id_usuario || null); 
- 
+  const userId = computed(() => user.value?.id_usuario || null);
+
 
   return {
     user,
@@ -272,7 +272,7 @@ export const useAuthStore = defineStore('auth', () => {
     checkAuth,
     refreshToken,
     clearAuthState,
-    fetchUser, 
+    fetchUser,
     userName,
     userId
   };

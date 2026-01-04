@@ -114,7 +114,7 @@
                 :options-limit="100"
               >
                 <template #singleLabel="{ option }">
-                  <span class="text-xs truncate">{{ getCityLabel(option) }}</span>
+                  <span class="text-[16px] sm:text-xs md:text-base truncate">{{ getCityLabel(option) }}</span>
                 </template>
               </multiselect>
             </div>
@@ -332,6 +332,12 @@
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
             <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
           </button>
+          
+          <button 
+            @click="isContratoTecnicoModalOpen = true"
+            class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Contrato del Técnico</p>
+          </button>
           <button 
             @click="isPrivacidadModalOpen = true"
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
@@ -358,182 +364,330 @@
     </div>
 
     <!-- Modal de Términos y Condiciones -->
-    <div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
-        <button 
-          @click="isTerminosModalOpen = false"
-          type="button"
-          class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-          aria-label="Cerrar modal"
-        >
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+<div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+    
+    <button 
+      @click="isTerminosModalOpen = false"
+      type="button"
+      class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+      aria-label="Cerrar modal"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
 
-        <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
-        </div>
+    <div class="mb-4">
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
+    </div>
 
-                <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+    <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
+        <p>
           Al registrarse y utilizar la plataforma HogarSeguro, el usuario (cliente o técnico) acepta de forma expresa
           estos Términos y Condiciones. Si no está de acuerdo con alguno de ellos, deberá abstenerse de utilizar la plataforma.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
+        <p>
           HogarSeguro es una plataforma tecnológica que facilita la conexión entre clientes y técnicos independientes
           para la prestación de servicios de mantenimiento y reparación a domicilio.
-          </p>
-          <p class="mt-2">
+        </p>
+        <p class="mt-2">
           <strong>Importante:</strong> HogarSeguro no presta directamente los servicios técnicos, no emplea a los técnicos
           y no asume una relación laboral con ellos. Los técnicos actúan de manera independiente y bajo su propia responsabilidad.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Modelo de Cobro y Pago Centralizado</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Modelo de Cobro y Pago Centralizado</h4>
+        <p>
           Por razones operativas, de seguridad y control, todos los pagos de los servicios solicitados a través de la plataforma
           deberán realizarse exclusivamente mediante transferencia bancaria o medios electrónicos autorizados
           a las cuentas oficiales de HogarSeguro.
-          </p>
-          <p class="mt-2">
-          HogarSeguro actúa como intermediario tecnológico en la gestión de pagos, factura únicamente sus comisiones y cargos 
-          propios, y posteriormente liquida al técnico independiente el valor correspondiente a la mano de obra por él prestada.
         </p>
-        </section>
+        <p class="mt-2">
+          HogarSeguro actúa como intermediario tecnológico y agente de gestión de pagos, facilitando el recaudo de los montos acordados 
+          entre cliente y técnico independiente. HogarSeguro factura únicamente sus comisiones, cargos propios y servicios adicionales 
+          ofrecidos por la plataforma, y gestiona la transferencia al técnico independiente del valor correspondiente a la mano de obra 
+          efectivamente prestada por éste.
+        </p>
+        <p class="mt-2">
+          Los montos recaudados por HogarSeguro correspondientes a la mano de obra del técnico independiente constituyen
+          <strong>fondos de terceros</strong> administrados temporalmente por la plataforma en calidad de agente de gestión de pago,
+          y no representan ingresos propios de HogarSeguro, reconociéndose contablemente como pasivos hasta su liquidación
+          al técnico correspondiente.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio y Distribución</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio y Distribución</h4>
+        <p>
           El precio de la mano de obra es definido directamente por el técnico y aceptado por el cliente antes
           de la ejecución del servicio.
-          </p>
-          <p class="mt-2">
+        </p>
+        <p class="mt-2">
           La distribución del pago entre el técnico y HogarSeguro es <strong>variable</strong> y será determinada
           por la plataforma según el tipo de servicio, categoría, promociones u otros criterios operativos,
           los cuales serán informados al técnico previo a la aceptación del trabajo.
-          </p>
-          <p class="mt-2">
+        </p>
+        <p class="mt-2">
           La comisión de HogarSeguro se calcula sobre el valor total de la mano de obra acordada,
           independientemente de descuentos, créditos o beneficios aplicados al cliente.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresías y Créditos</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresías y Créditos</h4>
+        <p>
           HogarSeguro ofrece membresías mensuales que otorgan beneficios, entre ellos la acumulación de crédito
           utilizable como descuento al momento de pagar servicios dentro de la plataforma.
-          </p>
-          <p class="mt-2">
-          El crédito acumulado:
-          </p>
-          <ul class="list-disc pl-5 space-y-1">
+        </p>
+        <p class="mt-2">El crédito acumulado:</p>
+        <ul class="list-disc pl-5 space-y-1">
           <li>No es dinero en efectivo</li>
           <li>No es transferible</li>
           <li>Solo puede utilizarse para pagar servicios dentro de HogarSeguro</li>
-          </ul>
-          <p class="mt-2">
+        </ul>
+        <p class="mt-2">
           El uso del crédito reduce únicamente el monto a pagar por el cliente,
           pero no afecta el valor total de la mano de obra ni el pago correspondiente al técnico.
-          </p>
-          <p class="mt-2">
-            La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
-            el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
-          </p>
-        </section>
+        </p>
+        <p class="mt-2">
+          La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
+          el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
+        <p>
           En caso de que el cliente no cuente con una membresía activa, se cobrará una tarifa fija por visita técnica,
           cuyo valor será informado previamente al cliente.
-          </p>
-          <p class="mt-2">
-          Esta tarifa corresponde exclusivamente a HogarSeguro y no forma parte del ingreso del técnico.
-          </p>
-        </section>
+        </p>
+        <p class="mt-2">
+          Esta tarifa corresponde a un servicio de gestión y coordinación prestado por HogarSeguro y será documentada
+          mediante recibo por honorarios profesionales, conforme al régimen fiscal aplicable a la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Pagos al Técnico</h4>
-          <p>
-            HogarSeguro realizará el pago al técnico independiente una vez confirmado el pago del cliente
-            y finalizado el servicio, descontando la comisión correspondiente.
-          </p>
-          <p class="mt-2">
-            Los pagos se efectuarán únicamente a la cuenta bancaria registrada por el técnico en la plataforma
-            y podrán tardar hasta cinco (5) días hábiles.
-          </p>
-          <p class="mt-2">
-            El técnico es responsable de cumplir con sus obligaciones fiscales, tributarias y legales
-            ante las autoridades correspondientes.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Pagos al Técnico</h4>
+        <p>
+          HogarSeguro realizará el pago al técnico independiente una vez confirmado el pago del cliente
+          y finalizado el servicio, descontando la comisión correspondiente.
+        </p>
+        <p class="mt-2">
+          Los pagos se efectuarán únicamente a la cuenta bancaria registrada por el técnico en la plataforma
+          y podrán tardar hasta cinco (5) días hábiles.
+        </p>
+        <p class="mt-2">
+          El técnico reconoce que es el único responsable de la emisión de los comprobantes fiscales 
+          correspondientes por los servicios técnicos prestados al cliente, así como del cumplimiento de sus 
+          obligaciones tributarias ante el Servicio de Administración de Rentas (SAR). La falta de emisión de 
+          comprobantes fiscales por parte del técnico no altera la naturaleza de intermediación de HogarSeguro 
+          ni convierte dichos montos en ingresos propios de la plataforma.
+        </p>
+        <p class="mt-2 font-medium">
+          La constancia de transferencia bancaria realizada a la cuenta registrada por el técnico constituye
+          prueba plena de pago.
+        </p>
+        <p class="mt-2">
+          La transferencia realizada a la cuenta registrada por el técnico se considerará válida y liberatoria
+          para HogarSeguro, aun cuando el técnico alegue desconocimiento, falta de notificación o no aceptación
+          expresa de la liquidación electrónica.
+        </p>
+        <p class="mt-2">
+          El técnico es el único responsable de la veracidad y exactitud de los datos bancarios proporcionados.
+          HogarSeguro no será responsable por errores en la información suministrada por el técnico que resulten
+          en transferencias a cuentas incorrectas, inexistentes o de terceros.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Pagos No Autorizados</h4>
-          <p>
-            Cualquier pago realizado fuera de la plataforma, en efectivo, a cuentas no autorizadas
-            o directamente al técnico, no será reconocido por HogarSeguro y no generará derechos de reclamo,
-            garantía, crédito o soporte.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Pagos No Autorizados</h4>
+        <p>
+          Cualquier pago realizado fuera de la plataforma, en efectivo, a cuentas no autorizadas
+          o directamente al técnico, no será reconocido por HogarSeguro y no generará derechos de reclamo,
+          garantía, crédito o soporte.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Limitación de Responsabilidad</h4>
-          <p>
-            Los servicios son prestados por técnicos independientes. HogarSeguro no garantiza el resultado final del servicio,
-            salvo en los casos expresamente establecidos por la plataforma.
-          </p>
-          <p class="mt-2">
-            HogarSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio,
-            excepto cuando la legislación aplicable disponga lo contrario.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Limitación de Responsabilidad</h4>
+        <p>
+          Los servicios son prestados por técnicos independientes. HogarSeguro no garantiza el resultado final del servicio,
+          salvo en los casos expresamente establecidos por la plataforma.
+        </p>
+        <p class="mt-2">
+          HogarSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio,
+          excepto cuando la legislación aplicable disponga lo contrario.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Privacidad y Protección de Datos</h4>
-          <p>
-            Los datos personales serán tratados conforme a la Política de Privacidad de HogarSeguro
-            y utilizados únicamente para la operación y mejora de la plataforma.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Privacidad y Protección de Datos</h4>
+        <p>
+          Los datos personales serán tratados conforme a la Política de Privacidad de HogarSeguro
+          y utilizados únicamente para la operación y mejora de la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Modificaciones</h4>
-          <p>
-            HogarSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
-            Las modificaciones entrarán en vigor desde su publicación en la plataforma.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Modificaciones</h4>
+        <p>
+          HogarSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
+          Las modificaciones entrarán en vigor desde su publicación en la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Ley Aplicable y Jurisdicción</h4>
-          <p>
-            Estos Términos se rigen por las leyes de la República de Honduras.
-            Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Ley Aplicable y Jurisdicción</h4>
+        <p>
+          Estos Términos se rigen por las leyes de la República de Honduras.
+          Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
+        </p>
+      </section>
+
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <button 
+        @click="isTerminosModalOpen = false"
+        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+      >
+        Cerrar
+      </button>
+    </div>
+
+  </div>
 </div>
 
-        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button 
-            @click="isTerminosModalOpen = false"
-            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
+<!-- Modal de Contrato del Técnico -->
+<div v-if="isContratoTecnicoModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+    
+    <button 
+      @click="isContratoTecnicoModalOpen = false"
+      type="button"
+      class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+      aria-label="Cerrar modal"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <div class="mb-4">
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        Contrato de Prestación de Servicios del Técnico
+      </h3> 
+      <p class="text-sm text-gray-600 dark:text-gray-400">
+        Última actualización: 2 de enero de 2025
+      </p>
     </div>
+
+    <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">1. Objeto del Contrato</h4>
+        <p>
+          El presente contrato tiene por objeto regular la relación entre HogarSeguro
+          (en adelante, “la Plataforma”) y el técnico independiente (en adelante, “el Técnico”)
+          para la intermediación tecnológica en la prestación de servicios a clientes finales.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">2. Naturaleza de la Relación</h4>
+        <p>
+          El Técnico actúa como profesional independiente, sin que exista relación laboral,
+          societaria o de subordinación con HogarSeguro. La Plataforma no presta directamente
+          los servicios técnicos.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">3. Obligaciones del Técnico</h4>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>Prestar los servicios con profesionalismo y diligencia.</li>
+          <li>Responder por los daños causados durante la ejecución del servicio.</li>
+          <li>Respetar los horarios y condiciones acordadas con el cliente.</li>
+          <li>Mantener la confidencialidad de la información de los clientes.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">4. Modelo de Pago y Liquidación</h4>
+        <p>
+          El Técnico reconoce y acepta que todos los pagos realizados por los clientes a través
+          de la Plataforma ingresan exclusivamente a las cuentas oficiales de HogarSeguro.
+        </p>
+        <p class="mt-2">
+          HogarSeguro realizará la liquidación correspondiente al Técnico una vez finalizado
+          el servicio y confirmado el pago del cliente, descontando la comisión aplicable.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">5. Prueba Plena de Pago</h4>
+        <p>
+          La constancia de transferencia bancaria realizada a la cuenta registrada por el
+          Técnico constituirá prueba plena, válida y suficiente de pago, considerándose
+          la obligación completamente cumplida y liberatoria para HogarSeguro.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">6. Datos Bancarios</h4>
+        <p>
+          El Técnico es el único responsable de la veracidad y exactitud de los datos bancarios
+          proporcionados. HogarSeguro no será responsable por errores que resulten en
+          transferencias a cuentas incorrectas.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">7. Obligaciones Fiscales</h4>
+        <p>
+          El Técnico reconoce que es el único responsable del cumplimiento de sus obligaciones
+          fiscales ante el Servicio de Administración de Rentas (SAR), incluyendo la emisión
+          de recibos por honorarios profesionales cuando corresponda.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">8. Aceptación del Contrato</h4>
+        <p>
+          El uso, acceso y permanencia en la Plataforma implica la aceptación expresa,
+          automática e incondicional del presente contrato.
+        </p>
+        <p class="mt-2 font-semibold">
+          Si el Técnico no está de acuerdo con estos términos, deberá abstenerse de utilizar
+          la Plataforma. El uso continuado de la misma se entenderá como aceptación total
+          del contrato.
+        </p>
+      </section>
+
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <button 
+        @click="isContratoTecnicoModalOpen = false"
+        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg"
+      >
+        Entendido
+      </button>
+    </div>
+
+  </div>
+</div>
+
 
     <!-- Modal de Política de Privacidad -->
     <div v-if="isPrivacidadModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
@@ -816,6 +970,7 @@ const isSaving = ref(false)
 const isUpdatingPassword = ref(false)
 const isPasswordModalOpen = ref(false)
 const isTerminosModalOpen = ref(false)
+const isContratoTecnicoModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
 
@@ -1118,14 +1273,15 @@ const fetchUserData = async () => {
     
     const safeUserData = {
       ...data,
-      nombre: data.nombre || 'Invitado',
+      nombre: data.nombre || '',
+      email: data.email || '',
+      telefono: data.telefono || '',
       id_usuario: data.id_usuario || userId,
       id_rol: data.id_rol || null,
       id_ciudad: ciudadId,
       ciudad: ciudadNombre,
       rol_nombre: data.rol?.nombre_rol || data.rol_nombre || 'Usuario',
       role: data.role || 'usuario',
-      // We'll set ciudadSeleccionada in the watch function when ciudades are loaded
     }
     
     user.value = {
@@ -1358,17 +1514,23 @@ watch(() => user.value.ciudadSeleccionada, (newCiudad) => {
 const checkAuthAndLoad = async () => {
   try {
     const token = useCookie('token')
-    const user = useCookie('user')
+    const userCookieValue = useCookie('user')
     
-    if (!token.value || !user.value) { 
+    if (!token.value || !userCookieValue.value) { 
       window.location.reload()
       return
     }
     
     await cargarDatosPerfil()
     
+    // Inicializar originalUserData con los datos cargados del usuario
     if (user.value) {
-      originalUserData.value = { ...user.value }
+      originalUserData.value = {
+        nombre: user.value.nombre,
+        email: user.value.email,
+        telefono: user.value.telefono,
+        id_ciudad: user.value.id_ciudad
+      }
     }
   } catch (error) { 
     window.location.reload() 

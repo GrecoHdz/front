@@ -873,9 +873,12 @@ import Toast from '~/components/ui/Toast.vue';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import Multiselect from 'vue-multiselect'
 
-// API base URL
+// ===== VARIABLES DE CONFIGURACIÓN =====
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
-const apiBase = config.public.apiBase
+const router = useRouter()
+const auth = useAuthStore()
+const userCookie = useCookie('user')
 
 // Reactive data
 const showLoginModal = ref(false)
@@ -884,10 +887,8 @@ const isLogin = ref(true)
 const isLoading = ref(true) // Iniciar en true para mostrar el spinner mientras se verifica la autenticación
 const isCheckingAuth = ref(true) // Nuevo estado para controlar la verificación de autenticación
 const authStatus = ref('') // '', 'success', 'error'
-const auth = useAuthStore()
 const formErrors = ref({})
 const registerAsTechnician = ref(false)
-const router = useRouter()
 const showPassword = ref(false)
 
 // Validation functions
@@ -944,7 +945,7 @@ const getCityLabel = (ciudad) => {
 const cargarCiudades = async () => {
   loadingCiudades.value = true
   try {
-    const data = await $fetch('/ciudad', {
+    const data = await $api('/ciudad', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -987,7 +988,7 @@ const checkAuthStatus = async () => {
 const fetchMembershipCost = async () => {
   isLoadingMembershipCost.value = true;
   try {
-    const data = await $fetch('/config/valor/membresia', {
+    const data = await $api('/config/valor/membresia', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1010,7 +1011,7 @@ const fetchMembershipCost = async () => {
 const fetchVisitCost = async () => {
   isLoadingVisitCost.value = true;
   try {
-    const response = await $fetch('/config/valor/visita_tecnico', {
+    const response = await $api('/config/valor/visita_tecnico', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1078,7 +1079,7 @@ const discountPercentage = ref()
 const fetchDiscountPercentage = async () => {
   try {
     
-    const response = await $fetch('/config/valor/porcentaje_descuento', {
+    const response = await $api('/config/valor/porcentaje_descuento', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1116,7 +1117,7 @@ const loadMembershipBenefits = async () => {
       await fetchDiscountPercentage()
     }
     
-    const data = await $fetch('/membresiabeneficios', {
+    const data = await $api('/membresiabeneficios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -1194,20 +1195,37 @@ const isLoadingServices = ref(false)
 const loadServices = async () => {
   try {
     isLoadingServices.value = true
-    const data = await $fetch('/servicios/activos', {
-      baseURL: config.public.apiBase,
+    console.log('Solicitando servicios activos a:', `${config.public.apiBase}/servicios/activos`)
+    
+    const response = await fetch(`${config.public.apiBase}/servicios/activos`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include' // Importante para incluir cookies si es necesario
     })
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Error en la respuesta del servidor:', response.status, errorText)
+      throw new Error(`Error del servidor: ${response.status} ${response.statusText}`)
+    }
+    
+    const data = await response.json()
+    console.log('Respuesta de la API (servicios activos):', data)
+    
+    if (!Array.isArray(data)) {
+      console.error('La respuesta no es un array:', data)
+      throw new Error('Formato de respuesta inesperado: se esperaba un array de servicios')
+    }
     
     // Mapear los datos de la API al formato esperado por el componente
     services.value = data.map(service => ({
       id: service.id_servicio,
       name: service.nombre,
       description: service.descripcion,
+      estado: service.estado,
       icon: getServiceIcon(service.nombre)
     }))
   } catch (error) {
@@ -1326,7 +1344,7 @@ const handlePasswordReset = async () => {
     }
 
     // Enviar solicitud de recuperación de contraseña
-    const response = await $fetch('/auth/forgot-password', {
+    const response = await $api('/auth/forgot-password', {
       baseURL: config.public.apiBase,
       method: 'POST',
       headers: {
@@ -1516,7 +1534,7 @@ const handleAuth = async () => {
           if (referralResponse.ok) {
             // Enviar notificación de nuevo referido
             try {
-              await $fetch('/notificaciones/enviar', {
+              await $api('/notificaciones/enviar', {
                 baseURL: config.public.apiBase,
                 method: 'POST',
                 headers: {
@@ -1546,7 +1564,7 @@ const handleAuth = async () => {
         
         // Enviar notificación a administradores
         try {
-          await $fetch('/notificaciones/enviar', {
+          await $api('/notificaciones/enviar', {
             baseURL: config.public.apiBase,
             method: 'POST',
             headers: {
@@ -1558,7 +1576,7 @@ const handleAuth = async () => {
               nombre_rol: 'admin'
             })
           })
-          await $fetch('/notificaciones/enviar', {
+          await $api('/notificaciones/enviar', {
             baseURL: config.public.apiBase,
             method: 'POST',
             headers: { 

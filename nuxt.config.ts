@@ -6,11 +6,11 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt'
   ],
-  
+
   // Configuración de impresión
   app: {
     head: {
-      title: 'TecniServ - Servicios Técnicos a Domicilio',
+      title: 'HogarSeguro - Servicios Técnicos a Domicilio',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, user-scalable=no' },
@@ -30,16 +30,16 @@ export default defineNuxtConfig({
       ]
     }
   },
-   // Server configuration 
-   devServer: {
+  // Server configuration 
+  devServer: {
     host: '0.0.0.0',
-    port: process.env.PORT ? Number(process.env.PORT) : 3000 
+    port: process.env.PORT ? Number(process.env.PORT) : 3000
   },
-  
+
   // Runtime config
   runtimeConfig: {
     public: {
-      appName: 'TecniServ',
+      appName: 'HogarSeguro',
       appVersion: '1.0.0',
       apiBase: process.env.NUXT_PUBLIC_API_URL
     }

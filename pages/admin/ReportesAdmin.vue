@@ -25,7 +25,7 @@
 >
   <div
     v-if="showDetailsModal && selectedPayment"
-    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+    class="fixed inset-0 z-[1] flex items-center justify-center p-2 sm:p-4"
   >
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeDetailsModal"></div>
 
@@ -165,7 +165,7 @@
           @click="openFacturaModal(selectedPayment)"
           class="px-3 py-2 font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
         >
-          Mostrar Factura
+          Mostrar Recibo
         </button>
         <button
           v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente' || selectedPayment.estado === 'pagado'"
@@ -196,7 +196,7 @@
 >
   <div
     v-if="showWithdrawalModal && selectedWithdrawal"
-    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4"
   >
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeWithdrawalModal"></div>
 
@@ -329,7 +329,8 @@
   </div>
 </Transition>
 
-<!-- Modal de Factura -->
+
+<!-- Modal de Recibo -->
 <Transition
   name="modal"
   enter-active-class="modal-enter-active"
@@ -339,227 +340,104 @@
 >
   <div
     v-if="showFacturaModal && selectedFacturaPayment"
-    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4"
   >
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeFacturaModal"></div>
 
-    <div
-      class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[90%] sm:w-full max-w-md max-h-[85vh] overflow-y-auto relative z-10 text-[12px] sm:text-xs md:text-base"
-    >
-      <!-- Header -->
-      <div
-        class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl z-10"
-      >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2 sm:space-x-3">
-            <div
-              class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
+    <div class="bg-white relative z-10 w-full max-w-2xl shadow-xl rounded-sm overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Receipt Content (Scrollable) -->
+      <div class="overflow-y-auto p-6 flex-1">
+        <!-- Top Header -->
+        <div class="flex justify-between items-center border-b-2 border-gray-300 pb-2 mb-2">
             <div>
-              <h3 class="font-black text-gray-900 dark:text-white">Factura</h3>
-              <p class="text-gray-600 dark:text-gray-400">ID: #{{ selectedFacturaPayment.id || 'N/A' }}</p>
+                <h2 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">RECIBO POR HONORARIOS</h2>
+                <p class="text-sm font-mono font-bold text-gray-900">N° {{ empresaCorrelativo || '000-000-00-00000000' }}</p>
+                <p class="text-[10px] text-gray-500 mt-1">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
             </div>
-          </div>
-          <button
-            @click="closeFacturaModal"
-            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-          >
-            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+            <div class="text-right">
+               <h1 class="text-lg font-bold text-gray-900 tracking-tight">{{ empresaNombre || 'HogarSeguro' }}</h1>
+               <div class="text-[10px] text-gray-500 mt-2 space-y-0.5">
+                  <p class="font-medium">RTN: {{ empresaRTN }}</p>
+                  <p>{{ empresaEmail }}</p>
+                  <p>{{ empresaTelefono }}</p>
+               </div>
+            </div>
+        </div>
+
+        <!-- Main Body -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300 p-4 sm:p-4 mb-2">
+            <div class="mb-6">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">RECIBÍ DE</span>
+                <p class="text-base sm:text-lg font-medium text-gray-900 break-words">
+                    {{ selectedFacturaPayment.cliente?.nombre || selectedFacturaPayment.solicitud?.cliente?.nombre || selectedFacturaPayment.usuario?.nombre || 'Cliente General' }}
+                </p>
+                <p class="text-xs text-gray-500 mt-0.5" v-if="selectedFacturaPayment.rtn_cliente">RTN: {{ selectedFacturaPayment.rtn_cliente }}</p>
+            </div>
+            
+            <div class="mb-6">
+                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">LA SUMA DE</span>
+                 <p class="text-lg sm:text-xl font-bold text-gray-900">{{ formatCurrency(selectedFacturaPayment.total) }}</p>
+            </div>
+
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">POR CONCEPTO DE</span>
+                <p class="text-xs leading-relaxed text-gray-700">
+                  <span v-if="selectedFacturaPayment.id_membresia">
+                    Servicio de acceso y uso de plataforma tecnológica HogarSeguro, correspondiente a membresía de beneficios y gestión de servicios.
+                  </span>
+                  <span v-else-if="selectedFacturaPayment.id_pagovisita">
+                    Servicio de intermediación tecnológica, coordinación y gestión de visita técnica para evaluación y diagnóstico de servicio solicitado a través de la plataforma HogarSeguro.
+                  </span>
+                  <span v-else-if="selectedFacturaPayment.id_cotizacion">
+                    Servicio de intermediación tecnológica, coordinación y gestión de pagos por servicios técnicos prestados por técnicos independientes a través de la plataforma HogarSeguro.
+                  </span>
+                  <span v-else>
+                    Pago de Servicio Profesional
+                  </span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Details & Fiscal Data (Stacked Rows) -->
+        <div class="flex flex-col gap-8 text-[11px] mb-8">
+             <div>
+                <h4 class="font-bold text-gray-900 mb-3 border-b border-gray-300 pb-1">DETALLES</h4>
+                 <div class="space-y-2 text-gray-600">
+                    <p class="flex justify-between"><span class="font-medium text-gray-500">Subtotal</span> <span>{{ formatCurrency(selectedFacturaPayment.subtotal) }}</span></p>
+                    <div class="flex justify-between pt-1 mt-1 border-t border-gray-300">
+                        <span class="font-bold text-gray-900 text-xs">TOTAL</span> 
+                        <span class="font-bold text-gray-900 text-xs">{{ formatCurrency(selectedFacturaPayment.total) }}</span>
+                    </div>
+                </div>
+             </div>
+             <div>
+                <h4 class="font-bold text-gray-900 mb-3 border-b border-gray-300 pb-1">DATOS FISCALES</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-gray-600">
+                    <p class="flex justify-between sm:justify-start sm:gap-2"><span class="font-medium text-gray-500">CAI:</span> <span class="text-right sm:text-left">{{ empresaCAI }}</span></p>
+                    <p class="flex justify-between sm:justify-start sm:gap-2"><span class="font-medium text-gray-500">Rango:</span> <span class="text-right sm:text-left">{{ empresaRangoAutorizado }}</span></p>
+                    <p class="flex justify-between sm:justify-start sm:gap-2 sm:col-span-2"><span class="font-medium text-gray-500">Límite:</span> <span class="text-right sm:text-left">{{ empresaFechaLimite }}</span></p>
+                </div>
+             </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="text-[10px] text-gray-400 text-center pt-1 border-t border-gray-300">
+           <p>Este documento es un comprobante de pago por honorarios profesionales.</p>
+           <p v-if="selectedFacturaPayment.num_comprobante" class="mt-1">Ref. Pago: {{ selectedFacturaPayment.num_comprobante }}</p>
         </div>
       </div>
 
-      <!-- Content -->
-      <div class="p-3 sm:p-4">
-        <!-- Información de la Empresa -->
-        <div class="text-center mb-3">
-          <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ empresaNombre || 'HogarSeguro' }}</h2>
-          <p class="text-xs text-gray-600 dark:text-gray-400">Número: {{ empresaTelefono }}</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">RTN: {{ empresaRTN }}</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">Correo: {{ empresaEmail }}</p>
-        </div>
-
-        <!-- Información Fiscal -->
-        <div class="border-t border-b border-gray-300 dark:border-gray-600 py-2 mb-2">
-          <div class="grid grid-cols-1 gap-1 text-xs">
-            <div class="flex justify-between">
-              <span class="font-semibold text-gray-700 dark:text-gray-300">CAI:</span>
-              <span class="text-gray-900 dark:text-white">{{ empresaCAI }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="font-semibold text-gray-700 dark:text-gray-300">Rango Autorizado:</span>
-              <span class="text-gray-900 dark:text-white">{{ empresaRangoAutorizado }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="font-semibold text-gray-700 dark:text-gray-300">Número Correlativo:</span>
-              <span class="text-gray-900 dark:text-white">{{ empresaCorrelativo }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="font-semibold text-gray-700 dark:text-gray-300">Fecha Límite Emisión:</span>
-              <span class="text-gray-900 dark:text-white">{{ empresaFechaLimite }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tipo de Documento y Número -->
-        <div class="text-center mb-3">
-          <p class="text-sm font-bold text-gray-900 dark:text-white">FACTURA</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedFacturaPayment.fecha) }}-{{ selectedFacturaPayment.id }}</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
-        </div>
-
-        <!-- Información del Cliente -->
-        <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
-          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Información del Cliente</h4>
-          <div class="space-y-1 text-xs">
-            <div class="flex justify-between">
-              <span class="text-gray-700 dark:text-gray-300">Nombre:</span>
-              <span class="font-medium text-gray-900 dark:text-white">
-                {{ selectedFacturaPayment.cliente?.nombre || selectedFacturaPayment.solicitud?.cliente?.nombre || selectedFacturaPayment.usuario?.nombre || 'N/A' }}
-              </span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-700 dark:text-gray-300">RTN:</span>
-              <span class="font-medium text-gray-900 dark:text-white">{{ selectedFacturaPayment.rtn_cliente || 'N/A' }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Detalles del Servicio -->
-        <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
-          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Detalles del Servicio</h4>
-          <table class="w-full text-xs">
-            <thead>
-              <tr class="border-b border-gray-300 dark:border-gray-600">
-                <th class="text-left py-1 font-semibold text-gray-900 dark:text-white">Descripción</th>
-                <th class="text-right py-1 font-semibold text-gray-900 dark:text-white">Precio</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="py-2 text-gray-700 dark:text-gray-300">
-                  <div>
-                    {{ selectedFacturaPayment.id_membresia ? 'Pago de Membresía' : 
-                       selectedFacturaPayment.id_visita ? 'Pago de Visita Técnica' : 
-                       selectedFacturaPayment.id_servicio ? 'Pago por Servicio' : 'Pago de Servicio' }}
-                  </div> 
-                </td>
-                <td class="text-right py-2 font-semibold text-gray-900 dark:text-white">
-                  {{ formatCurrency(selectedFacturaPayment.subtotal || 0) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Totales -->
-        <div class="border-t border-gray-300 dark:border-gray-600 pt-2 mb-3">
-          <div class="space-y-1 text-xs">
-            <div class="flex justify-between">
-              <span class="text-gray-700 dark:text-gray-300">Subtotal:</span>
-              <span class="font-semibold text-gray-900 dark:text-white">
-                {{ formatCurrency(selectedFacturaPayment.subtotal || 0) }}
-              </span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-700 dark:text-gray-300">ISV (15%):</span>
-              <span class="font-semibold text-gray-900 dark:text-white">
-                {{ formatCurrency(selectedFacturaPayment.isv || 0) }}
-              </span>
-            </div>
-            <div class="flex justify-between font-bold text-sm border-t border-gray-300 dark:border-gray-600 pt-1">
-              <span class="text-gray-900 dark:text-white">TOTAL:</span>
-              <span class="text-gray-900 dark:text-white">
-                {{ formatCurrency(selectedFacturaPayment.total || 0) }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Método de Pago -->
-        <div class="space-y-2 mb-3">
-          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Método de Pago:</h4>
-          <p class="text-xs text-gray-700 dark:text-gray-300 mb-2">Transferencia Bancaria</p>
-          <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
-            <div class="space-y-1 text-xs">
-              <div class="flex justify-between">
-                <span class="text-gray-700 dark:text-gray-300">Banco:</span>
-                <span class="font-medium text-gray-900 dark:text-white">
-                  {{ selectedFacturaPayment.cuenta?.banco || 'No especificado' }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-700 dark:text-gray-300">Número de Cuenta:</span>
-                <span class="font-medium text-gray-900 dark:text-white">
-                  {{ selectedFacturaPayment.cuenta?.num_cuenta || 'N/A' }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-700 dark:text-gray-300">Beneficiario:</span>
-                <span class="font-medium text-gray-900 dark:text-white">
-                  {{ selectedFacturaPayment.cuenta?.beneficiario || 'N/A' }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Comprobante -->
-        <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
-          <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Comprobante de Pago</h4>
-          <div class="space-y-1 text-xs">
-            <div class="flex justify-between">
-              <span class="text-gray-700 dark:text-gray-300">Número:</span>
-              <span class="font-medium text-gray-900 dark:text-white">
-                {{ selectedFacturaPayment.num_comprobante || 'No especificado' }}
-              </span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-700 dark:text-gray-300">Estado:</span>
-              <span
-                :class="getStatusBadgeClass(selectedFacturaPayment.estado)"
-                class="inline-flex items-center px-2 py-0.5 rounded-full font-medium"
-              >
-                {{ selectedFacturaPayment.estado || 'Pendiente' }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div
-        class="sticky bottom-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end rounded-b-xl sm:rounded-b-2xl"
-      >
-        <button
+      <!-- Action Footer -->
+      <div class="bg-gray-50 p-4 border-t border-gray-300 flex justify-end">
+        <button 
           @click="closeFacturaModal"
-          class="px-3 py-2 font-medium text-gray-700 bg-gray-200 border border-transparent rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+          class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
         >
-          Cerrar
+          Cerrar Recibo
         </button>
       </div>
+
     </div>
   </div>
 </Transition>
@@ -571,7 +449,7 @@
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to">
-      <div v-if="showServiceDetailModal && selectedService" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div v-if="showServiceDetailModal && selectedService" class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeServiceDetailModal"></div>
         
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[90%] sm:w-full max-w-md max-h-[85vh] overflow-y-auto relative z-10">
@@ -811,7 +689,7 @@
       </section>
 
       <!-- Selector de Gráficos -->
-      <section class="px-3 sm:px-4 mb-3 sm:mb-4">
+      <section class="px-3 sm:px-4 mb-3 sm:mb-4 relative z-1">
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Análisis de Datos</h2>
           <multiselect 
@@ -3418,10 +3296,18 @@ const usersData = reactive({
 const availableReports = ref([
   {
     id: 1,
-    title: 'Reporte Financiero Mensual',
-    description: 'Resumen completo de ingresos y Retiros',
+    title: 'Reporte Ingresos de la Plataforma',
+    description: 'Resumen detallado de ingresos por membresías, visitas y servicios',
     icon: '💰',
     iconClass: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+    generating: false
+  },
+  {
+    id: 5,
+    title: 'Reporte de Retiros',
+    description: 'Resumen de todos los retiros de técnicos',
+    icon: '💸',
+    iconClass: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
     generating: false
   },
   {
@@ -3473,7 +3359,7 @@ const generateReport = async (report) => {
     } 
 
     // 📦 2️⃣ Obtener datos base comunes
-    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes] = await Promise.all([
+    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes] = await Promise.all([
       $api(`/membresia${monthParam}`).catch(err => {
         console.error('❌ Error en /membresia:', err);
         throw err;
@@ -3493,6 +3379,11 @@ const generateReport = async (report) => {
       $api(`/usuarios${monthParam}`).catch(err => {
         console.error('❌ Error en /usuarios:', err);
         throw err;
+      }),
+      // Obtener movimientos de tipo ingreso (pagos a técnicos) para restar del ingreso de la app
+      $api(`/movimientos/ingresos/tecnicos${monthParam}`).catch(err => {
+        console.error('❌ Error en /movimientos (ingresos):', err);
+        return { movimientos: [], data: [] }; // Fallback
       })
     ]);
 
@@ -3515,6 +3406,27 @@ const generateReport = async (report) => {
     const visitData = processData(visitRes, 'Visitas Técnicas');
     const quotationData = processData(quotationRes, 'Cotizaciones');
     const withdrawalsData = processData(withdrawalsRes, 'Retiros');
+    
+    const rawTechData = technicianIncomeRes?.movimientos || technicianIncomeRes?.data || [];
+    const technicianIncomeData = Array.isArray(rawTechData) ? rawTechData : [];
+    console.log('📊 Datos de ingresos técnicos:', technicianIncomeData.length, 'registros found', Array.isArray(technicianIncomeData));
+    
+    // [DEBUG] Imprimir detalles solicitados
+    console.log('=== DEBUG FRONTEND: DATA ===');
+    console.log('COTIZACIONES (Servicios) Encontradas:', quotationRes?.data?.length);
+    console.log('Detalle Cotizaciones:', JSON.stringify(quotationRes?.data?.map(c => ({
+      id_cotizacion: c.id_cotizacion,
+      monto: c.monto_manodeobra, 
+      estado: c.estado
+    })), null, 2));
+
+    console.log('PAGOS TÉCNICOS Encontrados:', technicianIncomeData.length);
+    console.log('Detalle Pagos Técnicos:', JSON.stringify(technicianIncomeData.map(m => ({
+      id_cotizacion: m.id_cotizacion,
+      tipo: m.tipo,
+      monto: m.monto
+    })), null, 2));
+    console.log('============================');
 
     const serviceData = processData(quotationRes, 'Servicios'); // 👈 Cotizaciones se consideran "servicios" en el reporte financiero
 
@@ -3552,6 +3464,7 @@ const generateReport = async (report) => {
           visitData,
           serviceData,
           withdrawalsData,
+          technicianIncomeData, // Pasamos los datos de ingresos técnicos
           mesNombre: monthName,
           year,
           balanceNeto
@@ -3587,6 +3500,11 @@ const generateReport = async (report) => {
       // ===== REPORTE DE TRANSACCIONES =====
       case 4:
         await generarReporteTransacciones(doc, membershipData, visitData, withdrawalsData);
+        break;
+
+      // ===== REPORTE DE RETIROS =====
+      case 5:
+        await generarReporteRetiros(doc, withdrawalsData);
         break;
 
       default:
@@ -3629,7 +3547,24 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }) => {
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], mesNombre, year, balanceNeto }) => {
+  // Mapa de pagos a técnicos por cotización
+  const pagosTecnicosMap = technicianIncomeData.reduce((map, mv) => {
+      if (mv.id_cotizacion && mv.tipo === 'ingreso') {
+          map[mv.id_cotizacion] = (map[mv.id_cotizacion] || 0) + (parseFloat(mv.monto) || 0);
+      }
+      return map;
+  }, {});
+  
+  // Recalcular total de servicios restando pagos a técnicos
+  const totalServiciosReal = serviceData.data
+    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
+    .reduce((sum, s) => {
+        const pagoTecnico = pagosTecnicosMap[s.id_cotizacion] || 0;
+        const montoNeto = (parseFloat(s.monto_total) || 0) - pagoTecnico;
+        return sum + montoNeto;
+    }, 0);
+
   // Usar autoTable del documento
   let currentY = 40;
 
@@ -3637,11 +3572,12 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(93, 92, 222);
   doc.setFontSize(14);
-  doc.text('REPORTE FINANCIERO MENSUAL', 10, currentY);
+  doc.text('REPORTE DE INGRESOS DE LA PLATAFORMA', 10, currentY);
   currentY += 6;
 
   // 📊 Calcular porcentajes
-  const totalIngresos = membershipData.total + visitData.total + serviceData.total;
+  // Nota: Usamos totalServiciosReal en lugar de serviceData.total
+  const totalIngresos = membershipData.total + visitData.total + totalServiciosReal;
   const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
 
   // 📋 Tabla resumen de totales
@@ -3651,10 +3587,8 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     body: [
       ['Membresías', formatCurrency(membershipData.total), calcPorcentaje(membershipData.total)],
       ['Visitas Técnicas', formatCurrency(visitData.total), calcPorcentaje(visitData.total)],
-      ['Servicios', formatCurrency(serviceData.total), calcPorcentaje(serviceData.total)],
-      ['Ingresos', formatCurrency(totalIngresos), '-'],
-      ['Retiros', formatCurrency(withdrawalsData.total), '-'],
-      ['Balance Neto', formatCurrency(balanceNeto), '-']
+      ['Servicios', formatCurrency(totalServiciosReal), calcPorcentaje(totalServiciosReal)],
+      ['Total Ingresos', formatCurrency(totalIngresos), '-']
     ],
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 9 },
@@ -3688,7 +3622,11 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
 
   const serviciosFiltrados = serviceData.data
     .filter(s => s.estado?.toLowerCase() !== 'pendiente')
-    .map(s => [formatDate(s.fecha), 'Servicio', s.solicitud?.cliente?.nombre || '-', formatCurrency(s.monto_total || 0)]);
+    .map(s => {
+        const pagoTecnico = pagosTecnicosMap[s.id_cotizacion] || 0;
+        const montoNeto = (parseFloat(s.monto_total) || 0) - pagoTecnico;
+        return [formatDate(s.fecha), 'Servicio', s.solicitud?.cliente?.nombre || '-', formatCurrency(montoNeto)];
+    });
 
   // Calculate totals from original data instead of formatted strings
   const totalMembresias = membershipData.data
@@ -3699,9 +3637,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
     .reduce((sum, v) => sum + (parseFloat(v.monto) || 0), 0);
     
-  const totalServicios = serviceData.data
-    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
-    .reduce((sum, s) => sum + (parseFloat(s.monto_total) || 0), 0);
+  const totalServicios = totalServiciosReal;
     
   const totalIngresosTabla = totalMembresias + totalVisitas + totalServicios;
 
@@ -3728,20 +3664,17 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     margin: { left: 10, right: 10 },
     pageBreak: 'auto'
   });
+};
 
-  currentY = doc.lastAutoTable.finalY + 10;
-  
-  // Agregar nueva página si es necesario
-  if (currentY > 250) {
-    doc.addPage();
-    currentY = 20;
-  }
+// ===== REPORTE DE RETIROS =====
+const generarReporteRetiros = async (doc, withdrawalsData) => {
+  let currentY = 40;
 
-  // 📋 Detalle de Retiros
+  // 🎯 Título
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(93, 92, 222);
-  doc.setFontSize(12);
-  doc.text('Detalle de Retiros', 10, currentY);
+  doc.setFontSize(14);
+  doc.text('REPORTE DE RETIROS DE TÉCNICOS', 10, currentY);
   currentY += 8;
 
   const retirosFiltrados = withdrawalsData.data
@@ -3754,7 +3687,10 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       r.estado
     ]);
 
-  const totalRetiros = withdrawalsData.data.reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
+  const totalRetirosReal = withdrawalsData.data
+    .filter(r => r.estado?.toLowerCase() !== 'pendiente')
+    .reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
+    
   const hayRetiros = retirosFiltrados.length > 0;
 
   doc.autoTable({
@@ -3764,45 +3700,18 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       ? [
           ...retirosFiltrados,
           [
-            { content: 'TOTAL RETIROS', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: formatCurrency(totalRetiros), styles: { fontStyle: 'bold' } }
+            { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalRetirosReal), styles: { fontStyle: 'bold' } },
+            { content: '', styles: { fontStyle: 'bold' } }
           ]
         ]
       : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
+    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 35 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 }, 4: { cellWidth: 25 } },
     margin: { left: 10, right: 10 },
     pageBreak: 'auto'
-  });
-
-  currentY = doc.lastAutoTable.finalY + 10;
-  
-  // Agregar nueva página si es necesario
-  if (currentY > 250) {
-    doc.addPage();
-    currentY = 20;
-  }
-
-  // 📄 Resumen Final
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(33, 33, 33);
-  doc.text('Resumen Final', 10, currentY);
-  currentY += 6;
-
-  doc.autoTable({
-    startY: currentY,
-    head: [['Total Ingresos', 'Total Retiros', 'Balance Neto']],
-    body: [[
-      formatCurrency(totalIngresos),
-      formatCurrency(withdrawalsData.total),
-      formatCurrency(balanceNeto)
-    ]],
-    theme: 'grid',
-    headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    margin: { left: 10, right: 10 }
   });
 };
 
@@ -4286,15 +4195,46 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
 
     console.log(' Paso 2: Calculando montos de factura...');
     // Preparar datos de la factura - payment.monto_total es el total pagado
-    const total = parseFloat(payment.monto_total || payment.monto || 0);
-    const subtotal = total / 1.15; // Subtotal = Total / 1.15 (para revertir el 15% de ISV)
-    const isv = total - subtotal; // ISV = Total - Subtotal
+    let total = parseFloat(payment.monto_total || payment.monto || 0);
 
+    // Si es pago de servicio, calcular solo la comisión
+    if (tipoPago === 'services') {
+      try {
+        console.log('🔍 Obteniendo porcentaje de comisión por servicio...');
+        const configResponse = await $api('/config/valor/comision_por_servicio', {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+        
+        // El usuario indicó el formato directo, pero mantenemos soporte defensivo para .data
+        const configData = configResponse.data || configResponse;
+        
+        if (configData && configData.valor) {
+          const porcentaje = parseFloat(configData.valor);
+          const montoBase = total;
+          total = (montoBase * porcentaje) / 100;
+          console.log(`💰 Configuración obtenida: ${porcentaje}%`);
+          console.log(`💰 Comisión calculada: ${montoBase} * ${porcentaje}% = ${total}`);
+        } else {
+            console.warn('⚠️ No se pudo obtener el valor de la comisión correctamente:', configData);
+        }
+      } catch (error) {
+        console.error('❌ Error al obtener configuración de comisión:', error);
+      }
+    }
+
+    const subtotal = total; // Subtotal es igual al Total (sin ISV)
+    const isv = 0; // ISV en 0
+    
     console.log(' Montos calculados:', {
       totalPagado: total,
       subtotal,
       isv,
-      porcentajeISV: '15%',
+      porcentajeISV: '0%',
       fuenteDatos: payment.monto_total ? 'monto_total' : payment.monto ? 'monto' : 'default 0'
     });
 
@@ -4893,7 +4833,6 @@ onMounted(async () => {
 /* Estilos para vue-multiselect en filtros de admin */
 .multiselect-admin-filter {
   position: relative;
-  z-index: 50;
 }
 
 .multiselect-admin-filter .multiselect__tags {
