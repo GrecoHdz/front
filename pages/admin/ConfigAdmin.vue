@@ -225,15 +225,7 @@
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Este es el usuario que se asigna por defecto cuando un nuevo usuario se registra sin código de referido
               </p>
-            </div>
-
-            <!-- Info adicional -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 sm:p-4">
-              <h4 class="text-[12px] sm:text-xs md:text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">Información</h4>
-              <p class="text-[12px] sm:text-xs md:text-sm text-blue-600 dark:text-blue-300 leading-relaxed">
-                Esta información se utiliza para el contacto oficial de la empresa y aparece en documentos y comunicaciones.
-              </p>
-            </div>
+            </div> 
           </div>
         </div>
 
@@ -275,7 +267,7 @@
             <!-- Descuento -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Porcentaje de Descuento
+                Descuento por Membresía
               </label>
               <div class="relative">
                 <input
@@ -292,7 +284,7 @@
             <!-- Referido -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Porcentaje de Referido
+                Ganancia por Referido
               </label>
               <div class="relative">
                 <input
@@ -2369,7 +2361,7 @@ const hayChanges = computed(() => {
          configuracionVisita.value !== valoresOriginales.value.visita_tecnico ||
          configuracionComision.value !== valoresOriginales.value.comision_por_servicio ||
          configuracionTelefono.value !== valoresOriginales.value.numero_empresa ||
-         configuracionDiasGracia.value !== valoresOriginales.value.dias_gracia ||
+         configuracionDiasGracia.value !== valoresOriginales.value.reset_credito ||
          configuracionEmail.value !== valoresOriginales.value.correo_empresa ||
          configuracionRTN.value !== valoresOriginales.value.rtn ||
          configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento ||
