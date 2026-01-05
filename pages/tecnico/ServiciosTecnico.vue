@@ -409,15 +409,21 @@
                          min="0"
                          class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
                          placeholder="0">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Este es un estimado que puede variar</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Este monto es solo para referencia del cliente y no suma al total a pagar por el cliente</p>
                 </div>
 
                 <!-- Total -->
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-2.5 sm:p-3 rounded-lg">
                   <div class="flex justify-between items-center">
-                    <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Total Estimado:</span>
+                    <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Total a pagar por el Cliente:</span>
                     <span class="text-base sm:text-lg font-bold text-blue-900 dark:text-blue-100">
-                      L. {{ (Number(quotationForm.monto_manodeobra || 0) + Number(quotationForm.monto_materiales || 0)).toFixed(0) }}
+                      L. {{ Number(quotationForm.monto_manodeobra || 0) }}
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-center mt-1 border-t border-blue-200 dark:border-blue-800 pt-1">
+                    <span class="font-bold text-green-700 dark:text-green-400 text-xs">Tu Ganancia ({{ 100 - commissionPercentage }}% de mano de obra):</span>
+                    <span class="text-sm font-bold text-green-800 dark:text-green-300">
+                      L. {{ (Number(quotationForm.monto_manodeobra || 0) * ((100 - commissionPercentage) / 100)).toFixed(0) }}
                     </span>
                   </div>
                 </div>
@@ -524,15 +530,21 @@
                     min="0"
                     class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
                     placeholder="0.00">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Este es un estimado que puede variar</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Este monto es solo para referencia del cliente y no suma al total a pagar por el cliente</p>
                 </div>
 
                 <!-- Total -->
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-2.5 sm:p-3 rounded-lg">
                   <div class="flex justify-between items-center">
-                    <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Total Estimado:</span>
+                    <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Total a pagar por el Cliente:</span>
                     <span class="text-base sm:text-lg font-bold text-blue-900 dark:text-blue-100">
-                      L. {{ (parseFloat(currentQuotation.monto_manodeobra || 0) + parseFloat(currentQuotation.monto_materiales || 0)).toFixed(2) }}
+                      L. {{ parseFloat(currentQuotation.monto_manodeobra || 0) }}
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-center mt-1 border-t border-blue-200 dark:border-blue-800 pt-1">
+                    <span class="font-bold text-green-700 dark:text-green-400 text-xs">Tu Ganancia ({{ 100 - commissionPercentage }}% de mano de obra):</span>
+                    <span class="text-sm font-bold text-green-800 dark:text-green-300">
+                      L. {{ (parseFloat(currentQuotation.monto_manodeobra || 0) * ((100 - commissionPercentage) / 100)).toFixed(2) }}
                     </span>
                   </div>
                 </div>
@@ -710,6 +722,7 @@ const selectedServiceTypes = ref([])
 const completeServiceComment = ref('')
 const currentServiceToComplete = ref(null)
 const technicianStatus = ref('available')
+const commissionPercentage = ref(0)
 
 // Datos principales
 const serviceTypes = ref([])
@@ -1611,6 +1624,24 @@ const initializeDarkMode = () => {
   })
 }
 
+const loadCommission = async () => {
+  try {
+    const response = await $api('/config/valor/comision_por_servicio', {
+      baseURL: config.public.apiBase,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    if (response && response.valor) {
+      commissionPercentage.value = parseFloat(response.valor)
+    }
+  } catch (error) {
+    console.error('Error al cargar comisión:', error)
+    commissionPercentage.value = 30 // Fallback
+  }
+}
+
 // ===== INICIALIZACIÓN =====
 const checkAuthAndLoad = async () => {
   try {
@@ -1625,7 +1656,8 @@ const checkAuthAndLoad = async () => {
     initializeDarkMode()
     await Promise.all([
       loadServices(),
-      loadServiceTypes()
+      loadServiceTypes(),
+      loadCommission()
     ])
   } catch (error) { 
     window.location.reload() 
