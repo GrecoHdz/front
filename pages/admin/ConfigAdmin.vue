@@ -3230,7 +3230,7 @@ const formatDate = (dateString) => {
 const cargarCorrelativos = async (mostrarExito = false) => {
   try {
     correlativosCargando.value = true;
-    const response = await $fetch('/facturas/correlativos', {
+    const response = await $api('/facturas/correlativos', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
@@ -3358,7 +3358,7 @@ const guardarCorrelativo = async () => {
     console.log('Datos a enviar:', correlativoForm.value);
     console.log('CAI length:', correlativoForm.value.cai.length);
     
-    const response = await $fetch(url, {
+    const response = await $api(url, {
       baseURL: config.public.apiBase,
       method,
       headers: {
@@ -3434,7 +3434,7 @@ const eliminarCorrelativo = async (id) => {
   }
   
   try {
-    const response = await $fetch(`/facturas/correlativos/${id}`, {
+    const response = await $api(`/facturas/correlativos/${id}`, {
       baseURL: config.public.apiBase,
       method: 'DELETE',
       headers: {
