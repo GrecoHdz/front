@@ -2498,7 +2498,7 @@ const getItemTitle = (item) => {
     let title;
     switch (activeTab.value) {
       case 'membership': title = item.plan || 'Membresía'; break;
-      case 'visits': title = item.service || 'Visita'; break;
+      case 'visits': title = item.service || 'Visita Técnica'; break;
       case 'services': title = item.service || item.serviceName || 'Servicio'; break;
       case 'withdrawals': title = item.technician || 'Retiro'; break;
       default: return 'Item';
@@ -3451,8 +3451,16 @@ const generateReport = async (report) => {
     doc.setFontSize(9);
     doc.text(`Reporte: ${report.title}`, 15, 18);
     doc.text(hasSelectedMonth 
-      ? `Período: ${monthName}`
+      ? `Período: ${monthName} ${year}`
       : 'Período: General (Todos los meses)', 15, 23);
+
+    // Fecha de impresión
+    doc.setFontSize(8);
+    const fechaImpresion = new Date().toLocaleDateString('es-ES', {
+      day: '2-digit', month: '2-digit', year: 'numeric', 
+      hour: '2-digit', minute: '2-digit'
+    });
+    doc.text(`Impreso el: ${fechaImpresion}`, 195, 23, { align: 'right' });
 
     // 📚 6️⃣ Seleccionar tipo de reporte
     switch (report.id) {
@@ -3576,7 +3584,6 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   currentY += 6;
 
   // 📊 Calcular porcentajes
-  // Nota: Usamos totalServiciosReal en lugar de serviceData.total
   const totalIngresos = membershipData.total + visitData.total + totalServiciosReal;
   const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
 
@@ -3587,7 +3594,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     body: [
       ['Membresías', formatCurrency(membershipData.total), calcPorcentaje(membershipData.total)],
       ['Visitas Técnicas', formatCurrency(visitData.total), calcPorcentaje(visitData.total)],
-      ['Servicios', formatCurrency(totalServiciosReal), calcPorcentaje(totalServiciosReal)],
+      ['Comisión por Servicios', formatCurrency(totalServiciosReal), calcPorcentaje(totalServiciosReal)],
       ['Total Ingresos', formatCurrency(totalIngresos), '-']
     ],
     theme: 'grid',
@@ -3614,18 +3621,39 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
 
   const membresiasFiltradas = membershipData.data
     .filter(m => m.estado?.toLowerCase() !== 'pendiente')
-    .map(m => [formatDate(m.fecha), 'Membresía', m.usuario?.nombre || m.usuario?.cliente?.nombre || '-', formatCurrency(m.monto)]);
+    .map(m => [
+      formatDate(m.fecha), 
+      'Membresía', 
+      m.usuario?.nombre || m.usuario?.cliente?.nombre || '-', 
+      formatCurrency(m.monto),
+      m.facturaRelacion?.factura?.estado || 'PENDIENTE',
+      m.facturaRelacion?.factura?.numero_factura_correlativo || '-'
+    ]);
 
   const visitasFiltradas = visitData.data
     .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
-    .map(v => [formatDate(v.fecha), 'Visita', v.cliente?.nombre || v.client || v.usuario?.nombre || '-', formatCurrency(v.monto)]);
+    .map(v => [
+      formatDate(v.fecha), 
+      'Visita Técnica', 
+      v.cliente?.nombre || v.client || v.usuario?.nombre || '-', 
+      formatCurrency(v.monto),
+      v.facturaRelacion?.factura?.estado || 'PENDIENTE',
+      v.facturaRelacion?.factura?.numero_factura_correlativo || '-'
+    ]);
 
   const serviciosFiltrados = serviceData.data
     .filter(s => s.estado?.toLowerCase() !== 'pendiente')
     .map(s => {
         const pagoTecnico = pagosTecnicosMap[s.id_cotizacion] || 0;
         const montoNeto = (parseFloat(s.monto_total) || 0) - pagoTecnico;
-        return [formatDate(s.fecha), 'Servicio', s.solicitud?.cliente?.nombre || '-', formatCurrency(montoNeto)];
+        return [
+          formatDate(s.fecha), 
+          'Comisión por Servicio', 
+          s.solicitud?.cliente?.nombre || '-', 
+          formatCurrency(montoNeto),
+          s.facturaRelacion?.factura?.estado || 'PENDIENTE',
+          s.facturaRelacion?.factura?.numero_factura_correlativo || '-'
+        ];
     });
 
   // Calculate totals from original data instead of formatted strings
@@ -3645,7 +3673,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
 
   doc.autoTable({
     startY: currentY,
-    head: [['Fecha', 'Tipo', 'Cliente', 'Monto']],
+    head: [['Fecha', 'Concepto', 'Cliente', 'Monto', 'Estado Fiscal', 'Correlativo']],
     body: hayDatos
       ? [
           ...membresiasFiltradas,
@@ -3653,14 +3681,22 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
           ...serviciosFiltrados,
           [
             { content: 'TOTAL INGRESOS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: formatCurrency(totalIngresosTabla), styles: { fontStyle: 'bold' } }
+            { content: formatCurrency(totalIngresosTabla), styles: { fontStyle: 'bold' } },
+            { content: '', colSpan: 2 }
           ]
         ]
-      : [[{ content: 'No hay datos disponibles', colSpan: 4, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+      : [[{ content: 'No hay datos disponibles', colSpan: 6, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
-    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 30 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 } },
+    columnStyles: { 
+      0: { cellWidth: 20 }, 
+      1: { cellWidth: 25 }, 
+      2: { cellWidth: 35 }, 
+      3: { cellWidth: 25, halign: 'right' }, 
+      4: { cellWidth: 25, halign: 'center' }, 
+      5: { cellWidth: 'auto', halign: 'center' } 
+    },
     margin: { left: 10, right: 10 },
     pageBreak: 'auto'
   });
@@ -4110,9 +4146,9 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
       estado: m?.estado || 'Pendiente'
     })),
     ...(visitData?.data || []).map((v) => ({
-      tipo: 'Visita',
+      tipo: 'Visita Técnica',
       fecha: v?.fecha || new Date().toISOString(),
-      descripcion: `Pago visita - ${v?.solicitud?.servicio?.nombre || 'Servicio'}`,
+      descripcion: `Pago visita Técnica - ${v?.solicitud?.servicio?.nombre || 'Servicio'}`,
       monto: parseFloat(v?.monto || 0),
       estado: v?.estado || 'Pendiente'
     })),
@@ -4132,7 +4168,7 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
   doc.text('REPORTE DE TRANSACCIONES', 10, currentY);
   currentY += 6;
 
-  const headers = ['Fecha', 'Tipo', 'Descripción', 'Estado', 'Monto']; // monto al final
+  const headers = ['Fecha', 'Concepto', 'Descripción', 'Estado', 'Monto']; // monto al final
   const rows = data.map((t) => [
     formatDate(t.fecha),
     t.tipo,
