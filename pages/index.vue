@@ -972,8 +972,23 @@ const checkAuthStatus = async () => {
     const isAuthenticated = await authStore.checkAuth()
     
     if (isAuthenticated) {
-      // Si está autenticado, redirigir al dashboard correspondiente
-      const dashboardPath = '/cliente/DashboardCliente' // Ruta por defecto
+      // Si está autenticado, redirigir al dashboard correspondiente según su rol
+      const userRole = auth.user?.role?.toLowerCase() || 'usuario';
+      let dashboardPath = '/cliente/DashboardCliente'; // Default
+
+      switch (userRole) {
+        case 'admin':
+        case 'sa':
+          dashboardPath = '/admin/DashboardAdmin';
+          break;
+        case 'tecnico':
+          dashboardPath = '/tecnico/DashboardTecnico';
+          break;
+        case 'usuario':
+          dashboardPath = '/cliente/DashboardCliente';
+          break;
+      }
+      
       navigateTo(dashboardPath, { replace: true })
     }
   } catch (error) { 
@@ -1055,14 +1070,7 @@ const form = ref({
   password: '',
   confirmPassword: '',
   ciudad: null
-})
-
-// Mock data for login
-const mockUsers = [
-  { email: 'cliente@test.com', password: '123456', role: 'cliente', name: 'Juan Pérez' },
-  { email: 'tecnico@test.com', password: '123456', role: 'tecnico', name: 'Carlos López' },
-  { email: 'admin@test.com', password: '123456', role: 'admin', name: 'Admin HogarSeguro' }
-]
+}) 
 
 // Problems data
 const problems = [
@@ -1430,7 +1438,7 @@ const handleAuth = async () => {
               case 'usuario':
                 window.location.href = '/cliente/DashboardCliente';
                 break;
-              case 'as':
+              case 'sa':
                 window.location.href = '/admin/DashboardAdmin';
                 break;
               default:

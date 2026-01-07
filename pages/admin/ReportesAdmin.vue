@@ -15,6 +15,134 @@
       :loading="isLoading"
     />
 
+    <!-- MODAL: Facturación Rápida Inteligente -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="isBillingModalOpen && currentBillingItem" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeBillingModal"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative z-[101] animate-modal-in transform transition-all border border-gray-100 dark:border-gray-700">
+          <!-- Header (Estilo unificado) -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl z-10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2 sm:space-x-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                  <span class="text-lg">🧾</span>
+                </div>
+                <div>
+                  <h3 class="font-black font-sm text-gray-900 dark:text-white uppercase tracking-tight">Facturación SAR</h3>
+                  <div class="flex items-center space-x-1">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase">Siguiente:</p>
+                    <p class="text-[9px] text-blue-600 dark:text-blue-400 font-black">{{ formattedNextCorrelativo }}</p>
+                  </div>
+                </div>
+              </div>
+              <button @click="closeBillingModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-5 overflow-y-auto max-h-[70vh]">
+            <!-- Detalle del Pago -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-5 border border-blue-100 dark:border-blue-800/50">
+              <div class="flex justify-between items-start mb-2">
+                <span class="text-[10px] uppercase font-black text-blue-500 dark:text-blue-400">Concepto de Ingreso</span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300 uppercase">
+                  {{ currentBillingItem.billingType === 'membership' ? 'Membresía' : currentBillingItem.billingType === 'visits' ? 'Visita' : 'Servicio' }}
+                </span>
+              </div>
+              <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                {{ currentBillingItem.billingType === 'membership' ? (currentBillingItem.plan || 'Plan de Membresía') : (currentBillingItem.service || currentBillingItem.serviceName || 'Servicio Técnico') }}
+              </p>
+              <p class="text-[11px] text-gray-600 dark:text-gray-400 mb-3">Cliente: {{ currentBillingItem.usuario?.nombre || currentBillingItem.cliente || currentBillingItem.solicitud?.cliente?.nombre || 'Consumidor Final' }}</p>
+              <div class="pt-2 border-t border-blue-200 dark:border-blue-800/60 flex justify-between items-center">
+                <span class="text-[10px] uppercase font-black text-blue-500 dark:text-blue-400">Total a Facturar</span>
+                <span class="text-lg font-black text-blue-700 dark:text-blue-300">{{ formatCurrency(currentBillingItem.amount || currentBillingItem.monto || currentBillingItem.monto_total || 0) }}</span>
+              </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-2">Tipo de Factura</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <button 
+                    @click="billingForm.tipo_factura = 'CONSUMIDOR_FINAL'; billingForm.nombre_cliente = 'CONSUMIDOR FINAL'; billingForm.rtn_cliente = 'CF'"
+                    :class="billingForm.tipo_factura === 'CONSUMIDOR_FINAL' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
+                    class="py-3 rounded-xl text-xs font-bold transition-all border-2 border-transparent"
+                  >
+                    Cons. Final
+                  </button>
+                  <button 
+                    @click="billingForm.tipo_factura = 'CON_RTN'; billingForm.nombre_cliente = currentBillingItem.usuario?.nombre || currentBillingItem.cliente || currentBillingItem.solicitud?.cliente?.nombre || ''"
+                    :class="billingForm.tipo_factura === 'CON_RTN' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
+                    class="py-3 rounded-xl text-xs font-bold transition-all border-2 border-transparent"
+                  >
+                    Con RTN
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="billingForm.tipo_factura === 'CON_RTN'" class="space-y-4 animate-fade-in">
+                <div>
+                  <label class="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">RTN del Cliente</label>
+                  <input 
+                    v-model="billingForm.rtn_cliente" 
+                    type="text" 
+                    class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                    placeholder="Escriba el RTN"
+                  >
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">Nombre en Factura</label>
+                  <input 
+                    v-model="billingForm.nombre_cliente" 
+                    type="text" 
+                    class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                    placeholder="Nombre completo o Razón Social"
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+            <!-- Alerta: No hay correlativo activo -->
+            <div v-if="!activeCorrelativo && !isLoadingCorrelativo" class="mb-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-xl flex items-center space-x-3">
+              <span class="text-xl">⚠️</span>
+              <div>
+                <p class="text-[11px] font-black text-red-700 dark:text-red-400 uppercase">Configuración Requerida</p>
+                <p class="text-[10px] text-red-600 dark:text-red-300">No hay un rango de facturación SAR activo en el sistema.</p>
+              </div>
+            </div>
+
+          <!-- Acciones -->
+          <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex flex-col space-y-3">
+            <button 
+              @click="saveFactura({ form: billingForm, next: false })" 
+              :disabled="isProcessingBilling || !activeCorrelativo"
+              class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-4 rounded-xl font-black text-xs shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+            >
+              <span v-if="isProcessingBilling" class="animate-spin inline-block">⏳</span>
+              <span>GUARDAR Y CERRAR</span>
+            </button>
+            <button 
+              @click="saveFactura({ form: billingForm, next: true })" 
+              :disabled="isProcessingBilling || filteredPendingBilling.length <= 1 || !activeCorrelativo"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 text-white py-4 rounded-xl font-black text-xs shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+            >
+              <span v-if="isProcessingBilling" class="animate-spin inline-block">⏳</span>
+              <span>GUARDAR Y SIGUIENTE ({{ filteredPendingBilling.length - 1 }})</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
 <!-- Modal de Detalles del Pago -->
 <Transition
   name="modal"
@@ -1032,6 +1160,62 @@
         </div>
       </section>
 
+      <!-- SECCIÓN: Centro de Facturación Inteligente -->
+      <section class="px-3 sm:px-4 mb-4 sm:mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-3">
+          <!-- Header con título y selector de mes -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <div class="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-lg">
+                <span class="text-blue-600 dark:text-blue-400 text-sm">⚡</span>
+              </div>
+              <h2 class="text-sm font-black text-gray-900 dark:text-white">Centro de Facturación Inteligente</h2>
+            </div>
+            <input 
+              type="month"
+              v-model="billingMonth"
+              @change="loadPendingBilling"
+              class="px-2 py-1 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            />
+          </div>
+
+          <!-- Resumen de Contadores (Estilo consistente) -->
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5 mb-3 border border-gray-100 dark:border-gray-600/50">
+            <div class="grid grid-cols-4 gap-2 text-center">
+              <div>
+                <div class="text-sm font-black text-gray-900 dark:text-white">{{ billingCounts.total }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Pendientes</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ billingCounts.membership }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Membresías</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">{{ billingCounts.visits }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Visitas</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-purple-600 dark:text-purple-400">{{ billingCounts.services }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Servicios</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón de acción -->
+          <button 
+            v-if="filteredPendingBilling.length > 0"
+            @click="openNextPendingBilling"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold text-xs shadow-sm transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+          >
+            <span>🚀 Comenzar Facturación Rápida</span>
+            <span class="bg-blue-500 text-white px-2 py-0.5 rounded-full text-[10px]">{{ filteredPendingBilling.length }}</span>
+          </button>
+          <div v-else class="text-center py-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-dashed border-gray-200 dark:border-gray-600">
+            <p class="text-xs text-gray-500 dark:text-gray-400">No hay ingresos pendientes de factura.</p>
+          </div>
+        </div>
+      </section>
+
       <!-- Sección de Reportería -->
       <section class="px-3 sm:px-4 mb-4 sm:mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-3">
@@ -1156,6 +1340,21 @@ const visitPayments = ref([]);
 const servicePayments = ref([]);
 const withdrawals = ref([]);
 const transactions = ref([]);
+const isProcessingBilling = ref(false);
+const billingMonth = ref(new Date().toISOString().slice(0, 7));
+const pendingBillingItems = ref([]);
+const isBillingModalOpen = ref(false);
+const currentBillingItem = ref(null);
+const billingForm = reactive({
+  tipo_factura: 'CONSUMIDOR_FINAL',
+  nombre_cliente: 'CONSUMIDOR FINAL',
+  rtn_cliente: 'CF',
+  subtotal: 0,
+  isv: 0,
+  total: 0
+}); 
+const activeCorrelativo = ref(null);
+const isLoadingCorrelativo = ref(false);
 
 // Cache para datos
 const paymentsCache = ref({});
@@ -1214,6 +1413,27 @@ const toast = reactive({
   message: '',
   type: 'info',
   duration: 3000
+});
+
+// Computed para items pendientes de facturación
+const filteredPendingBilling = computed(() => {
+  return (pendingBillingItems.value || []).filter(item => !item.facturaRelacion?.factura);
+});
+
+const billingCounts = computed(() => {
+  const items = pendingBillingItems.value || [];
+  return {
+    membership: items.filter(item => item.billingType === 'membership').length,
+    visits: items.filter(item => item.billingType === 'visits').length,
+    services: items.filter(item => item.billingType === 'services').length,
+    total: items.length
+  };
+});
+
+const formattedNextCorrelativo = computed(() => {
+  if (!activeCorrelativo.value || activeCorrelativo.value.estado !== 'ACTIVO') return '---';
+  const next = (activeCorrelativo.value.correlativo_actual || 0) + 1;
+  return `${activeCorrelativo.value.prefijo || ''}${next.toString().padStart(8, '0')}`;
 });
 
 // ===== FUNCIONES DE UTILIDAD =====
@@ -1441,6 +1661,7 @@ const loadMembershipPayments = async (page = 1) => {
       const processedItems = items.map(item => ({
         ...item,
         id: item.id_membresia,
+        billingType: 'membership',
         // Mapear los estados al formato del frontend
         estado: mapApiStatusToFrontend(item.estado),
         // Asegurar que existan las propiedades necesarias
@@ -1579,6 +1800,7 @@ const loadVisitPayments = async (page = 1) => {
       const transformedData = items.map(item => ({
         ...item,
         id: item.id_pagovisita,
+        billingType: 'visits',
         status: mapApiStatusToFrontend(item.estado),
         amount: item.monto || 0,
         date: item.fecha,
@@ -1727,6 +1949,7 @@ const loadServicePayments = async (page = 1) => {
         return {
           ...item,
           id: item.id_cotizacion,
+          billingType: 'services',
           status: mapApiStatusToFrontend(item.estado),
           amount: item.monto_total || 0,
           date: item.fecha,
@@ -2461,6 +2684,131 @@ const getItemIcon = () => {
   }
 };
 
+// ===== FUNCIONES DE FACTURACIÓN =====
+const loadPendingBilling = async () => {
+  try {
+    isLoadingData.value = true;
+    const month = billingMonth.value;
+    
+    const response = await $api(`/facturas/pendientes?month=${month}`, {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    });
+
+    if (response?.status === 'success') {
+      pendingBillingItems.value = response.data || [];
+    }
+  } catch (error) {
+    console.error('Error cargando pendientes de facturación:', error);
+    showToast('Error al cargar pendientes de facturación', 'error');
+  } finally {
+    isLoadingData.value = false;
+  }
+};
+
+const fetchActiveCorrelativo = async () => {
+  try {
+    isLoadingCorrelativo.value = true;
+    const response = await $api('/facturas/estado-correlativo', {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    });
+    if (response?.status === 'success') {
+      activeCorrelativo.value = response.data;
+    }
+  } catch (error) {
+    console.error('Error al obtener correlativo:', error);
+  } finally {
+    isLoadingCorrelativo.value = false;
+  }
+};
+
+const openNextPendingBilling = async () => {
+  if (filteredPendingBilling.value.length > 0) {
+    currentBillingItem.value = filteredPendingBilling.value[0];
+    
+    // Resetear form con datos del item
+    billingForm.tipo_factura = 'CONSUMIDOR_FINAL';
+    billingForm.nombre_cliente = 'CONSUMIDOR FINAL';
+    billingForm.rtn_cliente = 'CF';
+    
+    // Cargar correlativo actual
+    await fetchActiveCorrelativo();
+    
+    isBillingModalOpen.value = true;
+  } else {
+    showToast('No hay facturas pendientes', 'success');
+  }
+};
+
+const closeBillingModal = () => {
+  isBillingModalOpen.value = false;
+  currentBillingItem.value = null;
+};
+
+const saveFactura = async ({ form, next }) => {
+  if (isProcessingBilling.value) return;
+  
+  try {
+    isProcessingBilling.value = true;
+    const item = currentBillingItem.value;
+    const total = parseFloat(item.amount || item.monto || item.monto_total || 0);
+    const subtotal = total;
+    const isv = 0.00;
+
+    const payload = {
+      ...form,
+      subtotal: subtotal.toFixed(2),
+      isv: isv.toFixed(2),
+      total: total.toFixed(2),
+      id_pagovisita: item.billingType === 'visits' ? (item.id_pagovisita || item.id) : null,
+      id_cotizacion: item.billingType === 'services' ? (item.id_cotizacion || item.id) : null,
+      id_membresia: item.billingType === 'membership' ? (item.id_membresia || item.id) : null
+    };
+
+    const response = await $api('/facturas', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (response?.status === 'success') {
+      showToast('Factura generada y vinculada correctamente', 'success');
+      
+      // Eliminar el item de la lista local
+      pendingBillingItems.value = pendingBillingItems.value.filter(i => i.id_local !== item.id_local);
+
+      if (next && filteredPendingBilling.value.length > 0) {
+        // Abrir el siguiente inmediatamente
+        currentBillingItem.value = filteredPendingBilling.value[0];
+        // Resetear form
+        billingForm.tipo_factura = 'CONSUMIDOR_FINAL';
+        billingForm.nombre_cliente = 'CONSUMIDOR FINAL';
+        billingForm.rtn_cliente = 'CF';
+      } else {
+        closeBillingModal();
+      }
+      
+      // Recargar datos de tabla principal
+      loadTabData(currentPaymentsPage.value);
+      
+      // Actualizar correlativo para el siguiente
+      await fetchActiveCorrelativo();
+    } else if (response?.status === 'error_config') {
+      showToast(response.message, 'warning');
+      if (!next) closeBillingModal();
+    }
+  } catch (error) {
+    console.error('Error al guardar factura:', error);
+    showToast(error.message || 'Error al generar la factura', 'error');
+  } finally {
+    isProcessingBilling.value = false;
+  }
+};
+
 const getItemAmountClass = (status) => {
   try {
     if (!status) return 'text-gray-600 dark:text-gray-400';
@@ -2682,8 +3030,6 @@ const openFacturaModal = async (payment) => {
         if (payment.id_membresia) params.append('id_membresia', payment.id_membresia);
         if (payment.id_pagovisita) params.append('id_pagovisita', payment.id_pagovisita);
 
-        console.log('Buscando factura por pago con parámetros:', params.toString());
-
         const response = await $api(`/facturas/relaciones/idpago?${params.toString()}`, {
           baseURL: config.public.apiBase,
           method: 'GET',
@@ -2693,13 +3039,9 @@ const openFacturaModal = async (payment) => {
           }
         });
 
-        console.log('Respuesta de búsqueda por pago:', JSON.stringify(response, null, 2));
-
         if (response?.status === 'success' && response.factura) {
           const factura = response.factura;
           const correlativo = response.correlativo;
-          console.log('Datos de la factura encontrados:', factura);
-          console.log('Datos del correlativo encontrados:', correlativo);
           
           // Actualizar variables de datos fiscales con los datos de la factura
           if (factura.cai) empresaCAI.value = factura.cai;
@@ -2719,7 +3061,6 @@ const openFacturaModal = async (payment) => {
           if (factura.isv) selectedFacturaPayment.value.isv = factura.isv;
           if (factura.total) selectedFacturaPayment.value.total = factura.total;
           
-          console.log('Datos actualizados - CAI:', empresaCAI.value, 'Correlativo:', empresaCorrelativo.value, 'Rango:', empresaRangoAutorizado.value, 'Fecha límite:', empresaFechaLimite.value);
         } else {
           console.warn('No se encontró factura asociada al pago:', response);
         }
@@ -2736,9 +3077,6 @@ const openFacturaModal = async (payment) => {
     } else if (payment.id_factura) {
       // Obtener datos de la factura específica si hay un ID
       try {
-        console.log('Solicitando factura con ID:', payment.id_factura);
-        console.log('URL de la API:', `${config.public.apiBase}/facturas/${payment.id_factura}`);
-        
         const response = await $api(`/facturas/${payment.id_factura}`, {
           baseURL: config.public.apiBase,
           method: 'GET',
@@ -2748,17 +3086,13 @@ const openFacturaModal = async (payment) => {
           }
         });
 
-        console.log('Respuesta del servidor:', JSON.stringify(response, null, 2));
-
         if (response?.status === 'success' && response.factura) {
           const factura = response.factura;
-          console.log('Datos de la factura recibidos:', factura);
           
           // Actualizar variables de datos fiscales con los datos de la factura
           if (factura.cai) empresaCAI.value = factura.cai;
           if (factura.numero_factura_correlativo) empresaCorrelativo.value = factura.numero_factura_correlativo;
           
-          console.log('Datos actualizados - CAI:', empresaCAI.value, 'Correlativo:', empresaCorrelativo.value);
         } else {
           console.warn('La respuesta no contiene datos de factura válidos:', response);
         }
@@ -3409,26 +3743,8 @@ const generateReport = async (report) => {
     
     const rawTechData = technicianIncomeRes?.movimientos || technicianIncomeRes?.data || [];
     const technicianIncomeData = Array.isArray(rawTechData) ? rawTechData : [];
-    console.log('📊 Datos de ingresos técnicos:', technicianIncomeData.length, 'registros found', Array.isArray(technicianIncomeData));
-    
-    // [DEBUG] Imprimir detalles solicitados
-    console.log('=== DEBUG FRONTEND: DATA ===');
-    console.log('COTIZACIONES (Servicios) Encontradas:', quotationRes?.data?.length);
-    console.log('Detalle Cotizaciones:', JSON.stringify(quotationRes?.data?.map(c => ({
-      id_cotizacion: c.id_cotizacion,
-      monto: c.monto_manodeobra, 
-      estado: c.estado
-    })), null, 2));
 
-    console.log('PAGOS TÉCNICOS Encontrados:', technicianIncomeData.length);
-    console.log('Detalle Pagos Técnicos:', JSON.stringify(technicianIncomeData.map(m => ({
-      id_cotizacion: m.id_cotizacion,
-      tipo: m.tipo,
-      monto: m.monto
-    })), null, 2));
-    console.log('============================');
-
-    const serviceData = processData(quotationRes, 'Servicios'); // 👈 Cotizaciones se consideran "servicios" en el reporte financiero
+    const serviceData = processData(quotationRes, 'Servicios'); // Cotizaciones se consideran "servicios" en el reporte financiero
 
     // 💰 4️⃣ Cálculos de balance
     const ingresosTotales = membershipData.total + visitData.total + serviceData.total;
@@ -4196,24 +4512,14 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
 
 // ===== FUNCIONES DE CREACIÓN DE FACTURAS =====
 const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado, idCotizacion = null) => {
-  console.log('🚀 INICIO - crearFacturaParaPago');
-  console.log('📋 Datos iniciales:', {
-    idUsuario,
-    tipoPago,
-    idRelacionado,
-    idCotizacion,
-    paymentData: payment
-  });
 
   try {
     const config = useRuntimeConfig();
     const auth = useAuthStore();
 
-    console.log('🔍 Paso 1: Verificando RTN del usuario...');
     // Verificar si el usuario tiene RTN
     let rtnResponse;
     try {
-      console.log(`📡 Haciendo petición a: /usuarios/verificar-rtn/${idUsuario}`);
       rtnResponse = await $api(`/usuarios/verificar-rtn/${idUsuario}`, {
         baseURL: config.public.apiBase,
         method: 'GET',
@@ -4222,21 +4528,16 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
           'Authorization': `Bearer ${auth.token}`
         }
       });
-      console.log('✅ Respuesta RTN exitosa:', rtnResponse);
     } catch (error) {
-      console.log(' Error al verificar RTN:', error);
-      console.log(' Usuario no tiene RTN o error al verificar:', error);
       rtnResponse = { success: false };
     }
 
-    console.log(' Paso 2: Calculando montos de factura...');
     // Preparar datos de la factura - payment.monto_total es el total pagado
     let total = parseFloat(payment.monto_total || payment.monto || 0);
 
     // Si es pago de servicio, calcular solo la comisión
     if (tipoPago === 'services') {
       try {
-        console.log('🔍 Obteniendo porcentaje de comisión por servicio...');
         const configResponse = await $api('/config/valor/comision_por_servicio', {
           baseURL: config.public.apiBase,
           method: 'GET',
@@ -4253,73 +4554,44 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
           const porcentaje = parseFloat(configData.valor);
           const montoBase = total;
           total = (montoBase * porcentaje) / 100;
-          console.log(`💰 Configuración obtenida: ${porcentaje}%`);
-          console.log(`💰 Comisión calculada: ${montoBase} * ${porcentaje}% = ${total}`);
         } else {
-            console.warn('⚠️ No se pudo obtener el valor de la comisión correctamente:', configData);
         }
       } catch (error) {
-        console.error('❌ Error al obtener configuración de comisión:', error);
       }
     }
 
     const subtotal = total; // Subtotal es igual al Total (sin ISV)
     const isv = 0; // ISV en 0
-    
-    console.log(' Montos calculados:', {
-      totalPagado: total,
-      subtotal,
-      isv,
-      porcentajeISV: '0%',
-      fuenteDatos: payment.monto_total ? 'monto_total' : payment.monto ? 'monto' : 'default 0'
-    });
 
-    console.log(' Paso 3: Preparando datos de factura...');
     let facturaData = {
       tipo_factura: rtnResponse?.success ? 'CON_RTN' : 'CONSUMIDOR_FINAL',
       subtotal,
       isv,
       total
-    };
-
-    console.log('🔍 Tipo de factura determinado:', facturaData.tipo_factura);
+    }; 
 
     // Agregar datos específicos según tipo de factura
     if (rtnResponse?.success && rtnResponse.data) {
       facturaData.rtn_cliente = rtnResponse.data.rtn;
       facturaData.nombre_cliente = rtnResponse.data.nombre.trim();
-      console.log('📋 Datos de cliente con RTN:', {
-        rtn: rtnResponse.data.rtn,
-        nombre: rtnResponse.data.nombre.trim()
-      });
-    } else {
-      console.log('📋 Factura como consumidor final (sin RTN)');
     }
 
-    console.log('🔗 Paso 4: Agregando IDs relacionados...');
     // Agregar ID relacionado según tipo de pago
     switch (tipoPago) {
       case 'membership':
         facturaData.id_membresia = idRelacionado;
-        console.log('📋 ID membresía agregado:', idRelacionado);
         break;
       case 'visits':
         facturaData.id_pagovisita = idRelacionado;
-        console.log('📋 ID pago visita agregado:', idRelacionado);
         if (idCotizacion) {
           facturaData.id_cotizacion = idCotizacion;
-          console.log('📋 ID cotización agregado:', idCotizacion);
         }
         break;
       case 'services':
         facturaData.id_cotizacion = idCotizacion || idRelacionado;
-        console.log('📋 ID cotización servicio agregado:', idCotizacion || idRelacionado);
         break;
     }
 
-    console.log('📦 Datos finales de factura:', facturaData);
-
-    console.log('📡 Paso 5: Enviando petición POST a /facturas...');
     // Crear la factura
     const facturaResponse = await $api('/facturas', {
       baseURL: config.public.apiBase,
@@ -4332,27 +4604,19 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
       body: facturaData
     });
 
-    console.log('📬 Respuesta de creación de factura:', facturaResponse);
-
     if (facturaResponse?.status === 'success') {
-      console.log(`✅ Factura creada exitosamente para ${tipoPago}:`, facturaResponse.data);
-      showToast(`Factura ${facturaData.tipo_factura === 'CON_RTN' ? 'con RTN' : 'consumidor final'} creada correctamente`, 'success');
+      // Retornamos éxito pero no mostramos toast aquí para no duplicar con el de approvePayment
+      return 'success';
+    } else if (facturaResponse?.status === 'error_config') {
+      showToast('Pago procesado correctamente, pero la factura deberá generarse manualmente cuando se active un correlativo.', 'warning');
+      return 'error_config';
     } else {
       throw new Error('Error al crear la factura');
     }
 
-    console.log('🎉 FIN - crearFacturaParaPago completado exitosamente');
-
   } catch (error) {
-    console.error('❌ ERROR en crearFacturaParaPago:', error);
-    console.error('📋 Detalles del error:', {
-      message: error.message,
-      response: error.response?._data,
-      stack: error.stack
-    });
-    showToast('Error al crear la factura: ' + (error.response?._data?.message || error.message), 'error');
-    // No interrumpir el flujo principal si falla la creación de factura
-    console.log('⚠️ Continuando con el flujo principal a pesar del error...');
+    const errorMsg = error.response?._data?.message || error.message;
+    showToast('Error al crear la factura: ' + errorMsg, 'error');
   }
 };
 
@@ -4361,6 +4625,7 @@ const approvePayment = async (id) => {
   try {
     const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
     let response;
+    let billingStatus = null;
     const config = useRuntimeConfig();
     const auth = useAuthStore();
     const headers = {
@@ -4418,7 +4683,7 @@ const approvePayment = async (id) => {
         });
 
         // Crear factura para pago de membresía
-        await crearFacturaParaPago(idUsuario, payment, 'membership', payment.id_membresia || payment.id);
+        billingStatus = await crearFacturaParaPago(idUsuario, payment, 'membership', payment.id_membresia || payment.id);
         break;
 
       case 'visits':
@@ -4434,7 +4699,7 @@ const approvePayment = async (id) => {
         });
 
         // Crear factura para pago de visita
-        await crearFacturaParaPago(idUsuario, payment, 'visits', payment.id_pagovisita, payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion);
+        billingStatus = await crearFacturaParaPago(idUsuario, payment, 'visits', payment.id_pagovisita, payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion);
 
         // Notificar al admin de servicio pendiente
         if (response?.success) {
@@ -4496,7 +4761,7 @@ const approvePayment = async (id) => {
         });
 
         // Crear factura para pago de servicio
-        await crearFacturaParaPago(idUsuario, payment, 'services', solicitudId, cotizacionId);
+        billingStatus = await crearFacturaParaPago(idUsuario, payment, 'services', solicitudId, cotizacionId);
 
         // Notificar al técnico sobre el pago recibido
         if (response?.success && payment.solicitud?.tecnico?.id_usuario) {
@@ -4541,7 +4806,11 @@ const approvePayment = async (id) => {
       closeDetailsModal();
     }
 
-    showToast('Pago aprobado correctamente', 'success');
+    // Solo mostrar el toast de éxito general si NO hubo una advertencia de facturación
+    // El toast de advertencia ya se mostró dentro de crearFacturaParaPago
+    if (billingStatus !== 'error_config') {
+      showToast('Pago aprobado correctamente', 'success');
+    }
 
     // Notificar al cliente sobre el pago aprobado
     try {
@@ -4581,6 +4850,7 @@ const approvePayment = async (id) => {
     await loadTabData(currentPage);
     await updatePlatformStats();
     await loadTransactions(); // Actualizar sección de transacciones
+    await loadPendingBilling(); // Actualizar Centro de Facturación
 
   } catch (error) {
     console.error('❌ Error aprobando pago:', error);
@@ -4835,6 +5105,7 @@ onMounted(async () => {
       };
     }    
     await loadTransactions();
+    await loadPendingBilling();
   } catch (error) {
     window.location.reload()
   } finally {
