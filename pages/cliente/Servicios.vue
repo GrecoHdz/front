@@ -596,7 +596,7 @@
                       placeholder="Ingresa el número de comprobante"
                     >
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Realiza la transferencia a la cuenta seleccionada e ingresa el número de comprobante.
+                      Realiza la transferencia, ingresa el número de comprobante y lo envias. Posteriormente serás redirigido a WhatsApp para adjuntar la captura.
                     </p>
                   </div>
                 </div>
@@ -862,7 +862,7 @@
                   placeholder="Ingresa el número de comprobante"
                 >
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Realiza la transferencia e ingresa el número de comprobante.
+                  Realiza la transferencia, ingresa el número de comprobante y lo envias. Posteriormente serás redirigido a WhatsApp para adjuntar la captura.
                 </p>
               </div>
             </div>
@@ -3200,16 +3200,22 @@ const processVisitPayment = async () => {
     
     const authToken = useCookie('token').value;
     
-    await $api('/pagovisita', {
-      method: 'POST',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      },
-      body: requestData
-    });
-    
+    const response = await $api('/pagovisita', {
+  method: 'POST',
+  baseURL: config.public.apiBase,
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${authToken}`
+  },
+  body: requestData
+});
+ 
+// Asignar el id_pagovisita al selectedService
+if (response?.data?.id_pagovisita) {
+  selectedService.value.id_pagovisita = response.data.id_pagovisita;
+  console.log('ID de pago asignado:', selectedService.value.id_pagovisita);
+}
+
     const token = useCookie('token').value;
     
     try {
@@ -3226,6 +3232,8 @@ const processVisitPayment = async () => {
       console.error('Error al actualizar el estado de la solicitud:', updateError);
       throw new Error(`Error al actualizar el estado de la solicitud: ${updateError.message}`);
     }
+
+    
     
     // Notificar a los administradores sobre el pago de visita recibido
     try {
@@ -3256,18 +3264,26 @@ const processVisitPayment = async () => {
           })
         });
     } catch (error) {
-      console.error('Error al enviar notificación a administradores:', error);
-      // No mostrar error al usuario para no afectar su experiencia
-    }
+      console.error('Error al enviar notificación a SA:', error);
+    }  
     
-    closeVisitPaymentModal();
-    await loadServices();
-    
+    // Mostrar mensaje de éxito
     showSuccess(
       '¡Pago Enviado!',
       'Una vez se verifique el pago, se le asignará un técnico.'
     );
+    console.log('Estructura de selectedService.value:', selectedService.value);
+     //Enviar mensaje por WhatsApp
+    sendWhatsAppMessage(
+      selectedService.value, 
+      'visit', 
+      visitCost.value, 
+      comprobante.value.trim()
+    );
     
+    // Limpiar y cerrar
+    closeVisitPaymentModal();
+    await loadServices();
     selectedAccount.value = '';
     comprobante.value = '';
     
@@ -3327,6 +3343,14 @@ const processPayment = async () => {
       },
       body: JSON.stringify(payload)
     });
+// Mostrar la respuesta del servidor
+console.log('Respuesta del servidor:', response);
+
+// Asignar el id_cotizacion al selectedService
+if (response?.detalles?.id_cotizacion) {
+  selectedService.value.id_cotizacion = response.detalles.id_cotizacion;
+  console.log('ID de cotización asignado:', selectedService.value.id_cotizacion);
+}
     
     // Notificar a los administradores sobre el pago de servicio recibido 
     try {
@@ -3365,6 +3389,21 @@ const processPayment = async () => {
       console.error('Error al enviar notificación a SA:', error);
     }  
     
+   // Verificar que el código llegue hasta aquí
+console.log('Llegó al punto de depuración');
+
+// Depuración: Mostrar la estructura de selectedService.value
+console.log('Estructura de selectedService.value:', selectedService.value);
+console.log('Tipo de selectedService.value:', typeof selectedService.value);
+    
+    //Enviar mensaje por WhatsApp
+    sendWhatsAppMessage(
+      selectedService.value, 
+      'service', 
+      totalAPagar.value, 
+      comprobante.value.trim()
+    ); 
+    
     // Cerrar el modal de pago
     showPaymentModal.value = false;
     
@@ -3374,9 +3413,6 @@ const processPayment = async () => {
     
     // Actualizar la lista de servicios
     await loadServices();
-    
-    // Mostrar mensaje de éxito
-    showSuccess('Pago procesado correctamente');
     
     // Cerrar cualquier otro modal abierto
     showQuotationModal.value = false;
@@ -3650,6 +3686,68 @@ const fetchTecnicoRating = async (idTecnico) => {
 // FUNCIONES DE UTILIDAD
 // =========================
 
+// Variable reactiva para almacenar el número de teléfono de la empresa
+const empresaPhoneNumber = ref('');
+
+// Función para obtener el número de teléfono de la empresa
+const fetchEmpresaPhoneNumber = async () => {
+  try {
+    const response = await $api('/config/valor/numero_empresa', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response && response.valor) {
+      empresaPhoneNumber.value = response.valor;
+    }
+  } catch (error) {
+    console.error('Error al obtener el número de teléfono de la empresa:', error);
+    // Establecer un valor por defecto en caso de error
+    empresaPhoneNumber.value = '1234567890';
+  }
+};
+
+// Función para enviar detalles de pago por WhatsApp
+const sendWhatsAppMessage = async (service, paymentType, amount, receiptNumber) => {
+  try {
+    // Si no tenemos el número de teléfono, intentar obtenerlo
+    if (!empresaPhoneNumber.value) {
+      await fetchEmpresaPhoneNumber();
+    }
+    
+    // Asegurarse de que amount sea un número
+    const amountNumber = Number(amount) || 0;
+    
+    // Formatear el mensaje con los detalles del pago
+    const message = `*Comprobante de Pago*\n\n` +
+      `*ID:* ${paymentType === 'visit' ? service.id_pagovisita : service.id_cotizacion}\n` +
+      `*Tipo de pago:* ${paymentType === 'visit' ? 'Pago de Visita' : 'Pago de Servicio'}\n` + 
+      `*N° de comprobante:* ${receiptNumber}\n\n`;
+    
+    // Mostrar en consola los detalles que se enviarán
+    console.log('Mensaje que se enviará por WhatsApp:', {
+      telefono: `+504 ${empresaPhoneNumber.value || '1234567890'}`,
+      mensaje: message,
+      url: `https://wa.me/+504${empresaPhoneNumber.value || '1234567890'}?text=${encodeURIComponent(message)}`
+    });
+    
+    // Codificar el mensaje para la URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Usar el número de teléfono de la empresa o uno por defecto
+    const phoneNumber = empresaPhoneNumber.value || '1234567890';
+    
+    // Abrir WhatsApp Web con el mensaje predefinido
+    window.open(`https://wa.me/+504${phoneNumber}?text=${encodedMessage}`, '_blank');
+  } catch (error) {
+    console.error('Error al preparar el mensaje de WhatsApp:', error);
+  }
+};
+
 const copyToClipboard = (text) => {
   navigator.clipboard.writeText(text).then(() => {
     showSuccess('Número de cuenta copiado')
@@ -3710,7 +3808,8 @@ onMounted(async () => {
     // Cargar datos de configuración primero
     await Promise.all([
       fetchDiscountPercentage(),
-      fetchMembresiaBeneficios()
+      fetchMembresiaBeneficios(),
+      fetchEmpresaPhoneNumber() // Cargar el número de teléfono de la empresa
     ]);
     
     // Luego cargar datos principales
