@@ -3389,13 +3389,6 @@ if (response?.detalles?.id_cotizacion) {
       console.error('Error al enviar notificación a SA:', error);
     }  
     
-   // Verificar que el código llegue hasta aquí
-console.log('Llegó al punto de depuración');
-
-// Depuración: Mostrar la estructura de selectedService.value
-console.log('Estructura de selectedService.value:', selectedService.value);
-console.log('Tipo de selectedService.value:', typeof selectedService.value);
-    
     //Enviar mensaje por WhatsApp
     sendWhatsAppMessage(
       selectedService.value, 
@@ -3722,11 +3715,20 @@ const sendWhatsAppMessage = async (service, paymentType, amount, receiptNumber) 
     // Asegurarse de que amount sea un número
     const amountNumber = Number(amount) || 0;
     
+    // Obtener la fecha actual en formato DDMMYY
+const today = new Date();
+const formattedDate = [
+  String(today.getDate()).padStart(2, '0'),
+  String(today.getMonth() + 1).padStart(2, '0'),
+  String(today.getFullYear()).slice(-2)
+].join('');
+
     // Formatear el mensaje con los detalles del pago
     const message = `*Comprobante de Pago*\n\n` +
-      `*ID:* ${paymentType === 'visit' ? service.id_pagovisita : service.id_cotizacion}\n` +
+      `*ID:* ${formattedDate}-${paymentType === 'visit' ? service.id_pagovisita : service.id_cotizacion}\n` +
       `*Tipo de pago:* ${paymentType === 'visit' ? 'Pago de Visita' : 'Pago de Servicio'}\n` + 
-      `*N° de comprobante:* ${receiptNumber}\n\n`;
+      `*N° de comprobante:* ${receiptNumber}\n\n`+
+      `Adjunto una captura del comprobante de pago para su verificación.`;
     
     // Mostrar en consola los detalles que se enviarán
     console.log('Mensaje que se enviará por WhatsApp:', {

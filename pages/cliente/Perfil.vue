@@ -2107,6 +2107,73 @@ const renovarMembresia = async () => {
   await fetchBankAccounts();
 };
 
+// Referencia para el número de teléfono de la empresa
+const empresaPhoneNumber = ref('');
+
+// Función para obtener el número de teléfono de la empresa
+const fetchEmpresaPhoneNumber = async () => {
+  try {
+    const response = await $api('/config/valor/numero_empresa', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response && response.valor) {
+      empresaPhoneNumber.value = response.valor;
+    } else {
+      empresaPhoneNumber.value = '1234567890';
+    }
+  } catch (error) {
+    console.error('Error al obtener el número de teléfono de la empresa:', error);
+    // Establecer un valor por defecto en caso de error
+    empresaPhoneNumber.value = '1234567890';
+  }
+};
+
+// Función para enviar mensaje de WhatsApp
+const sendWhatsAppMessage = async (amount, receiptNumber, membershipId) => {
+  try {
+    // Si no tenemos el número de teléfono, intentar obtenerlo
+    if (!empresaPhoneNumber.value) {
+      await fetchEmpresaPhoneNumber();
+    }
+    
+    // Asegurarse de que amount sea un número
+    const amountNumber = Number(amount) || 0;
+    
+    // Obtener la fecha actual en formato DDMMYY
+    const today = new Date();
+    const formattedDate = [
+      String(today.getDate()).padStart(2, '0'),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getFullYear()).slice(-2)
+    ].join('');
+    
+    // Formatear el mensaje con los detalles del pago
+    const message = `*Comprobante de Pago*\n\n` +
+      `*ID de Membresía:* ${formattedDate}-${membershipId || 'N/A'}\n` +
+      `*Tipo de pago:* Pago de Membresía\n` + 
+      `*N° de comprobante:* ${receiptNumber}\n\n` +
+      `Adjunto una captura del comprobante de pago para su verificación.`;
+    
+    // Codificar el mensaje para la URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Usar el número de teléfono de la empresa o uno por defecto
+    const phoneNumber = empresaPhoneNumber.value || '1234567890';
+    
+    // Abrir WhatsApp Web con el mensaje predefinido
+    window.open(`https://wa.me/+504${phoneNumber}?text=${encodedMessage}`, '_blank');
+  } catch (error) {
+    console.error('Error al preparar el mensaje de WhatsApp:', error);
+  }
+};
+
 const confirmRenewal = async () => {
   if (!selectedAccount.value) {
     showError('Error', 'Por favor selecciona una cuenta bancaria');
@@ -2157,19 +2224,19 @@ const confirmRenewal = async () => {
           nombre_rol: 'admin'
         })
       });
-       await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${auth.token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Pago por membresía recibido',
-            nombre_rol: 'sa'
-          })
-        });
+      await $api('/notificaciones/enviar', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${auth.token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          titulo: 'Pago por membresía recibido',
+          nombre_rol: 'sa'
+        })
+      });
     } catch (error) {
       console.error('Error al enviar notificación:', error);
       // No mostramos error al usuario para no afectar su experiencia
@@ -2184,6 +2251,9 @@ const confirmRenewal = async () => {
       '¡Pago Enviado!',
       'Tu membresía se actualizará una vez verifiquemos tu pago.'
     );
+    
+    // Enviar mensaje de WhatsApp con el ID de la membresía
+    await sendWhatsAppMessage(membershipCost.value, comprobante.value.trim(), data.id_membresia);
     
     // Limpiar formulario
     selectedAccount.value = '';

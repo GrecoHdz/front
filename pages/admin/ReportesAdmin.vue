@@ -989,15 +989,36 @@
       <!-- Pagos y Retiros con pestañas REDISEÑADA -->
       <section class="px-3 sm:px-4 mb-4 sm:mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-3">
-          <!-- Header con título y selector de mes -->
-          <div class="flex items-center justify-between mb-3">
+          <!-- Header con título, selector de mes y buscador -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
             <h2 class="text-sm font-black text-gray-900 dark:text-white">Gestión de Pagos y Retiros</h2>
-            <input 
-              type="month"
-              v-model="selectedMonthPayments"
-              @change="updateSelectedMonth('payments')"
-              class="px-2 py-1 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-            />
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <div class="relative flex-1 sm:w-48">
+                <input
+                  type="text"
+                  v-model="searchInput"
+                  @input="debouncedSearch"
+                  @keyup.enter="debouncedSearch"
+                  placeholder="Buscar por ID..."
+                  class="w-full px-3 py-1.5 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button 
+                  @click="clearSearch"
+                  v-if="searchId"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <input 
+                type="month"
+                v-model="selectedMonthPayments"
+                @change="updateSelectedMonth('payments')"
+                class="px-2 py-1.5 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+              />
+            </div>
           </div>
       
           <!-- Pestañas principales -->
@@ -1099,7 +1120,8 @@
               <div class="grid grid-cols-2 gap-1.5">
                 <div v-for="item in getCurrentTabData()" :key="item.id || item.id_membresia || item.id_pagovisita || item.id_cotizacion || item.id_movimiento"
                      :class="getItemCardClass(item.status || item.estado)"
-                     class="rounded-lg p-2 shadow-sm border text-[11px]">
+                     class="rounded-lg p-2 shadow-sm border text-[11px]"
+                >
                   <div class="mb-2">
                     <div class="flex items-center justify-between mb-1">
                       <div class="flex items-center space-x-1.5 flex-1 min-w-0">
@@ -1112,7 +1134,8 @@
                     </div> 
                   </div>
                   <button @click="showItemDetails(item)" 
-                          class="w-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[9px] px-2 py-1 rounded font-medium transition-colors">
+                          class="w-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[9px] px-2 py-1 rounded font-medium transition-colors"
+                  >
                     Ver Detalles
                   </button>
                 </div>
@@ -1232,7 +1255,8 @@
           
         <div class="grid grid-cols-1 gap-2 sm:gap-3">
           <div v-for="report in availableReports" :key="report.id"
-               class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-2 sm:p-3 shadow-sm hover:shadow transition-shadow">
+               class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-2 sm:p-3 shadow-sm hover:shadow transition-shadow"
+          >
             <div class="flex justify-between items-start h-full">
               <div class="pr-1 sm:pr-2 flex-1 min-w-0">
                 <h3 class="text-[12px] sm:text-xs font-medium text-gray-900 dark:text-white mb-0.5 line-clamp-1">{{ report.title }}</h3>
@@ -1261,6 +1285,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
 import { Chart, registerables } from 'chart.js';
 import { useHead, useCookie, useRuntimeConfig } from '#imports';
 import { useRouter, useRoute } from 'vue-router'
@@ -1373,6 +1398,23 @@ const totalMonthlyStats = ref({
 // Variables para fechas
 const platformDateFrom = ref('');
 const platformDateTo = ref('');
+
+// Variables de búsqueda
+const searchId = ref('');
+const searchInput = ref('');
+
+// Función de búsqueda con debounce de 1.5 segundos
+const debouncedSearch = useDebounceFn(() => {
+  searchId.value = searchInput.value.trim();
+  if (searchId.value) {
+    searchById();
+  } else {
+    clearSearch();
+  }
+}, 1500);
+const searchResults = ref(null);
+const isSearching = ref(false);
+
 
 // Variables de paginación
 const currentTransactionPage = ref(1);
@@ -2492,6 +2534,193 @@ const nextPaymentsPage = () => {
       }
     });
   }
+};
+
+const searchById = async () => {
+  if (!searchId.value.trim()) {
+    showToast('Por favor ingresa un ID para buscar', 'error');
+    return;
+  }
+
+  isSearching.value = true;
+  const config = useRuntimeConfig();
+  const auth = useAuthStore();
+  
+  try {
+    let endpoint = '';
+    let params = {};
+    
+    // Determinar el endpoint según la pestaña activa
+    switch (activeTab.value) {
+      case 'membership':
+        endpoint = '/membresia/buscar/' + searchId.value;
+        break;
+      case 'visits':
+        endpoint = '/pagovisita/' + searchId.value;
+        break;
+      case 'services':
+        endpoint = '/cotizacion/' + searchId.value;
+        break;
+      case 'withdrawals':
+        endpoint = '/movimientos/retiros/' + searchId.value; 
+        break;
+      default:
+        throw new Error('Pestaña no válida');
+    } 
+    
+    const response = await $api(endpoint, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      params: params
+    }); 
+
+    // Manejar la respuesta basada en la pestaña activa
+    if (response?.success) {
+      // Para la pestaña de retiros, los datos vienen en response.movimientos
+      // Para las demás pestañas, vienen en response.data
+      const responseData = activeTab.value === 'withdrawals' 
+        ? (response.movimientos || [])
+        : (Array.isArray(response.data) ? response.data : [response.data]); 
+      
+      // Limpiar los datos actuales
+      switch (activeTab.value) {
+        case 'membership': {
+          const transformedData = responseData.map(item => ({
+            ...item,
+            id: item.id_membresia,
+            billingType: 'membership',
+            status: mapApiStatusToFrontend(item.estado),
+            amount: item.monto || 0,
+            date: item.fecha,
+            service: 'Membresía',
+            client: item.usuario?.nombre || 'Cliente desconocido',
+            technician: 'N/A'
+          }));
+
+          membershipPayments.value = transformedData;
+          break;
+        }
+
+        case 'visits': {
+          const transformedData = responseData.map(item => ({
+            ...item,
+            id: item.id_pagovisita,
+            billingType: 'visits',
+            status: mapApiStatusToFrontend(item.estado),
+            amount: item.monto || 0,
+            date: item.fecha,
+            service: item.solicitud?.servicio?.nombre || 'Servicio de visita',
+            client: item.usuario?.nombre || 'Cliente desconocido',
+            technician: item.solicitud?.tecnico?.nombre || 'Sin asignar'
+          }));
+
+          visitPayments.value = transformedData;
+          break;
+        }
+
+        case 'services': {
+          const transformedData = responseData.map(item => {
+            const serviceName = item.solicitud?.servicio?.nombre || 'Servicio';
+
+            return {
+              ...item,
+              id: item.id_cotizacion,
+              billingType: 'services',
+              status: mapApiStatusToFrontend(item.estado),
+              amount: item.monto_total || 0,
+              date: item.fecha,
+              service: serviceName,
+              client: item.solicitud?.cliente?.nombre || 'Cliente desconocido',
+              technician: item.solicitud?.tecnico?.nombre || 'Sin asignar',
+              category: item.solicitud?.servicio?.categoria || 'general'
+            };
+          });
+
+          servicePayments.value = transformedData;
+          break;
+        }
+
+        case 'withdrawals': {
+          const transformedData = responseData.map(item => ({
+            ...item,
+            id: item.id_movimiento,
+            billingType: 'withdrawals',
+            status: mapApiStatusToFrontend(item.estado),
+            amount: item.monto || 0,
+            date: item.fecha,
+            technician: item.nombre_usuario || 'Técnico desconocido',
+            bankDetails: item.descripcion || 'Retiro de fondos',
+            // Agregar campos adicionales que podrían necesitarse
+            client: item.nombre_usuario || 'Técnico',
+            service: 'Retiro de fondos',
+            category: 'retiro'
+          }));
+
+          withdrawals.value = transformedData;
+          break;
+        }
+      }
+
+      // Verificar si hay datos en el array correspondiente
+      const hasData = activeTab.value === 'withdrawals' 
+        ? (response.movimientos && response.movimientos.length > 0)
+        : (responseData && responseData.length > 0);
+      
+      if (hasData) {
+        showToast('Resultado encontrado', 'success');
+      } else {
+        // Limpiar los datos si no hay resultados
+        switch (activeTab.value) {
+          case 'membership': membershipPayments.value = []; break;
+          case 'visits': visitPayments.value = []; break;
+          case 'services': servicePayments.value = []; break;
+          case 'withdrawals': withdrawals.value = []; break;
+        }
+        showToast('No se encontró ningún registro con el ID proporcionado', 'warning');
+      }
+    } else {
+      // Limpiar los datos si no hay resultados
+      switch (activeTab.value) {
+        case 'membership': membershipPayments.value = []; break;
+        case 'visits': visitPayments.value = []; break;
+        case 'services': servicePayments.value = []; break;
+        case 'withdrawals': withdrawals.value = []; break;
+      }
+      showToast('No se encontró ningún registro con el ID proporcionado', 'warning');
+    }
+  } catch (error) {
+    console.error('❌ Error al buscar por ID:', error);
+    // Limpiar los datos en caso de error
+    switch (activeTab.value) {
+      case 'membership': membershipPayments.value = []; break;
+      case 'visits': visitPayments.value = []; break;
+      case 'services': servicePayments.value = []; break;
+      case 'withdrawals': withdrawals.value = []; break;
+    }
+    
+    // Manejar específicamente el caso de no encontrado (404)
+    if (error.response?.status === 404) {
+      showToast('No se encontró ningún registro con el ID proporcionado', 'warning');
+    } else {
+      showToast(
+        error.response?._data?.message || 'Error al buscar el registro', 
+        'error'
+      );
+    }
+  } finally {
+    isSearching.value = false;
+  }
+};
+
+const clearSearch = () => {
+  searchId.value = '';
+  searchInput.value = ''; 
+  // Recargar los datos normales de la pestaña actual
+  loadTabData(1);
 };
 
 // ===== FUNCIONES DE UI Y HELPERS =====
