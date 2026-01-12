@@ -736,7 +736,207 @@
           </div>
         </div>
 
-        <!-- Card 7: Gestión de Ciudades -->
+        <!-- Card 7: Gestión de Paquetes -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 dark:bg-amber-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">📦</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  Gestión de Paquetes
+                </h3>
+                <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                  Administra los paquetes de mantenimiento disponibles
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="nuevoPaquete"
+              class="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors">
+              + Nuevo Paquete
+            </button>
+          </div>
+
+          <!-- Filtros y búsqueda -->
+          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4 relative z-20">
+            <div class="relative flex-1 min-w-0">
+              <input
+                v-model="filtroBusquedaPaquetes"
+                type="text"
+                placeholder="Buscar paquetes..."
+                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm sm:text-base transition-all"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            <multiselect 
+              v-model="filtroEstadoPaquetesObject"
+              :options="estadoOptions"
+              :searchable="false"
+              :close-on-select="true"
+              :show-labels="false"
+              placeholder="Todos"
+              label="label"
+              track-by="value"
+              class="multiselect-admin-filter w-32"
+              :custom-label="getEstadoLabel"
+              :options-limit="100"
+            >
+              <template #singleLabel="{ option }">
+                <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
+              </template>
+            </multiselect>
+          </div>
+
+          <!-- Lista de paquetes -->
+          <div class="space-y-3">
+            <div v-if="paquetesCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
+              <p>Cargando paquetes...</p>
+            </div>
+            
+            <div v-else-if="paquetesFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <span class="text-4xl mb-2 block">📦</span>
+              <p>No se encontraron paquetes</p>
+            </div>
+            
+            <div v-for="paquete in paquetesPaginados" :key="paquete.id_paquete" 
+                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-lg">📦</span>
+                  <div>
+                    <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">
+                      {{ paquete.nombre }}
+                    </h5>
+                    <p class="text-[12px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                      {{ paquete.descripcion || 'Sin descripción' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-2">
+                  <span 
+                    :class="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': paquete.estado,
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !paquete.estado
+                    }" 
+                    class="px-2 py-1 rounded-full text-xs font-medium">
+                    {{ paquete.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                  <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-xs font-medium">
+                    Crédito: {{ formatNumber(paquete.costo) }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
+                <button 
+                  @click="editarPaquete(paquete)"
+                  class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Editar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                
+                <button 
+                  v-if="paquete.estado === 1 || paquete.estado === true"
+                  @click="cambiarEstadoPaquete(paquete, false)"
+                  class="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Desactivar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                  </svg>
+                </button>
+                
+                <button 
+                  v-else-if="paquete.estado === 0 || paquete.estado === false"
+                  @click="cambiarEstadoPaquete(paquete, true)"
+                  class="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Activar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="confirmarEliminarPaquete(paquete)"
+                  class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Eliminar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación -->
+          <div v-if="paquetesFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Página {{ paginacionPaquetes.paginaActual }} de {{ paginacionPaquetesCalculada.totalPaginas }}
+              </div>
+              
+              <div class="flex items-center space-x-1">
+                <button 
+                  @click="paginacionPaquetes.paginaActual = 1" 
+                  :disabled="paginacionPaquetes.paginaActual === 1"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="paginacionPaquetes.paginaActual--" 
+                  :disabled="paginacionPaquetes.paginaActual === 1"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                <div class="flex items-center space-x-1">
+                  <button 
+                    v-for="page in paginacionPaquetesCalculada.totalPaginas" 
+                    :key="page"
+                    @click="paginacionPaquetes.paginaActual = page"
+                    :class="{'bg-amber-500 text-white': paginacionPaquetes.paginaActual === page, 'text-gray-700 dark:text-gray-300': paginacionPaquetes.paginaActual !== page}"
+                    class="w-8 h-8 rounded-full text-sm font-medium flex items-center justify-center">
+                    {{ page }}
+                  </button>
+                </div>
+                
+                <button 
+                  @click="paginacionPaquetes.paginaActual++" 
+                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="paginacionPaquetes.paginaActual = paginacionPaquetesCalculada.totalPaginas" 
+                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 8: Gestión de Ciudades -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="flex items-center">
@@ -2059,6 +2259,154 @@
       </Transition>
     </div>
   </Transition>
+
+  <!-- Modal para crear/editar paquete -->
+  <Transition name="fade">
+    <div v-if="mostrarModalNuevoPaquete" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalPaquete"></div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 relative z-10">
+        <!-- Header -->
+        <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ paqueteEditando ? 'Editar' : 'Nuevo' }} Paquete
+            </h3>
+            <button 
+              @click="cerrarModalPaquete"
+              class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+            >
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="p-6">
+          <form @submit.prevent="guardarPaquete" class="space-y-4">
+            <!-- Nombre -->
+            <div>
+              <label for="nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Nombre <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="nombre"
+                v-model="paqueteForm.nombre"
+                type="text"
+                required
+                class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                placeholder="Ej: Paquete Básico"
+                :disabled="guardandoPaquete"
+              >
+            </div>
+
+            <!-- Descripción -->
+            <div>
+              <label for="descripcion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Descripción
+              </label>
+              <textarea
+                id="descripcion"
+                v-model="paqueteForm.descripcion"
+                rows="3"
+                class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                placeholder="Descripción detallada del paquete"
+                :disabled="guardandoPaquete"
+              ></textarea>
+            </div>
+
+            <!-- Costo -->
+            <div>
+              <label for="costo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Costo (L.) <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">L.</span>
+                <input
+                  id="costo"
+                  v-model.number="paqueteForm.costo"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  class="w-full pl-8 pr-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="0.00"
+                  :disabled="guardandoPaquete"
+                >
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="flex items-center pt-2">
+              <input
+                id="estado"
+                v-model="paqueteForm.estado"
+                type="checkbox"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                :disabled="guardandoPaquete"
+              >
+              <label for="estado" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                Activo
+              </label>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 pt-4">
+              <button
+                type="button"
+                @click="cerrarModalPaquete"
+                class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                :disabled="guardandoPaquete"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="flex-1 py-2 px-4 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-50"
+                :disabled="guardandoPaquete || !paqueteForm.nombre || !paqueteForm.costo"
+              >
+                <div v-if="guardandoPaquete" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                {{ guardandoPaquete ? 'Guardando...' : (paqueteEditando ? 'Actualizar' : 'Crear') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
+  <!-- Modal de confirmación para eliminar paquete -->
+  <Transition name="fade">
+    <div v-if="mostrarModalConfirmacionEliminarPaquete" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="mostrarModalConfirmacionEliminarPaquete = false"></div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 relative z-10">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+          Confirmar eliminación
+        </h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+          ¿Estás seguro de que deseas eliminar el paquete "{{ paqueteAEliminar?.nombre }}"? Esta acción no se puede deshacer.
+        </p>
+        <div class="flex justify-end space-x-3">
+          <button
+            @click="mostrarModalConfirmacionEliminarPaquete = false"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            :disabled="guardandoPaquete"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="eliminarPaquete"
+            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center"
+            :disabled="guardandoPaquete"
+          >
+            <div v-if="guardandoPaquete" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            {{ guardandoPaquete ? 'Eliminando...' : 'Eliminar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -2218,6 +2566,33 @@ const servicios = ref([]);
 const serviciosCargando = ref(false);
 const servicioEditando = ref(null);
 const mostrarModalNuevoServicio = ref(false);
+
+// Estados para gestión de paquetes
+const paquetes = ref([]);
+const paquetesCargando = ref(false);
+const paqueteEditando = ref(null);
+const mostrarModalNuevoPaquete = ref(false);
+const filtroBusquedaPaquetes = ref('');
+const filtroEstadoPaquetesObject = ref(null);
+const paqueteAEliminar = ref(null);
+const mostrarModalConfirmacionEliminarPaquete = ref(false);
+
+// Formulario de paquete
+// Estado para controlar la carga al guardar
+const guardandoPaquete = ref(false);
+
+const paqueteForm = ref({
+  nombre: '',
+  descripcion: '',
+  costo: '',
+  estado: true
+});
+
+// Paginación de paquetes
+const paginacionPaquetes = reactive({
+  paginaActual: 1,
+  porPagina: 5
+});
 const guardandoServicio = ref(false);
 const formServicio = ref({
   nombre: '',
@@ -2377,6 +2752,53 @@ const puedeEnviar = computed(() => {
   if (tipoEnvio.value === 'global') return true
   return false
 })
+
+// Computed para paquetes filtrados (sin paginación)
+const paquetesFiltrados = computed(() => {
+  let resultado = [...paquetes.value];
+  
+  // Aplicar filtro de búsqueda
+  if (filtroBusquedaPaquetes.value) {
+    const busqueda = filtroBusquedaPaquetes.value.toLowerCase();
+    resultado = resultado.filter(paquete => 
+      paquete.nombre.toLowerCase().includes(busqueda) || 
+      (paquete.descripcion && paquete.descripcion.toLowerCase().includes(busqueda)) ||
+      paquete.costo.toString().includes(busqueda)
+    );
+  }
+  
+  // Aplicar filtro de estado
+  if (filtroEstadoPaquetesObject.value && filtroEstadoPaquetesObject.value.value !== undefined) {
+    const estadoFiltro = filtroEstadoPaquetesObject.value.value;
+    resultado = resultado.filter(paquete => paquete.estado === estadoFiltro);
+  }
+  
+  return resultado;
+});
+
+// Computed para paquetes paginados
+const paquetesPaginados = computed(() => {
+  const inicio = (paginacionPaquetes.paginaActual - 1) * paginacionPaquetes.porPagina;
+  const fin = inicio + paginacionPaquetes.porPagina;
+  return paquetesFiltrados.value.slice(inicio, fin);
+});
+
+// Computed para la paginación de paquetes
+const paginacionPaquetesCalculada = computed(() => {
+  const total = paquetesFiltrados.value.length;
+  const totalPaginas = Math.ceil(total / paginacionPaquetes.porPagina);
+  const inicio = (paginacionPaquetes.paginaActual - 1) * paginacionPaquetes.porPagina;
+  const fin = Math.min(inicio + paginacionPaquetes.porPagina, total);
+  
+  return {
+    total,
+    totalPaginas,
+    inicio: total > 0 ? inicio + 1 : 0,
+    fin: fin,
+    hasPrevious: paginacionPaquetes.paginaActual > 1,
+    hasNext: paginacionPaquetes.paginaActual < totalPaginas
+  };
+});
 
 // Computed para servicios filtrados (sin paginación)
 const serviciosFiltrados = computed(() => {
@@ -4501,6 +4923,304 @@ function cambiarPagina(nuevaPagina, event) {
   return false;
 }
 
+// ===== FUNCIONES PARA GESTIÓN DE PAQUETES =====
+
+// Función para formatear números con separadores de miles
+function formatNumber(value) {
+  if (value === null || value === undefined) return '0';
+  return new Intl.NumberFormat('es-HN').format(value);
+}
+
+// Cargar lista de paquetes
+async function cargarPaquetes() {
+  let data;
+  try {
+    paquetesCargando.value = true;
+    const auth = useAuthStore();
+    
+    if (!auth.token) {
+      throw new Error('No se encontró el token de autenticación');
+    }
+    
+    const response = await $api('/paquetes', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (!response) {
+      throw new Error('La respuesta del servidor está vacía');
+    }
+    
+    data = response;
+    
+    if (!Array.isArray(data)) {
+      console.warn('Se esperaba un arreglo de paquetes, se recibió:', data);
+      data = [];
+    }
+    
+    paquetes.value = data.map(paquete => ({
+      ...paquete,
+      // Asegurarse de que el estado sea booleano
+      estado: Boolean(paquete.estado),
+      // Asegurarse de que el costo sea un número
+      costo: parseFloat(paquete.costo) || 0
+    }));
+    
+    return data;
+  } catch (error) {
+    console.error('Error en cargarPaquetes:', {
+      error: error.message,
+      response: data,
+      stack: error.stack
+    });
+    showToastMessage('Error al cargar los paquetes', 'error');
+    throw error;
+  } finally {
+    paquetesCargando.value = false;
+  }
+}
+
+// Abrir modal para nuevo paquete
+function nuevoPaquete() {
+  console.log('Abriendo modal de nuevo paquete'); // Para depuración
+  paqueteEditando.value = null;
+  paqueteForm.value = {
+    nombre: '',
+    descripcion: '',
+    costo: '',
+    estado: true
+  };
+  mostrarModalNuevoPaquete.value = true;
+  console.log('Estado de mostrarModalNuevoPaquete:', mostrarModalNuevoPaquete.value); // Para depuración
+}
+
+// Abrir modal para editar paquete
+function editarPaquete(paquete) {
+  paqueteEditando.value = paquete;
+  paqueteForm.value = {
+    nombre: paquete.nombre,
+    descripcion: paquete.descripcion || '',
+    costo: paquete.costo,
+    estado: paquete.estado
+  };
+  mostrarModalNuevoPaquete.value = true;
+}
+
+// Cerrar modal de paquete
+function cerrarModalPaquete() {
+  mostrarModalNuevoPaquete.value = false;
+  paqueteEditando.value = null;
+  paqueteForm.value = {
+    nombre: '',
+    descripcion: '',
+    costo: '',
+    estado: true
+  };
+}
+
+// Guardar o actualizar paquete
+async function guardarPaquete() {
+  try {
+    // Validar campos obligatorios
+    if (!paqueteForm.value.nombre || !paqueteForm.value.costo) {
+      showToastMessage('El nombre y el costo son campos obligatorios', 'error');
+      return;
+    }
+
+    // Validar que el costo sea un número válido
+    const costo = parseFloat(paqueteForm.value.costo);
+    if (isNaN(costo) || costo < 0) {
+      showToastMessage('El costo debe ser un número válido mayor o igual a cero', 'error');
+      return;
+    }
+
+    const auth = useAuthStore();
+    const url = paqueteEditando.value 
+      ? `/paquetes/${paqueteEditando.value.id_paquete}`
+      : '/paquetes';
+    
+    const method = paqueteEditando.value ? 'PUT' : 'POST';
+    
+    // Preparar los datos del formulario
+    const datosPaquete = {
+      nombre: paqueteForm.value.nombre.trim(),
+      descripcion: paqueteForm.value.descripcion.trim(),
+      costo: costo,
+      estado: Boolean(paqueteForm.value.estado)
+    };
+
+    // Realizar la petición
+    const response = await $api(url, {
+      baseURL: config.public.apiBase,
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: datosPaquete
+    });
+
+    if (!response) {
+      throw new Error('No se recibió respuesta del servidor');
+    }
+
+    // Mostrar mensaje de éxito
+    showToastMessage(
+      paqueteEditando.value 
+        ? 'Paquete actualizado correctamente' 
+        : 'Paquete creado correctamente',
+      'success'
+    );
+    
+    // Recargar la lista de paquetes
+    await cargarPaquetes();
+    
+    // Cerrar el modal
+    cerrarModalPaquete();
+    
+    return true;
+  } catch (error) {
+    console.error('Error al guardar el paquete:', error);
+    
+    // Mostrar mensaje de error detallado
+    const errorMessage = error.data?.message || 
+                         error.response?._data?.message || 
+                         'Error al guardar el paquete';
+    
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+}
+
+// Mostrar confirmación para eliminar paquete
+function confirmarEliminarPaquete(paquete) {
+  paqueteAEliminar.value = paquete;
+  mostrarModalConfirmacionEliminarPaquete.value = true;
+}
+
+// Eliminar un paquete
+async function eliminarPaquete() {
+  if (!paqueteAEliminar.value) {
+    showToastMessage('No se ha seleccionado ningún paquete para eliminar', 'error');
+    return false;
+  }
+
+  try {
+    const auth = useAuthStore();
+    const response = await $api(`/paquetes/${paqueteAEliminar.value.id_paquete}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (!response) {
+      throw new Error('No se recibió respuesta del servidor');
+    }
+
+    // Mostrar mensaje de éxito
+    showToastMessage('Paquete eliminado correctamente', 'success');
+    
+    // Recargar la lista de paquetes
+    await cargarPaquetes();
+    
+    // Cerrar el modal de confirmación
+    mostrarModalConfirmacionEliminarPaquete.value = false;
+    paqueteAEliminar.value = null;
+    
+    return true;
+  } catch (error) {
+    console.error('Error al eliminar el paquete:', error);
+    
+    // Mostrar mensaje de error detallado
+    const errorMessage = error.data?.message || 
+                         error.response?._data?.message || 
+                         'Error al eliminar el paquete';
+    
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+}
+
+// Confirmar cambio de estado de un paquete
+function confirmarCambioEstadoPaquete(paquete, activar) {
+  paqueteAEliminar.value = paquete; // Reutilizamos esta variable para el paquete seleccionado
+  tituloConfirmacion.value = activar ? 'Activar Paquete' : 'Desactivar Paquete';
+  mensajeConfirmacion.value = `¿Estás seguro de que deseas ${activar ? 'activar' : 'desactivar'} el paquete "${paquete.nombre}"?`;
+  accionConfirmar.value = () => cambiarEstadoPaquete(paquete, activar);
+  mostrarModalConfirmacion.value = true;
+}
+
+// Cambiar estado de un paquete
+async function cambiarEstadoPaquete(paqueteOrId, activar) { 
+  const paqueteId = typeof paqueteOrId === 'object' ? paqueteOrId.id_paquete : paqueteOrId;
+  
+  if (paqueteId === undefined || paqueteId === null || paqueteId === '') {
+    console.error('ID de paquete no válido (undefined/null/vacío):', paqueteId);
+    showToastMessage('Error: No se pudo identificar el paquete seleccionado', 'error');
+    return false;
+  }
+  
+  try {
+    const auth = useAuthStore();
+    const response = await $api(`/paquetes/desactivar/${paqueteId}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        estado: activar
+      })
+    });
+
+    if (response && response.success) {
+      showToastMessage(activar ? 'Paquete activado correctamente' : 'Paquete desactivado correctamente', 'success');
+      await cargarPaquetes();
+      return true;
+    } else {
+      showToastMessage(response.message || 'Error al actualizar el estado del paquete', 'error');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error al cambiar el estado del paquete:', error);
+    showToastMessage('Error al actualizar el estado del paquete. Por favor, inténtalo de nuevo.', 'error');
+    return false;
+  }
+}
+
+// Cambiar de página en la paginación de paquetes
+function cambiarPaginaPaquetes(nuevaPagina, event) {
+  // Prevenir el comportamiento por defecto del botón
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  // Validar que la página esté dentro de los límites
+  if (nuevaPagina < 1 || nuevaPagina > paginacionPaquetesCalculada.value.totalPaginas) {
+    return false;
+  }
+  
+  // Actualizar solo la página actual en el estado reactivo
+  paginacionPaquetes.paginaActual = nuevaPagina;
+  
+  // Desplazamiento suave al principio de la lista de paquetes
+  const paquetesContainer = document.querySelector('.paquetes-container');
+  if (paquetesContainer) {
+    paquetesContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  return false;
+}
+
 // ===== UTILIDADES =====
 const formatearFecha = (fecha) => {
   return new Date(fecha).toLocaleString('es-ES', {
@@ -4561,7 +5281,8 @@ onMounted(async () => {
       cargarCiudades().catch(() => showToastMessage('Error al cargar las ciudades', 'error')),
       cargarNotificaciones().catch(() => showToastMessage('Error al cargar las notificaciones', 'error')),
       cargarCorrelativos().catch(() => showToastMessage('Error al cargar los correlativos', 'error')),
-      cargarReferidorPredeterminado().catch(() => showToastMessage('Error al cargar el referidor predeterminado', 'error'))
+      cargarReferidorPredeterminado().catch(() => showToastMessage('Error al cargar el referidor predeterminado', 'error')),
+      cargarPaquetes().catch(() => showToastMessage('Error al cargar los paquetes', 'error'))
     ])
   } catch (error) {
     window.location.reload()

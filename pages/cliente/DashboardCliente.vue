@@ -344,6 +344,72 @@
         </div>
       </section> 
 
+       <!-- Paquetes por Membresía - Mobile First -->
+<section class="px-4 mb-4">
+
+  <!-- Header -->
+  <div class="mb-4">
+    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+      Paquetes incluidos
+    </h3>
+    <p class="text-xs text-gray-500 dark:text-gray-400">
+      Canjea con tu crédito de membresía
+    </p>
+  </div>
+
+  <!-- Cards -->
+  <div class="space-y-3">
+    <div
+      v-for="paquete in paquetesMantenimiento"
+      :key="paquete.id"
+      class="relative p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+    >
+
+      <!-- Info -->
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40 text-xl">
+          🔧
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm">
+            {{ paquete.nombre }}
+          </h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            {{ paquete.descripcion || 'Beneficio por membresía' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Precio -->
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          Crédito requerido
+        </p>
+        <p class="text-lg font-bold text-gray-900 dark:text-white">
+          L. {{ formatNumber(paquete.costo) }}
+        </p>
+      </div> 
+
+      <!-- Acción -->
+      <button
+        @click="canjearPaquete(paquete)"
+        :disabled="userCredit < paquete.costo || !paquete.estado"
+        class="mt-3 w-full py-3 rounded-xl text-sm font-semibold transition"
+        :class="{
+          'bg-blue-600 text-white shadow active:scale-95':
+            userCredit >= paquete.costo && paquete.estado,
+          'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700':
+            userCredit < paquete.costo || !paquete.estado
+        }"
+      >
+        Canjear paquete
+      </button>
+    </div>
+  </div>
+
+</section>
+
+
       <!-- Quick Actions -->
       <section class="px-4 mb-4">
         <h3 class="text-lg font-black text-gray-900 dark:text-white mb-3">Acciones Rápidas</h3>
@@ -1312,13 +1378,103 @@ const fetchBeneficios = async () => {
   }
 }
 
+// Función para formatear números con separadores de miles
+const formatNumber = (value) => {
+  if (value === undefined || value === null) return '0.00';
+  return new Intl.NumberFormat('es-HN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+};
+
 // =========================
 // FUNCIONES DE NAVEGACIÓN
 // =========================
 
 const renovarMembresia = () => {
-  navigateTo('/cliente/perfil#membresia')
-}
+  navigateTo('/cliente/membresia');
+};
+
+// Lista de paquetes de mantenimiento disponibles
+const paquetesMantenimiento = ref([]);
+const cargandoPaquetes = ref(true);
+
+// Función para cargar los paquetes activos desde la API
+const cargarPaquetesActivos = async () => {
+  try {
+    cargandoPaquetes.value = true;
+    const response = await $api('/paquetes/activos', {
+      baseURL: config.public.apiBase,
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    // Mapear la respuesta de la API al formato esperado
+    paquetesMantenimiento.value = response.map(paquete => ({
+      id: paquete.id_paquete,
+      nombre: paquete.nombre,
+      descripcion: paquete.descripcion,
+      costo: parseFloat(paquete.costo), // Convertir a número
+      estado: paquete.estado
+    }));
+  } catch (error) {
+    console.error('Error al cargar paquetes:', error);
+    showToast('Error', 'No se pudieron cargar los paquetes', 'error');
+  } finally {
+    cargandoPaquetes.value = false;
+  }
+};
+
+// Cargar los paquetes cuando el componente se monte
+onMounted(() => {
+  cargarPaquetesActivos();
+});
+
+// Función para manejar el canje de paquetes de mantenimiento
+const canjearPaquete = async (paquete) => {
+  if (!paquete || !paquete.id) {
+    showToast('Error', 'Paquete no válido', 'error');
+    return;
+  }
+
+  if (userCredit.value < paquete.costo) {
+    showToast('Crédito insuficiente', `Necesitas L. ${(paquete.costo - userCredit.value).toLocaleString('es-HN')} más para canjear este servicio`, 'error');
+    return;
+  }
+
+  try {
+    const response = await $fetch('/paquetes/canjear', {
+      method: 'POST',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: {
+        paqueteId: paquete.id,
+        nombre: paquete.nombre,
+        costo: paquete.costo
+      }
+    });
+    
+    if (response.success) {
+      userCredit.value = response.data.nuevoSaldo;
+      
+      // Mostramos notificación de éxito
+      showToast(
+        '¡Servicio canjeado!', 
+        response.data.mensaje,
+        'success'
+      );
+      
+      // Aquí podrías redirigir a una página de confirmación o hacer otra acción
+      // navigateTo(`/cliente/confirmacion-servicio/${paquete.id}`);
+    }
+  } catch (error) {
+    console.error('Error al canjear el servicio:', error);
+    showToast('Error', 'Ocurrió un error al procesar tu solicitud', 'error');
+  }
+};
 
 // =========================
 // FUNCIONES DE PROCESAMIENTO
