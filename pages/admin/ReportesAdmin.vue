@@ -53,13 +53,13 @@
               <div class="flex justify-between items-start mb-2">
                 <span class="text-[10px] uppercase font-black text-blue-500 dark:text-blue-400">Concepto de Ingreso</span>
                 <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300 uppercase">
-                  {{ currentBillingItem.billingType === 'membership' ? 'Membresía' : currentBillingItem.billingType === 'visits' ? 'Visita' : 'Servicio' }}
+                  {{ currentBillingItem.billingType === 'membership' ? 'Membresía' : currentBillingItem.billingType === 'visits' ? 'Visita' : currentBillingItem.billingType === 'packages' ? 'Paquete' : 'Servicio' }}
                 </span>
               </div>
               <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">
-                {{ currentBillingItem.billingType === 'membership' ? (currentBillingItem.plan || 'Plan de Membresía') : (currentBillingItem.service || currentBillingItem.serviceName || 'Servicio Técnico') }}
+                {{ currentBillingItem.billingType === 'membership' ? (currentBillingItem.plan || 'Plan de Membresía') : currentBillingItem.billingType === 'packages' ? (currentBillingItem.paqueteUsuario?.paquete?.nombre || 'Paquete Adquirido') : (currentBillingItem.service || currentBillingItem.serviceName || 'Servicio Técnico') }}
               </p>
-              <p class="text-[11px] text-gray-600 dark:text-gray-400 mb-3">Cliente: {{ currentBillingItem.usuario?.nombre || currentBillingItem.cliente || currentBillingItem.solicitud?.cliente?.nombre || 'Consumidor Final' }}</p>
+              <p class="text-[11px] text-gray-600 dark:text-gray-400 mb-3">Cliente: {{ currentBillingItem.usuario?.nombre || currentBillingItem.nombre_usuario || currentBillingItem.cliente || currentBillingItem.solicitud?.cliente?.nombre || 'Consumidor Final' }}</p>
               <div class="pt-2 border-t border-blue-200 dark:border-blue-800/60 flex justify-between items-center">
                 <span class="text-[10px] uppercase font-black text-blue-500 dark:text-blue-400">Total a Facturar</span>
                 <span class="text-lg font-black text-blue-700 dark:text-blue-300">{{ formatCurrency(currentBillingItem.amount || currentBillingItem.monto || currentBillingItem.monto_total || 0) }}</span>
@@ -780,18 +780,18 @@
             </div>
           </div>
       
-          <!-- Retiros Totales -->
+          <!-- Ingresos Paquetes -->
           <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
             <div class="flex items-center space-x-2 sm:space-x-3">
-              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                <span class="text-red-600 dark:text-red-400 text-sm sm:text-lg">💸</span>
+              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                <span class="text-orange-600 dark:text-orange-400 text-sm sm:text-lg">📦</span>
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  {{ formatCurrency(platformStats.totalWithdrawals || 0) }}
+                  {{ formatCurrency(platformStats.packageRevenue || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
-                  Retiros Totales
+                  Ingresos Paquetes
                 </p>
               </div>
             </div>
@@ -911,8 +911,7 @@
             <!-- Paginación - Siempre visible cuando hay transacciones -->
             <div v-if="transactions.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
               <div class="flex items-center justify-between">
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ transactions.length }} de {{ transactionsPagination.total || 0 }}
+                <div class="text-xs text-gray-500 dark:text-gray-400"> 
                 </div>
                 <div class="flex items-center space-x-2">
                   <button 
@@ -1221,6 +1220,10 @@
                 <div class="text-sm font-bold text-purple-600 dark:text-purple-400">{{ billingCounts.services }}</div>
                 <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Servicios</div>
               </div>
+              <div>
+                <div class="text-sm font-bold text-orange-600 dark:text-orange-400">{{ billingCounts.packages }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Paquetes</div>
+              </div>
             </div>
           </div>
 
@@ -1427,6 +1430,7 @@ const platformStats = reactive({
   membershipRevenue: 0,
   visitRevenue: 0,
   serviceRevenue: 0,
+  packageRevenue: 0,
   totalWithdrawals: 0,
   totalCommissions: 0
 });
@@ -1468,6 +1472,7 @@ const billingCounts = computed(() => {
     membership: items.filter(item => item.billingType === 'membership').length,
     visits: items.filter(item => item.billingType === 'visits').length,
     services: items.filter(item => item.billingType === 'services').length,
+    packages: items.filter(item => item.billingType === 'packages').length,
     total: items.length
   };
 });
@@ -2990,7 +2995,8 @@ const saveFactura = async ({ form, next }) => {
       total: total.toFixed(2),
       id_pagovisita: item.billingType === 'visits' ? (item.id_pagovisita || item.id) : null,
       id_cotizacion: item.billingType === 'services' ? (item.id_cotizacion || item.id) : null,
-      id_membresia: item.billingType === 'membership' ? (item.id_membresia || item.id) : null
+      id_membresia: item.billingType === 'membership' ? (item.id_membresia || item.id) : null,
+      id_pago_paquete: item.billingType === 'packages' ? (item.id_pago_paquete || item.id) : null
     };
 
     const response = await $api('/facturas', {
@@ -3527,6 +3533,7 @@ const updatePlatformStats = async () => {
       platformStats.membershipRevenue = data.ingresosMembresias || 0;
       platformStats.visitRevenue = data.ingresosVisitas || 0;
       platformStats.serviceRevenue = data.ingresosServicios || 0;
+      platformStats.packageRevenue = data.ingresosPaquetes || 0;
       platformStats.totalWithdrawals = data.retiros || 0;
       platformStats.totalCommissions = data.comisiones || 0;
       
@@ -3903,7 +3910,7 @@ const generateReport = async (report) => {
     const selectedMonth = selectedMonthReports.value;
     
     // Solo incluir el parámetro month si se seleccionó un mes
-    const monthParam = hasSelectedMonth ? `?month=${selectedMonth}` : '';
+    const monthParam = hasSelectedMonth ? `?month=${selectedMonth}&limit=1000` : '?limit=1000';
     
     // Configurar título del reporte
     let reportTitle = 'Reporte General';
@@ -3922,7 +3929,7 @@ const generateReport = async (report) => {
     } 
 
     // 📦 2️⃣ Obtener datos base comunes
-    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes] = await Promise.all([
+    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes, packagePaymentsRes] = await Promise.all([
       $api(`/membresia${monthParam}`).catch(err => {
         console.error('❌ Error en /membresia:', err);
         throw err;
@@ -3947,6 +3954,11 @@ const generateReport = async (report) => {
       $api(`/movimientos/ingresos/tecnicos${monthParam}`).catch(err => {
         console.error('❌ Error en /movimientos (ingresos):', err);
         return { movimientos: [], data: [] }; // Fallback
+      }),
+      // Obtener pagos de paquetes aprobados
+      $api(`/paquetes/usuarios/pagos${monthParam}`).catch(err => {
+        console.error('❌ Error en /paquetes/usuarios/pagos:', err);
+        return { data: [], estadisticas: { total: 0 } };
       })
     ]);
 
@@ -3969,14 +3981,19 @@ const generateReport = async (report) => {
     const visitData = processData(visitRes, 'Visitas Técnicas');
     const quotationData = processData(quotationRes, 'Cotizaciones');
     const withdrawalsData = processData(withdrawalsRes, 'Retiros');
+    const packagePaymentsData = processData(packagePaymentsRes, 'Pagos de Paquetes');
     
     const rawTechData = technicianIncomeRes?.movimientos || technicianIncomeRes?.data || [];
     const technicianIncomeData = Array.isArray(rawTechData) ? rawTechData : [];
 
-    const serviceData = processData(quotationRes, 'Servicios'); // Cotizaciones se consideran "servicios" en el reporte financiero
+    const serviceData = processData(quotationRes, 'Servicios');
+    // Asegurar que serviceData.data solo contenga registros confirmados para el reporte
+    serviceData.data = (serviceData.data || []).filter(s => s.estado?.toLowerCase() === 'confirmado');
+    // Asegurar que serviceData.total refleje solo los confirmados (aunque el backend ya lo hace)
+    serviceData.total = parseFloat(quotationRes?.estadisticas?.total || 0);
 
     // 💰 4️⃣ Cálculos de balance
-    const ingresosTotales = membershipData.total + visitData.total + serviceData.total;
+    const ingresosTotales = membershipData.total + visitData.total + serviceData.total + packagePaymentsData.total;
     const retirosTotales = withdrawalsData.total;
     const balanceNeto = ingresosTotales - retirosTotales;
 
@@ -4018,6 +4035,7 @@ const generateReport = async (report) => {
           serviceData,
           withdrawalsData,
           technicianIncomeData, // Pasamos los datos de ingresos técnicos
+          packagePaymentsData, // Pasamos los datos de pagos de paquetes
           mesNombre: monthName,
           year,
           balanceNeto
@@ -4026,22 +4044,32 @@ const generateReport = async (report) => {
 
       // ===== REPORTE DE SERVICIOS =====
       case 2: {
-        // Solo en este reporte se usa /solicitudservicio
+        // Obtener servicios
         const serviceUrl = hasSelectedMonth 
           ? `/solicitudservicio?month=${selectedMonth}`
           : '/solicitudservicio'; 
         
-        const serviceRes = await $api(serviceUrl, {
-          baseURL: config.public.apiBase,
-          headers: { Authorization: `Bearer ${auth.token}` }
-        }).then(res => { 
-          return res;
-        }).catch(err => {
-          console.error('❌ Error en /solicitudservicio:', err);
-          throw err;
-        });
+        const [serviceRes, paquetesRes] = await Promise.all([
+          // Obtener servicios
+          $api(serviceUrl, {
+            baseURL: config.public.apiBase,
+            headers: { Authorization: `Bearer ${auth.token}` }
+          }).catch(err => {
+            console.error('❌ Error en /solicitudservicio:', err);
+            throw err;
+          }),
+          // Obtener paquetes utilizados
+          $api('/paquetes/usuarios/utilizados', {
+            baseURL: config.public.apiBase,
+            headers: { Authorization: `Bearer ${auth.token}` }
+          }).catch(err => {
+            console.error('❌ Error en /paquetes/usuarios/utilizados:', err);
+            return { data: [] }; // Continuar con array vacío si hay error
+          })
+        ]);
+        
         const serviceData = processData(serviceRes, 'Servicios');
-        await generarReporteServiciosDetallado(doc, serviceData);
+        await generarReporteServiciosDetallado(doc, serviceData, paquetesRes);
         break;
       }
 
@@ -4100,7 +4128,7 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], mesNombre, year, balanceNeto }) => {
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto }) => {
   // Mapa de pagos a técnicos por cotización
   const pagosTecnicosMap = technicianIncomeData.reduce((map, mv) => {
       if (mv.id_cotizacion && mv.tipo === 'ingreso') {
@@ -4111,7 +4139,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   
   // Recalcular total de servicios restando pagos a técnicos
   const totalServiciosReal = serviceData.data
-    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
+    .filter(s => s.estado?.toLowerCase() === 'confirmado')
     .reduce((sum, s) => {
         const pagoTecnico = pagosTecnicosMap[s.id_cotizacion] || 0;
         const montoNeto = (parseFloat(s.monto_total) || 0) - pagoTecnico;
@@ -4129,7 +4157,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   currentY += 6;
 
   // 📊 Calcular porcentajes
-  const totalIngresos = membershipData.total + visitData.total + totalServiciosReal;
+  const totalIngresos = membershipData.total + visitData.total + totalServiciosReal + packagePaymentsData.total;
   const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
 
   // 📋 Tabla resumen de totales
@@ -4139,6 +4167,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     body: [
       ['Membresías', formatCurrency(membershipData.total), calcPorcentaje(membershipData.total)],
       ['Visitas Técnicas', formatCurrency(visitData.total), calcPorcentaje(visitData.total)],
+      ['Venta de Paquetes', formatCurrency(packagePaymentsData.total), calcPorcentaje(packagePaymentsData.total)],
       ['Comisión por Servicios', formatCurrency(totalServiciosReal), calcPorcentaje(totalServiciosReal)],
       ['Total Ingresos', formatCurrency(totalIngresos), '-']
     ],
@@ -4165,7 +4194,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   currentY += 8;
 
   const membresiasFiltradas = membershipData.data
-    .filter(m => m.estado?.toLowerCase() !== 'pendiente')
+    .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
     .map(m => [
       formatDate(m.fecha), 
       'Membresía', 
@@ -4176,7 +4205,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     ]);
 
   const visitasFiltradas = visitData.data
-    .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
+    .filter(v => v.estado?.toLowerCase() === 'aprobado')
     .map(v => [
       formatDate(v.fecha), 
       'Visita Técnica', 
@@ -4187,7 +4216,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     ]);
 
   const serviciosFiltrados = serviceData.data
-    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
+    .filter(s => s.estado?.toLowerCase() === 'confirmado')
     .map(s => {
         const pagoTecnico = pagosTecnicosMap[s.id_cotizacion] || 0;
         const montoNeto = (parseFloat(s.monto_total) || 0) - pagoTecnico;
@@ -4201,20 +4230,36 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
         ];
     });
 
+  const paquetesFiltrados = packagePaymentsData.data
+    .filter(p => p.estado?.toLowerCase() !== 'rechazado')
+    .map(p => [
+      formatDate(p.fecha),
+      'Venta de Paquete',
+      p.usuario?.nombre || '-',
+      formatCurrency(p.monto_comision),
+      p.facturaRelacion?.factura?.estado || 'PENDIENTE',
+      p.facturaRelacion?.factura?.numero_factura_correlativo || '-'
+    ]);
+
   // Calculate totals from original data instead of formatted strings
   const totalMembresias = membershipData.data
-    .filter(m => m.estado?.toLowerCase() !== 'pendiente')
+    .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
     .reduce((sum, m) => sum + (parseFloat(m.monto) || 0), 0);
     
   const totalVisitas = visitData.data
-    .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
+    .filter(v => v.estado?.toLowerCase() === 'aprobado')
     .reduce((sum, v) => sum + (parseFloat(v.monto) || 0), 0);
+    
     
   const totalServicios = totalServiciosReal;
     
-  const totalIngresosTabla = totalMembresias + totalVisitas + totalServicios;
+  const totalPaquetes = packagePaymentsData.data
+    .filter(p => p.estado?.toLowerCase() !== 'rechazado')
+    .reduce((sum, p) => sum + (parseFloat(p.monto_comision) || 0), 0);
+    
+  const totalIngresosTabla = totalMembresias + totalVisitas + totalServicios + totalPaquetes;
 
-  const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0;
+  const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0 || paquetesFiltrados.length > 0;
 
   doc.autoTable({
     startY: currentY,
@@ -4223,6 +4268,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       ? [
           ...membresiasFiltradas,
           ...visitasFiltradas,
+          ...paquetesFiltrados,
           ...serviciosFiltrados,
           [
             { content: 'TOTAL INGRESOS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
@@ -4279,7 +4325,7 @@ const generarReporteRetiros = async (doc, withdrawalsData) => {
     head: [['Fecha', 'Usuario', 'Descripción', 'Monto', 'Estado']],
     body: hayRetiros
       ? [
-          ...retirosFiltrados,
+          ...retirosFiltradas,
           [
             { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
             { content: formatCurrency(totalRetirosReal), styles: { fontStyle: 'bold' } },
@@ -4485,7 +4531,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
 
 
 // ===== REPORTE DE SERVICIOS DETALLADO =====
-const generarReporteServiciosDetallado = async (doc, serviceData) => {
+const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData = null) => {
   // Usar autoTable del documento
   const autoTable = (options) => doc.autoTable(options);
   const servicios = Array.isArray(serviceData?.data) ? serviceData.data : [];
@@ -4662,7 +4708,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
     doc.setFontSize(13);
     doc.setTextColor(93, 92, 222);
     doc.text('DESGLOSE POR TIPO DE SERVICIO', 10, currentY);
-    currentY += 6;
+    currentY += 5;
 
     doc.autoTable({
       startY: currentY,
@@ -4671,6 +4717,49 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
       theme: 'grid',
       headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
       bodyStyles: { fontSize: 9 },
+      margin: { left: 10, right: 10 },
+      pageBreak: 'auto'
+    });
+    
+    currentY = doc.lastAutoTable.finalY + 10;
+  }
+  
+  // ========= 5️⃣ PAQUETES ADQUIRIDOS =========
+  if (paquetesData?.data?.length) {
+    // Agregar nueva página si es necesario
+    if (currentY > 220) {
+      doc.addPage();
+      currentY = 20;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(93, 92, 222);
+    doc.text('PAQUETES UTILIZADOS', 10, currentY);
+    currentY += 5;
+
+    const headers = ['Fecha de Compra', 'Usuario', 'Paquete', 'Estado'];
+    const rows = paquetesData.data.map(p => ([
+      formatDate(p.fecha_actualizacion),
+      p.Usuario?.nombre?.trim() || 'Usuario no disponible',
+      p.paquete?.nombre || 'Paquete no disponible',
+      p.estado.charAt(0).toUpperCase() + p.estado.slice(1) // Capitalizar primera letra
+    ]));
+
+    // Mostrar total de paquetes utilizados
+    const totalPaquetes = paquetesData.total || 0;
+    const totalRow = [
+      { content: 'TOTAL', colSpan: headers.length - 1, styles: { halign: 'right', fontStyle: 'bold' } },
+      { content: totalPaquetes.toString(), styles: { fontStyle: 'bold' } }
+    ];
+
+    doc.autoTable({
+      startY: currentY,
+      head: [headers],
+      body: [...rows, totalRow],
+      theme: 'grid',
+      headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
       margin: { left: 10, right: 10 },
       pageBreak: 'auto'
     });

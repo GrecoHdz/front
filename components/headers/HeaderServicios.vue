@@ -215,6 +215,8 @@ const onNotificationClick = async (notification) => {
       await navigateTo('/cliente/DashboardCliente');
     } else if (notification.tipo === 'financieros') { 
       await navigateTo('/cliente/Servicios');
+    } else if (notification.tipo === 'paquetes') { 
+      await navigateTo('/cliente/DashboardCliente');
     }
   } finally {
     // Asegurarse de que el loading siempre se desactive

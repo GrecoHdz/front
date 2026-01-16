@@ -1070,7 +1070,7 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
         estado: movementType === 'ingresos' ? (item.estado || 'Pendiente') : (item.estado || 'pendiente').toLowerCase(),
         ...(movementType === 'ingresos' ? {
           servicio: item.servicio || 'Servicio no especificado',
-          colonia: item.colonia || 'Sin ubicación'
+          colonia: item.colonia || ''
         } : {})
       }));
       

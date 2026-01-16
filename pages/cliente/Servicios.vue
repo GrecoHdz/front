@@ -596,7 +596,7 @@
                       placeholder="Ingresa el número de comprobante"
                     >
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Realiza la transferencia, ingresa el número de comprobante y lo envias. Posteriormente serás redirigido a WhatsApp para adjuntar la captura.
+                      Realiza la transferencia e ingresa el número de comprobante. Una vez envaido serás redirigido a WhatsApp para adjuntar la captura.
                     </p>
                   </div>
                 </div>
@@ -862,7 +862,7 @@
                   placeholder="Ingresa el número de comprobante"
                 >
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Realiza la transferencia, ingresa el número de comprobante y lo envias. Posteriormente serás redirigido a WhatsApp para adjuntar la captura.
+                  Realiza la transferencia e ingresa el número de comprobante. Una vez enviado serás redirigido a WhatsApp para adjuntar la captura.
                 </p>
               </div>
             </div>

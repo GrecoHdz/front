@@ -67,7 +67,7 @@
                 Precios y Tarifas
               </h3>
               <p class="text-[11px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                Configuración de precios del sistema
+                Configuración de precios
               </p>
             </div>
           </div>
@@ -254,6 +254,24 @@
               <div class="relative">
                 <input
                   v-model.number="configuracionComision"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full pl-4 pr-10 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="10.00">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+
+            <!-- Comisión por Paquete -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Comisión por Paquete
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionComisionPaquete"
                   type="number"
                   min="0"
                   max="100"
@@ -2489,6 +2507,7 @@ const buscarUsuarios = debounce(async () => {
 const configuracionMembresia = ref(0)
 const configuracionVisita = ref(0)
 const configuracionComision = ref(0)
+const configuracionComisionPaquete = ref(0)
 const configuracionTelefono = ref('')
 const configuracionEmail = ref('')
 const configuracionRTN = ref('')
@@ -4061,6 +4080,7 @@ const cargarConfiguraciones = async () => {
         membresia: 'membresia',
         visita_tecnico: 'visita_tecnico',
         comision_por_servicio: 'comision_por_servicio',
+        comision_por_paquete: 'comision_por_paquete',
         numero_empresa: 'numero_empresa',
         correo_empresa: 'correo_empresa',
         porcentaje_descuento: 'porcentaje_descuento',
@@ -4080,6 +4100,9 @@ const cargarConfiguraciones = async () => {
             break;
           case 'comision_por_servicio':
             configuracionComision.value = Number(item.valor) || 0;
+            break;
+          case 'comision_por_paquete':
+            configuracionComisionPaquete.value = Number(item.valor) || 0;
             break;
           case 'numero_empresa':
             configuracionTelefono.value = item.valor?.toString() || '';
@@ -4115,6 +4138,7 @@ const cargarConfiguraciones = async () => {
         membresia: configuracionMembresia.value,
         visita_tecnico: configuracionVisita.value,
         comision_por_servicio: configuracionComision.value,
+        comision_por_paquete: configuracionComisionPaquete.value,
         numero_empresa: configuracionTelefono.value,
         correo_empresa: configuracionEmail.value,
         rtn: configuracionRTN.value,

@@ -235,6 +235,416 @@
               </div>
             </section>
 
+            <!-- SECCIÓN: PAQUETES ACTIVOS -->
+            <section class="px-3 sm:px-6 mb-4 sm:mb-6">
+              <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+                <!-- Header de Paquetes Activos -->
+                <div class="flex flex-col space-y-4 mb-4">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">📦</span>
+                      </div>
+                      <div>
+                        <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white whitespace-nowrap">
+                          Solicitud de Paquetes
+                        </h2>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                          {{ (packageStats.en_uso || 0) + (packageStats.pendiente_verificacion || 0) }} solicitudes activas
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Buscador por ID -->
+                    <div class="relative w-full sm:w-64">
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-3.5 w-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        v-model="packageSearchInput"
+                        @input="debouncedPackageSearch"
+                        @keyup.enter="handlePackageSearch"
+                        placeholder="Buscar por ID de paquete..."
+                        class="w-full pl-9 pr-8 py-2 text-[11px] bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      />
+                      <button 
+                        @click="clearPackageSearch"
+                        v-if="packageSearchInput"
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                      >
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Loading State -->
+                <div v-if="loadingPackages" class="text-center py-8">
+                  <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                  <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Cargando solicitudes...</p>
+                </div>
+
+                <!-- Tabs para cambiar entre estados -->
+                <div v-else class="mb-4 border-b border-gray-200 dark:border-gray-700">
+                  <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="packageTabs" role="tablist">
+                    <!-- Pestaña de En Uso -->
+                    <li class="mr-2" role="presentation">
+                      <button 
+                        @click="activePackageTab = 'utilizando'" 
+                        :class="{
+                          'inline-block p-2 border-b-2 rounded-t-lg transition-colors duration-200': true,
+                          'text-green-600 border-green-600 dark:text-green-500 dark:border-green-500': activePackageTab === 'utilizando',
+                          'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300': activePackageTab !== 'utilizando'
+                        }" 
+                        type="button" 
+                        role="tab"
+                      >
+                        En Uso
+                        <span v-if="packageStats.en_uso > 0" 
+                              class="ml-1 px-2 py-0.5 text-[10px] font-bold rounded-full" 
+                              :class="activePackageTab === 'utilizando' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'">
+                          {{ packageStats.en_uso }}
+                        </span>
+                      </button>
+                    </li>
+                    
+                    <!-- Pestaña de Pendiente Revisión -->
+                    <li class="mr-2" role="presentation">
+                      <button 
+                        @click="activePackageTab = 'verificando_pago'" 
+                        :class="{
+                          'inline-block p-2 border-b-2 rounded-t-lg transition-colors duration-200': true,
+                          'text-orange-600 border-orange-600 dark:text-orange-500 dark:border-orange-500': activePackageTab === 'verificando_pago',
+                          'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300': activePackageTab !== 'verificando_pago'
+                        }" 
+                        type="button" 
+                        role="tab"
+                      >
+                        Pend. Revisión
+                        <span v-if="packageStats.pendiente_verificacion > 0" 
+                              class="ml-1 px-2 py-0.5 text-[10px] font-bold rounded-full" 
+                              :class="activePackageTab === 'verificando_pago' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'">
+                          {{ packageStats.pendiente_verificacion }}
+                        </span>
+                      </button>
+                    </li>
+                    
+                    <!-- Pestaña de Historial -->
+                    <li class="mr-2" role="presentation">
+                      <button 
+                        @click="activePackageTab = 'utilizado'" 
+                        :class="{
+                          'inline-block p-2 border-b-2 rounded-t-lg transition-colors duration-200': true,
+                          'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500': activePackageTab === 'utilizado',
+                          'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300': activePackageTab !== 'utilizado'
+                        }" 
+                        type="button" 
+                        role="tab"
+                      >
+                        Historial
+                        <span v-if="packageStats.historial > 0" 
+                              class="ml-1 px-2 py-0.5 text-[10px] font-bold rounded-full" 
+                              :class="activePackageTab === 'utilizado' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'">
+                          {{ packageStats.historial }}
+                        </span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Contenido de las pestañas -->
+                <div>
+                  <!-- 1. Pestaña de En Uso (Utilizando) -->
+                  <div v-if="activePackageTab === 'utilizando'">
+                    <div v-if="activePackages.utilizando?.length === 0" class="text-center py-8">
+                      <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">No hay paquetes activos</h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Los paquetes aprobados aparecerán aquí</p>
+                    </div>
+                    <div v-else>
+                      <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-3">
+                        <div 
+                          v-for="pkg in activePackages.utilizando" 
+                          :key="'using-' + pkg.id_paquete_usuario"
+                          class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow"
+                        >
+                          <!-- Card Header -->
+                          <div class="flex items-start justify-between mb-1.5">
+                            <div class="flex items-center space-x-1.5">
+                              <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-[10px]"
+                                   :class="getServiceTypeColor(pkg.paquete.nombre)">
+                                <span>{{ getServiceTypeIcon(pkg.paquete.nombre) }}</span>
+                              </div>
+                              <div class="min-w-0">
+                                <p class="font-bold text-gray-900 dark:text-white text-[10px] sm:text-xs leading-tight line-clamp-2">{{ pkg.paquete.nombre }}</p>
+                                <p class="text-[8px] text-gray-500 dark:text-gray-400">#{{ formatDateDDMMYY(pkg.fecha_solicitud) }}-{{ pkg.id_paquete_usuario }}</p>
+                              </div>
+                            </div> 
+                          </div>
+
+                          <!-- Client Info -->
+                          <div class="mb-1.5">
+                            <div class="flex items-center space-x-1.5 text-[10px] text-gray-600 dark:text-gray-300">
+                              <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              <span class="truncate">{{ pkg.Usuario.nombre }}</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                              <svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                              </svg>
+                              <span>{{ pkg.Usuario.telefono }}</span>
+                            </div>
+                          </div>
+
+                          <!-- Actions -->
+                          <div class="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-gray-700">
+                            <span class="text-[8px] px-1.5 py-0.5 rounded-full font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                              Activo
+                            </span>
+                            <button 
+                              @click="openPackageAssignment(pkg)"
+                              class="p-1 px-1.5 text-[9px] font-bold text-white bg-green-500 hover:bg-green-600 rounded transition-colors"
+                            >
+                              Liquidar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Paginación utilizando -->
+                      <div v-if="(packagePagination.utilizando.totalPages > 1) && packagePagination.utilizando.total > 0" class="mt-3 bg-white dark:bg-gray-800 p-1.5 sm:p-2 rounded-lg">
+                        <div class="flex items-center justify-between">
+                          <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            Pág. {{ packagePagination.utilizando.page }} de {{ packagePagination.utilizando.totalPages }}
+                          </div> 
+                          <div class="flex items-center space-x-1 sm:space-x-2">
+                            <button
+                              @click="changePackagePage('utilizando', packagePagination.utilizando.page - 1)"
+                              :disabled="packagePagination.utilizando.page === 1"
+                              class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              aria-label="Página anterior"
+                            >
+                              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                              </svg>
+                            </button>
+                            <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 px-1 sm:px-2 whitespace-nowrap">
+                              {{ packagePagination.utilizando.page }} / {{ packagePagination.utilizando.totalPages }}
+                            </div>
+                            <button
+                              @click="changePackagePage('utilizando', packagePagination.utilizando.page + 1)"
+                              :disabled="packagePagination.utilizando.page >= packagePagination.utilizando.totalPages"
+                              class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              aria-label="Página siguiente"
+                            >
+                              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 2. Pestaña de Pendiente Revisión (Verificando Pago) -->
+                  <div v-else-if="activePackageTab === 'verificando_pago'">
+                    <div v-if="activePackages.verificando_pago?.length === 0" class="text-center py-8">
+                      <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">No hay pagos pendientes</h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Todo está al día</p>
+                    </div>
+                    <div v-else>
+                      <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-3">
+                        <div 
+                          v-for="pkg in activePackages.verificando_pago" 
+                          :key="'pending-' + pkg.id_paquete_usuario"
+                          class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow"
+                        >
+                          <!-- Card Header -->
+                          <div class="flex items-start justify-between mb-1.5">
+                            <div class="flex items-center space-x-1.5">
+                              <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-[10px]"
+                                   :class="getServiceTypeColor(pkg.paquete.nombre)">
+                                <span>{{ getServiceTypeIcon(pkg.paquete.nombre) }}</span>
+                              </div>
+                              <div class="min-w-0">
+                                <p class="font-bold text-gray-900 dark:text-white text-[10px] sm:text-xs leading-tight line-clamp-2">{{ pkg.paquete.nombre }}</p>
+                                <p class="text-[8px] text-gray-500 dark:text-gray-400">#{{ pkg.id_paquete_usuario }}</p>
+                              </div>
+                            </div> 
+                          </div>
+
+                          <!-- Info & Payment Details -->
+                          <div class="mb-1.5">
+                            <div class="flex items-center space-x-1.5 text-[10px] text-gray-600 dark:text-gray-300">
+                              <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              <span class="truncate">{{ pkg.Usuario.nombre }}</span>
+                            </div>
+                            <div v-if="pkg.pagos?.length > 0" class="mt-1 p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-0.5">
+                              <p class="text-[8px] font-medium text-gray-600 dark:text-gray-400">Monto: <span class="text-gray-900 dark:text-white">L. {{ parseFloat(pkg.pagos[0].monto).toFixed(2) }}</span></p>
+                              <p class="text-[8px] font-medium text-gray-600 dark:text-gray-400">Comp: <span class="text-gray-900 dark:text-white">{{ pkg.pagos[0].num_comprobante }}</span></p>
+                            </div>
+                          </div>
+
+                          <!-- Actions -->
+                          <div class="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-gray-700">
+                            <span class="text-[8px] px-1.5 py-0.5 rounded-full font-bold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                              Verificando
+                            </span>
+                            <div class="flex space-x-1">
+                              <button 
+                              @click.stop="showPaymentConfirmation(pkg, null)"
+                              class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg transition-colors shadow-sm"
+                            >
+                              Gestionar
+                            </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Paginación verificando_pago -->
+                      <div v-if="(packagePagination.verificando_pago.totalPages > 1) && packagePagination.verificando_pago.total > 0" class="mt-3 bg-white dark:bg-gray-800 p-1.5 sm:p-2 rounded-lg">
+                        <div class="flex items-center justify-between">
+                          <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            Pág. {{ packagePagination.verificando_pago.page }} de {{ packagePagination.verificando_pago.totalPages }}
+                          </div> 
+                          <div class="flex items-center space-x-1 sm:space-x-2">
+                            <button
+                              @click="changePackagePage('verificando_pago', packagePagination.verificando_pago.page - 1)"
+                              :disabled="packagePagination.verificando_pago.page === 1"
+                              class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              aria-label="Página anterior"
+                            >
+                              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                              </svg>
+                            </button>
+                            <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 px-1 sm:px-2 whitespace-nowrap">
+                              {{ packagePagination.verificando_pago.page }} / {{ packagePagination.verificando_pago.totalPages }}
+                            </div>
+                            <button
+                              @click="changePackagePage('verificando_pago', packagePagination.verificando_pago.page + 1)"
+                              :disabled="packagePagination.verificando_pago.page >= packagePagination.verificando_pago.totalPages"
+                              class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              aria-label="Página siguiente"
+                            >
+                              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 3. Pestaña de Historial (Utilizado) -->
+                  <div v-else-if="activePackageTab === 'utilizado'">
+                    <div v-if="activePackages.utilizado?.length === 0" class="text-center py-8">
+                      <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">No hay historial</h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Los paquetes consumidos aparecerán aquí</p>
+                    </div>
+                    <div v-else>
+                      <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-3">
+                        <div 
+                          v-for="pkg in activePackages.utilizado" 
+                          :key="'history-' + pkg.id_paquete_usuario"
+                          class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow"
+                        >
+                          <!-- Card Header -->
+                          <div class="flex items-start justify-between mb-1.5">
+                            <div class="flex items-center space-x-1.5">
+                              <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-[10px] bg-gray-400">
+                                <span class="opacity-80">{{ getServiceTypeIcon(pkg.paquete.nombre) }}</span>
+                              </div>
+                              <div class="min-w-0">
+                                <p class="font-bold text-gray-900 dark:text-white text-[10px] sm:text-xs leading-tight line-clamp-2">{{ pkg.paquete.nombre }}</p>
+                                <p class="text-[8px] text-gray-500 dark:text-gray-400">#{{ pkg.id_paquete_usuario }}</p>
+                              </div>
+                            </div> 
+                          </div>
+
+                          <!-- Info -->
+                          <div class="mb-1.5">
+                            <div class="flex items-center space-x-1.5 text-[10px] text-gray-600 dark:text-gray-300">
+                              <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              <span class="truncate">{{ pkg.Usuario.nombre }}</span>
+                            </div>
+                            <p class="text-[8px] text-gray-400 mt-1">Uso: {{ formatDate(pkg.fecha_actualizacion) }}</p>
+                          </div>
+
+                          <!-- Status -->
+                          <div class="pt-1 border-t border-gray-100 dark:border-gray-700">
+                            <span v-if="pkg.estado === 'activo'" class="text-[8px] px-1.5 py-0.5 rounded-full font-bold bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                              Activo
+                            </span>
+                            <span v-else class="text-[8px] px-1.5 py-0.5 rounded-full font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                              Completado
+                            </span>
+                          </div>
+                        
+                          <!-- Botón Ver Detalles (Solo pago directo) -->
+                          <button 
+                            v-if="pkg.origen_compra === 'pago_directo'" 
+                            @click="showPackagePaymentDetails(pkg)" 
+                            class="w-full mt-2 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[9px] px-2 py-1 rounded font-medium transition-colors"
+                          >
+                            Ver Detalles
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Paginación utilizado -->
+                      <div v-if="(packagePagination.utilizado.totalPages > 1) && packagePagination.utilizado.total > 0" class="mt-3 bg-white dark:bg-gray-800 p-1.5 sm:p-2 rounded-lg">
+                        <div class="flex items-center justify-between">
+                          <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            Pág. {{ packagePagination.utilizado.page }} de {{ packagePagination.utilizado.totalPages }}
+                          </div> 
+                          <div class="flex items-center space-x-1 sm:space-x-2">
+                            <button
+                              @click="changePackagePage('utilizado', packagePagination.utilizado.page - 1)"
+                              :disabled="packagePagination.utilizado.page === 1"
+                              class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              aria-label="Página anterior"
+                            >
+                              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                              </svg>
+                            </button>
+                            <div class="text-[9px] sm:text-xs md:text-xs text-gray-500 dark:text-gray-400 px-1 sm:px-2 whitespace-nowrap">
+                              {{ packagePagination.utilizado.page }} / {{ packagePagination.utilizado.totalPages }}
+                            </div>
+                            <button
+                              @click="changePackagePage('utilizado', packagePagination.utilizado.page + 1)"
+                              :disabled="packagePagination.utilizado.page >= packagePagination.utilizado.totalPages"
+                              class="p-1 sm:p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              aria-label="Página siguiente"
+                            >
+                              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
             <!-- SECCIÓN: HISTORIAL -->
             <section class="px-3 sm:px-6 mb-4 sm:mb-6">
               <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
@@ -722,6 +1132,78 @@
       </div>
     </Transition>
 
+    <!-- Package Assignment Confirmation Modal -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="showPackageConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showPackageConfirmModal = false"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-xs sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                Confirmar Liquidación
+              </h3>
+              <button 
+                @click="showPackageConfirmModal = false"
+                class="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 p-1 -mr-1"
+              >
+                <span class="sr-only">Cerrar</span>
+                <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4 sm:p-5">
+            <div class="text-center">
+              <div class="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-100 dark:bg-green-900/50 mb-3 sm:mb-4">
+                <svg class="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">
+                ¿Liquidar técnico?
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-6">
+                Estás a punto de liquidar a <span class="font-semibold text-gray-900 dark:text-white">{{ selectedPackageTechnician?.nombre }}</span> 
+                <span class="block mt-2">
+                  <span class="text-base">Monto a liquidar: </span>
+                  <span class="font-bold text-green-600 dark:text-green-400 text-lg">L. {{ (parseFloat(selectedPackage?.paquete?.costo || 0) * (100 - parseFloat(comisionPorcentaje) || 0) / 100).toFixed(2) }}</span>
+                </span>
+                <span class="block mt-3 text-sm">¿Deseas continuar con la liquidación?</span>
+              </p>
+            </div>
+
+            <div class="mt-4 sm:mt-5 flex flex-row gap-2 sm:gap-3">
+              <button
+                type="button"
+                @click="showPackageConfirmModal = false"
+                class="inline-flex justify-center w-1/2 rounded-lg border border-gray-300 dark:border-gray-600 px-3 sm:px-4 py-2 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                @click="confirmPackageAssignment"
+                class="inline-flex justify-center w-1/2 rounded-lg border border-transparent px-3 sm:px-4 py-2 bg-green-600 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              >
+                Sí, liquidar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Technician Assignment Confirmation Modal -->
     <Transition
       name="modal"
@@ -941,6 +1423,160 @@
   </div>
 </Transition>
 
+<!-- Modal de Confirmación de Pago -->
+<Transition
+  name="modal"
+  enter-active-class="modal-enter-active"
+  leave-active-class="modal-leave-active"
+  enter-from-class="modal-enter-from"
+  leave-to-class="modal-leave-to">
+  <div v-if="showPaymentConfirmationModal" class="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-3">
+    <!-- Backdrop with animation -->
+    <Transition
+      name="backdrop"
+      enter-active-class="backdrop-enter-active"
+      leave-active-class="backdrop-leave-active"
+      enter-from-class="backdrop-enter-from"
+      leave-to-class="backdrop-leave-to"
+    >
+      <div 
+        v-if="showPaymentConfirmationModal"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        @click="cancelPaymentAction"
+      ></div>
+    </Transition>
+    
+    <!-- Modal content with animation -->
+    <Transition
+      name="modal-content"
+      enter-active-class="modal-content-enter-active"
+      leave-active-class="modal-content-leave-active"
+      enter-from-class="modal-content-enter-from"
+      leave-to-class="modal-content-leave-to">
+      <div 
+        v-if="showPaymentConfirmationModal"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-[320px] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 text-[10px] sm:text-sm mx-auto"
+        @click.stop
+      >
+        <!-- Modal header -->
+        <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div class="w-7 h-7 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-lg flex items-center justify-center text-sm">
+                💰
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-base font-black text-gray-900 dark:text-white">
+                  Confirmación de Pago
+                </h3>
+                <p class="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400">
+                  Paquete #{{ selectedPackage?.id_paquete_usuario }}
+                </p>
+              </div>
+            </div>
+            <button @click="cancelPaymentAction" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="p-3">
+          <!-- Package Summary -->
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg mb-3">
+            <h4 class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm mb-2">
+              Paquete Solicitado
+            </h4>
+            <div class="flex items-center space-x-2">
+              <div class="w-6 h-6 rounded-lg flex items-center justify-center text-sm text-white" :class="getServiceTypeColor(selectedPackage?.paquete?.nombre)">
+                {{ getServiceTypeIcon(selectedPackage?.paquete?.nombre) }}
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm">{{ selectedPackage?.paquete?.nombre }}</p>
+                <p class="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400">{{ selectedPackage?.Usuario?.nombre }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información del Pago -->
+          <div class="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 mb-3">
+            <h4 class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm mb-3 flex items-center">
+              <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+              </svg>
+              Información del Pago
+            </h4>
+            
+            <div class="space-y-3 text-xs sm:text-sm">
+              <!-- Monto -->
+              <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <p class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">Monto</p>
+                  <p class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
+                    L. {{ selectedPackage?.pagos?.[0]?.monto ? parseFloat(selectedPackage.pagos[0].monto).toFixed(2) : '0.00' }}
+                  </p>
+                </div>
+              </div> 
+
+              <!-- Banco -->
+              <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                   <p class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">Banco</p>
+                   <p class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
+                     {{ selectedPackage?.pagos?.[0]?.cuenta?.banco || 'No especificado' }}
+                   </p>
+                </div>
+                <!-- Mini detalle bancario desplegable o info extra si se requiere, similar al diseño original -->
+                <button 
+                  v-if="selectedPackage?.pagos?.[0]?.cuenta"
+                  @click="showBankDetailsModal = true"
+                  class="p-1.5 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
+                  title="Ver detalles del banco"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de Acción (Accept/Reject) -->
+          <div class="flex gap-2 mt-2">
+            <button 
+              @click="pendingPaymentAction = 'reject'; confirmPaymentAction()"
+              :disabled="isVerifying"
+              class="flex-1 flex items-center justify-center px-4 py-3 bg-red-100 hover:bg-red-200 text-red-700 hover:text-red-800 text-[10px] sm:text-sm font-bold rounded-xl transition-all shadow-sm active:scale-95 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg v-if="!isVerifying" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              Rechazar
+            </button>
+            
+            <button 
+              @click="pendingPaymentAction = 'approve'; confirmPaymentAction()"
+              :disabled="isVerifying"
+              class="flex-1 flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white text-[10px] sm:text-sm font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-wider disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <svg v-if="isVerifying" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Aprobar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </div>
+</Transition>
+
     <!-- Modal de Detalles del Monto -->
     <Transition
       name="modal"
@@ -1016,7 +1652,7 @@
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to">
-      <div v-if="showBankDetailsModal" class="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-3">
+      <div v-if="showBankDetailsModal" class="fixed inset-0 z-[80] flex items-center justify-center p-2 sm:p-3">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showBankDetailsModal = false"></div>
         
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-[300px] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
@@ -1040,43 +1676,60 @@
                 <div class="flex justify-between">
                   <span class="text-gray-600 dark:text-gray-400">Banco:</span>
                   <span class="font-medium text-gray-900 dark:text-white">
-                    {{ paymentType === 'visit' 
-                        ? (serviceToPayment?.pagoVisita?.cuenta?.banco || 'No especificado')
-                        : (serviceToPayment?.cotizacion?.cuenta?.banco || 'No especificado')
+                    {{ 
+                      selectedPackage 
+                        ? (selectedPackage.pagos?.[0]?.cuenta?.banco || 'No especificado') 
+                        : (paymentType === 'visit' 
+                            ? (serviceToPayment?.pagoVisita?.cuenta?.banco || 'No especificado')
+                            : (serviceToPayment?.cotizacion?.cuenta?.banco || 'No especificado'))
                     }}
                   </span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600 dark:text-gray-400">N° Cuenta:</span>
                   <span class="font-medium text-gray-900 dark:text-white">
-                    {{ paymentType === 'visit' 
-                        ? (serviceToPayment?.pagoVisita?.cuenta?.num_cuenta || 'No especificado')
-                        : (serviceToPayment?.cotizacion?.cuenta?.num_cuenta || 'No especificado')
+                    {{ 
+                      selectedPackage 
+                        ? (selectedPackage.pagos?.[0]?.cuenta?.numero || selectedPackage.pagos?.[0]?.cuenta?.num_cuenta || 'No especificado') 
+                        : (paymentType === 'visit' 
+                            ? (serviceToPayment?.pagoVisita?.cuenta?.num_cuenta || 'No especificado')
+                            : (serviceToPayment?.cotizacion?.cuenta?.num_cuenta || 'No especificado'))
                     }}
                   </span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600 dark:text-gray-400">Tipo de cuenta:</span>
                   <span class="font-medium text-gray-900 dark:text-white">
-                    {{ paymentType === 'visit' 
-                        ? (serviceToPayment?.pagoVisita?.cuenta?.tipo || 'No especificado')
-                        : (serviceToPayment?.cotizacion?.cuenta?.tipo || 'No especificado')
+                    {{ 
+                      selectedPackage 
+                        ? (selectedPackage.pagos?.[0]?.cuenta?.tipo || 'No especificado') 
+                        : (paymentType === 'visit' 
+                            ? (serviceToPayment?.pagoVisita?.cuenta?.tipo || 'No especificado')
+                            : (serviceToPayment?.cotizacion?.cuenta?.tipo || 'No especificado'))
                     }}
                   </span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600 dark:text-gray-400">N° Comprobante:</span>
                   <span class="font-medium text-gray-900 dark:text-white">
-                    {{ paymentType === 'visit' 
-                        ? (serviceToPayment?.pagoVisita?.num_comprobante || 'No especificado')
-                        : (serviceToPayment?.cotizacion?.num_comprobante || 'No especificado')
+                    {{ 
+                      selectedPackage 
+                        ? (selectedPackage.pagos?.[0]?.num_comprobante || 'No especificado') 
+                        : (paymentType === 'visit' 
+                            ? (serviceToPayment?.pagoVisita?.num_comprobante || 'No especificado')
+                            : (serviceToPayment?.cotizacion?.num_comprobante || 'No especificado'))
                     }}
                   </span>
                 </div>
-                <div v-if="paymentType === 'visit'" class="flex justify-between">
+                <!-- Fecha de pago: Aplica para paquetes y visitas -->
+                <div v-if="selectedPackage || paymentType === 'visit'" class="flex justify-between">
                   <span class="text-gray-600 dark:text-gray-400">Fecha de pago:</span>
                   <span class="font-medium text-gray-900 dark:text-white">
-                    {{ serviceToPayment?.pagoVisita?.fecha ? formatDateDDMMYY(serviceToPayment.pagoVisita.fecha) : 'No especificada' }}
+                    {{ 
+                      selectedPackage 
+                        ? (selectedPackage.pagos?.[0]?.fecha ? new Date(selectedPackage.pagos[0].fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : 'No especificada') 
+                        : (serviceToPayment?.pagoVisita?.fecha ? new Date(serviceToPayment.pagoVisita.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : 'No especificada') 
+                    }}
                   </span>
                 </div>
               </div>
@@ -1086,99 +1739,407 @@
       </div>
     </Transition>
     
-    <!-- Modal de Confirmación de Pago -->
-    <Transition
-      name="modal"
-      enter-active-class="modal-enter-active"
-      leave-active-class="modal-leave-active"
-      enter-from-class="modal-enter-from"
-      leave-to-class="modal-leave-to">
-      <div v-if="showPaymentConfirmationModal" class="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-3">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="cancelPaymentAction"></div>
-        
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-md max-h-[90vh] overflow-y-auto relative z-10">
-          <!-- Header -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
-            <div class="flex items-center justify-between">
-              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
-                {{ pendingPaymentAction === 'approve' ? 'Confirmar Aprobación' : 'Confirmar Rechazo' }}
-              </h3>
-              <button @click="cancelPaymentAction" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
+  </div>
+
+  <!-- Package Assignment Modal -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to">
+    <div v-if="showPackageAssignmentModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showPackageAssignmentModal = false"></div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-[320px] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-2 sm:p-3 pb-0 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-3">
+            <div class="w-7 h-7 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-sm">
+              👷
             </div>
+            <h3 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Asignar Técnico</h3>
           </div>
+          <button 
+            @click="showPackageAssignmentModal = false" 
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
+            aria-label="Cerrar modal"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+          
+        <!-- Filtro por ciudad -->
+        <div class="px-2">
+          <multiselect 
+            id="cityFilter"
+            v-model="selectedTechCityObject"
+            :options="availableCities"
+            :searchable="false"
+            :close-on-select="true"
+            :show-labels="false"
+            placeholder="Buscar por ciudad"
+            class="multiselect-admin-filter"
+            :custom-label="getTechCityLabel"
+            :options-limit="100"
+            :disabled="availableCities.length === 0"
+            :loading="cities.length === 0"
+            @open="onMultiselectOpen" 
+            :tabindex="0"
+          >
+            <template #singleLabel="{ option }">
+              <span class="text-xs truncate">{{ getTechCityLabel(option) }}</span>
+            </template>
+          </multiselect>
+        </div>
 
-          <!-- Content -->
-          <div class="p-4">
-            <div class="mb-4">
-              <div class="flex items-center mb-3">
-                <div :class="pendingPaymentAction === 'approve' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'" class="p-2 rounded-full mr-3">
-                  <svg v-if="pendingPaymentAction === 'approve'" class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                  </svg>
-                  <svg v-else class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
+        <!-- Technicians List -->
+        <div class="p-3">
+          <div class="space-y-2">
+            <div 
+              v-for="tech in paginatedTechnicians" 
+              :key="tech.id_usuario"
+              @click="tech.estado === 'activo' ? selectPackageTechnician(tech) : null"
+              :class="[
+                'group p-2.5 rounded-lg border transition-colors',
+                tech.estado === 'activo' 
+                  ? 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer'
+                  : 'bg-gray-100/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-70'
+              ]"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{{ tech.nombre }}</p>
+                  <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{{ tech.ciudad?.nombre_ciudad }}</p>
                 </div>
-                <div>
-                  <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
-                    {{ pendingPaymentAction === 'approve' ? '¿Estás seguro de aprobar este pago?' : '¿Estás seguro de rechazar este pago?' }}
-                  </h4>
-                  <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {{ pendingPaymentAction === 'approve' 
-                      ? 'Esta acción finalizará el servicio y confirmará el pago.' 
-                      : 'Esta acción rechazará el pago y permitirá al cliente intentarlo nuevamente.' 
-                    }}
-                  </p>
+                <div class="flex items-center space-x-2 ml-2">
+                  <span 
+                    v-if="tech.estado === 'activo'"
+                    class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                  >
+                    Disponible
+                  </span>
+                  <span 
+                    v-else
+                    class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                  >
+                    Inactivo
+                  </span>
+                  <span class="text-[10px] sm:text-xs text-gray-500 flex items-center whitespace-nowrap">
+                    <svg class="w-3 h-3 text-yellow-400 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    {{ tech.promedio_calificacion?.toFixed(1) || '0.0' }}
+                  </span>
                 </div>
-              </div>
-
-              <!-- Información adicional para aprobación -->
-              <div v-if="pendingPaymentAction === 'approve'" class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-4">
-                <p class="text-xs text-blue-800 dark:text-blue-200 font-medium mb-1">Verificación requerida:</p>
-                <p class="text-xs text-blue-700 dark:text-blue-300">
-                  Asegúrate de haber verificado el pago en tu banca móvil antes de proceder.
-                </p>
               </div>
             </div>
-
-            <!-- Botones de acción -->
-            <div class="flex flex-col sm:flex-row gap-3 sm:gap-2">
+            
+            <div v-if="filteredTechnicians.length === 0" class="text-center py-6">
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">No hay técnicos disponibles</p>
+              <p class="text-[10px] sm:text-xs text-gray-400 mt-1">Intenta con otro filtro</p>
+            </div>
+            
+            <!-- Paginación -->
+            <div v-if="filteredTechnicians.length > 0" class="mt-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-3">
               <button 
-                @click="confirmPaymentAction"
-                :disabled="isVerifying"
-                :class="{
-                  'bg-green-600 hover:bg-green-700 disabled:bg-green-400': pendingPaymentAction === 'approve',
-                  'bg-red-600 hover:bg-red-700 disabled:bg-red-400': pendingPaymentAction === 'reject'
-                }"
-                class="flex-1 flex items-center justify-center px-4 py-2.5 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors disabled:cursor-not-allowed"
-                :style="{
-                  focusRing: pendingPaymentAction === 'approve' ? 'focus:ring-green-500' : 'focus:ring-red-500'
-                }"
+                @click="changeTechPage(currentTechPage - 1)" 
+                :disabled="currentTechPage === 1"
+                class="px-3 py-1 text-xs sm:text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <svg v-if="isVerifying" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {{ isVerifying ? 'Procesando...' : (pendingPaymentAction === 'approve' ? 'Sí, Aprobar' : 'Sí, Rechazar') }}
+                Anterior
               </button>
-              
+              <span class="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                Página {{ currentTechPage }} de {{ totalTechPages }}
+              </span>
               <button 
-                @click="cancelPaymentAction"
-                :disabled="isVerifying"
-                class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                @click="changeTechPage(currentTechPage + 1)" 
+                :disabled="currentTechPage >= totalTechPages"
+                class="px-3 py-1 text-xs sm:text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Cancelar
+                Siguiente
               </button>
             </div>
           </div>
         </div>
       </div>
-    </Transition>
-  </div>
+    </div>
+  </Transition>
+
+  <!-- Modal de Detalles del Pago de Paquete -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to"
+  >
+    <div
+      v-if="showPackagePaymentDetailsModal && selectedPackagePayment"
+      class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4"
+    >
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closePackagePaymentDetailsModal"></div>
+
+      <div
+        class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[90%] sm:w-full max-w-md max-h-[85vh] overflow-y-auto relative z-10 text-[12px] sm:text-xs md:text-base"
+      >
+        <!-- Header -->
+        <div
+          class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl z-10"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+              <div
+                class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-black text-gray-900 dark:text-white">Detalles del Pago</h3>
+                <div class="flex items-center space-x-2">
+                  <p class="text-gray-600 dark:text-gray-400">ID: #{{ selectedPackagePayment.id_pago_paquete || 'N/A' }}</p>
+                  <span class="text-gray-400">•</span>
+                 <p class="text-gray-600 dark:text-gray-400">{{ formatDate(selectedPackagePayment.fecha) || 'N/A' }}</p>
+                </div>
+              </div>
+            </div>
+            <button
+              @click="closePackagePaymentDetailsModal"
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-3 sm:p-4 space-y-4">
+          <!-- Información del Pago -->
+          <div>
+            <h4 class="font-bold text-gray-900 dark:text-white mb-2">Información del Paquete</h4>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-500 dark:text-gray-400 mb-1">Paquete</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ selectedPackagePayment.paquete?.nombre || 'Paquete' }}
+                </p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-500 dark:text-gray-400 mb-1">Monto</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ formatCurrency(selectedPackagePayment.monto || 0) }}
+                </p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-500 dark:text-gray-400 mb-1">Comprobante</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ selectedPackagePayment.num_comprobante || 'No especificado' }}
+                </p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-500 dark:text-gray-400 mb-1">Usuario</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ selectedPackagePayment.usuario?.nombre || 'N/A' }}
+                </p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-500 dark:text-gray-400 mb-1">Teléfono</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ selectedPackagePayment.usuario?.telefono || 'N/A' }}
+                </p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <p class="text-gray-500 dark:text-gray-400 mb-1">Estado</p>
+                <span
+                  :class="getStatusBadgeClass(selectedPackagePayment.estado)"
+                  class="inline-flex items-center px-2 py-0.5 rounded-full font-medium"
+                >
+                  {{ selectedPackagePayment.estado || 'Pendiente' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información Bancaria -->
+          <div v-if="selectedPackagePayment.cuenta">
+            <h4 class="font-bold text-gray-900 dark:text-white mb-2">Información Bancaria</h4>
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg space-y-2">
+              <div class="flex justify-between">
+                <span class="text-gray-500 dark:text-gray-400">Banco:</span>
+                <span class="font-medium text-gray-900 dark:text-white text-right">
+                  {{ selectedPackagePayment.cuenta.banco || 'No especificado' }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500 dark:text-gray-400">Número de Cuenta:</span>
+                <span class="font-medium text-gray-900 dark:text-white text-right">
+                  {{ selectedPackagePayment.cuenta.numero || selectedPackagePayment.cuenta.num_cuenta || 'N/A' }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500 dark:text-gray-400">Beneficiario:</span>
+                <span class="font-medium text-gray-900 dark:text-white text-right">
+                  {{ selectedPackagePayment.cuenta.beneficiario || 'N/A' }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500 dark:text-gray-400">Tipo de Cuenta:</span>
+                <span class="font-medium text-gray-900 dark:text-white text-right">
+                  {{ selectedPackagePayment.cuenta.tipo || 'N/A' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div
+          class="sticky bottom-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex flex-wrap justify-end gap-2 sm:gap-3 rounded-b-xl sm:rounded-b-2xl"
+        >
+          <button
+            v-if="selectedPackagePayment.estado === 'aprobado' || selectedPackagePayment.estado === 'completado'"
+            @click="openFacturaModal(selectedPackagePayment)"
+            class="px-3 py-2 font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+          >
+            Mostrar Recibo
+          </button>
+          <button
+            @click="closePackagePaymentDetailsModal"
+            class="px-3 py-2 font-medium text-gray-700 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
+  <!-- Modal de Recibo -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to"
+  >
+    <div
+      v-if="showFacturaModal && selectedFacturaPayment"
+      class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+    >
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeFacturaModal"></div>
+
+      <div class="bg-white relative z-10 w-full max-w-2xl shadow-xl rounded-sm overflow-hidden flex flex-col max-h-[90vh]">
+        
+        <!-- Receipt Content (Scrollable) -->
+        <div class="overflow-y-auto p-6 flex-1">
+          <!-- Top Header -->
+          <div class="flex justify-between items-center border-b-2 border-gray-300 pb-2 mb-2">
+              <div>
+                  <h2 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">RECIBO POR HONORARIOS</h2>
+                  <p class="text-sm font-mono font-bold text-gray-900">N° {{ empresaCorrelativo || '000-000-00-00000000' }}</p>
+                  <p class="text-[10px] text-gray-500 mt-1">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
+              </div>
+              <div class="text-right">
+                 <h1 class="text-lg font-bold text-gray-900 tracking-tight">{{ empresaNombre || 'HogarSeguro' }}</h1>
+                 <div class="text-[10px] text-gray-500 mt-2 space-y-0.5">
+                    <p class="font-medium">RTN: {{ empresaRTN }}</p>
+                    <p>{{ empresaEmail }}</p>
+                    <p>{{ empresaTelefono }}</p>
+                 </div>
+              </div>
+          </div>
+
+          <!-- Main Body -->
+          <div class="bg-gray-50 rounded-lg border border-gray-300 p-4 sm:p-4 mb-2">
+              <div class="mb-6">
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">RECIBÍ DE</span>
+                  <p class="text-base sm:text-lg font-medium text-gray-900 break-words">
+                      {{ selectedFacturaPayment.cliente?.nombre || selectedFacturaPayment.usuario?.nombre || 'Cliente General' }}
+                  </p>
+              </div>
+              
+              <div class="mb-6">
+                   <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">LA SUMA DE</span>
+                   <p class="text-lg sm:text-xl font-bold text-gray-900">{{ formatCurrency(selectedFacturaPayment.total || selectedFacturaPayment.monto || selectedFacturaPayment.monto_total || 0) }}</p>
+              </div>
+
+              <div>
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">POR CONCEPTO DE</span>
+                  <p class="text-xs leading-relaxed text-gray-700">
+                    <span v-if="selectedFacturaPayment.paquete">
+                      Servicio de acceso, intermediación tecnológica, coordinación y gestión de solicitudes de adquisición de productos, servicios y/o beneficios ofrecidos por terceros a través de la plataforma HogarSeguro, correspondiente al paquete
+                      <strong>{{ selectedFacturaPayment.paquete.nombre }}</strong>.
+                    </span>
+                    <span v-else>
+                      Pago de Servicio Profesional
+                    </span>
+                  </p>
+              </div>
+          </div>
+          
+          <!-- Details & Fiscal Data (Stacked Rows) -->
+          <div class="flex flex-col gap-8 text-[11px] mb-8">
+               <div>
+                  <h4 class="font-bold text-gray-900 mb-3 border-b border-gray-300 pb-1">DETALLES</h4>
+                   <div class="space-y-2 text-gray-600">
+                      <p class="flex justify-between"><span class="font-medium text-gray-500">Subtotal</span> <span>{{ formatCurrency(selectedFacturaPayment.subtotal || selectedFacturaPayment.total || selectedFacturaPayment.monto || 0) }}</span></p>
+                      <div class="flex justify-between pt-1 mt-1 border-t border-gray-300">
+                          <span class="font-bold text-gray-900 text-xs">TOTAL</span> 
+                          <span class="font-bold text-gray-900 text-xs">{{ formatCurrency(selectedFacturaPayment.total || selectedFacturaPayment.monto || 0) }}</span>
+                      </div>
+                  </div>
+               </div>
+               <div>
+                  <h4 class="font-bold text-gray-900 mb-3 border-b border-gray-300 pb-1">DATOS FISCALES</h4>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-gray-600">
+                      <p class="flex justify-between sm:justify-start sm:gap-2"><span class="font-medium text-gray-500">CAI:</span> <span class="text-right sm:text-left">{{ empresaCAI }}</span></p>
+                      <p class="flex justify-between sm:justify-start sm:gap-2"><span class="font-medium text-gray-500">Rango:</span> <span class="text-right sm:text-left">{{ empresaRangoAutorizado }}</span></p>
+                      <p class="flex justify-between sm:justify-start sm:gap-2 sm:col-span-2"><span class="font-medium text-gray-500">Límite:</span> <span class="text-right sm:text-left">{{ empresaFechaLimite }}</span></p>
+                  </div>
+               </div>
+          </div>
+
+          <!-- Footer Info -->
+          <div class="text-[10px] text-gray-400 text-center pt-1 border-t border-gray-300">
+             <p>Este documento es un comprobante de pago por honorarios profesionales.</p>
+             <p v-if="selectedFacturaPayment.num_comprobante" class="mt-1">Ref. Pago: {{ selectedFacturaPayment.num_comprobante }}</p>
+          </div>
+        </div>
+
+        <!-- Action Footer -->
+        <div class="bg-gray-50 p-4 border-t border-gray-300 flex justify-end">
+          <button 
+            @click="closeFacturaModal"
+            class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
+          >
+            Cerrar Recibo
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <style>
@@ -1327,10 +2288,21 @@
   .multiselect-admin-filter .multiselect__option--highlight::after {
     content: '';
   }
+
+  .modal-enter-active,
+  .modal-leave-active {
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-enter-from,
+  .modal-leave-to {
+    opacity: 0;
+  }
 </style>
 
 <script setup>
 import { ref, computed, onMounted, nextTick, reactive, watch } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import { useHead, useCookie } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import { useRouter, useRoute } from 'vue-router';
@@ -1359,6 +2331,7 @@ useHead({
 const isLoading = ref(true)
 const loadingPending = ref(false)
 const loadingHistory = ref(false)
+const loadingPackages = ref(false)
 const isProcessingPayment = ref(false)
 const isVerifying = ref(false)
 const showDetailModal = ref(false)
@@ -1368,6 +2341,94 @@ const showAmountDetailsModal = ref(false)
 const showBankDetailsModal = ref(false)
 const showPaymentConfirmationModal = ref(false)
 
+// Package Assignment Modal
+const showPackageAssignmentModal = ref(false)
+const showPackageConfirmModal = ref(false) 
+const selectedPackageTechnician = ref(null)
+const isAssigningPackage = ref(false)
+const packageCities = ref([])
+const selectedPackageCity = ref(null)
+const packageTechnicians = ref([])
+const currentPackagePage = ref(1)
+const itemsPerPackagePage = 5
+const comisionPorcentaje = ref(0)
+
+// Búsqueda de paquetes
+const packageSearchInput = ref('')
+const packageSearchId = ref('')
+const handlePackageSearch = () => {
+  packageSearchId.value = packageSearchInput.value.trim()
+  invalidatePackageCache() // Limpiar todo el cache al buscar
+  fetchActivePackages(true)
+}
+
+const debouncedPackageSearch = useDebounceFn(handlePackageSearch, 1500)
+
+const clearPackageSearch = () => {
+  packageSearchInput.value = ''
+  packageSearchId.value = ''
+  invalidatePackageCache() // Limpiar todo el cache
+  fetchActivePackages(true)
+}
+
+const activePackages = ref({
+  utilizando: [],
+  verificando_pago: [],
+  utilizado: []
+})
+
+// Cache para paquetes
+const packagesCache = ref({
+  utilizando: {},
+  verificando_pago: {},
+  utilizado: {}
+})
+
+// Función para invalidar cache
+const invalidatePackageCache = (estado = null) => {
+  if (estado) {
+    packagesCache.value[estado] = {}
+  } else {
+    packagesCache.value = {
+      utilizando: {},
+      verificando_pago: {},
+      utilizado: {}
+    }
+  }
+}
+
+// Contadores de paquetes (Header y Tabs)
+const packageStats = ref({
+  en_uso: 0,
+  pendiente_verificacion: 0,
+  historial: 0
+})
+
+// Estado de paginación por pestaña
+const packagePagination = ref({
+  utilizando: {
+    page: 1,
+    hasMore: true,
+    loading: false,
+    total: 0,
+    totalPages: 1
+  },
+  verificando_pago: {
+    page: 1,
+    hasMore: true,
+    loading: false,
+    total: 0,
+    totalPages: 1
+  },
+  utilizado: {
+    page: 1,
+    hasMore: true,
+    loading: false,
+    total: 0,
+    totalPages: 1
+  }
+})
+
 // Filtros y búsqueda
 const searchQuery = ref('')
 const isSearching = ref(false)
@@ -1376,6 +2437,229 @@ const selectedServiceType = ref('')
 const selectedCity = ref('')
 const selectedTechCity = ref('')
 const selectedMonth = ref(new Date().toISOString().slice(0, 7)) // Formato YYYY-MM
+
+// Variables para el manejo de pestañas y estados
+const activePackageTab = ref('verificando_pago'); // 'verificando_pago' o 'utilizando'
+const selectedPackage = ref(null); 
+
+// Función para mostrar el modal de confirmación de pago
+const showPaymentConfirmation = (pkg, action) => {
+  selectedPackage.value = pkg;
+  pendingPaymentAction.value = action;
+  showPaymentConfirmationModal.value = true;
+};
+
+// Función para crear factura automáticamente
+const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado) => {
+  try {
+    console.log('🔵 === INICIO CREACIÓN DE FACTURA ===');
+    console.log('📦 Datos recibidos:', {
+      idUsuario,
+      payment,
+      tipoPago,
+      idRelacionado
+    });
+
+    // Verificar RTN
+    let rtnResponse = { success: false };
+    try {
+      console.log('🔍 Verificando RTN para usuario:', idUsuario);
+      rtnResponse = await $api(`/usuarios/verificar-rtn/${idUsuario}`, {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${auth.token}` }
+      });
+      console.log('✅ Respuesta verificación RTN:', rtnResponse);
+    } catch (rtnError) {
+      console.log('⚠️ Error verificando RTN (continuando sin RTN):', rtnError);
+    }
+
+    let total = parseFloat(payment.monto_total || payment.monto || 0);
+    console.log('💰 Monto total del pago:', total);
+
+    // Si es pago de paquete, calcular solo la comisión
+    if (tipoPago === 'package') {
+      try {
+        console.log('📊 Obteniendo comisión por paquete...');
+        const comisionResponse = await $api('/config/valor/comision_por_paquete', {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+
+        console.log('✅ Respuesta de comisión:', comisionResponse);
+
+        if (comisionResponse && comisionResponse.valor) {
+          const porcentajeComision = parseFloat(comisionResponse.valor);
+          const montoBase = total;
+          total = (montoBase * porcentajeComision) / 100;
+          
+          console.log('💵 Cálculo de comisión:', {
+            montoBase,
+            porcentajeComision,
+            comisionCalculada: total
+          });
+        } else {
+          console.warn('⚠️ No se obtuvo porcentaje de comisión, usando monto completo');
+        }
+      } catch (comisionError) {
+        console.error('❌ Error obteniendo comisión:', comisionError);
+        console.warn('⚠️ Continuando con monto completo debido al error');
+      }
+    }
+
+    const subtotal = total;
+    const isv = 0;
+
+    let facturaData = {
+      tipo_factura: rtnResponse?.success ? 'CON_RTN' : 'CONSUMIDOR_FINAL',
+      subtotal,
+      isv,
+      total
+    };
+
+    // Asignar ID correspondiente
+    if (tipoPago === 'package') {
+      facturaData.id_pago_paquete = idRelacionado;
+      console.log('📦 Asignado id_pago_paquete:', idRelacionado);
+    }
+
+    if (rtnResponse?.success && rtnResponse.data) {
+      facturaData.rtn_cliente = rtnResponse.data.rtn;
+      facturaData.nombre_cliente = rtnResponse.data.nombre.trim();
+      console.log('👤 Datos de cliente agregados:', {
+        rtn: facturaData.rtn_cliente,
+        nombre: facturaData.nombre_cliente
+      });
+    }
+
+    console.log('📤 Enviando datos de factura al backend:', facturaData);
+
+    const facturaResponse = await $api('/facturas', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: facturaData
+    });
+
+    console.log('✅ Respuesta del servidor (factura creada):', facturaResponse);
+    console.log('🔵 === FIN CREACIÓN DE FACTURA ===');
+    
+  } catch (error) {
+    console.error('❌ Error generando factura:', error);
+    console.error('❌ Detalles del error:', {
+      message: error.message,
+      response: error.response,
+      data: error.data
+    });
+    showError('El pago se aprobó, pero hubo un error generando la factura.');
+  }
+};
+
+// Función para confirmar la acción de pago
+const confirmPaymentAction = async () => {
+  if (!selectedPackage.value || !pendingPaymentAction.value) return;
+  
+  isVerifying.value = true;
+  const pagoId = selectedPackage.value.pagos?.[0]?.id_pago_paquete;
+  
+  if (!pagoId) {
+    showError('No se encontró el ID del pago');
+    isVerifying.value = false;
+    return;
+  }
+
+  try {
+    const response = await $api(`/paquetes/usuarios/pagos/${pagoId}/${pendingPaymentAction.value}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${useCookie('token').value}`
+      }
+    });
+
+    if (response && response.success) {
+      showSuccess(`Pago ${pendingPaymentAction.value === 'approve' ? 'aprobado' : 'rechazado'} correctamente`);
+      
+      // Si se rechazó, notificar a usuario
+      if (pendingPaymentAction.value === 'reject') {  
+
+        // Notificar a Usuario
+        try {
+          await $api('/notificaciones/enviar', {
+            baseURL: config.public.apiBase,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${useCookie('token').value}` 
+            },
+            body: JSON.stringify({
+              titulo: 'Pago de Paquete Rechazado',
+              id_usuario: selectedPackage.value?.id_usuario
+            })
+          });
+        } catch (e) {
+          console.error('Error notificando Usuario:', e);
+        }
+      }
+
+      // Si se aprobó, notificar a usuario
+      if (pendingPaymentAction.value === 'approve') {
+        const adminName = userCookie.value?.nombre || 'Administrador';
+        try {
+          await $api('/notificaciones/enviar', {
+            baseURL: config.public.apiBase,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${useCookie('token').value}` 
+            },
+            body: JSON.stringify({
+              titulo: 'Pago de Paquete Aceptado',
+              id_usuario: selectedPackage.value?.id_usuario
+            })
+          });
+        } catch (e) {
+          console.error('Error notificando Usuario (Aprobación):', e);
+        }
+
+        // Generar factura automática para el paquete
+        const pago = selectedPackage.value?.pagos?.[0];
+        if (pago) {
+           await crearFacturaParaPago(selectedPackage.value.id_usuario, pago, 'package', pago.id_pago_paquete);
+        }
+      }
+
+      // Invalidar cache y recargar
+      invalidatePackageCache();
+      await fetchActivePackages();
+    } else {
+      showError(response?.message || `Error al ${pendingPaymentAction.value === 'approve' ? 'aprobar' : 'rechazar'} el pago`);
+    }
+  } catch (error) {
+    console.error('Error al procesar el pago:', error);
+    showError(`Error al ${pendingPaymentAction.value === 'approve' ? 'aprobar' : 'rechazar'} el pago`);
+  } finally {
+    isVerifying.value = false;
+    showPaymentConfirmationModal.value = false;
+    selectedPackage.value = null;
+    pendingPaymentAction.value = null;
+  }
+};
+
+// Función para cancelar la acción de pago
+const cancelPaymentAction = () => {
+  selectedPackage.value = null;
+  pendingPaymentAction.value = null;
+  showPaymentConfirmationModal.value = false;
+};
 
 // Objetos seleccionados para multiselect
 const selectedStatusObject = ref(null)
@@ -1476,7 +2760,370 @@ const toast = ref({
   duration: 5000
 })
 
+// ===== VARIABLES PARA MODALES DE PAGOS y CONFIG EMPRESA =====
+const showPackagePaymentDetailsModal = ref(false)
+const selectedPackagePayment = ref(null)
+const showFacturaModal = ref(false)
+const selectedFacturaPayment = ref(null)
+
+// Variables de datos de empresa
+const empresaNombre = ref('HogarSeguro');
+const empresaTelefono = ref('');
+const empresaEmail = ref('');
+const empresaRTN = ref('');
+const empresaCAI = ref('');
+const empresaRangoAutorizado = ref('');
+const empresaFechaLimite = ref('');
+const empresaCorrelativo = ref('');
+
+// Función de utilidad para clases de estado
+const getStatusBadgeClass = (status) => {
+  if (!status) return 'bg-gray-100 text-gray-800'
+  const normalizedStatus = status.toLowerCase()
+  switch (normalizedStatus) {
+    case 'aprobado':
+    case 'confirmado':
+    case 'completado':
+      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+    case 'pendiente':
+    case 'pendiente_validacion':
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+    case 'rechazado':
+    case 'denegado':
+      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+            default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+  }
+}
+
+// Funciones de utilidad para formateo
+const formatCurrency = (value) => {
+  try {
+    if (value === undefined || value === null || isNaN(value)) return 'L. 0.00';
+    const number = parseFloat(value);
+    return `L. ${number.toLocaleString('es-HN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  } catch (error) {
+    console.error('Error formateando moneda:', error);
+    return 'L. 0.00';
+  }
+}; 
+
+// Cargar configuración de empresa
+const loadEmpresaConfig = async () => {
+  try {
+    const [telefonoRes, emailRes, rtnRes] = await Promise.all([
+      $api('/config/valor/numero_empresa', { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } }).catch(() => null),
+      $api('/config/valor/correo_empresa', { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } }).catch(() => null),
+      $api('/config/valor/rtn', { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } }).catch(() => null)
+    ]);
+
+    if (telefonoRes?.valor) empresaTelefono.value = telefonoRes.valor.toString();
+    if (emailRes?.valor) empresaEmail.value = emailRes.valor.toString();
+    if (rtnRes?.valor) empresaRTN.value = rtnRes.valor.toString();
+  } catch (error) {
+    console.error('Error cargando configuración de empresa:', error);
+  }
+};
+
+// Mostrar detalles de pago de paquete
+const showPackagePaymentDetails = (pkg) => {
+  if (pkg.pagos && pkg.pagos.length > 0) {
+    // Tomamos el primer pago (o el más reciente si hubiera orden)
+    // Asumimos que para pago_directo hay un pago relevante
+    const pago = pkg.pagos[0]; 
+    selectedPackagePayment.value = {
+      ...pago,
+      paquete: pkg.paquete,
+      usuario: pkg.Usuario || pkg.usuario, // Normalizar usuario
+      estado: pago.estado || pkg.estado // Usar estado del pago o del paquete si pago no tiene
+    };
+    showPackagePaymentDetailsModal.value = true;
+  } else {
+    showError('No hay información de pagos disponible para este paquete');
+  }
+};
+
+const closePackagePaymentDetailsModal = () => {
+  showPackagePaymentDetailsModal.value = false;
+  selectedPackagePayment.value = null;
+};
+
+const openFacturaModal = async (payment) => {
+  try {
+    if (!payment) {
+      console.error('No se proporcionó un pago');
+      return;
+    }
+
+    console.log('🔍 Abriendo modal de factura para pago:', payment);
+    selectedFacturaPayment.value = payment;
+    showFacturaModal.value = true;
+
+    // Si no tiene id_factura, intentar buscar por el ID del pago
+    if (!payment.id_factura && payment.id_pago_paquete) {
+      try {
+        const params = new URLSearchParams();
+        params.append('id_pago_paquete', payment.id_pago_paquete);
+
+        console.log('📤 Buscando factura con params:', params.toString());
+
+        const response = await $api(`/facturas/relaciones/idpago?${params.toString()}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+
+        console.log('📄 Respuesta de búsqueda de factura:', response);
+
+        if (response?.status === 'success' && response.factura) {
+          const factura = response.factura;
+          const correlativo = response.correlativo;
+          
+          // Actualizar variables de datos fiscales con los datos de la factura
+          if (factura.cai) empresaCAI.value = factura.cai;
+          if (factura.numero_factura_correlativo) empresaCorrelativo.value = factura.numero_factura_correlativo;
+          
+          // Actualizar con datos del correlativo
+          if (correlativo) {
+            if (correlativo.rango_autorizado) empresaRangoAutorizado.value = correlativo.rango_autorizado;
+            if (correlativo.fecha_limite_emision) empresaFechaLimite.value = correlativo.fecha_limite_emision;
+          }
+          
+          // Actualizar RTN del cliente en selectedFacturaPayment
+          if (factura.rtn_cliente) selectedFacturaPayment.value.rtn_cliente = factura.rtn_cliente;
+          
+          // Actualizar datos financieros en selectedFacturaPayment
+          if (factura.subtotal) selectedFacturaPayment.value.subtotal = factura.subtotal;
+          if (factura.isv) selectedFacturaPayment.value.isv = factura.isv;
+          if (factura.total) selectedFacturaPayment.value.total = factura.total;
+          
+          console.log('✅ Factura cargada exitosamente');
+        } else {
+          console.warn('⚠️ No se encontró factura asociada al pago:', response);
+          showError('No se encontró la factura asociada a este pago');
+        }
+      } catch (error) {
+        console.error('❌ Error al cargar la factura:', error);
+        if (error.response) {
+          console.error('Detalles del error:', {
+            status: error.response.status,
+            data: error.response.data
+          });
+        }
+        showError('Error al cargar la factura: ' + (error.message || 'Error desconocido'));
+      }
+    } else if (payment.id_factura) {
+      // Obtener datos de la factura específica si hay un ID
+      try {
+        const response = await $api(`/facturas/${payment.id_factura}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+
+        if (response?.status === 'success' && response.factura) {
+          const factura = response.factura;
+          
+          // Actualizar variables de datos fiscales con los datos de la factura
+          if (factura.cai) empresaCAI.value = factura.cai;
+          if (factura.numero_factura_correlativo) empresaCorrelativo.value = factura.numero_factura_correlativo;
+          
+          console.log('✅ Factura cargada por ID');
+        } else {
+          console.warn('⚠️ La respuesta no contiene datos de factura válidos:', response);
+        }
+      } catch (error) {
+        console.error('❌ Error obteniendo datos de factura:', error);
+      }
+    } else {
+      console.warn('⚠️ No se proporcionó un ID de factura ni ID de pago de paquete:', payment);
+    }
+    
+  } catch (error) {
+    console.error('❌ Error inesperado al abrir el modal de factura:', error);
+  }
+};
+
+const closeFacturaModal = () => {
+  showFacturaModal.value = false;
+  selectedFacturaPayment.value = null;
+};
+
+// Modificar onMounted para cargar config de empresa
+onMounted(async () => {
+  // ... código existente
+  await loadEmpresaConfig();
+});
+
 // ===== API FUNCTIONS =====
+// Función para obtener paquetes según el estado de la pestaña activa
+const fetchActivePackages = async (reset = false) => {
+  try {
+    loadingPackages.value = true;
+    
+    // Determinar qué estados cargar
+    const estadosACargar = [];
+    const estadoActual = activePackageTab.value || 'utilizando';
+    
+    // Si reseteamos, volvemos a la página 1 y limpiamos datos de todas las tabs
+    if (reset) {
+      const tabs = ['utilizando', 'verificando_pago', 'utilizado'];
+      tabs.forEach(estado => {
+        packagePagination.value[estado].page = 1;
+        packagePagination.value[estado].hasMore = true;
+        invalidatePackageCache(estado);
+      });
+      // Solo cargamos la tab actual pero el resto quedan limpias para cuando se cambie
+      estadosACargar.push(estadoActual);
+    } else {
+       // Carga inicial o cambio de tab normal sin forzar reset global inmediato
+       if (['utilizando', 'verificando_pago', 'utilizado'].includes(estadoActual)) {
+         estadosACargar.push(estadoActual);
+       }
+    }
+
+    // Realizar solicitudes solo si no están en cache o si se fuerza recarga
+    const requests = [];
+
+    for (const estado of estadosACargar) {
+      const page = packagePagination.value[estado].page;
+      
+      // Verificar cache
+      if (packagesCache.value[estado]?.[page]) {
+        // Usar datos cacheados
+        const cached = packagesCache.value[estado][page];
+        activePackages.value[estado] = cached.data;
+        packagePagination.value[estado].hasMore = cached.hasMore;
+        packagePagination.value[estado].total = cached.total;
+        packagePagination.value[estado].totalPages = cached.totalPages;
+        
+        // Si hay contadores en cache (guardados en la primera pagina usualmente), usarlos
+        if (cached.contadores) {
+           packageStats.value = {
+            en_uso: cached.contadores.en_uso || 0,
+            pendiente_verificacion: cached.contadores.pendiente_verificacion || 0,
+            historial: cached.contadores.historial || 0
+          };
+        }
+        continue;
+      }
+
+      // Si no está en cache, preparar request
+      const limit = 4;
+      const offset = (page - 1) * limit;
+
+      requests.push(
+        (async () => {
+          try {
+            const response = await $api(`/paquetes/usuarios/estado`, {
+              baseURL: config.public.apiBase,
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${useCookie('token').value}`
+              },
+              params: {
+                estado: estado === 'utilizado' ? 'utilizado,activo' : estado,
+                limit,
+                offset,
+                search: packageSearchId.value || undefined
+              }
+
+            });
+
+            return {
+              estado,
+              data: (response?.success && response.data) || [],
+              contadores: response?.contadores || null,
+              hasMore: response?.hasMore || false,
+              total: response?.total || 0, 
+              page: response?.page || 1,
+              totalPages: response?.totalPages || 1
+            };
+          } catch (error) {
+            console.error(`Error al obtener paquetes en estado ${estado}:`, error);
+            return { 
+              estado, 
+              data: [],
+              contadores: null,
+              hasMore: false,
+              total: 0,
+              page: 1,
+              totalPages: 1
+            };
+          }
+        })()
+      );
+    }
+
+    // Si no hay requests, terminamos
+    if (requests.length === 0) {
+      loadingPackages.value = false;
+      return;
+    }
+
+    // Ejecutar peticiones
+    const results = await Promise.all(requests);
+    
+    let contadoresActualizados = false;
+    
+    results.forEach(({ estado, data, contadores, hasMore, total, totalPages, page }) => {
+      // Guardar en cache
+      packagesCache.value[estado][page] = {
+        data: [...data], // Clonar para evitar mutaciones
+        contadores,
+        hasMore,
+        total,
+        totalPages
+      };
+
+      activePackages.value[estado] = data;
+      packagePagination.value[estado].hasMore = hasMore;
+      packagePagination.value[estado].total = total;
+      packagePagination.value[estado].totalPages = totalPages;
+      
+      // Actualizar contadores globales
+      if (contadores && !contadoresActualizados) {
+        packageStats.value = {
+          en_uso: contadores.en_uso || 0,
+          pendiente_verificacion: contadores.pendiente_verificacion || 0,
+          historial: contadores.historial || 0
+        };
+        contadoresActualizados = true;
+      }
+    });
+    
+    // Si no hay tab, default
+    if (!activePackageTab.value) {
+      activePackageTab.value = 'utilizando';
+    }
+  } catch (error) {
+    console.error('Error al obtener paquetes activos:', error);
+    showError('Error al cargar los paquetes activos');
+  } finally {
+    loadingPackages.value = false;
+  }
+};
+
+// Función para cambiar de página en paquetes
+const changePackagePage = async (estado, newPage) => {
+  if (newPage < 1 || newPage > packagePagination.value[estado].totalPages) return;
+  
+  packagePagination.value[estado].page = newPage;
+  // Al cambiar pagina, llamamos a fetchActivePackages que usa el estado actual de la pagina
+  await fetchActivePackages();
+};
+
+
 // Función para obtener técnicos desde la API
 const fetchTechnicians = async (cityId = null, limit = 4, offset = 0, serviceId = null) => {
   try {
@@ -2321,27 +3968,7 @@ const verifyPayment = async (isApproved) => {
   } finally {
     isVerifying.value = false
   }
-}
-
-const showPaymentConfirmation = (action) => {
-  pendingPaymentAction.value = action
-  showPaymentConfirmationModal.value = true
-}
-
-const confirmPaymentAction = async () => {
-  try {
-    if (pendingPaymentAction.value === 'approve') {
-      await verifyPayment(true);
-    } else if (pendingPaymentAction.value === 'reject') {
-      await verifyPayment(false);
-    }
-  } catch (error) {
-    console.error('Error en confirmPaymentAction:', error);
-  } finally {
-    showPaymentConfirmationModal.value = false;
-    pendingPaymentAction.value = null;
-  }
-}
+} 
 
 const resetPaymentDetails = () => {
   paymentDetails.verified = false
@@ -2349,13 +3976,149 @@ const resetPaymentDetails = () => {
   isVerifying.value = false
   showPaymentConfirmationModal.value = false
   pendingPaymentAction.value = null
+} 
+
+// ===== MÉTODOS PARA ASIGNACIÓN DE PAQUETES =====
+const openPackageAssignment = async (pkg) => {
+  try {
+    selectedPackage.value = pkg
+    selectedPackageTechnician.value = null
+    isAssigningPackage.value = true
+    showPackageAssignmentModal.value = true
+    
+    // Cargar ciudades y técnicos usando las mismas funciones que el modal de técnicos
+    await Promise.all([
+      fetchCities(),
+      fetchTechnicians()
+    ])
+  } catch (error) {
+    console.error('Error al abrir el modal de asignación:', error)
+    showError('No se pudo cargar la información de asignación')
+  } finally {
+    isAssigningPackage.value = false
+  }
 }
 
-const cancelPaymentAction = () => {
-  showPaymentConfirmationModal.value = false
-  pendingPaymentAction.value = null
-  isVerifying.value = false
+const selectPackageTechnician = async (tech) => {
+  if (tech.estado !== 'activo') return;
+  
+  try {
+    selectedPackageTechnician.value = tech;
+    
+    // Obtener el porcentaje de comisión
+    console.log('Obteniendo porcentaje de comisión...');
+    const comisionResponse = await $api('/config/valor/comision_por_paquete', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${useCookie('token').value}`
+      }
+    });
+    
+    console.log('Respuesta de comisión:', comisionResponse);
+    comisionPorcentaje.value = parseFloat(comisionResponse.valor) || 0;
+    
+    // Mostrar modal de confirmación y cerrar el modal de selección
+    showPackageConfirmModal.value = true;
+    showPackageAssignmentModal.value = false;
+    
+  } catch (error) {
+    console.error('Error al obtener la comisión:', {
+      error: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    showError('No se pudo obtener la información de comisión');
+  }
 }
+
+const confirmPackageAssignment = async () => {
+  try {
+    const montoPaquete = parseFloat(selectedPackage.value.paquete.costo) || 0;
+    const porcentajeTecnico = 100 - comisionPorcentaje.value;
+    const montoTecnico = (montoPaquete * porcentajeTecnico) / 100;
+    
+    console.log('=== DATOS A ENVIAR A MOVIMIENTOS ===');
+    console.log('Técnico:', selectedPackageTechnician.value.nombre);
+    console.log('Monto a liquidar:', montoTecnico);
+
+    // 1. Enviar movimiento de ingreso
+    const movimientoResponse = await $api('/movimientos', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${useCookie('token').value}`
+      },
+      body: {
+        id_usuario: Number(selectedPackageTechnician.value.id_usuario),
+        tipo: "ingreso",
+        monto: Number(montoTecnico.toFixed(2)),
+        descripcion: `Ingreso por Paquete ${selectedPackage.value.paquete.nombre}`,
+        estado: 'completado'
+      }
+    });
+
+    // 2. Marcar el paquete como utilizado
+    try {
+      await $api(`/paquetes/usuarios/utilizado/${selectedPackage.value.id_paquete_usuario}`, {
+        baseURL: config.public.apiBase,
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${useCookie('token').value}`
+        }
+      });
+      console.log('Paquete marcado como utilizado exitosamente');
+
+      // 3. Enviar notificación al cliente 
+      try { 
+        
+        await $api('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${useCookie('token').value}`
+          },
+          body: JSON.stringify({
+            titulo: 'Paquete Consumido',
+            id_usuario: selectedPackage.value.id_usuario
+          })
+        }); 
+      } catch (notifError) {
+        console.error('Error al enviar notificación de paquete consumido:', notifError);
+      }
+
+    } catch (error) {
+      console.error('Error al marcar el paquete como utilizado:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      }); 
+      throw error; // Relanzar el error para que lo capture el catch externo
+    }
+
+    // Mostrar mensaje de éxito
+    showSuccess(`Se ha liquidado L.${montoTecnico.toFixed(2)} al técnico ${selectedPackageTechnician.value.nombre}`);
+    
+    // Cerrar modales
+    showPackageConfirmModal.value = false;
+    showPackageAssignmentModal.value = false;
+    
+    // Actualizar la lista de paquetes
+    await fetchActivePackages();
+    
+  } catch (error) {
+    console.error('Error en la solicitud:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    showError(error.response?.data?.message || 'Error al procesar la liquidación');
+  }
+};
 
 // ===== FUNCIONES DE PAGINACIÓN =====
 const changePendingPage = async (page) => {
@@ -2411,9 +4174,16 @@ const changeHistoryPage = async (page) => {
 }
 
 // ===== WATCHERS =====
+// Observar cambios en la pestaña activa para cargar los datos correspondientes
+watch(activePackageTab, (newTab) => {
+  if (newTab) {
+    fetchActivePackages(true);
+  }
+}, { immediate: true });
+
 // Variables para almacenar los timeouts del debounce
-let searchDebounceTimeout = null
-let spinnerDebounceTimeout = null
+let searchDebounceTimeout = null;
+let spinnerDebounceTimeout = null;
 
 // Watch con debounce para el campo de búsqueda
 watch(searchQuery, () => {
@@ -2538,7 +4308,8 @@ onMounted(async () => {
       fetchCities(),
       fetchTechnicians(),
       loadPendingServices(),
-      loadHistoryServices()
+      loadHistoryServices(),
+      fetchActivePackages()
     ])
   } catch (error) {
     window.location.reload()

@@ -344,71 +344,327 @@
         </div>
       </section> 
 
-       <!-- Paquetes por Membresía - Mobile First -->
-<section class="px-4 mb-4">
-
+       <!-- Paquetes por Membresía - Diseño de 2 columnas -->
+<section class="px-4 mb-6">
   <!-- Header -->
   <div class="mb-4">
     <h3 class="text-lg font-bold text-gray-900 dark:text-white">
       Paquetes incluidos
     </h3>
     <p class="text-xs text-gray-500 dark:text-gray-400">
-      Canjea con tu crédito de membresía
+      Compra paquetes o canjealos usando tu crédito
     </p>
   </div>
 
-  <!-- Cards -->
-  <div class="space-y-3">
+  <!-- Grid de paquetes -->
+  <div class="grid grid-cols-2 gap-3">
     <div
       v-for="paquete in paquetesMantenimiento"
       :key="paquete.id"
-      class="relative p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+      class="relative p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col h-full"
     >
-
-      <!-- Info -->
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40 text-xl">
-          🔧
-        </div>
-        <div>
-          <h4 class="font-semibold text-gray-900 dark:text-white text-sm">
-            {{ paquete.nombre }}
-          </h4>
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            {{ paquete.descripcion || 'Beneficio por membresía' }}
-          </p>
+      <!-- Imagen del paquete -->
+      <div class="w-full h-24 mb-3 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+        <img 
+          v-if="paquete.imagen" 
+          :src="paquete.imagen" 
+          :alt="paquete.nombre"
+          class="w-full h-full object-cover"
+        >
+        <div v-else class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4.5L4 7m16 0l-8 4.5M4 7v10l8 4.5m0 0l8-4.5M4 7l8 4.5m0 0L20 7m-8 11.5V12" />
+          </svg>
         </div>
       </div>
 
-      <!-- Precio -->
-      <div class="flex items-center justify-between mb-2">
-        <p class="text-xs text-gray-500 dark:text-gray-400">
-          Crédito requerido
+      <!-- Info -->
+      <div class="flex-grow">
+        <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1 line-clamp-1">
+          {{ paquete.nombre }}
+        </h4>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2 h-8">
+          {{ paquete.descripcion || 'Beneficio por membresía' }}
         </p>
-        <p class="text-lg font-bold text-gray-900 dark:text-white">
-          L. {{ formatNumber(paquete.costo) }}
-        </p>
-      </div> 
 
-      <!-- Acción -->
-      <button
-        @click="canjearPaquete(paquete)"
-        :disabled="userCredit < paquete.costo || !paquete.estado"
-        class="mt-3 w-full py-3 rounded-xl text-sm font-semibold transition"
-        :class="{
-          'bg-blue-600 text-white shadow active:scale-95':
-            userCredit >= paquete.costo && paquete.estado,
-          'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700':
-            userCredit < paquete.costo || !paquete.estado
-        }"
-      >
-        Canjear paquete
-      </button>
+        <!-- Precio -->
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-gray-500 dark:text-gray-400">Crédito:</span>
+          <span class="text-sm font-bold text-gray-900 dark:text-white">
+            L. {{ formatNumber(paquete.costo) }}
+          </span>
+        </div>
+
+        <!-- Acciones -->
+        <div class="flex flex-col gap-2 mt-2">
+          <button
+            @click.stop="usarPaquete(paquete)"
+            :disabled="!tienePaquete(paquete.id) || getEstadoPaquete(paquete.id) === 'En uso'"
+            class="w-full py-2 rounded-lg text-xs font-semibold transition"
+            :class="{
+              'bg-green-600 text-white hover:bg-green-700 active:scale-95':
+                tienePaquete(paquete.id) && getEstadoPaquete(paquete.id) !== 'En uso',
+
+              'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700':
+                !tienePaquete(paquete.id) || getEstadoPaquete(paquete.id) === 'En uso'
+            }"
+          >
+            Usar paquete
+          </button>
+          <button
+  @click.stop="canjearPaquete(paquete)"
+  :disabled="!paquete.estado || tienePaquete(paquete.id) || getEstadoPaquete(paquete.id) === 'En uso' || getEstadoPaquete(paquete.id) === 'Verificando pago...'"
+  class="w-full py-2 rounded-lg text-xs font-semibold transition"
+  :class="{
+    '!bg-yellow-500/50 !text-white/70 cursor-not-allowed': 
+      getEstadoPaquete(paquete.id) === 'Verificando pago...',
+    'bg-green-600 text-white hover:bg-green-700 active:scale-95': 
+      getEstadoPaquete(paquete.id) === 'Adquirido',
+    'bg-indigo-600/50 text-white/70 cursor-not-allowed': 
+      getEstadoPaquete(paquete.id) === 'En uso',
+    'bg-blue-600 text-white hover:bg-blue-700 active:scale-95':
+      paquete.estado && !getEstadoPaquete(paquete.id) && userCredit >= paquete.costo,
+    'bg-purple-600 text-white hover:bg-purple-700 active:scale-95':
+      paquete.estado && !getEstadoPaquete(paquete.id) && userCredit < paquete.costo,
+    'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700':
+      !paquete.estado || tienePaquete(paquete.id)
+  }"
+>
+  {{ 
+    getEstadoPaquete(paquete.id) ? getEstadoPaquete(paquete.id) : 
+    (userCredit >= paquete.costo ? 'Canjear' : 'Comprar')
+  }}
+</button>
+        </div>
+      </div>
     </div>
   </div>
-
 </section>
 
+      <!-- Modal de Pago de Paquete -->
+      <Transition
+        name="modal"
+        enter-active-class="modal-enter-active"
+        leave-active-class="modal-leave-active"
+        enter-from-class="modal-enter-from"
+        leave-to-class="modal-leave-to">
+        <div v-if="showPaquetePagoModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+          <!-- Backdrop con animación -->
+          <Transition
+            name="backdrop"
+            enter-active-class="backdrop-enter-active"
+            leave-active-class="backdrop-leave-active"
+            enter-from-class="backdrop-enter-from"
+            leave-to-class="backdrop-leave-to"
+          >
+            <div 
+              v-if="showPaquetePagoModal"
+              class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              @click="closePaquetePagoModal"
+            ></div>
+          </Transition>
+
+          <!-- Contenido del modal con animación -->
+          <Transition
+            name="modal-content"
+            enter-active-class="modal-content-enter-active"
+            leave-active-class="modal-content-leave-active"
+            enter-from-class="modal-content-enter-from"
+            leave-to-class="modal-content-leave-to">
+            <div 
+              v-if="showPaquetePagoModal"
+              class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
+              @click.stop
+            >
+              <!-- Encabezado del modal -->
+              <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-base">
+                      💳
+                    </div>
+                    <div>
+                      <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Paquete</h3> 
+                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedPaquete?.nombre }}</p>
+                    </div> 
+                  </div>
+                  <button @click="closePaquetePagoModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Contenido principal del modal -->
+              <div class="p-3">
+                <!-- Resumen del paquete -->
+                <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
+                  <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Detalles del Paquete</h4>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center text-base">
+                      📦
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ selectedPaquete?.nombre }}</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedPaquete?.descripcion || 'Paquete de servicio' }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Desglose de pago -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-3">
+                  <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center">
+                      <span class="text-blue-700 dark:text-blue-300">Costo del paquete:</span>
+                      <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ formatNumber(selectedPaquete?.costo || 0) }}</span>
+                    </div> 
+                    <hr class="border-blue-200 dark:border-blue-700">
+                    <div class="flex justify-between items-center">
+                      <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
+                      <span class="font-bold text-blue-800 dark:text-blue-200 text-base">L. {{ formatNumber(selectedPaquete?.costo || 0) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cuentas -->
+                <div class="space-y-2 mb-3">
+                  <label for="bank-account-package" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Transferencia
+                  </label>
+
+                  <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
+                  </div>
+
+                  <div v-else class="space-y-3">
+                    <multiselect
+                      id="bank-account-package"
+                      v-model="selectedAccountObject"
+                      :options="bankAccounts"
+                      :searchable="false"
+                      :close-on-select="true"
+                      :show-labels="false"
+                      placeholder="Selecciona una cuenta"
+                      label="banco"
+                      track-by="id_cuenta"
+                      class="multiselect-custom"
+                      :class="{ 'multiselect--active': selectedAccountObject }"
+                      :select-label="''"
+                      :deselect-label="''"
+                      :selected-label="''"
+                      :custom-label="getAccountLabel"
+                      @search-change="$event && $event.stopPropagation()"
+                      @search-focus="(e) => e && e.target && e.target.blur()"
+                      @touchstart.native.stop
+                      @click.native.stop
+                      :options-limit="100"
+                      :disabled="bankAccounts.length === 0"
+                      :loading="isLoadingAccounts"
+                    >
+                      <template #singleLabel="{ option }">
+                        <span class="text-xs truncate">{{ getAccountLabel(option) }}</span>
+                      </template>
+                    </multiselect>
+
+                    <!-- Detalles -->
+                    <div 
+                      v-if="selectedAccountObject" 
+                      class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                    >
+                      <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Detalles de la cuenta:
+                      </h4>
+                      <div class="space-y-1">
+                        <div class="flex justify-between">
+                          <span class="text-xs text-gray-500 dark:text-gray-400">Nombre:</span>
+                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ selectedAccountObject.banco }}</span>
+                        </div>
+
+                        <div class="flex justify-between">
+                          <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
+                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ selectedAccountObject.beneficiario }}</span>
+                        </div>
+
+                        <div class="flex justify-between">
+                          <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
+                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ selectedAccountObject.tipo }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                          <span class="text-xs text-gray-500 dark:text-gray-400">Cuenta:</span>
+                          <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
+                              {{ selectedAccountObject.num_cuenta }}
+                            </span>
+                            <button 
+                              v-if="selectedAccountObject.num_cuenta.length > 10"
+                              @click="copyToClipboard(selectedAccountObject.num_cuenta)"
+                              class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                              :title="'Copiar ' + selectedAccountObject.num_cuenta"
+                            >
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p v-if="bankAccounts.length === 0" class="text-xs text-red-500 mt-1">
+                      No hay cuentas bancarias disponibles. Por favor contacta al administrador.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Campo de número de comprobante -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Número de Comprobante
+                    <span class="text-red-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <input
+                      v-model="numeroComprobante"
+                      type="text"
+                      inputmode="numeric"
+                      pattern="\d*"
+                      placeholder="Ingresa el número de comprobante"
+                      class="w-full px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                      :disabled="isProcessingPayment"
+                    /> 
+                  </div>
+                </div>
+
+                <!-- Botón de pago -->
+                <button
+                  @click="procesarPagoPaquete"
+                  :disabled="isProcessingPayment || bankAccounts.length === 0 || !numeroComprobante"
+                  class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <span v-if="!isProcessingPayment">
+                    Pagar L. {{ formatNumber(selectedPaquete?.costo || 0) }}
+                  </span>
+                  <span v-else class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Procesando pago...
+                  </span>
+                </button>
+
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Realiza la transferencia e ingresa el número de comprobante. Una vez enviado serás redirigido a WhatsApp para adjuntar la captura.
+                </p>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </Transition>
 
       <!-- Quick Actions -->
       <section class="px-4 mb-4">
@@ -891,6 +1147,9 @@ const toast = ref({
   message: '',
   type: 'success'
 })
+
+// Variable reactiva para almacenar el número de teléfono de la empresa
+const empresaPhoneNumber = ref('');
 
 // =========================
 // COMPUTED PROPERTIES
@@ -1387,6 +1646,79 @@ const formatNumber = (value) => {
   }).format(value);
 };
 
+// Función para obtener el número de teléfono de la empresa
+const fetchEmpresaPhoneNumber = async () => {
+  try {
+    const response = await $api('/config/valor/numero_empresa', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response && response.valor) {
+      empresaPhoneNumber.value = response.valor;
+    }
+  } catch (error) {
+    console.error('Error al obtener el número de teléfono de la empresa:', error);
+    // Establecer un valor por defecto en caso de error
+    empresaPhoneNumber.value = '1234567890';
+  }
+};
+
+// Función para enviar detalles por WhatsApp
+const sendWhatsAppMessage = async (data, type) => {
+  try {
+    // Si no tenemos el número de teléfono, intentar obtenerlo
+    if (!empresaPhoneNumber.value) {
+      await fetchEmpresaPhoneNumber();
+    }
+    
+    const today = new Date();
+    const formattedDate = [
+      String(today.getDate()).padStart(2, '0'),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getFullYear()).slice(-2)
+    ].join('');
+
+    let message = '';
+    
+    if (type === 'package_payment') {
+      // Mensaje para comprobante de pago de paquete
+      message = `*Comprobante de Pago de Paquete*\n\n` +
+        `*ID:* ${formattedDate}-${data.id_paquete_usuario}\n` +
+        `*Paquete:* ${data.nombre_paquete}\n` + 
+        `*N° de comprobante:* ${data.receiptNumber}\n` +
+        `*Monto:* L. ${formatNumber(data.amount)}\n\n` +
+        `Adjunto una captura del comprobante de pago para su verificación.`;
+    } else if (type === 'use_package') {
+      // Mensaje para solicitud de uso de paquete
+      // Mensaje general para solicitud de uso de paquete
+      message =
+        `*Solicitud de Uso de Paquete*\n\n` +
+        `Hola, deseo solicitar el uso de un paquete adquirido a través de la plataforma HogarSeguro.\n\n` +
+        `*ID:* ${formattedDate}-${data.id_paquete_usuario}\n` +
+        `*Paquete:* ${data.nombre_paquete}\n` +
+        `Quedo atento(a) a la coordinación correspondiente.`;
+    }
+    
+    if (!message) return;
+
+    // Codificar el mensaje para la URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Usar el número de teléfono de la empresa o uno por defecto
+    const phoneNumber = empresaPhoneNumber.value || '1234567890';
+    
+    // Abrir WhatsApp Web con el mensaje predefinido
+    window.open(`https://wa.me/+504${phoneNumber}?text=${encodedMessage}`, '_blank');
+  } catch (error) {
+    console.error('Error al preparar el mensaje de WhatsApp:', error);
+  }
+};
+
 // =========================
 // FUNCIONES DE NAVEGACIÓN
 // =========================
@@ -1397,7 +1729,17 @@ const renovarMembresia = () => {
 
 // Lista de paquetes de mantenimiento disponibles
 const paquetesMantenimiento = ref([]);
+const paquetesUsuario = ref([]);
 const cargandoPaquetes = ref(true);
+
+// Estado del modal de pago de paquete
+const showPaquetePagoModal = ref(false);
+const selectedPaquete = ref(null);
+const isLoadingAccounts = ref(false);
+const bankAccounts = ref([]);
+const selectedAccountObject = ref(null);
+const isProcessingPayment = ref(false);
+const numeroComprobante = ref('');
 
 // Función para cargar los paquetes activos desde la API
 const cargarPaquetesActivos = async () => {
@@ -1427,11 +1769,11 @@ const cargarPaquetesActivos = async () => {
 };
 
 // Cargar los paquetes cuando el componente se monte
-onMounted(() => {
-  cargarPaquetesActivos();
+onMounted(async () => {
+  await cargarPaquetesActivos();
+  await cargarPaquetesUsuario();
 });
 
-// Función para manejar el canje de paquetes de mantenimiento
 const canjearPaquete = async (paquete) => {
   if (!paquete || !paquete.id) {
     showToast('Error', 'Paquete no válido', 'error');
@@ -1439,40 +1781,389 @@ const canjearPaquete = async (paquete) => {
   }
 
   if (userCredit.value < paquete.costo) {
-    showToast('Crédito insuficiente', `Necesitas L. ${(paquete.costo - userCredit.value).toLocaleString('es-HN')} más para canjear este servicio`, 'error');
+    // Mostrar modal de pago en lugar de mensaje de error
+    selectedPaquete.value = paquete;
+    await cargarCuentasBancarias();
+    showPaquetePagoModal.value = true;
     return;
   }
 
   try {
-    const response = await $fetch('/paquetes/canjear', {
+    // Obtener el usuario de la cookie
+    const user = useCookie('user').value;
+    if (!user || !user.id_usuario) {
+      throw new Error('No se pudo obtener la información del usuario');
+    }
+
+    // Primero, descontar el crédito
+    const creditoResponse = await $api('/credito', {
       method: 'POST',
       baseURL: config.public.apiBase,
       headers: {
-        'Authorization': `Bearer ${auth.token}`
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'application/json'
       },
-      body: {
-        paqueteId: paquete.id,
-        nombre: paquete.nombre,
-        costo: paquete.costo
+      body: { 
+        id_usuario: user.id_usuario,
+        monto_credito: -Math.abs(paquete.costo)
       }
     });
+
+    if (!creditoResponse.success) {
+      throw new Error(creditoResponse.error || 'Error al actualizar el crédito');
+    }
+
+    // Luego, registrar el paquete para el usuario
+    const requestData = {
+      id_paquete: paquete.id,
+      id_usuario: user.id_usuario
+    };
+    
+    console.log('Canjeando paquete:', requestData);
+
+    const response = await $api('/paquetes/usuarios/canjear', {
+      method: 'POST',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: requestData
+    });
+
+    console.log('Respuesta del servidor:', response);
     
     if (response.success) {
-      userCredit.value = response.data.nuevoSaldo;
+      // Actualizar el crédito del usuario
+      userCredit.value = userCredit.value - paquete.costo;
       
-      // Mostramos notificación de éxito
+      // Actualizar la lista de paquetes del usuario
+      await cargarPaquetesUsuario();
+      
+      // Notificar a los administradores
+      try {
+        const user = useCookie('user').value;
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          baseURL: config.public.apiBase,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Paquete Adquirido',
+            nombre_rol: 'admin'
+            })
+        });
+
+        // Notificar también al super admin
+        await $api('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${auth.token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Paquete Adquirido',
+            nombre_rol: 'sa'
+          })
+        });
+      } catch (error) {
+        console.error('Error al enviar notificaciones:', error);
+      }
+      
+      // Mostrar notificación de éxito al usuario
       showToast(
-        '¡Servicio canjeado!', 
-        response.data.mensaje,
+        '¡Paquete canjeado!', 
+        response.message || 'El paquete se ha canjeado exitosamente',
         'success'
       );
       
-      // Aquí podrías redirigir a una página de confirmación o hacer otra acción
-      // navigateTo(`/cliente/confirmacion-servicio/${paquete.id}`);
+      // Recargar la lista de paquetes
+      await cargarPaquetesActivos();
+    } else {
+      console.error('Error en la respuesta del servidor:', response);
     }
   } catch (error) {
-    console.error('Error al canjear el servicio:', error);
-    showToast('Error', 'Ocurrió un error al procesar tu solicitud', 'error');
+    console.error('Error al canjear el paquete:', {
+      error: error,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    const errorMessage = error.data?.error || error.response?.data?.error || error.message || 'Ocurrió un error al procesar tu solicitud';
+    showToast('Error', errorMessage, 'error');
+  }
+};
+
+// Función para cargar las cuentas bancarias
+const cargarCuentasBancarias = async () => {
+  isLoadingAccounts.value = true;
+  try {
+    const response = await $api('/cuentas', {
+      baseURL: config.public.apiBase,
+      method: 'GET'
+    });
+
+    if (response && Array.isArray(response)) {
+      bankAccounts.value = response;
+    }
+  } catch (error) {
+    console.error('Error al cargar cuentas bancarias:', error);
+  } finally {
+    isLoadingAccounts.value = false;
+  }
+};
+
+// Función para obtener la etiqueta de la cuenta
+const getAccountLabel = (account) => {
+  if (!account) return '';
+  return `🏦 ${account.banco}`;
+};
+
+// Función para procesar el pago del paquete
+const procesarPagoPaquete = async () => {
+  // Validar que se haya seleccionado un paquete y que el número de comprobante no esté vacío
+  if (!selectedPaquete.value) {
+    showToast('Error', 'No se ha seleccionado ningún paquete', 'error');
+    return;
+  }
+
+  // Validar el número de comprobante
+  const numComprobante = numeroComprobante.value ? numeroComprobante.value.trim() : '';
+  if (!numComprobante) {
+    showToast('Error', 'Por favor ingresa el número de comprobante', 'error');
+    return;
+  }
+
+  // Validar que el número de comprobante solo contenga números
+  if (!/^\d+$/.test(numComprobante)) {
+    showToast('Error', 'El número de comprobante solo puede contener números', 'error');
+    return;
+  }
+
+  const user = useCookie('user').value;
+  if (!user || !user.id_usuario) {
+    showToast('Error', 'No se pudo obtener la información del usuario', 'error');
+    return;
+  }
+
+  // Verificar si es pago con saldo o por transferencia
+  const esPagoConSaldo = user.credito >= selectedPaquete.value.costo;
+  
+  // Si es pago por transferencia, validar que se haya seleccionado una cuenta
+  if (!esPagoConSaldo && !selectedAccountObject.value) {
+    showToast('Error', 'Por favor selecciona una cuenta bancaria para la transferencia', 'error');
+    return;
+  }
+
+  isProcessingPayment.value = true;
+
+  try {
+    const requestData = {
+      id_paquete: selectedPaquete.value.id,
+      id_usuario: user.id_usuario,
+      // Solo incluir estos campos si es pago por transferencia
+      ...(!esPagoConSaldo && {
+        esPagoTransferencia: true,
+        id_cuenta: selectedAccountObject.value.id_cuenta,
+        numero_comprobante: numComprobante
+      })
+    };
+
+    console.log('Enviando datos al servidor:', requestData);
+
+    const response = await $api('/paquetes/usuarios/canjear', {
+      method: 'POST',
+      body: requestData
+    });
+
+    if (response.success) {
+      // Obtener el ID de paquete usuario recién creado
+      const idPaqueteUsuario = response.data.paquete.id_paquete_usuario;
+
+      // Actualizar el saldo del usuario si fue pago con saldo
+      if (esPagoConSaldo && response.data.nuevoSaldo !== undefined) {
+        user.credito = response.data.nuevoSaldo;
+        // Actualizar la cookie con el nuevo saldo
+        useCookie('user').value = user;
+      }
+
+      // Mostrar mensaje de éxito
+      showToast(
+        '¡Éxito!', 
+        esPagoConSaldo 
+          ? 'Paquete canjeado exitosamente' 
+          : 'Solicitud de pago por transferencia registrada. Por favor espera la verificación.',
+        'success'
+      );
+
+      // Capturar datos del paquete antes de cerrar el modal
+      const paqueteNombre = selectedPaquete.value.nombre;
+      const paqueteCosto = selectedPaquete.value.costo;
+
+      // Cerrar el modal y actualizar la lista de paquetes
+      closePaquetePagoModal();
+      await cargarPaquetesUsuario();
+
+      // Si fue por transferencia, abrir WhatsApp para enviar comprobante y notificar a los admins
+      if (!esPagoConSaldo) {
+        // Enviar notificaciones a los administradores
+        try {
+          const token = useCookie('token').value;
+          const notificationData = { titulo: 'Pago de Paquete Recibido' };
+          
+          await Promise.all([
+            $api('/notificaciones/enviar', {
+              method: 'POST',
+              baseURL: config.public.apiBase,
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+            }),
+            $api('/notificaciones/enviar', {
+              method: 'POST',
+              baseURL: config.public.apiBase,
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+            })
+          ]);
+        } catch (notifierError) {
+          console.error('Error al enviar notificaciones de pago de paquete:', notifierError);
+        }
+
+        sendWhatsAppMessage({
+          id_paquete_usuario: idPaqueteUsuario,
+          nombre_paquete: paqueteNombre,
+          receiptNumber: numComprobante,
+          amount: paqueteCosto
+        }, 'package_payment');
+      }
+    }
+  } catch (error) {
+    console.error('Error al procesar el pago:', error);
+    const errorMessage = error.response?.data?.error || 'Error al procesar el pago';
+    showToast('Error', errorMessage, 'error');
+  } finally {
+    isProcessingPayment.value = false;
+  }
+};
+
+// Función para cerrar el modal de pago
+const closePaquetePagoModal = () => {
+  showPaquetePagoModal.value = false;
+  selectedPaquete.value = null;
+  isProcessingPayment.value = false;
+  numeroComprobante.value = ''; // Limpiar el campo al cerrar el modal
+};
+
+// Función para cargar los paquetes del usuario
+const cargarPaquetesUsuario = async () => {
+  try {
+    const user = useCookie('user').value;
+    if (!user || !user.id_usuario) {
+      throw new Error('No se pudo obtener la información del usuario');
+    }
+
+    const response = await $api(`/paquetes/usuarios/${user.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (response.success && response.data) {
+      paquetesUsuario.value = response.data;
+    }
+  } catch (error) {
+    console.error('Error al cargar paquetes del usuario:', error);
+    showToast('Error', 'No se pudieron cargar tus paquetes', 'error');
+  }
+};
+
+// Función para verificar si el usuario tiene un paquete específico disponible para usar
+const tienePaquete = (paqueteId) => {
+  return paquetesUsuario.value.some(p => 
+    p.id_paquete === paqueteId && p.estado === 'activo'
+  );
+};
+
+// Función para obtener el estado del paquete (priorizando el estado más importante)
+const getEstadoPaquete = (paqueteId) => {
+  const paquetes = paquetesUsuario.value.filter(p => p.id_paquete === paqueteId);
+  if (paquetes.length === 0) return '';
+  
+  // Prioridad 1: Verificando pago
+  if (paquetes.some(p => p.estado === 'verificando_pago')) {
+    return 'Verificando pago...';
+  }
+  
+  // Prioridad 2: Activo (Disponible para usar)
+  if (paquetes.some(p => p.estado === 'activo')) {
+    return 'Adquirido';
+  }
+  
+  // Prioridad 3: Utilizando (En uso)
+  if (paquetes.some(p => p.estado === 'utilizando')) {
+    return 'En uso';
+  }
+  
+  return '';
+};
+
+// Función para usar un paquete canjeado
+const usarPaquete = async (paquete) => {
+  try {
+    // Buscar el registro del paquete en la lista de paquetes del usuario que esté activo
+    const paqueteUsuario = paquetesUsuario.value.find(p => 
+      p.id_paquete === paquete.id && p.estado === 'activo'
+    );
+
+    if (!paqueteUsuario) {
+      showToast('Error', 'No tienes este paquete disponible para usar', 'error');
+      return;
+    }
+
+    const response = await $api(`/paquetes/usuarios/${paqueteUsuario.id_paquete_usuario}/activar`, {
+      method: 'PUT',
+      baseURL: config.public.apiBase,
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.success) {
+      showToast(
+        '¡Paquete activado!', 
+        `El paquete ${paquete.nombre} está ahora en uso.`,
+        'success'
+      );
+      
+      // Recargar la lista de paquetes del usuario
+      await cargarPaquetesUsuario();
+      
+      // Enviar mensaje por WhatsApp
+      sendWhatsAppMessage({
+        id_paquete_usuario: paqueteUsuario.id_paquete_usuario,
+        nombre_paquete: paquete.nombre
+      }, 'use_package');
+      
+      // Opcional: Redirigir a la página de servicios o mostrar algo más
+    } else {
+      showToast('Error', response.message || 'No se pudo activar el paquete', 'error');
+    }
+  } catch (error) {
+    console.error('Error al usar el paquete:', error);
+    const errorMessage = error.response?.data?.message || error.message || 'Error al activar el paquete';
+    showToast('Error', errorMessage, 'error');
   }
 };
 
