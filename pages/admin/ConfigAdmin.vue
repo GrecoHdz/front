@@ -669,14 +669,20 @@
                     </p>
                   </div>
                 </div>
-                <span 
-                  :class="{
-                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': servicio.estado,
-                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !servicio.estado
-                  }" 
-                  class="px-2 py-1 rounded-full text-xs font-medium">
-                  {{ servicio.estado ? 'Activo' : 'Inactivo' }}
-                </span>
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span 
+                    :class="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': servicio.estado,
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !servicio.estado
+                    }" 
+                    class="px-2 py-1 rounded-full text-[10px] font-medium">
+                    {{ servicio.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                  <span v-for="ciudad in servicio.ciudades" :key="ciudad.id_ciudad"
+                    class="px-2 py-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full text-[10px] font-medium border border-indigo-100 dark:border-indigo-800">
+                    {{ ciudad.nombre_ciudad }}
+                  </span>
+                </div>
               </div>
               
               <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
@@ -838,17 +844,21 @@
                     </p>
                   </div>
                 </div>
-                <div class="flex flex-wrap gap-2 mt-2">
+                <div class="flex flex-wrap gap-1 mt-2">
                   <span 
                     :class="{
                       'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': paquete.estado,
                       'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !paquete.estado
                     }" 
-                    class="px-2 py-1 rounded-full text-xs font-medium">
+                    class="px-2 py-1 rounded-full text-[10px] font-medium">
                     {{ paquete.estado ? 'Activo' : 'Inactivo' }}
                   </span>
-                  <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-xs font-medium">
+                  <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-[10px] font-medium">
                     Crédito: {{ formatNumber(paquete.costo) }}
+                  </span>
+                  <span v-for="ciudad in paquete.ciudades" :key="ciudad.id_ciudad"
+                    class="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 rounded-full text-[10px] font-medium border border-amber-100 dark:border-amber-800">
+                    {{ ciudad.nombre_ciudad }}
                   </span>
                 </div>
               </div>
@@ -1550,6 +1560,31 @@
                   placeholder="Descripción detallada del servicio"></textarea>
               </div>
               
+              <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Ciudades disponibles
+                </label>
+                <multiselect
+                  v-model="formServicio.ciudades_seleccionadas"
+                  :options="ciudades"
+                  :searchable="false"
+                  :multiple="true"
+                  :close-on-select="false"
+                  :clear-on-select="false"
+                  :preserve-search="true"
+                  placeholder="Seleccionar ciudades"
+                  label="nombre"
+                  track-by="id_ciudad"
+                  class="multiselect-admin-filter"
+                >
+                  <template #selection="{ values, isOpen }">
+                    <span class="multiselect__single" v-if="values.length && !isOpen">
+                      {{ values.length }} ciudades seleccionadas
+                    </span>
+                  </template>
+                </multiselect>
+              </div>
+
               <div class="flex items-center">
                 <input
                   id="estado"
@@ -2355,6 +2390,32 @@
               </div>
             </div>
 
+            <!-- Ciudades -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Ciudades disponibles
+              </label>
+              <multiselect
+                v-model="paqueteForm.ciudades_seleccionadas"
+                :options="ciudades"
+                :searchable="false"
+                :multiple="true"
+                :close-on-select="false"
+                :clear-on-select="false"
+                :preserve-search="true"
+                placeholder="Seleccionar ciudades"
+                label="nombre"
+                track-by="id_ciudad"
+                class="multiselect-admin-filter"
+              >
+                <template #selection="{ values, isOpen }">
+                  <span class="multiselect__single" v-if="values.length && !isOpen">
+                    {{ values.length }} ciudades seleccionadas
+                  </span>
+                </template>
+              </multiselect>
+            </div>
+
             <!-- Estado -->
             <div class="flex items-center pt-2">
               <input
@@ -2604,7 +2665,8 @@ const paqueteForm = ref({
   nombre: '',
   descripcion: '',
   costo: '',
-  estado: true
+  estado: true,
+  ciudades_seleccionadas: []
 });
 
 // Paginación de paquetes
@@ -2616,7 +2678,8 @@ const guardandoServicio = ref(false);
 const formServicio = ref({
   nombre: '',
   descripcion: '',
-  estado: true
+  estado: true,
+  ciudades_seleccionadas: []
 });
 const filtroBusqueda = ref('')
 const filtroEstado = ref('')
@@ -4758,7 +4821,8 @@ function nuevoServicio() {
   formServicio.value = {
     nombre: '',
     descripcion: '',
-    estado: true
+    estado: true,
+    ciudades_seleccionadas: []
   }
   mostrarModalNuevoServicio.value = true
 }
@@ -4769,7 +4833,8 @@ function editarServicio(servicio) {
   formServicio.value = {
     nombre: servicio.nombre,
     descripcion: servicio.descripcion || '',
-    estado: servicio.estado
+    estado: servicio.estado,
+    ciudades_seleccionadas: servicio.ciudades ? servicio.ciudades.map(c => ({ ...c, nombre: c.nombre_ciudad })) : []
   }
   mostrarModalNuevoServicio.value = true
 }
@@ -4803,7 +4868,8 @@ async function guardarServicio() {
       body: JSON.stringify({
         nombre: formServicio.value.nombre,
         descripcion: formServicio.value.descripcion || null,
-        estado: formServicio.value.estado ? 1 : 0
+        estado: formServicio.value.estado ? 1 : 0,
+        id_ciudades: formServicio.value.ciudades_seleccionadas.map(c => c.id_ciudad)
       })
     });
 
@@ -5016,7 +5082,8 @@ function nuevoPaquete() {
     nombre: '',
     descripcion: '',
     costo: '',
-    estado: true
+    estado: true,
+    ciudades_seleccionadas: []
   };
   mostrarModalNuevoPaquete.value = true;
   console.log('Estado de mostrarModalNuevoPaquete:', mostrarModalNuevoPaquete.value); // Para depuración
@@ -5029,7 +5096,8 @@ function editarPaquete(paquete) {
     nombre: paquete.nombre,
     descripcion: paquete.descripcion || '',
     costo: paquete.costo,
-    estado: paquete.estado
+    estado: paquete.estado,
+    ciudades_seleccionadas: paquete.ciudades ? paquete.ciudades.map(c => ({ ...c, nombre: c.nombre_ciudad })) : []
   };
   mostrarModalNuevoPaquete.value = true;
 }
@@ -5074,7 +5142,8 @@ async function guardarPaquete() {
       nombre: paqueteForm.value.nombre.trim(),
       descripcion: paqueteForm.value.descripcion.trim(),
       costo: costo,
-      estado: Boolean(paqueteForm.value.estado)
+      estado: Boolean(paqueteForm.value.estado),
+      id_ciudades: paqueteForm.value.ciudades_seleccionadas.map(c => c.id_ciudad)
     };
 
     // Realizar la petición

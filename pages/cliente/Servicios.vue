@@ -2387,13 +2387,17 @@ const loadServices = async () => {
 const loadServiceTypes = async () => {
   try {
     isLoadingServiceTypes.value = true
+    const userRole = useCookie('user').value
+    const id_ciudad = userRole?.id_ciudad
+    
     const data = await $api('/servicios/activos', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
-      }
+      },
+      params: id_ciudad ? { id_ciudad } : {}
     })
     
     serviceTypes.value = data.map(service => ({

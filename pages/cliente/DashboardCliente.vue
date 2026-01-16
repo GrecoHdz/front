@@ -1567,13 +1567,17 @@ const fetchTotalSolicitudes = async () => {
 const fetchServices = async () => {
   try {
     isLoadingServices.value = true
+    const user = useCookie('user').value
+    const id_ciudad = user?.id_ciudad
+    
     const data = await $api('/servicios', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
-      }
+      },
+      params: id_ciudad ? { id_ciudad } : {}
     })
     
     if (Array.isArray(data)) {
@@ -1745,11 +1749,15 @@ const numeroComprobante = ref('');
 const cargarPaquetesActivos = async () => {
   try {
     cargandoPaquetes.value = true;
+    const user = useCookie('user').value
+    const id_ciudad = user?.id_ciudad
+
     const response = await $api('/paquetes/activos', {
       baseURL: config.public.apiBase,
       headers: {
         'Authorization': `Bearer ${auth.token}`
-      }
+      },
+      params: id_ciudad ? { id_ciudad } : {}
     });
     
     // Mapear la respuesta de la API al formato esperado

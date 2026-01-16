@@ -1123,13 +1123,17 @@ const cargarCiudades = async () => {
 const fetchAvailableServices = async () => {
   try {
     loadingServices.value = true
+    const userVal = useCookie('user').value
+    const id_ciudad = userVal?.id_ciudad
+
     const response = await $api('/servicios/activos', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
-      }
+      },
+      params: id_ciudad ? { id_ciudad } : {}
     })
     
     if (response.success && response.data) {
