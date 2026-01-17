@@ -675,7 +675,12 @@
             </div>
             
             <div v-for="servicio in serviciosPaginados" :key="servicio.id_servicio" 
-                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                 @click="editarServicio(servicio)"
+                 :class="{
+                   'bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 hover:border-green-300 dark:hover:border-green-600': servicio.estado,
+                   'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:border-red-300 dark:hover:border-pink-600': !servicio.estado
+                 }"
+                 class="cursor-pointer rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all duration-200 flex items-center justify-between">
               <div class="flex-1">
                 <div class="flex items-center gap-3 mb-2">
                   <span class="text-lg">🔧</span>
@@ -687,14 +692,6 @@
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-1 mt-2">
-                  <span 
-                    :class="{
-                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': servicio.estado,
-                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !servicio.estado
-                    }" 
-                    class="px-2 py-1 rounded-full text-[10px] font-medium">
-                    {{ servicio.estado ? 'Activo' : 'Inactivo' }}
-                  </span>
                   <span v-for="ciudad in servicio.ciudades" :key="ciudad.id_ciudad"
                     class="px-2 py-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full text-[10px] font-medium border border-indigo-100 dark:border-indigo-800">
                     {{ ciudad.nombre_ciudad }}
@@ -770,210 +767,6 @@
                   :class="{ 'cursor-not-allowed': paginacion.paginaActual >= paginacionCalculada.totalPaginas }">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 7: Gestión de Paquetes -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
-          <div class="flex items-center justify-between mb-4 sm:mb-6">
-            <div class="flex items-center">
-              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 dark:bg-amber-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-                <span class="text-lg sm:text-2xl">📦</span>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
-                  Gestión de Paquetes
-                </h3>
-                <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                  Administra los paquetes de mantenimiento disponibles
-                </p>
-              </div>
-            </div>
-            <button 
-              @click="nuevoPaquete"
-              class="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors">
-              + Nuevo Paquete
-            </button>
-          </div>
-
-          <!-- Filtros y búsqueda -->
-          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4 relative z-20">
-            <div class="relative flex-1 min-w-0">
-              <input
-                v-model="filtroBusquedaPaquetes"
-                type="text"
-                placeholder="Buscar paquetes..."
-                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm sm:text-base transition-all"
-              >
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-            </div>
-            
-            <multiselect 
-              v-model="filtroEstadoPaquetesObject"
-              :options="estadoOptions"
-              :searchable="false"
-              :close-on-select="true"
-              :show-labels="false"
-              placeholder="Todos"
-              label="label"
-              track-by="value"
-              class="multiselect-admin-filter w-32"
-              :custom-label="getEstadoLabel"
-              :options-limit="100"
-            >
-              <template #singleLabel="{ option }">
-                <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
-              </template>
-            </multiselect>
-          </div>
-
-          <!-- Lista de paquetes -->
-          <div class="space-y-3">
-            <div v-if="paquetesCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
-              <p>Cargando paquetes...</p>
-            </div>
-            
-            <div v-else-if="paquetesFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-              <span class="text-4xl mb-2 block">📦</span>
-              <p>No se encontraron paquetes</p>
-            </div>
-            
-            <div v-for="paquete in paquetesPaginados" :key="paquete.id_paquete" 
-                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
-                  <span class="text-lg">📦</span>
-                  <div>
-                    <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">
-                      {{ paquete.nombre }}
-                    </h5>
-                    <p class="text-[12px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                      {{ paquete.descripcion || 'Sin descripción' }}
-                    </p>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1 mt-2">
-                  <span 
-                    :class="{
-                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': paquete.estado,
-                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !paquete.estado
-                    }" 
-                    class="px-2 py-1 rounded-full text-[10px] font-medium">
-                    {{ paquete.estado ? 'Activo' : 'Inactivo' }}
-                  </span>
-                  <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-[10px] font-medium">
-                    Crédito: {{ formatNumber(paquete.costo) }}
-                  </span>
-                  <span v-for="ciudad in paquete.ciudades" :key="ciudad.id_ciudad"
-                    class="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 rounded-full text-[10px] font-medium border border-amber-100 dark:border-amber-800">
-                    {{ ciudad.nombre_ciudad }}
-                  </span>
-                </div>
-              </div>
-              
-              <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
-                <button 
-                  @click="editarPaquete(paquete)"
-                  class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
-                  title="Editar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </button>
-                
-                <button 
-                  v-if="paquete.estado === 1 || paquete.estado === true"
-                  @click="cambiarEstadoPaquete(paquete, false)"
-                  class="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center justify-center"
-                  title="Desactivar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                  </svg>
-                </button>
-                
-                <button 
-                  v-else-if="paquete.estado === 0 || paquete.estado === false"
-                  @click="cambiarEstadoPaquete(paquete, true)"
-                  class="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-center"
-                  title="Activar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                </button>
-                
-                <button 
-                  @click="confirmarEliminarPaquete(paquete)"
-                  class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
-                  title="Eliminar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Paginación -->
-          <div v-if="paquetesFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
-            <div class="flex items-center justify-between">
-              <div class="text-xs text-gray-500 dark:text-gray-400">
-                Página {{ paginacionPaquetes.paginaActual }} de {{ paginacionPaquetesCalculada.totalPaginas }}
-              </div>
-              
-              <div class="flex items-center space-x-1">
-                <button 
-                  @click="paginacionPaquetes.paginaActual = 1" 
-                  :disabled="paginacionPaquetes.paginaActual === 1"
-                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                  </svg>
-                </button>
-                
-                <button 
-                  @click="paginacionPaquetes.paginaActual--" 
-                  :disabled="paginacionPaquetes.paginaActual === 1"
-                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                
-                <div class="flex items-center space-x-1">
-                  <button 
-                    v-for="page in paginacionPaquetesCalculada.totalPaginas" 
-                    :key="page"
-                    @click="paginacionPaquetes.paginaActual = page"
-                    :class="{'bg-amber-500 text-white': paginacionPaquetes.paginaActual === page, 'text-gray-700 dark:text-gray-300': paginacionPaquetes.paginaActual !== page}"
-                    class="w-8 h-8 rounded-full text-sm font-medium flex items-center justify-center">
-                    {{ page }}
-                  </button>
-                </div>
-                
-                <button 
-                  @click="paginacionPaquetes.paginaActual++" 
-                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas"
-                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-                
-                <button 
-                  @click="paginacionPaquetes.paginaActual = paginacionPaquetesCalculada.totalPaginas" 
-                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas"
-                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
@@ -1096,6 +889,221 @@
             </div>
           </div>
         </div>
+
+        <!-- Card 7: Gestión de Paquetes -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 dark:bg-amber-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">📦</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  Gestión de Paquetes
+                </h3>
+                <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                  Administra los paquetes de mantenimiento disponibles
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="nuevoPaquete"
+              class="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors">
+              + Nuevo Paquete
+            </button>
+          </div>
+
+          <!-- Filtros y búsqueda -->
+          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4 relative z-20">
+            <div class="relative flex-1 min-w-0">
+              <input
+                v-model="filtroBusquedaPaquetes"
+                type="text"
+                placeholder="Buscar paquetes..."
+                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm sm:text-base transition-all"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            <multiselect 
+              v-model="filtroEstadoPaquetesObject"
+              :options="estadoOptions"
+              :searchable="false"
+              :close-on-select="true"
+              :show-labels="false"
+              placeholder="Todos"
+              label="label"
+              track-by="value"
+              class="multiselect-admin-filter w-32"
+              :custom-label="getEstadoLabel"
+              :options-limit="100"
+            >
+              <template #singleLabel="{ option }">
+                <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
+              </template>
+            </multiselect>
+          </div>
+
+          <!-- Lista de paquetes -->
+          <div class="space-y-3">
+            <div v-if="paquetesCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
+              <p>Cargando paquetes...</p>
+            </div>
+            
+            <div v-else-if="paquetesFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <span class="text-4xl mb-2 block">📦</span>
+              <p>No se encontraron paquetes</p>
+            </div>
+            
+            <div v-for="paquete in paquetesPaginados" :key="paquete.id_paquete" 
+                 @click="editarPaquete(paquete)"
+                 :class="{
+                   'bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 hover:border-green-300 dark:hover:border-green-600': paquete.estado,
+                   'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:border-red-300 dark:hover:border-pink-600': !paquete.estado
+                 }"
+                 class="cursor-pointer rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all duration-200 flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-lg">📦</span>
+                  <div>
+                    <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">
+                      {{ paquete.nombre }}
+                    </h5>
+                    <p class="text-[12px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                      {{ paquete.descripcion || 'Sin descripción' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-[10px] font-medium">
+                    Crédito: {{ formatNumber(paquete.costo) }}
+                  </span>
+                  <span 
+                    v-if="paquete.cantidad"
+                    class="px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded-full text-[10px] font-medium"
+                    title="Usos disponibles"
+                  >
+                    {{ paquete.cantidad }} {{ paquete.cantidad === 1 ? 'uso' : 'usos' }}
+                  </span>
+                  <span 
+                    v-else
+                    class="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-[10px] font-medium"
+                    title="Usos ilimitados"
+                  >
+                    Ilimitado
+                  </span>
+                  <span v-for="ciudad in paquete.ciudades" :key="ciudad.id_ciudad"
+                    class="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 rounded-full text-[10px] font-medium border border-amber-100 dark:border-amber-800">
+                    {{ ciudad.nombre_ciudad }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
+                <button 
+                  @click="editarPaquete(paquete)"
+                  class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Editar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                
+                <button 
+                  v-if="paquete.estado === 1 || paquete.estado === true"
+                  @click="cambiarEstadoPaquete(paquete, false)"
+                  class="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Desactivar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                  </svg>
+                </button>
+                
+                <button 
+                  v-else-if="paquete.estado === 0 || paquete.estado === false"
+                  @click="cambiarEstadoPaquete(paquete, true)"
+                  class="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Activar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="confirmarEliminarPaquete(paquete)"
+                  class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Eliminar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación -->
+          <div v-if="paquetesFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Página {{ paginacionPaquetes.paginaActual }} de {{ paginacionPaquetesCalculada.totalPaginas }}
+              </div>
+              
+              <div class="flex items-center space-x-1">
+                <button 
+                  @click="paginacionPaquetes.paginaActual = 1" 
+                  :disabled="paginacionPaquetes.paginaActual === 1"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="paginacionPaquetes.paginaActual--" 
+                  :disabled="paginacionPaquetes.paginaActual === 1"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                <div class="flex items-center space-x-1">
+                  <button 
+                    v-for="page in paginacionPaquetesCalculada.totalPaginas" 
+                    :key="page"
+                    @click="paginacionPaquetes.paginaActual = page"
+                    :class="{'bg-amber-500 text-white': paginacionPaquetes.paginaActual === page, 'text-gray-700 dark:text-gray-300': paginacionPaquetes.paginaActual !== page}"
+                    class="w-8 h-8 rounded-full text-sm font-medium flex items-center justify-center">
+                    {{ page }}
+                  </button>
+                </div>
+                
+                <button 
+                  @click="paginacionPaquetes.paginaActual++" 
+                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="paginacionPaquetes.paginaActual = paginacionPaquetesCalculada.totalPaginas" 
+                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>  
 
         <!-- Card 8: Gestión de Notificaciones -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
@@ -2407,6 +2415,28 @@
               </div>
             </div>
 
+            <!-- Cantidad -->
+            <div>
+              <label for="cantidad" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Cantidad de usos
+              </label>
+              <div class="relative">
+                <input
+                  id="cantidad"
+                  v-model.number="paqueteForm.cantidad"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="Dejar vacío para ilimitado"
+                  :disabled="guardandoPaquete"
+                >
+              </div>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Dejar vacío para paquete ilimitado
+              </p>
+            </div>
+
             <!-- Ciudades -->
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -2683,6 +2713,7 @@ const paqueteForm = ref({
   nombre: '',
   descripcion: '',
   costo: '',
+  cantidad: null,
   estado: true,
   ciudades_seleccionadas: []
 });
@@ -3536,7 +3567,7 @@ const cargarCuentas = async () => {
     if (Array.isArray(response)) {
       cuentas.value = response.map(cuenta => ({
         ...cuenta,
-        // Asegurar que activo sea booleano
+        // Asegurarse de que activo sea booleano
         activo: Boolean(cuenta.activo)
       }));
     } else {
@@ -3716,7 +3747,7 @@ const eliminarCuenta = async (cuentaId) => {
     return true;
   } catch (error) {
     console.error('Error al eliminar cuenta:', error);
-    const errorMessage = error.data?.message || error.message || 'Error al eliminar la cuenta bancaria';
+    const errorMessage = error.data?.message || 'Error al eliminar la cuenta bancaria';
     showToastMessage(errorMessage, 'error');
     return false;
   }
@@ -4035,6 +4066,14 @@ const guardarConfiguraciones = async () => {
       })
     }
     
+    if (configuracionDiasGracia.value !== valoresOriginales.value.reset_credito) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'reset_credito')?.id_config || null,
+        tipo_config: 'reset_credito',
+        valor: configuracionDiasGracia.value
+      })
+    }
+    
     if (configuracionEmail.value !== valoresOriginales.value.correo_empresa) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'correo_empresa')?.id_config,
@@ -4082,20 +4121,12 @@ const guardarConfiguraciones = async () => {
         valor: configuracionRetiro.value
       })
     }
-    
+
     if (configuracionRetiroMinimo.value !== valoresOriginales.value.retiro_minimo) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'retiro_minimo')?.id_config,
         tipo_config: 'retiro_minimo',
         valor: configuracionRetiroMinimo.value
-      })
-    }
-
-    if (configuracionDiasGracia.value !== valoresOriginales.value.reset_credito) {
-      cambios.push({
-        id: configuraciones.value.find(c => c.tipo_config === 'reset_credito')?.id_config || null,
-        tipo_config: 'reset_credito',
-        valor: configuracionDiasGracia.value
       })
     }
 
@@ -4698,7 +4729,7 @@ const eliminarNotificacion = async () => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       }
-    })
+    });
 
     if (response.success) {
       showToastMessage('Notificación eliminada exitosamente', 'success')
@@ -4889,7 +4920,7 @@ async function guardarServicio() {
     
     const response = await $api(url, {
       baseURL: config.public.apiBase,
-      method,
+      method: method,
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -4917,10 +4948,10 @@ async function guardarServicio() {
   } catch (error) {
     console.error('Error al guardar servicio:', error);
     
-    // Mostrar mensaje de error más descriptivo
+    // Mostrar mensaje de error detallado
     const errorMessage = error.data?.message || 
-                       error.response?._data?.message || 
-                       'Error al guardar el servicio. Por favor, inténtalo de nuevo.';
+                         error.response?._data?.message || 
+                         'Error al guardar el servicio';
     
     showToastMessage(errorMessage, 'error');
     return false;
@@ -5112,6 +5143,7 @@ function nuevoPaquete() {
     nombre: '',
     descripcion: '',
     costo: '',
+    cantidad: null,
     estado: true,
     ciudades_seleccionadas: []
   };
@@ -5126,6 +5158,7 @@ function editarPaquete(paquete) {
     nombre: paquete.nombre,
     descripcion: paquete.descripcion || '',
     costo: paquete.costo,
+    cantidad: paquete.cantidad || null,
     estado: paquete.estado,
     ciudades_seleccionadas: paquete.ciudades ? paquete.ciudades.map(c => ({ ...c, nombre: c.nombre_ciudad })) : []
   };
@@ -5140,6 +5173,7 @@ function cerrarModalPaquete() {
     nombre: '',
     descripcion: '',
     costo: '',
+    cantidad: null,
     estado: true
   };
 }
@@ -5172,6 +5206,7 @@ async function guardarPaquete() {
       nombre: paqueteForm.value.nombre.trim(),
       descripcion: paqueteForm.value.descripcion.trim(),
       costo: costo,
+      cantidad: paqueteForm.value.cantidad || null,
       estado: Boolean(paqueteForm.value.estado),
       id_ciudades: paqueteForm.value.ciudades_seleccionadas.map(c => c.id_ciudad)
     };

@@ -348,7 +348,7 @@
       </section> 
 
        <!-- Paquetes por Membresía - Diseño de 2 columnas -->
-<section class="px-4 mb-6">
+<section v-if="paquetesMantenimiento && paquetesMantenimiento.length > 0" class="px-4 mb-6">
   <!-- Header -->
   <div class="mb-4">
     <h3 class="text-lg font-bold text-gray-900 dark:text-white">
@@ -1722,15 +1722,19 @@ const numeroComprobante = ref('');
 const cargarPaquetesActivos = async () => {
   try {
     cargandoPaquetes.value = true;
-    const user = useCookie('user').value
-    const id_ciudad = user?.id_ciudad
+    const user = useCookie('user').value;
+    const id_ciudad = user?.id_ciudad;
+    const id_usuario = user?.id_usuario;
 
     const response = await $api('/paquetes/activos', {
       baseURL: config.public.apiBase,
       headers: {
         'Authorization': `Bearer ${auth.token}`
       },
-      params: id_ciudad ? { id_ciudad } : {}
+      params: {
+        ...(id_ciudad && { id_ciudad }),
+        ...(id_usuario && { id_usuario })
+      }
     });
     
     // Mapear la respuesta de la API al formato esperado
@@ -1739,7 +1743,8 @@ const cargarPaquetesActivos = async () => {
       nombre: paquete.nombre,
       descripcion: paquete.descripcion,
       costo: parseFloat(paquete.costo), // Convertir a número
-      estado: paquete.estado
+      estado: paquete.estado,
+      disponible: paquete.disponible !== false // Asegurar que sea booleano
     }));
   } catch (error) {
     console.error('Error al cargar paquetes:', error);
