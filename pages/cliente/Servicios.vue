@@ -729,29 +729,42 @@
                 </span>
               </div>
 
+              <!-- Mostrar descuento (regular o especial) -->
               <template v-if="shouldShowDiscountBenefit">
-                <div class="flex justify-between items-center mb-1">
+                <!-- Descuento especial si aplica -->
+                <div v-if="membresiaProgreso?.aplica_descuento_especial && membresiaProgreso?.porcentaje_descuento_especial" 
+                     class="flex justify-between items-center mb-1">
+                  <span class="text-amber-700 dark:text-amber-300">Descuento especial {{ membresiaProgreso.porcentaje_descuento_especial }}%:</span>
+                  <span class="font-bold text-amber-600 dark:text-amber-400">
+                    -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (parseFloat(membresiaProgreso.porcentaje_descuento_especial) / 100)).toFixed(2) }}
+                  </span>
+                </div>
+                <!-- Descuento regular si no hay descuento especial -->
+                <div v-else class="flex justify-between items-center mb-1">
                   <span class="text-blue-700 dark:text-blue-300">Descuento por membresía:</span>
                   <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                    -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * discountPercentage).toFixed(2) }}
+                    -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (discountPercentage / 100)).toFixed(2) }}
                   </span>
                 </div>
               </template>
 
-              <template v-if="shouldShowCreditBenefit && membresiaProgreso?.monto_credito_mostrado > 0">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
-                  <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                    -L. {{ parseFloat(membresiaProgreso?.monto_credito_mostrado || 0).toFixed(2) }}
-                  </span>
-                </div>
-              </template>
+              <!-- Mostrar crédito de membresía si aplica -->
+              <template v-if="shouldShowCreditBenefit && membresiaProgreso?.monto_credito > 0">
+  <div class="space-y-1">
+    <div class="flex justify-between items-center">
+      <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
+      <span class="font-bold text-emerald-600 dark:text-emerald-400">
+        -L. {{ parseFloat(membresiaProgreso?.monto_credito || 0).toFixed(2) }}
+      </span>
+    </div>
+  </div>
+</template>
 
               <div class="flex justify-between items-center pt-2 mt-2 
                           border-t border-blue-200 dark:border-blue-700">
                 <span class="font-bold text-blue-800 dark:text-blue-100">Total a pagar:</span>
                 <span class="font-bold text-lg text-blue-800 dark:text-blue-100">
-                  L. {{ totalAPagar.toFixed(2) }}
+                  L. {{ (totalAPagar || 0).toFixed(2) }}
                 </span>
               </div>
             </div>
@@ -877,7 +890,7 @@
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
               >
                 <span v-if="!isProcessingPayment">
-                  Procesar Pago L. {{ totalAPagar.toFixed(2) }}
+                  Procesar Pago L. {{ (totalAPagar || 0).toFixed(2) }}
                 </span>
                 <span v-else class="flex items-center justify-center">
                   <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -1083,8 +1096,7 @@
                     </svg>
                   </div>
                   <div>
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Diagnóstico Técnico</h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Análisis realizado por el técnico</p>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Diagnóstico Técnico</h4> 
                   </div>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
@@ -1103,8 +1115,7 @@
                     </svg>
                   </div>
                   <div>
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Detalle de Costos</h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Desglose de la cotización</p>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Desglose de la cotización</h4> 
                   </div>
                 </div>
                 
@@ -1155,11 +1166,17 @@
               <!-- Información adicional -->
               <div class="text-center mb-3">
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  <span class="inline-flex items-center">
-                    <svg class="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <span class="inline-flex items-start">
+                    <svg
+                      class="w-3 h-3 mr-1 mt-0.5 text-blue-500 flex-shrink-0"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    Esta cotización tiene una validez de 7 días
+                    <span>
+                      Aceptar esta cotización autoriza el servicio. El pago se realiza desde la app al finalizar
+                    </span>
                   </span>
                 </p>
               </div>
@@ -1843,7 +1860,8 @@ const cancelModalTexts = {
 
 // Estado de carga y datos principales
 const isLoading = ref(true)
-const discountPercentage = ref(0) // Porcentaje de descuento obtenido del backend
+const discountPercentage = ref(10) // Porcentaje de descuento regular (valor por defecto 10%)
+const specialDiscountPercentage = ref(15) // Porcentaje de descuento especial (valor por defecto 15%)
 const userData = ref({
   id: null,
   identidad: '',
@@ -2029,22 +2047,23 @@ const shouldShowDiscountBenefit = computed(() => {
   return membresiaProgreso.value.mesesProgreso >= discountBenefit.mes_requerido;
 });
 
-const shouldShowCreditBenefit = computed(() => { 
+const shouldShowCreditBenefit = computed(() => {  
   
   if (!membresiaBeneficios.value.length || !membresiaProgreso.value) { 
-    return false;
+     return false;
   }
   
   const creditBenefit = membresiaBeneficios.value.find(
     beneficio => beneficio.tipo_beneficio === 'Crédito acumulable activado'
   ); 
+   
   
-  if (!creditBenefit) { 
+  if (!creditBenefit) {  
     return false;
   }
   
   const cumpleRequisito = membresiaProgreso.value.mesesProgreso >= creditBenefit.mes_requerido;
-  
+   
   return cumpleRequisito;
 }); 
 
@@ -2246,28 +2265,7 @@ const fetchMembresiaBeneficios = async () => {
     isLoadingBeneficios.value = false;
   }
 };
-
-// Obtener el porcentaje de descuento del backend
-const fetchDiscountPercentage = async () => {
-  try {
-    const response = await $api('/config/valor/porcentaje_descuento', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
-    })
-    
-    if (response && response.valor) {
-      discountPercentage.value = parseFloat(response.valor) / 100 // Convertir de porcentaje a decimal
-    }
-  } catch (error) {
-    console.error('Error al obtener el porcentaje de descuento:', error)
-    // Usar un valor por defecto en caso de error
-    discountPercentage.value = 0 // 0% por defecto
-  }
-}
+ 
 
 const loadServices = async () => {
   try {
@@ -2705,12 +2703,14 @@ const fetchMembresiaProgreso = async (userId) => {
     // Verificar si la respuesta de membresía tiene el formato esperado
     if (membresiaResponse?.status === 'success') {
       membresiaProgreso.value = {
-        monto_credito: parseFloat(creditoUsuario.monto_credito || 0), // Usar el crédito del usuario
+        monto_credito: parseFloat(creditoUsuario.monto_credito || 0),
         mesesProgreso: parseInt(membresiaResponse.mesesProgreso || 0),
         montoTotal: parseFloat(membresiaResponse.montoTotal || 0),
         valorMembresia: parseFloat(membresiaResponse.valorMembresia || 0),
-        id_credito_usuario: creditoUsuario.id_credito_usuario,
-        fecha_credito: creditoUsuario.fecha
+        id_credito_usuario: creditoUsuario.id_credito_usuario || null,
+        fecha_credito: creditoUsuario.fecha_creacion || null,
+        // Solo necesitamos el porcentaje de descuento que ya viene calculado
+        porcentaje_descuento: parseFloat(membresiaResponse.porcentaje_descuento || '0')
       };
     } else {
       // Si no hay datos de membresía, usar solo el crédito del usuario
@@ -2719,9 +2719,15 @@ const fetchMembresiaProgreso = async (userId) => {
         mesesProgreso: 0,
         montoTotal: 0,
         valorMembresia: 0,
-        id_credito_usuario: creditoUsuario.id_credito_usuario,
-        fecha_credito: creditoUsuario.fecha
+        id_credito_usuario: creditoUsuario.id_credito_usuario || null,
+        fecha_credito: creditoUsuario.fecha_creacion || null,
+        porcentaje_descuento: 0
       };
+    }
+    
+    // Actualizar las variables reactivas de descuento
+    if (membresiaProgreso.value) {
+      discountPercentage.value = membresiaProgreso.value.porcentaje_descuento;
     }
     
     return membresiaProgreso.value;
@@ -3217,7 +3223,6 @@ const processVisitPayment = async () => {
 // Asignar el id_pagovisita al selectedService
 if (response?.data?.id_pagovisita) {
   selectedService.value.id_pagovisita = response.data.id_pagovisita;
-  console.log('ID de pago asignado:', selectedService.value.id_pagovisita);
 }
 
     const token = useCookie('token').value;
@@ -3275,8 +3280,7 @@ if (response?.data?.id_pagovisita) {
     showSuccess(
       '¡Pago Enviado!',
       'Una vez se verifique el pago, se le asignará un técnico.'
-    );
-    console.log('Estructura de selectedService.value:', selectedService.value);
+    ); 
      //Enviar mensaje por WhatsApp
     sendWhatsAppMessage(
       selectedService.value, 
@@ -3327,14 +3331,26 @@ const processPayment = async () => {
     id_cuenta: Number(selectedAccount.value),
     monto_credito: Number(parseFloat(membresiaProgreso.value?.monto_credito_mostrado || 0)),
     num_comprobante: comprobante.value,
-    monto_manodeobra: totalAPagar.value,
+    monto_manodeobra: Number(totalAPagar.value) || 0,
     id_usuario: auth.user.id_usuario,
     nombre: auth.user.nombre
   };
   
-  // Solo agregar el descuento si está activo
-  if (shouldShowDiscountBenefit.value) {
-    payload.descuento_membresia = Math.round(parseFloat(quotationData.value?.monto_manodeobra || 0) * (discountPercentage.value || 0) * 100) / 100;
+  // Agregar el descuento correspondiente (especial o regular)
+  const porcentajeDescuento = parseFloat(membresiaProgreso.value?.porcentaje_descuento || 0) || 0;
+  if (porcentajeDescuento > 0) {
+    payload.descuento_membresia = Math.round(
+      parseFloat(quotationData.value?.monto_manodeobra || 0) * 
+      (porcentajeDescuento / 100) * 
+      100
+    ) / 100;
+  } else if (shouldShowDiscountBenefit.value) {
+    // Si no hay descuento especial, usamos el descuento regular
+    payload.descuento_membresia = Math.round(
+      parseFloat(quotationData.value?.monto_manodeobra || 0) * 
+      (discountPercentage.value / 100) * 
+      100
+    ) / 100;
   }
 
   try {
@@ -3347,13 +3363,10 @@ const processPayment = async () => {
       },
       body: JSON.stringify(payload)
     });
-// Mostrar la respuesta del servidor
-console.log('Respuesta del servidor:', response);
 
 // Asignar el id_cotizacion al selectedService
 if (response?.detalles?.id_cotizacion) {
   selectedService.value.id_cotizacion = response.detalles.id_cotizacion;
-  console.log('ID de cotización asignado:', selectedService.value.id_cotizacion);
 }
     
     // Notificar a los administradores sobre el pago de servicio recibido 
@@ -3397,7 +3410,7 @@ if (response?.detalles?.id_cotizacion) {
     sendWhatsAppMessage(
       selectedService.value, 
       'service', 
-      totalAPagar.value, 
+      Number(totalAPagar.value) || 0, 
       comprobante.value.trim()
     ); 
     
@@ -3577,50 +3590,51 @@ const resetFilters = () => {
 }
 
 // =========================
-// FUNCIONES DE CÁLCULO
 // =========================
 
 const totalAPagar = ref(0)
 
 // Función para calcular el total basado en los beneficios dinámicos
 const calcularTotal = () => {
-  const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0)
-  
-  // Solo aplicar descuento si se cumple el beneficio
-  const montoDescuento = shouldShowDiscountBenefit.value 
-    ? montoManodeObra * discountPercentage.value 
-    : 0 
-  
-  // Calcular el monto después del descuento
-  const montoDespuesDescuento = montoManodeObra - montoDescuento
-    
-  // Solo aplicar crédito si se cumple el beneficio
-  const creditoDisponible = shouldShowCreditBenefit.value 
-    ? parseFloat(membresiaProgreso.value?.monto_credito || 0)
-    : 0
-    
-  // El crédito aplicado no puede ser mayor al monto después del descuento
-  const montoCreditoAplicado = Math.min(creditoDisponible, montoDespuesDescuento)
-  
-  // Actualizar el monto de crédito mostrado
-  if (membresiaProgreso.value) {
-    membresiaProgreso.value.monto_credito_mostrado = montoCreditoAplicado
+  try {
+    const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0) || 0;
+    let total = montoManodeObra;
+
+    // Aplicar descuento si existe
+    const porcentajeDescuento = parseFloat(membresiaProgreso.value?.porcentaje_descuento || 0) || 0;
+    if (porcentajeDescuento > 0) {
+      const montoDescuentoAplicado = montoManodeObra * (porcentajeDescuento / 100);
+      total -= montoDescuentoAplicado; 
+    }
+
+    // Aplicar crédito si corresponde
+if (shouldShowCreditBenefit.value && membresiaProgreso.value?.monto_credito) {
+  const montoCredito = parseFloat(membresiaProgreso.value.monto_credito) || 0;
+  total = Math.max(0, total - montoCredito);
+} 
+
+    return total;
+  } catch (error) {
+    console.error('Error en calcularTotal:', error);
+    return 0;
   }
-  
-  // Calcular el total final
-  const totalFinal = montoDespuesDescuento - montoCreditoAplicado
-  
-  return Math.max(0, totalFinal) // Asegurar que el total no sea negativo
-}
+};
 
 // Actualizar el total cuando cambien los datos relevantes
 watch([() => quotationData.value?.monto_manodeobra, 
       () => membresiaProgreso.value?.monto_credito,
       () => membresiaProgreso.value?.mesesProgreso,
       () => discountPercentage.value,
-      () => membresiaBeneficios.value], () => {
-  totalAPagar.value = calcularTotal()
-}, { immediate: true })
+      () => membresiaBeneficios.value], 
+() => {
+  try {
+    const total = calcularTotal();
+    totalAPagar.value = typeof total === 'number' ? total : 0;
+  } catch (error) {
+    console.error('Error al calcular el total:', error);
+    totalAPagar.value = 0;
+  }
+}, { immediate: true, deep: true })
 
 // Watch para sincronizar selectedAccount con selectedAccountObject
 watch(() => selectedAccount.value, (newId) => {
@@ -3734,13 +3748,6 @@ const formattedDate = [
       `*N° de comprobante:* ${receiptNumber}\n\n`+
       `Adjunto una captura del comprobante de pago para su verificación.`;
     
-    // Mostrar en consola los detalles que se enviarán
-    console.log('Mensaje que se enviará por WhatsApp:', {
-      telefono: `+504 ${empresaPhoneNumber.value || '1234567890'}`,
-      mensaje: message,
-      url: `https://wa.me/+504${empresaPhoneNumber.value || '1234567890'}?text=${encodeURIComponent(message)}`
-    });
-    
     // Codificar el mensaje para la URL
     const encodedMessage = encodeURIComponent(message);
     
@@ -3813,7 +3820,6 @@ onMounted(async () => {
 
     // Cargar datos de configuración primero
     await Promise.all([
-      fetchDiscountPercentage(),
       fetchMembresiaBeneficios(),
       fetchEmpresaPhoneNumber() // Cargar el número de teléfono de la empresa
     ]);

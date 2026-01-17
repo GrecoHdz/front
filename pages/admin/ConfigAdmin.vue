@@ -299,6 +299,23 @@
               </div>
             </div>
 
+            <!-- Descuento Especial -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Descuento por Membresía Especial
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionDescuentoEspecial"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-full pl-4 pr-8 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="15">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+
             <!-- Referido -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -2573,6 +2590,7 @@ const configuracionTelefono = ref('')
 const configuracionEmail = ref('')
 const configuracionRTN = ref('')
 const configuracionDescuento = ref(0)
+const configuracionDescuentoEspecial = ref(0)
 const configuracionReferido = ref(0)
 const configuracionRetiro = ref(0)
 const configuracionRetiroMinimo = ref(0)
@@ -4041,6 +4059,14 @@ const guardarConfiguraciones = async () => {
       })
     }
     
+    if (configuracionDescuentoEspecial.value !== (valoresOriginales.value.porcentaje_descuento_especial || 0)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_descuento_especial')?.id_config,
+        tipo_config: 'porcentaje_descuento_especial',
+        valor: configuracionDescuentoEspecial.value
+      })
+    }
+    
     if (configuracionReferido.value !== valoresOriginales.value.porcentaje_referido) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_referido')?.id_config,
@@ -4147,6 +4173,7 @@ const cargarConfiguraciones = async () => {
         numero_empresa: 'numero_empresa',
         correo_empresa: 'correo_empresa',
         porcentaje_descuento: 'porcentaje_descuento',
+        porcentaje_descuento_especial: 'porcentaje_descuento_especial',
         porcentaje_referido: 'porcentaje_referido',
         porcentaje_retiro: 'porcentaje_retiro',
         retiro_minimo: 'retiro_minimo',
@@ -4178,6 +4205,9 @@ const cargarConfiguraciones = async () => {
             break;
           case 'porcentaje_descuento':
             configuracionDescuento.value = Number(item.valor) || 0;
+            break;
+          case 'porcentaje_descuento_especial':
+            configuracionDescuentoEspecial.value = Number(item.valor) || 0;
             break;
           case 'porcentaje_referido':
             configuracionReferido.value = Number(item.valor) || 0;

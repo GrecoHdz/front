@@ -926,6 +926,7 @@ const validateForm = () => {
 // Estado para el costo de la membresía y visita técnica
 const membershipCost = ref(0)
 const visitCost = ref(0)
+const specialDiscountPercentage = ref('50') // Valor por defecto
 const isLoadingMembershipCost = ref(false)
 const isLoadingVisitCost = ref(false)
 
@@ -1138,6 +1139,10 @@ const loadMembershipBenefits = async () => {
     if (data.valores) {
       visitCost.value = parseFloat(data.valores.visita_tecnico) || 0;
       discountPercentage.value = data.valores.porcentaje_descuento || '0';
+      // Guardar el porcentaje de descuento especial si está disponible
+      if (data.valores.porcentaje_descuento_especial) {
+        specialDiscountPercentage.value = data.valores.porcentaje_descuento_especial;
+      }
     }
     
     // Obtener beneficios de la respuesta o usar valores por defecto
@@ -1146,36 +1151,33 @@ const loadMembershipBenefits = async () => {
     if (!beneficios || beneficios.length === 0) {
       // Usar beneficios por defecto si no hay datos
       const costoVisita = visitCost.value || 0;
-      const porcentaje = discountPercentage.value || '0';
-      
-      beneficios = [
-        {
-          mes_requerido: 1,
-          tipo_beneficio: 'Visita técnica gratis',
-          descripcion: `Olvídate de pagar L. ${costoVisita.toLocaleString('es-HN')} cada vez: te enviamos al técnico sin costo.`
-        },
-        {
-          mes_requerido: 2,
-          tipo_beneficio: `${porcentaje}% porciento de descuento`,
-          descripcion: 'Descuento aplicado automáticamente en cualquier trabajo.'
-        }
-      ];
+      const porcentaje = discountPercentage.value || '0'; 
     }
     
     // Ordenar por mes_requerido y mapear los datos
     membershipBenefitsList.value = beneficios
       .sort((a, b) => a.mes_requerido - b.mes_requerido)
-      .map((benefit, index) => ({
-        id: index + 1,
-        mes_requerido: benefit.mes_requerido,
-        title: benefit.tipo_beneficio,
-        description: benefit.descripcion,
-        savings: benefit.tipo_beneficio.includes('Visita técnica') ? 
-          `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita` : 
-          benefit.tipo_beneficio.includes('Descuento en todos los servicios') ?
-          `Ahorro: ${discountPercentage.value}% en cada servicio` :
-          ''
-      }))
+      .map((benefit, index) => {
+        // Determinar el ahorro basado en el tipo de beneficio
+        let savings = '';
+        if (benefit.id_beneficio === 4) {
+          // Usar el valor de specialDiscountPercentage para el beneficio con id_beneficio = 4
+          const porcentaje = specialDiscountPercentage.value || benefit.tipo_beneficio.split('%')[0];
+          savings = `Ahorro: ${porcentaje}% en cada servicio`;
+        } else if (benefit.tipo_beneficio.includes('Visita técnica')) {
+          savings = `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita`;
+        } else if (benefit.tipo_beneficio.includes('Descuento en todos los servicios')) {
+          savings = `Ahorro: ${discountPercentage.value}% en cada servicio`;
+        }
+        
+        return {
+          id: index + 1,
+          mes_requerido: benefit.mes_requerido,
+          title: benefit.tipo_beneficio,
+          description: benefit.descripcion,
+          savings: savings
+        };
+      })
   } catch (error) {
     console.error('Error al cargar los beneficios de membresía:', error)
     // En caso de error, se manejará en el bloque try principal
@@ -1202,8 +1204,7 @@ const isLoadingServices = ref(false)
 // Función para cargar los servicios desde la API
 const loadServices = async () => {
   try {
-    isLoadingServices.value = true
-    console.log('Solicitando servicios activos a:', `${config.public.apiBase}/servicios/activos`)
+    isLoadingServices.value = true 
     
     const response = await fetch(`${config.public.apiBase}/servicios/activos`, {
       method: 'GET',
@@ -1221,7 +1222,6 @@ const loadServices = async () => {
     }
     
     const data = await response.json()
-    console.log('Respuesta de la API (servicios activos):', data)
     
     if (!Array.isArray(data)) {
       console.error('La respuesta no es un array:', data)

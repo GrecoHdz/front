@@ -108,9 +108,9 @@
                   </svg>
                   <div class="absolute inset-0 flex items-center justify-center">
                     <div class="text-center">
-                      <div v-if="isLoadingProgress" class="text-lg font-black text-white">--/6</div>
-                      <div v-else class="text-lg font-black text-white">{{ progressCount }}/6</div>
-                      <div class="text-xs text-white/80">Beneficios</div>
+                      <div v-if="isLoadingProgress" class="text-lg font-black text-white">--</div>
+                      <div v-else class="text-lg font-black text-white">{{ statsData.membershipMonths }}</div>
+                      <div class="text-xs text-white/80">Mes</div>
                     </div>
                   </div>
                 </div>
@@ -159,13 +159,16 @@
                   {{ benefit.tipo_beneficio }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ benefit.descripcion }}
+                  <template v-if="benefit.tipo_beneficio === 'Descuento Especial en todos los Servicios'">
+                    Descuento Especial del {{ specialDiscount }}% en todos los servicios
+                  </template>
+                  <template v-else-if="benefit.tipo_beneficio === 'Descuento en todos los servicios'">
+                    Descuento del {{ regularDiscount }}% en todos los servicios
+                  </template>
+                  <template v-else>
+                    {{ benefit.descripcion }}
+                  </template>
                 </p>
-                <div v-if="benefit.savings" class="mt-1">
-                  <span class="text-xs font-medium text-green-600 dark:text-green-400">
-                    {{ benefit.savings }}
-                  </span>
-                </div>
               </div>
             </div>
             
@@ -349,7 +352,7 @@
   <!-- Header -->
   <div class="mb-4">
     <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-      Paquetes incluidos
+      Mercado de Paquetes
     </h3>
     <p class="text-xs text-gray-500 dark:text-gray-400">
       Compra paquetes o canjealos usando tu crédito
@@ -1038,48 +1041,6 @@ useHead({
 })
 
 // =========================
-// VARIABLES ESTÁTICAS
-// =========================
-
-// Static data arrays
-const membershipBenefits = [
-  { month: 1, title: 'Visita técnica gratis + 10% descuento' },
-  { month: 2, title: 'Crédito acumulable activado' },
-  { month: 3, title: 'Limpieza de aire gratuita' },
-  { month: 6, title: 'Mano de obra 100% gratuita' }
-]
-
-const recentServicesData = ref([
-  {
-    id: 1001,
-    title: 'Reparación de aire acondicionado',
-    description: 'El aire no enfría correctamente en la sala principal',
-    date: '15 Dic 2024',
-    status: 'Completado',
-    cost: 450,
-    icon: '❄️'
-  },
-  {
-    id: 1002,
-    title: 'Instalación de lámpara',
-    description: 'Instalar lámpara LED en comedor',
-    date: '12 Dic 2024',
-    status: 'En progreso',
-    cost: 150,
-    icon: '💡'
-  },
-  {
-    id: 1003,
-    title: 'Fuga en cocina',
-    description: 'Pequeña fuga en el grifo de la cocina',
-    date: '10 Dic 2024',
-    status: 'En camino',
-    cost: 200,
-    icon: '🔧'
-  }
-])
-
-// =========================
 // VARIABLES REACTIVAS
 // =========================
 
@@ -1123,6 +1084,8 @@ const creditResetDone = ref(false)
 const beneficios = ref([]);
 const loadingBenefits = ref(false);
 const benefitsError = ref(null);
+const specialDiscount = ref('15'); // Valor por defecto para descuento especial
+const regularDiscount = ref('10'); // Valor por defecto para descuento regular
 
 // Estados de servicios
 const servicesList = ref([])
@@ -1276,8 +1239,8 @@ const progressCount = computed(() => {
 const progressMessage = computed(() => {
   const month = statsData.value.membershipMonths
   if (month >= 6) return '¡Has desbloqueado todos los beneficios!'
-  if (month >= 3) return 'Ya tienes limpieza de aire gratis'
-  if (month >= 2) return 'Tu crédito ya se está acumulando'
+  if (month >= 3) return 'Ya Puedes Adquirir el Paquete de Limpieza de Aire Acondicionado'
+  if (month >= 2) return 'Ya puedes usar lo abonado en Membresía para pagar Servicios'
   if (month >= 1) return 'Ya tienes descuentos disponibles'
   return 'Empieza a acumular beneficios con tu membresía'
 })
@@ -1620,6 +1583,16 @@ const fetchBeneficios = async () => {
         descripcion: benefit.descripcion || '',
         savings: benefit.savings || ''
       }));
+      
+      // Guardar los porcentajes de descuento si están disponibles
+      if (response.valores) {
+        if (response.valores.porcentaje_descuento_especial) {
+          specialDiscount.value = response.valores.porcentaje_descuento_especial;
+        }
+        if (response.valores.porcentaje_descuento) {
+          regularDiscount.value = response.valores.porcentaje_descuento;
+        }
+      }
     } else if (Array.isArray(response)) {
       // Para compatibilidad con versiones anteriores de la API
       beneficios.value = response;
@@ -1825,9 +1798,7 @@ const canjearPaquete = async (paquete) => {
     const requestData = {
       id_paquete: paquete.id,
       id_usuario: user.id_usuario
-    };
-    
-    console.log('Canjeando paquete:', requestData);
+    }; 
 
     const response = await $api('/paquetes/usuarios/canjear', {
       method: 'POST',
@@ -1837,9 +1808,7 @@ const canjearPaquete = async (paquete) => {
         'Content-Type': 'application/json'
       },
       body: requestData
-    });
-
-    console.log('Respuesta del servidor:', response);
+    }); 
     
     if (response.success) {
       // Actualizar el crédito del usuario
@@ -1979,9 +1948,7 @@ const procesarPagoPaquete = async () => {
         id_cuenta: selectedAccountObject.value.id_cuenta,
         numero_comprobante: numComprobante
       })
-    };
-
-    console.log('Enviando datos al servidor:', requestData);
+    }; 
 
     const response = await $api('/paquetes/usuarios/canjear', {
       method: 'POST',
