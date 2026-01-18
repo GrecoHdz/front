@@ -1052,52 +1052,24 @@
               <div class="text-xs text-gray-500 dark:text-gray-400">
                 Página {{ paginacionPaquetes.paginaActual }} de {{ paginacionPaquetesCalculada.totalPaginas }}
               </div>
-              
               <div class="flex items-center space-x-1">
                 <button 
-                  @click="paginacionPaquetes.paginaActual = 1" 
-                  :disabled="paginacionPaquetes.paginaActual === 1"
-                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                  </svg>
-                </button>
-                
-                <button 
-                  @click="paginacionPaquetes.paginaActual--" 
-                  :disabled="paginacionPaquetes.paginaActual === 1"
+                  @click="$event => cambiarPaginaPaquetes(paginacionPaquetes.paginaActual - 1, $event)" 
+                  :disabled="paginacionPaquetes.paginaActual === 1 || paquetesCargando"
                   class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
-                
-                <div class="flex items-center space-x-1">
-                  <button 
-                    v-for="page in paginacionPaquetesCalculada.totalPaginas" 
-                    :key="page"
-                    @click="paginacionPaquetes.paginaActual = page"
-                    :class="{'bg-amber-500 text-white': paginacionPaquetes.paginaActual === page, 'text-gray-700 dark:text-gray-300': paginacionPaquetes.paginaActual !== page}"
-                    class="w-8 h-8 rounded-full text-sm font-medium flex items-center justify-center">
-                    {{ page }}
-                  </button>
-                </div>
-                
+                <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {{ paginacionPaquetes.paginaActual }} / {{ paginacionPaquetesCalculada.totalPaginas }}
+                </span>
                 <button 
-                  @click="paginacionPaquetes.paginaActual++" 
-                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas"
+                  @click="$event => cambiarPaginaPaquetes(paginacionPaquetes.paginaActual + 1, $event)" 
+                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas || paquetesCargando"
                   class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-                
-                <button 
-                  @click="paginacionPaquetes.paginaActual = paginacionPaquetesCalculada.totalPaginas" 
-                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas"
-                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
@@ -1211,50 +1183,50 @@
         </div>
 
         <!-- Card 9: Gestión de Correlativos de Facturación -->
-<div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
-  <div class="flex items-center justify-between mb-4 sm:mb-6">
-    <div class="flex items-center">
-      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-pink-100 dark:bg-pink-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-        <span class="text-lg sm:text-2xl">🔢</span>
-      </div>
-      <div class="min-w-0 flex-1">
-        <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
-          Gestión de Correlativos de Facturación
-        </h3>
-        <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-          Administra los rangos de facturación y CAI
-        </p>
-      </div>
-    </div>
-    <button 
-      @click="abrirModalNuevoCorrelativo"
-      class="px-3 sm:px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-      Nuevo Correlativo
-    </button>
-  </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-pink-100 dark:bg-pink-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">🔢</span>
+              </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                Gestión de Correlativos
+              </h3>
+              <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                Administra la facturación
+              </p>
+            </div>
+          </div>
+          <button 
+          @click="abrirModalNuevoCorrelativo"
+          class="px-3 sm:px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          <span>Nuevo</span>
+          </button>
+        </div>
 
-  <!-- Filtros y búsqueda -->
-  <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3">
-    <div class="flex-1 relative">
+      <!-- Filtros y búsqueda -->
+  <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-4">
+    <div class="relative flex-1 min-w-0">
       <input
         v-model="filtroBusquedaCorrelativos"
         type="text"
         placeholder="Buscar por CAI o rango..."
-        class="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white">
-      <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
     </div>
-    <div class="w-full sm:w-48">
+    <div class="w-full sm:w-40">
       <select 
         v-model="filtroEstadoCorrelativo"
-        class="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white">
-        <option value="">Todos los estados</option>
+        class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white transition-colors">
+        <option value="">Todos</option>
         <option value="ACTIVO">Activo</option>
         <option value="INACTIVO">Inactivo</option>
         <option value="AGOTADO">Agotado</option>
@@ -1269,56 +1241,71 @@
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-4"></div>
       <p>Cargando correlativos...</p>
     </div>
+    
     <div v-else-if="correlativosFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
       <span class="text-4xl mb-2 block">📭</span>
       <p>No se encontraron correlativos</p>
     </div>
+    
     <template v-else>
       <div v-for="correlativo in correlativosPaginados" :key="correlativo.id" 
+           @click="editarCorrelativo(correlativo)"
            :class="getCorrelativoCardColor(correlativo)"
-           class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border transition-colors">
-        <div class="flex-1 mb-3 sm:mb-0">
-          <div class="flex items-center gap-3 mb-2">
-            <span class="text-lg">🔢</span>
-            <div>
+           class="cursor-pointer rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all duration-200">
+        <div class="flex flex-col">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-lg">🔢</span>
               <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">
-                CAI: {{ correlativo.cai }}
+                {{ correlativo.cai }}
               </h5>
-              <p class="text-[12px] sm:text-xs md:text-base text-gray-500 dark:text-gray-400">
-                Rango: {{ correlativo.rango_inicio }} - {{ correlativo.rango_fin }} • 
-                Actual: {{ correlativo.prefijo }}{{ (correlativo.correlativo_actual || correlativo.rango_inicio).toString().padStart(8, '0') }}
-              </p> 
-              <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Válido hasta: {{ formatDate(correlativo.fecha_vencimiento) }} • 
-                <span :class="{
-                  'text-green-600 dark:text-green-400': correlativo.estado === 'ACTIVO',
-                  'text-yellow-600 dark:text-yellow-400': correlativo.estado === 'AGOTADO',
-                  'text-red-600 dark:text-red-400': correlativo.estado === 'VENCIDO',
-                  'text-gray-600 dark:text-gray-400': correlativo.estado === 'INACTIVO'
-                }">
-                  {{ getEstadoCorrelativoLabel(correlativo.estado) }}
-                </span>
-              </p>
+            </div>
+            <span 
+              :class="{
+                'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400': correlativo.estado === 'ACTIVO',
+                'bg-yellow-100 text-yellow-800 dark:bg-yellow-800/30 dark:text-yellow-400': correlativo.estado === 'AGOTADO',
+                'bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-400': correlativo.estado === 'VENCIDO',
+                'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400': correlativo.estado === 'INACTIVO'
+              }"
+              class="px-2 py-1 text-[10px] font-medium rounded-full whitespace-nowrap">
+              {{ getEstadoCorrelativoLabel(correlativo.estado) }}
+            </span>
+          </div>
+          
+          <div class="mt-2 pl-8">
+            <p class="text-[12px] sm:text-xs text-gray-600 dark:text-gray-400">
+              <span class="font-medium">Rango:</span> 
+                {{ correlativo.rango_inicio }} - {{ correlativo.rango_fin }} 
+            </p>
+            <p class="text-[12px] sm:text-xs text-gray-600 dark:text-gray-400 mt-1">
+              <span class="font-medium">Actual:</span> 
+              {{ correlativo.prefijo }}{{ (correlativo.correlativo_actual || correlativo.rango_inicio).toString().padStart(8, '0') }}
+            </p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-500 mt-2">
+              Válido hasta: {{ formatDate(correlativo.fecha_vencimiento) }}
+            </p>
+          </div>
+          
+          <div class="flex justify-end mt-3 pt-2 border-t border-gray-100 dark:border-gray-600">
+            <div class="flex gap-2">
+              <button 
+                @click.stop="editarCorrelativo(correlativo)"
+                class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                title="Editar">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button 
+                @click.stop="confirmarEliminarCorrelativo(correlativo)"
+                class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                title="Eliminar">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
             </div>
           </div>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <button 
-            @click.stop="editarCorrelativo(correlativo)"
-            class="px-3 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Editar
-          </button>
-          <button 
-            @click.stop="confirmarEliminarCorrelativo(correlativo)"
-            class="px-3 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Eliminar
-          </button>
         </div>
       </div>
     </template>
@@ -1326,38 +1313,29 @@
 
   <!-- Paginación -->
   <div v-if="correlativosFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="flex items-center justify-between">
       <div class="text-xs text-gray-500 dark:text-gray-400">
-        Mostrando {{ paginacionCorrelativosCalculada.desde }} a {{ paginacionCorrelativosCalculada.hasta }} de {{ paginacionCorrelativosCalculada.total }} registros
+        Página {{ paginacionCorrelativos.paginaActual }} de {{ paginacionCorrelativosCalculada.totalPaginas }}
       </div>
-      <div class="flex items-center gap-1">
-        <button
-          @click="cambiarPaginaCorrelativos(paginacionCorrelativos.paginaActual - 1, $event)"
-          :disabled="paginacionCorrelativos.paginaActual === 1"
-          class="px-3 py-1 text-sm rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Anterior
+      <div class="flex items-center space-x-1">
+        <button 
+          @click="$event => cambiarPaginaCorrelativos(paginacionCorrelativos.paginaActual - 1, $event)" 
+          :disabled="paginacionCorrelativos.paginaActual === 1 || correlativosCargando"
+          class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
-        
-        <template v-for="pagina in paginacionCorrelativosCalculada.paginas" :key="pagina">
-          <button
-            @click="cambiarPaginaCorrelativos(pagina, $event)"
-            :class="{
-              'bg-pink-500 text-white': pagina === paginacionCorrelativos.paginaActual,
-              'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700': pagina !== paginacionCorrelativos.paginaActual
-            }"
-            class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium"
-          >
-            {{ pagina }}
-          </button>
-        </template>
-        
-        <button
-          @click="cambiarPaginaCorrelativos(paginacionCorrelativos.paginaActual + 1, $event)"
-          :disabled="paginacionCorrelativos.paginaActual === paginacionCorrelativosCalculada.totalPaginas"
-          class="px-3 py-1 text-sm rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Siguiente
+        <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+          {{ paginacionCorrelativos.paginaActual }} / {{ paginacionCorrelativosCalculada.totalPaginas }}
+        </span>
+        <button 
+          @click="$event => cambiarPaginaCorrelativos(paginacionCorrelativos.paginaActual + 1, $event)" 
+          :disabled="paginacionCorrelativos.paginaActual >= paginacionCorrelativosCalculada.totalPaginas || correlativosCargando"
+          class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
     </div>
@@ -2340,11 +2318,11 @@
 
   <!-- Modal para crear/editar paquete -->
   <Transition name="fade">
-    <div v-if="mostrarModalNuevoPaquete" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalPaquete"></div>
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 relative z-10">
+    <div v-if="mostrarModalNuevoPaquete" class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalPaquete"></div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-auto relative z-10 max-h-[85vh] overflow-y-auto">
         <!-- Header -->
-        <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+        <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
           <div class="flex items-center justify-between">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">
               {{ paqueteEditando ? 'Editar' : 'Nuevo' }} Paquete
@@ -2361,8 +2339,8 @@
         </div>
 
         <!-- Formulario -->
-        <div class="p-6">
-          <form @submit.prevent="guardarPaquete" class="space-y-4">
+        <div class="p-4 sm:p-6">
+          <form @submit.prevent="guardarPaquete" class="space-y-3 sm:space-y-4">
             <!-- Nombre -->
             <div>
               <label for="nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -2392,7 +2370,7 @@
                 placeholder="Descripción detallada del paquete"
                 :disabled="guardandoPaquete"
               ></textarea>
-            </div>
+            </div> 
 
             <!-- Costo -->
             <div>
@@ -2418,7 +2396,7 @@
             <!-- Cantidad -->
             <div>
               <label for="cantidad" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Cantidad de usos
+                Cantidad (Vacío para ilimitado)
               </label>
               <div class="relative">
                 <input
@@ -2428,43 +2406,79 @@
                   min="1"
                   step="1"
                   class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                  placeholder="Dejar vacío para ilimitado"
+                  placeholder="Vacío para ilimitado"
                   :disabled="guardandoPaquete"
                 >
-              </div>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Dejar vacío para paquete ilimitado
-              </p>
-            </div>
+              </div> 
+            </div> 
 
-            <!-- Ciudades -->
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Ciudades disponibles
-              </label>
-              <multiselect
-                v-model="paqueteForm.ciudades_seleccionadas"
-                :options="ciudades"
-                :searchable="false"
-                :multiple="true"
-                :close-on-select="false"
-                :clear-on-select="false"
-                :preserve-search="true"
-                placeholder="Seleccionar ciudades"
-                label="nombre"
-                track-by="id_ciudad"
-                class="multiselect-admin-filter"
-              >
-                <template #selection="{ values, isOpen }">
-                  <span class="multiselect__single" v-if="values.length && !isOpen">
-                    {{ values.length }} ciudades seleccionadas
-                  </span>
-                </template>
-              </multiselect>
+            <!-- Grid: Ciudades e Imagen -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Ciudades -->
+              <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Ciudades disponibles
+                </label>
+                <multiselect
+                  v-model="paqueteForm.ciudades_seleccionadas"
+                  :options="ciudades"
+                  :searchable="false"
+                  :multiple="true"
+                  :close-on-select="false"
+                  :clear-on-select="false"
+                  :preserve-search="true"
+                  placeholder="Seleccionar ciudades"
+                  label="nombre"
+                  track-by="id_ciudad"
+                  class="multiselect-admin-filter"
+                  :show-labels="false"
+                >
+                  <template #tag="{ option, remove }">
+                    <span class="multiselect__tag">
+                      {{ option.nombre }}
+                      <i class="multiselect__tag-icon" @click="remove(option)">✕</i>
+                    </span>
+                  </template>
+                </multiselect>
+              </div>
+
+              <!-- Imagen del paquete -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Imagen del paquete
+                </label>
+                <div class="mt-1">
+                  <label
+                    class="cursor-pointer bg-white dark:bg-gray-700 py-1.5 px-2.5 sm:py-2 sm:px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-xs sm:text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 inline-block w-full text-center"
+                  >
+                    <span>Seleccionar imagen</span>
+                    <input
+                      type="file"
+                      class="sr-only"
+                      accept="image/*"
+                      @change="manejarCambioImagen"
+                    >
+                  </label>
+                  <p v-if="paqueteForm.imagen" class="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                    {{ paqueteForm.imagen.name }}
+                  </p>
+                </div>
+                <!-- Vista previa de la imagen -->
+                <div v-if="paqueteForm.imagen_previa" class="mt-2">
+                  <img :src="paqueteForm.imagen_previa" alt="Vista previa" class="w-full h-32 object-cover rounded-lg">
+                  <button 
+                    type="button"
+                    @click="eliminarImagen"
+                    class="mt-1 sm:mt-2 text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  >
+                    Eliminar imagen
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Estado -->
-            <div class="flex items-center pt-2">
+            <div class="flex items-center">
               <input
                 id="estado"
                 v-model="paqueteForm.estado"
@@ -2513,20 +2527,20 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">
           ¿Estás seguro de que deseas eliminar el paquete "{{ paqueteAEliminar?.nombre }}"? Esta acción no se puede deshacer.
         </p>
-        <div class="flex justify-end space-x-3">
+        <div class="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
           <button
             @click="mostrarModalConfirmacionEliminarPaquete = false"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="flex-1 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             :disabled="guardandoPaquete"
           >
             Cancelar
           </button>
           <button
             @click="eliminarPaquete"
-            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center"
+            class="flex-1 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center"
             :disabled="guardandoPaquete"
           >
-            <div v-if="guardandoPaquete" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            <div v-if="guardandoPaquete" class="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white mr-1.5 sm:mr-2"></div>
             {{ guardandoPaquete ? 'Eliminando...' : 'Eliminar' }}
           </button>
         </div>
@@ -2715,7 +2729,10 @@ const paqueteForm = ref({
   costo: '',
   cantidad: null,
   estado: true,
-  ciudades_seleccionadas: []
+  ciudades_seleccionadas: [],
+  imagen: null,
+  imagen_previa: null,
+  imagen_public_id: null
 });
 
 // Paginación de paquetes
@@ -5145,7 +5162,10 @@ function nuevoPaquete() {
     costo: '',
     cantidad: null,
     estado: true,
-    ciudades_seleccionadas: []
+    ciudades_seleccionadas: [],
+    imagen: null,
+    imagen_previa: null,
+    imagen_public_id: null
   };
   mostrarModalNuevoPaquete.value = true;
   console.log('Estado de mostrarModalNuevoPaquete:', mostrarModalNuevoPaquete.value); // Para depuración
@@ -5153,6 +5173,7 @@ function nuevoPaquete() {
 
 // Abrir modal para editar paquete
 function editarPaquete(paquete) {
+  console.log('Editando paquete:', paquete);
   paqueteEditando.value = paquete;
   paqueteForm.value = {
     nombre: paquete.nombre,
@@ -5160,8 +5181,12 @@ function editarPaquete(paquete) {
     costo: paquete.costo,
     cantidad: paquete.cantidad || null,
     estado: paquete.estado,
-    ciudades_seleccionadas: paquete.ciudades ? paquete.ciudades.map(c => ({ ...c, nombre: c.nombre_ciudad })) : []
+    ciudades_seleccionadas: paquete.ciudades ? paquete.ciudades.map(c => ({ ...c, nombre: c.nombre_ciudad })) : [],
+    imagen: null,
+    imagen_previa: paquete.imagen_url || null,
+    imagen_public_id: paquete.imagen_public_id || null
   };
+  console.log('Formulario de edición:', paqueteForm.value);
   mostrarModalNuevoPaquete.value = true;
 }
 
@@ -5178,8 +5203,85 @@ function cerrarModalPaquete() {
   };
 }
 
+// Función para manejar la selección de imagen
+function manejarCambioImagen(event) {
+  const file = event.target.files[0];
+  if (file) {
+    // Validar tipo de archivo
+    if (!file.type.match('image.*')) {
+      showToastMessage('Por favor, selecciona un archivo de imagen válido', 'error');
+      return;
+    }
+    
+    // Validar tamaño (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      showToastMessage('La imagen no debe superar los 10MB', 'error');
+      return;
+    }
+    
+    // Actualizar el formulario
+    paqueteForm.value.imagen = file;
+    
+    // Crear vista previa
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      paqueteForm.value.imagen_previa = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Función para eliminar la imagen seleccionada
+async function eliminarImagen() {
+  try {
+    // Si estamos editando un paquete y tiene una imagen en el backend
+    if (paqueteEditando.value && paqueteEditando.value.imagen_public_id) {
+      const auth = useAuthStore();
+      
+      // Enviar petición para eliminar la imagen del backend
+      await $api(`/paquetes/imagen/${paqueteEditando.value.id_paquete}`, {
+        method: 'DELETE',
+        baseURL: config.public.apiBase,
+        headers: {
+          'Authorization': `Bearer ${auth.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          public_id: paqueteEditando.value.imagen_public_id
+        })
+      });
+      
+      // Actualizar el paquete en el frontend
+      paqueteEditando.value.imagen_url = null;
+      paqueteEditando.value.imagen_public_id = null;
+    }
+    
+    // Limpiar el formulario
+    paqueteForm.value.imagen = null;
+    paqueteForm.value.imagen_previa = null;
+    paqueteForm.value.imagen_public_id = null;
+    
+    // Limpiar el input file
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    showToastMessage('Imagen eliminada correctamente', 'success');
+  } catch (error) {
+    console.error('Error al eliminar la imagen:', error);
+    const errorMessage = error.data?.message || 
+                        error.response?._data?.message || 
+                        'Error al eliminar la imagen';
+    showToastMessage(errorMessage, 'error');
+  }
+}
+
 // Guardar o actualizar paquete
 async function guardarPaquete() {
+  if (guardandoPaquete.value) return;
+  guardandoPaquete.value = true;
+  
   try {
     // Validar campos obligatorios
     if (!paqueteForm.value.nombre || !paqueteForm.value.costo) {
@@ -5201,25 +5303,65 @@ async function guardarPaquete() {
     
     const method = paqueteEditando.value ? 'PUT' : 'POST';
     
-    // Preparar los datos del formulario
-    const datosPaquete = {
-      nombre: paqueteForm.value.nombre.trim(),
-      descripcion: paqueteForm.value.descripcion.trim(),
-      costo: costo,
-      cantidad: paqueteForm.value.cantidad || null,
-      estado: Boolean(paqueteForm.value.estado),
-      id_ciudades: paqueteForm.value.ciudades_seleccionadas.map(c => c.id_ciudad)
+    // Crear FormData para enviar archivos
+    const formData = new FormData();
+    
+    // Función auxiliar para agregar campos al FormData manejando valores nulos
+    const appendFormData = (key, value) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
     };
+
+    // Agregar campos al FormData
+    appendFormData('nombre', paqueteForm.value.nombre.trim());
+    appendFormData('descripcion', paqueteForm.value.descripcion.trim());
+    appendFormData('costo', costo);
+    
+    // Manejar cantidad: si está vacío, no se envía el campo (el backend lo manejará como null)
+    if (paqueteForm.value.cantidad) {
+      appendFormData('cantidad', parseInt(paqueteForm.value.cantidad, 10));
+    }
+    
+    // Estado siempre como booleano
+    appendFormData('estado', paqueteForm.value.estado === true || paqueteForm.value.estado === 'true');
+    
+    // Agregar ciudades seleccionadas
+    if (paqueteForm.value.ciudades_seleccionadas && paqueteForm.value.ciudades_seleccionadas.length > 0) {
+      paqueteForm.value.ciudades_seleccionadas.forEach((ciudad, index) => {
+        formData.append(`id_ciudades[${index}]`, ciudad.id_ciudad);
+      });
+    }
+    
+    // Agregar la imagen si existe
+    if (paqueteForm.value.imagen) {
+      // Usamos 'imagen' como nombre de campo para que coincida con el backend
+      formData.append('imagen', paqueteForm.value.imagen);
+    } else if (paqueteEditando.value && paqueteForm.value.imagen_public_id) {
+      // Si estamos editando y no hay una nueva imagen, pero hay un public_id, lo enviamos
+      formData.append('imagen_public_id', paqueteForm.value.imagen_public_id);
+    }
+
+    // Depuración: Mostrar los datos que se enviarán
+    console.log('Enviando datos al servidor:', {
+      url: `${config.public.apiBase}${url}`,
+      method,
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'multipart/form-data'
+      },
+      formData: Object.fromEntries(formData.entries())
+    });
 
     // Realizar la petición
     const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: method,
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${auth.token}`
+        // No establecer Content-Type, se establecerá automáticamente con el boundary
       },
-      body: datosPaquete
+      body: formData
     });
 
     if (!response) {
@@ -5251,6 +5393,8 @@ async function guardarPaquete() {
     
     showToastMessage(errorMessage, 'error');
     return false;
+  } finally {
+    guardandoPaquete.value = false;
   }
 }
 
@@ -5537,7 +5681,7 @@ input, select, textarea {
 
 .multiselect-admin-filter .multiselect__tags {
   min-height: 44px;
-  padding: 1px 40px 1px 12px;
+  padding: 6px 40px 6px 12px;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   background-color: #f9fafb;
@@ -5545,7 +5689,75 @@ input, select, textarea {
   transition: all 0.2s ease;
   color: #111827;
   display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.multiselect-admin-filter .multiselect__tag {
+  background: #1e40af; /* Azul más oscuro para mejor contraste */
+  color: white;
+  border-radius: 0.375rem; /* 6px - para coincidir con otros bordes redondeados */
+  padding: 0.25rem 0.5rem; /* 4px 8px */
+  margin: 0.125rem; /* 2px */
+  font-size: 0.75rem; /* 12px */
+  display: inline-flex;
   align-items: center;
+  transition: all 0.2s ease;
+  border: 1px solid #1e3a8a; /* Borde sutil */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.multiselect-admin-filter .multiselect__tag:hover {
+  background: #1e3a8a; /* Un tono ligeramente más oscuro al pasar el mouse */
+}
+
+.multiselect-admin-filter .multiselect__tag-icon {
+  margin-left: 0.375rem; /* 6px */
+  cursor: pointer;
+  opacity: 0.8;
+  font-style: normal;
+  font-size: 0.625rem; /* 10px */
+  line-height: 1;
+  transition: all 0.2s ease;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-right: -2px;
+}
+
+.multiselect-admin-filter .multiselect__tag-icon:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Estilos para el modo oscuro */
+.dark .multiselect-admin-filter .multiselect__tag {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #f3f4f6;
+}
+
+.dark .multiselect-admin-filter .multiselect__tag:hover {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.dark .multiselect-admin-filter .multiselect__tag-icon:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.multiselect-admin-filter .multiselect__select {
+  top: 50%;
+  transform: translateY(-50%);
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background-size: 10px;
 }
 
 .dark .multiselect-admin-filter .multiselect__tags {

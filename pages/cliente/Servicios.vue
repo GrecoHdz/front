@@ -243,7 +243,29 @@
           <h4 class="text-sm font-black text-gray-900 dark:text-white mb-2">Técnico Asignado</h4>
           <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
             <div class="flex items-center space-x-2 mb-2">
-              <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <button 
+              v-if="selectedService.tecnico?.imagen_url" 
+              @click="() => {
+                selectedImage = getOptimizedImage(selectedService.tecnico.imagen_url, 800, 800, 'fill')
+                showImageModal = true
+              }"
+              class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 relative focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              aria-label="Ver imagen del técnico"
+            >
+              <img 
+                :src="getOptimizedImage(selectedService.tecnico.imagen_url, 100, 100)" 
+                :alt="'Foto de ' + (selectedService.technicianName || 'Técnico')"
+                class="w-full h-full object-cover transition-opacity duration-300 hover:opacity-90"
+                :class="{ 'opacity-0': !imageLoaded }"
+                @load="imageLoaded = true"
+                @error="handleImageError"
+                loading="lazy"
+              >
+              <div v-if="!imageLoaded" class="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                <div class="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+              </div>
+            </button>
+              <div v-else class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center">
                 <span class="text-white text-lg">👨‍🔧</span>
               </div>
               <div>
@@ -492,6 +514,7 @@
               <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg mb-3">
                 <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
                 <div class="space-y-2 text-sm">
+
                   <div class="flex justify-between items-center">
                     <span class="text-blue-700 dark:text-blue-300">Visita del Técnico:</span>
                     <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ visitCost }}</span>
@@ -914,6 +937,38 @@
   </div>
 </Transition>
 
+<!-- Modal para ver imagen en grande -->
+<Transition
+  enter-active-class="transition-opacity duration-300"
+  leave-active-class="transition-opacity duration-200"
+  enter-from-class="opacity-0"
+  leave-to-class="opacity-0"
+>
+  <div 
+    v-if="showImageModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+    @click.self="showImageModal = false"
+  >
+    <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col">
+      <button 
+        @click="showImageModal = false"
+        class="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+        aria-label="Cerrar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex-1 flex items-center justify-center">
+        <img 
+          :src="selectedImage" 
+          class="max-w-full max-h-[80vh] object-contain"
+          :alt="'Imagen de ' + (selectedService?.technicianName || 'técnico')"
+        />
+      </div>
+    </div>
+  </div>
+</Transition>
 
   <!-- Modal de Cancelación con Transiciones -->
   <Transition
@@ -998,7 +1053,7 @@
           <div class="sticky bottom-0 bg-gray-50 dark:bg-gray-800/80 px-3 py-2 border-t border-gray-200 dark:border-gray-700 rounded-b-xl flex justify-end space-x-2 backdrop-blur-sm">
             <button 
               @click="closeCancelModal" 
-              class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+              class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Volver atrás
             </button>
@@ -1475,16 +1530,15 @@
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+  background: rgba(59, 130, 246, 0.5);
 }
 
 /* Estilos para modo oscuro */
@@ -1892,6 +1946,8 @@ const showVisitPaymentModal = ref(false)
 const showCancelModal = ref(false)
 const showQuotationModal = ref(false)
 const showRatingModal = ref(false) 
+const showImageModal = ref(false)
+const selectedImage = ref('') 
 
 // Estados para calificación
 const rating = ref(0)
@@ -1959,6 +2015,9 @@ const pendingServices = computed(() => servicesData.value.pendientes || allServi
 
 // Referencia reactiva para almacenar el servicio seleccionado
 const selectedServiceRef = ref({})
+
+// Estado para controlar la carga de la imagen del técnico
+const imageLoaded = ref(false)
 
 // Propiedad computada para acceder al servicio seleccionado
 const selectedService = computed(() => {
@@ -2167,6 +2226,37 @@ const getStepStatus = (stepId, rawStatus) => {
 }
 
 // =========================
+// FUNCIONES DE MANEJO DE IMÁGENES
+// =========================
+
+const getOptimizedImage = (imageUrl, width = 300, height = 200, crop = 'fill') => {
+  if (!imageUrl) return '';
+  
+  // Si la imagen ya es una URL de Cloudinary, aplicar transformaciones
+  if (imageUrl.includes('res.cloudinary.com')) {
+    // Extraer la ruta base de la URL
+    const urlParts = imageUrl.split('/upload/');
+    if (urlParts.length === 2) {
+      return `${urlParts[0]}/upload/c_${crop},w_${width},h_${height},q_auto:good/${urlParts[1]}`;
+    }
+  }
+  
+  // Si no es una URL de Cloudinary, devolver la URL original
+  return imageUrl;
+};
+
+const handleImageError = (event, fallbackImage = '/img/placeholder-user.jpg') => {
+  // Si ya estamos mostrando la imagen de respaldo, no hacer nada
+  if (event.target.src.endsWith(fallbackImage)) return;
+  
+  // Establecer la imagen de respaldo
+  event.target.src = fallbackImage;
+  
+  // Asegurarse de que la imagen de respaldo se muestre correctamente
+  event.target.onerror = null;
+};
+
+// =========================
 // FUNCIONES DE MAPEO DE DATOS
 // =========================
 
@@ -2227,7 +2317,9 @@ const mapApiServiceToLocal = (apiService) => {
     pagar_visita: apiService.pagar_visita == 1,  
     serviceDescription: apiService.descripcion,
     diagnosis: 'Diagnóstico pendiente...',
-    technician: apiService.id_tecnico
+    technician: apiService.id_tecnico,
+    // Incluir la propiedad tecnico si está presente
+    ...(apiService.tecnico && { tecnico: { ...apiService.tecnico } })
   }; 
   return servicioMapeado;
 }
@@ -2514,27 +2606,22 @@ const fetchVisitCost = async () => {
 // =========================
 
 const openServiceModal = async (service) => {
+  // Solo lectura: usar el objeto original directamente
+  selectedServiceId.value = service.id;
+  selectedServiceRef.value = service;
+  showServiceModal.value = true;
   
-  // Crear una copia del servicio para no modificar el original
-  const serviceCopy = { ...service };
-  
-  // Si hay un técnico asignado cargar su calificación
+  // Si hay un técnico asignado, cargar su calificación
   if (service.technician) {
-    // Usar el nombre del técnico si ya está disponible
-    if (service.technicianName) {
-      serviceCopy.technicianName = service.technicianName;
-    } else if (service.tecnico?.nombre) {
-      serviceCopy.technicianName = service.tecnico.nombre;
-    } else {
-      serviceCopy.technicianName = `Técnico #${service.technician}`;
+    // Usar el nombre del técnico si está disponible
+    if (!service.technicianName && service.tecnico?.nombre) {
+      service.technicianName = service.tecnico.nombre;
+    } else if (!service.technicianName) {
+      service.technicianName = `Técnico #${service.technician}`;
     }
      
     await fetchTecnicoRating(service.technician);
   }
-
-  selectedServiceId.value = service.id;
-  selectedServiceRef.value = serviceCopy;
-  showServiceModal.value = true;
 }
 
 const closeServiceModal = () => {
@@ -3069,11 +3156,6 @@ const rejectQuotation = async () => {
     }
     
     const token = useCookie('token').value
-    if (!token) {
-      console.error('Token de autenticación no encontrado')
-      showError('No se encontró el token de autenticación')
-      return
-    }
     
     // Cerrar el modal de confirmación
     showRejectConfirmation.value = false;

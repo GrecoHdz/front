@@ -24,8 +24,20 @@
       <!-- Profile Card -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 dark:border-gray-700 mb-4 sm:mb-6">
         <div class="flex flex-col items-center text-center mb-4 sm:mb-6">
-          <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-3xl sm:text-4xl text-white mb-3 sm:mb-4 shadow-lg">
-            {{ userInitials }}
+          <div class="relative group">
+            <div v-if="user.imagen_url" 
+                 class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 mb-3 sm:mb-4 relative">
+              <img :src="user.imagen_url" 
+                   :alt="user.nombre" 
+                   class="w-full h-full object-cover">
+              <div v-if="isUploading" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+              </div>
+            </div>
+            <div v-else 
+                 class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-3xl sm:text-4xl text-white mb-3 sm:mb-4 shadow-lg">
+              {{ userInitials }}
+            </div> 
           </div>
           <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white">{{ user.nombre }}</h2>
           <p class="text-emerald-600 dark:text-emerald-400 font-medium text-sm sm:text-base">{{ user.email }}</p>
@@ -214,12 +226,24 @@
               <span v-if="isSaving">Guardando...</span>
               <span v-else>Actualizar Perfil</span>
             </button>
-              <button 
+            <button 
               @click="isPasswordModalOpen = true"
               type="button"
               class="w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
             >
               Cambiar Contraseña
+            </button>
+            <button 
+              @click="isPhotoModalOpen = true"
+              type="button"
+              class="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+            >
+              <div class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Gestionar Foto</span>
+              </div>
             </button>
           </div>
         </div>
@@ -934,6 +958,83 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de Gestión de Foto de Perfil -->
+<Transition name="fade">
+  <div v-if="isPhotoModalOpen" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700 transform transition-all duration-300">
+      <!-- Header con gradiente sutil -->
+      <div class="relative bg-gradient-to-r from-blue-500 to-blue-600 p-5 text-white">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold">Foto de perfil</h3>
+          <button 
+            @click="isPhotoModalOpen = false"
+            class="p-1.5 rounded-full hover:bg-white/20 transition-colors duration-200"
+            aria-label="Cerrar modal"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenido principal -->
+      <div class="p-6">
+        <div class="flex flex-col items-center space-y-6">
+          <!-- Avatar con efecto de elevación -->
+          <div class="relative group">
+            <div class="relative w-40 h-40 rounded-full ring-4 ring-white dark:ring-gray-800 shadow-xl overflow-hidden transition-transform duration-300 group-hover:scale-105">
+              <div v-if="user.imagen_url" class="w-full h-full">
+                <img 
+                  :src="user.imagen_url" 
+                  :alt="user.nombre" 
+                  class="w-full h-full object-cover"
+                >
+                <div v-if="isUploading" class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
+                </div>
+              </div>
+              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 text-6xl text-white font-bold">
+                {{ userInitials }}
+              </div>
+            </div> 
+          </div>
+
+          <!-- Botones de acción con iconos -->
+<div class="w-full" :class="{'grid grid-cols-2 gap-4': user.imagen_url}">
+  <label class="block" :class="{'opacity-50 cursor-not-allowed': isUploading}">
+    <div class="flex items-center justify-center space-x-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-xl cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed" :class="{'opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-none': isUploading}">
+      <svg v-if="!isUploading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <span v-if="!isUploading">{{ user.imagen_url ? 'Cambiar' : 'Subir foto' }}</span>
+      <span v-else>Procesando...</span>
+      <input 
+        type="file" 
+        class="hidden" 
+        @change="onFileChange" 
+        accept="image/*" 
+        :disabled="isUploading"
+      >
+    </div>
+  </label>
+  
+  <button 
+    v-if="user.imagen_url"
+    @click="deleteProfileImage"
+    type="button"
+    class="w-full flex items-center justify-center space-x-2 px-5 py-3 bg-white dark:bg-gray-700 border-2 border-red-100 dark:border-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 font-medium rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+    :disabled="isUploading"
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+    <span>Eliminar</span>
+  </button> </div></div></div>
+    </div>
+  </div>
+</Transition>
   </div>
   
 </template>
@@ -966,9 +1067,11 @@ useHead({
 // ===== VARIABLES DE ESTADO =====
 const isLoading = ref(true)
 const isLoggingOut = ref(false)
+const isUploading = ref(false)
 const isSaving = ref(false)
 const isUpdatingPassword = ref(false)
 const isPasswordModalOpen = ref(false)
+const isPhotoModalOpen = ref(false)
 const isTerminosModalOpen = ref(false)
 const isContratoTecnicoModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
@@ -1003,6 +1106,8 @@ const user = ref({
   id_rol: null,
   role: 'usuario',
   rol_nombre: 'Usuario',
+  imagen_url: null,
+  imagen_public_id: null
 })
 
 // Toast notification
@@ -1340,6 +1445,158 @@ const cargarDatosPerfil = async () => {
     isLoading.value = false
   }
 }
+
+// ===== FUNCIONES DE MANEJO DE IMÁGENES =====
+const onFileChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // Validar tipo de archivo
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!validTypes.includes(file.type)) {
+    showError('Error', 'Formato de archivo no válido. Solo se permiten imágenes JPG, PNG o WebP.')
+    return
+  }
+
+  // Validar tamaño (máximo 5MB)
+  const maxSize = 5 * 1024 * 1024 // 5MB
+  if (file.size > maxSize) {
+    showError('Error', 'La imagen es demasiado grande. El tamaño máximo permitido es 5MB.')
+    return
+  }
+
+  uploadProfileImage(file)
+}
+
+const uploadProfileImage = async (file) => {
+  const formData = new FormData()
+  formData.append('imagen', file)
+  
+  // Verificar que el ID de usuario existe
+  if (!user.value || !user.value.id_usuario) {
+    console.error('ID de usuario no encontrado')
+    showError('Error', 'No se pudo identificar tu cuenta. Por favor, recarga la página e intenta de nuevo.')
+    return
+  }
+  
+  const url = `/usuarios/imagen-perfil/${user.value.id_usuario}`
+  const fullUrl = `${config.public.apiBase}${url}`
+  
+  console.log('Enviando solicitud a:', fullUrl)
+  console.log('Método: POST')
+  console.log('Headers:', {
+    'Accept': 'application/json',
+    'Authorization': `Bearer ${auth.token?.substring(0, 10)}...` // Mostrar solo parte del token por seguridad
+  })
+  console.log('Body (FormData):', {
+    hasImage: file ? 'Sí' : 'No',
+    fileName: file?.name,
+    fileType: file?.type,
+    fileSize: file?.size
+  })
+
+  try {
+    isUploading.value = true
+    
+    const response = await $api(url, {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: formData
+    })
+    
+    if (response.success) {
+      // Actualizar la URL de la imagen en el estado del usuario
+      user.value.imagen_url = response.data.imagen_url
+      user.value.imagen_public_id = response.data.imagen_public_id
+      
+      showSuccess('¡Éxito!', 'Imagen de perfil actualizada correctamente')
+    } else {
+      console.error('Error en la respuesta del servidor:', response)
+      showError('Error', response.message || 'No se pudo actualizar la imagen de perfil')
+    }
+  } catch (error) {
+    console.error('Error al subir la imagen:', {
+      message: error.message,
+      response: error.response,
+      request: error.request,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers ? {
+          ...error.config.headers,
+          Authorization: error.config.headers.Authorization ? 'Bearer [TOKEN]' : undefined
+        } : undefined
+      }
+    })
+    showError('Error', 'No se pudo subir la imagen. Por favor, verifica tu conexión e inténtalo de nuevo.')
+  } finally {
+    isUploading.value = false
+    // Limpiar el input de archivo
+    if (fileInput.value) {
+      fileInput.value.value = ''
+    }
+  }
+}
+
+const deleteProfileImage = async () => { 
+
+  // Verificar que el ID de usuario existe
+  if (!user.value || !user.value.id_usuario) {
+    console.error('ID de usuario no encontrado')
+    showError('Error', 'No se pudo identificar tu cuenta. Por favor, recarga la página e intenta de nuevo.')
+    return
+  } 
+
+  const url = `/usuarios/imagen-perfil/${user.value.id_usuario}` 
+
+  try {
+    isUploading.value = true
+    
+    const response = await $api(url, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    }) 
+
+    if (response.success) {
+      // Eliminar la referencia a la imagen en el estado del usuario
+      user.value.imagen_url = null
+      user.value.imagen_public_id = null
+      
+      showSuccess('¡Éxito!', 'Imagen de perfil eliminada correctamente')
+    } else {
+      console.error('Error en la respuesta del servidor (DELETE):', response)
+      showError('Error', response.message || 'No se pudo eliminar la imagen de perfil')
+    }
+  } catch (error) {
+    console.error('Error al eliminar la imagen:', {
+      message: error.message,
+      response: error.response,
+      request: error.request,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers ? {
+          ...error.config.headers,
+          Authorization: error.config.headers.Authorization ? 'Bearer [TOKEN]' : undefined
+        } : undefined
+      }
+    })
+    showError('Error', 'No se pudo eliminar la imagen. Por favor, verifica tu conexión e inténtalo de nuevo.')
+  } finally {
+    isUploading.value = false
+  }
+}
+
+// Referencia al input de archivo
+const fileInput = ref(null)
 
 // ===== FUNCIONES DE ACCIONES =====
 const saveProfile = async () => {
@@ -1810,5 +2067,25 @@ button:hover {
 .dark .multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
     background-color: #4b5563;
     color: #f9fafb;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 </style>
