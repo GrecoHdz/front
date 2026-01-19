@@ -5128,6 +5128,13 @@ const approvePayment = async (id) => {
     // El toast de advertencia ya se mostró dentro de crearFacturaParaPago
     if (billingStatus !== 'error_config') {
       showToast('Pago aprobado correctamente', 'success');
+      
+      // Redirigir a ServiciosAdmin.vue si es un pago de visita
+      if (activeTab.value === 'visits') {
+        setTimeout(() => {
+          navigateTo('/admin/ServiciosAdmin');
+        }, 1500);
+      }
     }
 
     // Notificar al cliente sobre el pago aprobado

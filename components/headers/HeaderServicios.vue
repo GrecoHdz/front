@@ -17,6 +17,7 @@
       
       <div class="relative px-4 py-3">
         <div class="flex items-center justify-between">
+          <!-- Sección izquierda: Título y contador -->
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
               <div class="w-5 h-5 bg-white rounded-lg flex items-center justify-center">
@@ -27,20 +28,22 @@
               <h1 class="text-lg font-black text-white">Mis Servicios</h1>
               <p class="text-blue-100 text-xs">{{ totalServices }} servicios solicitados</p>
             </div>
-          </div> 
-
-           <!-- Componente de notificaciones -->
+          </div>
+          
+          <!-- Sección derecha: Botones de notificaciones y filtros -->
+          <div class="flex items-center space-x-2">
+            <!-- Componente de notificaciones -->
             <NotificationsDropdown 
               @notification-click="onNotificationClick"
             />
-
             <!-- Botón de filtros -->
             <button @click="toggleFilters" 
                     class="p-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-lg hover:bg-white/30 transition-all duration-300">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"/>
               </svg>
-            </button> 
+            </button>
+          </div>
         </div>
       </div>
     </header>

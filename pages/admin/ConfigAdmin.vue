@@ -2552,6 +2552,12 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { debounce } from 'lodash';
+
+// Función para validar formato de correo electrónico
+const isValidEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(String(email).toLowerCase());
+}
 import { useAuthStore } from '~/middleware/auth.store'
 import { useHead, useCookie, useRuntimeConfig } from '#imports';
 import { useRouter, useRoute } from 'vue-router'
@@ -4047,121 +4053,154 @@ const cambiarPaginaCorrelativos = (nuevaPagina, event) => {
 const guardarConfiguraciones = async () => {
   try {
     isSaving.value = true
+    console.log('=== INICIO DEL PROCESO DE GUARDADO ===')
     
     // Detectar cambios y preparar datos para enviar
     const cambios = []
     
-    if (configuracionMembresia.value !== valoresOriginales.value.membresia) {
+    // Función auxiliar para comparar valores
+    const hasChanged = (current, original, isNumber = true) => {
+      if (isNumber) {
+        return Number(current || 0) !== Number(original || 0);
+      }
+      return String(current || '').trim() !== String(original || '').trim();
+    };
+
+    // Membresía (número)
+    if (hasChanged(configuracionMembresia.value, valoresOriginales.value.membresia, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'membresia')?.id_config,
         tipo_config: 'membresia',
-        valor: configuracionMembresia.value
+        valor: Number(configuracionMembresia.value) || 0
       })
     }
     
-    if (configuracionVisita.value !== valoresOriginales.value.visita_tecnico) {
+    // Visita técnica (número)
+    if (hasChanged(configuracionVisita.value, valoresOriginales.value.visita_tecnico, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'visita_tecnico')?.id_config,
         tipo_config: 'visita_tecnico',
-        valor: configuracionVisita.value
+        valor: Number(configuracionVisita.value) || 0
       })
     }
     
-    if (configuracionComision.value !== valoresOriginales.value.comision_por_servicio) {
+    // Comisión por servicio (número)
+    if (hasChanged(configuracionComision.value, valoresOriginales.value.comision_por_servicio, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'comision_por_servicio')?.id_config,
         tipo_config: 'comision_por_servicio',
-        valor: configuracionComision.value
+        valor: Number(configuracionComision.value) || 0
       })
     }
     
-    if (configuracionTelefono.value !== valoresOriginales.value.numero_empresa) {
+    // Teléfono (texto)
+    if (hasChanged(configuracionTelefono.value, valoresOriginales.value.numero_empresa, false)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'numero_empresa')?.id_config,
         tipo_config: 'numero_empresa',
-        valor: configuracionTelefono.value
+        valor: String(configuracionTelefono.value || '').trim()
       })
     }
     
-    if (configuracionDiasGracia.value !== valoresOriginales.value.reset_credito) {
+    // Días de gracia (número)
+    if (hasChanged(configuracionDiasGracia.value, valoresOriginales.value.reset_credito, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'reset_credito')?.id_config || null,
         tipo_config: 'reset_credito',
-        valor: configuracionDiasGracia.value
+        valor: Number(configuracionDiasGracia.value) || 14
       })
     }
     
-    if (configuracionEmail.value !== valoresOriginales.value.correo_empresa) {
+    // Email (texto con validación especial)
+    const emailValue = String(configuracionEmail.value || '').trim();
+    if (hasChanged(emailValue, valoresOriginales.value.correo_empresa, false)) {
+      if (emailValue && !isValidEmail(emailValue)) {
+        throw new Error('El formato del correo electrónico no es válido');
+      }
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'correo_empresa')?.id_config,
         tipo_config: 'correo_empresa',
-        valor: configuracionEmail.value
+        valor: emailValue
       })
     }
     
-    if (configuracionRTN.value !== valoresOriginales.value.rtn) {
+    // RTN (texto)
+    if (hasChanged(configuracionRTN.value, valoresOriginales.value.rtn, false)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'rtn')?.id_config,
         tipo_config: 'rtn',
-        valor: configuracionRTN.value
+        valor: String(configuracionRTN.value || '').trim()
       })
     }
     
-    if (configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento) {
+    // Porcentaje de descuento (número)
+    if (hasChanged(configuracionDescuento.value, valoresOriginales.value.porcentaje_descuento, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_descuento')?.id_config,
         tipo_config: 'porcentaje_descuento',
-        valor: configuracionDescuento.value
+        valor: Number(configuracionDescuento.value) || 0
       })
     }
     
-    if (configuracionDescuentoEspecial.value !== (valoresOriginales.value.porcentaje_descuento_especial || 0)) {
+    // Descuento especial (número)
+    if (hasChanged(configuracionDescuentoEspecial.value, valoresOriginales.value.porcentaje_descuento_especial, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_descuento_especial')?.id_config,
         tipo_config: 'porcentaje_descuento_especial',
-        valor: configuracionDescuentoEspecial.value
+        valor: Number(configuracionDescuentoEspecial.value) || 0
       })
     }
     
-    if (configuracionReferido.value !== valoresOriginales.value.porcentaje_referido) {
+    // Porcentaje referido (número)
+    if (hasChanged(configuracionReferido.value, valoresOriginales.value.porcentaje_referido, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_referido')?.id_config,
         tipo_config: 'porcentaje_referido',
-        valor: configuracionReferido.value
+        valor: Number(configuracionReferido.value) || 0
       })
     }
     
-    if (configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro) {
+    // Porcentaje retiro (número)
+    if (hasChanged(configuracionRetiro.value, valoresOriginales.value.porcentaje_retiro, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_retiro')?.id_config,
         tipo_config: 'porcentaje_retiro',
-        valor: configuracionRetiro.value
+        valor: Number(configuracionRetiro.value) || 0
       })
     }
 
-    if (configuracionRetiroMinimo.value !== valoresOriginales.value.retiro_minimo) {
+    // Retiro mínimo (número)
+    if (hasChanged(configuracionRetiroMinimo.value, valoresOriginales.value.retiro_minimo, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'retiro_minimo')?.id_config,
         tipo_config: 'retiro_minimo',
-        valor: configuracionRetiroMinimo.value
+        valor: Number(configuracionRetiroMinimo.value) || 0
       })
     }
 
     if (cambios.length === 0) {
+      console.log('No hay cambios para guardar')
       showToastMessage('No hay cambios para guardar', 'info')
       return
     }
+
+    console.log('=== CAMBIOS A GUARDAR ===', JSON.stringify(cambios, null, 2))
 
     // Hacer peticiones individuales para cada cambio
     const promesas = cambios.map(async (cambio) => {
       const payload = {
         tipo_config: cambio.tipo_config,
         valor: cambio.valor
-      }
+      };
       
       // Si el cambio tiene un ID, es una actualización (PUT), de lo contrario es nuevo (POST)
-      const url = cambio.id ? `/config/${cambio.id}` : '/config/crear'
-      const method = cambio.id ? 'PUT' : 'POST'
+      const url = cambio.id ? `/config/${cambio.id}` : '/config/crear';
+      const method = cambio.id ? 'PUT' : 'POST';
+      const fullUrl = `${config.public.apiBase}${url}`;
+      
+      console.log(`\n=== SOLICITUD ${method} ===`);
+      console.log('URL:', fullUrl);
+      console.log('Payload:', JSON.stringify(payload, null, 2));
       
       try {
         const response = await $api(url, {
@@ -4172,34 +4211,52 @@ const guardarConfiguraciones = async () => {
             'Authorization': `Bearer ${auth.token}`,
             'Content-Type': 'application/json'
           },
-          body: payload
-        })
-        return response
+          body: JSON.stringify(payload)
+        });
+        
+        console.log(`✅ Respuesta exitosa (${method}):`, response);
+        return response;
       } catch (error) {
-        console.error(`Error al ${method === 'PUT' ? 'actualizar' : 'crear'} configuración ${cambio.tipo_config}:`, error)
-        throw error // Propagar el error para manejarlo en el bloque catch externo
+        console.error(`❌ Error en ${method} ${url}:`, {
+          message: error.message,
+          status: error.status || error.response?.status,
+          response: error.response?.data || 'No hay respuesta del servidor',
+          stack: error.stack
+        });
+        
+        // Mejorar el mensaje de error para el usuario
+        let errorMessage = `Error al ${method === 'PUT' ? 'actualizar' : 'crear'} configuración ${cambio.tipo_config}`;
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+        
+        throw new Error(errorMessage);
       }
     })
 
-    await Promise.all(promesas)
+    const resultados = await Promise.all(promesas)
+    console.log('=== TODAS LAS PETICIONES COMPLETADAS ===', resultados)
     
     // Actualizar valores originales después de guardar exitosamente
     await cargarConfiguraciones()
-    
     showToastMessage('Configuraciones guardadas exitosamente', 'success')
     
   } catch (error) {
-    console.error('Error al guardar configuraciones:', error)
-    showToastMessage('Error al guardar las configuraciones', 'error')
+    console.error('=== ERROR GENERAL AL GUARDAR CONFIGURACIONES ===', {
+      message: error.message,
+      status: error.status,
+      response: error.response?.data || 'No hay respuesta del servidor',
+      stack: error.stack
+    })
+    const errorMessage = error.response?.data?.message || error.message || 'Error al guardar las configuraciones'
+    showToastMessage(errorMessage, 'error')
   } finally {
     isSaving.value = false
   }
 }
 
 const cargarConfiguraciones = async () => {
-  isLoading.value = true;
-  try { 
-    
+  try {
     const response = await $api('/config', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -4210,24 +4267,9 @@ const cargarConfiguraciones = async () => {
     });
 
     if (Array.isArray(response)) {
-      configuraciones.value = response
+      configuraciones.value = response;
       
       // Mapeo directo de la respuesta de la API a las variables
-      const configMapeo = {
-        membresia: 'membresia',
-        visita_tecnico: 'visita_tecnico',
-        comision_por_servicio: 'comision_por_servicio',
-        comision_por_paquete: 'comision_por_paquete',
-        numero_empresa: 'numero_empresa',
-        correo_empresa: 'correo_empresa',
-        porcentaje_descuento: 'porcentaje_descuento',
-        porcentaje_descuento_especial: 'porcentaje_descuento_especial',
-        porcentaje_referido: 'porcentaje_referido',
-        porcentaje_retiro: 'porcentaje_retiro',
-        retiro_minimo: 'retiro_minimo',
-        reset_credito: 'reset_credito'
-      }
-      
       response.forEach(item => {
         switch(item.tipo_config) {
           case 'membresia':
@@ -4241,15 +4283,15 @@ const cargarConfiguraciones = async () => {
             break;
           case 'comision_por_paquete':
             configuracionComisionPaquete.value = Number(item.valor) || 0;
-            break;
+            break;  
           case 'numero_empresa':
-            configuracionTelefono.value = item.valor?.toString() || '';
+            configuracionTelefono.value = String(item.valor || '');
             break;
           case 'correo_empresa':
-            configuracionEmail.value = item.valor?.toString() || '';
+            configuracionEmail.value = String(item.valor || '');
             break;
           case 'rtn':
-            configuracionRTN.value = item.valor?.toString() || '';
+            configuracionRTN.value = String(item.valor || '');
             break;
           case 'porcentaje_descuento':
             configuracionDescuento.value = Number(item.valor) || 0;
@@ -4261,45 +4303,39 @@ const cargarConfiguraciones = async () => {
             configuracionReferido.value = Number(item.valor) || 0;
             break;
           case 'porcentaje_retiro':
-            configuracionRetiro.value = parseFloat(item.valor) || 0
+            configuracionRetiro.value = Number(item.valor) || 0;
             break;
           case 'retiro_minimo':
-            configuracionRetiroMinimo.value = parseFloat(item.valor) || 0
-            valoresOriginales.value.retiro_minimo = configuracionRetiroMinimo.value
+            configuracionRetiroMinimo.value = Number(item.valor) || 0;
             break;
           case 'reset_credito':
-            configuracionDiasGracia.value = parseInt(item.valor, 10) || 14
-            valoresOriginales.value.reset_credito = configuracionDiasGracia.value
+            configuracionDiasGracia.value = Number(item.valor) || 14;
             break;
         }
       });
-      
-      // Guardar valores originales para detectar cambios
+
+      // Guardar valores originales con los tipos correctos
       valoresOriginales.value = {
-        membresia: configuracionMembresia.value,
-        visita_tecnico: configuracionVisita.value,
-        comision_por_servicio: configuracionComision.value,
-        comision_por_paquete: configuracionComisionPaquete.value,
-        numero_empresa: configuracionTelefono.value,
-        correo_empresa: configuracionEmail.value,
-        rtn: configuracionRTN.value,
-        porcentaje_descuento: configuracionDescuento.value,
-        porcentaje_referido: configuracionReferido.value,
-        porcentaje_retiro: configuracionRetiro.value,
-        retiro_minimo: configuracionRetiroMinimo.value,
-        reset_credito: configuracionDiasGracia.value
-      } 
-    } else {
-      console.error('La respuesta de la API no es un array:', response);
-      showToastMessage('Error: Formato de respuesta inválido', 'error');
+        membresia: Number(configuracionMembresia.value) || 0,
+        visita_tecnico: Number(configuracionVisita.value) || 0,
+        comision_por_servicio: Number(configuracionComision.value) || 0,
+        comision_por_paquete: Number(configuracionComisionPaquete.value) || 0,
+        numero_empresa: String(configuracionTelefono.value || ''),
+        correo_empresa: String(configuracionEmail.value || ''),
+        rtn: String(configuracionRTN.value || ''),
+        porcentaje_descuento: Number(configuracionDescuento.value) || 0,
+        porcentaje_descuento_especial: Number(configuracionDescuentoEspecial.value) || 0,
+        porcentaje_referido: Number(configuracionReferido.value) || 0,
+        porcentaje_retiro: Number(configuracionRetiro.value) || 0,
+        retiro_minimo: Number(configuracionRetiroMinimo.value) || 0,
+        reset_credito: Number(configuracionDiasGracia.value) || 14
+      };
     }
   } catch (error) {
     console.error('Error al cargar configuraciones:', error);
-    showToastMessage('Error al cargar las configuraciones. Por favor, recarga la página.', 'error');
-  } finally {
-    isLoading.value = false;
+    showToastMessage('Error al cargar las configuraciones', 'error');
   }
-}
+};
 
 // ===== FUNCIONES PARA BENEFICIOS =====
 const cargarBeneficios = async () => {
