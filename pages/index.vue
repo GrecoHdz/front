@@ -139,7 +139,7 @@
               <h4 class="font-black text-lg">Todo desde tu celular</h4>
             </div>
             <p class="text-blue-100 leading-relaxed text-sm">
-              Solicitá cualquier servicio con solo <span class="font-bold text-yellow-300">3 clics</span>. 
+              Solicita cualquier servicio con solo <span class="font-bold text-yellow-300">un par de clics</span>. 
               Recibes confirmación, técnico asignado y seguimiento en tiempo real.
             </p>
           </div>
@@ -151,8 +151,7 @@
         <div class="text-center mb-4">
           <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
             ¿Qué servicios cubrimos?
-          </h3>
-          <div class="text-3xl mb-3">🛠️</div>
+          </h3> 
         </div>
         <div class="grid grid-cols-1 gap-3">
           <div v-for="service in services" :key="service.id"
@@ -208,8 +207,7 @@
         <div class="text-center mb-4">
           <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
             ¿Cómo funciona?
-          </h3>
-          <div class="text-3xl">🚀</div>
+          </h3> 
         </div>
         <div class="space-y-3">
           <div v-for="(step, index) in howItWorks" :key="step.id"
@@ -318,9 +316,9 @@
   class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center"
 />
 
-<!-- Modal de Login/Registro -->
-<div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto relative">
+    <!-- Modal de Login/Registro -->
+    <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto overflow-x-hidden relative">
         <button 
           @click="showLoginModal = false" 
           class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 z-10"
@@ -377,7 +375,7 @@
 
             <div v-if="!isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Teléfono
+                Teléfono (Incluye código de país)
               </label>
               <input 
                 v-model="form.telefono"
@@ -486,16 +484,24 @@
                 type="checkbox" 
                 id="registerAsTechnician" 
                 v-model="registerAsTechnician"
-                class="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 focus:ring-2"
+                class="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-0 focus:ring-offset-0 focus:outline-none"
               >
               <label for="registerAsTechnician" class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Unirme como Técnico
               </label>
             </div>
 
+            
+
             <button 
               type="submit"
-              class="w-full py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded hover:shadow transition"
+              :disabled="!isFormValid"
+              :class="[
+                'w-full py-1.5 font-black text-base rounded transition',
+                isFormValid 
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow cursor-pointer'
+                  : 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+              ]"
             >
               {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
             </button>
@@ -885,18 +891,79 @@ const showLoginModal = ref(false)
 const showSuccess = ref(false)
 const isLogin = ref(true)
 const isLoading = ref(true) // Iniciar en true para mostrar el spinner mientras se verifica la autenticación
-const isCheckingAuth = ref(true) // Nuevo estado para controlar la verificación de autenticación
-const authStatus = ref('') // '', 'success', 'error'
+const isCheckingAuth = ref(true) // Estado para controlar la verificación de autenticación
+const isFileDialogOpen = ref(false) // Estado para controlar cuando se abre el selector de archivos
+const authStatus = ref('') // Estado para manejo de errores
 const formErrors = ref({})
+
+// Referencias para la imagen de perfil
+const profileImage = ref(null)
+const profileImagePreview = ref('')
+const fileInput = ref(null)
 const registerAsTechnician = ref(false)
 const showPassword = ref(false)
 
-// Validation functions
+
+// Abrir el selector de archivos
+const openFileDialog = () => {
+  isFileDialogOpen.value = true;
+  
+  // Usar setTimeout para asegurarnos de que el input se haya renderizado
+  nextTick(() => {
+    if (fileInput.value) {
+      fileInput.value.click();
+    }
+    
+    // Restablecer el estado después de un tiempo razonable
+    setTimeout(() => {
+      isFileDialogOpen.value = false;
+    }, 2000);
+  });
+};
+
+// Manejar la carga de la imagen
+const handleImageUpload = (event) => {
+  isFileDialogOpen.value = false; // Ocultar el indicador de carga
+  const file = event.target.files[0]
+  
+  if (!file) return
+  
+  // Validar tipo de archivo
+  const validTypes = ['image/jpeg', 'image/png', 'image/jpg']
+  if (!validTypes.includes(file.type)) {
+    formErrors.value.profileImage = 'Formato de archivo no válido. Solo se aceptan JPG y PNG.'
+    return
+  }
+  
+  // Validar tamaño (10MB máximo)
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    formErrors.value.profileImage = 'La imagen es demasiado grande. El tamaño máximo es de 10MB.'
+    return
+  }
+  
+  // Actualizar la referencia de la imagen
+  profileImage.value = file
+  
+  // Crear vista previa
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    profileImagePreview.value = e.target.result
+    form.value.profileImage = e.target.result // Guardar como base64
+  }
+  reader.readAsDataURL(file)
+  
+  // Limpiar mensajes de error
+  formErrors.value.profileImage = ''
+}
+
+// Validación del formulario
 const validateForm = () => {
   const errors = {}
   
+  // Solo validar estos campos si es registro
   if (!isLogin.value) {
-    // Validar nombre completo (mínimo 2 palabras)
+    // Validar nombre (mínimo 2 palabras)
     if (!form.value.nombre || form.value.nombre.trim().split(' ').filter(Boolean).length < 2) {
       errors.nombre = 'Por favor ingresa tu nombre completo (mínimo 2 palabras)'
     }
@@ -911,7 +978,7 @@ const validateForm = () => {
     const identidadRegex = /^\d{13,15}$/
     if (!form.value.identidad || !identidadRegex.test(form.value.identidad)) {
       errors.identidad = 'El número de identidad debe tener entre 13 y 15 dígitos'
-    }
+    } 
   }
   
   // Validar contraseña (mínimo 6 caracteres)
@@ -1063,6 +1130,7 @@ onMounted(async () => {
   }
 })
 
+// Estado para el formulario
 const form = ref({
   nombre: '',
   email: '',
@@ -1070,7 +1138,8 @@ const form = ref({
   identidad: '',
   password: '',
   confirmPassword: '',
-  ciudad: null
+  ciudad: null,
+  profileImage: null
 }) 
 
 // Problems data
@@ -1237,16 +1306,7 @@ const loadServices = async () => {
       icon: getServiceIcon(service.nombre)
     }))
   } catch (error) {
-    console.error('Error al cargar los servicios:', error)
-    // Valores por defecto en caso de error
-    services.value = [
-      { id: 1, name: 'Fontanería', description: 'fugas, grifos, tuberías', icon: '🔧' },
-      { id: 2, name: 'Electricidad', description: 'instalación y reparación', icon: '💡' },
-      { id: 3, name: 'Cámaras', description: 'instalación y mantenimiento', icon: '🎥' },
-      { id: 4, name: 'Aires A/C', description: 'limpieza y reparación', icon: '❄️' },
-      { id: 5, name: 'Electrodomésticos', description: 'reparación y mantenimiento', icon: '🧊' },
-      { id: 6, name: 'Pintura', description: 'interiores y exteriores', icon: '🎨' }
-    ]
+    console.error('Error al cargar los servicios:', error) 
   } finally {
     isLoadingServices.value = false
   }
@@ -1279,7 +1339,7 @@ const getServiceIcon = (serviceName) => {
 // How it works data
 const howItWorks = [
   { id: 1, title: 'Regístrate en la plataforma (gratis)', description: 'Crea tu cuenta sin costo alguno' },
-  { id: 2, title: 'Elege si deseas pagar la membresía mensual', description: 'Decide si quieres los beneficios de membresía' },
+  { id: 2, title: 'Elige si deseas pagar la membresía mensual', description: 'Decide si quieres los beneficios de membresía' },
   { id: 3, title: 'Accede a todos los beneficios desde el primer día', description: 'Disfruta inmediatamente de las ventajas' },
   { id: 4, title: 'Solicita servicios cuando los necesites', description: 'Pide ayuda cuando tu hogar lo requiera' },
   { id: 5, title: 'Acumula crédito mes a mes si no lo usás', description: 'Tu dinero se convierte en ahorro real' }
@@ -1464,141 +1524,142 @@ const handleAuth = async () => {
       }
     } else {
       // Lógica de registro
-      try {
+      try { 
         const registerData = {
           nombre: form.value.nombre,
           email: form.value.email,
           telefono: form.value.telefono,
           identidad: form.value.identidad,
-          password_hash: form.value.password,
+          password_hash: form.value.password, // Cambiado a password_hash para coincidir con el backend
           id_ciudad: form.value.ciudad?.id,
           es_tecnico: registerAsTechnician.value ? 1 : 0
-        }; 
+        };  
         
-        // Realizar la petición de registro directamente en el componente
-        const response = await fetch(`${apiBase}/usuarios`, {
+        // Realizar la petición de registro
+        
+        // Usar fetch directamente para tener más control sobre la respuesta
+        const response = await fetch(`${config.public.apiBase}/usuarios/nuevo`, {
           method: 'POST',
           headers: {
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(registerData)
         });
         
-        const data = await response.json(); 
+        // Obtener la respuesta como texto primero para depuración
+        const responseText = await response.text();
         
+        // Intentar parsear la respuesta como JSON
+        let responseData;
+        try {
+          responseData = responseText ? JSON.parse(responseText) : {};
+        } catch (e) {
+          throw new Error('Error al procesar la respuesta del servidor');
+        }
+        
+        // Verificar si hay un error en la respuesta
         if (!response.ok) {
+          const errorMessage = responseData.message || 'Error en el registro';
+          console.error('Error en la respuesta:', response.status, errorMessage);
+          
           // Crear un objeto de error con toda la información disponible
-          const error = new Error(data.message || 'Error en el registro');
+          const error = new Error(errorMessage);
           error.response = response;
-          error.data = data;
+          error.data = responseData;
           error.statusCode = response.status;
           
           // Incluir el mensaje SQL si está disponible
-          if (data.sqlMessage) {
-            error.message = data.sqlMessage;
+          if (responseData.sqlMessage) {
+            error.message = responseData.sqlMessage;
           }
           
           // Si hay un campo específico con error, resaltarlo en el formulario
-          if (data.field) {
-            formErrors.value[data.field] = error.message;
+          if (responseData.field) {
+            formErrors.value[responseData.field] = error.message;
           }
           
           throw error;
         }
         
-        // Verificar si hay un código de referido en la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        let referralCode = urlParams.get('ref');
-        
-        // Si no hay código de referido, usar el ID 36 (usuario por defecto)
-        if (!referralCode) {
-          referralCode = '36'; 
-        }
-        
-        try {
-          // Intentar obtener el ID del usuario de diferentes campos posibles en la respuesta
-          const userId = data.id_usuario || data.id || data.userId || data.user_id;
-          
-          if (!userId) {
-            console.error('No se pudo obtener el ID del usuario de la respuesta:', data);
-            throw new Error('No se pudo obtener el ID del usuario');
-          }
-          
-          const referralData = {
-            id_referidor: referralCode,
-            id_referido_usuario: userId
-          }; 
-          
-          const referralResponse = await fetch(`${apiBase}/referidos`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(referralData)
-          });
-          
-          const responseData = await referralResponse.json();
-          
-          if (referralResponse.ok) {
-            // Enviar notificación de nuevo referido
-            try {
-              await $api('/notificaciones/enviar', {
-                baseURL: config.public.apiBase,
-                method: 'POST',
-                headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  titulo: 'Nuevo referido',
-                  id_usuario: referralCode
-                })
-              });
-            } catch (error) {
-              console.error('Error al enviar notificación de referido:', error);
-            }
-          } else {
-            console.warn('No se pudo registrar el referido:', responseData);
-          }
-        } catch (error) {
-          console.error('Error al registrar referido:', {
-            error: error.message,
-            stack: error.stack
-          });
+        // Obtener el ID del usuario de la respuesta
+        const userId = responseData.id_usuario || responseData.id;
+        if (!userId) {
+          throw new Error('No se pudo obtener el ID del usuario del registro');
         }
         
         // Mostrar mensaje de éxito
-        showToast('¡Registro exitoso! Ya puedes iniciar sesión.', 'success');
-        
-        // Enviar notificación a administradores
-        try {
-          await $api('/notificaciones/enviar', {
-            baseURL: config.public.apiBase,
-            method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              titulo: 'Nuevo registro',
-              nombre_rol: 'admin'
-            })
-          })
-          await $api('/notificaciones/enviar', {
-            baseURL: config.public.apiBase,
-            method: 'POST',
-            headers: { 
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              titulo: 'Nuevo registro',
-              nombre_rol: 'sa'
-            })
-          });
-        } catch (error) {
-          console.error('Error al enviar notificación:', error);
+        if (registerAsTechnician.value) {
+          showToast('¡Solicitud de técnico enviada! Tu perfil está en revisión. Te notificaremos cuando sea aprobado.', 'success');
+          // Guardar los datos del formulario antes de limpiarlos
+          const formData = { ...form.value };
+          
+          // Enviar mensaje de WhatsApp con los datos del formulario
+          setTimeout(() => {
+            const nombreTecnico = formData.nombre || 'Nuevo Técnico';
+            sendTechnicianRegistrationMessage(nombreTecnico, formData);
+            
+            // Cerrar el modal después de 2 segundos
+            setTimeout(() => {
+              // Limpiar el formulario
+              form.value = {
+                nombre: '',
+                email: '',
+                telefono: '',
+                ciudad: null,
+                identidad: '',
+                password: ''
+              };
+              registerAsTechnician.value = false;
+              isLoading.value = false;
+              showLoginModal.value = false;
+            }, 2000);
+          }, 0); // Tiempo 0 para ejecutar de forma asíncrona
+          
         }
+        
+        // Manejar referido después del registro exitoso
+        try {
+          await handleReferral(userId);
+        } catch (error) {
+          // No interrumpir el flujo por errores en el referido
+        }
+        
+        // Enviar notificaciones a administradores en segundo plano
+        const sendAdminNotifications = async () => {
+          try {
+            // Notificación para administradores
+            await fetch(`${config.public.apiBase}/notificaciones/enviar`, {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                titulo: 'Nuevo registro',
+                nombre_rol: 'admin'
+              })
+            });
+            
+            // Notificación para super administradores
+            await fetch(`${config.public.apiBase}/notificaciones/enviar`, {
+              method: 'POST',
+              headers: { 
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                titulo: 'Nuevo registro',
+                nombre_rol: 'sa'
+              })
+            });
+          } catch (error) {
+            // No interrumpir el flujo por errores en las notificaciones
+          }
+        };
+        
+        // Ejecutar notificaciones en segundo plano
+        sendAdminNotifications();
         
         // Cambiar a pestaña de login
         isLogin.value = true;
@@ -1612,40 +1673,34 @@ const handleAuth = async () => {
           email: '',
           telefono: '',
           identidad: '',
-          password: ''
+          password: '',
+          ciudad: null
         };
+        
+        // Limpiar la imagen de perfil
+        profileImage.value = null;
+        profileImagePreview.value = '';
+        registerAsTechnician.value = false;
         
         // Desactivar loading solo para registro exitoso
         setTimeout(() => {
           isLoading.value = false;
           authStatus.value = '';
         }, 1500);
-      } catch (error) { 
+      } catch (error) {
+        
         // Si hay una respuesta del servidor, extraer el mensaje de error
         if (error.response?.data) {
           const responseData = error.response.data;
-          
-          // Usar el mensaje del backend si está disponible
-          const errorMessage = responseData.message || 
-                             'Error en el registro. Por favor, inténtalo de nuevo.';
+          const errorMessage = responseData.message || 'Error en el registro. Por favor, inténtalo de nuevo.';
           
           // Si hay un campo específico con error, resaltarlo
           if (responseData.field) {
             formErrors.value[responseData.field] = errorMessage;
           }
           
-          // Si hay errores de validación, mostrarlos en los campos correspondientes
-          if (responseData.validationErrors) {
-            responseData.validationErrors.forEach(err => {
-              if (err.field) {
-                formErrors.value[err.field] = err.message;
-              }
-            });
-          }
-          
           // Mostrar el mensaje de error al usuario
           showToast(errorMessage, 'error');
-          
         } else if (error.message) {
           // Si no hay respuesta del servidor pero hay un mensaje de error
           showToast(error.message, 'error');
@@ -1660,13 +1715,10 @@ const handleAuth = async () => {
       }
     }
   } catch (error) {
-    // Capturar cualquier error no manejado
-    console.error('Error en handleAuth:', error);
+    showToast('Error inesperado. Por favor, inténtalo de nuevo.', 'error');
     isLoading.value = false;
     authStatus.value = '';
-    showToast('Error inesperado. Por favor, inténtalo de nuevo.', 'error');
   }
-  // NO hay finally que desactive isLoading para el caso de login exitoso
 }
 
 // Estado para el modal de recuperación de contraseña
@@ -1770,16 +1822,59 @@ const handlePhoneInput = (e) => {
   // Obtener el valor actual
   let value = e.target.value;
   
+  // Si se está pegando un valor, permitir la operación completa
+  if (e.inputType === 'insertFromPaste') {
+    form.telefono = value;
+    validatePhoneNumber(value);
+    return;
+  }
+  
   // Filtrar solo caracteres permitidos y limpiar espacios múltiples
   value = value
     .replace(/[^0-9+\s-]/g, '')
     .replace(/\s{2,}/g, ' ');
   
+  // Limitar la longitud total
+  if (value.length > 20) {
+    value = value.substring(0, 20);
+  }
+  
   // Actualizar el valor del campo
   form.telefono = value;
   
-  // Limpiar errores
+  // Validar el número de teléfono
+  validatePhoneNumber(value);
+};
+
+// Validar el formato del número de teléfono
+const validatePhoneNumber = (phoneNumber) => {
+  // Eliminar espacios en blanco para la validación
+  const cleanNumber = phoneNumber.replace(/\s+/g, '');
+  
+  // Validar que comience con + seguido de 1-4 dígitos (código de país)
+  const countryCodeRegex = /^\+[0-9]{1,4}/;
+  
+  // Validar que el número completo tenga entre 8 y 15 dígitos (incluyendo el código de país)
+  const minLength = 8;
+  const maxLength = 15;
+  const digitCount = cleanNumber.replace(/[^0-9]/g, '').length;
+  
+  // Limpiar errores previos
   formErrors.telefono = '';
+  
+  // Validaciones
+  if (!cleanNumber.startsWith('+')) {
+    formErrors.telefono = 'El número debe comenzar con el código de país (ej: +504)';
+  } else if (!countryCodeRegex.test(cleanNumber)) {
+    formErrors.telefono = 'El código de país debe tener entre 1 y 4 dígitos después del +';
+  } else if (digitCount < minLength) {
+    formErrors.telefono = `El número es demasiado corto. Mínimo ${minLength} dígitos incluyendo el código de país`;
+  } else if (digitCount > maxLength) {
+    formErrors.telefono = `El número es demasiado largo. Máximo ${maxLength} dígitos incluyendo el código de país`;
+  }
+  
+  // Devolver si el número es válido
+  return !formErrors.telefono;
 };
 
 // Manejar pegado en el campo de teléfono
@@ -1799,6 +1894,128 @@ const handlePhonePaste = (e) => {
   // Prevenir el comportamiento por defecto
   e.preventDefault();
 }
+
+// Función para manejar el referido y notificaciones de forma asíncrona
+const handleReferral = async (userId) => {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    let referralCode = urlParams.get('ref');
+    
+    // Si no hay código de referido, usar el ID 36 (usuario por defecto)
+    if (!referralCode) {
+      referralCode = '36'; 
+    }
+    
+    if (!userId) {
+      console.error('No se pudo obtener el ID del usuario');
+      return; // Salir silenciosamente si no hay userId
+    }
+    
+    const referralData = {
+      id_referidor: referralCode,
+      id_referido_usuario: userId
+    };
+    
+    // Registrar el referido
+    const response = await fetch(`${config.public.apiBase}/referidos/nuevo`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(referralData)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Error al registrar el referido');
+    }
+    
+    console.log('Referido registrado exitosamente');
+  } catch (error) {
+    console.error('Error en handleReferral:', error);
+    // No mostrar error al usuario para no interrumpir el flujo principal
+  }
+};
+
+// Función para enviar mensaje de WhatsApp al registrarse como técnico
+// Variable reactiva para almacenar el número de teléfono de la empresa
+const empresaPhoneNumber = ref('');
+
+// Función para obtener el número de teléfono de la empresa
+const fetchEmpresaPhoneNumber = async () => {
+  try {
+    const response = await $api('/config/valor/numero_empresa', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response && response.valor) {
+      empresaPhoneNumber.value = response.valor;
+    } else {
+      // Valor por defecto en caso de que no haya respuesta
+      empresaPhoneNumber.value = '1234567890';
+    }
+  } catch (error) {
+    console.error('Error al obtener el número de teléfono de la empresa:', error);
+    // Establecer un valor por defecto en caso de error
+    empresaPhoneNumber.value = '1234567890';
+  }
+};
+
+const sendTechnicianRegistrationMessage = async (nombre, formData = {}) => {
+  try { 
+
+    // Si no tenemos el número de teléfono, intentar obtenerlo
+    if (!empresaPhoneNumber.value) {
+      await fetchEmpresaPhoneNumber();
+    }
+
+    // Asegurarse de que tenemos los valores
+    const nombreUsuario = nombre?.trim() || formData?.nombre?.trim() || 'Usuario';
+    const identidadUsuario = formData?.identidad || 'No proporcionada';
+    
+    // Mantener el formato original del mensaje
+    const message = `Hola, mi nombre es ${nombreUsuario}\n` +
+      `*Identidad:* ${identidadUsuario}\n\n` +  
+      `Me registré como técnico en la plataforma y quiero continuar con mi validación.\n\n` +
+      `Me dedico a:\n` +
+      `(escribir aquí qué servicios u oficios ofrece)\n\n` +
+      `Tengo experiencia en:\n` +
+      `(escribir años de experiencia o tipo de trabajos que ha realizado)\n\n` +
+      `Adjunto a continuación:\n` +
+      `• Mis especialidades\n` +
+      `• Fotos de trabajos realizados\n` +
+      `• Certificados, diplomas o constancias (si cuento con ellos)\n` +
+      `• Cualquier otra información que respalde mi experiencia`; 
+    
+    // Codificar el mensaje para la URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Abrir WhatsApp Web con el mensaje predefinido
+    window.open(`https://wa.me/+504${empresaPhoneNumber.value}?text=${encodedMessage}`, '_blank');
+  } catch (error) {
+    console.error('Error al preparar el mensaje de WhatsApp:', error);
+  }
+};
+
+// Computed property para verificar si el formulario está completo
+const isFormValid = computed(() => {
+  if (isLogin.value) {
+    return form.value.identidad && form.value.password;
+  } else {
+    const basicFields = form.value.nombre && 
+                       form.value.email && 
+                       form.value.telefono && 
+                       form.value.ciudad && 
+                       form.value.identidad && 
+                       form.value.password; 
+    
+    return basicFields;
+  }
+});
 
 // Forzar modo oscuro
 onMounted(() => {

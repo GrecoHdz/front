@@ -92,8 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       return { success: false, error: response.message || 'Error en la autenticación' };
 
-    } catch (error: any) {
-      console.error('Error en login:', error);
+    } catch (error: any) { 
       clearAuthState();
       return { success: false, error: error.data?.message || error.message || 'Error en la autenticación' };
     }
@@ -108,7 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
         credentials: 'include'
       });
     } catch (err) {
-      console.error('Error al cerrar sesión:', err);
+      // No interrumpir el flujo por errores en el logout
     } finally {
       clearAuthState();
       navigateTo('/');
@@ -153,7 +152,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       return setUser(normalizedUser);
     } catch (err) {
-      console.error('Error al obtener usuario con /auth/me:', err);
       clearAuthState();
       return null;
     }
@@ -162,7 +160,6 @@ export const useAuthStore = defineStore('auth', () => {
   const checkAuth = async (): Promise<boolean> => {
     try {
       if (!token.value) {
-        console.warn('⚠️ [auth] No hay token, intentando refresh...');
         return await refreshToken();
       }
 
@@ -170,8 +167,7 @@ export const useAuthStore = defineStore('auth', () => {
       let tokenPayload: any;
       try {
         tokenPayload = JSON.parse(atob(token.value.split('.')[1]));
-      } catch {
-        console.warn('⚠️ [auth] Token inválido, intentando refresh...');
+      } catch { 
         return await refreshToken();
       }
 
@@ -189,15 +185,13 @@ export const useAuthStore = defineStore('auth', () => {
       // Obtener usuario actualizado
       const fetchedUser = await fetchUser();
 
-      if (!fetchedUser) {
-        console.warn('⚠️ [auth] No se pudo obtener usuario. Limpiando estado...');
+      if (!fetchedUser) { 
         clearAuthState();
         return false;
       }
 
       return true;
-    } catch (err) {
-      console.error('❌ [auth] Error en checkAuth:', err);
+    } catch (err) { 
       clearAuthState();
       return false;
     }
@@ -243,8 +237,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
 
         return false;
-      } catch (err) {
-        console.error('❌ [auth] Error al renovar token:', err);
+      } catch (err) { 
         clearAuthState();
         return false;
       } finally {
