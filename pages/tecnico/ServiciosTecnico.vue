@@ -227,9 +227,9 @@
                       <p class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ selectedService.customer?.name }}</p>
                       <p class="text-blue-600 dark:text-blue-400 text-xs sm:text-sm">{{ selectedService.customer?.phone }}</p>
                     </div>
-                    <button @click="callCustomer(selectedService.customer?.phone)" class="p-1.5 sm:p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                    <button @click="openWhatsApp(selectedService.customer?.phone)" class="p-1.5 sm:p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.967-.273-.1-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.075-.3-.15-1.263-.465-2.403-1.485-.888-.795-1.484-1.761-1.66-2.059-.173-.297-.018-.458.13-.606.136-.135.298-.345.446-.523.146-.181.194-.301.297-.496.1-.21.049-.375-.025-.524-.075-.15-.672-1.62-.922-2.206-.24-.584-.487-.51-.672-.517-.172-.008-.371-.011-.571-.011s-.524.074-.797.358c-.273.3-1.045 1.02-1.045 2.475s1.07 2.865 1.219 3.075c.149.195 2.109 3.195 5.1 4.485.714.3 1.27.48 1.703.629.714.227 1.365.195 1.88.121.574-.09 1.767-.721 2.016-1.426.255-.705.255-1.29.18-1.425-.074-.135-.27-.21-.57-.345m-5.446 7.443h-.016c-1.77 0-3.524-.48-5.055-1.38l-.36-.214-3.75.975 1.005-3.645-.239-.375a11.92 11.92 0 01-1.819-6.355C2.5 6.28 6.84 2 12.092 2h.016c3.06 0 5.926 1.17 8.07 3.316A11.37 11.37 0 0123.5 12.87a11.28 11.28 0 01-3.346 8.016 11.54 11.54 0 01-8.162 3.315"/>
                       </svg>
                     </button>
                   </div>
@@ -1603,14 +1603,32 @@ const cancelService = async () => {
 }
 
 const callCustomer = (phone) => {
-  if (phone && phone !== 'N/A') {
-    window.open(`tel:${phone}`, '_self')
-  } else {
-    showToast({
-      message: 'Número de teléfono no disponible',
-      type: 'error'
-    })
+  if (!phone) {
+    showToast('Número de teléfono no disponible', 'error')
+    return
   }
+  
+  // Eliminar cualquier carácter que no sea dígito
+  const cleanPhone = phone.replace(/\D/g, '')
+  
+  // Abrir el enlace de llamada
+  window.open(`tel:${cleanPhone}`, '_blank')
+}
+
+const openWhatsApp = (phone) => {
+  if (!phone) {
+    showToast('Número de teléfono no disponible', 'error')
+    return
+  }
+  
+  // Eliminar cualquier carácter que no sea dígito
+  const cleanPhone = phone.replace(/\D/g, '')
+  
+  // Verificar si el número ya tiene el código de país de Honduras (504)
+  const formattedPhone = cleanPhone.startsWith('504') ? cleanPhone : `504${cleanPhone}`
+  
+  // Abrir WhatsApp con el número
+  window.open(`https://wa.me/${formattedPhone}`, '_blank')
 }
 
 // ===== FUNCIONES DE CONFIGURACIÓN =====

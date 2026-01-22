@@ -3991,6 +3991,9 @@ const openPackageAssignment = async (pkg) => {
       fetchCities(),
       fetchTechnicians()
     ])
+    
+    // Asegurarse de que los datos estén actualizados
+    await fetchActivePackages(true)
   } catch (error) {
     console.error('Error al abrir el modal de asignación:', error)
     showError('No se pudo cargar la información de asignación')
@@ -4072,9 +4075,9 @@ const confirmPackageAssignment = async () => {
       });
       console.log('Paquete marcado como utilizado exitosamente');
 
-      // 3. Enviar notificación al cliente 
-      try { 
-        
+      // 3. Enviar notificaciones
+      try {
+        // Notificación al cliente
         await $api('/notificaciones/enviar', {
           baseURL: config.public.apiBase,
           method: 'POST',
@@ -4086,9 +4089,23 @@ const confirmPackageAssignment = async () => {
             titulo: 'Paquete Consumido',
             id_usuario: selectedPackage.value.id_usuario
           })
-        }); 
+        });
+
+        // Notificación al técnico
+        await $api('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${useCookie('token').value}`
+          },
+          body: JSON.stringify({
+            titulo: 'Pago de Paquete Recibido',
+            id_usuario: selectedPackageTechnician.value.id_usuario
+          })
+        });
       } catch (notifError) {
-        console.error('Error al enviar notificación de paquete consumido:', notifError);
+        console.error('Error al enviar notificaciones:', notifError);
       }
 
     } catch (error) {
@@ -4100,15 +4117,21 @@ const confirmPackageAssignment = async () => {
       throw error; // Relanzar el error para que lo capture el catch externo
     }
 
-    // Mostrar mensaje de éxito
-    showSuccess(`Se ha liquidado L.${montoTecnico.toFixed(2)} al técnico ${selectedPackageTechnician.value.nombre}`);
-    
-    // Cerrar modales
+    // Cerrar modales primero para mejor experiencia de usuario
     showPackageConfirmModal.value = false;
     showPackageAssignmentModal.value = false;
     
-    // Actualizar la lista de paquetes
-    await fetchActivePackages();
+    // Mostrar mensaje de éxito
+    showSuccess(`Se ha liquidado L.${montoTecnico.toFixed(2)} al técnico ${selectedPackageTechnician.value.nombre}`);
+    
+    // Forzar una recarga completa de los paquetes
+    await new Promise(resolve => setTimeout(resolve, 500)); // Pequeño retraso
+    await fetchActivePackages(true); // Forzar recarga completa
+    
+    // Si estamos en la pestaña de 'utilizado', forzar recarga de esa pestaña
+    if (activePackageTab.value === 'utilizado') {
+      await fetchActivePackages(true);
+    }
     
   } catch (error) {
     console.error('Error en la solicitud:', {

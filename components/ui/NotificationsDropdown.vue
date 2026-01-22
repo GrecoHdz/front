@@ -574,6 +574,12 @@ const navigateToProfile = () => {
 // ===== VERIFICACIÓN DE PERFIL DE TÉCNICO =====
 const verificarPerfilTecnico = async () => {
   try {
+    // Verificar si estamos en una ruta de técnico
+    const route = useRoute();
+    const isTecnicoRoute = route.path.startsWith('/tecnico/');
+    
+    if (!isTecnicoRoute) return;
+    
     // Obtener el ID del usuario autenticado
     const userId = auth.user?.id_usuario;
     if (!userId) return;

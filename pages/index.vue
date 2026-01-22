@@ -155,7 +155,8 @@
         </div>
         <div class="grid grid-cols-1 gap-3">
           <div v-for="service in services" :key="service.id"
-               class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+               @click="showLoginModal = true"
+               class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-300">
                 {{ service.icon }}

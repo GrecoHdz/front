@@ -3377,6 +3377,9 @@ if (response?.data?.id_pagovisita) {
     selectedAccount.value = '';
     comprobante.value = '';
     
+    // Redirigir a la página de referir después de un pago exitoso
+    navigateTo('/cliente/Referir');
+    
   } catch (error) {
     console.error('Error al procesar el pago de la visita:', error);
     showError(
@@ -3508,6 +3511,9 @@ if (response?.detalles?.id_cotizacion) {
     
     // Cerrar cualquier otro modal abierto
     showQuotationModal.value = false;
+    
+    // Redirigir a la página de referir después de un pago exitoso
+    navigateTo('/cliente/Referir');
   } catch (error) {
     console.error('❌ Error al procesar pago:', {
       status: error.response?.status,
