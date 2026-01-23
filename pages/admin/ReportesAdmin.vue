@@ -298,16 +298,18 @@
         <button
           v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente' || selectedPayment.estado === 'pagado'"
           @click="rejectPayment(selectedPayment.id)"
-          class="px-3 py-2 font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+          :disabled="isRejecting || isApproving"
+          class="px-3 py-2 font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Rechazar
+          {{ isRejecting ? 'Procesando...' : 'Rechazar' }}
         </button>
         <button
           v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente' || selectedPayment.estado === 'pagado'"
           @click="approvePayment(selectedPayment.id)"
-          class="px-3 py-2 font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+          :disabled="isApproving || isRejecting"
+          class="px-3 py-2 font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Aprobar
+          {{ isApproving ? 'Procesando...' : 'Aprobar' }}
         </button>
       </div>
     </div>
@@ -424,21 +426,23 @@
           <template v-if="selectedWithdrawal.estado === 'pendiente' || selectedWithdrawal.estado === 'Pendiente'">
             <button
               @click="rejectPayment(selectedWithdrawal.id_movimiento)"
-              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5"
+              :disabled="isRejecting || isApproving"
+              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span>Rechazar</span>
+              <span>{{ isRejecting ? 'Procesando...' : 'Rechazar' }}</span>
             </button>
             <button
               @click="approvePayment(selectedWithdrawal.id_movimiento)"
-              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5"
+              :disabled="isApproving || isRejecting"
+              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span>Aprobar</span>
+              <span>{{ isApproving ? 'Procesando...' : 'Aprobar' }}</span>
             </button>
           </template>
           <button
@@ -1369,6 +1373,8 @@ const servicePayments = ref([]);
 const withdrawals = ref([]);
 const transactions = ref([]);
 const isProcessingBilling = ref(false);
+const isApproving = ref(false);
+const isRejecting = ref(false);
 const billingMonth = ref(new Date().toISOString().slice(0, 7));
 const pendingBillingItems = ref([]);
 const isBillingModalOpen = ref(false);
@@ -4942,6 +4948,8 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
 
 // ===== FUNCIONES DE APROBACION o RECHAZO DE PAGOS =====
 const approvePayment = async (id) => {
+  if (isApproving.value) return;
+  isApproving.value = true;
   try {
     const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
     let response;
@@ -5182,10 +5190,14 @@ const approvePayment = async (id) => {
   } catch (error) {
     console.error('❌ Error aprobando pago:', error);
     showToast(error.response?._data?.message || 'Error al aprobar el pago', 'error');
+  } finally {
+    isApproving.value = false;
   }
 };
 
 const rejectPayment = async (id) => {
+  if (isRejecting.value) return;
+  isRejecting.value = true;
   try {
     const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
     let response;
@@ -5337,6 +5349,8 @@ const rejectPayment = async (id) => {
   } catch (error) {
     console.error('❌ Error rechazando pago:', error);
     showToast(error.response?._data?.message || 'Error al rechazar el pago', 'error');
+  } finally {
+    isRejecting.value = false;
   }
 };
 

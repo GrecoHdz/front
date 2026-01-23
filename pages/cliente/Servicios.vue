@@ -315,24 +315,6 @@
           <h4 v-if="hasVisibleActions" class="text-sm font-black text-gray-900 dark:text-white mb-2">Acciones</h4>
           <div class="space-y-2">
 
-            <!-- Botón de Cancelar - Visible solo en estados específicos -->
-            <div v-if="['pendiente_pagovisita', 'pendiente_asignacion', 'asignado'].includes(selectedService.rawStatus)" class="mb-2">
-              <button 
-                @click="confirmarCancelar"
-                class="w-full flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-              >
-                <div class="flex items-center space-x-2">
-                  <span class="text-base">❌</span>
-                  <span class="font-bold text-red-800 dark:text-red-200 text-sm">
-                    {{ getCancelButtonText }}
-                  </span>
-                </div>
-                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </button>
-            </div> 
-
             <!-- Acciones para Cotización Pendiente -->
             <div v-if="selectedService.status === 'Cotización Pendiente'">
               <div class="bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg mb-2">
@@ -414,7 +396,25 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
-            </div>
+            </div> 
+
+            <!-- Botón de Cancelar - Visible solo en estados específicos -->
+            <div v-if="['pendiente_pagovisita', 'pendiente_asignacion', 'asignado'].includes(selectedService.rawStatus)" class="mb-2">
+              <button 
+                @click="confirmarCancelar"
+                class="w-full flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+              >
+                <div class="flex items-center space-x-2">
+                  <span class="text-base">❌</span>
+                  <span class="font-bold text-red-800 dark:text-red-200 text-sm">
+                    {{ getCancelButtonText }}
+                  </span>
+                </div>
+                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div> 
 
             <div v-if="selectedService.rawStatus === 'calificado' || selectedService.rawStatus === 'finalizado'" class="space-y-2">
               <!-- Botón de Reportar Problema -->
