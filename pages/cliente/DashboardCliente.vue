@@ -1737,8 +1737,8 @@ const sendWhatsAppMessage = async (data, type) => {
 // =========================
 
 const renovarMembresia = () => {
-  navigateTo('/cliente/membresia');
-};
+  navigateTo('/cliente/perfil#membresia')
+}
 
 // Lista de paquetes de mantenimiento disponibles
 const paquetesMantenimiento = ref([]);

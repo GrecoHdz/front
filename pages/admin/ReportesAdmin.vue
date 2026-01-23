@@ -2993,6 +2993,7 @@ const saveFactura = async ({ form, next }) => {
       subtotal: subtotal.toFixed(2),
       isv: isv.toFixed(2),
       total: total.toFixed(2),
+      id_usuario: item.id_usuario || item.usuario?.id_usuario || item.id_cliente || item.cliente?.id_usuario,
       id_pagovisita: item.billingType === 'visits' ? (item.id_pagovisita || item.id) : null,
       id_cotizacion: item.billingType === 'services' ? (item.id_cotizacion || item.id) : null,
       id_membresia: item.billingType === 'membership' ? (item.id_membresia || item.id) : null,
@@ -4885,7 +4886,8 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
       tipo_factura: rtnResponse?.success ? 'CON_RTN' : 'CONSUMIDOR_FINAL',
       subtotal,
       isv,
-      total
+      total,
+      id_usuario: idUsuario
     }; 
 
     // Agregar datos específicos según tipo de factura
