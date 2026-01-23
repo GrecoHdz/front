@@ -893,10 +893,11 @@
                   <div>
                     <p class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{{ getTransactionTitle(transaction) }}</p>
                     <p class="text-xs text-gray-600 dark:text-gray-400">
-                      <template v-if="transaction.id_solicitud">#{{ transaction.id_solicitud }}</template>
-                      <template v-if="transaction.id_solicitud && getTransactionSubtitle(transaction)"> • </template>
+                      <template v-if="transaction.id_pago">#P{{ transaction.id_pago }}</template>
+                      <template v-if="transaction.id_solicitud && transaction.id_solicitud != transaction.id_pago"> • #S{{ transaction.id_solicitud }}</template>
+                      <template v-if="(transaction.id_pago || transaction.id_solicitud) && getTransactionSubtitle(transaction)"> • </template>
                       <template v-if="getTransactionSubtitle(transaction)">{{ getTransactionSubtitle(transaction) }}</template>
-                      <template v-if="transaction.id_solicitud || getTransactionSubtitle(transaction)"> • </template>
+                      <template v-if="transaction.id_pago || transaction.id_solicitud || getTransactionSubtitle(transaction)"> • </template>
                       {{ formatDate(transaction.fecha) }}
                     </p>
                   </div>
@@ -1002,7 +1003,7 @@
                   v-model="searchInput"
                   @input="debouncedSearch"
                   @keyup.enter="debouncedSearch"
-                  placeholder="Buscar por ID..."
+                  placeholder="Buscar por ID del pago"
                   class="w-full px-3 py-1.5 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <button 
