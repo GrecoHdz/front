@@ -368,7 +368,7 @@
       class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden hover:shadow-lg transition"
     >
       <!-- Imagen (altura limitada) -->
-      <div class="relative w-full h-24 bg-gray-100 dark:bg-gray-700">
+      <div class="relative w-full h-32 bg-gray-100 dark:bg-gray-700">
         <img
           v-if="paquete.imagen"
           :src="getOptimizedImage(paquete.imagen, 400, 200)"
@@ -408,11 +408,17 @@
         <!-- Acciones -->
         <div class="mt-auto">
           <button
-            v-if="tienePaquete(paquete.id) && getEstadoPaquete(paquete.id) === 'Adquirido'"
-            @click.stop="usarPaquete(paquete)"
-            class="w-full py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+            v-if="tienePaquete(paquete.id)"
+            @click.stop="handlePaqueteClick(paquete)"
+            class="w-full py-1.5 text-xs rounded-lg transition"
+            :class="{
+              'bg-emerald-600 text-white hover:bg-emerald-700': getEstadoPaquete(paquete.id) === 'Adquirido',
+              'bg-emerald-600 text-white cursor-default': getEstadoPaquete(paquete.id) === 'En uso',
+              'bg-gray-200 text-gray-400 cursor-not-allowed': ['Utilizado', 'Vencido', 'Verificando pago...'].includes(getEstadoPaquete(paquete.id))
+            }"
+            :disabled="getEstadoPaquete(paquete.id) !== 'Adquirido'"
           >
-            Usar paquete
+            {{ getEstadoPaquete(paquete.id) === 'En uso' ? 'En uso' : 'Usar paquete' }}
           </button>
 
           <button
@@ -435,6 +441,60 @@
       </div>
     </div>
   </div>
+  
+  <!-- Modal de confirmación de uso de paquete -->
+  <Transition
+    name="fade"
+    enter-active-class="transition-opacity duration-300 ease-out"
+    leave-active-class="transition-opacity duration-200 ease-in"
+    enter-from-class="opacity-0"
+    leave-to-class="opacity-0"
+  >
+    <div v-if="showConfirmarUsoModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 dark:bg-black/70">
+      <div 
+        class="w-full max-w-md transform transition-all duration-300 ease-out"
+        :class="{
+          'opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95': !showConfirmarUsoModal,
+          'opacity-100 translate-y-0 sm:scale-100': showConfirmarUsoModal
+        }"
+        @click.stop
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 dark:bg-blue-900/30">
+              <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 class="mb-2 text-xl font-semibold text-center text-gray-900 dark:text-white">¿Usar paquete?</h3>
+            <p v-if="selectedPaquete" class="mb-6 text-sm text-center text-gray-500 dark:text-gray-400">
+              ¿Estás seguro de que deseas usar el paquete <span class="font-medium text-gray-700 dark:text-gray-200">{{ selectedPaquete.nombre }}</span>?
+            </p>
+            <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3"> 
+              <button
+                type="button"
+                @click="usarPaquete(selectedPaquete)"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 flex items-center justify-center"
+              >
+                <span>Sí, usar paquete</span>
+                <svg v-if="isProcessingPayment" class="w-4 h-4 ml-2 -mr-1 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </button>
+              <button
+                type="button"
+                @click="showConfirmarUsoModal = false"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </section>
  
 
@@ -473,26 +533,6 @@
               class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
               @click.stop
             >
-              <!-- Encabezado del modal -->
-              <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-base">
-                      💳
-                    </div>
-                    <div>
-                      <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Paquete</h3> 
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedPaquete?.nombre }}</p>
-                    </div> 
-                  </div>
-                  <button @click="closePaquetePagoModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
               <!-- Contenido principal del modal -->
               <div class="p-3">
                 <!-- Resumen del paquete -->
@@ -1734,6 +1774,7 @@ const handleImageError = (paqueteId) => {
 
 // Estado del modal de pago de paquete
 const showPaquetePagoModal = ref(false);
+const showConfirmarUsoModal = ref(false);
 const selectedPaquete = ref(null);
 const isLoadingAccounts = ref(false);
 const bankAccounts = ref([]);
@@ -1939,19 +1980,22 @@ const getAccountLabel = (account) => {
 };
 
 // Función para procesar el pago del paquete
+// Función para procesar el pago del paquete
 const procesarPagoPaquete = async () => {
-  // Validaciones iniciales...
+  // Validar que se haya seleccionado un paquete y que el número de comprobante no esté vacío
   if (!selectedPaquete.value) {
     showToast('Error', 'No se ha seleccionado ningún paquete', 'error');
     return;
   }
 
+  // Validar el número de comprobante
   const numComprobante = numeroComprobante.value ? numeroComprobante.value.trim() : '';
   if (!numComprobante) {
     showToast('Error', 'Por favor ingresa el número de comprobante', 'error');
     return;
   }
 
+  // Validar que el número de comprobante solo contenga números
   if (!/^\d+$/.test(numComprobante)) {
     showToast('Error', 'El número de comprobante solo puede contener números', 'error');
     return;
@@ -1963,8 +2007,10 @@ const procesarPagoPaquete = async () => {
     return;
   }
 
+  // Verificar si es pago con saldo o por transferencia
   const esPagoConSaldo = user.credito >= selectedPaquete.value.costo;
   
+  // Si es pago por transferencia, validar que se haya seleccionado una cuenta
   if (!esPagoConSaldo && !selectedAccountObject.value) {
     showToast('Error', 'Por favor selecciona una cuenta bancaria para la transferencia', 'error');
     return;
@@ -1976,6 +2022,7 @@ const procesarPagoPaquete = async () => {
     const requestData = {
       id_paquete: selectedPaquete.value.id,
       id_usuario: user.id_usuario,
+      // Solo incluir estos campos si es pago por transferencia
       ...(!esPagoConSaldo && {
         esPagoTransferencia: true,
         id_cuenta: selectedAccountObject.value.id_cuenta,
@@ -1983,43 +2030,81 @@ const procesarPagoPaquete = async () => {
       })
     }; 
 
-    // 1. Mostrar datos que se enviarán al backend
-    console.log('=== DATOS ENVIADOS AL BACKEND ===');
-    console.log('Endpoint:', '/paquetes/usuarios/canjear');
-    console.log('Método:', 'POST');
-    console.log('Datos:', JSON.stringify(requestData, null, 2));
-    console.log('=================================');
-
     const response = await $api('/paquetes/usuarios/canjear', {
       method: 'POST',
       body: requestData
     });
 
-    // 2. Mostrar la respuesta del servidor
-    console.log('=== RESPUESTA DEL SERVIDOR ===');
-    console.log('Status:', response?.status || 'No disponible');
-    console.log('Datos:', JSON.stringify(response, null, 2));
-    console.log('==============================');
-
     if (response.success) {
-      // Resto del código de manejo de éxito...
-    } else {
-      console.error('Error en la respuesta del servidor:', response);
-      throw new Error(response.error || 'Error al procesar el pago');
+      // Obtener el ID de paquete usuario recién creado
+      const idPaqueteUsuario = response.data.paquete.id_paquete_usuario;
+
+      // Actualizar el saldo del usuario si fue pago con saldo
+      if (esPagoConSaldo && response.data.nuevoSaldo !== undefined) {
+        user.credito = response.data.nuevoSaldo;
+        // Actualizar la cookie con el nuevo saldo
+        useCookie('user').value = user;
+      }
+
+      // Mostrar mensaje de éxito
+      showToast(
+        '¡Éxito!', 
+        esPagoConSaldo 
+          ? 'Paquete canjeado exitosamente' 
+          : 'Solicitud de pago por transferencia registrada. Por favor espera la verificación.',
+        'success'
+      );
+
+      // Capturar datos del paquete antes de cerrar el modal
+      const paqueteNombre = selectedPaquete.value.nombre;
+      const paqueteCosto = selectedPaquete.value.costo;
+
+      // Cerrar el modal y actualizar la lista de paquetes
+      closePaquetePagoModal();
+      await cargarPaquetesUsuario();
+
+      // Si fue por transferencia, abrir WhatsApp para enviar comprobante y notificar a los admins
+      if (!esPagoConSaldo) {
+        // Enviar notificaciones a los administradores
+        try {
+          const token = useCookie('token').value;
+          const notificationData = { titulo: 'Pago de Paquete Recibido' };
+          
+          await Promise.all([
+            $api('/notificaciones/enviar', {
+              method: 'POST',
+              baseURL: config.public.apiBase,
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+            }),
+            $api('/notificaciones/enviar', {
+              method: 'POST',
+              baseURL: config.public.apiBase,
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+            })
+          ]);
+        } catch (notifierError) {
+          console.error('Error al enviar notificaciones de pago de paquete:', notifierError);
+        }
+
+        sendWhatsAppMessage({
+          id_paquete_usuario: idPaqueteUsuario,
+          nombre_paquete: paqueteNombre,
+          receiptNumber: numComprobante,
+          amount: paqueteCosto
+        }, 'package_payment');
+      }
     }
   } catch (error) {
-    console.error('Error detallado al procesar el pago:', {
-      error: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-      stack: error.stack
-    });
-    
-    const errorMessage = error.response?.data?.error || 
-                        error.data?.error || 
-                        error.message || 
-                        'Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.';
-    
+    console.error('Error al procesar el pago:', error);
+    const errorMessage = error.response?.data?.error || 'Error al procesar el pago';
     showToast('Error', errorMessage, 'error');
   } finally {
     isProcessingPayment.value = false;
@@ -2050,6 +2135,7 @@ const cargarPaquetesUsuario = async () => {
     });
 
     if (response.success && response.data) {
+      console.log('Paquetes del usuario:', JSON.stringify(response.data, null, 2));
       paquetesUsuario.value = response.data;
     }
   } catch (error) {
@@ -2061,7 +2147,7 @@ const cargarPaquetesUsuario = async () => {
 // Función para verificar si el usuario tiene un paquete específico disponible para usar
 const tienePaquete = (paqueteId) => {
   return paquetesUsuario.value.some(p => 
-    p.id_paquete === paqueteId && p.estado === 'activo'
+    p.id_paquete === paqueteId && (p.estado === 'activo' || p.estado === 'utilizando')
   );
 };
 
@@ -2088,9 +2174,31 @@ const getEstadoPaquete = (paqueteId) => {
   return '';
 };
 
+// Función para manejar el clic en el botón de paquete
+const handlePaqueteClick = (paquete) => {
+  console.log('Paquete clickeado:', paquete);
+  const estado = getEstadoPaquete(paquete.id);
+  console.log('Estado del paquete:', estado);
+  
+  if (estado === 'Adquirido') {
+    console.log('Mostrando modal de confirmación');
+    selectedPaquete.value = paquete;
+    showConfirmarUsoModal.value = true;
+    console.log('showConfirmarUsoModal después de cambiar:', showConfirmarUsoModal.value);
+  } else {
+    console.log('No se puede usar el paquete. Estado actual:', estado);
+  }
+};
+
 // Función para usar un paquete canjeado
+const confirmarUsoPaquete = (paquete) => {
+  selectedPaquete.value = paquete;
+  showConfirmarUsoModal.value = true;
+};
+
 const usarPaquete = async (paquete) => {
   try {
+    isProcessingPayment.value = true;
     // Buscar el registro del paquete en la lista de paquetes del usuario que esté activo
     const paqueteUsuario = paquetesUsuario.value.find(p => 
       p.id_paquete === paquete.id && p.estado === 'activo'
@@ -2098,6 +2206,8 @@ const usarPaquete = async (paquete) => {
 
     if (!paqueteUsuario) {
       showToast('Error', 'No tienes este paquete disponible para usar', 'error');
+      isProcessingPayment.value = false;
+      showConfirmarUsoModal.value = false; // Cerrar el modal en caso de error
       return;
     }
 
@@ -2126,14 +2236,19 @@ const usarPaquete = async (paquete) => {
         nombre_paquete: paquete.nombre
       }, 'use_package');
       
-      // Opcional: Redirigir a la página de servicios o mostrar algo más
+      // Cerrar el modal después de completar las operaciones
+      showConfirmarUsoModal.value = false;
     } else {
       showToast('Error', response.message || 'No se pudo activar el paquete', 'error');
+      showConfirmarUsoModal.value = false; // Cerrar el modal en caso de error
     }
   } catch (error) {
     console.error('Error al usar el paquete:', error);
     const errorMessage = error.response?.data?.message || error.message || 'Error al activar el paquete';
     showToast('Error', errorMessage, 'error');
+  } finally {
+    isProcessingPayment.value = false;
+    showConfirmarUsoModal.value = false; // Asegurarse de que el modal se cierre en cualquier caso
   }
 };
 
