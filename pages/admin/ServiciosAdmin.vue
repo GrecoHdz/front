@@ -3146,13 +3146,23 @@ const changePackagePage = async (estado, newPage) => {
 // Función para obtener técnicos desde la API
 const fetchTechnicians = async (cityId = null, limit = 4, offset = 0, serviceId = null) => {
   try {
+    console.log('=== fetchTechnicians ===')
+    console.log('Parámetros recibidos:', { cityId, limit, offset, serviceId })
+    
     let url = `/usuarios/tecnicos?limit=${limit}&offset=${offset}`
     if (cityId) {
       url += `&id_ciudad=${cityId}`
+      console.log('Añadiendo filtro de ciudad con ID:', cityId)
+    } else {
+      console.log('No se proporcionó ID de ciudad')
     }
+    
     if (serviceId) {
       url += `&id_servicio=${serviceId}`
+      console.log('Añadiendo filtro de servicio con ID:', serviceId)
     }
+    
+    console.log('URL final de la petición:', url)
 
     const response = await $api(url, {
       baseURL: config.public.apiBase,
@@ -3685,8 +3695,6 @@ const onMultiselectOpen = async () => {
 
 const assignTechnician = async (service) => {
   serviceToAssign.value = service
-  selectedTechCity.value = ''
-  selectedTechCityObject.value = null
   currentTechPage.value = 1
   
   // Asegurarse de que las ciudades estén cargadas antes de abrir el modal
@@ -3694,11 +3702,29 @@ const assignTechnician = async (service) => {
     await fetchCities()
   }
   
+  // Establecer la ciudad del servicio actual si está disponible
+  if (service.id_ciudad) {
+    const city = cities.value.find(c => c.id_ciudad === service.id_ciudad)
+    if (city) {
+      selectedTechCityObject.value = city
+      selectedTechCity.value = city.id_ciudad
+    } else {
+      selectedTechCityObject.value = null
+      selectedTechCity.value = ''
+    }
+  } else {
+    selectedTechCityObject.value = null
+    selectedTechCity.value = ''
+  }
+  
   showAssignmentModal.value = true
   
-  // Cargar técnicos iniciales después de que el modal esté visible
+  // Cargar técnicos de la ciudad del servicio si está disponible
+  const cityId = service.id_ciudad || null
+  await fetchTechnicians(cityId, 4, 0, service.id_servicio)
+  
+  // Esperar a que el DOM se actualice después de cargar los técnicos
   await nextTick()
-  await fetchTechnicians(null, techsPerPage, 0, service.id_servicio)
 }
 
 // Cambiar página de técnicos
