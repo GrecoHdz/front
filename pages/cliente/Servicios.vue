@@ -764,7 +764,7 @@
                 </div>
                 <!-- Descuento regular si no hay descuento especial -->
                 <div v-else class="flex justify-between items-center mb-1">
-                  <span class="text-blue-700 dark:text-blue-300">Descuento por membresía:</span>
+                  <span class="text-blue-700 dark:text-blue-300">Descuento por membresía ({{ membresiaProgreso.porcentaje_descuento }}%):</span>
                   <span class="font-bold text-emerald-600 dark:text-emerald-400">
                     -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (discountPercentage / 100)).toFixed(2) }}
                   </span>
@@ -3414,7 +3414,8 @@ const processPayment = async () => {
     id_cotizacion: Number(quotationData.value.id_cotizacion),
     id_solicitud: Number(selectedService.value.id),
     id_cuenta: Number(selectedAccount.value),
-    monto_credito: Number(parseFloat(membresiaProgreso.value?.monto_credito_mostrado || 0)),
+    // CORRECCIÓN: Usar monto_credito en lugar de monto_credito_mostrado
+    monto_credito: Number(parseFloat(membresiaProgreso.value?.monto_credito || 0)),
     num_comprobante: comprobante.value,
     monto_manodeobra: Number(totalAPagar.value) || 0,
     id_usuario: auth.user.id_usuario,

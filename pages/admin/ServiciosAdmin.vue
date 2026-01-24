@@ -3725,6 +3725,42 @@ const selectTechnician = (technician) => {
   showConfirmModal.value = true
 }
 
+const sendWhatsAppNotification = (technician, service) => {
+  try {
+    const techName = technician.nombre;
+    const techPhone = technician.telefono;
+    
+    if (!techPhone) {
+      console.warn('El técnico no tiene número de teléfono registrado');
+      return;
+    }
+
+    const serviceName = service.servicio?.nombre || 'Servicio';
+    const clientName = service.cliente?.nombre || 'Cliente';
+    const serviceId = service.id_solicitud;
+    const dateStr = formatDateDDMMYY(service.fecha_solicitud);
+    
+    const message = `*Nuevo Servicio Asignado*\n\n` +
+      `Hola *${techName}*,\n` +
+      `Se te ha asignado un nuevo servicio en HogarSeguro.\n\n` +
+      `*ID:* ${dateStr}-${serviceId}\n` +
+      `*Servicio:* ${serviceName}\n` +
+      `*Cliente:* ${clientName}\n` +
+      `*Colonia:* ${service.colonia || 'No especificada'}\n\n` +
+      `Por favor, ingresa a la plataforma para ver los detalles.`;
+
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Limpiar el número y asegurar prefijo 504
+    const cleanPhone = techPhone.toString().replace(/\D/g, '');
+    const finalPhone = cleanPhone.length === 8 ? `504${cleanPhone}` : cleanPhone;
+
+    window.open(`https://wa.me/${finalPhone}?text=${encodedMessage}`, '_blank');
+  } catch (error) {
+    console.error('Error al preparar el mensaje de WhatsApp para el técnico:', error);
+  }
+};
+
 // Función para confirmar la asignación del técnico
 const confirmTechnicianAssignment = async () => {
   try { 
@@ -3758,6 +3794,10 @@ const confirmTechnicianAssignment = async () => {
       })
     });
 
+    // Guardar referencia antes de limpiar el estado
+    const techToNotify = selectedTechnician.value;
+    const serviceToNotify = serviceToAssign.value;
+
     // Buscar en servicios pendientes
     const pendingIndex = pendingServices.value.findIndex(s => s.id_solicitud === serviceToAssign.value.id_solicitud)
     if (pendingIndex > -1) {
@@ -3767,6 +3807,9 @@ const confirmTechnicianAssignment = async () => {
       showSuccess(`${selectedTechnician.value.nombre} asignado al servicio exitosamente`) 
       await loadPendingServices(1, true) 
     }
+    
+    // Notificar al técnico vía WhatsApp
+    sendWhatsAppNotification(techToNotify, serviceToNotify)
     
     showConfirmModal.value = false
     showAssignmentModal.value = false

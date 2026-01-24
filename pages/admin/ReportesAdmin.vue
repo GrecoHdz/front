@@ -4349,7 +4349,7 @@ const generarReporteRetiros = async (doc, withdrawalsData) => {
     head: [['Fecha', 'Usuario', 'Descripción', 'Monto', 'Estado']],
     body: hayRetiros
       ? [
-          ...retirosFiltradas,
+          ...retirosFiltrados,
           [
             { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
             { content: formatCurrency(totalRetirosReal), styles: { fontStyle: 'bold' } },
@@ -5155,13 +5155,13 @@ const approvePayment = async (id) => {
     // El toast de advertencia ya se mostró dentro de crearFacturaParaPago
     if (billingStatus !== 'error_config') {
       showToast('Pago aprobado correctamente', 'success');
-      
-      // Redirigir a ServiciosAdmin.vue si es un pago de visita
-      if (activeTab.value === 'visits') {
-        setTimeout(() => {
-          navigateTo('/admin/ServiciosAdmin');
-        }, 1500);
-      }
+    }
+
+    // Redirigir a ServiciosAdmin.vue si es un pago de visita
+    if (activeTab.value === 'visits') {
+      setTimeout(() => {
+        navigateTo('/admin/ServiciosAdmin');
+      }, 1500);
     }
 
     // Notificar al cliente sobre el pago aprobado
