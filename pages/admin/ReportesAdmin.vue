@@ -594,8 +594,8 @@
                   <span class="text-sm sm:text-base">{{ getServiceTypeIcon(selectedService?.servicio?.nombre) }}</span>
                 </div>
                 <div>
-                  <h3 class="text-sm sm:text-lg font-black text-gray-900 dark:text-white">{{ selectedService?.servicio?.nombre || 'Servicio' }}</h3>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService?.id_solicitud || 'N/A' }}</p>
+                  <h3 class="text-sm sm:text-lg font-black text-gray-900 dark:text-white">{{ selectedService?.servicio?.nombre }}</h3>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService?.id_solicitud }}</p>
                 </div>
               </div>
               <button @click="closeServiceDetailModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -622,7 +622,7 @@
               <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Ubicación</h4>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
                 <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService?.colonia || 'Ubicación no disponible' }}</p>
-                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ selectedService?.direccion_precisa || '' }}{{ selectedService?.direccion_precisa && selectedService?.ciudad?.nombre ? ', ' : '' }}{{ selectedService?.ciudad?.nombre || '' }}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ selectedService?.direccion_precisa || '' }}{{ selectedService?.direccion_precisa && (selectedService?.ciudad?.nombre_ciudad || selectedService?.ciudad?.nombre) ? ', ' : '' }}{{ selectedService?.ciudad?.nombre_ciudad || selectedService?.ciudad?.nombre || '' }}</p>
               </div>
             </div>
 
@@ -630,7 +630,7 @@
             <div>
               <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Descripción del Problema</h4>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService?.descripcion || 'Sin descripción disponible' }}</p>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService?.descripcion }}</p>
               </div>
             </div>
 
@@ -646,6 +646,16 @@
             <div v-if="selectedService?.cotizacion && ['en_proceso', 'pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(selectedService.estado)">
               <div class="flex justify-between items-center mb-2">
                 <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Cotización</h4>
+                <button 
+                  @click="openAmountDetails('service', selectedService)"
+                  class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  Ver detalles
+                </button>
               </div>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
                 <p class="text-gray-700 dark:text-gray-300 text-sm">{{ formatCurrency(selectedService.cotizacion?.total || 0) }}</p>
@@ -668,7 +678,76 @@
                   <span class="text-yellow-500 mr-2">⭐</span>
                   <span class="font-bold text-yellow-800 dark:text-yellow-200">{{ selectedService.calificacion.calificacion }}/5</span>
                 </div>
-                <p v-if="selectedService.calificacion?.comentario" class="text-yellow-700 dark:text-yellow-300 text-sm">{{ selectedService.calificacion.comentario }}</p>
+                <p v-if="selectedService.calificacion.comentario" class="text-yellow-700 dark:text-yellow-300 text-sm">{{ selectedService.calificacion.comentario }}</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Modal de Detalles del Monto (Copiado de ServiciosAdmin) -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showAmountDetailsModal" class="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-3">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showAmountDetailsModal = false"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-[300px] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Detalles del Monto</h3>
+              <button @click="showAmountDetailsModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-3">
+            <div v-if="paymentType === 'visit'" class="space-y-2">
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                <h4 class="font-medium text-blue-800 dark:text-blue-200 text-xs sm:text-sm mb-2">Pago de Visita</h4>
+                <div class="text-xs sm:text-sm space-y-1">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Monto:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">
+                      {{ serviceToPayment?.pagoVisita?.monto ? `${serviceToPayment.pagoVisita.monto}` : 'L. 150.00' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else-if="paymentType === 'service' && serviceToPayment?.cotizacion" class="space-y-3">
+              <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                <h4 class="font-medium text-green-800 dark:text-green-200 text-xs sm:text-sm mb-2">Detalles de la Cotización</h4>
+                <div class="text-xs sm:text-sm space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.descuento_membresia || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Crédito usado:</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.credito_usado || 0 }}</span>
+                  </div>
+                  <hr class="border-gray-200 dark:border-gray-600">
+                  <div class="flex justify-between font-bold">
+                    <span class="text-gray-900 dark:text-white">Total a pagar:</span>
+                    <span class="text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.total || 0 }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2000,6 +2079,17 @@ const loadServicePayments = async (page = 1) => {
           ? item.solicitud.servicio.nombre 
           : 'Servicio';
         
+        // Inyectar detalles de la cotización en la solicitud para el modal
+        if (item.solicitud) {
+          item.solicitud.cotizacion = {
+            id: item.id_cotizacion,
+            total: item.monto_total || 0,
+            monto_manodeobra: item.monto_manodeobra || 0,
+            descuento_membresia: item.descuento_membresia || 0,
+            credito_usado: item.credito_usado || 0
+          };
+        }
+
         return {
           ...item,
           id: item.id_cotizacion,
@@ -2499,6 +2589,17 @@ const updateSelectedMonth = async (type = 'payments') => {
   }
 };
 
+// ===== FUNCIONES DE DETALLES DE MONTO (COPIADO DE SERVICIOSADMIN) =====
+const showAmountDetailsModal = ref(false);
+const paymentType = ref('');
+const serviceToPayment = ref(null);
+
+const openAmountDetails = (type, service) => {
+  paymentType.value = type;
+  serviceToPayment.value = service;
+  showAmountDetailsModal.value = true;
+};
+
 // ===== FUNCIONES DE PAGINACIÓN =====
 const nextPage = () => {
   try {
@@ -2637,6 +2738,17 @@ const searchById = async () => {
         case 'services': {
           const transformedData = responseData.map(item => {
             const serviceName = item.solicitud?.servicio?.nombre || 'Servicio';
+
+            // Inyectar detalles de la cotización en la solicitud para el modal
+            if (item.solicitud) {
+              item.solicitud.cotizacion = {
+                id: item.id_cotizacion,
+                total: item.monto_total || 0,
+                monto_manodeobra: item.monto_manodeobra || 0,
+                descuento_membresia: item.descuento_membresia || 0,
+                credito_usado: item.credito_usado || 0
+              };
+            }
 
             return {
               ...item,
