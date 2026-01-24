@@ -2057,7 +2057,7 @@
           <div class="flex justify-between items-center border-b-2 border-gray-300 pb-2 mb-2">
               <div>
                   <h2 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">RECIBO POR HONORARIOS</h2>
-                  <p class="text-sm font-mono font-bold text-gray-900">N° {{ empresaCorrelativo || '000-000-00-00000000' }}</p>
+                  <p class="text-sm font-mono font-bold text-gray-900">N° {{ empresaCorrelativo }}</p>
                   <p class="text-[10px] text-gray-500 mt-1">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
               </div>
               <div class="text-right">
@@ -2081,7 +2081,7 @@
               
               <div class="mb-6">
                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">LA SUMA DE</span>
-                   <p class="text-lg sm:text-xl font-bold text-gray-900">{{ formatCurrency(selectedFacturaPayment.total || selectedFacturaPayment.monto || selectedFacturaPayment.monto_total || 0) }}</p>
+                   <p class="text-lg sm:text-xl font-bold text-gray-900">{{ formatCurrency(selectedFacturaPayment.total || 0) }}</p>
               </div>
 
               <div>
@@ -2103,10 +2103,10 @@
                <div>
                   <h4 class="font-bold text-gray-900 mb-3 border-b border-gray-300 pb-1">DETALLES</h4>
                    <div class="space-y-2 text-gray-600">
-                      <p class="flex justify-between"><span class="font-medium text-gray-500">Subtotal</span> <span>{{ formatCurrency(selectedFacturaPayment.subtotal || selectedFacturaPayment.total || selectedFacturaPayment.monto || 0) }}</span></p>
+                      <p class="flex justify-between"><span class="font-medium text-gray-500">Subtotal</span> <span>{{ formatCurrency(selectedFacturaPayment.subtotal || 0) }}</span></p>
                       <div class="flex justify-between pt-1 mt-1 border-t border-gray-300">
                           <span class="font-bold text-gray-900 text-xs">TOTAL</span> 
-                          <span class="font-bold text-gray-900 text-xs">{{ formatCurrency(selectedFacturaPayment.total || selectedFacturaPayment.monto || 0) }}</span>
+                          <span class="font-bold text-gray-900 text-xs">{{ formatCurrency(selectedFacturaPayment.total || 0) }}</span>
                       </div>
                   </div>
                </div>
@@ -2858,8 +2858,21 @@ const openFacturaModal = async (payment) => {
       return;
     }
 
+    // Resetear variables fiscales para evitar que se muestren datos de la factura anterior
+    empresaCAI.value = '';
+    empresaCorrelativo.value = '';
+    empresaRangoAutorizado.value = '';
+    empresaFechaLimite.value = '';
+
     console.log('🔍 Abriendo modal de factura para pago:', payment);
-    selectedFacturaPayment.value = payment;
+    // Clonar para no modificar el objeto original y resetear campos financieros/fiscales
+    selectedFacturaPayment.value = { 
+      ...payment, 
+      subtotal: 0, 
+      isv: 0, 
+      total: 0,
+      rtn_cliente: '' 
+    };
     showFacturaModal.value = true;
 
     // Si no tiene id_factura, intentar buscar por el ID del pago
@@ -2904,19 +2917,25 @@ const openFacturaModal = async (payment) => {
           if (factura.total) selectedFacturaPayment.value.total = factura.total;
           
           console.log('✅ Factura cargada exitosamente');
+        } else if (response?.status === 'not_found') {
+          console.warn('ℹ️ No se encontró factura asociada al pago:', response.message);
+          // Los valores ya están reseteados por el inicio de la función
         } else {
           console.warn('⚠️ No se encontró factura asociada al pago:', response);
           showError('No se encontró la factura asociada a este pago');
         }
       } catch (error) {
         console.error('❌ Error al cargar la factura:', error);
-        if (error.response) {
-          console.error('Detalles del error:', {
-            status: error.response.status,
-            data: error.response.data
-          });
+        
+        // Manejar el caso de no encontrado vía error de red/fetch
+        const isNotFound = 
+          error.response?.status === 404 || 
+          error.data?.status === 'not_found' || 
+          error.response?._data?.status === 'not_found';
+
+        if (!isNotFound) {
+          showError('No se pudo establecer conexión con el sistema de facturación');
         }
-        showError('Error al cargar la factura: ' + (error.message || 'Error desconocido'));
       }
     } else if (payment.id_factura) {
       // Obtener datos de la factura específica si hay un ID

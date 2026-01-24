@@ -1005,17 +1005,18 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
       monthNum = now.getMonth() + 1;
     }
 
-    const tipoMovimiento = movementType === 'ingresos' ? 'ingresos' : 'retiro';
+    const tipoMovimiento = movementType === 'ingresos' ? 'ingresos' : 'retiros';
     const endpoint = `/movimientos/${userId}`;
+    const actualPage = typeof page === 'string' ? 1 : page;
     const params = { 
       mes: monthNum, 
       tipo: tipoMovimiento,
-      page: typeof page === 'string' ? 1 : page,
+      page: actualPage,
       limit: itemsPerPage
     }; 
     
     // Crear clave de caché sin timestamp para reutilización
-    const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${page}`;
+    const cacheKey = `${MOVEMENTS_CACHE_KEY}_${userId}_${movementType}_${year}-${String(monthNum).padStart(2, '0')}_page_${actualPage}`;
     
     // Verificar caché primero si no es una recarga forzada
     if (!forceRefresh) {
@@ -2101,22 +2102,8 @@ const handleMonthChange = async (event, tabType) => {
 const setActiveTab = async (tab) => {
   if (activeTab.value === tab) return;
   
+  // El watcher de activeTab se encargará de llamar a loadMovements(1)
   activeTab.value = tab;
-  
-  try {
-    isLoadingMovements.value = true;
-    
-    if (tab === 'ingresos') {
-      await loadMovements(selectedMonth.value);
-    } else if (tab === 'retiros') {
-      await loadMovements(selectedWithdrawMonth.value);
-    }
-  } catch (error) {
-    console.error('Error al cambiar de pestaña:', error);
-    showError('No se pudo cargar la información de ' + (tab === 'ingresos' ? 'ingresos' : 'retiros'));
-  } finally {
-    isLoadingMovements.value = false;
-  }
 }
 
 // ===== WATCHERS =====

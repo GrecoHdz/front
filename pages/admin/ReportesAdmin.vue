@@ -484,7 +484,7 @@
         <div class="flex justify-between items-center border-b-2 border-gray-300 pb-2 mb-2">
             <div>
                 <h2 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">RECIBO POR HONORARIOS</h2>
-                <p class="text-sm font-mono font-bold text-gray-900">N° {{ empresaCorrelativo || '000-000-00-00000000' }}</p>
+                <p class="text-sm font-mono font-bold text-gray-900">N° {{ empresaCorrelativo }}</p>
                 <p class="text-[10px] text-gray-500 mt-1">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
             </div>
             <div class="text-right">
@@ -3262,7 +3262,20 @@ const openFacturaModal = async (payment) => {
       return;
     }
 
-    selectedFacturaPayment.value = payment;
+    // Resetear variables fiscales para evitar que se muestren datos de la factura anterior
+    empresaCAI.value = '';
+    empresaCorrelativo.value = '';
+    empresaRangoAutorizado.value = '';
+    empresaFechaLimite.value = '';
+
+    // Clonar para no modificar el objeto original y resetear campos financieros/fiscales
+    selectedFacturaPayment.value = { 
+      ...payment, 
+      subtotal: 0, 
+      isv: 0, 
+      total: 0,
+      rtn_cliente: '' 
+    };
     showFacturaModal.value = true;
 
     // Si no tiene id_factura, intentar buscar por el ID del pago
@@ -3304,6 +3317,9 @@ const openFacturaModal = async (payment) => {
           if (factura.isv) selectedFacturaPayment.value.isv = factura.isv;
           if (factura.total) selectedFacturaPayment.value.total = factura.total;
           
+        } else if (response?.status === 'not_found') {
+          console.warn('ℹ️ No se encontró factura asociada al pago:', response.message);
+          // Los valores ya están reseteados por el inicio de la función
         } else {
           console.warn('No se encontró factura asociada al pago:', response);
         }

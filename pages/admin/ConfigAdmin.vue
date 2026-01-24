@@ -2644,7 +2644,7 @@ const configuracionDescuentoEspecial = ref(0)
 const configuracionReferido = ref(0)
 const configuracionRetiro = ref(0)
 const configuracionRetiroMinimo = ref(0)
-const configuracionDiasGracia = ref(14) // Valor por defecto de 14 días
+const configuracionDiasGracia = ref(14) // Valor por defecto de 14 días 
 
 // ===== VALORES ORIGINALES PARA DETECTAR CAMBIOS =====
 const valoresOriginales = ref({})
@@ -2889,11 +2889,13 @@ const hayChanges = computed(() => {
   return configuracionMembresia.value !== valoresOriginales.value.membresia ||
          configuracionVisita.value !== valoresOriginales.value.visita_tecnico ||
          configuracionComision.value !== valoresOriginales.value.comision_por_servicio ||
+         configuracionComisionPaquete.value !== valoresOriginales.value.comision_por_paquete ||
          configuracionTelefono.value !== valoresOriginales.value.numero_empresa ||
          configuracionDiasGracia.value !== valoresOriginales.value.reset_credito ||
          configuracionEmail.value !== valoresOriginales.value.correo_empresa ||
          configuracionRTN.value !== valoresOriginales.value.rtn ||
          configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento ||
+         configuracionDescuentoEspecial.value !== valoresOriginales.value.porcentaje_descuento_especial ||
          configuracionReferido.value !== valoresOriginales.value.porcentaje_referido ||
          configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro ||
          configuracionRetiroMinimo.value !== valoresOriginales.value.retiro_minimo
@@ -4090,6 +4092,15 @@ const guardarConfiguraciones = async () => {
         id: configuraciones.value.find(c => c.tipo_config === 'comision_por_servicio')?.id_config,
         tipo_config: 'comision_por_servicio',
         valor: Number(configuracionComision.value) || 0
+      })
+    }
+
+    // Comisión por paquete (número)
+    if (hasChanged(configuracionComisionPaquete.value, valoresOriginales.value.comision_por_paquete, true)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'comision_por_paquete')?.id_config,
+        tipo_config: 'comision_por_paquete',
+        valor: Number(configuracionComisionPaquete.value) || 0
       })
     }
     

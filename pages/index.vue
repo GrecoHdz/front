@@ -1617,6 +1617,9 @@ const handleAuth = async () => {
             }, 2000);
           }, 0); // Tiempo 0 para ejecutar de forma asíncrona
           
+        } else {
+          // Mostrar mensaje de éxito para usuarios normales
+          showToast('¡Registro exitoso! Ahora puedes iniciar sesión.', 'success');
         }
         
         // Manejar referido después del registro exitoso
@@ -1902,9 +1905,25 @@ const handleReferral = async (userId) => {
     const urlParams = new URLSearchParams(window.location.search);
     let referralCode = urlParams.get('ref');
     
-    // Si no hay código de referido, usar el ID 36 (usuario por defecto)
+    // Si no hay código de referido, obtener el ID del referido predeterminado desde la configuración
     if (!referralCode) {
-      referralCode = '36'; 
+      try {
+        const response = await $api('/config/valor/referidor_predeterminado', {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response && response.valor) {
+          referralCode = response.valor;
+        } 
+      } catch (error) {
+        console.error('Error al obtener el referidor predeterminado:', error);
+        referralCode = '36'; 
+      }
     }
     
     if (!userId) {

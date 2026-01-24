@@ -41,7 +41,7 @@ export default defineNuxtConfig({
     public: {
       appName: 'HogarSeguro',
       appVersion: '1.0.0',
-      apiBase: process.env.NUXT_PUBLIC_API_URL
+      apiBase: process.env.NUXT_PUBLIC_API_URLL
     }
   }
 })
