@@ -815,7 +815,7 @@ const getStatusColor = (status) => {
   const colors = {
     'completado': 'text-green-600 dark:text-green-400',
     'pendiente': 'text-yellow-600 dark:text-yellow-400',
-    'cancelado': 'text-red-600 dark:text-red-400'
+    'rechazado': 'text-red-600 dark:text-red-400'
   }
   return colors[status?.toLowerCase()] || 'text-gray-600 dark:text-gray-400'
 }
@@ -825,7 +825,7 @@ const getStatusWithDrawalColor = (status) => {
     'completado': 'text-green-600 dark:text-green-400',
     'pendiente': 'text-yellow-600 dark:text-yellow-400',
     'procesando': 'text-blue-600 dark:text-blue-400',
-    'cancelado': 'text-red-600 dark:text-red-400'
+    'rechazado': 'text-red-600 dark:text-red-400'
   }
   return colors[status?.toLowerCase()] || 'text-gray-600 dark:text-gray-400'
 }

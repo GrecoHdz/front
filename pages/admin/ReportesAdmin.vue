@@ -801,18 +801,18 @@
             </div>
           </div>
 
-          <!-- Comisiones Técnicos -->
+          <!-- Retiros -->
           <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
             <div class="flex items-center space-x-2 sm:space-x-3">
               <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
-                <span class="text-indigo-600 dark:text-indigo-400 text-sm sm:text-lg">🏆</span>
+                <span class="text-indigo-600 dark:text-indigo-400 text-sm sm:text-lg">₹</span>
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  {{ formatCurrency(platformStats.totalCommissions || 0) }}
+                  {{ formatCurrency(platformStats.totalWithdrawals || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
-                  Comisiones
+                  Retiros
                 </p>
               </div>
             </div>
@@ -3560,6 +3560,7 @@ const updatePlatformStats = async () => {
       platformStats.packageRevenue = data.ingresosPaquetes || 0;
       platformStats.totalWithdrawals = data.retiros || 0;
       platformStats.totalCommissions = data.comisiones || 0;
+      platformStats.totalRevenue = data.gananciaNeta || 0;
       
       if (response.data.grafico) {
         updateChart(response.data.grafico);
@@ -3896,14 +3897,7 @@ const availableReports = ref([
     iconClass: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
     generating: false
   },
-  {
-    id: 5,
-    title: 'Reporte de Retiros',
-    description: 'Resumen de todos los retiros de técnicos',
-    icon: '💸',
-    iconClass: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-    generating: false
-  },
+
   {
     id: 2,
     title: 'Reporte de Servicios Detallado',
@@ -4153,22 +4147,10 @@ const generateReport = async (report) => {
 
 // ===== REPORTE FINANCIERO =====
 const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto }) => {
-  // Mapa de pagos a técnicos por cotización
-  const pagosTecnicosMap = technicianIncomeData.reduce((map, mv) => {
-      if (mv.id_cotizacion && mv.tipo === 'ingreso') {
-          map[mv.id_cotizacion] = (map[mv.id_cotizacion] || 0) + (parseFloat(mv.monto) || 0);
-      }
-      return map;
-  }, {});
-  
-  // Recalcular total de servicios restando pagos a técnicos
+  // Recalcular total de servicios usando la comisión guardada directamente
   const totalServiciosReal = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
-    .reduce((sum, s) => {
-        const pagoTecnico = pagosTecnicosMap[s.id_cotizacion] || 0;
-        const montoNeto = (parseFloat(s.monto_total) || 0) - pagoTecnico;
-        return sum + montoNeto;
-    }, 0);
+    .reduce((sum, s) => sum + (parseFloat(s.monto_comision_app) || 0), 0);
 
   // Usar autoTable del documento
   let currentY = 40;
@@ -4242,8 +4224,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const serviciosFiltrados = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
     .map(s => {
-        const pagoTecnico = pagosTecnicosMap[s.id_cotizacion] || 0;
-        const montoNeto = (parseFloat(s.monto_total) || 0) - pagoTecnico;
+        const montoNeto = parseFloat(s.monto_comision_app) || 0;
         return [
           formatDate(s.fecha), 
           'Comisión por Servicio', 
@@ -4315,6 +4296,86 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     margin: { left: 10, right: 10 },
     pageBreak: 'auto'
   });
+
+  // Agregar detalle de retiros
+  currentY = doc.lastAutoTable.finalY + 10;
+  
+  // Agregar nueva página si es necesario
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(220, 38, 38); // Rojo
+  doc.setFontSize(12);
+  doc.text('Detalle de Retiros', 10, currentY);
+  currentY += 8;
+
+  const retirosFiltrados = withdrawalsData.data
+    .filter(r => r.estado?.toLowerCase() === 'completado')
+    .map(r => [
+      formatDate(r.fecha),
+      r.nombre_usuario || '-',
+      r.descripcion?.replace(/\n/g, ' ') || 'Sin descripción',
+      formatCurrency(r.monto),
+      r.estado
+    ]);
+
+  const hayRetiros = retirosFiltrados.length > 0;
+
+  doc.autoTable({
+    startY: currentY,
+    head: [['Fecha', 'Usuario', 'Descripción', 'Monto', 'Estado']],
+    body: hayRetiros
+      ? [
+          ...retirosFiltrados,
+          [
+            { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(withdrawalsData.total), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } },
+            { content: '', styles: { fontStyle: 'bold' } }
+          ]
+        ]
+      : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [220, 38, 38], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 35 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 }, 4: { cellWidth: 25 } },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto'
+  });
+
+  // Balance Final
+  currentY = doc.lastAutoTable.finalY + 15;
+
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(50, 50, 50);
+  doc.setFontSize(14);
+  doc.text('BALANCE GENERAL', 10, currentY);
+  currentY += 8;
+
+  doc.autoTable({
+    startY: currentY,
+    head: [['Concepto', 'Monto (HNL)']],
+    body: [
+      [{ content: 'Total Ingresos', styles: { fontStyle: 'bold', textColor: [22, 163, 74] } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right' } }],
+      [{ content: 'Total Retiros', styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }, { content: `-${formatCurrency(withdrawalsData.total)}`, styles: { fontStyle: 'bold', textColor: [220, 38, 38], halign: 'right' } }],
+      [{ content: 'GANANCIA NETA', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 10 } }, 
+       { content: formatCurrency(balanceNeto), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 10, halign: 'right' } }]
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 10 },
+    bodyStyles: { fontSize: 9, cellPadding: 3 },
+    columnStyles: { 0: { cellWidth: 140 }, 1: { cellWidth: 'auto' } },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'avoid',
+    tableWidth: 'wrap'
+  });
 };
 
 // ===== REPORTE DE RETIROS =====
@@ -4329,7 +4390,7 @@ const generarReporteRetiros = async (doc, withdrawalsData) => {
   currentY += 8;
 
   const retirosFiltrados = withdrawalsData.data
-    .filter(r => r.estado?.toLowerCase() !== 'pendiente')
+    .filter(r => r.estado?.toLowerCase() === 'completado')
     .map(r => [
       formatDate(r.fecha),
       r.nombre_usuario || '-',
@@ -4339,7 +4400,7 @@ const generarReporteRetiros = async (doc, withdrawalsData) => {
     ]);
 
   const totalRetirosReal = withdrawalsData.data
-    .filter(r => r.estado?.toLowerCase() !== 'pendiente')
+    .filter(r => r.estado?.toLowerCase() === 'completado')
     .reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
     
   const hayRetiros = retirosFiltrados.length > 0;
@@ -5125,6 +5186,27 @@ const approvePayment = async (id) => {
             });
           } catch (notificationError) {
             console.error('❌ Error al enviar notificación al técnico:', notificationError);
+            // No interrumpir el flujo si falla la notificación
+          }
+        }
+        
+        // Notificar al usuario referidor 'Comisión por referido recibida'
+        if (response?.success && response.detalles?.id_referidor) {
+          try {
+            await $api('/notificaciones/enviar', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth.token}`
+              },
+              body: JSON.stringify({
+                titulo: 'Comisión por referido recibida',
+                id_usuario: response.detalles.id_referidor
+              })
+            });
+          } catch (notificationError) {
+            console.error('❌ Error al enviar notificación al referidor:', notificationError);
             // No interrumpir el flujo si falla la notificación
           }
         }
