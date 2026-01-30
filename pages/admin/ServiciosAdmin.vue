@@ -932,6 +932,7 @@
               <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Información del Cliente</h4>
               <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                 <p class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ selectedService?.cliente?.nombre }}</p>
+                <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">{{ selectedService?.cliente?.telefono }}</p>
               </div>
             </div>
 

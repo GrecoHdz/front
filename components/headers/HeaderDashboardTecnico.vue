@@ -155,7 +155,9 @@ const onNotificationClick = async (notification) => {
       await navigateTo('/tecnico/MetricasTecnico');
     } else if (notification.tipo === 'usuario') { 
       await navigateTo('/tecnico/MetricasTecnico');
-    }
+    } else if (notification.tipo === 'paquetes') { 
+      await navigateTo('/tecnico/MetricasTecnico');
+    } 
   } finally {
     // Asegurarse de que el loading siempre se desactive
     isLoading.value = false;
