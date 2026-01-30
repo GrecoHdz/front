@@ -4271,8 +4271,8 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(93, 92, 222);
   doc.setFontSize(14);
-  doc.text('REPORTE DE INGRESOS DE LA PLATAFORMA', 10, currentY);
-  currentY += 6;
+  doc.text('Reporte de Ingresos', 10, currentY);
+  currentY += 4;
 
   // 📊 Calcular porcentajes
   const totalIngresos = membershipData.total + visitData.total + totalServiciosReal + packagePaymentsData.total;
@@ -4292,8 +4292,9 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 9 },
     bodyStyles: { fontSize: 9 },
-    columnStyles: { 0: { cellWidth: 70 }, 1: { halign: 'right' }, 2: { halign: 'center' } },
-    margin: { left: 10, right: 10 }
+    columnStyles: { 0: { cellWidth: 70 }, 1: { halign: 'center' }, 2: { halign: 'center' } },
+    margin: { left: 10, right: 10 },
+    styles: { halign: 'center' }
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
@@ -4309,7 +4310,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.setTextColor(93, 92, 222);
   doc.setFontSize(12);
   doc.text('Detalle de Ingresos', 10, currentY);
-  currentY += 8;
+  currentY += 4;
 
   const membresiasFiltradas = membershipData.data
     .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
@@ -4317,9 +4318,9 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       formatDate(m.fecha), 
       'Membresía', 
       m.usuario?.nombre || m.usuario?.cliente?.nombre || '-', 
-      formatCurrency(m.monto),
       m.facturaRelacion?.factura?.estado || 'PENDIENTE',
-      m.facturaRelacion?.factura?.numero_factura_correlativo || '-'
+      m.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+      formatCurrency(m.monto)
     ]);
 
   const visitasFiltradas = visitData.data
@@ -4328,9 +4329,9 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       formatDate(v.fecha), 
       'Visita Técnica', 
       v.cliente?.nombre || v.client || v.usuario?.nombre || '-', 
-      formatCurrency(v.monto),
       v.facturaRelacion?.factura?.estado || 'PENDIENTE',
-      v.facturaRelacion?.factura?.numero_factura_correlativo || '-'
+      v.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+      formatCurrency(v.monto)
     ]);
 
   const serviciosFiltrados = serviceData.data
@@ -4341,9 +4342,9 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
           formatDate(s.fecha), 
           'Comisión por Servicio', 
           s.solicitud?.cliente?.nombre || '-', 
-          formatCurrency(montoNeto),
           s.facturaRelacion?.factura?.estado || 'PENDIENTE',
-          s.facturaRelacion?.factura?.numero_factura_correlativo || '-'
+          s.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+          formatCurrency(montoNeto)
         ];
     });
 
@@ -4353,9 +4354,9 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       formatDate(p.fecha),
       'Venta de Paquete',
       p.usuario?.nombre || '-',
-      formatCurrency(p.monto_comision),
       p.facturaRelacion?.factura?.estado || 'PENDIENTE',
-      p.facturaRelacion?.factura?.numero_factura_correlativo || '-'
+      p.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+      formatCurrency(p.monto_comision)
     ]);
 
   // Calculate totals from original data instead of formatted strings
@@ -4380,7 +4381,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
 
   doc.autoTable({
     startY: currentY,
-    head: [['Fecha', 'Concepto', 'Cliente', 'Monto', 'Estado Fiscal', 'Correlativo']],
+    head: [['Fecha', 'Concepto', 'Cliente', 'Estado Fiscal', 'Correlativo', 'Monto']],
     body: hayDatos
       ? [
           ...membresiasFiltradas,
@@ -4388,9 +4389,8 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
           ...paquetesFiltrados,
           ...serviciosFiltrados,
           [
-            { content: 'TOTAL INGRESOS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: formatCurrency(totalIngresosTabla), styles: { fontStyle: 'bold' } },
-            { content: '', colSpan: 2 }
+            { content: 'TOTAL INGRESOS', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalIngresosTabla), styles: { fontStyle: 'bold' } }
           ]
         ]
       : [[{ content: 'No hay datos disponibles', colSpan: 6, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
@@ -4398,15 +4398,16 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
     columnStyles: { 
-      0: { cellWidth: 20 }, 
-      1: { cellWidth: 25 }, 
-      2: { cellWidth: 35 }, 
-      3: { cellWidth: 25, halign: 'right' }, 
-      4: { cellWidth: 25, halign: 'center' }, 
-      5: { cellWidth: 'auto', halign: 'center' } 
+      0: { cellWidth: 20, halign: 'center' }, 
+      1: { cellWidth: 35, halign: 'center' }, 
+      2: { cellWidth: 35, halign: 'center' }, 
+      3: { cellWidth: 25, halign: 'center' }, 
+      4: { cellWidth: 'auto', halign: 'center' },
+      5: { cellWidth: 25, halign: 'center' }
     },
     margin: { left: 10, right: 10 },
-    pageBreak: 'auto'
+    pageBreak: 'auto',
+    styles: { halign: 'center' }
   });
 
   // Agregar detalle de retiros
@@ -4422,7 +4423,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.setTextColor(220, 38, 38); // Rojo
   doc.setFontSize(12);
   doc.text('Detalle de Retiros', 10, currentY);
-  currentY += 8;
+  currentY += 4;
 
   const retirosFiltrados = withdrawalsData.data
     .filter(r => r.estado?.toLowerCase() === 'completado')
@@ -4430,35 +4431,42 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       formatDate(r.fecha),
       r.nombre_usuario || '-',
       r.descripcion?.replace(/\n/g, ' ') || 'Sin descripción',
+      r.estado,
       formatCurrency(r.monto),
-      r.estado
     ]);
 
   const hayRetiros = retirosFiltrados.length > 0;
 
   doc.autoTable({
     startY: currentY,
-    head: [['Fecha', 'Usuario', 'Descripción', 'Monto', 'Estado']],
+    head: [['Fecha', 'Usuario', 'Descripción', 'Estado', 'Monto']],
     body: hayRetiros
       ? [
           ...retirosFiltrados,
           [
             { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: formatCurrency(withdrawalsData.total), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } },
-            { content: '', styles: { fontStyle: 'bold' } }
+            { content: '', styles: { fontStyle: 'bold' } },
+            { content: formatCurrency(withdrawalsData.total), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }
           ]
         ]
       : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
     theme: 'grid',
     headStyles: { fillColor: [220, 38, 38], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
-    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 35 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 }, 4: { cellWidth: 25 } },
+    columnStyles: { 
+      0: { cellWidth: 25, halign: 'center' }, 
+      1: { cellWidth: 35, halign: 'center' }, 
+      2: { cellWidth: 'auto', halign: 'center' }, 
+      3: { cellWidth: 30, halign: 'center' }, 
+      4: { cellWidth: 25, halign: 'center' } 
+    },
     margin: { left: 10, right: 10 },
-    pageBreak: 'auto'
+    pageBreak: 'auto',
+    styles: { halign: 'center' }
   });
 
   // Balance Final
-  currentY = doc.lastAutoTable.finalY + 15;
+  currentY = doc.lastAutoTable.finalY + 10;
 
   if (currentY > 250) {
     doc.addPage();
@@ -4469,24 +4477,28 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.setTextColor(50, 50, 50);
   doc.setFontSize(14);
   doc.text('BALANCE GENERAL', 10, currentY);
-  currentY += 8;
+  currentY += 5;
 
   doc.autoTable({
     startY: currentY,
     head: [['Concepto', 'Monto (HNL)']],
     body: [
-      [{ content: 'Total Ingresos', styles: { fontStyle: 'bold', textColor: [22, 163, 74] } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right' } }],
-      [{ content: 'Total Retiros', styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }, { content: `-${formatCurrency(withdrawalsData.total)}`, styles: { fontStyle: 'bold', textColor: [220, 38, 38], halign: 'right' } }],
-      [{ content: 'GANANCIA NETA', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 10 } }, 
-       { content: formatCurrency(balanceNeto), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 10, halign: 'right' } }]
+      [{ content: 'Total Ingresos', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
+      [{ content: 'Total Retiros', styles: { fontStyle: 'bold', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(withdrawalsData.total)}`, styles: { fontStyle: 'bold', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: 'GANANCIA NETA', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
+       { content: formatCurrency(balanceNeto), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }]
     ],
     theme: 'grid',
-    headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 10 },
-    bodyStyles: { fontSize: 9, cellPadding: 3 },
-    columnStyles: { 0: { cellWidth: 140 }, 1: { cellWidth: 'auto' } },
+    headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8, cellPadding: 2 },
+    columnStyles: { 
+      0: { cellWidth: 120, halign: 'left' }, 
+      1: { cellWidth: 70, halign: 'right' } 
+    },
     margin: { left: 10, right: 10 },
     pageBreak: 'avoid',
-    tableWidth: 'wrap'
+    tableWidth: 190,
+    styles: { halign: 'center' }
   });
 };
 
@@ -4607,7 +4619,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     pageBreak: 'auto'
   });
 
-  currentY = doc.lastAutoTable.finalY + 10;
+  currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4668,7 +4680,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     pageBreak: 'auto'
   });
 
-  currentY = doc.lastAutoTable.finalY + 10;
+  currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4798,7 +4810,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 10;
+    currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4837,7 +4849,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 10;
+    currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4882,7 +4894,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 10;
+    currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4918,7 +4930,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       pageBreak: 'auto'
     });
     
-    currentY = doc.lastAutoTable.finalY + 10;
+    currentY = doc.lastAutoTable.finalY + 5;
   }
   
   // ========= 5️⃣ PAQUETES ADQUIRIDOS =========

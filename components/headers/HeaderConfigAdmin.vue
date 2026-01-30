@@ -120,6 +120,8 @@ const onNotificationClick = async (notification) => {
       await navigateTo('/admin/ReportesAdmin');
     } else if (notification.tipo === 'usuario') { 
       await navigateTo('/admin/UsuariosAdmin');
+    } else if (notification.tipo === 'paquetes') { 
+      await navigateTo('/admin/ServiciosAdmin');
     } else if (notification.tipo === 'ticket') { 
       await navigateTo('/admin/DashboardAdmin');
     }

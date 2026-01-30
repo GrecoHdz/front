@@ -1035,8 +1035,8 @@
             </button>
           </div>
             
-            <!-- Filtro por ciudad -->
-            <div class="px-2">
+           <!-- Filtro por ciudad -->
+            <!--<div class="px-2">
               <multiselect 
                 id="cityFilter"
                 v-model="selectedTechCityObject"
@@ -1057,7 +1057,7 @@
                   <span class="text-xs truncate">{{ getTechCityLabel(option) }}</span>
                 </template>
               </multiselect>
-            </div>
+            </div> -->
 
           <!-- Technicians List -->
           <div class="p-3">
@@ -1770,8 +1770,8 @@
           </button>
         </div>
           
-        <!-- Filtro por ciudad -->
-        <div class="px-2">
+        <!-- // Filtro por ciudad -->
+        <!-- <div class="px-2">
           <multiselect 
             id="cityFilter"
             v-model="selectedTechCityObject"
@@ -1792,7 +1792,7 @@
               <span class="text-xs truncate">{{ getTechCityLabel(option) }}</span>
             </template>
           </multiselect>
-        </div>
+        </div> -->
 
         <!-- Technicians List -->
         <div class="p-3">
@@ -3150,11 +3150,13 @@ const fetchTechnicians = async (cityId = null, limit = 4, offset = 0, serviceId 
     console.log('Parámetros recibidos:', { cityId, limit, offset, serviceId })
     
     let url = `/usuarios/tecnicos?limit=${limit}&offset=${offset}`
+    
+    // Si se proporciona un ID de ciudad, filtrar por esa ciudad
     if (cityId) {
       url += `&id_ciudad=${cityId}`
-      console.log('Añadiendo filtro de ciudad con ID:', cityId)
+      console.log('Filtrando técnicos por ciudad con ID:', cityId)
     } else {
-      console.log('No se proporcionó ID de ciudad')
+      console.log('No se proporcionó ID de ciudad, mostrando todos los técnicos')
     }
     
     if (serviceId) {
@@ -3500,9 +3502,22 @@ const paginatedTechnicians = computed(() => {
 
 // Función para cambiar de página de técnicos
 const changeTechPage = async (page) => {
-  currentTechPage.value = page
-  const offset = (page - 1) * techsPerPage
-  await fetchTechnicians(selectedTechCityObject.value?.id_ciudad, techsPerPage, offset, serviceToAssign.value?.id_servicio)
+  try {
+    currentTechPage.value = page;
+    const offset = (page - 1) * techsPerPage;
+    
+    // Obtener el ID de la ciudad del paquete seleccionado o del selector de ciudad
+    const cityId = selectedPackage.value?.Usuario?.ciudad?.id_ciudad || 
+                  selectedPackage.value?.Usuario?.id_ciudad || 
+                  selectedTechCityObject.value?.id_ciudad;
+    
+    console.log('Cambiando a página', page, 'con ciudad:', cityId);
+    
+    await fetchTechnicians(cityId, techsPerPage, offset, serviceToAssign.value?.id_servicio);
+  } catch (error) {
+    console.error('Error al cambiar de página de técnicos:', error);
+    showError('No se pudieron cargar los técnicos');
+  }
 }
 
 const hasActiveFilters = computed(() => {
@@ -4074,11 +4089,30 @@ const openPackageAssignment = async (pkg) => {
     isAssigningPackage.value = true
     showPackageAssignmentModal.value = true
     
-    // Cargar ciudades y técnicos usando las mismas funciones que el modal de técnicos
-    await Promise.all([
-      fetchCities(),
-      fetchTechnicians()
-    ])
+    // Obtener el ID de la ciudad del usuario que tiene el paquete
+    const cityId = pkg.Usuario?.ciudad?.id_ciudad || pkg.Usuario?.id_ciudad;
+    console.log('ID de ciudad del usuario:', cityId);
+    
+    // Actualizar el selectedTechCityObject si se encontró una ciudad
+    if (cityId) {
+      // Si ya tenemos las ciudades cargadas, buscar la ciudad
+      if (cities.value.length > 0) {
+        const city = cities.value.find(c => c.id_ciudad === cityId);
+        if (city) {
+          selectedTechCityObject.value = city;
+        }
+      } else {
+        // Si no tenemos las ciudades, cargarlas primero
+        await fetchCities();
+        const city = cities.value.find(c => c.id_ciudad === cityId);
+        if (city) {
+          selectedTechCityObject.value = city;
+        }
+      }
+    }
+    
+    // Cargar técnicos de la misma ciudad que el usuario
+    await fetchTechnicians(cityId);
     
     // Asegurarse de que los datos estén actualizados
     await fetchActivePackages(true)

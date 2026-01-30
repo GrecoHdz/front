@@ -495,6 +495,60 @@
       </div>
     </div>
   </Transition>
+  
+  <!-- Modal de confirmación de canjeo de paquete -->
+  <Transition
+    name="fade"
+    enter-active-class="transition-opacity duration-300 ease-out"
+    leave-active-class="transition-opacity duration-200 ease-in"
+    enter-from-class="opacity-0"
+    leave-to-class="opacity-0"
+  >
+    <div v-if="showConfirmarCanjeoModal && selectedPaquete" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 dark:bg-black/70">
+      <div 
+        class="w-full max-w-md transform transition-all duration-300 ease-out"
+        :class="{
+          'opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95': !showConfirmarCanjeoModal,
+          'opacity-100 translate-y-0 sm:scale-100': showConfirmarCanjeoModal
+        }"
+        @click.stop
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 dark:bg-blue-900/30">
+              <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 class="mb-2 text-xl font-semibold text-center text-gray-900 dark:text-white">¿Canjear paquete?</h3>
+            <p class="mb-6 text-sm text-center text-gray-500 dark:text-gray-400">
+              ¿Estás seguro de que deseas canjear <span class="font-medium text-gray-700 dark:text-gray-200">{{ selectedPaquete.nombre }}</span> por <span class="font-bold text-blue-600 dark:text-blue-400">L. {{ selectedPaquete.costo.toLocaleString('es-HN') }}</span> de su saldo?
+            </p>
+            <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3"> 
+              <button
+                type="button"
+                @click="confirmarCanjeo"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 flex items-center justify-center"
+              >
+                <span>Sí, canjear</span>
+                <svg v-if="isProcessingPayment" class="w-4 h-4 ml-2 -mr-1 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </button>
+              <button
+                type="button"
+                @click="cancelarCanjeo"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </section>
  
 
@@ -1775,6 +1829,7 @@ const handleImageError = (paqueteId) => {
 // Estado del modal de pago de paquete
 const showPaquetePagoModal = ref(false);
 const showConfirmarUsoModal = ref(false);
+const showConfirmarCanjeoModal = ref(false);
 const selectedPaquete = ref(null);
 const isLoadingAccounts = ref(false);
 const bankAccounts = ref([]);
@@ -1847,7 +1902,18 @@ const canjearPaquete = async (paquete) => {
     showPaquetePagoModal.value = true;
     return;
   }
+  
+  // Si tiene crédito suficiente, mostrar modal de confirmación
+  selectedPaquete.value = paquete;
+  showConfirmarCanjeoModal.value = true;
+};
 
+const confirmarCanjeo = async () => {
+  const paquete = selectedPaquete.value;
+  if (!paquete) return;
+  
+  showConfirmarCanjeoModal.value = false;
+  
   try {
     // Obtener el usuario de la cookie
     const user = useCookie('user').value;
@@ -1952,6 +2018,11 @@ const canjearPaquete = async (paquete) => {
     const errorMessage = error.data?.error || error.response?.data?.error || error.message || 'Ocurrió un error al procesar tu solicitud';
     showToast('Error', errorMessage, 'error');
   }
+};
+
+const cancelarCanjeo = () => {
+  showConfirmarCanjeoModal.value = false;
+  selectedPaquete.value = null;
 };
 
 // Función para cargar las cuentas bancarias
@@ -2235,6 +2306,38 @@ const usarPaquete = async (paquete) => {
         id_paquete_usuario: paqueteUsuario.id_paquete_usuario,
         nombre_paquete: paquete.nombre
       }, 'use_package');
+      
+      // Notificar a los administradores y super administradores
+      try {
+        const user = useCookie('user').value;
+        const notificationData = { titulo: 'Solicitud Uso de Paquete' };
+        
+        await Promise.all([
+          $api('/notificaciones/enviar', {
+            method: 'POST',
+            baseURL: config.public.apiBase,
+            headers: { 
+              'Authorization': `Bearer ${auth.token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+          }),
+          $api('/notificaciones/enviar', {
+            method: 'POST',
+            baseURL: config.public.apiBase,
+            headers: { 
+              'Authorization': `Bearer ${auth.token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+          })
+        ]);
+      } catch (error) {
+        console.error('Error al enviar notificaciones:', error);
+        // No mostramos error al usuario para no interrumpir el flujo
+      }
       
       // Cerrar el modal después de completar las operaciones
       showConfirmarUsoModal.value = false;
