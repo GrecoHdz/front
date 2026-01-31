@@ -1358,9 +1358,8 @@
               <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 Enviar notificación
               </h3>
-              
-              <div class="space-y-4">
-                <div>
+                            <div class="space-y-4 relative">
+                <div class="relative z-10">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Destinatario
                   </label>
@@ -1384,19 +1383,96 @@
                 </div>
 
                 <div v-if="tipoEnvio === 'usuario'">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    ID de Usuario
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Buscar Usuario
                   </label>
-                  <input
-                    v-model.number="idUsuarioDestino"
-                    type="number"
-                    min="1"
-                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                    placeholder="ID del usuario"
-                  >
+                  <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                      <div 
+                        @click="abrirModalBuscarUsuario()"
+                        class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white cursor-pointer flex items-center justify-between"
+                      >
+                        <span class="truncate">
+                          {{ usuarioSeleccionado ? (usuarioSeleccionado.nombre || `Usuario #${usuarioSeleccionado.id_usuario}`) : 'Haz clic para buscar usuario' }}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                      <input
+                        v-model.number="idUsuarioDestino"
+                        type="hidden"
+                      >
+                    </div>
+                    <button
+                      v-if="usuarioSeleccionado"
+                      type="button"
+                      @click="limpiarUsuarioSeleccionado"
+                      class="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                      title="Limpiar selección"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
-                <div v-if="tipoEnvio === 'rol'">
+                <div v-if="tipoEnvio === 'ciudad'" class="space-y-4">
+                  <!-- Selector de ciudad -->
+                  <div class="relative z-10">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Ciudad
+                    </label>
+                    <multiselect 
+                      v-model="ciudadSeleccionada"
+                      :options="ciudades"
+                    :searchable="false"
+                      :loading="cargandoCiudades"
+                      :close-on-select="true"
+                      :show-labels="false"
+                      placeholder="Seleccionar ciudad"
+                      label="nombre"
+                      track-by="id_ciudad"
+                      class="multiselect-admin-filter"
+                      :options-limit="100"
+                    >
+                      <template #singleLabel="{ option }">
+                        <span class="text-[11px] truncate">{{ option.nombre }}</span>
+                      </template>
+                      <template #noResult>
+                        <div class="p-2 text-xs text-gray-500">
+                          No se encontraron ciudades. Intenta con otro término de búsqueda.
+                        </div>
+                      </template>
+                    </multiselect>
+                  </div>
+
+                  <!-- Selector de rol opcional -->
+                  <div class="relative z-0">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Rol (opcional)
+                    </label>
+                    <multiselect 
+                      v-model="rolCiudadSeleccionado"
+                      :options="rolOptions"
+                      :searchable="false"
+                      :close-on-select="true"
+                      :show-labels="false"
+                      placeholder="Filtrar por rol (opcional)"
+                      label="label"
+                      track-by="value"
+                      class="multiselect-admin-filter"
+                      :options-limit="100"
+                    >
+                      <template #singleLabel="{ option }">
+                        <span class="text-[11px] truncate">{{ option.label }}</span>
+                      </template>
+                    </multiselect>
+                  </div>
+                </div>
+
+                <div v-if="tipoEnvio === 'rol'" class="relative z-0 mt-2">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Rol
                   </label>
@@ -2588,11 +2664,17 @@ const isLoading = ref(true)
 const isSaving = ref(false)
 const referidorPredeterminado = ref(null)
 
+// Variables para selección de ciudad
+const ciudadSeleccionada = ref(null)
+const rolCiudadSeleccionado = ref(null)
+const cargandoCiudades = ref(false)
+
 // Variables para búsqueda de usuarios
 const mostrarModalBuscarUsuario = ref(false)
 const terminoBusquedaUsuario = ref('')
 const buscandoUsuarios = ref(false)
 const usuariosEncontrados = ref([])
+const usuarioSeleccionado = ref(null)
 
 // Watcher para el término de búsqueda con debounce
 watch(terminoBusquedaUsuario, (newVal) => {
@@ -2602,6 +2684,35 @@ watch(terminoBusquedaUsuario, (newVal) => {
     usuariosEncontrados.value = [];
   }
 });
+
+// Limpiar selecciones al cambiar el tipo de envío
+watch(() => tipoEnvio.value, async (newValue) => {
+  if (newValue !== 'usuario') {
+    usuarioSeleccionado.value = null;
+  }
+  if (newValue === 'ciudad' && ciudades.value.length === 0) {
+    await cargarCiudades();
+  } else if (newValue !== 'ciudad') {
+    ciudadSeleccionada.value = null;
+  }
+});
+
+// Método para seleccionar un usuario para envío de notificación
+const seleccionarUsuario = (usuario) => {
+  usuarioSeleccionado.value = usuario;
+  idUsuarioDestino.value = usuario.id_usuario;
+  mostrarModalBuscarUsuario.value = false;
+  terminoBusquedaUsuario.value = '';
+  usuariosEncontrados.value = [];
+};
+
+// Método para limpiar la selección de usuario
+const limpiarUsuarioSeleccionado = () => {
+  usuarioSeleccionado.value = null;
+  idUsuarioDestino.value = null;
+  terminoBusquedaUsuario.value = '';
+  usuariosEncontrados.value = [];
+};
 
 // Configurar el debounce para la búsqueda
 const buscarUsuarios = debounce(async () => {
@@ -2671,9 +2782,10 @@ const tipoEnvioObject = ref(null)
 
 // Opciones para el selector de tipo de envío
 const tipoEnvioOptions = [
-  { value: 'usuario', label: 'Usuario específico' },
   { value: 'rol', label: 'Por rol' },
-  { value: 'global', label: 'Todos los usuarios' }
+  { value: 'usuario', label: 'Usuario específico' },
+  { value: 'ciudad', label: 'Usuarios de una ciudad' }, 
+  { value: 'global', label: 'Todos los usuarios de la Plataforma' }, 
 ]
 
 // Función para etiquetar tipo de envío
@@ -2905,8 +3017,8 @@ const puedeEnviar = computed(() => {
   if (!tipoEnvio.value) return false
   if (tipoEnvio.value === 'usuario') return !!idUsuarioDestino.value
   if (tipoEnvio.value === 'rol') return !!nombreRolDestino.value
-  if (tipoEnvio.value === 'global') return true
-  return false
+  if (tipoEnvio.value === 'ciudad') return !!ciudadSeleccionada.value?.id_ciudad
+  return true
 })
 
 // Computed para paquetes filtrados (sin paginación)
@@ -4557,11 +4669,41 @@ const cambiarPaginaBeneficios = (nuevaPagina, event) => {
   return false;
 }
 
+// ===== FUNCIONES PARA OBTENER CIUDADES =====
+const obtenerCiudades = async () => {
+  if (ciudades.value.length > 0) return; // Ya tenemos las ciudades cargadas
+  
+  cargandoCiudades.value = true;
+  try {
+    const response = await $api('/ciudades', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    ciudades.value = Array.isArray(response) ? response : [];
+  } catch (error) {
+    console.error('Error al obtener ciudades:', error);
+    showToastMessage('Error al cargar la lista de ciudades', 'error');
+  } finally {
+    cargandoCiudades.value = false;
+  }
+};
+
 // ===== FUNCIONES PARA BÚSQUEDA DE USUARIOS =====
 const abrirModalBuscarUsuario = () => {
   mostrarModalBuscarUsuario.value = true
   terminoBusquedaUsuario.value = ''
   usuariosEncontrados.value = []
+  // Forzar la actualización del DOM si es necesario
+  nextTick(() => {
+    const searchInput = document.querySelector('input[placeholder="Buscar por nombre"]')
+    if (searchInput) {
+      searchInput.focus()
+    }
+  })
 }
 
 const cerrarModalBuscarUsuario = () => {
@@ -4571,7 +4713,7 @@ const cerrarModalBuscarUsuario = () => {
   buscandoUsuarios.value = false
 }
 
-const seleccionarUsuario = async (usuario) => {
+const seleccionarReferentePredeterminado = async (usuario) => {
   try {
     // Primero obtenemos el ID de la configuración existente
     const configResponse = await $api('/config/valor/referidor_predeterminado', {
@@ -4703,6 +4845,8 @@ const resetearFormularioEnvio = () => {
   nombreRolDestinoObject.value = null
   tipoEnvio.value = ''
   tipoEnvioObject.value = null
+  ciudadSeleccionada.value = null
+  rolCiudadSeleccionado.value = null
 }
 
 const enviarNotificacion = async () => {
@@ -4722,7 +4866,13 @@ const enviarNotificacion = async () => {
     if (tipoEnvio.value === 'usuario') {
       payload.id_usuario = idUsuarioDestino.value
     } else if (tipoEnvio.value === 'rol') {
-      payload.nombre_rol = nombreRolDestino.value
+      payload.nombre_rol = nombreRolDestinoObject.value.value
+    } else if (tipoEnvio.value === 'ciudad') {
+      payload.id_ciudad = ciudadSeleccionada.value.id_ciudad
+      // Si se seleccionó un rol para filtrar, lo agregamos al payload
+      if (rolCiudadSeleccionado.value) {
+        payload.nombre_rol = rolCiudadSeleccionado.value.value
+      }
     } else if (tipoEnvio.value === 'global') {
       payload.global = true
     }
@@ -4742,7 +4892,11 @@ const enviarNotificacion = async () => {
       // Mensaje mejorado con información del tipo de envío
       const tipoEnvioTexto = response.data.tipo_envio || 
         (tipoEnvio.value === 'usuario' ? 'usuario individual' : 
-         tipoEnvio.value === 'rol' ? `rol ${nombreRolDestino.value}` : 
+         tipoEnvio.value === 'rol' ? `rol ${nombreRolDestinoObject.value?.label || ''}` : 
+         tipoEnvio.value === 'ciudad' ? 
+           (ciudadSeleccionada.value?.nombre ? 
+             `ciudad ${ciudadSeleccionada.value.nombre}${rolCiudadSeleccionado.value ? ` (rol: ${rolCiudadSeleccionado.value.label})` : ''}` : 
+             'ciudad') : 
          'todos los usuarios')
       
       showToastMessage(
@@ -5723,7 +5877,7 @@ input, select, textarea {
 /* Estilos para vue-multiselect en filtros de admin */
 .multiselect-admin-filter {
   position: relative;
-  z-index: 50;
+  z-index: auto;
 }
 
 .multiselect-admin-filter .multiselect__tags {
@@ -5814,13 +5968,15 @@ input, select, textarea {
 }
 
 .multiselect-admin-filter .multiselect__content-wrapper {
-  position: absolute; 
-  z-index: 30;
+  position: absolute;
+  z-index: 9999;
   background: white;
-  border: 1px solid #d1d5db;
+  border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   margin-top: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  min-width: 200px;
 }
 
 .dark .multiselect-admin-filter .multiselect__content-wrapper {
