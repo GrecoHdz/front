@@ -2453,35 +2453,23 @@ const showPaymentConfirmation = (pkg, action) => {
 // Función para crear factura automáticamente
 const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado) => {
   try {
-    console.log('🔵 === INICIO CREACIÓN DE FACTURA ===');
-    console.log('📦 Datos recibidos:', {
-      idUsuario,
-      payment,
-      tipoPago,
-      idRelacionado
-    });
 
     // Verificar RTN
     let rtnResponse = { success: false };
     try {
-      console.log('🔍 Verificando RTN para usuario:', idUsuario);
       rtnResponse = await $api(`/usuarios/verificar-rtn/${idUsuario}`, {
         baseURL: config.public.apiBase,
         method: 'GET',
         headers: { 'Authorization': `Bearer ${auth.token}` }
       });
-      console.log('✅ Respuesta verificación RTN:', rtnResponse);
     } catch (rtnError) {
-      console.log('⚠️ Error verificando RTN (continuando sin RTN):', rtnError);
     }
 
     let total = parseFloat(payment.monto_total || payment.monto || 0);
-    console.log('💰 Monto total del pago:', total);
 
     // Si es pago de paquete, calcular solo la comisión
     if (tipoPago === 'package') {
       try {
-        console.log('📊 Obteniendo comisión por paquete...');
         const comisionResponse = await $api('/config/valor/comision_por_paquete', {
           baseURL: config.public.apiBase,
           method: 'GET',
@@ -2491,18 +2479,11 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado)
           }
         });
 
-        console.log('✅ Respuesta de comisión:', comisionResponse);
-
         if (comisionResponse && comisionResponse.valor) {
           const porcentajeComision = parseFloat(comisionResponse.valor);
           const montoBase = total;
           total = (montoBase * porcentajeComision) / 100;
           
-          console.log('💵 Cálculo de comisión:', {
-            montoBase,
-            porcentajeComision,
-            comisionCalculada: total
-          });
         } else {
           console.warn('⚠️ No se obtuvo porcentaje de comisión, usando monto completo');
         }
@@ -2525,19 +2506,12 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado)
     // Asignar ID correspondiente
     if (tipoPago === 'package') {
       facturaData.id_pago_paquete = idRelacionado;
-      console.log('📦 Asignado id_pago_paquete:', idRelacionado);
     }
 
     if (rtnResponse?.success && rtnResponse.data) {
       facturaData.rtn_cliente = rtnResponse.data.rtn;
       facturaData.nombre_cliente = rtnResponse.data.nombre.trim();
-      console.log('👤 Datos de cliente agregados:', {
-        rtn: facturaData.rtn_cliente,
-        nombre: facturaData.nombre_cliente
-      });
     }
-
-    console.log('📤 Enviando datos de factura al backend:', facturaData);
 
     const facturaResponse = await $api('/facturas', {
       baseURL: config.public.apiBase,
@@ -2548,9 +2522,6 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado)
       },
       body: facturaData
     });
-
-    console.log('✅ Respuesta del servidor (factura creada):', facturaResponse);
-    console.log('🔵 === FIN CREACIÓN DE FACTURA ===');
     
   } catch (error) {
     console.error('❌ Error generando factura:', error);
@@ -2865,7 +2836,6 @@ const openFacturaModal = async (payment) => {
     empresaRangoAutorizado.value = '';
     empresaFechaLimite.value = '';
 
-    console.log('🔍 Abriendo modal de factura para pago:', payment);
     // Clonar para no modificar el objeto original y resetear campos financieros/fiscales
     selectedFacturaPayment.value = { 
       ...payment, 
@@ -2882,8 +2852,6 @@ const openFacturaModal = async (payment) => {
         const params = new URLSearchParams();
         params.append('id_pago_paquete', payment.id_pago_paquete);
 
-        console.log('📤 Buscando factura con params:', params.toString());
-
         const response = await $api(`/facturas/relaciones/idpago?${params.toString()}`, {
           baseURL: config.public.apiBase,
           method: 'GET',
@@ -2892,8 +2860,6 @@ const openFacturaModal = async (payment) => {
             'Authorization': `Bearer ${auth.token}`
           }
         });
-
-        console.log('📄 Respuesta de búsqueda de factura:', response);
 
         if (response?.status === 'success' && response.factura) {
           const factura = response.factura;
@@ -2917,7 +2883,6 @@ const openFacturaModal = async (payment) => {
           if (factura.isv) selectedFacturaPayment.value.isv = factura.isv;
           if (factura.total) selectedFacturaPayment.value.total = factura.total;
           
-          console.log('✅ Factura cargada exitosamente');
         } else if (response?.status === 'not_found') {
           console.warn('ℹ️ No se encontró factura asociada al pago:', response.message);
           // Los valores ya están reseteados por el inicio de la función
@@ -2957,7 +2922,6 @@ const openFacturaModal = async (payment) => {
           if (factura.cai) empresaCAI.value = factura.cai;
           if (factura.numero_factura_correlativo) empresaCorrelativo.value = factura.numero_factura_correlativo;
           
-          console.log('✅ Factura cargada por ID');
         } else {
           console.warn('⚠️ La respuesta no contiene datos de factura válidos:', response);
         }
@@ -3147,26 +3111,17 @@ const changePackagePage = async (estado, newPage) => {
 // Función para obtener técnicos desde la API
 const fetchTechnicians = async (cityId = null, limit = 4, offset = 0, serviceId = null) => {
   try {
-    console.log('=== fetchTechnicians ===')
-    console.log('Parámetros recibidos:', { cityId, limit, offset, serviceId })
-    
     let url = `/usuarios/tecnicos?limit=${limit}&offset=${offset}`
     
     // Si se proporciona un ID de ciudad, filtrar por esa ciudad
     if (cityId) {
       url += `&id_ciudad=${cityId}`
-      console.log('Filtrando técnicos por ciudad con ID:', cityId)
-    } else {
-      console.log('No se proporcionó ID de ciudad, mostrando todos los técnicos')
-    }
+    } 
     
     if (serviceId) {
       url += `&id_servicio=${serviceId}`
-      console.log('Añadiendo filtro de servicio con ID:', serviceId)
     }
     
-    console.log('URL final de la petición:', url)
-
     const response = await $api(url, {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -3225,7 +3180,6 @@ const fetchCatalogoServicios = async () => {
       // Si la respuesta tiene una propiedad servicios
       servicios = response.servicios
     } else {
-      console.warn('Estructura de respuesta no reconocida:', response)
       servicios = []
     }
     
@@ -3511,8 +3465,6 @@ const changeTechPage = async (page) => {
     const cityId = selectedPackage.value?.Usuario?.ciudad?.id_ciudad || 
                   selectedPackage.value?.Usuario?.id_ciudad || 
                   selectedTechCityObject.value?.id_ciudad;
-    
-    console.log('Cambiando a página', page, 'con ciudad:', cityId);
     
     await fetchTechnicians(cityId, techsPerPage, offset, serviceToAssign.value?.id_servicio);
   } catch (error) {
@@ -4092,7 +4044,6 @@ const openPackageAssignment = async (pkg) => {
     
     // Obtener el ID de la ciudad del usuario que tiene el paquete
     const cityId = pkg.Usuario?.ciudad?.id_ciudad || pkg.Usuario?.id_ciudad;
-    console.log('ID de ciudad del usuario:', cityId);
     
     // Actualizar el selectedTechCityObject si se encontró una ciudad
     if (cityId) {
@@ -4132,7 +4083,6 @@ const selectPackageTechnician = async (tech) => {
     selectedPackageTechnician.value = tech;
     
     // Obtener el porcentaje de comisión
-    console.log('Obteniendo porcentaje de comisión...');
     const comisionResponse = await $api('/config/valor/comision_por_paquete', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -4142,7 +4092,6 @@ const selectPackageTechnician = async (tech) => {
       }
     });
     
-    console.log('Respuesta de comisión:', comisionResponse);
     comisionPorcentaje.value = parseFloat(comisionResponse.valor) || 0;
     
     // Mostrar modal de confirmación y cerrar el modal de selección
@@ -4165,10 +4114,6 @@ const confirmPackageAssignment = async () => {
     const porcentajeTecnico = 100 - comisionPorcentaje.value;
     const montoTecnico = (montoPaquete * porcentajeTecnico) / 100;
     
-    console.log('=== DATOS A ENVIAR A MOVIMIENTOS ===');
-    console.log('Técnico:', selectedPackageTechnician.value.nombre);
-    console.log('Monto a liquidar:', montoTecnico);
-
     // 1. Enviar movimiento de ingreso
     const movimientoResponse = await $api('/movimientos', {
       baseURL: config.public.apiBase,
@@ -4196,7 +4141,6 @@ const confirmPackageAssignment = async () => {
           'Authorization': `Bearer ${useCookie('token').value}`
         }
       });
-      console.log('Paquete marcado como utilizado exitosamente');
 
       // 3. Enviar notificaciones
       try {

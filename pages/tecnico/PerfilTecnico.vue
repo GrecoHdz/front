@@ -1482,19 +1482,6 @@ const uploadProfileImage = async (file) => {
   const url = `/usuarios/imagen-perfil/${user.value.id_usuario}`
   const fullUrl = `${config.public.apiBase}${url}`
   
-  console.log('Enviando solicitud a:', fullUrl)
-  console.log('Método: POST')
-  console.log('Headers:', {
-    'Accept': 'application/json',
-    'Authorization': `Bearer ${auth.token?.substring(0, 10)}...` // Mostrar solo parte del token por seguridad
-  })
-  console.log('Body (FormData):', {
-    hasImage: file ? 'Sí' : 'No',
-    fileName: file?.name,
-    fileType: file?.type,
-    fileSize: file?.size
-  })
-
   try {
     isUploading.value = true
     

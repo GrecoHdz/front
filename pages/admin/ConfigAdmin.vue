@@ -2664,6 +2664,15 @@ const isLoading = ref(true)
 const isSaving = ref(false)
 const referidorPredeterminado = ref(null)
 
+// Variables para el envío de notificaciones
+const mostrarModalEnvio = ref(false)
+const notificacionAEnviar = ref(null)
+const tipoEnvio = ref('')
+const tipoEnvioObject = ref(null)
+const idUsuarioDestino = ref(null)
+const nombreRolDestino = ref('')
+const nombreRolDestinoObject = ref(null)
+
 // Variables para selección de ciudad
 const ciudadSeleccionada = ref(null)
 const rolCiudadSeleccionado = ref(null)
@@ -2675,6 +2684,14 @@ const terminoBusquedaUsuario = ref('')
 const buscandoUsuarios = ref(false)
 const usuariosEncontrados = ref([])
 const usuarioSeleccionado = ref(null)
+
+// Opciones para el selector de tipo de envío
+const tipoEnvioOptions = [
+  { value: 'rol', label: 'Por rol' },
+  { value: 'usuario', label: 'Usuario específico' },
+  { value: 'ciudad', label: 'Usuarios de una ciudad' }, 
+  { value: 'global', label: 'Todos los usuarios de la Plataforma' }, 
+]
 
 // Watcher para el término de búsqueda con debounce
 watch(terminoBusquedaUsuario, (newVal) => {
@@ -2773,29 +2790,14 @@ const nuevaNotificacion = ref({
   tipo: '',
   titulo: ''
 })
+ 
 
-// Modal envío
-const mostrarModalEnvio = ref(false)
-const notificacionAEnviar = ref(null)
-const tipoEnvio = ref('')
-const tipoEnvioObject = ref(null)
-
-// Opciones para el selector de tipo de envío
-const tipoEnvioOptions = [
-  { value: 'rol', label: 'Por rol' },
-  { value: 'usuario', label: 'Usuario específico' },
-  { value: 'ciudad', label: 'Usuarios de una ciudad' }, 
-  { value: 'global', label: 'Todos los usuarios de la Plataforma' }, 
-]
 
 // Función para etiquetar tipo de envío
 const getTipoEnvioLabel = (option) => {
   if (!option) return ''
   return option.label
-}
-const idUsuarioDestino = ref(null)
-const nombreRolDestino = ref('')
-const nombreRolDestinoObject = ref(null)
+}   
 
 // Opciones para el selector de rol
 const rolOptions = [
@@ -4041,13 +4043,6 @@ const guardarCorrelativo = async () => {
       
     const method = correlativoEditando.value ? 'PUT' : 'POST';
     
-    // Log para depuración
-    console.log('=== ENVIANDO CORRELATIVO ===');
-    console.log('URL:', url);
-    console.log('Método:', method);
-    console.log('Datos a enviar:', correlativoForm.value);
-    console.log('CAI length:', correlativoForm.value.cai.length);
-    
     const response = await $api(url, {
       baseURL: config.public.apiBase,
       method,
@@ -4058,10 +4053,6 @@ const guardarCorrelativo = async () => {
       },
       body: JSON.stringify(correlativoForm.value)
     });
-    
-    // Log para depuración
-    console.log('=== RESPUESTA RECIBIDA ===');
-    console.log('Response:', response);
     
     if (response.success) {
       showToastMessage(
@@ -4167,7 +4158,6 @@ const cambiarPaginaCorrelativos = (nuevaPagina, event) => {
 const guardarConfiguraciones = async () => {
   try {
     isSaving.value = true
-    console.log('=== INICIO DEL PROCESO DE GUARDADO ===')
     
     // Detectar cambios y preparar datos para enviar
     const cambios = []
@@ -4302,12 +4292,9 @@ const guardarConfiguraciones = async () => {
     }
 
     if (cambios.length === 0) {
-      console.log('No hay cambios para guardar')
       showToastMessage('No hay cambios para guardar', 'info')
       return
     }
-
-    console.log('=== CAMBIOS A GUARDAR ===', JSON.stringify(cambios, null, 2))
 
     // Hacer peticiones individuales para cada cambio
     const promesas = cambios.map(async (cambio) => {
@@ -4321,10 +4308,6 @@ const guardarConfiguraciones = async () => {
       const method = cambio.id ? 'PUT' : 'POST';
       const fullUrl = `${config.public.apiBase}${url}`;
       
-      console.log(`\n=== SOLICITUD ${method} ===`);
-      console.log('URL:', fullUrl);
-      console.log('Payload:', JSON.stringify(payload, null, 2));
-      
       try {
         const response = await $api(url, {
           baseURL: config.public.apiBase,
@@ -4337,7 +4320,6 @@ const guardarConfiguraciones = async () => {
           body: JSON.stringify(payload)
         });
         
-        console.log(`✅ Respuesta exitosa (${method}):`, response);
         return response;
       } catch (error) {
         console.error(`❌ Error en ${method} ${url}:`, {
@@ -4358,7 +4340,6 @@ const guardarConfiguraciones = async () => {
     })
 
     const resultados = await Promise.all(promesas)
-    console.log('=== TODAS LAS PETICIONES COMPLETADAS ===', resultados)
     
     // Actualizar valores originales después de guardar exitosamente
     await cargarConfiguraciones()
@@ -4850,6 +4831,11 @@ const resetearFormularioEnvio = () => {
 }
 
 const enviarNotificacion = async () => {
+  if (!tipoEnvio.value) {
+    showToastMessage('Por favor selecciona un tipo de envío', 'error')
+    return
+  }
+  
   if (!puedeEnviar.value) {
     showToastMessage('Por favor completa la información de destino', 'error')
     return
@@ -5355,7 +5341,6 @@ async function cargarPaquetes() {
 
 // Abrir modal para nuevo paquete
 function nuevoPaquete() {
-  console.log('Abriendo modal de nuevo paquete'); // Para depuración
   paqueteEditando.value = null;
   paqueteForm.value = {
     nombre: '',
@@ -5369,12 +5354,10 @@ function nuevoPaquete() {
     imagen_public_id: null
   };
   mostrarModalNuevoPaquete.value = true;
-  console.log('Estado de mostrarModalNuevoPaquete:', mostrarModalNuevoPaquete.value); // Para depuración
 }
 
 // Abrir modal para editar paquete
 function editarPaquete(paquete) {
-  console.log('Editando paquete:', paquete);
   paqueteEditando.value = paquete;
   paqueteForm.value = {
     nombre: paquete.nombre,
@@ -5387,7 +5370,6 @@ function editarPaquete(paquete) {
     imagen_previa: paquete.imagen_url || null,
     imagen_public_id: paquete.imagen_public_id || null
   };
-  console.log('Formulario de edición:', paqueteForm.value);
   mostrarModalNuevoPaquete.value = true;
 }
 
@@ -5542,17 +5524,6 @@ async function guardarPaquete() {
       // Si estamos editando y no hay una nueva imagen, pero hay un public_id, lo enviamos
       formData.append('imagen_public_id', paqueteForm.value.imagen_public_id);
     }
-
-    // Depuración: Mostrar los datos que se enviarán
-    console.log('Enviando datos al servidor:', {
-      url: `${config.public.apiBase}${url}`,
-      method,
-      headers: {
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'multipart/form-data'
-      },
-      formData: Object.fromEntries(formData.entries())
-    });
 
     // Realizar la petición
     const response = await $api(url, {

@@ -1948,11 +1948,8 @@ const handleReferral = async (userId) => {
     if (!response.ok) {
       throw new Error('Error al registrar el referido');
     }
-    
-    console.log('Referido registrado exitosamente');
   } catch (error) {
     console.error('Error en handleReferral:', error);
-    // No mostrar error al usuario para no interrumpir el flujo principal
   }
 };
 

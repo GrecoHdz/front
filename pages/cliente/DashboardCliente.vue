@@ -1870,8 +1870,6 @@ const cargarPaquetesActivos = async () => {
       }
     });
     
-    console.log('Respuesta de la API de paquetes activos:', response);
-    
     // Inicializar estados de carga de imágenes
     response.forEach(paquete => {
       if (paquete.imagen_url) {
@@ -2220,7 +2218,6 @@ const cargarPaquetesUsuario = async () => {
     });
 
     if (response.success && response.data) {
-      console.log('Paquetes del usuario:', JSON.stringify(response.data, null, 2));
       paquetesUsuario.value = response.data;
     }
   } catch (error) {
@@ -2261,17 +2258,11 @@ const getEstadoPaquete = (paqueteId) => {
 
 // Función para manejar el clic en el botón de paquete
 const handlePaqueteClick = (paquete) => {
-  console.log('Paquete clickeado:', paquete);
   const estado = getEstadoPaquete(paquete.id);
-  console.log('Estado del paquete:', estado);
   
   if (estado === 'Adquirido') {
-    console.log('Mostrando modal de confirmación');
     selectedPaquete.value = paquete;
     showConfirmarUsoModal.value = true;
-    console.log('showConfirmarUsoModal después de cambiar:', showConfirmarUsoModal.value);
-  } else {
-    console.log('No se puede usar el paquete. Estado actual:', estado);
   }
 };
 
