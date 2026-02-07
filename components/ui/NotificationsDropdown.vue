@@ -389,7 +389,7 @@
             <!-- Mensaje principal -->
             <div class="text-center mb-6">
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Notamos que tienes un pago pendiente. Recuerda que los pagos deben realizarse únicamente a las cuentas proporcionadas por HogarSeguro.
+                Notamos que tienes un pago pendiente. Recuerda que los pagos deben realizarse únicamente a las cuentas proporcionadas por MiSeguro.
               </p>
             </div>
 

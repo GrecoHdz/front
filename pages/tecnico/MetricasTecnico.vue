@@ -591,10 +591,10 @@ import Multiselect from 'vue-multiselect'
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Metricas Técnico',
+  title: 'MiSeguro - Metricas Técnico',
   meta: [
     { name: 'description', content: 'Panel de Metricas Técnico - Gestiona tus metricas' },
-    { name: 'keywords', content: 'HogarSeguro, Panel Metricas Técnico, Técnico, Metricas' }, 
+    { name: 'keywords', content: 'MiSeguro, Panel Metricas Técnico, Técnico, Metricas' }, 
     { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })

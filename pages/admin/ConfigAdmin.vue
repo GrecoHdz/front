@@ -33,7 +33,7 @@
                 Configuración del Sistema
               </h1>
               <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                Administra las configuraciones principales de HogarSeguro
+                Administra las configuraciones principales de MiSeguro
               </p>
             </div>
           </div>
@@ -196,7 +196,7 @@
                 v-model="configuracionEmail"
                 type="email"
                 class="w-full px-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                placeholder="hogarseguro@gmail.com">
+                placeholder="MiSeguro@gmail.com">
             </div>
 
             <!-- Referente Predeterminado -->
@@ -492,7 +492,7 @@
                   Beneficios de Membresía
                 </h3>
                 <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                  Administra los beneficios disponibles para miembros de HogarSeguro
+                  Administra los beneficios disponibles para miembros de MiSeguro
                 </p>
               </div>
             </div>
@@ -616,7 +616,7 @@
                   Gestión de Servicios
                 </h3>
                 <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                  Administra los servicios disponibles en HogarSeguro
+                  Administra los servicios disponibles en MiSeguro
                 </p>
               </div>
             </div>
@@ -2652,9 +2652,9 @@ import Multiselect from 'vue-multiselect'
 
 // SEO y Meta
 useHead({
-  title: 'HogarSeguro - Configuraciones',
+  title: 'MiSeguro - Configuraciones',
   meta: [
-    { name: 'description', content: 'Configuraciones del sistema HogarSeguro - Administrar configuraciones' },
+    { name: 'description', content: 'Configuraciones del sistema MiSeguro - Administrar configuraciones' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' }
   ]
 })

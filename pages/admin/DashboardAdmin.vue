@@ -460,9 +460,9 @@ const route = useRoute();
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Panel Administrativo',
+  title: 'MiSeguro - Panel Administrativo',
   meta: [
-    { name: 'description', content: 'Panel de administración de HogarSeguro - Gestión completa del sistema' },
+    { name: 'description', content: 'Panel de administración de MiSeguro - Gestión completa del sistema' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' }
   ]
 })

@@ -40,13 +40,13 @@
                 <h2 class="text-lg font-black text-gray-900 dark:text-white">
                   ¡Hola, {{ shortName }}!
                 </h2>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Bienvenido a HogarSeguro</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Bienvenido a MiSeguro</p>
               </div>
             </div>
             
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-3 rounded-xl">
               <p class="text-emerald-800 dark:text-emerald-200 font-medium text-center text-sm">
-                🏠 Tu hogar está protegido con HogarSeguro
+                🏠 Tu hogar está protegido con MiSeguro
               </p>
             </div>
           </div>
@@ -1134,10 +1134,10 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Dashboard',
+  title: 'MiSeguro - Dashboard',
   meta: [
-    { name: 'description', content: 'Panel de control de HogarSeguro - Gestiona tus servicios y membresía' },
-    { name: 'keywords', content: 'dashboard, HogarSeguro, servicios, membresía, panel de control' },
+    { name: 'description', content: 'Panel de control de MiSeguro - Gestiona tus servicios y membresía' },
+    { name: 'keywords', content: 'dashboard, MiSeguro, servicios, membresía, panel de control' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })
@@ -1779,7 +1779,7 @@ const sendWhatsAppMessage = async (data, type) => {
       // Mensaje general para solicitud de uso de paquete
       message =
         `*Solicitud de Uso de Paquete*\n\n` +
-        `Hola, deseo solicitar el uso de un paquete adquirido a través de la plataforma HogarSeguro.\n\n` +
+        `Hola, deseo solicitar el uso de un paquete adquirido a través de la plataforma MiSeguro.\n\n` +
         `*ID:* ${formattedDate}-${data.id_paquete_usuario}\n` +
         `*Paquete:* ${data.nombre_paquete}\n` +
         `Quedo atento(a) a la coordinación correspondiente.`;

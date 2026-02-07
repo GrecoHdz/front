@@ -684,10 +684,10 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Dashboard Técnico',
+  title: 'MiSeguro - Dashboard Técnico',
   meta: [
     { name: 'description', content: 'Panel de Técnico - Gestiona tus servicios asignados' }, 
-    { name: 'keywords', content: 'HogarSeguro, Técnico, Servicios, Asignados' },
+    { name: 'keywords', content: 'MiSeguro, Técnico, Servicios, Asignados' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })

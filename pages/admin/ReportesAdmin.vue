@@ -488,7 +488,7 @@
                 <p class="text-[10px] text-gray-500 mt-1">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
             </div>
             <div class="text-right">
-               <h1 class="text-lg font-bold text-gray-900 tracking-tight">{{ empresaNombre || 'HogarSeguro' }}</h1>
+               <h1 class="text-lg font-bold text-gray-900 tracking-tight">{{ empresaNombre || 'MiSeguro' }}</h1>
                <div class="text-[10px] text-gray-500 mt-2 space-y-0.5">
                   <p class="font-medium">RTN: {{ empresaRTN }}</p>
                   <p>{{ empresaEmail }}</p>
@@ -516,13 +516,13 @@
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">POR CONCEPTO DE</span>
                 <p class="text-xs leading-relaxed text-gray-700">
                   <span v-if="selectedFacturaPayment.id_membresia">
-                    Servicio de acceso y uso de plataforma tecnológica HogarSeguro, correspondiente a membresía de beneficios y gestión de servicios.
+                    Servicio de acceso y uso de plataforma tecnológica MiSeguro, correspondiente a membresía de beneficios y gestión de servicios.
                   </span>
                   <span v-else-if="selectedFacturaPayment.id_pagovisita">
-                    Servicio de intermediación tecnológica, coordinación y gestión de visita técnica para evaluación y diagnóstico de servicio solicitado a través de la plataforma HogarSeguro.
+                    Servicio de intermediación tecnológica, coordinación y gestión de visita técnica para evaluación y diagnóstico de servicio solicitado a través de la plataforma MiSeguro.
                   </span>
                   <span v-else-if="selectedFacturaPayment.id_cotizacion">
-                    Servicio de intermediación tecnológica, coordinación y gestión de pagos por servicios técnicos prestados por técnicos independientes a través de la plataforma HogarSeguro.
+                    Servicio de intermediación tecnológica, coordinación y gestión de pagos por servicios técnicos prestados por técnicos independientes a través de la plataforma MiSeguro.
                   </span>
                   <span v-else>
                     Pago de Servicio Profesional
@@ -1393,9 +1393,9 @@ const userCookie = useCookie('user');
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Reportes',
+  title: 'MiSeguro - Reportes',
   meta: [
-    { name: 'description', content: 'Reportes del sistema HogarSeguro - Administrar solicitudes, asignaciones y seguimiento' },
+    { name: 'description', content: 'Reportes del sistema MiSeguro - Administrar solicitudes, asignaciones y seguimiento' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no'}
   ]
 });
@@ -1408,7 +1408,7 @@ const selectedChart = ref('earnings');
 const selectedChartObject = ref(null);
 
 // Variables de datos de empresa
-const empresaNombre = ref('HogarSeguro');
+const empresaNombre = ref('MiSeguro');
 const empresaTelefono = ref('XXXX9451');
 const empresaEmail = ref('XXXXX@gmail.com');
 const empresaRTN = ref('XXXX-XXXX-XXXXXX');

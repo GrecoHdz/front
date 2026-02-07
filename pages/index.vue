@@ -24,7 +24,7 @@
             </div>
             <div>
               <h1 class="text-xl font-black text-white tracking-tight">
-                HogarSeguro
+                MiSeguro
               </h1>
               <p class="text-emerald-100 text-xs font-medium">Tu casa es tu refugio</p>
             </div>
@@ -70,7 +70,7 @@
       <section class="px-4 mb-5">
         <div class="text-center"> 
           <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed px-2">
-            <strong class="text-emerald-600 dark:text-emerald-400">HogarSeguro</strong> es la primera plataforma en Honduras que te da 
+            <strong class="text-emerald-600 dark:text-emerald-400">MiSeguro</strong> es la primera plataforma en Honduras que te da 
             <span class="font-bold text-gray-900 dark:text-white">mantenimiento, descuentos y asistencia técnica</span> 
             en un solo lugar, a cambio de una membresía mensual accesible.
           </p>
@@ -282,7 +282,7 @@
       <div class="text-4xl mb-3">🔐</div>
       <h3 class="text-xl font-black mb-3">En pocas palabras...</h3>
       <div class="text-lg font-bold mb-4 text-yellow-300">
-        HogarSeguro = Más tranquilidad, más ahorro y cero estrés ✨
+        MiSeguro = Más tranquilidad, más ahorro y cero estrés ✨
       </div>
       <div class="space-y-2 mb-5 text-sm">
         <div class="flex items-center space-x-2 justify-center">
@@ -302,7 +302,7 @@
         @click="showLoginModal = true"
         class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
       >
-        🌟 Quiero ser parte de HogarSeguro
+        🌟 Quiero ser parte de MiSeguro
       </button>
     </div>
   </div>
@@ -334,7 +334,7 @@
               <span class="text-white text-xl">🔐</span>
             </div>
             <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">
-              {{ isLogin ? 'Bienvenido' : 'Únete a HogarSeguro' }}
+              {{ isLogin ? 'Bienvenido' : 'Únete a MiSeguro' }}
             </h3>
             <p class="text-gray-600 dark:text-gray-400 text-sm">
               {{ isLogin ? 'Ingresa a tu cuenta' : 'Crea tu cuenta gratuita' }}

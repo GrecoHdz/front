@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   // Configuración de impresión
   app: {
     head: {
-      title: 'HogarSeguro - Servicios Técnicos a Domicilio',
+      title: 'MiSeguro - Servicios Técnicos a Domicilio',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, user-scalable=no' },
@@ -39,7 +39,7 @@ export default defineNuxtConfig({
   // Runtime config
   runtimeConfig: {
     public: {
-      appName: 'HogarSeguro',
+      appName: 'MiSeguro',
       appVersion: '1.0.0',
       apiBase: process.env.NUXT_PUBLIC_API_URL
     }

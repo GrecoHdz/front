@@ -40,7 +40,7 @@
                   </div>
                   <h1 class="text-2xl font-black mb-2">¡Gana Dinero Refiriendo!</h1>
                   <p class="text-white/90 font-medium mb-5 text-sm">
-                    Invita a tus amigos y familiares a HogarSeguro y recibe el <span class="font-black">{{ referralReward }}%</span> de cada servicio que paguen 
+                    Invita a tus amigos y familiares a MiSeguro y recibe el <span class="font-black">{{ referralReward }}%</span> de cada servicio que paguen 
                   </p>
                   
                   <!-- Stats -->
@@ -638,10 +638,10 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Programa de Referidos',
+  title: 'MiSeguro - Programa de Referidos',
   meta: [
-    { name: 'description', content: 'Gana dinero refiriendo amigos a HogarSeguro - Programa de referidos' },
-    { name: 'keywords', content: 'HogarSeguro, Programa de Referidos, Referir, Referidos' }, 
+    { name: 'description', content: 'Gana dinero refiriendo amigos a MiSeguro - Programa de referidos' },
+    { name: 'keywords', content: 'MiSeguro, Programa de Referidos, Referir, Referidos' }, 
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
@@ -765,7 +765,7 @@ const toast = ref({
 
 const referralLink = computed(() => {
   const userId = userCookie.value?.id_usuario || ''
-  return `https://hogarseguro.hn/registro?ref=${userId}`
+  return `https://MiSeguro.hn/registro?ref=${userId}`
 })
 
 const maxWithdrawableAmount = computed(() => {
@@ -1158,7 +1158,7 @@ const copyReferralLink = async () => {
 }
 
 const shareWhatsApp = () => {
-  const message = `¡Hola! 👋 Te invito a conocer HogarSeguro, el mejor servicio de reparaciones para tu hogar. 
+  const message = `¡Hola! 👋 Te invito a conocer MiSeguro, el mejor servicio de reparaciones para tu hogar. 
 
 🏠 Servicios profesionales
 💰 Precios justos
@@ -1176,8 +1176,8 @@ Regístrate aquí: ${referralLink.value}
 
 const shareGeneral = async () => {
   const shareData = {
-    title: 'HogarSeguro - Servicios para tu hogar',
-    text: `¡Únete a HogarSeguro con mi código ${userReferralCode.value} y ambos ganamos!`,
+    title: 'MiSeguro - Servicios para tu hogar',
+    text: `¡Únete a MiSeguro con mi código ${userReferralCode.value} y ambos ganamos!`,
     url: referralLink.value
   }
 

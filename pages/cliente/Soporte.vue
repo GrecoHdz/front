@@ -383,10 +383,10 @@ const tokenCookie = useCookie('token')
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Soporte Técnico',
+  title: 'MiSeguro - Soporte Técnico',
   meta: [
-    { name: 'description', content: 'Centro de soporte técnico de HogarSeguro - Contáctanos para resolver tus dudas' },
-    { name: 'keywords', content: 'soporte técnico, HogarSeguro, servicios, soporte, soporte técnico' },
+    { name: 'description', content: 'Centro de soporte técnico de MiSeguro - Contáctanos para resolver tus dudas' },
+    { name: 'keywords', content: 'soporte técnico, MiSeguro, servicios, soporte, soporte técnico' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })

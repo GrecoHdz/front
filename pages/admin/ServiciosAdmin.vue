@@ -2062,7 +2062,7 @@
                   <p class="text-[10px] text-gray-500 mt-1">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
               </div>
               <div class="text-right">
-                 <h1 class="text-lg font-bold text-gray-900 tracking-tight">{{ empresaNombre || 'HogarSeguro' }}</h1>
+                 <h1 class="text-lg font-bold text-gray-900 tracking-tight">{{ empresaNombre || 'MiSeguro' }}</h1>
                  <div class="text-[10px] text-gray-500 mt-2 space-y-0.5">
                     <p class="font-medium">RTN: {{ empresaRTN }}</p>
                     <p>{{ empresaEmail }}</p>
@@ -2089,7 +2089,7 @@
                   <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">POR CONCEPTO DE</span>
                   <p class="text-xs leading-relaxed text-gray-700">
                     <span v-if="selectedFacturaPayment.paquete">
-                      Servicio de acceso, intermediación tecnológica, coordinación y gestión de solicitudes de adquisición de productos, servicios y/o beneficios ofrecidos por terceros a través de la plataforma HogarSeguro, correspondiente al paquete
+                      Servicio de acceso, intermediación tecnológica, coordinación y gestión de solicitudes de adquisición de productos, servicios y/o beneficios ofrecidos por terceros a través de la plataforma MiSeguro, correspondiente al paquete
                       <strong>{{ selectedFacturaPayment.paquete.nombre }}</strong>.
                     </span>
                     <span v-else>
@@ -2321,9 +2321,9 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Gestión de Servicios',
+  title: 'MiSeguro - Gestión de Servicios',
   meta: [
-    { name: 'description', content: 'Gestión de servicios del sistema HogarSeguro - Administrar solicitudes, asignaciones y seguimiento' },
+    { name: 'description', content: 'Gestión de servicios del sistema MiSeguro - Administrar solicitudes, asignaciones y seguimiento' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no'}
   ]
 })
@@ -2739,7 +2739,7 @@ const showFacturaModal = ref(false)
 const selectedFacturaPayment = ref(null)
 
 // Variables de datos de empresa
-const empresaNombre = ref('HogarSeguro');
+const empresaNombre = ref('MiSeguro');
 const empresaTelefono = ref('');
 const empresaEmail = ref('');
 const empresaRTN = ref('');
@@ -3736,7 +3736,7 @@ const sendWhatsAppNotification = (technician, service) => {
     
     const message = `*Nuevo Servicio Asignado*\n\n` +
       `Hola *${techName}*,\n` +
-      `Se te ha asignado un nuevo servicio en HogarSeguro.\n\n` +
+      `Se te ha asignado un nuevo servicio en MiSeguro.\n\n` +
       `*ID:* ${dateStr}-${serviceId}\n` +
       `*Servicio:* ${serviceName}\n` +
       `*Cliente:* ${clientName}\n` +

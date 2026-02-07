@@ -1852,10 +1852,10 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Dashboard',
+  title: 'MiSeguro - Dashboard',
   meta: [
     { name: 'description', content: 'Panel de Servicios - Gestiona tus servicios y membresía' },
-    { name: 'keywords', content: 'dashboard, HogarSeguro, servicios, membresía, panel de control' },
+    { name: 'keywords', content: 'dashboard, MiSeguro, servicios, membresía, panel de control' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })
