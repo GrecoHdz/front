@@ -124,6 +124,8 @@ const onNotificationClick = async (notification) => {
       await navigateTo('/admin/UsuariosAdmin');
     } else if (notification.tipo === 'ticket') { 
       await navigateTo('/admin/DashboardAdmin');
+    } else if (notification.tipo === 'paquetes') { 
+      await navigateTo('/admin/ServiciosAdmin');
     }
   } finally {
     // Asegurarse de que el loading siempre se desactive

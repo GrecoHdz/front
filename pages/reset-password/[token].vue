@@ -240,9 +240,9 @@ export default {
   
   head() {
     return {
-      title: 'Restablecer Contraseña - HogarSeguro',
+      title: 'Restablecer Contraseña - MiSeguro',
       meta: [
-        { hid: 'description', name: 'description', content: 'Restablece tu contraseña de HogarSeguro' }
+        { hid: 'description', name: 'description', content: 'Restablece tu contraseña de MiSeguro' }
       ]
     }
   }

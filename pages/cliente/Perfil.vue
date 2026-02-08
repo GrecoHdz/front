@@ -332,7 +332,7 @@
           <button 
             @click="isAcercaModalOpen = true"
             class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de HogarSeguro</p>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de MiSeguro</p>
           </button>
           <button 
             @click="handleLogout"
@@ -545,182 +545,209 @@
     </Transition>
 
     <!-- Modal de Términos y Condiciones -->
-    <div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
-        <button 
-          @click="isTerminosModalOpen = false"
-          type="button"
-          class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-          aria-label="Cerrar modal"
-        >
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+<div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+    
+    <button 
+      @click="isTerminosModalOpen = false"
+      type="button"
+      class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+      aria-label="Cerrar modal"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
 
-        <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
-        </div>
+    <div class="mb-4">
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
+    </div>
 
-        <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+    <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
-          <p>
-          Al registrarse y utilizar la plataforma HogarSeguro, el usuario (cliente o técnico) acepta de forma expresa
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
+        <p>
+          Al registrarse y utilizar la plataforma MiSeguro, el usuario (cliente o técnico) acepta de forma expresa
           estos Términos y Condiciones. Si no está de acuerdo con alguno de ellos, deberá abstenerse de utilizar la plataforma.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
-          <p>
-          HogarSeguro es una plataforma tecnológica que facilita la conexión entre clientes y técnicos independientes
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
+        <p>
+          MiSeguro es una plataforma tecnológica que facilita la conexión entre clientes y técnicos independientes
           para la prestación de servicios de mantenimiento y reparación a domicilio.
-          </p>
-          <p class="mt-2">
-          <strong>Importante:</strong> HogarSeguro no presta directamente los servicios técnicos, no emplea a los técnicos
+        </p>
+        <p class="mt-2">
+          <strong>Importante:</strong> MiSeguro no presta directamente los servicios técnicos, no emplea a los técnicos
           y no asume una relación laboral con ellos. Los técnicos actúan de manera independiente y bajo su propia responsabilidad.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Modelo de Cobro y Pago Centralizado</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Modelo de Cobro y Pago Centralizado</h4>
+        <p>
           Por razones operativas, de seguridad y control, todos los pagos de los servicios solicitados a través de la plataforma
           deberán realizarse exclusivamente mediante transferencia bancaria o medios electrónicos autorizados
-          a las cuentas oficiales de HogarSeguro.
-          </p>
-          <p class="mt-2">
-          HogarSeguro actúa como intermediario tecnológico en la gestión de pagos, factura únicamente sus comisiones y cargos 
-          propios, y posteriormente liquida al técnico independiente el valor correspondiente a la mano de obra por él prestada.
+          a las cuentas oficiales de MiSeguro.
         </p>
-        </section>
+        <p class="mt-2">
+          MiSeguro actúa como intermediario tecnológico y agente de gestión de pagos, facilitando el recaudo de los montos acordados 
+          entre cliente y técnico independiente. MiSeguro factura únicamente sus comisiones, cargos propios y servicios adicionales 
+          ofrecidos por la plataforma, y gestiona la transferencia al técnico independiente del valor correspondiente a la mano de obra 
+          efectivamente prestada por éste.
+        </p>
+        <p class="mt-2">
+          Los montos recaudados por MiSeguro correspondientes a la mano de obra del técnico independiente constituyen
+          <strong>fondos de terceros</strong> administrados temporalmente por la plataforma en calidad de agente de gestión de pago,
+          y no representan ingresos propios de MiSeguro, reconociéndose contablemente como pasivos hasta su liquidación
+          al técnico correspondiente.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio y Distribución</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio y Distribución</h4>
+        <p>
           El precio de la mano de obra es definido directamente por el técnico y aceptado por el cliente antes
           de la ejecución del servicio.
-          </p>
-          <p class="mt-2">
-          La distribución del pago entre el técnico y HogarSeguro es <strong>variable</strong> y será determinada
+        </p>
+        <p class="mt-2">
+          La distribución del pago entre el técnico y MiSeguro es <strong>variable</strong> y será determinada
           por la plataforma según el tipo de servicio, categoría, promociones u otros criterios operativos,
           los cuales serán informados al técnico previo a la aceptación del trabajo.
-          </p>
-          <p class="mt-2">
-          La comisión de HogarSeguro se calcula sobre el valor total de la mano de obra acordada,
+        </p>
+        <p class="mt-2">
+          La comisión de MiSeguro se calcula sobre el valor total de la mano de obra acordada,
           independientemente de descuentos, créditos o beneficios aplicados al cliente.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresías y Créditos</h4>
-          <p>
-          HogarSeguro ofrece membresías mensuales que otorgan beneficios, entre ellos la acumulación de crédito
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresías y Créditos</h4>
+        <p>
+          MiSeguro ofrece membresías mensuales que otorgan beneficios, entre ellos la acumulación de crédito
           utilizable como descuento al momento de pagar servicios dentro de la plataforma.
-          </p>
-          <p class="mt-2">
-          El crédito acumulado:
-          </p>
-          <ul class="list-disc pl-5 space-y-1">
+        </p>
+        <p class="mt-2">El crédito acumulado:</p>
+        <ul class="list-disc pl-5 space-y-1">
           <li>No es dinero en efectivo</li>
           <li>No es transferible</li>
-          <li>Solo puede utilizarse para pagar servicios dentro de HogarSeguro</li>
-          </ul>
-          <p class="mt-2">
+          <li>Solo puede utilizarse para pagar servicios dentro de MiSeguro</li>
+        </ul>
+        <p class="mt-2">
           El uso del crédito reduce únicamente el monto a pagar por el cliente,
           pero no afecta el valor total de la mano de obra ni el pago correspondiente al técnico.
-          </p>
-          <p class="mt-2">
-            La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
-            el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
-          </p>
-        </section>
+        </p>
+        <p class="mt-2">
+          La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
+          el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
+        <p>
           En caso de que el cliente no cuente con una membresía activa, se cobrará una tarifa fija por visita técnica,
           cuyo valor será informado previamente al cliente.
-          </p>
-          <p class="mt-2">
-          Esta tarifa corresponde exclusivamente a HogarSeguro y no forma parte del ingreso del técnico.
-          </p>
-        </section>
+        </p>
+        <p class="mt-2">
+          Esta tarifa corresponde a un servicio de gestión y coordinación prestado por MiSeguro y será documentada
+          mediante recibo por honorarios profesionales, conforme al régimen fiscal aplicable a la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Pagos al Técnico</h4>
-          <p>
-            HogarSeguro realizará el pago al técnico independiente una vez confirmado el pago del cliente
-            y finalizado el servicio, descontando la comisión correspondiente.
-          </p>
-          <p class="mt-2">
-            Los pagos se efectuarán únicamente a la cuenta bancaria registrada por el técnico en la plataforma
-            y podrán tardar hasta cinco (5) días hábiles.
-          </p>
-          <p class="mt-2">
-            El técnico es responsable de cumplir con sus obligaciones fiscales, tributarias y legales
-            ante las autoridades correspondientes.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Pagos al Técnico</h4>
+        <p>
+          MiSeguro realizará el pago al técnico independiente una vez confirmado el pago del cliente
+          y finalizado el servicio, descontando la comisión correspondiente.
+        </p>
+        <p class="mt-2">
+          Los pagos se efectuarán únicamente a la cuenta bancaria registrada por el técnico en la plataforma
+          y podrán tardar hasta cinco (5) días hábiles.
+        </p>
+        <p class="mt-2">
+          El técnico reconoce que es el único responsable de la emisión de los comprobantes fiscales 
+          correspondientes por los servicios técnicos prestados al cliente, así como del cumplimiento de sus 
+          obligaciones tributarias ante el Servicio de Administración de Rentas (SAR). La falta de emisión de 
+          comprobantes fiscales por parte del técnico no altera la naturaleza de intermediación de MiSeguro 
+          ni convierte dichos montos en ingresos propios de la plataforma.
+        </p>
+        <p class="mt-2 font-medium">
+          La constancia de transferencia bancaria realizada a la cuenta registrada por el técnico constituye
+          prueba plena de pago.
+        </p>
+        <p class="mt-2">
+          La transferencia realizada a la cuenta registrada por el técnico se considerará válida y liberatoria
+          para MiSeguro, aun cuando el técnico alegue desconocimiento, falta de notificación o no aceptación
+          expresa de la liquidación electrónica.
+        </p>
+        <p class="mt-2">
+          El técnico es el único responsable de la veracidad y exactitud de los datos bancarios proporcionados.
+          MiSeguro no será responsable por errores en la información suministrada por el técnico que resulten
+          en transferencias a cuentas incorrectas, inexistentes o de terceros.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Pagos No Autorizados</h4>
-          <p>
-            Cualquier pago realizado fuera de la plataforma, en efectivo, a cuentas no autorizadas
-            o directamente al técnico, no será reconocido por HogarSeguro y no generará derechos de reclamo,
-            garantía, crédito o soporte.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Pagos No Autorizados</h4>
+        <p>
+          Cualquier pago realizado fuera de la plataforma, en efectivo, a cuentas no autorizadas
+          o directamente al técnico, no será reconocido por MiSeguro y no generará derechos de reclamo,
+          garantía, crédito o soporte.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Limitación de Responsabilidad</h4>
-          <p>
-            Los servicios son prestados por técnicos independientes. HogarSeguro no garantiza el resultado final del servicio,
-            salvo en los casos expresamente establecidos por la plataforma.
-          </p>
-          <p class="mt-2">
-            HogarSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio,
-            excepto cuando la legislación aplicable disponga lo contrario.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Limitación de Responsabilidad</h4>
+        <p>
+          Los servicios son prestados por técnicos independientes. MiSeguro no garantiza el resultado final del servicio,
+          salvo en los casos expresamente establecidos por la plataforma.
+        </p>
+        <p class="mt-2">
+          MiSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio,
+          excepto cuando la legislación aplicable disponga lo contrario.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Privacidad y Protección de Datos</h4>
-          <p>
-            Los datos personales serán tratados conforme a la Política de Privacidad de HogarSeguro
-            y utilizados únicamente para la operación y mejora de la plataforma.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Privacidad y Protección de Datos</h4>
+        <p>
+          Los datos personales serán tratados conforme a la Política de Privacidad de MiSeguro
+          y utilizados únicamente para la operación y mejora de la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Modificaciones</h4>
-          <p>
-            HogarSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
-            Las modificaciones entrarán en vigor desde su publicación en la plataforma.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Modificaciones</h4>
+        <p>
+          MiSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
+          Las modificaciones entrarán en vigor desde su publicación en la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Ley Aplicable y Jurisdicción</h4>
-          <p>
-            Estos Términos se rigen por las leyes de la República de Honduras.
-            Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
-          </p>
-        </section>
-</div>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Ley Aplicable y Jurisdicción</h4>
+        <p>
+          Estos Términos se rigen por las leyes de la República de Honduras.
+          Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
+        </p>
+      </section>
 
-        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button 
-            @click="isTerminosModalOpen = false"
-            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
     </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <button 
+        @click="isTerminosModalOpen = false"
+        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+      >
+        Cerrar
+      </button>
+    </div>
+
+  </div>
+</div>
 
     <!-- Modal de Política de Privacidad -->
     <div v-if="isPrivacidadModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
@@ -851,7 +878,7 @@
       </div>
     </div>
 
-    <!-- Modal de Acerca de HogarSeguro -->
+    <!-- Modal de Acerca de MiSeguro -->
     <div v-if="isAcercaModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
       <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
         <button 
@@ -866,7 +893,7 @@
         </button>
 
         <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acerca de HogarSeguro</h3>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acerca de MiSeguro</h3>
           <p class="text-sm text-gray-600 dark:text-gray-400">Tu plataforma de confianza para servicios del hogar</p>
         </div>
 
@@ -875,13 +902,13 @@
             <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-3xl text-white mb-4 shadow-lg mx-auto">
               🏠
             </div>
-            <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">HogarSeguro</h4>
+            <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">MiSeguro</h4>
             <p class="text-gray-600 dark:text-gray-400">Conectando hogares con profesionales de confianza</p>
           </section>
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestra Misión</h4>
-            <p>En HogarSeguro, nos dedicamos a facilitar el acceso a servicios técnicos de alta calidad para el hogar, conectando a clientes con profesionales verificados y confiables. Buscamos convertir cada experiencia de servicio en una solución satisfactoria y segura.</p>
+            <p>En MiSeguro, nos dedicamos a facilitar el acceso a servicios técnicos de alta calidad para el hogar, conectando a clientes con profesionales verificados y confiables. Buscamos convertir cada experiencia de servicio en una solución satisfactoria y segura.</p>
           </section>
 
           <section>
@@ -891,7 +918,7 @@
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">¿Qué Hacemos?</h4>
-            <p>HogarSeguro es una plataforma tecnológica que:</p>
+            <p>MiSeguro es una plataforma tecnológica que:</p>
             <ul class="list-disc pl-5 space-y-1 mt-2">
               <li>Conecta a clientes con técnicos profesionales calificados</li>
               <li>Verifica la identidad y experiencia de todos nuestros técnicos</li>
@@ -947,7 +974,7 @@
             <div class="space-y-2 mt-2">
               <div class="flex items-center space-x-2">
                 <span class="text-blue-600 dark:text-blue-400">📧</span>
-                <span class="text-sm">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@hogarseguro.com' }}</span>
+                <span class="text-sm">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@MiSeguro.com' }}</span>
               </div>
               <div class="flex items-center space-x-2">
                 <span class="text-green-600 dark:text-green-400">📱</span>
@@ -1246,9 +1273,9 @@ const { $api } = useNuxtApp();
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Perfil',
+  title: 'MiSeguro - Perfil',
   meta: [
-    { name: 'description', content: 'Perfil de usuario de HogarSeguro - Gestiona tus servicios y membresía' },
+    { name: 'description', content: 'Perfil de usuario de MiSeguro - Gestiona tus servicios y membresía' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
@@ -1340,7 +1367,7 @@ const fetchContactInfo = async () => {
         console.error(`Error al obtener ${contact.type}:`, error)
         // Mostrar un mensaje de error específico para cada campo
         if (contact.type === 'email') {
-          updateContactInfo('email', 'soporte@hogarseguro.com')
+          updateContactInfo('email', 'soporte@MiSeguro.com')
         } else if (contact.type === 'phone') {
           updateContactInfo('phone', '+504 1234-5678')
         }
@@ -1352,7 +1379,7 @@ const fetchContactInfo = async () => {
   } catch (error) {
     console.error('Error general al obtener información de contacto:', error)
     // Establecer valores por defecto en caso de error general
-    updateContactInfo('email', 'soporte@hogarseguro.com')
+    updateContactInfo('email', 'soporte@MiSeguro.com')
     updateContactInfo('phone', '+504 1234-5678')
   }
 }
@@ -2080,6 +2107,73 @@ const renovarMembresia = async () => {
   await fetchBankAccounts();
 };
 
+// Referencia para el número de teléfono de la empresa
+const empresaPhoneNumber = ref('');
+
+// Función para obtener el número de teléfono de la empresa
+const fetchEmpresaPhoneNumber = async () => {
+  try {
+    const response = await $api('/config/valor/numero_empresa', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response && response.valor) {
+      empresaPhoneNumber.value = response.valor;
+    } else {
+      empresaPhoneNumber.value = '1234567890';
+    }
+  } catch (error) {
+    console.error('Error al obtener el número de teléfono de la empresa:', error);
+    // Establecer un valor por defecto en caso de error
+    empresaPhoneNumber.value = '1234567890';
+  }
+};
+
+// Función para enviar mensaje de WhatsApp
+const sendWhatsAppMessage = async (amount, receiptNumber, membershipId) => {
+  try {
+    // Si no tenemos el número de teléfono, intentar obtenerlo
+    if (!empresaPhoneNumber.value) {
+      await fetchEmpresaPhoneNumber();
+    }
+    
+    // Asegurarse de que amount sea un número
+    const amountNumber = Number(amount) || 0;
+    
+    // Obtener la fecha actual en formato DDMMYY
+    const today = new Date();
+    const formattedDate = [
+      String(today.getDate()).padStart(2, '0'),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getFullYear()).slice(-2)
+    ].join('');
+    
+    // Formatear el mensaje con los detalles del pago
+    const message = `*Comprobante de Pago*\n\n` +
+      `*ID de Membresía:* ${formattedDate}-${membershipId || 'N/A'}\n` +
+      `*Tipo de pago:* Pago de Membresía\n` + 
+      `*N° de comprobante:* ${receiptNumber}\n\n` +
+      `Adjunto una captura del comprobante de pago para su verificación.`;
+    
+    // Codificar el mensaje para la URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Usar el número de teléfono de la empresa o uno por defecto
+    const phoneNumber = empresaPhoneNumber.value || '1234567890';
+    
+    // Abrir WhatsApp Web con el mensaje predefinido
+    window.open(`https://wa.me/+504${phoneNumber}?text=${encodedMessage}`, '_blank');
+  } catch (error) {
+    console.error('Error al preparar el mensaje de WhatsApp:', error);
+  }
+};
+
 const confirmRenewal = async () => {
   if (!selectedAccount.value) {
     showError('Error', 'Por favor selecciona una cuenta bancaria');
@@ -2130,19 +2224,19 @@ const confirmRenewal = async () => {
           nombre_rol: 'admin'
         })
       });
-       await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${auth.token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Pago por membresía recibido',
-            nombre_rol: 'sa'
-          })
-        });
+      await $api('/notificaciones/enviar', {
+        baseURL: config.public.apiBase,
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${auth.token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          titulo: 'Pago por membresía recibido',
+          nombre_rol: 'sa'
+        })
+      });
     } catch (error) {
       console.error('Error al enviar notificación:', error);
       // No mostramos error al usuario para no afectar su experiencia
@@ -2157,6 +2251,9 @@ const confirmRenewal = async () => {
       '¡Pago Enviado!',
       'Tu membresía se actualizará una vez verifiquemos tu pago.'
     );
+    
+    // Enviar mensaje de WhatsApp con el ID de la membresía
+    await sendWhatsAppMessage(membershipCost.value, comprobante.value.trim(), data.id_membresia);
     
     // Limpiar formulario
     selectedAccount.value = '';

@@ -804,10 +804,10 @@
                       :options-limit="100"
                     >
                       <template #singleLabel="{ option }">
-                        <span class="text-[12px] md:text-base truncate">{{ getRoleLabel(option) }}</span>
+                        <span class="text-[12px] sm:text-xs truncate">{{ getRoleLabel(option) }}</span>
                       </template>
                       <template #option="{ option }">
-                        <span class="text-[12px]">{{ getRoleLabel(option) }}</span>
+                        <span class="text-[12px] sm:text-xs">{{ getRoleLabel(option) }}</span>
                       </template>
                     </multiselect>
                   </div>
@@ -1099,10 +1099,10 @@
               <!-- Saldo -->
               <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700 flex-1">
                 <p class="text-sm font-bold text-green-600 dark:text-green-400">
-                  L. {{ formatCurrency(creditsResponse?.saldoRangoFechas !== undefined ? creditsResponse.saldoRangoFechas : creditsResponse?.saldoDisponible || 0) }}
+                  L. {{ formatCurrency(creditsResponse?.saldoDisponible || 0) }}
                 </p>
                 <p class="text-xs text-green-600 dark:text-green-400">
-                  {{ creditsFilterMonth ? 'Saldo del período' : 'Saldo disponible' }}
+                  Saldo disponible
                 </p>
               </div>
             </div>
@@ -2138,9 +2138,9 @@ const route = useRoute()
 
 // SEO y Meta
 useHead({
-  title: 'HogarSeguro - Gestión de Usuarios',
+  title: 'MiSeguro - Gestión de Usuarios',
   meta: [
-    { name: 'description', content: 'Gestión de usuarios del sistema HogarSeguro - Administrar usuarios, técnicos y administradores' },
+    { name: 'description', content: 'Gestión de usuarios del sistema MiSeguro - Administrar usuarios, técnicos y administradores' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no'}
   ]
 })

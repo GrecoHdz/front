@@ -15,6 +15,134 @@
       :loading="isLoading"
     />
 
+    <!-- MODAL: Facturación Rápida Inteligente -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="isBillingModalOpen && currentBillingItem" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeBillingModal"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative z-[101] animate-modal-in transform transition-all border border-gray-100 dark:border-gray-700">
+          <!-- Header (Estilo unificado) -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl z-10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2 sm:space-x-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                  <span class="text-lg">🧾</span>
+                </div>
+                <div>
+                  <h3 class="font-black font-sm text-gray-900 dark:text-white uppercase tracking-tight">Facturación SAR</h3>
+                  <div class="flex items-center space-x-1">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase">Siguiente:</p>
+                    <p class="text-[9px] text-blue-600 dark:text-blue-400 font-black">{{ formattedNextCorrelativo }}</p>
+                  </div>
+                </div>
+              </div>
+              <button @click="closeBillingModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-5 overflow-y-auto max-h-[70vh]">
+            <!-- Detalle del Pago -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-5 border border-blue-100 dark:border-blue-800/50">
+              <div class="flex justify-between items-start mb-2">
+                <span class="text-[10px] uppercase font-black text-blue-500 dark:text-blue-400">Concepto de Ingreso</span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300 uppercase">
+                  {{ currentBillingItem.billingType === 'membership' ? 'Membresía' : currentBillingItem.billingType === 'visits' ? 'Visita' : currentBillingItem.billingType === 'packages' ? 'Paquete' : 'Servicio' }}
+                </span>
+              </div>
+              <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                {{ currentBillingItem.billingType === 'membership' ? (currentBillingItem.plan || 'Plan de Membresía') : currentBillingItem.billingType === 'packages' ? (currentBillingItem.paqueteUsuario?.paquete?.nombre || 'Paquete Adquirido') : (currentBillingItem.service || currentBillingItem.serviceName || 'Servicio Técnico') }}
+              </p>
+              <p class="text-[11px] text-gray-600 dark:text-gray-400 mb-3">Cliente: {{ currentBillingItem.usuario?.nombre || currentBillingItem.nombre_usuario || currentBillingItem.cliente || currentBillingItem.solicitud?.cliente?.nombre || 'Consumidor Final' }}</p>
+              <div class="pt-2 border-t border-blue-200 dark:border-blue-800/60 flex justify-between items-center">
+                <span class="text-[10px] uppercase font-black text-blue-500 dark:text-blue-400">Total a Facturar</span>
+                <span class="text-lg font-black text-blue-700 dark:text-blue-300">{{ formatCurrency(currentBillingItem.amount || currentBillingItem.monto || currentBillingItem.monto_total || 0) }}</span>
+              </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-2">Tipo de Factura</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <button 
+                    @click="billingForm.tipo_factura = 'CONSUMIDOR_FINAL'; billingForm.nombre_cliente = 'CONSUMIDOR FINAL'; billingForm.rtn_cliente = 'CF'"
+                    :class="billingForm.tipo_factura === 'CONSUMIDOR_FINAL' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
+                    class="py-3 rounded-xl text-xs font-bold transition-all border-2 border-transparent"
+                  >
+                    Cons. Final
+                  </button>
+                  <button 
+                    @click="billingForm.tipo_factura = 'CON_RTN'; billingForm.nombre_cliente = currentBillingItem.usuario?.nombre || currentBillingItem.cliente || currentBillingItem.solicitud?.cliente?.nombre || ''"
+                    :class="billingForm.tipo_factura === 'CON_RTN' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
+                    class="py-3 rounded-xl text-xs font-bold transition-all border-2 border-transparent"
+                  >
+                    Con RTN
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="billingForm.tipo_factura === 'CON_RTN'" class="space-y-4 animate-fade-in">
+                <div>
+                  <label class="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">RTN del Cliente</label>
+                  <input 
+                    v-model="billingForm.rtn_cliente" 
+                    type="text" 
+                    class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                    placeholder="Escriba el RTN"
+                  >
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">Nombre en Factura</label>
+                  <input 
+                    v-model="billingForm.nombre_cliente" 
+                    type="text" 
+                    class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                    placeholder="Nombre completo o Razón Social"
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+            <!-- Alerta: No hay correlativo activo -->
+            <div v-if="!activeCorrelativo && !isLoadingCorrelativo" class="mb-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-xl flex items-center space-x-3">
+              <span class="text-xl">⚠️</span>
+              <div>
+                <p class="text-[11px] font-black text-red-700 dark:text-red-400 uppercase">Configuración Requerida</p>
+                <p class="text-[10px] text-red-600 dark:text-red-300">No hay un rango de facturación SAR activo en el sistema.</p>
+              </div>
+            </div>
+
+          <!-- Acciones -->
+          <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex flex-col space-y-3">
+            <button 
+              @click="saveFactura({ form: billingForm, next: false })" 
+              :disabled="isProcessingBilling || !activeCorrelativo"
+              class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-4 rounded-xl font-black text-xs shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+            >
+              <span v-if="isProcessingBilling" class="animate-spin inline-block">⏳</span>
+              <span>GUARDAR Y CERRAR</span>
+            </button>
+            <button 
+              @click="saveFactura({ form: billingForm, next: true })" 
+              :disabled="isProcessingBilling || filteredPendingBilling.length <= 1 || !activeCorrelativo"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 text-white py-4 rounded-xl font-black text-xs shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+            >
+              <span v-if="isProcessingBilling" class="animate-spin inline-block">⏳</span>
+              <span>GUARDAR Y SIGUIENTE ({{ filteredPendingBilling.length - 1 }})</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
 <!-- Modal de Detalles del Pago -->
 <Transition
   name="modal"
@@ -25,7 +153,7 @@
 >
   <div
     v-if="showDetailsModal && selectedPayment"
-    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+    class="fixed inset-0 z-[1] flex items-center justify-center p-2 sm:p-4"
   >
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeDetailsModal"></div>
 
@@ -161,18 +289,27 @@
           Ver Servicio
         </button>
         <button
+          v-if="selectedPayment.estado === 'Aprobado' || selectedPayment.estado === 'confirmado' || selectedPayment.estado === 'aprobado'"
+          @click="openFacturaModal(selectedPayment)"
+          class="px-3 py-2 font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+        >
+          Mostrar Recibo
+        </button>
+        <button
           v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente' || selectedPayment.estado === 'pagado'"
           @click="rejectPayment(selectedPayment.id)"
-          class="px-3 py-2 font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+          :disabled="isRejecting || isApproving"
+          class="px-3 py-2 font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Rechazar
+          {{ isRejecting ? 'Procesando...' : 'Rechazar' }}
         </button>
         <button
           v-if="selectedPayment.estado === 'pendiente' || selectedPayment.estado === 'Pendiente' || selectedPayment.estado === 'pagado'"
           @click="approvePayment(selectedPayment.id)"
-          class="px-3 py-2 font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+          :disabled="isApproving || isRejecting"
+          class="px-3 py-2 font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Aprobar
+          {{ isApproving ? 'Procesando...' : 'Aprobar' }}
         </button>
       </div>
     </div>
@@ -189,7 +326,7 @@
 >
   <div
     v-if="showWithdrawalModal && selectedWithdrawal"
-    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4"
   >
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeWithdrawalModal"></div>
 
@@ -289,21 +426,23 @@
           <template v-if="selectedWithdrawal.estado === 'pendiente' || selectedWithdrawal.estado === 'Pendiente'">
             <button
               @click="rejectPayment(selectedWithdrawal.id_movimiento)"
-              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5"
+              :disabled="isRejecting || isApproving"
+              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span>Rechazar</span>
+              <span>{{ isRejecting ? 'Procesando...' : 'Rechazar' }}</span>
             </button>
             <button
               @click="approvePayment(selectedWithdrawal.id_movimiento)"
-              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5"
+              :disabled="isApproving || isRejecting"
+              class="py-1.5 px-3 sm:py-2 sm:px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span>Aprobar</span>
+              <span>{{ isApproving ? 'Procesando...' : 'Aprobar' }}</span>
             </button>
           </template>
           <button
@@ -323,6 +462,118 @@
 </Transition>
 
 
+<!-- Modal de Recibo -->
+<Transition
+  name="modal"
+  enter-active-class="modal-enter-active"
+  leave-active-class="modal-leave-active"
+  enter-from-class="modal-enter-from"
+  leave-to-class="modal-leave-to"
+>
+  <div
+    v-if="showFacturaModal && selectedFacturaPayment"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+  >
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeFacturaModal"></div>
+
+    <div class="bg-white relative z-10 w-full max-w-2xl shadow-xl rounded-sm overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Receipt Content (Scrollable) -->
+      <div class="overflow-y-auto p-6 flex-1">
+        <!-- Top Header -->
+        <div class="flex justify-between items-center border-b-2 border-gray-300 pb-2 mb-2">
+            <div>
+                <h2 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">RECIBO POR HONORARIOS</h2>
+                <p class="text-sm font-mono font-bold text-gray-900">N° {{ empresaCorrelativo }}</p>
+                <p class="text-[10px] text-gray-500 mt-1">Fecha: {{ formatDate(selectedFacturaPayment.fecha) }}</p>
+            </div>
+            <div class="text-right">
+               <h1 class="text-lg font-bold text-gray-900 tracking-tight">{{ empresaNombre || 'MiSeguro' }}</h1>
+               <div class="text-[10px] text-gray-500 mt-2 space-y-0.5">
+                  <p class="font-medium">RTN: {{ empresaRTN }}</p>
+                  <p>{{ empresaEmail }}</p>
+                  <p>{{ empresaTelefono }}</p>
+               </div>
+            </div>
+        </div>
+
+        <!-- Main Body -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300 p-4 sm:p-4 mb-2">
+            <div class="mb-6">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">RECIBÍ DE</span>
+                <p class="text-base sm:text-lg font-medium text-gray-900 break-words">
+                    {{ selectedFacturaPayment.cliente?.nombre || selectedFacturaPayment.solicitud?.cliente?.nombre || selectedFacturaPayment.usuario?.nombre || 'Cliente General' }}
+                </p>
+                <p class="text-xs text-gray-500 mt-0.5" v-if="selectedFacturaPayment.rtn_cliente">RTN: {{ selectedFacturaPayment.rtn_cliente }}</p>
+            </div>
+            
+            <div class="mb-6">
+                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">LA SUMA DE</span>
+                 <p class="text-lg sm:text-xl font-bold text-gray-900">{{ formatCurrency(selectedFacturaPayment.total) }}</p>
+            </div>
+
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">POR CONCEPTO DE</span>
+                <p class="text-xs leading-relaxed text-gray-700">
+                  <span v-if="selectedFacturaPayment.id_membresia">
+                    Servicio de acceso y uso de plataforma tecnológica MiSeguro, correspondiente a membresía de beneficios y gestión de servicios.
+                  </span>
+                  <span v-else-if="selectedFacturaPayment.id_pagovisita">
+                    Servicio de intermediación tecnológica, coordinación y gestión de visita técnica para evaluación y diagnóstico de servicio solicitado a través de la plataforma MiSeguro.
+                  </span>
+                  <span v-else-if="selectedFacturaPayment.id_cotizacion">
+                    Servicio de intermediación tecnológica, coordinación y gestión de pagos por servicios técnicos prestados por técnicos independientes a través de la plataforma MiSeguro.
+                  </span>
+                  <span v-else>
+                    Pago de Servicio Profesional
+                  </span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Details & Fiscal Data (Stacked Rows) -->
+        <div class="flex flex-col gap-8 text-[11px] mb-8">
+             <div>
+                <h4 class="font-bold text-gray-900 mb-3 border-b border-gray-300 pb-1">DETALLES</h4>
+                 <div class="space-y-2 text-gray-600">
+                    <p class="flex justify-between"><span class="font-medium text-gray-500">Subtotal</span> <span>{{ formatCurrency(selectedFacturaPayment.subtotal) }}</span></p>
+                    <div class="flex justify-between pt-1 mt-1 border-t border-gray-300">
+                        <span class="font-bold text-gray-900 text-xs">TOTAL</span> 
+                        <span class="font-bold text-gray-900 text-xs">{{ formatCurrency(selectedFacturaPayment.total) }}</span>
+                    </div>
+                </div>
+             </div>
+             <div>
+                <h4 class="font-bold text-gray-900 mb-3 border-b border-gray-300 pb-1">DATOS FISCALES</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-gray-600">
+                    <p class="flex justify-between sm:justify-start sm:gap-2"><span class="font-medium text-gray-500">CAI:</span> <span class="text-right sm:text-left">{{ empresaCAI }}</span></p>
+                    <p class="flex justify-between sm:justify-start sm:gap-2"><span class="font-medium text-gray-500">Rango:</span> <span class="text-right sm:text-left">{{ empresaRangoAutorizado }}</span></p>
+                    <p class="flex justify-between sm:justify-start sm:gap-2 sm:col-span-2"><span class="font-medium text-gray-500">Límite:</span> <span class="text-right sm:text-left">{{ empresaFechaLimite }}</span></p>
+                </div>
+             </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="text-[10px] text-gray-400 text-center pt-1 border-t border-gray-300">
+           <p>Este documento es un comprobante de pago por honorarios profesionales.</p>
+           <p v-if="selectedFacturaPayment.num_comprobante" class="mt-1">Ref. Pago: {{ selectedFacturaPayment.num_comprobante }}</p>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="bg-gray-50 p-4 border-t border-gray-300 flex justify-end">
+        <button 
+          @click="closeFacturaModal"
+          class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
+        >
+          Cerrar Recibo
+        </button>
+      </div>
+
+    </div>
+  </div>
+</Transition>
+
     <!-- Service Detail Modal -->
     <Transition
       name="modal"
@@ -330,7 +581,7 @@
       leave-active-class="modal-leave-active"
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to">
-      <div v-if="showServiceDetailModal && selectedService" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div v-if="showServiceDetailModal && selectedService" class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeServiceDetailModal"></div>
         
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-[90%] sm:w-full max-w-md max-h-[85vh] overflow-y-auto relative z-10">
@@ -343,8 +594,8 @@
                   <span class="text-sm sm:text-base">{{ getServiceTypeIcon(selectedService?.servicio?.nombre) }}</span>
                 </div>
                 <div>
-                  <h3 class="text-sm sm:text-lg font-black text-gray-900 dark:text-white">{{ selectedService?.servicio?.nombre || 'Servicio' }}</h3>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService?.id_solicitud || 'N/A' }}</p>
+                  <h3 class="text-sm sm:text-lg font-black text-gray-900 dark:text-white">{{ selectedService?.servicio?.nombre }}</h3>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService?.id_solicitud }}</p>
                 </div>
               </div>
               <button @click="closeServiceDetailModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -371,7 +622,7 @@
               <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Ubicación</h4>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
                 <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService?.colonia || 'Ubicación no disponible' }}</p>
-                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ selectedService?.direccion_precisa || '' }}{{ selectedService?.direccion_precisa && selectedService?.ciudad?.nombre ? ', ' : '' }}{{ selectedService?.ciudad?.nombre || '' }}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ selectedService?.direccion_precisa || '' }}{{ selectedService?.direccion_precisa && (selectedService?.ciudad?.nombre_ciudad || selectedService?.ciudad?.nombre) ? ', ' : '' }}{{ selectedService?.ciudad?.nombre_ciudad || selectedService?.ciudad?.nombre || '' }}</p>
               </div>
             </div>
 
@@ -379,7 +630,7 @@
             <div>
               <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Descripción del Problema</h4>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService?.descripcion || 'Sin descripción disponible' }}</p>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService?.descripcion }}</p>
               </div>
             </div>
 
@@ -395,6 +646,16 @@
             <div v-if="selectedService?.cotizacion && ['en_proceso', 'pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(selectedService.estado)">
               <div class="flex justify-between items-center mb-2">
                 <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Cotización</h4>
+                <button 
+                  @click="openAmountDetails('service', selectedService)"
+                  class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  Ver detalles
+                </button>
               </div>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
                 <p class="text-gray-700 dark:text-gray-300 text-sm">{{ formatCurrency(selectedService.cotizacion?.total || 0) }}</p>
@@ -417,7 +678,76 @@
                   <span class="text-yellow-500 mr-2">⭐</span>
                   <span class="font-bold text-yellow-800 dark:text-yellow-200">{{ selectedService.calificacion.calificacion }}/5</span>
                 </div>
-                <p v-if="selectedService.calificacion?.comentario" class="text-yellow-700 dark:text-yellow-300 text-sm">{{ selectedService.calificacion.comentario }}</p>
+                <p v-if="selectedService.calificacion.comentario" class="text-yellow-700 dark:text-yellow-300 text-sm">{{ selectedService.calificacion.comentario }}</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Modal de Detalles del Monto (Copiado de ServiciosAdmin) -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showAmountDetailsModal" class="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-3">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showAmountDetailsModal = false"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-[300px] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Detalles del Monto</h3>
+              <button @click="showAmountDetailsModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-3">
+            <div v-if="paymentType === 'visit'" class="space-y-2">
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                <h4 class="font-medium text-blue-800 dark:text-blue-200 text-xs sm:text-sm mb-2">Pago de Visita</h4>
+                <div class="text-xs sm:text-sm space-y-1">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Monto:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">
+                      {{ serviceToPayment?.pagoVisita?.monto ? `${serviceToPayment.pagoVisita.monto}` : 'L. 150.00' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else-if="paymentType === 'service' && serviceToPayment?.cotizacion" class="space-y-3">
+              <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                <h4 class="font-medium text-green-800 dark:text-green-200 text-xs sm:text-sm mb-2">Detalles de la Cotización</h4>
+                <div class="text-xs sm:text-sm space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.descuento_membresia || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Crédito usado:</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.credito_usado || 0 }}</span>
+                  </div>
+                  <hr class="border-gray-200 dark:border-gray-600">
+                  <div class="flex justify-between font-bold">
+                    <span class="text-gray-900 dark:text-white">Total a pagar:</span>
+                    <span class="text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.total || 0 }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -533,35 +863,35 @@
             </div>
           </div>
       
-          <!-- Retiros Totales -->
+          <!-- Ingresos Paquetes -->
           <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
             <div class="flex items-center space-x-2 sm:space-x-3">
-              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                <span class="text-red-600 dark:text-red-400 text-sm sm:text-lg">💸</span>
+              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                <span class="text-orange-600 dark:text-orange-400 text-sm sm:text-lg">📦</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
+                  {{ formatCurrency(platformStats.packageRevenue || 0) }}
+                </p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
+                  Ingresos Paquetes
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Retiros -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                <span class="text-indigo-600 dark:text-indigo-400 text-sm sm:text-lg">₹</span>
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
                   {{ formatCurrency(platformStats.totalWithdrawals || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
-                  Retiros Totales
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Comisiones Técnicos -->
-          <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center space-x-2 sm:space-x-3">
-              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
-                <span class="text-indigo-600 dark:text-indigo-400 text-sm sm:text-lg">🏆</span>
-              </div>
-              <div class="min-w-0">
-                <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  {{ formatCurrency(platformStats.totalCommissions || 0) }}
-                </p>
-                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
-                  Comisiones
+                  Retiros
                 </p>
               </div>
             </div>
@@ -570,7 +900,7 @@
       </section>
 
       <!-- Selector de Gráficos -->
-      <section class="px-3 sm:px-4 mb-3 sm:mb-4">
+      <section class="px-3 sm:px-4 mb-3 sm:mb-4 relative z-1">
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Análisis de Datos</h2>
           <multiselect 
@@ -642,10 +972,11 @@
                   <div>
                     <p class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{{ getTransactionTitle(transaction) }}</p>
                     <p class="text-xs text-gray-600 dark:text-gray-400">
-                      <template v-if="transaction.id_solicitud">#{{ transaction.id_solicitud }}</template>
-                      <template v-if="transaction.id_solicitud && getTransactionSubtitle(transaction)"> • </template>
+                      <template v-if="transaction.id_pago">#P{{ transaction.id_pago }}</template>
+                      <template v-if="transaction.id_solicitud && transaction.id_solicitud != transaction.id_pago"> • #S{{ transaction.id_solicitud }}</template>
+                      <template v-if="(transaction.id_pago || transaction.id_solicitud) && getTransactionSubtitle(transaction)"> • </template>
                       <template v-if="getTransactionSubtitle(transaction)">{{ getTransactionSubtitle(transaction) }}</template>
-                      <template v-if="transaction.id_solicitud || getTransactionSubtitle(transaction)"> • </template>
+                      <template v-if="transaction.id_pago || transaction.id_solicitud || getTransactionSubtitle(transaction)"> • </template>
                       {{ formatDate(transaction.fecha) }}
                     </p>
                   </div>
@@ -664,8 +995,7 @@
             <!-- Paginación - Siempre visible cuando hay transacciones -->
             <div v-if="transactions.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
               <div class="flex items-center justify-between">
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ transactions.length }} de {{ transactionsPagination.total || 0 }}
+                <div class="text-xs text-gray-500 dark:text-gray-400"> 
                 </div>
                 <div class="flex items-center space-x-2">
                   <button 
@@ -742,15 +1072,36 @@
       <!-- Pagos y Retiros con pestañas REDISEÑADA -->
       <section class="px-3 sm:px-4 mb-4 sm:mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-3">
-          <!-- Header con título y selector de mes -->
-          <div class="flex items-center justify-between mb-3">
+          <!-- Header con título, selector de mes y buscador -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
             <h2 class="text-sm font-black text-gray-900 dark:text-white">Gestión de Pagos y Retiros</h2>
-            <input 
-              type="month"
-              v-model="selectedMonthPayments"
-              @change="updateSelectedMonth('payments')"
-              class="px-2 py-1 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-            />
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <div class="relative flex-1 sm:w-48">
+                <input
+                  type="text"
+                  v-model="searchInput"
+                  @input="debouncedSearch"
+                  @keyup.enter="debouncedSearch"
+                  placeholder="Buscar por ID del pago"
+                  class="w-full px-3 py-1.5 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button 
+                  @click="clearSearch"
+                  v-if="searchId"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <input 
+                type="month"
+                v-model="selectedMonthPayments"
+                @change="updateSelectedMonth('payments')"
+                class="px-2 py-1.5 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+              />
+            </div>
           </div>
       
           <!-- Pestañas principales -->
@@ -852,7 +1203,8 @@
               <div class="grid grid-cols-2 gap-1.5">
                 <div v-for="item in getCurrentTabData()" :key="item.id || item.id_membresia || item.id_pagovisita || item.id_cotizacion || item.id_movimiento"
                      :class="getItemCardClass(item.status || item.estado)"
-                     class="rounded-lg p-2 shadow-sm border text-[11px]">
+                     class="rounded-lg p-2 shadow-sm border text-[11px]"
+                >
                   <div class="mb-2">
                     <div class="flex items-center justify-between mb-1">
                       <div class="flex items-center space-x-1.5 flex-1 min-w-0">
@@ -865,7 +1217,8 @@
                     </div> 
                   </div>
                   <button @click="showItemDetails(item)" 
-                          class="w-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[9px] px-2 py-1 rounded font-medium transition-colors">
+                          class="w-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[9px] px-2 py-1 rounded font-medium transition-colors"
+                  >
                     Ver Detalles
                   </button>
                 </div>
@@ -913,6 +1266,66 @@
         </div>
       </section>
 
+      <!-- SECCIÓN: Centro de Facturación Inteligente -->
+      <section class="px-3 sm:px-4 mb-4 sm:mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-3">
+          <!-- Header con título y selector de mes -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <div class="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-lg">
+                <span class="text-blue-600 dark:text-blue-400 text-sm">⚡</span>
+              </div>
+              <h2 class="text-sm font-black text-gray-900 dark:text-white">Centro de Facturación Inteligente</h2>
+            </div>
+            <input 
+              type="month"
+              v-model="billingMonth"
+              @change="loadPendingBilling"
+              class="px-2 py-1 text-[11px] bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            />
+          </div>
+
+          <!-- Resumen de Contadores (Estilo consistente) -->
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5 mb-3 border border-gray-100 dark:border-gray-600/50">
+            <div class="grid grid-cols-4 gap-2 text-center">
+              <div>
+                <div class="text-sm font-black text-gray-900 dark:text-white">{{ billingCounts.total }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Pendientes</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ billingCounts.membership }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Membresías</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">{{ billingCounts.visits }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Visitas</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-purple-600 dark:text-purple-400">{{ billingCounts.services }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Servicios</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-orange-600 dark:text-orange-400">{{ billingCounts.packages }}</div>
+                <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Paquetes</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón de acción -->
+          <button 
+            v-if="filteredPendingBilling.length > 0"
+            @click="openNextPendingBilling"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold text-xs shadow-sm transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+          >
+            <span>🚀 Comenzar Facturación Rápida</span>
+            <span class="bg-blue-500 text-white px-2 py-0.5 rounded-full text-[10px]">{{ filteredPendingBilling.length }}</span>
+          </button>
+          <div v-else class="text-center py-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-dashed border-gray-200 dark:border-gray-600">
+            <p class="text-xs text-gray-500 dark:text-gray-400">No hay ingresos pendientes de factura.</p>
+          </div>
+        </div>
+      </section>
+
       <!-- Sección de Reportería -->
       <section class="px-3 sm:px-4 mb-4 sm:mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-3">
@@ -929,7 +1342,8 @@
           
         <div class="grid grid-cols-1 gap-2 sm:gap-3">
           <div v-for="report in availableReports" :key="report.id"
-               class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-2 sm:p-3 shadow-sm hover:shadow transition-shadow">
+               class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-2 sm:p-3 shadow-sm hover:shadow transition-shadow"
+          >
             <div class="flex justify-between items-start h-full">
               <div class="pr-1 sm:pr-2 flex-1 min-w-0">
                 <h3 class="text-[12px] sm:text-xs font-medium text-gray-900 dark:text-white mb-0.5 line-clamp-1">{{ report.title }}</h3>
@@ -958,6 +1372,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
 import { Chart, registerables } from 'chart.js';
 import { useHead, useCookie, useRuntimeConfig } from '#imports';
 import { useRouter, useRoute } from 'vue-router'
@@ -978,9 +1393,9 @@ const userCookie = useCookie('user');
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Reportes',
+  title: 'MiSeguro - Reportes',
   meta: [
-    { name: 'description', content: 'Reportes del sistema HogarSeguro - Administrar solicitudes, asignaciones y seguimiento' },
+    { name: 'description', content: 'Reportes del sistema MiSeguro - Administrar solicitudes, asignaciones y seguimiento' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no'}
   ]
 });
@@ -991,6 +1406,17 @@ const isLoadingData = ref(false);
 const isLoadingTransactions = ref(false);
 const selectedChart = ref('earnings');
 const selectedChartObject = ref(null);
+
+// Variables de datos de empresa
+const empresaNombre = ref('MiSeguro');
+const empresaTelefono = ref('XXXX9451');
+const empresaEmail = ref('XXXXX@gmail.com');
+const empresaRTN = ref('XXXX-XXXX-XXXXXX');
+const configuracionRTN = ref('')
+const empresaCAI = ref('');
+const empresaRangoAutorizado = ref('');
+const empresaFechaLimite = ref('');
+const empresaCorrelativo = ref('');
 
 // Inicializar selectedChartObject con la primera opción
 const initializeChartObject = () => {
@@ -1006,8 +1432,10 @@ const selectedMonthReports = ref(new Date().toISOString().slice(0, 7));
 const statusFilter = ref('all');
 const showDetailsModal = ref(false);
 const showWithdrawalModal = ref(false);
+const showFacturaModal = ref(false);
 const selectedPayment = ref(null);
 const selectedWithdrawal = ref(null);
+const selectedFacturaPayment = ref(null);
 const showServiceDetailModal = ref(false);
 const selectedService = ref(null);
 const initialStats = ref({
@@ -1024,6 +1452,23 @@ const visitPayments = ref([]);
 const servicePayments = ref([]);
 const withdrawals = ref([]);
 const transactions = ref([]);
+const isProcessingBilling = ref(false);
+const isApproving = ref(false);
+const isRejecting = ref(false);
+const billingMonth = ref(new Date().toISOString().slice(0, 7));
+const pendingBillingItems = ref([]);
+const isBillingModalOpen = ref(false);
+const currentBillingItem = ref(null);
+const billingForm = reactive({
+  tipo_factura: 'CONSUMIDOR_FINAL',
+  nombre_cliente: 'CONSUMIDOR FINAL',
+  rtn_cliente: 'CF',
+  subtotal: 0,
+  isv: 0,
+  total: 0
+}); 
+const activeCorrelativo = ref(null);
+const isLoadingCorrelativo = ref(false);
 
 // Cache para datos
 const paymentsCache = ref({});
@@ -1043,6 +1488,23 @@ const totalMonthlyStats = ref({
 const platformDateFrom = ref('');
 const platformDateTo = ref('');
 
+// Variables de búsqueda
+const searchId = ref('');
+const searchInput = ref('');
+
+// Función de búsqueda con debounce de 1.5 segundos
+const debouncedSearch = useDebounceFn(() => {
+  searchId.value = searchInput.value.trim();
+  if (searchId.value) {
+    searchById();
+  } else {
+    clearSearch();
+  }
+}, 1500);
+const searchResults = ref(null);
+const isSearching = ref(false);
+
+
 // Variables de paginación
 const currentTransactionPage = ref(1);
 const currentPaymentsPage = ref(1);
@@ -1054,6 +1516,7 @@ const platformStats = reactive({
   membershipRevenue: 0,
   visitRevenue: 0,
   serviceRevenue: 0,
+  packageRevenue: 0,
   totalWithdrawals: 0,
   totalCommissions: 0
 });
@@ -1084,7 +1547,76 @@ const toast = reactive({
   duration: 3000
 });
 
+// Computed para items pendientes de facturación
+const filteredPendingBilling = computed(() => {
+  return (pendingBillingItems.value || []).filter(item => !item.facturaRelacion?.factura);
+});
+
+const billingCounts = computed(() => {
+  const items = pendingBillingItems.value || [];
+  return {
+    membership: items.filter(item => item.billingType === 'membership').length,
+    visits: items.filter(item => item.billingType === 'visits').length,
+    services: items.filter(item => item.billingType === 'services').length,
+    packages: items.filter(item => item.billingType === 'packages').length,
+    total: items.length
+  };
+});
+
+const formattedNextCorrelativo = computed(() => {
+  if (!activeCorrelativo.value || activeCorrelativo.value.estado !== 'ACTIVO') return '---';
+  const next = (activeCorrelativo.value.correlativo_actual || 0) + 1;
+  return `${activeCorrelativo.value.prefijo || ''}${next.toString().padStart(8, '0')}`;
+});
+
 // ===== FUNCIONES DE UTILIDAD =====
+const loadEmpresaConfig = async () => {
+  try {
+    // Obtener configuraciones básicas de la empresa
+    const [telefonoRes, emailRes, rtnRes] = await Promise.all([
+      $api('/config/valor/numero_empresa', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      }),
+      $api('/config/valor/correo_empresa', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      }),
+      $api('/config/valor/rtn', {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      })
+    ]);
+
+    // Asignar valores si existen las respuestas
+    if (telefonoRes?.valor) {
+      empresaTelefono.value = telefonoRes.valor.toString();
+    }
+    if (emailRes?.valor) {
+      empresaEmail.value = emailRes.valor.toString();
+    }
+    if (rtnRes?.valor) {
+      empresaRTN.value = rtnRes.valor.toString();
+    }
+
+  } catch (error) {
+    console.error('Error cargando configuración de empresa:', error);
+    // Mantener valores por defecto si hay error
+  }
+};
+
 const formatCurrency = (value) => {
   try {
     if (value === undefined || value === null || isNaN(value)) return 'L. 0.00';
@@ -1115,6 +1647,19 @@ const formatDate = (dateString) => {
   } catch (error) {
     console.error('Error formateando fecha:', error);
     return 'Fecha inválida';
+  }
+};
+
+const formatDateDDMMYY = (dateString) => {
+  try {
+    const date = dateString ? new Date(dateString) : new Date();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
+    return `${day}${month}${year}`;
+  } catch (error) {
+    console.error('Error formateando fecha DDMMYY:', error);
+    return 'FechaInválida';
   }
 };
 
@@ -1249,6 +1794,7 @@ const loadMembershipPayments = async (page = 1) => {
       const processedItems = items.map(item => ({
         ...item,
         id: item.id_membresia,
+        billingType: 'membership',
         // Mapear los estados al formato del frontend
         estado: mapApiStatusToFrontend(item.estado),
         // Asegurar que existan las propiedades necesarias
@@ -1387,6 +1933,7 @@ const loadVisitPayments = async (page = 1) => {
       const transformedData = items.map(item => ({
         ...item,
         id: item.id_pagovisita,
+        billingType: 'visits',
         status: mapApiStatusToFrontend(item.estado),
         amount: item.monto || 0,
         date: item.fecha,
@@ -1532,9 +2079,21 @@ const loadServicePayments = async (page = 1) => {
           ? item.solicitud.servicio.nombre 
           : 'Servicio';
         
+        // Inyectar detalles de la cotización en la solicitud para el modal
+        if (item.solicitud) {
+          item.solicitud.cotizacion = {
+            id: item.id_cotizacion,
+            total: item.monto_total || 0,
+            monto_manodeobra: item.monto_manodeobra || 0,
+            descuento_membresia: item.descuento_membresia || 0,
+            credito_usado: item.credito_usado || 0
+          };
+        }
+
         return {
           ...item,
           id: item.id_cotizacion,
+          billingType: 'services',
           status: mapApiStatusToFrontend(item.estado),
           amount: item.monto_total || 0,
           date: item.fecha,
@@ -2030,6 +2589,17 @@ const updateSelectedMonth = async (type = 'payments') => {
   }
 };
 
+// ===== FUNCIONES DE DETALLES DE MONTO (COPIADO DE SERVICIOSADMIN) =====
+const showAmountDetailsModal = ref(false);
+const paymentType = ref('');
+const serviceToPayment = ref(null);
+
+const openAmountDetails = (type, service) => {
+  paymentType.value = type;
+  serviceToPayment.value = service;
+  showAmountDetailsModal.value = true;
+};
+
 // ===== FUNCIONES DE PAGINACIÓN =====
 const nextPage = () => {
   try {
@@ -2077,6 +2647,204 @@ const nextPaymentsPage = () => {
       }
     });
   }
+};
+
+const searchById = async () => {
+  if (!searchId.value.trim()) {
+    showToast('Por favor ingresa un ID para buscar', 'error');
+    return;
+  }
+
+  isSearching.value = true;
+  const config = useRuntimeConfig();
+  const auth = useAuthStore();
+  
+  try {
+    let endpoint = '';
+    let params = {};
+    
+    // Determinar el endpoint según la pestaña activa
+    switch (activeTab.value) {
+      case 'membership':
+        endpoint = '/membresia/buscar/' + searchId.value;
+        break;
+      case 'visits':
+        endpoint = '/pagovisita/' + searchId.value;
+        break;
+      case 'services':
+        endpoint = '/cotizacion/' + searchId.value;
+        break;
+      case 'withdrawals':
+        endpoint = '/movimientos/retiros/' + searchId.value; 
+        break;
+      default:
+        throw new Error('Pestaña no válida');
+    } 
+    
+    const response = await $api(endpoint, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      params: params
+    }); 
+
+    // Manejar la respuesta basada en la pestaña activa
+    if (response?.success) {
+      // Para la pestaña de retiros, los datos vienen en response.movimientos
+      // Para las demás pestañas, vienen en response.data
+      const responseData = activeTab.value === 'withdrawals' 
+        ? (response.movimientos || [])
+        : (Array.isArray(response.data) ? response.data : [response.data]); 
+      
+      // Limpiar los datos actuales
+      switch (activeTab.value) {
+        case 'membership': {
+          const transformedData = responseData.map(item => ({
+            ...item,
+            id: item.id_membresia,
+            billingType: 'membership',
+            status: mapApiStatusToFrontend(item.estado),
+            amount: item.monto || 0,
+            date: item.fecha,
+            service: 'Membresía',
+            client: item.usuario?.nombre || 'Cliente desconocido',
+            technician: 'N/A'
+          }));
+
+          membershipPayments.value = transformedData;
+          break;
+        }
+
+        case 'visits': {
+          const transformedData = responseData.map(item => ({
+            ...item,
+            id: item.id_pagovisita,
+            billingType: 'visits',
+            status: mapApiStatusToFrontend(item.estado),
+            amount: item.monto || 0,
+            date: item.fecha,
+            service: item.solicitud?.servicio?.nombre || 'Servicio de visita',
+            client: item.usuario?.nombre || 'Cliente desconocido',
+            technician: item.solicitud?.tecnico?.nombre || 'Sin asignar'
+          }));
+
+          visitPayments.value = transformedData;
+          break;
+        }
+
+        case 'services': {
+          const transformedData = responseData.map(item => {
+            const serviceName = item.solicitud?.servicio?.nombre || 'Servicio';
+
+            // Inyectar detalles de la cotización en la solicitud para el modal
+            if (item.solicitud) {
+              item.solicitud.cotizacion = {
+                id: item.id_cotizacion,
+                total: item.monto_total || 0,
+                monto_manodeobra: item.monto_manodeobra || 0,
+                descuento_membresia: item.descuento_membresia || 0,
+                credito_usado: item.credito_usado || 0
+              };
+            }
+
+            return {
+              ...item,
+              id: item.id_cotizacion,
+              billingType: 'services',
+              status: mapApiStatusToFrontend(item.estado),
+              amount: item.monto_total || 0,
+              date: item.fecha,
+              service: serviceName,
+              client: item.solicitud?.cliente?.nombre || 'Cliente desconocido',
+              technician: item.solicitud?.tecnico?.nombre || 'Sin asignar',
+              category: item.solicitud?.servicio?.categoria || 'general'
+            };
+          });
+
+          servicePayments.value = transformedData;
+          break;
+        }
+
+        case 'withdrawals': {
+          const transformedData = responseData.map(item => ({
+            ...item,
+            id: item.id_movimiento,
+            billingType: 'withdrawals',
+            status: mapApiStatusToFrontend(item.estado),
+            amount: item.monto || 0,
+            date: item.fecha,
+            technician: item.nombre_usuario || 'Técnico desconocido',
+            bankDetails: item.descripcion || 'Retiro de fondos',
+            // Agregar campos adicionales que podrían necesitarse
+            client: item.nombre_usuario || 'Técnico',
+            service: 'Retiro de fondos',
+            category: 'retiro'
+          }));
+
+          withdrawals.value = transformedData;
+          break;
+        }
+      }
+
+      // Verificar si hay datos en el array correspondiente
+      const hasData = activeTab.value === 'withdrawals' 
+        ? (response.movimientos && response.movimientos.length > 0)
+        : (responseData && responseData.length > 0);
+      
+      if (hasData) {
+        showToast('Resultado encontrado', 'success');
+      } else {
+        // Limpiar los datos si no hay resultados
+        switch (activeTab.value) {
+          case 'membership': membershipPayments.value = []; break;
+          case 'visits': visitPayments.value = []; break;
+          case 'services': servicePayments.value = []; break;
+          case 'withdrawals': withdrawals.value = []; break;
+        }
+        showToast('No se encontró ningún registro con el ID proporcionado', 'warning');
+      }
+    } else {
+      // Limpiar los datos si no hay resultados
+      switch (activeTab.value) {
+        case 'membership': membershipPayments.value = []; break;
+        case 'visits': visitPayments.value = []; break;
+        case 'services': servicePayments.value = []; break;
+        case 'withdrawals': withdrawals.value = []; break;
+      }
+      showToast('No se encontró ningún registro con el ID proporcionado', 'warning');
+    }
+  } catch (error) {
+    console.error('❌ Error al buscar por ID:', error);
+    // Limpiar los datos en caso de error
+    switch (activeTab.value) {
+      case 'membership': membershipPayments.value = []; break;
+      case 'visits': visitPayments.value = []; break;
+      case 'services': servicePayments.value = []; break;
+      case 'withdrawals': withdrawals.value = []; break;
+    }
+    
+    // Manejar específicamente el caso de no encontrado (404)
+    if (error.response?.status === 404) {
+      showToast('No se encontró ningún registro con el ID proporcionado', 'warning');
+    } else {
+      showToast(
+        error.response?._data?.message || 'Error al buscar el registro', 
+        'error'
+      );
+    }
+  } finally {
+    isSearching.value = false;
+  }
+};
+
+const clearSearch = () => {
+  searchId.value = '';
+  searchInput.value = ''; 
+  // Recargar los datos normales de la pestaña actual
+  loadTabData(1);
 };
 
 // ===== FUNCIONES DE UI Y HELPERS =====
@@ -2269,6 +3037,133 @@ const getItemIcon = () => {
   }
 };
 
+// ===== FUNCIONES DE FACTURACIÓN =====
+const loadPendingBilling = async () => {
+  try {
+    isLoadingData.value = true;
+    const month = billingMonth.value;
+    
+    const response = await $api(`/facturas/pendientes?month=${month}`, {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    });
+
+    if (response?.status === 'success') {
+      pendingBillingItems.value = response.data || [];
+    }
+  } catch (error) {
+    console.error('Error cargando pendientes de facturación:', error);
+    showToast('Error al cargar pendientes de facturación', 'error');
+  } finally {
+    isLoadingData.value = false;
+  }
+};
+
+const fetchActiveCorrelativo = async () => {
+  try {
+    isLoadingCorrelativo.value = true;
+    const response = await $api('/facturas/estado-correlativo', {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    });
+    if (response?.status === 'success') {
+      activeCorrelativo.value = response.data;
+    }
+  } catch (error) {
+    console.error('Error al obtener correlativo:', error);
+  } finally {
+    isLoadingCorrelativo.value = false;
+  }
+};
+
+const openNextPendingBilling = async () => {
+  if (filteredPendingBilling.value.length > 0) {
+    currentBillingItem.value = filteredPendingBilling.value[0];
+    
+    // Resetear form con datos del item
+    billingForm.tipo_factura = 'CONSUMIDOR_FINAL';
+    billingForm.nombre_cliente = 'CONSUMIDOR FINAL';
+    billingForm.rtn_cliente = 'CF';
+    
+    // Cargar correlativo actual
+    await fetchActiveCorrelativo();
+    
+    isBillingModalOpen.value = true;
+  } else {
+    showToast('No hay facturas pendientes', 'success');
+  }
+};
+
+const closeBillingModal = () => {
+  isBillingModalOpen.value = false;
+  currentBillingItem.value = null;
+};
+
+const saveFactura = async ({ form, next }) => {
+  if (isProcessingBilling.value) return;
+  
+  try {
+    isProcessingBilling.value = true;
+    const item = currentBillingItem.value;
+    const total = parseFloat(item.amount || item.monto || item.monto_total || 0);
+    const subtotal = total;
+    const isv = 0.00;
+
+    const payload = {
+      ...form,
+      subtotal: subtotal.toFixed(2),
+      isv: isv.toFixed(2),
+      total: total.toFixed(2),
+      id_usuario: item.id_usuario || item.usuario?.id_usuario || item.id_cliente || item.cliente?.id_usuario,
+      id_pagovisita: item.billingType === 'visits' ? (item.id_pagovisita || item.id) : null,
+      id_cotizacion: item.billingType === 'services' ? (item.id_cotizacion || item.id) : null,
+      id_membresia: item.billingType === 'membership' ? (item.id_membresia || item.id) : null,
+      id_pago_paquete: item.billingType === 'packages' ? (item.id_pago_paquete || item.id) : null
+    };
+
+    const response = await $api('/facturas', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (response?.status === 'success') {
+      showToast('Factura generada y vinculada correctamente', 'success');
+      
+      // Eliminar el item de la lista local
+      pendingBillingItems.value = pendingBillingItems.value.filter(i => i.id_local !== item.id_local);
+
+      if (next && filteredPendingBilling.value.length > 0) {
+        // Abrir el siguiente inmediatamente
+        currentBillingItem.value = filteredPendingBilling.value[0];
+        // Resetear form
+        billingForm.tipo_factura = 'CONSUMIDOR_FINAL';
+        billingForm.nombre_cliente = 'CONSUMIDOR FINAL';
+        billingForm.rtn_cliente = 'CF';
+      } else {
+        closeBillingModal();
+      }
+      
+      // Recargar datos de tabla principal
+      loadTabData(currentPaymentsPage.value);
+      
+      // Actualizar correlativo para el siguiente
+      await fetchActiveCorrelativo();
+    } else if (response?.status === 'error_config') {
+      showToast(response.message, 'warning');
+      if (!next) closeBillingModal();
+    }
+  } catch (error) {
+    console.error('Error al guardar factura:', error);
+    showToast(error.message || 'Error al generar la factura', 'error');
+  } finally {
+    isProcessingBilling.value = false;
+  }
+};
+
 const getItemAmountClass = (status) => {
   try {
     if (!status) return 'text-gray-600 dark:text-gray-400';
@@ -2306,7 +3201,7 @@ const getItemTitle = (item) => {
     let title;
     switch (activeTab.value) {
       case 'membership': title = item.plan || 'Membresía'; break;
-      case 'visits': title = item.service || 'Visita'; break;
+      case 'visits': title = item.service || 'Visita Técnica'; break;
       case 'services': title = item.service || item.serviceName || 'Servicio'; break;
       case 'withdrawals': title = item.technician || 'Retiro'; break;
       default: return 'Item';
@@ -2469,6 +3364,138 @@ const closeDetailsModal = () => {
     selectedPayment.value = null;
   } catch (error) {
     console.error('Error cerrando modal:', error);
+  }
+};
+
+const openFacturaModal = async (payment) => {
+  try {
+    if (!payment) {
+      console.error('No se proporcionó un pago');
+      return;
+    }
+
+    // Resetear variables fiscales para evitar que se muestren datos de la factura anterior
+    empresaCAI.value = '';
+    empresaCorrelativo.value = '';
+    empresaRangoAutorizado.value = '';
+    empresaFechaLimite.value = '';
+
+    // Clonar para no modificar el objeto original y resetear campos financieros/fiscales
+    selectedFacturaPayment.value = { 
+      ...payment, 
+      subtotal: 0, 
+      isv: 0, 
+      total: 0,
+      rtn_cliente: '' 
+    };
+    showFacturaModal.value = true;
+
+    // Si no tiene id_factura, intentar buscar por el ID del pago
+    if (!payment.id_factura && (payment.id_cotizacion || payment.id_membresia || payment.id_pagovisita)) {
+      try {
+        const params = new URLSearchParams();
+        if (payment.id_cotizacion) params.append('id_cotizacion', payment.id_cotizacion);
+        if (payment.id_membresia) params.append('id_membresia', payment.id_membresia);
+        if (payment.id_pagovisita) params.append('id_pagovisita', payment.id_pagovisita);
+
+        const response = await $api(`/facturas/relaciones/idpago?${params.toString()}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+
+        if (response?.status === 'success' && response.factura) {
+          const factura = response.factura;
+          const correlativo = response.correlativo;
+          
+          // Actualizar variables de datos fiscales con los datos de la factura
+          if (factura.cai) empresaCAI.value = factura.cai;
+          if (factura.numero_factura_correlativo) empresaCorrelativo.value = factura.numero_factura_correlativo;
+          
+          // Actualizar con datos del correlativo
+          if (correlativo) {
+            if (correlativo.rango_autorizado) empresaRangoAutorizado.value = correlativo.rango_autorizado;
+            if (correlativo.fecha_limite_emision) empresaFechaLimite.value = correlativo.fecha_limite_emision;
+          }
+          
+          // Actualizar RTN del cliente en selectedFacturaPayment
+          if (factura.rtn_cliente) selectedFacturaPayment.value.rtn_cliente = factura.rtn_cliente;
+          
+          // Actualizar datos financieros en selectedFacturaPayment
+          if (factura.subtotal) selectedFacturaPayment.value.subtotal = factura.subtotal;
+          if (factura.isv) selectedFacturaPayment.value.isv = factura.isv;
+          if (factura.total) selectedFacturaPayment.value.total = factura.total;
+          
+        } else if (response?.status === 'not_found') {
+          console.warn('ℹ️ No se encontró factura asociada al pago:', response.message);
+          // Los valores ya están reseteados por el inicio de la función
+        } else {
+          console.warn('No se encontró factura asociada al pago:', response);
+        }
+      } catch (error) {
+        console.warn('No se pudo cargar la factura asociada al pago:', error);
+        if (error.response) {
+          console.error('Detalles del error:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers
+          });
+        }
+      }
+    } else if (payment.id_factura) {
+      // Obtener datos de la factura específica si hay un ID
+      try {
+        const response = await $api(`/facturas/${payment.id_factura}`, {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+
+        if (response?.status === 'success' && response.factura) {
+          const factura = response.factura;
+          
+          // Actualizar variables de datos fiscales con los datos de la factura
+          if (factura.cai) empresaCAI.value = factura.cai;
+          if (factura.numero_factura_correlativo) empresaCorrelativo.value = factura.numero_factura_correlativo;
+          
+        } else {
+          console.warn('La respuesta no contiene datos de factura válidos:', response);
+        }
+      } catch (error) {
+        console.error('Error obteniendo datos de factura:', error);
+        if (error.response) {
+          console.error('Detalles del error:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers
+          });
+        } else if (error.request) {
+          console.error('No se recibió respuesta del servidor:', error.request);
+        } else {
+          console.error('Error al configurar la solicitud:', error.message);
+        }
+      }
+    } else {
+      console.warn('No se proporcionó un ID de factura en el pago ni IDs de pago asociados:', payment);
+    }
+    
+  } catch (error) {
+    console.error('Error inesperado al abrir el modal de factura:', error);
+  }
+};
+
+const closeFacturaModal = () => {
+  try {
+    showFacturaModal.value = false;
+    selectedFacturaPayment.value = null;
+  } catch (error) {
+    console.error('Error cerrando modal de factura:', error);
   }
 };
 
@@ -2642,8 +3669,10 @@ const updatePlatformStats = async () => {
       platformStats.membershipRevenue = data.ingresosMembresias || 0;
       platformStats.visitRevenue = data.ingresosVisitas || 0;
       platformStats.serviceRevenue = data.ingresosServicios || 0;
+      platformStats.packageRevenue = data.ingresosPaquetes || 0;
       platformStats.totalWithdrawals = data.retiros || 0;
       platformStats.totalCommissions = data.comisiones || 0;
+      platformStats.totalRevenue = data.gananciaNeta || 0;
       
       if (response.data.grafico) {
         updateChart(response.data.grafico);
@@ -2974,12 +4003,13 @@ const usersData = reactive({
 const availableReports = ref([
   {
     id: 1,
-    title: 'Reporte Financiero Mensual',
-    description: 'Resumen completo de ingresos y Retiros',
+    title: 'Reporte Ingresos de la Plataforma',
+    description: 'Resumen detallado de ingresos por membresías, visitas y servicios',
     icon: '💰',
     iconClass: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
     generating: false
   },
+
   {
     id: 2,
     title: 'Reporte de Servicios Detallado',
@@ -3010,7 +4040,7 @@ const generateReport = async (report) => {
     const selectedMonth = selectedMonthReports.value;
     
     // Solo incluir el parámetro month si se seleccionó un mes
-    const monthParam = hasSelectedMonth ? `?month=${selectedMonth}` : '';
+    const monthParam = hasSelectedMonth ? `?month=${selectedMonth}&limit=1000` : '?limit=1000';
     
     // Configurar título del reporte
     let reportTitle = 'Reporte General';
@@ -3029,7 +4059,7 @@ const generateReport = async (report) => {
     } 
 
     // 📦 2️⃣ Obtener datos base comunes
-    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes] = await Promise.all([
+    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes, packagePaymentsRes] = await Promise.all([
       $api(`/membresia${monthParam}`).catch(err => {
         console.error('❌ Error en /membresia:', err);
         throw err;
@@ -3049,6 +4079,16 @@ const generateReport = async (report) => {
       $api(`/usuarios${monthParam}`).catch(err => {
         console.error('❌ Error en /usuarios:', err);
         throw err;
+      }),
+      // Obtener movimientos de tipo ingreso (pagos a técnicos) para restar del ingreso de la app
+      $api(`/movimientos/ingresos/tecnicos${monthParam}`).catch(err => {
+        console.error('❌ Error en /movimientos (ingresos):', err);
+        return { movimientos: [], data: [] }; // Fallback
+      }),
+      // Obtener pagos de paquetes aprobados
+      $api(`/paquetes/usuarios/pagos${monthParam}`).catch(err => {
+        console.error('❌ Error en /paquetes/usuarios/pagos:', err);
+        return { data: [], estadisticas: { total: 0 } };
       })
     ]);
 
@@ -3071,11 +4111,19 @@ const generateReport = async (report) => {
     const visitData = processData(visitRes, 'Visitas Técnicas');
     const quotationData = processData(quotationRes, 'Cotizaciones');
     const withdrawalsData = processData(withdrawalsRes, 'Retiros');
+    const packagePaymentsData = processData(packagePaymentsRes, 'Pagos de Paquetes');
+    
+    const rawTechData = technicianIncomeRes?.movimientos || technicianIncomeRes?.data || [];
+    const technicianIncomeData = Array.isArray(rawTechData) ? rawTechData : [];
 
-    const serviceData = processData(quotationRes, 'Servicios'); // 👈 Cotizaciones se consideran "servicios" en el reporte financiero
+    const serviceData = processData(quotationRes, 'Servicios');
+    // Asegurar que serviceData.data solo contenga registros confirmados para el reporte
+    serviceData.data = (serviceData.data || []).filter(s => s.estado?.toLowerCase() === 'confirmado');
+    // Asegurar que serviceData.total refleje solo los confirmados (aunque el backend ya lo hace)
+    serviceData.total = parseFloat(quotationRes?.estadisticas?.total || 0);
 
     // 💰 4️⃣ Cálculos de balance
-    const ingresosTotales = membershipData.total + visitData.total + serviceData.total;
+    const ingresosTotales = membershipData.total + visitData.total + serviceData.total + packagePaymentsData.total;
     const retirosTotales = withdrawalsData.total;
     const balanceNeto = ingresosTotales - retirosTotales;
 
@@ -3095,8 +4143,16 @@ const generateReport = async (report) => {
     doc.setFontSize(9);
     doc.text(`Reporte: ${report.title}`, 15, 18);
     doc.text(hasSelectedMonth 
-      ? `Período: ${monthName}`
+      ? `Período: ${monthName} ${year}`
       : 'Período: General (Todos los meses)', 15, 23);
+
+    // Fecha de impresión
+    doc.setFontSize(8);
+    const fechaImpresion = new Date().toLocaleDateString('es-ES', {
+      day: '2-digit', month: '2-digit', year: 'numeric', 
+      hour: '2-digit', minute: '2-digit'
+    });
+    doc.text(`Impreso el: ${fechaImpresion}`, 195, 23, { align: 'right' });
 
     // 📚 6️⃣ Seleccionar tipo de reporte
     switch (report.id) {
@@ -3108,6 +4164,8 @@ const generateReport = async (report) => {
           visitData,
           serviceData,
           withdrawalsData,
+          technicianIncomeData, // Pasamos los datos de ingresos técnicos
+          packagePaymentsData, // Pasamos los datos de pagos de paquetes
           mesNombre: monthName,
           year,
           balanceNeto
@@ -3116,22 +4174,32 @@ const generateReport = async (report) => {
 
       // ===== REPORTE DE SERVICIOS =====
       case 2: {
-        // Solo en este reporte se usa /solicitudservicio
+        // Obtener servicios
         const serviceUrl = hasSelectedMonth 
           ? `/solicitudservicio?month=${selectedMonth}`
           : '/solicitudservicio'; 
         
-        const serviceRes = await $api(serviceUrl, {
-          baseURL: config.public.apiBase,
-          headers: { Authorization: `Bearer ${auth.token}` }
-        }).then(res => { 
-          return res;
-        }).catch(err => {
-          console.error('❌ Error en /solicitudservicio:', err);
-          throw err;
-        });
+        const [serviceRes, paquetesRes] = await Promise.all([
+          // Obtener servicios
+          $api(serviceUrl, {
+            baseURL: config.public.apiBase,
+            headers: { Authorization: `Bearer ${auth.token}` }
+          }).catch(err => {
+            console.error('❌ Error en /solicitudservicio:', err);
+            throw err;
+          }),
+          // Obtener paquetes utilizados
+          $api('/paquetes/usuarios/utilizados', {
+            baseURL: config.public.apiBase,
+            headers: { Authorization: `Bearer ${auth.token}` }
+          }).catch(err => {
+            console.error('❌ Error en /paquetes/usuarios/utilizados:', err);
+            return { data: [] }; // Continuar con array vacío si hay error
+          })
+        ]);
+        
         const serviceData = processData(serviceRes, 'Servicios');
-        await generarReporteServiciosDetallado(doc, serviceData);
+        await generarReporteServiciosDetallado(doc, serviceData, paquetesRes);
         break;
       }
 
@@ -3143,6 +4211,11 @@ const generateReport = async (report) => {
       // ===== REPORTE DE TRANSACCIONES =====
       case 4:
         await generarReporteTransacciones(doc, membershipData, visitData, withdrawalsData);
+        break;
+
+      // ===== REPORTE DE RETIROS =====
+      case 5:
+        await generarReporteRetiros(doc, withdrawalsData);
         break;
 
       default:
@@ -3185,7 +4258,12 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, mesNombre, year, balanceNeto }) => {
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto }) => {
+  // Recalcular total de servicios usando la comisión guardada directamente
+  const totalServiciosReal = serviceData.data
+    .filter(s => s.estado?.toLowerCase() === 'confirmado')
+    .reduce((sum, s) => sum + (parseFloat(s.monto_comision_app) || 0), 0);
+
   // Usar autoTable del documento
   let currentY = 40;
 
@@ -3193,11 +4271,11 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(93, 92, 222);
   doc.setFontSize(14);
-  doc.text('REPORTE FINANCIERO MENSUAL', 10, currentY);
-  currentY += 6;
+  doc.text('Reporte de Ingresos', 10, currentY);
+  currentY += 4;
 
   // 📊 Calcular porcentajes
-  const totalIngresos = membershipData.total + visitData.total + serviceData.total;
+  const totalIngresos = membershipData.total + visitData.total + totalServiciosReal + packagePaymentsData.total;
   const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
 
   // 📋 Tabla resumen de totales
@@ -3207,16 +4285,16 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     body: [
       ['Membresías', formatCurrency(membershipData.total), calcPorcentaje(membershipData.total)],
       ['Visitas Técnicas', formatCurrency(visitData.total), calcPorcentaje(visitData.total)],
-      ['Servicios', formatCurrency(serviceData.total), calcPorcentaje(serviceData.total)],
-      ['Ingresos', formatCurrency(totalIngresos), '-'],
-      ['Retiros', formatCurrency(withdrawalsData.total), '-'],
-      ['Balance Neto', formatCurrency(balanceNeto), '-']
+      ['Venta de Paquetes', formatCurrency(packagePaymentsData.total), calcPorcentaje(packagePaymentsData.total)],
+      ['Comisión por Servicios', formatCurrency(totalServiciosReal), calcPorcentaje(totalServiciosReal)],
+      ['Total Ingresos', formatCurrency(totalIngresos), '-']
     ],
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 9 },
     bodyStyles: { fontSize: 9 },
-    columnStyles: { 0: { cellWidth: 70 }, 1: { halign: 'right' }, 2: { halign: 'center' } },
-    margin: { left: 10, right: 10 }
+    columnStyles: { 0: { cellWidth: 70 }, 1: { halign: 'center' }, 2: { halign: 'center' } },
+    margin: { left: 10, right: 10 },
+    styles: { halign: 'center' }
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
@@ -3232,59 +4310,107 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.setTextColor(93, 92, 222);
   doc.setFontSize(12);
   doc.text('Detalle de Ingresos', 10, currentY);
-  currentY += 8;
+  currentY += 4;
 
   const membresiasFiltradas = membershipData.data
-    .filter(m => m.estado?.toLowerCase() !== 'pendiente')
-    .map(m => [formatDate(m.fecha), 'Membresía', m.usuario?.nombre || m.usuario?.cliente?.nombre || '-', formatCurrency(m.monto)]);
+    .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
+    .map(m => [
+      formatDate(m.fecha), 
+      'Membresía', 
+      m.usuario?.nombre || m.usuario?.cliente?.nombre || '-', 
+      m.facturaRelacion?.factura?.estado || 'PENDIENTE',
+      m.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+      formatCurrency(m.monto)
+    ]);
 
   const visitasFiltradas = visitData.data
-    .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
-    .map(v => [formatDate(v.fecha), 'Visita', v.cliente?.nombre || v.client || v.usuario?.nombre || '-', formatCurrency(v.monto)]);
+    .filter(v => v.estado?.toLowerCase() === 'aprobado')
+    .map(v => [
+      formatDate(v.fecha), 
+      'Visita Técnica', 
+      v.cliente?.nombre || v.client || v.usuario?.nombre || '-', 
+      v.facturaRelacion?.factura?.estado || 'PENDIENTE',
+      v.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+      formatCurrency(v.monto)
+    ]);
 
   const serviciosFiltrados = serviceData.data
-    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
-    .map(s => [formatDate(s.fecha), 'Servicio', s.solicitud?.cliente?.nombre || '-', formatCurrency(s.monto_total || 0)]);
+    .filter(s => s.estado?.toLowerCase() === 'confirmado')
+    .map(s => {
+        const montoNeto = parseFloat(s.monto_comision_app) || 0;
+        return [
+          formatDate(s.fecha), 
+          'Comisión por Servicio', 
+          s.solicitud?.cliente?.nombre || '-', 
+          s.facturaRelacion?.factura?.estado || 'PENDIENTE',
+          s.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+          formatCurrency(montoNeto)
+        ];
+    });
+
+  const paquetesFiltrados = packagePaymentsData.data
+    .filter(p => p.estado?.toLowerCase() !== 'rechazado')
+    .map(p => [
+      formatDate(p.fecha),
+      'Venta de Paquete',
+      p.usuario?.nombre || '-',
+      p.facturaRelacion?.factura?.estado || 'PENDIENTE',
+      p.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+      formatCurrency(p.monto_comision)
+    ]);
 
   // Calculate totals from original data instead of formatted strings
   const totalMembresias = membershipData.data
-    .filter(m => m.estado?.toLowerCase() !== 'pendiente')
+    .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
     .reduce((sum, m) => sum + (parseFloat(m.monto) || 0), 0);
     
   const totalVisitas = visitData.data
-    .filter(v => !['pendiente', 'rechazado'].includes(v.estado?.toLowerCase()))
+    .filter(v => v.estado?.toLowerCase() === 'aprobado')
     .reduce((sum, v) => sum + (parseFloat(v.monto) || 0), 0);
     
-  const totalServicios = serviceData.data
-    .filter(s => s.estado?.toLowerCase() !== 'pendiente')
-    .reduce((sum, s) => sum + (parseFloat(s.monto_total) || 0), 0);
     
-  const totalIngresosTabla = totalMembresias + totalVisitas + totalServicios;
+  const totalServicios = totalServiciosReal;
+    
+  const totalPaquetes = packagePaymentsData.data
+    .filter(p => p.estado?.toLowerCase() !== 'rechazado')
+    .reduce((sum, p) => sum + (parseFloat(p.monto_comision) || 0), 0);
+    
+  const totalIngresosTabla = totalMembresias + totalVisitas + totalServicios + totalPaquetes;
 
-  const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0;
+  const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0 || paquetesFiltrados.length > 0;
 
   doc.autoTable({
     startY: currentY,
-    head: [['Fecha', 'Tipo', 'Cliente', 'Monto']],
+    head: [['Fecha', 'Concepto', 'Cliente', 'Estado Fiscal', 'Correlativo', 'Monto']],
     body: hayDatos
       ? [
           ...membresiasFiltradas,
           ...visitasFiltradas,
+          ...paquetesFiltrados,
           ...serviciosFiltrados,
           [
-            { content: 'TOTAL INGRESOS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: 'TOTAL INGRESOS', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
             { content: formatCurrency(totalIngresosTabla), styles: { fontStyle: 'bold' } }
           ]
         ]
-      : [[{ content: 'No hay datos disponibles', colSpan: 4, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+      : [[{ content: 'No hay datos disponibles', colSpan: 6, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
-    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 30 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 } },
+    columnStyles: { 
+      0: { cellWidth: 20, halign: 'center' }, 
+      1: { cellWidth: 35, halign: 'center' }, 
+      2: { cellWidth: 35, halign: 'center' }, 
+      3: { cellWidth: 25, halign: 'center' }, 
+      4: { cellWidth: 'auto', halign: 'center' },
+      5: { cellWidth: 25, halign: 'center' }
+    },
     margin: { left: 10, right: 10 },
-    pageBreak: 'auto'
+    pageBreak: 'auto',
+    styles: { halign: 'center' }
   });
 
+  // Agregar detalle de retiros
   currentY = doc.lastAutoTable.finalY + 10;
   
   // Agregar nueva página si es necesario
@@ -3293,15 +4419,102 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     currentY = 20;
   }
 
-  // 📋 Detalle de Retiros
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(93, 92, 222);
+  doc.setTextColor(220, 38, 38); // Rojo
   doc.setFontSize(12);
   doc.text('Detalle de Retiros', 10, currentY);
+  currentY += 4;
+
+  const retirosFiltrados = withdrawalsData.data
+    .filter(r => r.estado?.toLowerCase() === 'completado')
+    .map(r => [
+      formatDate(r.fecha),
+      r.nombre_usuario || '-',
+      r.descripcion?.replace(/\n/g, ' ') || 'Sin descripción',
+      r.estado,
+      formatCurrency(r.monto),
+    ]);
+
+  const hayRetiros = retirosFiltrados.length > 0;
+
+  doc.autoTable({
+    startY: currentY,
+    head: [['Fecha', 'Usuario', 'Descripción', 'Estado', 'Monto']],
+    body: hayRetiros
+      ? [
+          ...retirosFiltrados,
+          [
+            { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: '', styles: { fontStyle: 'bold' } },
+            { content: formatCurrency(withdrawalsData.total), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }
+          ]
+        ]
+      : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+    theme: 'grid',
+    headStyles: { fillColor: [220, 38, 38], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: { 
+      0: { cellWidth: 25, halign: 'center' }, 
+      1: { cellWidth: 35, halign: 'center' }, 
+      2: { cellWidth: 'auto', halign: 'center' }, 
+      3: { cellWidth: 30, halign: 'center' }, 
+      4: { cellWidth: 25, halign: 'center' } 
+    },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'auto',
+    styles: { halign: 'center' }
+  });
+
+  // Balance Final
+  currentY = doc.lastAutoTable.finalY + 10;
+
+  if (currentY > 250) {
+    doc.addPage();
+    currentY = 20;
+  }
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(50, 50, 50);
+  doc.setFontSize(14);
+  doc.text('BALANCE GENERAL', 10, currentY);
+  currentY += 5;
+
+  doc.autoTable({
+    startY: currentY,
+    head: [['Concepto', 'Monto (HNL)']],
+    body: [
+      [{ content: 'Total Ingresos', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
+      [{ content: 'Total Retiros', styles: { fontStyle: 'bold', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(withdrawalsData.total)}`, styles: { fontStyle: 'bold', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: 'GANANCIA NETA', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
+       { content: formatCurrency(balanceNeto), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }]
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8, cellPadding: 2 },
+    columnStyles: { 
+      0: { cellWidth: 120, halign: 'left' }, 
+      1: { cellWidth: 70, halign: 'right' } 
+    },
+    margin: { left: 10, right: 10 },
+    pageBreak: 'avoid',
+    tableWidth: 190,
+    styles: { halign: 'center' }
+  });
+};
+
+// ===== REPORTE DE RETIROS =====
+const generarReporteRetiros = async (doc, withdrawalsData) => {
+  let currentY = 40;
+
+  // 🎯 Título
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(93, 92, 222);
+  doc.setFontSize(14);
+  doc.text('REPORTE DE RETIROS DE TÉCNICOS', 10, currentY);
   currentY += 8;
 
   const retirosFiltrados = withdrawalsData.data
-    .filter(r => r.estado?.toLowerCase() !== 'pendiente')
+    .filter(r => r.estado?.toLowerCase() === 'completado')
     .map(r => [
       formatDate(r.fecha),
       r.nombre_usuario || '-',
@@ -3310,7 +4523,10 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       r.estado
     ]);
 
-  const totalRetiros = withdrawalsData.data.reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
+  const totalRetirosReal = withdrawalsData.data
+    .filter(r => r.estado?.toLowerCase() === 'completado')
+    .reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
+    
   const hayRetiros = retirosFiltrados.length > 0;
 
   doc.autoTable({
@@ -3320,45 +4536,18 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       ? [
           ...retirosFiltrados,
           [
-            { content: 'TOTAL RETIROS', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: formatCurrency(totalRetiros), styles: { fontStyle: 'bold' } }
+            { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalRetirosReal), styles: { fontStyle: 'bold' } },
+            { content: '', styles: { fontStyle: 'bold' } }
           ]
         ]
       : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
+    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 35 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 }, 4: { cellWidth: 25 } },
     margin: { left: 10, right: 10 },
     pageBreak: 'auto'
-  });
-
-  currentY = doc.lastAutoTable.finalY + 10;
-  
-  // Agregar nueva página si es necesario
-  if (currentY > 250) {
-    doc.addPage();
-    currentY = 20;
-  }
-
-  // 📄 Resumen Final
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(33, 33, 33);
-  doc.text('Resumen Final', 10, currentY);
-  currentY += 6;
-
-  doc.autoTable({
-    startY: currentY,
-    head: [['Total Ingresos', 'Total Retiros', 'Balance Neto']],
-    body: [[
-      formatCurrency(totalIngresos),
-      formatCurrency(withdrawalsData.total),
-      formatCurrency(balanceNeto)
-    ]],
-    theme: 'grid',
-    headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    margin: { left: 10, right: 10 }
   });
 };
 
@@ -3430,7 +4619,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     pageBreak: 'auto'
   });
 
-  currentY = doc.lastAutoTable.finalY + 10;
+  currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -3491,7 +4680,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     pageBreak: 'auto'
   });
 
-  currentY = doc.lastAutoTable.finalY + 10;
+  currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -3551,7 +4740,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
 
 
 // ===== REPORTE DE SERVICIOS DETALLADO =====
-const generarReporteServiciosDetallado = async (doc, serviceData) => {
+const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData = null) => {
   // Usar autoTable del documento
   const autoTable = (options) => doc.autoTable(options);
   const servicios = Array.isArray(serviceData?.data) ? serviceData.data : [];
@@ -3621,7 +4810,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 10;
+    currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -3660,7 +4849,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 10;
+    currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -3705,7 +4894,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 10;
+    currentY = doc.lastAutoTable.finalY + 5;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -3728,7 +4917,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
     doc.setFontSize(13);
     doc.setTextColor(93, 92, 222);
     doc.text('DESGLOSE POR TIPO DE SERVICIO', 10, currentY);
-    currentY += 6;
+    currentY += 5;
 
     doc.autoTable({
       startY: currentY,
@@ -3737,6 +4926,49 @@ const generarReporteServiciosDetallado = async (doc, serviceData) => {
       theme: 'grid',
       headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
       bodyStyles: { fontSize: 9 },
+      margin: { left: 10, right: 10 },
+      pageBreak: 'auto'
+    });
+    
+    currentY = doc.lastAutoTable.finalY + 5;
+  }
+  
+  // ========= 5️⃣ PAQUETES ADQUIRIDOS =========
+  if (paquetesData?.data?.length) {
+    // Agregar nueva página si es necesario
+    if (currentY > 220) {
+      doc.addPage();
+      currentY = 20;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(93, 92, 222);
+    doc.text('PAQUETES UTILIZADOS', 10, currentY);
+    currentY += 5;
+
+    const headers = ['Fecha de Compra', 'Usuario', 'Paquete', 'Estado'];
+    const rows = paquetesData.data.map(p => ([
+      formatDate(p.fecha_actualizacion),
+      p.Usuario?.nombre?.trim() || 'Usuario no disponible',
+      p.paquete?.nombre || 'Paquete no disponible',
+      p.estado.charAt(0).toUpperCase() + p.estado.slice(1) // Capitalizar primera letra
+    ]));
+
+    // Mostrar total de paquetes utilizados
+    const totalPaquetes = paquetesData.total || 0;
+    const totalRow = [
+      { content: 'TOTAL', colSpan: headers.length - 1, styles: { halign: 'right', fontStyle: 'bold' } },
+      { content: totalPaquetes.toString(), styles: { fontStyle: 'bold' } }
+    ];
+
+    doc.autoTable({
+      startY: currentY,
+      head: [headers],
+      body: [...rows, totalRow],
+      theme: 'grid',
+      headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
       margin: { left: 10, right: 10 },
       pageBreak: 'auto'
     });
@@ -3757,9 +4989,9 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
       estado: m?.estado || 'Pendiente'
     })),
     ...(visitData?.data || []).map((v) => ({
-      tipo: 'Visita',
+      tipo: 'Visita Técnica',
       fecha: v?.fecha || new Date().toISOString(),
-      descripcion: `Pago visita - ${v?.solicitud?.servicio?.nombre || 'Servicio'}`,
+      descripcion: `Pago visita Técnica - ${v?.solicitud?.servicio?.nombre || 'Servicio'}`,
       monto: parseFloat(v?.monto || 0),
       estado: v?.estado || 'Pendiente'
     })),
@@ -3779,7 +5011,7 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
   doc.text('REPORTE DE TRANSACCIONES', 10, currentY);
   currentY += 6;
 
-  const headers = ['Fecha', 'Tipo', 'Descripción', 'Estado', 'Monto']; // monto al final
+  const headers = ['Fecha', 'Concepto', 'Descripción', 'Estado', 'Monto']; // monto al final
   const rows = data.map((t) => [
     formatDate(t.fecha),
     t.tipo,
@@ -3805,11 +5037,125 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
   });
 };
 
+// ===== FUNCIONES DE CREACIÓN DE FACTURAS =====
+const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado, idCotizacion = null) => {
+
+  try {
+    const config = useRuntimeConfig();
+    const auth = useAuthStore();
+
+    // Verificar si el usuario tiene RTN
+    let rtnResponse;
+    try {
+      rtnResponse = await $api(`/usuarios/verificar-rtn/${idUsuario}`, {
+        baseURL: config.public.apiBase,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        }
+      });
+    } catch (error) {
+      rtnResponse = { success: false };
+    }
+
+    // Preparar datos de la factura - payment.monto_total es el total pagado
+    let total = parseFloat(payment.monto_total || payment.monto || 0);
+
+    // Si es pago de servicio, calcular solo la comisión
+    if (tipoPago === 'services') {
+      try {
+        const configResponse = await $api('/config/valor/comision_por_servicio', {
+          baseURL: config.public.apiBase,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+        
+        // El usuario indicó el formato directo, pero mantenemos soporte defensivo para .data
+        const configData = configResponse.data || configResponse;
+        
+        if (configData && configData.valor) {
+          const porcentaje = parseFloat(configData.valor);
+          const montoBase = total;
+          total = (montoBase * porcentaje) / 100;
+        } else {
+        }
+      } catch (error) {
+      }
+    }
+
+    const subtotal = total; // Subtotal es igual al Total (sin ISV)
+    const isv = 0; // ISV en 0
+
+    let facturaData = {
+      tipo_factura: rtnResponse?.success ? 'CON_RTN' : 'CONSUMIDOR_FINAL',
+      subtotal,
+      isv,
+      total,
+      id_usuario: idUsuario
+    }; 
+
+    // Agregar datos específicos según tipo de factura
+    if (rtnResponse?.success && rtnResponse.data) {
+      facturaData.rtn_cliente = rtnResponse.data.rtn;
+      facturaData.nombre_cliente = rtnResponse.data.nombre.trim();
+    }
+
+    // Agregar ID relacionado según tipo de pago
+    switch (tipoPago) {
+      case 'membership':
+        facturaData.id_membresia = idRelacionado;
+        break;
+      case 'visits':
+        facturaData.id_pagovisita = idRelacionado;
+        if (idCotizacion) {
+          facturaData.id_cotizacion = idCotizacion;
+        }
+        break;
+      case 'services':
+        facturaData.id_cotizacion = idCotizacion || idRelacionado;
+        break;
+    }
+
+    // Crear la factura
+    const facturaResponse = await $api('/facturas', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: facturaData
+    });
+
+    if (facturaResponse?.status === 'success') {
+      // Retornamos éxito pero no mostramos toast aquí para no duplicar con el de approvePayment
+      return 'success';
+    } else if (facturaResponse?.status === 'error_config') {
+      showToast('Pago procesado correctamente, pero la factura deberá generarse manualmente cuando se active un correlativo.', 'warning');
+      return 'error_config';
+    } else {
+      throw new Error('Error al crear la factura');
+    }
+
+  } catch (error) {
+    const errorMsg = error.response?._data?.message || error.message;
+    showToast('Error al crear la factura: ' + errorMsg, 'error');
+  }
+};
+
 // ===== FUNCIONES DE APROBACION o RECHAZO DE PAGOS =====
 const approvePayment = async (id) => {
+  if (isApproving.value) return;
+  isApproving.value = true;
   try {
     const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
     let response;
+    let billingStatus = null;
     const config = useRuntimeConfig();
     const auth = useAuthStore();
     const headers = {
@@ -3850,7 +5196,6 @@ const approvePayment = async (id) => {
         });
 
         // Add credit for the user with the membership amount
-
         const creditRequestBody = {
           id_usuario: idUsuario,
           monto_credito: payment.monto
@@ -3865,7 +5210,10 @@ const approvePayment = async (id) => {
             'Authorization': `Bearer ${auth.token}`
           },
           body: creditRequestBody
-        }); 
+        });
+
+        // Crear factura para pago de membresía
+        billingStatus = await crearFacturaParaPago(idUsuario, payment, 'membership', payment.id_membresia || payment.id);
         break;
 
       case 'visits':
@@ -3879,6 +5227,9 @@ const approvePayment = async (id) => {
             id_cotizacion: payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion
           }
         });
+
+        // Crear factura para pago de visita
+        billingStatus = await crearFacturaParaPago(idUsuario, payment, 'visits', payment.id_pagovisita, payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion);
 
         // Notificar al admin de servicio pendiente
         if (response?.success) {
@@ -3939,6 +5290,9 @@ const approvePayment = async (id) => {
           }
         });
 
+        // Crear factura para pago de servicio
+        billingStatus = await crearFacturaParaPago(idUsuario, payment, 'services', solicitudId, cotizacionId);
+
         // Notificar al técnico sobre el pago recibido
         if (response?.success && payment.solicitud?.tecnico?.id_usuario) {
           try {
@@ -3956,6 +5310,27 @@ const approvePayment = async (id) => {
             });
           } catch (notificationError) {
             console.error('❌ Error al enviar notificación al técnico:', notificationError);
+            // No interrumpir el flujo si falla la notificación
+          }
+        }
+        
+        // Notificar al usuario referidor 'Comisión por referido recibida'
+        if (response?.success && response.detalles?.id_referidor) {
+          try {
+            await $api('/notificaciones/enviar', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth.token}`
+              },
+              body: JSON.stringify({
+                titulo: 'Comisión por referido recibida',
+                id_usuario: response.detalles.id_referidor
+              })
+            });
+          } catch (notificationError) {
+            console.error('❌ Error al enviar notificación al referidor:', notificationError);
             // No interrumpir el flujo si falla la notificación
           }
         }
@@ -3982,7 +5357,18 @@ const approvePayment = async (id) => {
       closeDetailsModal();
     }
 
-    showToast('Pago aprobado correctamente', 'success');
+    // Solo mostrar el toast de éxito general si NO hubo una advertencia de facturación
+    // El toast de advertencia ya se mostró dentro de crearFacturaParaPago
+    if (billingStatus !== 'error_config') {
+      showToast('Pago aprobado correctamente', 'success');
+    }
+
+    // Redirigir a ServiciosAdmin.vue si es un pago de visita
+    if (activeTab.value === 'visits') {
+      setTimeout(() => {
+        navigateTo('/admin/ServiciosAdmin');
+      }, 1500);
+    }
 
     // Notificar al cliente sobre el pago aprobado
     try {
@@ -4021,14 +5407,20 @@ const approvePayment = async (id) => {
 
     await loadTabData(currentPage);
     await updatePlatformStats();
+    await loadTransactions(); // Actualizar sección de transacciones
+    await loadPendingBilling(); // Actualizar Centro de Facturación
 
   } catch (error) {
     console.error('❌ Error aprobando pago:', error);
     showToast(error.response?._data?.message || 'Error al aprobar el pago', 'error');
+  } finally {
+    isApproving.value = false;
   }
 };
 
 const rejectPayment = async (id) => {
+  if (isRejecting.value) return;
+  isRejecting.value = true;
   try {
     const payment = activeTab.value === 'withdrawals' ? selectedWithdrawal.value : selectedPayment.value;
     let response;
@@ -4180,6 +5572,8 @@ const rejectPayment = async (id) => {
   } catch (error) {
     console.error('❌ Error rechazando pago:', error);
     showToast(error.response?._data?.message || 'Error al rechazar el pago', 'error');
+  } finally {
+    isRejecting.value = false;
   }
 };
 
@@ -4253,6 +5647,9 @@ onMounted(async () => {
 
     Chart.register(...registerables, DataLabelsPlugin);
     
+    // Cargar configuración de la empresa
+    await loadEmpresaConfig();
+    
     // Inicializar selectedChartObject con la primera opción
     initializeChartObject();  
 
@@ -4272,6 +5669,7 @@ onMounted(async () => {
       };
     }    
     await loadTransactions();
+    await loadPendingBilling();
   } catch (error) {
     window.location.reload()
   } finally {
@@ -4306,7 +5704,6 @@ onMounted(async () => {
 /* Estilos para vue-multiselect en filtros de admin */
 .multiselect-admin-filter {
   position: relative;
-  z-index: 50;
 }
 
 .multiselect-admin-filter .multiselect__tags {

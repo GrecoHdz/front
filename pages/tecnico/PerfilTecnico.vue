@@ -24,8 +24,20 @@
       <!-- Profile Card -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 dark:border-gray-700 mb-4 sm:mb-6">
         <div class="flex flex-col items-center text-center mb-4 sm:mb-6">
-          <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-3xl sm:text-4xl text-white mb-3 sm:mb-4 shadow-lg">
-            {{ userInitials }}
+          <div class="relative group">
+            <div v-if="user.imagen_url" 
+                 class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 mb-3 sm:mb-4 relative">
+              <img :src="user.imagen_url" 
+                   :alt="user.nombre" 
+                   class="w-full h-full object-cover">
+              <div v-if="isUploading" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+              </div>
+            </div>
+            <div v-else 
+                 class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-3xl sm:text-4xl text-white mb-3 sm:mb-4 shadow-lg">
+              {{ userInitials }}
+            </div> 
           </div>
           <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white">{{ user.nombre }}</h2>
           <p class="text-emerald-600 dark:text-emerald-400 font-medium text-sm sm:text-base">{{ user.email }}</p>
@@ -114,7 +126,7 @@
                 :options-limit="100"
               >
                 <template #singleLabel="{ option }">
-                  <span class="text-xs truncate">{{ getCityLabel(option) }}</span>
+                  <span class="text-[16px] sm:text-xs md:text-base truncate">{{ getCityLabel(option) }}</span>
                 </template>
               </multiselect>
             </div>
@@ -214,12 +226,24 @@
               <span v-if="isSaving">Guardando...</span>
               <span v-else>Actualizar Perfil</span>
             </button>
-              <button 
+            <button 
               @click="isPasswordModalOpen = true"
               type="button"
               class="w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
             >
               Cambiar Contraseña
+            </button>
+            <button 
+              @click="isPhotoModalOpen = true"
+              type="button"
+              class="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+            >
+              <div class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Gestionar Foto</span>
+              </div>
             </button>
           </div>
         </div>
@@ -332,6 +356,12 @@
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
             <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
           </button>
+          
+          <button 
+            @click="isContratoTecnicoModalOpen = true"
+            class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Contrato del Técnico</p>
+          </button>
           <button 
             @click="isPrivacidadModalOpen = true"
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
@@ -340,7 +370,7 @@
           <button 
             @click="isAcercaModalOpen = true"
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
-            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de HogarSeguro</p>
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de MiSeguro</p>
           </button>
           <button 
             @click="handleLogout"
@@ -358,182 +388,330 @@
     </div>
 
     <!-- Modal de Términos y Condiciones -->
-    <div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
-        <button 
-          @click="isTerminosModalOpen = false"
-          type="button"
-          class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-          aria-label="Cerrar modal"
-        >
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+<div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+    
+    <button 
+      @click="isTerminosModalOpen = false"
+      type="button"
+      class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+      aria-label="Cerrar modal"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
 
-        <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
-        </div>
+    <div class="mb-4">
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
+    </div>
 
-                <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+    <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
-          <p>
-          Al registrarse y utilizar la plataforma HogarSeguro, el usuario (cliente o técnico) acepta de forma expresa
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
+        <p>
+          Al registrarse y utilizar la plataforma MiSeguro, el usuario (cliente o técnico) acepta de forma expresa
           estos Términos y Condiciones. Si no está de acuerdo con alguno de ellos, deberá abstenerse de utilizar la plataforma.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
-          <p>
-          HogarSeguro es una plataforma tecnológica que facilita la conexión entre clientes y técnicos independientes
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
+        <p>
+          MiSeguro es una plataforma tecnológica que facilita la conexión entre clientes y técnicos independientes
           para la prestación de servicios de mantenimiento y reparación a domicilio.
-          </p>
-          <p class="mt-2">
-          <strong>Importante:</strong> HogarSeguro no presta directamente los servicios técnicos, no emplea a los técnicos
+        </p>
+        <p class="mt-2">
+          <strong>Importante:</strong> MiSeguro no presta directamente los servicios técnicos, no emplea a los técnicos
           y no asume una relación laboral con ellos. Los técnicos actúan de manera independiente y bajo su propia responsabilidad.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Modelo de Cobro y Pago Centralizado</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Modelo de Cobro y Pago Centralizado</h4>
+        <p>
           Por razones operativas, de seguridad y control, todos los pagos de los servicios solicitados a través de la plataforma
           deberán realizarse exclusivamente mediante transferencia bancaria o medios electrónicos autorizados
-          a las cuentas oficiales de HogarSeguro.
-          </p>
-          <p class="mt-2">
-          HogarSeguro actúa como intermediario tecnológico en la gestión de pagos, factura únicamente sus comisiones y cargos 
-          propios, y posteriormente liquida al técnico independiente el valor correspondiente a la mano de obra por él prestada.
+          a las cuentas oficiales de MiSeguro.
         </p>
-        </section>
+        <p class="mt-2">
+          MiSeguro actúa como intermediario tecnológico y agente de gestión de pagos, facilitando el recaudo de los montos acordados 
+          entre cliente y técnico independiente. MiSeguro factura únicamente sus comisiones, cargos propios y servicios adicionales 
+          ofrecidos por la plataforma, y gestiona la transferencia al técnico independiente del valor correspondiente a la mano de obra 
+          efectivamente prestada por éste.
+        </p>
+        <p class="mt-2">
+          Los montos recaudados por MiSeguro correspondientes a la mano de obra del técnico independiente constituyen
+          <strong>fondos de terceros</strong> administrados temporalmente por la plataforma en calidad de agente de gestión de pago,
+          y no representan ingresos propios de MiSeguro, reconociéndose contablemente como pasivos hasta su liquidación
+          al técnico correspondiente.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio y Distribución</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio y Distribución</h4>
+        <p>
           El precio de la mano de obra es definido directamente por el técnico y aceptado por el cliente antes
           de la ejecución del servicio.
-          </p>
-          <p class="mt-2">
-          La distribución del pago entre el técnico y HogarSeguro es <strong>variable</strong> y será determinada
+        </p>
+        <p class="mt-2">
+          La distribución del pago entre el técnico y MiSeguro es <strong>variable</strong> y será determinada
           por la plataforma según el tipo de servicio, categoría, promociones u otros criterios operativos,
           los cuales serán informados al técnico previo a la aceptación del trabajo.
-          </p>
-          <p class="mt-2">
-          La comisión de HogarSeguro se calcula sobre el valor total de la mano de obra acordada,
+        </p>
+        <p class="mt-2">
+          La comisión de MiSeguro se calcula sobre el valor total de la mano de obra acordada,
           independientemente de descuentos, créditos o beneficios aplicados al cliente.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresías y Créditos</h4>
-          <p>
-          HogarSeguro ofrece membresías mensuales que otorgan beneficios, entre ellos la acumulación de crédito
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresías y Créditos</h4>
+        <p>
+          MiSeguro ofrece membresías mensuales que otorgan beneficios, entre ellos la acumulación de crédito
           utilizable como descuento al momento de pagar servicios dentro de la plataforma.
-          </p>
-          <p class="mt-2">
-          El crédito acumulado:
-          </p>
-          <ul class="list-disc pl-5 space-y-1">
+        </p>
+        <p class="mt-2">El crédito acumulado:</p>
+        <ul class="list-disc pl-5 space-y-1">
           <li>No es dinero en efectivo</li>
           <li>No es transferible</li>
-          <li>Solo puede utilizarse para pagar servicios dentro de HogarSeguro</li>
-          </ul>
-          <p class="mt-2">
+          <li>Solo puede utilizarse para pagar servicios dentro de MiSeguro</li>
+        </ul>
+        <p class="mt-2">
           El uso del crédito reduce únicamente el monto a pagar por el cliente,
           pero no afecta el valor total de la mano de obra ni el pago correspondiente al técnico.
-          </p>
-          <p class="mt-2">
-            La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
-            el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
-          </p>
-        </section>
+        </p>
+        <p class="mt-2">
+          La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
+          el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
-          <p>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
+        <p>
           En caso de que el cliente no cuente con una membresía activa, se cobrará una tarifa fija por visita técnica,
           cuyo valor será informado previamente al cliente.
-          </p>
-          <p class="mt-2">
-          Esta tarifa corresponde exclusivamente a HogarSeguro y no forma parte del ingreso del técnico.
-          </p>
-        </section>
+        </p>
+        <p class="mt-2">
+          Esta tarifa corresponde a un servicio de gestión y coordinación prestado por MiSeguro y será documentada
+          mediante recibo por honorarios profesionales, conforme al régimen fiscal aplicable a la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Pagos al Técnico</h4>
-          <p>
-            HogarSeguro realizará el pago al técnico independiente una vez confirmado el pago del cliente
-            y finalizado el servicio, descontando la comisión correspondiente.
-          </p>
-          <p class="mt-2">
-            Los pagos se efectuarán únicamente a la cuenta bancaria registrada por el técnico en la plataforma
-            y podrán tardar hasta cinco (5) días hábiles.
-          </p>
-          <p class="mt-2">
-            El técnico es responsable de cumplir con sus obligaciones fiscales, tributarias y legales
-            ante las autoridades correspondientes.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Pagos al Técnico</h4>
+        <p>
+          MiSeguro realizará el pago al técnico independiente una vez confirmado el pago del cliente
+          y finalizado el servicio, descontando la comisión correspondiente.
+        </p>
+        <p class="mt-2">
+          Los pagos se efectuarán únicamente a la cuenta bancaria registrada por el técnico en la plataforma
+          y podrán tardar hasta cinco (5) días hábiles.
+        </p>
+        <p class="mt-2">
+          El técnico reconoce que es el único responsable de la emisión de los comprobantes fiscales 
+          correspondientes por los servicios técnicos prestados al cliente, así como del cumplimiento de sus 
+          obligaciones tributarias ante el Servicio de Administración de Rentas (SAR). La falta de emisión de 
+          comprobantes fiscales por parte del técnico no altera la naturaleza de intermediación de MiSeguro 
+          ni convierte dichos montos en ingresos propios de la plataforma.
+        </p>
+        <p class="mt-2 font-medium">
+          La constancia de transferencia bancaria realizada a la cuenta registrada por el técnico constituye
+          prueba plena de pago.
+        </p>
+        <p class="mt-2">
+          La transferencia realizada a la cuenta registrada por el técnico se considerará válida y liberatoria
+          para MiSeguro, aun cuando el técnico alegue desconocimiento, falta de notificación o no aceptación
+          expresa de la liquidación electrónica.
+        </p>
+        <p class="mt-2">
+          El técnico es el único responsable de la veracidad y exactitud de los datos bancarios proporcionados.
+          MiSeguro no será responsable por errores en la información suministrada por el técnico que resulten
+          en transferencias a cuentas incorrectas, inexistentes o de terceros.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Pagos No Autorizados</h4>
-          <p>
-            Cualquier pago realizado fuera de la plataforma, en efectivo, a cuentas no autorizadas
-            o directamente al técnico, no será reconocido por HogarSeguro y no generará derechos de reclamo,
-            garantía, crédito o soporte.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Pagos No Autorizados</h4>
+        <p>
+          Cualquier pago realizado fuera de la plataforma, en efectivo, a cuentas no autorizadas
+          o directamente al técnico, no será reconocido por MiSeguro y no generará derechos de reclamo,
+          garantía, crédito o soporte.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Limitación de Responsabilidad</h4>
-          <p>
-            Los servicios son prestados por técnicos independientes. HogarSeguro no garantiza el resultado final del servicio,
-            salvo en los casos expresamente establecidos por la plataforma.
-          </p>
-          <p class="mt-2">
-            HogarSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio,
-            excepto cuando la legislación aplicable disponga lo contrario.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Limitación de Responsabilidad</h4>
+        <p>
+          Los servicios son prestados por técnicos independientes. MiSeguro no garantiza el resultado final del servicio,
+          salvo en los casos expresamente establecidos por la plataforma.
+        </p>
+        <p class="mt-2">
+          MiSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio,
+          excepto cuando la legislación aplicable disponga lo contrario.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Privacidad y Protección de Datos</h4>
-          <p>
-            Los datos personales serán tratados conforme a la Política de Privacidad de HogarSeguro
-            y utilizados únicamente para la operación y mejora de la plataforma.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Privacidad y Protección de Datos</h4>
+        <p>
+          Los datos personales serán tratados conforme a la Política de Privacidad de MiSeguro
+          y utilizados únicamente para la operación y mejora de la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Modificaciones</h4>
-          <p>
-            HogarSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
-            Las modificaciones entrarán en vigor desde su publicación en la plataforma.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Modificaciones</h4>
+        <p>
+          MiSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
+          Las modificaciones entrarán en vigor desde su publicación en la plataforma.
+        </p>
+      </section>
 
-        <section>
-          <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Ley Aplicable y Jurisdicción</h4>
-          <p>
-            Estos Términos se rigen por las leyes de la República de Honduras.
-            Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
-          </p>
-        </section>
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Ley Aplicable y Jurisdicción</h4>
+        <p>
+          Estos Términos se rigen por las leyes de la República de Honduras.
+          Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
+        </p>
+      </section>
+
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <button 
+        @click="isTerminosModalOpen = false"
+        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+      >
+        Cerrar
+      </button>
+    </div>
+
+  </div>
 </div>
 
-        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button 
-            @click="isTerminosModalOpen = false"
-            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
+<!-- Modal de Contrato del Técnico -->
+<div v-if="isContratoTecnicoModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+    
+    <button 
+      @click="isContratoTecnicoModalOpen = false"
+      type="button"
+      class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+      aria-label="Cerrar modal"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <div class="mb-4">
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        Contrato de Prestación de Servicios del Técnico
+      </h3> 
+      <p class="text-sm text-gray-600 dark:text-gray-400">
+        Última actualización: 2 de enero de 2025
+      </p>
     </div>
+
+    <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">1. Objeto del Contrato</h4>
+        <p>
+          El presente contrato tiene por objeto regular la relación entre MiSeguro
+          (en adelante, “la Plataforma”) y el técnico independiente (en adelante, “el Técnico”)
+          para la intermediación tecnológica en la prestación de servicios a clientes finales.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">2. Naturaleza de la Relación</h4>
+        <p>
+          El Técnico actúa como profesional independiente, sin que exista relación laboral,
+          societaria o de subordinación con MiSeguro. La Plataforma no presta directamente
+          los servicios técnicos.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">3. Obligaciones del Técnico</h4>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>Prestar los servicios con profesionalismo y diligencia.</li>
+          <li>Responder por los daños causados durante la ejecución del servicio.</li>
+          <li>Respetar los horarios y condiciones acordadas con el cliente.</li>
+          <li>Mantener la confidencialidad de la información de los clientes.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">4. Modelo de Pago y Liquidación</h4>
+        <p>
+          El Técnico reconoce y acepta que todos los pagos realizados por los clientes a través
+          de la Plataforma ingresan exclusivamente a las cuentas oficiales de MiSeguro.
+        </p>
+        <p class="mt-2">
+          MiSeguro realizará la liquidación correspondiente al Técnico una vez finalizado
+          el servicio y confirmado el pago del cliente, descontando la comisión aplicable.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">5. Prueba Plena de Pago</h4>
+        <p>
+          La constancia de transferencia bancaria realizada a la cuenta registrada por el
+          Técnico constituirá prueba plena, válida y suficiente de pago, considerándose
+          la obligación completamente cumplida y liberatoria para MiSeguro.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">6. Datos Bancarios</h4>
+        <p>
+          El Técnico es el único responsable de la veracidad y exactitud de los datos bancarios
+          proporcionados. MiSeguro no será responsable por errores que resulten en
+          transferencias a cuentas incorrectas.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">7. Obligaciones Fiscales</h4>
+        <p>
+          El Técnico reconoce que es el único responsable del cumplimiento de sus obligaciones
+          fiscales ante el Servicio de Administración de Rentas (SAR), incluyendo la emisión
+          de recibos por honorarios profesionales cuando corresponda.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base mb-2">8. Aceptación del Contrato</h4>
+        <p>
+          El uso, acceso y permanencia en la Plataforma implica la aceptación expresa,
+          automática e incondicional del presente contrato.
+        </p>
+        <p class="mt-2 font-semibold">
+          Si el Técnico no está de acuerdo con estos términos, deberá abstenerse de utilizar
+          la Plataforma. El uso continuado de la misma se entenderá como aceptación total
+          del contrato.
+        </p>
+      </section>
+
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <button 
+        @click="isContratoTecnicoModalOpen = false"
+        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg"
+      >
+        Entendido
+      </button>
+    </div>
+
+  </div>
+</div>
+
 
     <!-- Modal de Política de Privacidad -->
     <div v-if="isPrivacidadModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
@@ -664,7 +842,7 @@
       </div>
     </div>
 
-    <!-- Modal de Acerca de HogarSeguro -->
+    <!-- Modal de Acerca de MiSeguro -->
     <div v-if="isAcercaModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
       <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
         <button 
@@ -679,7 +857,7 @@
         </button>
 
         <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acerca de HogarSeguro</h3>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acerca de MiSeguro</h3>
           <p class="text-sm text-gray-600 dark:text-gray-400">Tu plataforma de confianza para servicios del hogar</p>
         </div>
 
@@ -688,13 +866,13 @@
             <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-3xl text-white mb-4 shadow-lg mx-auto">
               🏠
             </div>
-            <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">HogarSeguro</h4>
+            <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">MiSeguro</h4>
             <p class="text-gray-600 dark:text-gray-400">Conectando hogares con profesionales de confianza</p>
           </section>
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestra Misión</h4>
-            <p>En HogarSeguro, nos dedicamos a facilitar el acceso a servicios técnicos de alta calidad para el hogar, conectando a clientes con profesionales verificados y confiables. Buscamos convertir cada experiencia de servicio en una solución satisfactoria y segura.</p>
+            <p>En MiSeguro, nos dedicamos a facilitar el acceso a servicios técnicos de alta calidad para el hogar, conectando a clientes con profesionales verificados y confiables. Buscamos convertir cada experiencia de servicio en una solución satisfactoria y segura.</p>
           </section>
 
           <section>
@@ -704,7 +882,7 @@
 
           <section>
           <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">¿Qué Hacemos?</h4>
-          <p>HogarSeguro es una plataforma tecnológica que:</p>
+          <p>MiSeguro es una plataforma tecnológica que:</p>
           <ul class="list-disc pl-5 space-y-1 mt-2">
           <li>Conecta a clientes con técnicos profesionales calificados</li>
           <li>Verifica la identidad y experiencia de todos nuestros técnicos</li>
@@ -760,7 +938,7 @@
             <div class="space-y-2 mt-2">
           <div class="flex items-center space-x-2">
             <span class="text-blue-600 dark:text-blue-400">📧</span>
-            <span class="text-sm">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@hogarseguro.com' }}</span>
+            <span class="text-sm">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@MiSeguro.com' }}</span>
           </div>
           <div class="flex items-center space-x-2">
             <span class="text-green-600 dark:text-green-400">📱</span>
@@ -780,6 +958,83 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de Gestión de Foto de Perfil -->
+<Transition name="fade">
+  <div v-if="isPhotoModalOpen" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700 transform transition-all duration-300">
+      <!-- Header con gradiente sutil -->
+      <div class="relative bg-gradient-to-r from-blue-500 to-blue-600 p-5 text-white">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold">Foto de perfil</h3>
+          <button 
+            @click="isPhotoModalOpen = false"
+            class="p-1.5 rounded-full hover:bg-white/20 transition-colors duration-200"
+            aria-label="Cerrar modal"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenido principal -->
+      <div class="p-6">
+        <div class="flex flex-col items-center space-y-6">
+          <!-- Avatar con efecto de elevación -->
+          <div class="relative group">
+            <div class="relative w-40 h-40 rounded-full ring-4 ring-white dark:ring-gray-800 shadow-xl overflow-hidden transition-transform duration-300 group-hover:scale-105">
+              <div v-if="user.imagen_url" class="w-full h-full">
+                <img 
+                  :src="user.imagen_url" 
+                  :alt="user.nombre" 
+                  class="w-full h-full object-cover"
+                >
+                <div v-if="isUploading" class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
+                </div>
+              </div>
+              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 text-6xl text-white font-bold">
+                {{ userInitials }}
+              </div>
+            </div> 
+          </div>
+
+          <!-- Botones de acción con iconos -->
+<div class="w-full" :class="{'grid grid-cols-2 gap-4': user.imagen_url}">
+  <label class="block" :class="{'opacity-50 cursor-not-allowed': isUploading}">
+    <div class="flex items-center justify-center space-x-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-xl cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed" :class="{'opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-none': isUploading}">
+      <svg v-if="!isUploading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <span v-if="!isUploading">{{ user.imagen_url ? 'Cambiar' : 'Subir foto' }}</span>
+      <span v-else>Procesando...</span>
+      <input 
+        type="file" 
+        class="hidden" 
+        @change="onFileChange" 
+        accept="image/*" 
+        :disabled="isUploading"
+      >
+    </div>
+  </label>
+  
+  <button 
+    v-if="user.imagen_url"
+    @click="deleteProfileImage"
+    type="button"
+    class="w-full flex items-center justify-center space-x-2 px-5 py-3 bg-white dark:bg-gray-700 border-2 border-red-100 dark:border-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 font-medium rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+    :disabled="isUploading"
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+    <span>Eliminar</span>
+  </button> </div></div></div>
+    </div>
+  </div>
+</Transition>
   </div>
   
 </template>
@@ -801,9 +1056,9 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Perfil',
+  title: 'MiSeguro - Perfil',
   meta: [
-    { name: 'description', content: 'Perfil de usuario de HogarSeguro - Gestiona tus servicios y membresía' },
+    { name: 'description', content: 'Perfil de usuario de MiSeguro - Gestiona tus servicios y membresía' },
     { name: 'keywords', content: 'Perfil, usuario, servicios, membresía' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
@@ -812,10 +1067,13 @@ useHead({
 // ===== VARIABLES DE ESTADO =====
 const isLoading = ref(true)
 const isLoggingOut = ref(false)
+const isUploading = ref(false)
 const isSaving = ref(false)
 const isUpdatingPassword = ref(false)
 const isPasswordModalOpen = ref(false)
+const isPhotoModalOpen = ref(false)
 const isTerminosModalOpen = ref(false)
+const isContratoTecnicoModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
 
@@ -848,6 +1106,8 @@ const user = ref({
   id_rol: null,
   role: 'usuario',
   rol_nombre: 'Usuario',
+  imagen_url: null,
+  imagen_public_id: null
 })
 
 // Toast notification
@@ -860,7 +1120,7 @@ const toast = ref({
 
 // Información de contacto
 const contactInfo = ref([
-  { type: 'email', value: 'soporte@hogarseguro.com' },
+  { type: 'email', value: 'soporte@MiSeguro.com' },
   { type: 'phone', value: '+504 1234-5678' }
 ])
 
@@ -968,13 +1228,17 @@ const cargarCiudades = async () => {
 const fetchAvailableServices = async () => {
   try {
     loadingServices.value = true
+    const userVal = useCookie('user').value
+    const id_ciudad = userVal?.id_ciudad
+
     const response = await $api('/servicios/activos', {
       baseURL: config.public.apiBase,
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
-      }
+      },
+      params: id_ciudad ? { id_ciudad } : {}
     })
     
     if (response.success && response.data) {
@@ -1118,14 +1382,15 @@ const fetchUserData = async () => {
     
     const safeUserData = {
       ...data,
-      nombre: data.nombre || 'Invitado',
+      nombre: data.nombre || '',
+      email: data.email || '',
+      telefono: data.telefono || '',
       id_usuario: data.id_usuario || userId,
       id_rol: data.id_rol || null,
       id_ciudad: ciudadId,
       ciudad: ciudadNombre,
       rol_nombre: data.rol?.nombre_rol || data.rol_nombre || 'Usuario',
       role: data.role || 'usuario',
-      // We'll set ciudadSeleccionada in the watch function when ciudades are loaded
     }
     
     user.value = {
@@ -1180,6 +1445,145 @@ const cargarDatosPerfil = async () => {
     isLoading.value = false
   }
 }
+
+// ===== FUNCIONES DE MANEJO DE IMÁGENES =====
+const onFileChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // Validar tipo de archivo
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!validTypes.includes(file.type)) {
+    showError('Error', 'Formato de archivo no válido. Solo se permiten imágenes JPG, PNG o WebP.')
+    return
+  }
+
+  // Validar tamaño (máximo 5MB)
+  const maxSize = 5 * 1024 * 1024 // 5MB
+  if (file.size > maxSize) {
+    showError('Error', 'La imagen es demasiado grande. El tamaño máximo permitido es 5MB.')
+    return
+  }
+
+  uploadProfileImage(file)
+}
+
+const uploadProfileImage = async (file) => {
+  const formData = new FormData()
+  formData.append('imagen', file)
+  
+  // Verificar que el ID de usuario existe
+  if (!user.value || !user.value.id_usuario) {
+    console.error('ID de usuario no encontrado')
+    showError('Error', 'No se pudo identificar tu cuenta. Por favor, recarga la página e intenta de nuevo.')
+    return
+  }
+  
+  const url = `/usuarios/imagen-perfil/${user.value.id_usuario}`
+  const fullUrl = `${config.public.apiBase}${url}`
+  
+  try {
+    isUploading.value = true
+    
+    const response = await $api(url, {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: formData
+    })
+    
+    if (response.success) {
+      // Actualizar la URL de la imagen en el estado del usuario
+      user.value.imagen_url = response.data.imagen_url
+      user.value.imagen_public_id = response.data.imagen_public_id
+      
+      showSuccess('¡Éxito!', 'Imagen de perfil actualizada correctamente')
+    } else {
+      console.error('Error en la respuesta del servidor:', response)
+      showError('Error', response.message || 'No se pudo actualizar la imagen de perfil')
+    }
+  } catch (error) {
+    console.error('Error al subir la imagen:', {
+      message: error.message,
+      response: error.response,
+      request: error.request,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers ? {
+          ...error.config.headers,
+          Authorization: error.config.headers.Authorization ? 'Bearer [TOKEN]' : undefined
+        } : undefined
+      }
+    })
+    showError('Error', 'No se pudo subir la imagen. Por favor, verifica tu conexión e inténtalo de nuevo.')
+  } finally {
+    isUploading.value = false
+    // Limpiar el input de archivo
+    if (fileInput.value) {
+      fileInput.value.value = ''
+    }
+  }
+}
+
+const deleteProfileImage = async () => { 
+
+  // Verificar que el ID de usuario existe
+  if (!user.value || !user.value.id_usuario) {
+    console.error('ID de usuario no encontrado')
+    showError('Error', 'No se pudo identificar tu cuenta. Por favor, recarga la página e intenta de nuevo.')
+    return
+  } 
+
+  const url = `/usuarios/imagen-perfil/${user.value.id_usuario}` 
+
+  try {
+    isUploading.value = true
+    
+    const response = await $api(url, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    }) 
+
+    if (response.success) {
+      // Eliminar la referencia a la imagen en el estado del usuario
+      user.value.imagen_url = null
+      user.value.imagen_public_id = null
+      
+      showSuccess('¡Éxito!', 'Imagen de perfil eliminada correctamente')
+    } else {
+      console.error('Error en la respuesta del servidor (DELETE):', response)
+      showError('Error', response.message || 'No se pudo eliminar la imagen de perfil')
+    }
+  } catch (error) {
+    console.error('Error al eliminar la imagen:', {
+      message: error.message,
+      response: error.response,
+      request: error.request,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers ? {
+          ...error.config.headers,
+          Authorization: error.config.headers.Authorization ? 'Bearer [TOKEN]' : undefined
+        } : undefined
+      }
+    })
+    showError('Error', 'No se pudo eliminar la imagen. Por favor, verifica tu conexión e inténtalo de nuevo.')
+  } finally {
+    isUploading.value = false
+  }
+}
+
+// Referencia al input de archivo
+const fileInput = ref(null)
 
 // ===== FUNCIONES DE ACCIONES =====
 const saveProfile = async () => {
@@ -1358,17 +1762,23 @@ watch(() => user.value.ciudadSeleccionada, (newCiudad) => {
 const checkAuthAndLoad = async () => {
   try {
     const token = useCookie('token')
-    const user = useCookie('user')
+    const userCookieValue = useCookie('user')
     
-    if (!token.value || !user.value) { 
+    if (!token.value || !userCookieValue.value) { 
       window.location.reload()
       return
     }
     
     await cargarDatosPerfil()
     
+    // Inicializar originalUserData con los datos cargados del usuario
     if (user.value) {
-      originalUserData.value = { ...user.value }
+      originalUserData.value = {
+        nombre: user.value.nombre,
+        email: user.value.email,
+        telefono: user.value.telefono,
+        id_ciudad: user.value.id_ciudad
+      }
     }
   } catch (error) { 
     window.location.reload() 
@@ -1644,5 +2054,25 @@ button:hover {
 .dark .multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
     background-color: #4b5563;
     color: #f9fafb;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 </style>

@@ -460,9 +460,9 @@ const route = useRoute();
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Panel Administrativo',
+  title: 'MiSeguro - Panel Administrativo',
   meta: [
-    { name: 'description', content: 'Panel de administración de HogarSeguro - Gestión completa del sistema' },
+    { name: 'description', content: 'Panel de administración de MiSeguro - Gestión completa del sistema' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' }
   ]
 })
@@ -498,6 +498,36 @@ const isLoading = ref(true)
 const startDate = ref('')
 const endDate = ref('')
 const recentActivities = ref([])
+ 
+// ===== FUNCIONES PARA ALERTAS DE CORRELATIVOS =====
+const verificarCorrelativos = async () => {
+  try {
+    const response = await $fetch('/facturas/correlativos', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response.success && response.alertas && response.alertas.length > 0) {
+      // Mostrar alertas de correlativos próximos a vencer
+      response.alertas.forEach((alerta, index) => {
+        if (alerta.mensaje && typeof alerta.mensaje === 'string') {
+          showToast({
+            message: alerta.mensaje,
+            type: 'warning',
+            duration: 8000
+          });
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error al verificar correlativos:', error);
+    // No mostrar error al usuario ya que son solo alertas
+  }
+};
  
 // ===== INICIALIZACIÓN =====
 onMounted(async () => {
@@ -1394,6 +1424,9 @@ const initializeDashboard = async () => {
       
       // Cargar estadísticas u otros datos necesarios
       await fetchStatistics()
+      
+      // Verificar correlativos próximos a vencer
+      await verificarCorrelativos()
       
       // Cargar actividades recientes (usará caché si está disponible, sin forzar recarga)
       await refreshPendingItems(false)

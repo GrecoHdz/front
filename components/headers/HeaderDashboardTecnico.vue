@@ -48,13 +48,13 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store';
 import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 import { useRuntimeConfig } from '#imports';
-import { useRouter } from 'vue-router'
-import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import { useRouter } from 'vue-router';
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 
 // ===== CONFIGURACIÓN =====
 const config = useRuntimeConfig()
@@ -64,6 +64,38 @@ const { $api } = useNuxtApp();
 
 // Definir eventos emitidos
 const emit = defineEmits(['availabilityChange']);
+
+// Verificar perfil al montar el componente
+const verificarPerfilTecnico = async () => {
+  try {
+    // Obtener el ID del usuario autenticado
+    const userId = auth.user?.id_usuario;
+    if (!userId) return;
+
+    // Realizar la petición para verificar el perfil del técnico
+    const response = await $api(`/usuarios/verificar-perfil-tecnico/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    // Si el perfil no está completo, mostrar notificación
+    if (!response.perfil_completo) {
+      showToast('Por favor completa tu perfil para ofrecer servicios', 'warning', 5000);
+    }
+  } catch (error) {
+    console.error('Error al verificar perfil de técnico:', error);
+  }
+};
+
+// Verificar perfil cuando el componente se monta
+onMounted(() => {
+  if (auth.user?.id_rol === 2) { // Asumiendo que 2 es el ID del rol de técnico
+    verificarPerfilTecnico();
+  }
+});
 
 // Toast state
 const toast = reactive({
@@ -123,7 +155,9 @@ const onNotificationClick = async (notification) => {
       await navigateTo('/tecnico/MetricasTecnico');
     } else if (notification.tipo === 'usuario') { 
       await navigateTo('/tecnico/MetricasTecnico');
-    }
+    } else if (notification.tipo === 'paquetes') { 
+      await navigateTo('/tecnico/MetricasTecnico');
+    } 
   } finally {
     // Asegurarse de que el loading siempre se desactive
     isLoading.value = false;

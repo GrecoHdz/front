@@ -15,8 +15,7 @@
 
     <!-- Loading Spinner -->
     <LoadingSpinner 
-      :loading="isLoading" 
-      :message="'Cargando configuraciones...'"
+      :loading="isLoading"  
     />
 
     <!-- Contenido Principal -->
@@ -34,7 +33,7 @@
                 Configuración del Sistema
               </h1>
               <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                Administra las configuraciones principales de HogarSeguro
+                Administra las configuraciones principales de MiSeguro
               </p>
             </div>
           </div>
@@ -68,7 +67,7 @@
                 Precios y Tarifas
               </h3>
               <p class="text-[11px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                Configuración de precios del sistema
+                Configuración de precios
               </p>
             </div>
           </div>
@@ -176,6 +175,18 @@
                 placeholder="99866626">
             </div>
 
+            <!-- RTN -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                RTN de Empresa
+              </label>
+              <input
+                v-model="configuracionRTN"
+                type="text"
+                class="w-full px-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                placeholder="XXXX-XXXX-XXXXXX">
+            </div>
+
             <!-- Email -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -185,7 +196,7 @@
                 v-model="configuracionEmail"
                 type="email"
                 class="w-full px-4 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                placeholder="hogarseguro@gmail.com">
+                placeholder="MiSeguro@gmail.com">
             </div>
 
             <!-- Referente Predeterminado -->
@@ -214,15 +225,7 @@
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Este es el usuario que se asigna por defecto cuando un nuevo usuario se registra sin código de referido
               </p>
-            </div>
-
-            <!-- Info adicional -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 sm:p-4">
-              <h4 class="text-[12px] sm:text-xs md:text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">Información</h4>
-              <p class="text-[12px] sm:text-xs md:text-sm text-blue-600 dark:text-blue-300 leading-relaxed">
-                Esta información se utiliza para el contacto oficial de la empresa y aparece en documentos y comunicaciones.
-              </p>
-            </div>
+            </div> 
           </div>
         </div>
 
@@ -261,10 +264,28 @@
               </div>
             </div>
 
+            <!-- Comisión por Paquete -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Comisión por Paquete
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionComisionPaquete"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full pl-4 pr-10 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="10.00">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+
             <!-- Descuento -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Porcentaje de Descuento
+                Descuento por Membresía
               </label>
               <div class="relative">
                 <input
@@ -278,10 +299,27 @@
               </div>
             </div>
 
+            <!-- Descuento Especial -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Descuento por Membresía Especial
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionDescuentoEspecial"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-full pl-4 pr-8 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="15">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+
             <!-- Referido -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Porcentaje de Referido
+                Ganancia por Referido
               </label>
               <div class="relative">
                 <input
@@ -454,7 +492,7 @@
                   Beneficios de Membresía
                 </h3>
                 <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                  Administra los beneficios disponibles para miembros de HogarSeguro
+                  Administra los beneficios disponibles para miembros de MiSeguro
                 </p>
               </div>
             </div>
@@ -578,7 +616,7 @@
                   Gestión de Servicios
                 </h3>
                 <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                  Administra los servicios disponibles en HogarSeguro
+                  Administra los servicios disponibles en MiSeguro
                 </p>
               </div>
             </div>
@@ -637,7 +675,12 @@
             </div>
             
             <div v-for="servicio in serviciosPaginados" :key="servicio.id_servicio" 
-                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                 @click="editarServicio(servicio)"
+                 :class="{
+                   'bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 hover:border-green-300 dark:hover:border-green-600': servicio.estado,
+                   'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:border-red-300 dark:hover:border-pink-600': !servicio.estado
+                 }"
+                 class="cursor-pointer rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all duration-200 flex items-center justify-between">
               <div class="flex-1">
                 <div class="flex items-center gap-3 mb-2">
                   <span class="text-lg">🔧</span>
@@ -648,14 +691,12 @@
                     </p>
                   </div>
                 </div>
-                <span 
-                  :class="{
-                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': servicio.estado,
-                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': !servicio.estado
-                  }" 
-                  class="px-2 py-1 rounded-full text-xs font-medium">
-                  {{ servicio.estado ? 'Activo' : 'Inactivo' }}
-                </span>
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span v-for="ciudad in servicio.ciudades" :key="ciudad.id_ciudad"
+                    class="px-2 py-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full text-[10px] font-medium border border-indigo-100 dark:border-indigo-800">
+                    {{ ciudad.nombre_ciudad }}
+                  </span>
+                </div>
               </div>
               
               <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
@@ -733,7 +774,7 @@
           </div>
         </div>
 
-        <!-- Card 7: Gestión de Ciudades -->
+        <!-- Card 8: Gestión de Ciudades -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="flex items-center">
@@ -849,6 +890,193 @@
           </div>
         </div>
 
+        <!-- Card 7: Gestión de Paquetes -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 dark:bg-amber-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">📦</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  Gestión de Paquetes
+                </h3>
+                <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                  Administra los paquetes de mantenimiento disponibles
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="nuevoPaquete"
+              class="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors">
+              + Nuevo Paquete
+            </button>
+          </div>
+
+          <!-- Filtros y búsqueda -->
+          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4 relative z-20">
+            <div class="relative flex-1 min-w-0">
+              <input
+                v-model="filtroBusquedaPaquetes"
+                type="text"
+                placeholder="Buscar paquetes..."
+                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm sm:text-base transition-all"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            <multiselect 
+              v-model="filtroEstadoPaquetesObject"
+              :options="estadoOptions"
+              :searchable="false"
+              :close-on-select="true"
+              :show-labels="false"
+              placeholder="Todos"
+              label="label"
+              track-by="value"
+              class="multiselect-admin-filter w-32"
+              :custom-label="getEstadoLabel"
+              :options-limit="100"
+            >
+              <template #singleLabel="{ option }">
+                <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
+              </template>
+            </multiselect>
+          </div>
+
+          <!-- Lista de paquetes -->
+          <div class="space-y-3">
+            <div v-if="paquetesCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
+              <p>Cargando paquetes...</p>
+            </div>
+            
+            <div v-else-if="paquetesFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <span class="text-4xl mb-2 block">📦</span>
+              <p>No se encontraron paquetes</p>
+            </div>
+            
+            <div v-for="paquete in paquetesPaginados" :key="paquete.id_paquete" 
+                 @click="editarPaquete(paquete)"
+                 :class="{
+                   'bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 hover:border-green-300 dark:hover:border-green-600': paquete.estado,
+                   'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:border-red-300 dark:hover:border-pink-600': !paquete.estado
+                 }"
+                 class="cursor-pointer rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all duration-200 flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-lg">📦</span>
+                  <div>
+                    <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">
+                      {{ paquete.nombre }}
+                    </h5>
+                    <p class="text-[12px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                      {{ paquete.descripcion || 'Sin descripción' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-[10px] font-medium">
+                    Crédito: {{ formatNumber(paquete.costo) }}
+                  </span>
+                  <span 
+                    v-if="paquete.cantidad"
+                    class="px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded-full text-[10px] font-medium"
+                    title="Usos disponibles"
+                  >
+                    {{ paquete.cantidad }} {{ paquete.cantidad === 1 ? 'uso' : 'usos' }}
+                  </span>
+                  <span 
+                    v-else
+                    class="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-[10px] font-medium"
+                    title="Usos ilimitados"
+                  >
+                    Ilimitado
+                  </span>
+                  <span v-for="ciudad in paquete.ciudades" :key="ciudad.id_ciudad"
+                    class="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 rounded-full text-[10px] font-medium border border-amber-100 dark:border-amber-800">
+                    {{ ciudad.nombre_ciudad }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
+                <button 
+                  @click="editarPaquete(paquete)"
+                  class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Editar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                
+                <button 
+                  v-if="paquete.estado === 1 || paquete.estado === true"
+                  @click="cambiarEstadoPaquete(paquete, false)"
+                  class="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Desactivar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                  </svg>
+                </button>
+                
+                <button 
+                  v-else-if="paquete.estado === 0 || paquete.estado === false"
+                  @click="cambiarEstadoPaquete(paquete, true)"
+                  class="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Activar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+                
+                <button 
+                  @click="confirmarEliminarPaquete(paquete)"
+                  class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  title="Eliminar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación -->
+          <div v-if="paquetesFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Página {{ paginacionPaquetes.paginaActual }} de {{ paginacionPaquetesCalculada.totalPaginas }}
+              </div>
+              <div class="flex items-center space-x-1">
+                <button 
+                  @click="$event => cambiarPaginaPaquetes(paginacionPaquetes.paginaActual - 1, $event)" 
+                  :disabled="paginacionPaquetes.paginaActual === 1 || paquetesCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {{ paginacionPaquetes.paginaActual }} / {{ paginacionPaquetesCalculada.totalPaginas }}
+                </span>
+                <button 
+                  @click="$event => cambiarPaginaPaquetes(paginacionPaquetes.paginaActual + 1, $event)" 
+                  :disabled="paginacionPaquetes.paginaActual >= paginacionPaquetesCalculada.totalPaginas || paquetesCargando"
+                  class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>  
+
         <!-- Card 8: Gestión de Notificaciones -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
@@ -953,6 +1181,167 @@
             </div>
           </div>
         </div>
+
+        <!-- Card 9: Gestión de Correlativos de Facturación -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 md:col-span-2 xl:col-span-3">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-pink-100 dark:bg-pink-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                <span class="text-lg sm:text-2xl">🔢</span>
+              </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                Gestión de Correlativos
+              </h3>
+              <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                Administra la facturación
+              </p>
+            </div>
+          </div>
+          <button 
+          @click="abrirModalNuevoCorrelativo"
+          class="px-3 sm:px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          <span>Nuevo</span>
+          </button>
+        </div>
+
+      <!-- Filtros y búsqueda -->
+  <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-4">
+    <div class="relative flex-1 min-w-0">
+      <input
+        v-model="filtroBusquedaCorrelativos"
+        type="text"
+        placeholder="Buscar por CAI o rango..."
+        class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+    </div>
+    <div class="w-full sm:w-40">
+      <select 
+        v-model="filtroEstadoCorrelativo"
+        class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white transition-colors">
+        <option value="">Todos</option>
+        <option value="ACTIVO">Activo</option>
+        <option value="INACTIVO">Inactivo</option>
+        <option value="AGOTADO">Agotado</option>
+        <option value="VENCIDO">Vencido</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Lista de correlativos -->
+  <div class="space-y-3">
+    <div v-if="correlativosCargando" class="text-center py-8 text-gray-500 dark:text-gray-400">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-4"></div>
+      <p>Cargando correlativos...</p>
+    </div>
+    
+    <div v-else-if="correlativosFiltrados.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+      <span class="text-4xl mb-2 block">📭</span>
+      <p>No se encontraron correlativos</p>
+    </div>
+    
+    <template v-else>
+      <div v-for="correlativo in correlativosPaginados" :key="correlativo.id" 
+           @click="editarCorrelativo(correlativo)"
+           :class="getCorrelativoCardColor(correlativo)"
+           class="cursor-pointer rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all duration-200">
+        <div class="flex flex-col">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-lg">🔢</span>
+              <h5 class="text-[13px] sm:text-xs md:text-base font-medium text-gray-900 dark:text-white">
+                {{ correlativo.cai }}
+              </h5>
+            </div>
+            <span 
+              :class="{
+                'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400': correlativo.estado === 'ACTIVO',
+                'bg-yellow-100 text-yellow-800 dark:bg-yellow-800/30 dark:text-yellow-400': correlativo.estado === 'AGOTADO',
+                'bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-400': correlativo.estado === 'VENCIDO',
+                'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400': correlativo.estado === 'INACTIVO'
+              }"
+              class="px-2 py-1 text-[10px] font-medium rounded-full whitespace-nowrap">
+              {{ getEstadoCorrelativoLabel(correlativo.estado) }}
+            </span>
+          </div>
+          
+          <div class="mt-2 pl-8">
+            <p class="text-[12px] sm:text-xs text-gray-600 dark:text-gray-400">
+              <span class="font-medium">Rango:</span> 
+                {{ correlativo.rango_inicio }} - {{ correlativo.rango_fin }} 
+            </p>
+            <p class="text-[12px] sm:text-xs text-gray-600 dark:text-gray-400 mt-1">
+              <span class="font-medium">Actual:</span> 
+              {{ correlativo.prefijo }}{{ (correlativo.correlativo_actual || correlativo.rango_inicio).toString().padStart(8, '0') }}
+            </p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-500 mt-2">
+              Válido hasta: {{ formatDate(correlativo.fecha_vencimiento) }}
+            </p>
+          </div>
+          
+          <div class="flex justify-end mt-3 pt-2 border-t border-gray-100 dark:border-gray-600">
+            <div class="flex gap-2">
+              <button 
+                @click.stop="editarCorrelativo(correlativo)"
+                class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                title="Editar">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button 
+                @click.stop="confirmarEliminarCorrelativo(correlativo)"
+                class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                title="Eliminar">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <!-- Paginación -->
+  <div v-if="correlativosFiltrados.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+    <div class="flex items-center justify-between">
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        Página {{ paginacionCorrelativos.paginaActual }} de {{ paginacionCorrelativosCalculada.totalPaginas }}
+      </div>
+      <div class="flex items-center space-x-1">
+        <button 
+          @click="$event => cambiarPaginaCorrelativos(paginacionCorrelativos.paginaActual - 1, $event)" 
+          :disabled="paginacionCorrelativos.paginaActual === 1 || correlativosCargando"
+          class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+          {{ paginacionCorrelativos.paginaActual }} / {{ paginacionCorrelativosCalculada.totalPaginas }}
+        </span>
+        <button 
+          @click="$event => cambiarPaginaCorrelativos(paginacionCorrelativos.paginaActual + 1, $event)" 
+          :disabled="paginacionCorrelativos.paginaActual >= paginacionCorrelativosCalculada.totalPaginas || correlativosCargando"
+          class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
     </div>
     
@@ -969,9 +1358,8 @@
               <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 Enviar notificación
               </h3>
-              
-              <div class="space-y-4">
-                <div>
+                            <div class="space-y-4 relative">
+                <div class="relative z-10">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Destinatario
                   </label>
@@ -995,19 +1383,96 @@
                 </div>
 
                 <div v-if="tipoEnvio === 'usuario'">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    ID de Usuario
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Buscar Usuario
                   </label>
-                  <input
-                    v-model.number="idUsuarioDestino"
-                    type="number"
-                    min="1"
-                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                    placeholder="ID del usuario"
-                  >
+                  <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                      <div 
+                        @click="abrirModalBuscarUsuario()"
+                        class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white cursor-pointer flex items-center justify-between"
+                      >
+                        <span class="truncate">
+                          {{ usuarioSeleccionado ? (usuarioSeleccionado.nombre || `Usuario #${usuarioSeleccionado.id_usuario}`) : 'Haz clic para buscar usuario' }}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                      <input
+                        v-model.number="idUsuarioDestino"
+                        type="hidden"
+                      >
+                    </div>
+                    <button
+                      v-if="usuarioSeleccionado"
+                      type="button"
+                      @click="limpiarUsuarioSeleccionado"
+                      class="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                      title="Limpiar selección"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
-                <div v-if="tipoEnvio === 'rol'">
+                <div v-if="tipoEnvio === 'ciudad'" class="space-y-4">
+                  <!-- Selector de ciudad -->
+                  <div class="relative z-10">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Ciudad
+                    </label>
+                    <multiselect 
+                      v-model="ciudadSeleccionada"
+                      :options="ciudades"
+                    :searchable="false"
+                      :loading="cargandoCiudades"
+                      :close-on-select="true"
+                      :show-labels="false"
+                      placeholder="Seleccionar ciudad"
+                      label="nombre"
+                      track-by="id_ciudad"
+                      class="multiselect-admin-filter"
+                      :options-limit="100"
+                    >
+                      <template #singleLabel="{ option }">
+                        <span class="text-[11px] truncate">{{ option.nombre }}</span>
+                      </template>
+                      <template #noResult>
+                        <div class="p-2 text-xs text-gray-500">
+                          No se encontraron ciudades. Intenta con otro término de búsqueda.
+                        </div>
+                      </template>
+                    </multiselect>
+                  </div>
+
+                  <!-- Selector de rol opcional -->
+                  <div class="relative z-0">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Rol (opcional)
+                    </label>
+                    <multiselect 
+                      v-model="rolCiudadSeleccionado"
+                      :options="rolOptions"
+                      :searchable="false"
+                      :close-on-select="true"
+                      :show-labels="false"
+                      placeholder="Filtrar por rol (opcional)"
+                      label="label"
+                      track-by="value"
+                      class="multiselect-admin-filter"
+                      :options-limit="100"
+                    >
+                      <template #singleLabel="{ option }">
+                        <span class="text-[11px] truncate">{{ option.label }}</span>
+                      </template>
+                    </multiselect>
+                  </div>
+                </div>
+
+                <div v-if="tipoEnvio === 'rol'" class="relative z-0 mt-2">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Rol
                   </label>
@@ -1174,6 +1639,31 @@
                   placeholder="Descripción detallada del servicio"></textarea>
               </div>
               
+              <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Ciudades disponibles
+                </label>
+                <multiselect
+                  v-model="formServicio.ciudades_seleccionadas"
+                  :options="ciudades"
+                  :searchable="false"
+                  :multiple="true"
+                  :close-on-select="false"
+                  :clear-on-select="false"
+                  :preserve-search="true"
+                  placeholder="Seleccionar ciudades"
+                  label="nombre"
+                  track-by="id_ciudad"
+                  class="multiselect-admin-filter"
+                >
+                  <template #selection="{ values, isOpen }">
+                    <span class="multiselect__single" v-if="values.length && !isOpen">
+                      {{ values.length }} ciudades seleccionadas
+                    </span>
+                  </template>
+                </multiselect>
+              </div>
+
               <div class="flex items-center">
                 <input
                   id="estado"
@@ -1709,11 +2199,441 @@
       </div>
     </div>
   </Transition>
+
+  <!-- Modal para crear/editar correlativo -->
+  <Transition name="fade">
+    <div v-if="mostrarModalCorrelativo" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalCorrelativo"></div>
+      <Transition name="modal">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ correlativoEditando ? 'Editar' : 'Nuevo' }} Correlativo
+              </h3>
+              <button 
+                @click="cerrarModalCorrelativo"
+                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+              >
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Formulario -->
+          <div class="p-6">
+            <form @submit.prevent="guardarCorrelativo" @submit="checkFormValidity" class="space-y-4">
+
+              <!-- CAI -->
+              <div>
+                <label for="cai" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  CAI <span class="text-red-500">*</span>
+                  <span class="text-xs text-gray-500 ml-2">(Incluye guiones -)</span>
+                </label>
+                <input
+                  id="cai"
+                  v-model="correlativoForm.cai"
+                  type="text"
+                  required
+                  maxlength="37"
+                  minlength="37"
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: 123456-789012-345678-901234-567890-12345-67"
+                  :disabled="guardandoCorrelativo"
+                >
+                <p v-if="correlativoForm.cai && correlativoForm.cai.length !== 37" class="text-xs text-red-500 mt-1">
+                  El CAI debe tener máximo 37 caracteres (actual: {{ correlativoForm.cai.length }})
+                </p>
+              </div>
+
+              <!-- Prefijo -->
+              <div>
+                <label for="prefijo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Prefijo <span class="text-red-500">*</span>
+                  <span class="text-xs text-gray-500 ml-2">(Formato: xxx-xxx-xx-)</span>
+                </label>
+                <input
+                  id="prefijo"
+                  v-model="correlativoForm.prefijo"
+                  type="text"
+                  required
+                  maxlength="12"
+                  pattern="[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{2}-"
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  placeholder="Ej: ABC-123-XY-"
+                  :disabled="guardandoCorrelativo"
+                >
+                <p v-if="correlativoForm.prefijo && !/^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{2}-$/.test(correlativoForm.prefijo)" class="text-xs text-red-500 mt-1">
+                  El prefijo debe tener el formato xxx-xxx-xx-
+                </p>
+              </div>
+
+              <!-- Rango Inicio -->
+              <div>
+                <label for="rango_inicio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Rango Inicial <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="rango_inicio"
+                  v-model.number="correlativoForm.rango_inicio"
+                  type="number"
+                  min="1"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  placeholder="Número inicial del rango"
+                  :disabled="guardandoCorrelativo"
+                >
+                <p v-if="correlativoForm.rango_inicio && correlativoForm.rango_fin && correlativoForm.rango_inicio >= correlativoForm.rango_fin" class="text-xs text-red-500 mt-1">
+                  El rango inicial debe ser menor al rango final
+                </p>
+              </div>
+
+              <!-- Rango Fin -->
+              <div>
+                <label for="rango_fin" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Rango Final <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="rango_fin"
+                  v-model.number="correlativoForm.rango_fin"
+                  type="number"
+                  min="1"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  placeholder="Número final del rango"
+                  :disabled="guardandoCorrelativo"
+                >
+                <p v-if="correlativoForm.rango_fin && correlativoForm.rango_inicio && correlativoForm.rango_fin <= correlativoForm.rango_inicio" class="text-xs text-red-500 mt-1">
+                  El rango final debe ser mayor al rango inicial
+                </p>
+              </div>
+
+              <!-- Fecha de Autorización -->
+              <div>
+                <label for="fecha_autorizacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Fecha de Autorización <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="fecha_autorizacion"
+                  v-model="correlativoForm.fecha_autorizacion"
+                  type="date"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  :disabled="guardandoCorrelativo"
+                >
+                <p v-if="correlativoForm.fecha_autorizacion && correlativoForm.fecha_vencimiento && correlativoForm.fecha_autorizacion !== '' && correlativoForm.fecha_vencimiento !== '' && new Date(correlativoForm.fecha_autorizacion) >= new Date(correlativoForm.fecha_vencimiento)" class="text-xs text-red-500 mt-1">
+                  La fecha de autorización debe ser anterior a la fecha de vencimiento
+                </p>
+              </div>
+
+              <!-- Fecha de Vencimiento -->
+              <div>
+                <label for="fecha_vencimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Fecha de Vencimiento <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="fecha_vencimiento"
+                  v-model="correlativoForm.fecha_vencimiento"
+                  type="date"
+                  required
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  :disabled="guardandoCorrelativo"
+                >
+                <p v-if="correlativoForm.fecha_vencimiento && correlativoForm.fecha_autorizacion && correlativoForm.fecha_vencimiento !== '' && correlativoForm.fecha_autorizacion !== '' && new Date(correlativoForm.fecha_vencimiento) <= new Date(correlativoForm.fecha_autorizacion)" class="text-xs text-red-500 mt-1">
+                  La fecha de vencimiento debe ser posterior a la fecha de autorización
+                </p>
+              </div>
+
+              <!-- Estado (solo para edición) -->
+              <div v-if="correlativoEditando">
+                <label for="estado" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Estado
+                </label>
+                <select
+                  id="estado"
+                  v-model="correlativoForm.estado"
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-900 dark:text-white"
+                  :disabled="guardandoCorrelativo"
+                >
+                  <option value="ACTIVO">Activo</option>
+                  <option value="INACTIVO">Inactivo</option>
+                  <option value="AGOTADO">Agotado</option>
+                  <option value="VENCIDO">Vencido</option>
+                </select>
+              </div>
+
+              <!-- Botones -->
+              <div class="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  @click="cerrarModalCorrelativo"
+                  class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  :disabled="guardandoCorrelativo"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="flex-1 py-2 px-4 bg-pink-500 text-white font-medium text-sm rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-pink-500"
+                  :disabled="guardandoCorrelativo || !esFormularioCorrelativoValido"
+                  @click="!esFormularioCorrelativoValido || guardandoCorrelativo ? $event.preventDefault() : null"
+                >
+                  <div v-if="guardandoCorrelativo" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {{ guardandoCorrelativo ? 'Guardando...' : (correlativoEditando ? 'Actualizar' : 'Crear') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
+
+  <!-- Modal para crear/editar paquete -->
+  <Transition name="fade">
+    <div v-if="mostrarModalNuevoPaquete" class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click.self="cerrarModalPaquete"></div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-auto relative z-10 max-h-[85vh] overflow-y-auto">
+        <!-- Header -->
+        <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ paqueteEditando ? 'Editar' : 'Nuevo' }} Paquete
+            </h3>
+            <button 
+              @click="cerrarModalPaquete"
+              class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+            >
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="p-4 sm:p-6">
+          <form @submit.prevent="guardarPaquete" class="space-y-3 sm:space-y-4">
+            <!-- Nombre -->
+            <div>
+              <label for="nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Nombre <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="nombre"
+                v-model="paqueteForm.nombre"
+                type="text"
+                required
+                class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                placeholder="Ej: Paquete Básico"
+                :disabled="guardandoPaquete"
+              >
+            </div>
+
+            <!-- Descripción -->
+            <div>
+              <label for="descripcion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Descripción
+              </label>
+              <textarea
+                id="descripcion"
+                v-model="paqueteForm.descripcion"
+                rows="3"
+                class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                placeholder="Descripción detallada del paquete"
+                :disabled="guardandoPaquete"
+              ></textarea>
+            </div> 
+
+            <!-- Costo -->
+            <div>
+              <label for="costo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Costo (L.) <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">L.</span>
+                <input
+                  id="costo"
+                  v-model.number="paqueteForm.costo"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  class="w-full pl-8 pr-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="0.00"
+                  :disabled="guardandoPaquete"
+                >
+              </div>
+            </div>
+
+            <!-- Cantidad -->
+            <div>
+              <label for="cantidad" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Cantidad (Vacío para ilimitado)
+              </label>
+              <div class="relative">
+                <input
+                  id="cantidad"
+                  v-model.number="paqueteForm.cantidad"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="Vacío para ilimitado"
+                  :disabled="guardandoPaquete"
+                >
+              </div> 
+            </div> 
+
+            <!-- Grid: Ciudades e Imagen -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Ciudades -->
+              <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Ciudades disponibles
+                </label>
+                <multiselect
+                  v-model="paqueteForm.ciudades_seleccionadas"
+                  :options="ciudades"
+                  :searchable="false"
+                  :multiple="true"
+                  :close-on-select="false"
+                  :clear-on-select="false"
+                  :preserve-search="true"
+                  placeholder="Seleccionar ciudades"
+                  label="nombre"
+                  track-by="id_ciudad"
+                  class="multiselect-admin-filter"
+                  :show-labels="false"
+                >
+                  <template #tag="{ option, remove }">
+                    <span class="multiselect__tag">
+                      {{ option.nombre }}
+                      <i class="multiselect__tag-icon" @click="remove(option)">✕</i>
+                    </span>
+                  </template>
+                </multiselect>
+              </div>
+
+              <!-- Imagen del paquete -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Imagen del paquete
+                </label>
+                <div class="mt-1">
+                  <label
+                    class="cursor-pointer bg-white dark:bg-gray-700 py-1.5 px-2.5 sm:py-2 sm:px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-xs sm:text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 inline-block w-full text-center"
+                  >
+                    <span>Seleccionar imagen</span>
+                    <input
+                      type="file"
+                      class="sr-only"
+                      accept="image/*"
+                      @change="manejarCambioImagen"
+                    >
+                  </label>
+                  <p v-if="paqueteForm.imagen" class="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                    {{ paqueteForm.imagen.name }}
+                  </p>
+                </div>
+                <!-- Vista previa de la imagen -->
+                <div v-if="paqueteForm.imagen_previa" class="mt-2">
+                  <img :src="paqueteForm.imagen_previa" alt="Vista previa" class="w-full h-32 object-cover rounded-lg">
+                  <button 
+                    type="button"
+                    @click="eliminarImagen"
+                    class="mt-1 sm:mt-2 text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  >
+                    Eliminar imagen
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="flex items-center">
+              <input
+                id="estado"
+                v-model="paqueteForm.estado"
+                type="checkbox"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                :disabled="guardandoPaquete"
+              >
+              <label for="estado" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                Activo
+              </label>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 pt-4">
+              <button
+                type="button"
+                @click="cerrarModalPaquete"
+                class="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                :disabled="guardandoPaquete"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="flex-1 py-2 px-4 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-50"
+                :disabled="guardandoPaquete || !paqueteForm.nombre || !paqueteForm.costo"
+              >
+                <div v-if="guardandoPaquete" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                {{ guardandoPaquete ? 'Guardando...' : (paqueteEditando ? 'Actualizar' : 'Crear') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
+  <!-- Modal de confirmación para eliminar paquete -->
+  <Transition name="fade">
+    <div v-if="mostrarModalConfirmacionEliminarPaquete" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click.self="mostrarModalConfirmacionEliminarPaquete = false"></div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 relative z-10">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+          Confirmar eliminación
+        </h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+          ¿Estás seguro de que deseas eliminar el paquete "{{ paqueteAEliminar?.nombre }}"? Esta acción no se puede deshacer.
+        </p>
+        <div class="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
+          <button
+            @click="mostrarModalConfirmacionEliminarPaquete = false"
+            class="flex-1 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            :disabled="guardandoPaquete"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="eliminarPaquete"
+            class="flex-1 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center"
+            :disabled="guardandoPaquete"
+          >
+            <div v-if="guardandoPaquete" class="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white mr-1.5 sm:mr-2"></div>
+            {{ guardandoPaquete ? 'Eliminando...' : 'Eliminar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { debounce } from 'lodash';
+
+// Función para validar formato de correo electrónico
+const isValidEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(String(email).toLowerCase());
+}
 import { useAuthStore } from '~/middleware/auth.store'
 import { useHead, useCookie, useRuntimeConfig } from '#imports';
 import { useRouter, useRoute } from 'vue-router'
@@ -1732,9 +2652,9 @@ import Multiselect from 'vue-multiselect'
 
 // SEO y Meta
 useHead({
-  title: 'HogarSeguro - Configuraciones',
+  title: 'MiSeguro - Configuraciones',
   meta: [
-    { name: 'description', content: 'Configuraciones del sistema HogarSeguro - Administrar configuraciones' },
+    { name: 'description', content: 'Configuraciones del sistema MiSeguro - Administrar configuraciones' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' }
   ]
 })
@@ -1744,11 +2664,34 @@ const isLoading = ref(true)
 const isSaving = ref(false)
 const referidorPredeterminado = ref(null)
 
+// Variables para el envío de notificaciones
+const mostrarModalEnvio = ref(false)
+const notificacionAEnviar = ref(null)
+const tipoEnvio = ref('')
+const tipoEnvioObject = ref(null)
+const idUsuarioDestino = ref(null)
+const nombreRolDestino = ref('')
+const nombreRolDestinoObject = ref(null)
+
+// Variables para selección de ciudad
+const ciudadSeleccionada = ref(null)
+const rolCiudadSeleccionado = ref(null)
+const cargandoCiudades = ref(false)
+
 // Variables para búsqueda de usuarios
 const mostrarModalBuscarUsuario = ref(false)
 const terminoBusquedaUsuario = ref('')
 const buscandoUsuarios = ref(false)
 const usuariosEncontrados = ref([])
+const usuarioSeleccionado = ref(null)
+
+// Opciones para el selector de tipo de envío
+const tipoEnvioOptions = [
+  { value: 'rol', label: 'Por rol' },
+  { value: 'usuario', label: 'Usuario específico' },
+  { value: 'ciudad', label: 'Usuarios de una ciudad' }, 
+  { value: 'global', label: 'Todos los usuarios de la Plataforma' }, 
+]
 
 // Watcher para el término de búsqueda con debounce
 watch(terminoBusquedaUsuario, (newVal) => {
@@ -1758,6 +2701,35 @@ watch(terminoBusquedaUsuario, (newVal) => {
     usuariosEncontrados.value = [];
   }
 });
+
+// Limpiar selecciones al cambiar el tipo de envío
+watch(() => tipoEnvio.value, async (newValue) => {
+  if (newValue !== 'usuario') {
+    usuarioSeleccionado.value = null;
+  }
+  if (newValue === 'ciudad' && ciudades.value.length === 0) {
+    await cargarCiudades();
+  } else if (newValue !== 'ciudad') {
+    ciudadSeleccionada.value = null;
+  }
+});
+
+// Método para seleccionar un usuario para envío de notificación
+const seleccionarUsuario = (usuario) => {
+  usuarioSeleccionado.value = usuario;
+  idUsuarioDestino.value = usuario.id_usuario;
+  mostrarModalBuscarUsuario.value = false;
+  terminoBusquedaUsuario.value = '';
+  usuariosEncontrados.value = [];
+};
+
+// Método para limpiar la selección de usuario
+const limpiarUsuarioSeleccionado = () => {
+  usuarioSeleccionado.value = null;
+  idUsuarioDestino.value = null;
+  terminoBusquedaUsuario.value = '';
+  usuariosEncontrados.value = [];
+};
 
 // Configurar el debounce para la búsqueda
 const buscarUsuarios = debounce(async () => {
@@ -1791,13 +2763,16 @@ const buscarUsuarios = debounce(async () => {
 const configuracionMembresia = ref(0)
 const configuracionVisita = ref(0)
 const configuracionComision = ref(0)
+const configuracionComisionPaquete = ref(0)
 const configuracionTelefono = ref('')
 const configuracionEmail = ref('')
+const configuracionRTN = ref('')
 const configuracionDescuento = ref(0)
+const configuracionDescuentoEspecial = ref(0)
 const configuracionReferido = ref(0)
 const configuracionRetiro = ref(0)
 const configuracionRetiroMinimo = ref(0)
-const configuracionDiasGracia = ref(14) // Valor por defecto de 14 días
+const configuracionDiasGracia = ref(14) // Valor por defecto de 14 días 
 
 // ===== VALORES ORIGINALES PARA DETECTAR CAMBIOS =====
 const valoresOriginales = ref({})
@@ -1815,28 +2790,14 @@ const nuevaNotificacion = ref({
   tipo: '',
   titulo: ''
 })
+ 
 
-// Modal envío
-const mostrarModalEnvio = ref(false)
-const notificacionAEnviar = ref(null)
-const tipoEnvio = ref('')
-const tipoEnvioObject = ref(null)
-
-// Opciones para el selector de tipo de envío
-const tipoEnvioOptions = [
-  { value: 'usuario', label: 'Usuario específico' },
-  { value: 'rol', label: 'Por rol' },
-  { value: 'global', label: 'Todos los usuarios' }
-]
 
 // Función para etiquetar tipo de envío
 const getTipoEnvioLabel = (option) => {
   if (!option) return ''
   return option.label
-}
-const idUsuarioDestino = ref(null)
-const nombreRolDestino = ref('')
-const nombreRolDestinoObject = ref(null)
+}   
 
 // Opciones para el selector de rol
 const rolOptions = [
@@ -1867,11 +2828,44 @@ const servicios = ref([]);
 const serviciosCargando = ref(false);
 const servicioEditando = ref(null);
 const mostrarModalNuevoServicio = ref(false);
+
+// Estados para gestión de paquetes
+const paquetes = ref([]);
+const paquetesCargando = ref(false);
+const paqueteEditando = ref(null);
+const mostrarModalNuevoPaquete = ref(false);
+const filtroBusquedaPaquetes = ref('');
+const filtroEstadoPaquetesObject = ref(null);
+const paqueteAEliminar = ref(null);
+const mostrarModalConfirmacionEliminarPaquete = ref(false);
+
+// Formulario de paquete
+// Estado para controlar la carga al guardar
+const guardandoPaquete = ref(false);
+
+const paqueteForm = ref({
+  nombre: '',
+  descripcion: '',
+  costo: '',
+  cantidad: null,
+  estado: true,
+  ciudades_seleccionadas: [],
+  imagen: null,
+  imagen_previa: null,
+  imagen_public_id: null
+});
+
+// Paginación de paquetes
+const paginacionPaquetes = reactive({
+  paginaActual: 1,
+  porPagina: 5
+});
 const guardandoServicio = ref(false);
 const formServicio = ref({
   nombre: '',
   descripcion: '',
-  estado: true
+  estado: true,
+  ciudades_seleccionadas: []
 });
 const filtroBusqueda = ref('')
 const filtroEstado = ref('')
@@ -1931,6 +2925,24 @@ const formCiudad = ref({
 });
 const filtroBusquedaCiudades = ref('')
 
+// Estados para gestión de correlativos
+const correlativos = ref([]);
+const correlativosCargando = ref(false);
+const correlativoEditando = ref(null);
+const mostrarModalCorrelativo = ref(false);
+const guardandoCorrelativo = ref(false);
+const correlativoForm = ref({
+  cai: '',
+  prefijo: '',
+  rango_inicio: 0,
+  rango_fin: 0,
+  fecha_autorizacion: '',
+  fecha_vencimiento: '',
+  estado: 'ACTIVO'
+});
+const filtroBusquedaCorrelativos = ref('');
+const filtroEstadoCorrelativo = ref('');
+
 // Paginación
 const paginacion = ref({
   paginaActual: 1,
@@ -1975,15 +2987,29 @@ const paginacionCiudades = ref({
   hasta: 0
 })
 
+// Paginación para correlativos
+const paginacionCorrelativos = ref({
+  paginaActual: 1,
+  porPagina: 10, // Mostrar 10 correlativos por página
+  total: 0,
+  totalPaginas: 1,
+  paginas: [],
+  desde: 0,
+  hasta: 0
+})
+
 // ===== COMPUTED PARA DETECTAR CAMBIOS =====
 const hayChanges = computed(() => {
   return configuracionMembresia.value !== valoresOriginales.value.membresia ||
          configuracionVisita.value !== valoresOriginales.value.visita_tecnico ||
          configuracionComision.value !== valoresOriginales.value.comision_por_servicio ||
+         configuracionComisionPaquete.value !== valoresOriginales.value.comision_por_paquete ||
          configuracionTelefono.value !== valoresOriginales.value.numero_empresa ||
-         configuracionDiasGracia.value !== valoresOriginales.value.dias_gracia ||
+         configuracionDiasGracia.value !== valoresOriginales.value.reset_credito ||
          configuracionEmail.value !== valoresOriginales.value.correo_empresa ||
+         configuracionRTN.value !== valoresOriginales.value.rtn ||
          configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento ||
+         configuracionDescuentoEspecial.value !== valoresOriginales.value.porcentaje_descuento_especial ||
          configuracionReferido.value !== valoresOriginales.value.porcentaje_referido ||
          configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro ||
          configuracionRetiroMinimo.value !== valoresOriginales.value.retiro_minimo
@@ -1993,9 +3019,56 @@ const puedeEnviar = computed(() => {
   if (!tipoEnvio.value) return false
   if (tipoEnvio.value === 'usuario') return !!idUsuarioDestino.value
   if (tipoEnvio.value === 'rol') return !!nombreRolDestino.value
-  if (tipoEnvio.value === 'global') return true
-  return false
+  if (tipoEnvio.value === 'ciudad') return !!ciudadSeleccionada.value?.id_ciudad
+  return true
 })
+
+// Computed para paquetes filtrados (sin paginación)
+const paquetesFiltrados = computed(() => {
+  let resultado = [...paquetes.value];
+  
+  // Aplicar filtro de búsqueda
+  if (filtroBusquedaPaquetes.value) {
+    const busqueda = filtroBusquedaPaquetes.value.toLowerCase();
+    resultado = resultado.filter(paquete => 
+      paquete.nombre.toLowerCase().includes(busqueda) || 
+      (paquete.descripcion && paquete.descripcion.toLowerCase().includes(busqueda)) ||
+      paquete.costo.toString().includes(busqueda)
+    );
+  }
+  
+  // Aplicar filtro de estado
+  if (filtroEstadoPaquetesObject.value && filtroEstadoPaquetesObject.value.value !== undefined) {
+    const estadoFiltro = filtroEstadoPaquetesObject.value.value;
+    resultado = resultado.filter(paquete => paquete.estado === estadoFiltro);
+  }
+  
+  return resultado;
+});
+
+// Computed para paquetes paginados
+const paquetesPaginados = computed(() => {
+  const inicio = (paginacionPaquetes.paginaActual - 1) * paginacionPaquetes.porPagina;
+  const fin = inicio + paginacionPaquetes.porPagina;
+  return paquetesFiltrados.value.slice(inicio, fin);
+});
+
+// Computed para la paginación de paquetes
+const paginacionPaquetesCalculada = computed(() => {
+  const total = paquetesFiltrados.value.length;
+  const totalPaginas = Math.ceil(total / paginacionPaquetes.porPagina);
+  const inicio = (paginacionPaquetes.paginaActual - 1) * paginacionPaquetes.porPagina;
+  const fin = Math.min(inicio + paginacionPaquetes.porPagina, total);
+  
+  return {
+    total,
+    totalPaginas,
+    inicio: total > 0 ? inicio + 1 : 0,
+    fin: fin,
+    hasPrevious: paginacionPaquetes.paginaActual > 1,
+    hasNext: paginacionPaquetes.paginaActual < totalPaginas
+  };
+});
 
 // Computed para servicios filtrados (sin paginación)
 const serviciosFiltrados = computed(() => {
@@ -2163,6 +3236,58 @@ const paginacionCiudadesCalculada = computed(() => {
   }
 })
 
+// Computed para correlativos filtrados
+const correlativosFiltrados = computed(() => {
+  let resultado = [...correlativos.value]
+  
+  // Aplicar filtro de búsqueda
+  if (filtroBusquedaCorrelativos.value) {
+    const busqueda = filtroBusquedaCorrelativos.value.toLowerCase()
+    resultado = resultado.filter(correlativo => 
+      correlativo.cai.toLowerCase().includes(busqueda) ||
+      correlativo.id.toString().includes(busqueda)
+    )
+  }
+  
+  // Aplicar filtro de estado
+  if (filtroEstadoCorrelativo.value) {
+    resultado = resultado.filter(correlativo => correlativo.estado === filtroEstadoCorrelativo.value)
+  }
+  
+  return resultado
+})
+
+// Computed para la paginación de correlativos
+const paginacionCorrelativosCalculada = computed(() => {
+  const total = correlativosFiltrados.value.length
+  const totalPaginas = Math.ceil(total / paginacionCorrelativos.value.porPagina) || 1
+  const paginaActual = Math.min(paginacionCorrelativos.value.paginaActual, totalPaginas || 1)
+  
+  const inicio = (paginaActual - 1) * paginacionCorrelativos.value.porPagina
+  const fin = inicio + paginacionCorrelativos.value.porPagina
+  
+  let paginas = []
+  if (totalPaginas > 0) {
+    let paginaInicial = Math.max(1, paginaActual - 2)
+    if (totalPaginas - paginaActual < 2) {
+      paginaInicial = Math.max(1, totalPaginas - 4)
+    }
+    paginas = Array.from(
+      { length: Math.min(5, totalPaginas) },
+      (_, i) => Math.min(paginaInicial + i, totalPaginas)
+    ).filter((pagina, index, array) => !index || pagina > array[index - 1])
+  }
+  
+  return {
+    total,
+    totalPaginas,
+    paginaActual,
+    desde: total > 0 ? inicio + 1 : 0,
+    hasta: Math.min(fin, total),
+    paginas
+  }
+})
+
 // Computed para la paginación de cuentas
 const paginacionCuentasCalculada = computed(() => {
   const total = cuentasFiltradas.value.length
@@ -2221,6 +3346,85 @@ const ciudadesPaginadas = computed(() => {
   const fin = inicio + paginacionCiudades.value.porPagina
   return ciudadesFiltradas.value.slice(inicio, fin)
 })
+
+// Correlativos paginados
+const correlativosPaginados = computed(() => {
+  const inicio = (paginacionCorrelativosCalculada.value.paginaActual - 1) * paginacionCorrelativos.value.porPagina
+  const fin = inicio + paginacionCorrelativos.value.porPagina
+  return correlativosFiltrados.value.slice(inicio, fin)
+})
+
+// Validación del formulario de correlativo
+const esFormularioCorrelativoValido = computed(() => {
+  // Verificar que los campos básicos no estén vacíos
+  const camposBasicosValidos = correlativoForm.value.cai.trim() !== '' &&
+         correlativoForm.value.cai.length === 37 &&
+         correlativoForm.value.prefijo.trim() !== '' &&
+         /^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{2}-$/.test(correlativoForm.value.prefijo) &&
+         correlativoForm.value.rango_inicio > 0 &&
+         correlativoForm.value.rango_fin > 0 &&
+         correlativoForm.value.rango_inicio < correlativoForm.value.rango_fin &&
+         correlativoForm.value.fecha_autorizacion !== '' &&
+         correlativoForm.value.fecha_vencimiento !== '';
+
+  // Si los campos básicos no son válidos, retornar false inmediatamente
+  if (!camposBasicosValidos) return false;
+
+  // Validar fechas solo si los campos básicos son válidos
+  try {
+    const fechaAutorizacion = new Date(correlativoForm.value.fecha_autorizacion);
+    const fechaVencimiento = new Date(correlativoForm.value.fecha_vencimiento);
+    
+    // Verificar que las fechas sean válidas
+    if (isNaN(fechaAutorizacion.getTime()) || isNaN(fechaVencimiento.getTime())) {
+      return false;
+    }
+    
+    // Verificar que la fecha de autorización sea anterior a la de vencimiento
+    return fechaAutorizacion < fechaVencimiento;
+  } catch (error) {
+    return false;
+  }
+})
+
+// Helper function for correlativo estado labels
+const getEstadoCorrelativoLabel = (estado) => {
+  const estados = {
+    'ACTIVO': 'Activo',
+    'INACTIVO': 'Inactivo', 
+    'AGOTADO': 'Agotado',
+    'VENCIDO': 'Vencido'
+  }
+  return estados[estado] || estado
+}
+
+// Helper function to determine card color based on state and alerts
+const getCorrelativoCardColor = (correlativo) => {
+  if (correlativo.estado !== 'ACTIVO') {
+    return 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20'
+  }
+  
+  // Check if correlativo has alerts (based on backend logic)
+  const hoy = new Date();
+  const unMesDespues = new Date();
+  unMesDespues.setMonth(unMesDespues.getMonth() + 1);
+  const fechaVencimiento = new Date(correlativo.fecha_vencimiento);
+  
+  // Check range usage
+  const rangoTotal = correlativo.rango_fin - correlativo.rango_inicio + 1;
+  const utilizado = (correlativo.correlativo_actual || correlativo.rango_inicio - 1) - correlativo.rango_inicio + 1;
+  const porcentajeUtilizado = (utilizado / rangoTotal) * 100;
+  
+  // Alert conditions
+  const rangoProximoAgotarse = porcentajeUtilizado >= 70;
+  const fechaProximaVencer = fechaVencimiento <= unMesDespues;
+  
+  if (rangoProximoAgotarse || fechaProximaVencer) {
+    return 'border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20'
+  }
+  
+  return 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700'
+}
 
 // Watchers para reiniciar la paginación cuando cambian los filtros
 
@@ -2301,6 +3505,19 @@ watch([filtroBusquedaCuentas], () => {
 
 watch([filtroBusquedaCiudades], () => {
   paginacionCiudades.value.paginaActual = 1
+})
+
+watch([filtroBusquedaCorrelativos, filtroEstadoCorrelativo], () => {
+  paginacionCorrelativos.value.paginaActual = 1
+})
+
+// Watch para inicializar el formulario cuando se abre el modal de correlativo
+watch(mostrarModalCorrelativo, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      inicializarFormularioCorrelativo();
+    });
+  }
 })
 
 // ===== TOAST NOTIFICATION =====
@@ -2489,7 +3706,7 @@ const cargarCuentas = async () => {
     if (Array.isArray(response)) {
       cuentas.value = response.map(cuenta => ({
         ...cuenta,
-        // Asegurar que activo sea booleano
+        // Asegurarse de que activo sea booleano
         activo: Boolean(cuenta.activo)
       }));
     } else {
@@ -2669,7 +3886,7 @@ const eliminarCuenta = async (cuentaId) => {
     return true;
   } catch (error) {
     console.error('Error al eliminar cuenta:', error);
-    const errorMessage = error.data?.message || error.message || 'Error al eliminar la cuenta bancaria';
+    const errorMessage = error.data?.message || 'Error al eliminar la cuenta bancaria';
     showToastMessage(errorMessage, 'error');
     return false;
   }
@@ -2695,6 +3912,248 @@ const cambiarPaginaCuentas = (nuevaPagina, event) => {
   return false;
 }
 
+// ===== FUNCIONES PARA CORRELATIVOS =====
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString('es-HN', options);
+}; 
+
+const cargarCorrelativos = async (mostrarExito = false) => {
+  try {
+    correlativosCargando.value = true;
+    const response = await $api('/facturas/correlativos', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    if (response.success) {
+      correlativos.value = response.data;
+      
+      // Mostrar alertas de correlativos próximos a vencer si existen
+      if (response.alertas && response.alertas.length > 0) {
+        response.alertas.forEach(alerta => {
+          if (alerta.mensaje && typeof alerta.mensaje === 'string') {
+            showToastMessage(alerta.mensaje, 'warning');
+          }
+        });
+      }
+      
+      if (mostrarExito) {
+        showToastMessage('Correlativos cargados correctamente', 'success');
+      }
+    }
+  } catch (error) {
+    console.error('Error al cargar correlativos:', error);
+    showToastMessage('Error al cargar los correlativos', 'error');
+  } finally {
+    correlativosCargando.value = false;
+  }
+};
+
+const abrirModalNuevoCorrelativo = () => {
+  correlativoEditando.value = null;
+  inicializarFormularioCorrelativo();
+  mostrarModalCorrelativo.value = true;
+};
+
+const editarCorrelativo = (correlativo) => {
+  correlativoEditando.value = { ...correlativo };
+  inicializarFormularioCorrelativo();
+  mostrarModalCorrelativo.value = true;
+};
+
+const cerrarModalCorrelativo = () => {
+  mostrarModalCorrelativo.value = false;
+  correlativoEditando.value = null;
+};
+
+const checkFormValidity = (event) => {
+  if (!esFormularioCorrelativoValido.value || guardandoCorrelativo.value) {
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
+  }
+  return true;
+};
+
+const inicializarFormularioCorrelativo = () => {
+  if (correlativoEditando.value) {
+    // Formatear fechas para el input type="date"
+    const formatearFecha = (fecha) => {
+      if (!fecha) return '';
+      const date = new Date(fecha);
+      return date.toISOString().split('T')[0];
+    };
+    
+    correlativoForm.value = {
+      ...correlativoEditando.value,
+      fecha_autorizacion: formatearFecha(correlativoEditando.value.fecha_autorizacion),
+      fecha_vencimiento: formatearFecha(correlativoEditando.value.fecha_vencimiento)
+    };
+  } else {
+    correlativoForm.value = {
+      cai: '',
+      prefijo: '',
+      rango_inicio: 0,
+      rango_fin: 0,
+      fecha_autorizacion: '',
+      fecha_vencimiento: '',
+      estado: 'ACTIVO'
+    };
+  }
+};
+
+const guardarCorrelativo = async () => {
+  try {
+    // Protección adicional: no ejecutar si ya está guardando o el formulario no es válido
+    if (guardandoCorrelativo.value || !esFormularioCorrelativoValido.value) {
+      return;
+    }
+    
+    guardandoCorrelativo.value = true;
+    
+    // Validaciones
+    if (!correlativoForm.value.cai) {
+      throw new Error('El CAI es requerido');
+    }
+    
+    if (!correlativoForm.value.prefijo) {
+      throw new Error('El prefijo es requerido');
+    }
+    
+    if (!/^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{2}-$/.test(correlativoForm.value.prefijo)) {
+      throw new Error('El prefijo debe tener el formato xxx-xxx-xx-');
+    }
+    
+    if (correlativoForm.value.rango_inicio >= correlativoForm.value.rango_fin) {
+      throw new Error('El rango inicial debe ser menor al rango final');
+    }
+    
+    if (!correlativoForm.value.fecha_autorizacion || !correlativoForm.value.fecha_vencimiento) {
+      throw new Error('Las fechas de autorización y vencimiento son requeridas');
+    }
+    
+    const url = correlativoEditando.value 
+      ? `/facturas/correlativos/${correlativoEditando.value.id}`
+      : '/facturas/correlativos';
+      
+    const method = correlativoEditando.value ? 'PUT' : 'POST';
+    
+    const response = await $api(url, {
+      baseURL: config.public.apiBase,
+      method,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify(correlativoForm.value)
+    });
+    
+    if (response.success) {
+      showToastMessage(
+        correlativoEditando.value 
+          ? 'Correlativo actualizado correctamente' 
+          : 'Correlativo creado correctamente',
+        'success'
+      );
+      
+      await cargarCorrelativos(true); // Mostrar toast de éxito al recargar
+      cerrarModalCorrelativo();
+    }
+  } catch (error) {
+    console.error('=== ERROR AL GUARDAR CORRELATIVO ===');
+    console.error('Error completo:', error);
+    console.error('Status:', error.response?.status);
+    console.error('StatusText:', error.response?.statusText);
+    console.error('Data:', error.data);
+    console.error('Message:', error.message);
+    
+    // Extraer mensaje de error específico si existe
+    let errorMessage = 'Error al guardar el correlativo';
+    if (error.data?.message) {
+      errorMessage = error.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    showToastMessage(errorMessage, 'error');
+  } finally {
+    guardandoCorrelativo.value = false;
+  }
+};
+
+const confirmarEliminarCorrelativo = (correlativo) => {
+  if (correlativo.estado === 'ACTIVO') {
+    showToastMessage('No se puede eliminar un correlativo activo', 'error');
+    return;
+  }
+  
+  // Validar que el correlativo tenga un ID válido
+  if (!correlativo.id || correlativo.id === undefined || correlativo.id === null) {
+    showToastMessage('Error: No se pudo identificar el correlativo a eliminar', 'error');
+    return;
+  }
+  
+  servicioSeleccionado.value = correlativo.id;
+  tituloConfirmacion.value = 'Eliminar Correlativo';
+  mensajeConfirmacion.value = `¿Estás seguro de que deseas eliminar el correlativo con CAI: ${correlativo.cai}? Esta acción no se puede deshacer.`;
+  accionConfirmar.value = () => eliminarCorrelativo(correlativo.id);
+  mostrarModalConfirmacion.value = true;
+};
+
+const eliminarCorrelativo = async (id) => {
+  // Validar que el ID sea válido
+  if (!id || id === undefined || id === null || id === 'undefined') {
+    console.error('ID de correlativo no válido:', id);
+    showToastMessage('Error: No se pudo identificar el correlativo a eliminar', 'error');
+    return;
+  }
+  
+  try {
+    const response = await $api(`/facturas/correlativos/${id}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (response.success) {
+      showToastMessage('Correlativo eliminado correctamente', 'success');
+      await cargarCorrelativos(true); // Mostrar toast de éxito al recargar
+    }
+  } catch (error) {
+    console.error('Error al eliminar correlativo:', error);
+    showToastMessage('Error al eliminar el correlativo', 'error');
+  }
+};
+
+const cambiarPaginaCorrelativos = (nuevaPagina, event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  if (nuevaPagina < 1 || nuevaPagina > paginacionCorrelativosCalculada.value.totalPaginas) {
+    return false;
+  }
+  
+  paginacionCorrelativos.value.paginaActual = nuevaPagina;
+  
+  const correlativosContainer = document.querySelector('.bg-amber-50');
+  if (correlativosContainer) {
+    correlativosContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  return false;
+};
+
 // ===== FUNCIONES PARA CONFIGURACIONES =====
 const guardarConfiguraciones = async () => {
   try {
@@ -2703,83 +4162,132 @@ const guardarConfiguraciones = async () => {
     // Detectar cambios y preparar datos para enviar
     const cambios = []
     
-    if (configuracionMembresia.value !== valoresOriginales.value.membresia) {
+    // Función auxiliar para comparar valores
+    const hasChanged = (current, original, isNumber = true) => {
+      if (isNumber) {
+        return Number(current || 0) !== Number(original || 0);
+      }
+      return String(current || '').trim() !== String(original || '').trim();
+    };
+
+    // Membresía (número)
+    if (hasChanged(configuracionMembresia.value, valoresOriginales.value.membresia, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'membresia')?.id_config,
         tipo_config: 'membresia',
-        valor: configuracionMembresia.value
+        valor: Number(configuracionMembresia.value) || 0
       })
     }
     
-    if (configuracionVisita.value !== valoresOriginales.value.visita_tecnico) {
+    // Visita técnica (número)
+    if (hasChanged(configuracionVisita.value, valoresOriginales.value.visita_tecnico, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'visita_tecnico')?.id_config,
         tipo_config: 'visita_tecnico',
-        valor: configuracionVisita.value
+        valor: Number(configuracionVisita.value) || 0
       })
     }
     
-    if (configuracionComision.value !== valoresOriginales.value.comision_por_servicio) {
+    // Comisión por servicio (número)
+    if (hasChanged(configuracionComision.value, valoresOriginales.value.comision_por_servicio, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'comision_por_servicio')?.id_config,
         tipo_config: 'comision_por_servicio',
-        valor: configuracionComision.value
-      })
-    }
-    
-    if (configuracionTelefono.value !== valoresOriginales.value.numero_empresa) {
-      cambios.push({
-        id: configuraciones.value.find(c => c.tipo_config === 'numero_empresa')?.id_config,
-        tipo_config: 'numero_empresa',
-        valor: configuracionTelefono.value
-      })
-    }
-    
-    if (configuracionEmail.value !== valoresOriginales.value.correo_empresa) {
-      cambios.push({
-        id: configuraciones.value.find(c => c.tipo_config === 'correo_empresa')?.id_config,
-        tipo_config: 'correo_empresa',
-        valor: configuracionEmail.value
-      })
-    }
-    
-    if (configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento) {
-      cambios.push({
-        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_descuento')?.id_config,
-        tipo_config: 'porcentaje_descuento',
-        valor: configuracionDescuento.value
-      })
-    }
-    
-    if (configuracionReferido.value !== valoresOriginales.value.porcentaje_referido) {
-      cambios.push({
-        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_referido')?.id_config,
-        tipo_config: 'porcentaje_referido',
-        valor: configuracionReferido.value
-      })
-    }
-    
-    if (configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro) {
-      cambios.push({
-        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_retiro')?.id_config,
-        tipo_config: 'porcentaje_retiro',
-        valor: configuracionRetiro.value
-      })
-    }
-    
-    if (configuracionRetiroMinimo.value !== valoresOriginales.value.retiro_minimo) {
-      cambios.push({
-        id: configuraciones.value.find(c => c.tipo_config === 'retiro_minimo')?.id_config,
-        tipo_config: 'retiro_minimo',
-        valor: configuracionRetiroMinimo.value
+        valor: Number(configuracionComision.value) || 0
       })
     }
 
-    if (configuracionDiasGracia.value !== valoresOriginales.value.reset_credito) {
+    // Comisión por paquete (número)
+    if (hasChanged(configuracionComisionPaquete.value, valoresOriginales.value.comision_por_paquete, true)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'comision_por_paquete')?.id_config,
+        tipo_config: 'comision_por_paquete',
+        valor: Number(configuracionComisionPaquete.value) || 0
+      })
+    }
+    
+    // Teléfono (texto)
+    if (hasChanged(configuracionTelefono.value, valoresOriginales.value.numero_empresa, false)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'numero_empresa')?.id_config,
+        tipo_config: 'numero_empresa',
+        valor: String(configuracionTelefono.value || '').trim()
+      })
+    }
+    
+    // Días de gracia (número)
+    if (hasChanged(configuracionDiasGracia.value, valoresOriginales.value.reset_credito, true)) {
       cambios.push({
         id: configuraciones.value.find(c => c.tipo_config === 'reset_credito')?.id_config || null,
         tipo_config: 'reset_credito',
-        valor: configuracionDiasGracia.value
+        valor: Number(configuracionDiasGracia.value) || 14
+      })
+    }
+    
+    // Email (texto con validación especial)
+    const emailValue = String(configuracionEmail.value || '').trim();
+    if (hasChanged(emailValue, valoresOriginales.value.correo_empresa, false)) {
+      if (emailValue && !isValidEmail(emailValue)) {
+        throw new Error('El formato del correo electrónico no es válido');
+      }
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'correo_empresa')?.id_config,
+        tipo_config: 'correo_empresa',
+        valor: emailValue
+      })
+    }
+    
+    // RTN (texto)
+    if (hasChanged(configuracionRTN.value, valoresOriginales.value.rtn, false)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'rtn')?.id_config,
+        tipo_config: 'rtn',
+        valor: String(configuracionRTN.value || '').trim()
+      })
+    }
+    
+    // Porcentaje de descuento (número)
+    if (hasChanged(configuracionDescuento.value, valoresOriginales.value.porcentaje_descuento, true)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_descuento')?.id_config,
+        tipo_config: 'porcentaje_descuento',
+        valor: Number(configuracionDescuento.value) || 0
+      })
+    }
+    
+    // Descuento especial (número)
+    if (hasChanged(configuracionDescuentoEspecial.value, valoresOriginales.value.porcentaje_descuento_especial, true)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_descuento_especial')?.id_config,
+        tipo_config: 'porcentaje_descuento_especial',
+        valor: Number(configuracionDescuentoEspecial.value) || 0
+      })
+    }
+    
+    // Porcentaje referido (número)
+    if (hasChanged(configuracionReferido.value, valoresOriginales.value.porcentaje_referido, true)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_referido')?.id_config,
+        tipo_config: 'porcentaje_referido',
+        valor: Number(configuracionReferido.value) || 0
+      })
+    }
+    
+    // Porcentaje retiro (número)
+    if (hasChanged(configuracionRetiro.value, valoresOriginales.value.porcentaje_retiro, true)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_retiro')?.id_config,
+        tipo_config: 'porcentaje_retiro',
+        valor: Number(configuracionRetiro.value) || 0
+      })
+    }
+
+    // Retiro mínimo (número)
+    if (hasChanged(configuracionRetiroMinimo.value, valoresOriginales.value.retiro_minimo, true)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'retiro_minimo')?.id_config,
+        tipo_config: 'retiro_minimo',
+        valor: Number(configuracionRetiroMinimo.value) || 0
       })
     }
 
@@ -2793,11 +4301,12 @@ const guardarConfiguraciones = async () => {
       const payload = {
         tipo_config: cambio.tipo_config,
         valor: cambio.valor
-      }
+      };
       
       // Si el cambio tiene un ID, es una actualización (PUT), de lo contrario es nuevo (POST)
-      const url = cambio.id ? `/config/${cambio.id}` : '/config/crear'
-      const method = cambio.id ? 'PUT' : 'POST'
+      const url = cambio.id ? `/config/${cambio.id}` : '/config/crear';
+      const method = cambio.id ? 'PUT' : 'POST';
+      const fullUrl = `${config.public.apiBase}${url}`;
       
       try {
         const response = await $api(url, {
@@ -2808,34 +4317,50 @@ const guardarConfiguraciones = async () => {
             'Authorization': `Bearer ${auth.token}`,
             'Content-Type': 'application/json'
           },
-          body: payload
-        })
-        return response
+          body: JSON.stringify(payload)
+        });
+        
+        return response;
       } catch (error) {
-        console.error(`Error al ${method === 'PUT' ? 'actualizar' : 'crear'} configuración ${cambio.tipo_config}:`, error)
-        throw error // Propagar el error para manejarlo en el bloque catch externo
+        console.error(`❌ Error en ${method} ${url}:`, {
+          message: error.message,
+          status: error.status || error.response?.status,
+          response: error.response?.data || 'No hay respuesta del servidor',
+          stack: error.stack
+        });
+        
+        // Mejorar el mensaje de error para el usuario
+        let errorMessage = `Error al ${method === 'PUT' ? 'actualizar' : 'crear'} configuración ${cambio.tipo_config}`;
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+        
+        throw new Error(errorMessage);
       }
     })
 
-    await Promise.all(promesas)
+    const resultados = await Promise.all(promesas)
     
     // Actualizar valores originales después de guardar exitosamente
     await cargarConfiguraciones()
-    
     showToastMessage('Configuraciones guardadas exitosamente', 'success')
     
   } catch (error) {
-    console.error('Error al guardar configuraciones:', error)
-    showToastMessage('Error al guardar las configuraciones', 'error')
+    console.error('=== ERROR GENERAL AL GUARDAR CONFIGURACIONES ===', {
+      message: error.message,
+      status: error.status,
+      response: error.response?.data || 'No hay respuesta del servidor',
+      stack: error.stack
+    })
+    const errorMessage = error.response?.data?.message || error.message || 'Error al guardar las configuraciones'
+    showToastMessage(errorMessage, 'error')
   } finally {
     isSaving.value = false
   }
 }
 
 const cargarConfiguraciones = async () => {
-  isLoading.value = true;
-  try { 
-    
+  try {
     const response = await $api('/config', {
       baseURL: config.public.apiBase,
       method: 'GET',
@@ -2846,22 +4371,9 @@ const cargarConfiguraciones = async () => {
     });
 
     if (Array.isArray(response)) {
-      configuraciones.value = response
+      configuraciones.value = response;
       
       // Mapeo directo de la respuesta de la API a las variables
-      const configMapeo = {
-        membresia: 'membresia',
-        visita_tecnico: 'visita_tecnico',
-        comision_por_servicio: 'comision_por_servicio',
-        numero_empresa: 'numero_empresa',
-        correo_empresa: 'correo_empresa',
-        porcentaje_descuento: 'porcentaje_descuento',
-        porcentaje_referido: 'porcentaje_referido',
-        porcentaje_retiro: 'porcentaje_retiro',
-        retiro_minimo: 'retiro_minimo',
-        reset_credito: 'reset_credito'
-      }
-      
       response.forEach(item => {
         switch(item.tipo_config) {
           case 'membresia':
@@ -2873,56 +4385,61 @@ const cargarConfiguraciones = async () => {
           case 'comision_por_servicio':
             configuracionComision.value = Number(item.valor) || 0;
             break;
+          case 'comision_por_paquete':
+            configuracionComisionPaquete.value = Number(item.valor) || 0;
+            break;  
           case 'numero_empresa':
-            configuracionTelefono.value = item.valor?.toString() || '';
+            configuracionTelefono.value = String(item.valor || '');
             break;
           case 'correo_empresa':
-            configuracionEmail.value = item.valor?.toString() || '';
+            configuracionEmail.value = String(item.valor || '');
+            break;
+          case 'rtn':
+            configuracionRTN.value = String(item.valor || '');
             break;
           case 'porcentaje_descuento':
             configuracionDescuento.value = Number(item.valor) || 0;
+            break;
+          case 'porcentaje_descuento_especial':
+            configuracionDescuentoEspecial.value = Number(item.valor) || 0;
             break;
           case 'porcentaje_referido':
             configuracionReferido.value = Number(item.valor) || 0;
             break;
           case 'porcentaje_retiro':
-            configuracionRetiro.value = parseFloat(item.valor) || 0
+            configuracionRetiro.value = Number(item.valor) || 0;
             break;
           case 'retiro_minimo':
-            configuracionRetiroMinimo.value = parseFloat(item.valor) || 0
-            valoresOriginales.value.retiro_minimo = configuracionRetiroMinimo.value
+            configuracionRetiroMinimo.value = Number(item.valor) || 0;
             break;
           case 'reset_credito':
-            configuracionDiasGracia.value = parseInt(item.valor, 10) || 14
-            valoresOriginales.value.reset_credito = configuracionDiasGracia.value
+            configuracionDiasGracia.value = Number(item.valor) || 14;
             break;
         }
       });
-      
-      // Guardar valores originales para detectar cambios
+
+      // Guardar valores originales con los tipos correctos
       valoresOriginales.value = {
-        membresia: configuracionMembresia.value,
-        visita_tecnico: configuracionVisita.value,
-        comision_por_servicio: configuracionComision.value,
-        numero_empresa: configuracionTelefono.value,
-        correo_empresa: configuracionEmail.value,
-        porcentaje_descuento: configuracionDescuento.value,
-        porcentaje_referido: configuracionReferido.value,
-        porcentaje_retiro: configuracionRetiro.value,
-        retiro_minimo: configuracionRetiroMinimo.value,
-        reset_credito: configuracionDiasGracia.value
-      } 
-    } else {
-      console.error('La respuesta de la API no es un array:', response);
-      showToastMessage('Error: Formato de respuesta inválido', 'error');
+        membresia: Number(configuracionMembresia.value) || 0,
+        visita_tecnico: Number(configuracionVisita.value) || 0,
+        comision_por_servicio: Number(configuracionComision.value) || 0,
+        comision_por_paquete: Number(configuracionComisionPaquete.value) || 0,
+        numero_empresa: String(configuracionTelefono.value || ''),
+        correo_empresa: String(configuracionEmail.value || ''),
+        rtn: String(configuracionRTN.value || ''),
+        porcentaje_descuento: Number(configuracionDescuento.value) || 0,
+        porcentaje_descuento_especial: Number(configuracionDescuentoEspecial.value) || 0,
+        porcentaje_referido: Number(configuracionReferido.value) || 0,
+        porcentaje_retiro: Number(configuracionRetiro.value) || 0,
+        retiro_minimo: Number(configuracionRetiroMinimo.value) || 0,
+        reset_credito: Number(configuracionDiasGracia.value) || 14
+      };
     }
   } catch (error) {
     console.error('Error al cargar configuraciones:', error);
-    showToastMessage('Error al cargar las configuraciones. Por favor, recarga la página.', 'error');
-  } finally {
-    isLoading.value = false;
+    showToastMessage('Error al cargar las configuraciones', 'error');
   }
-}
+};
 
 // ===== FUNCIONES PARA BENEFICIOS =====
 const cargarBeneficios = async () => {
@@ -3133,11 +4650,41 @@ const cambiarPaginaBeneficios = (nuevaPagina, event) => {
   return false;
 }
 
+// ===== FUNCIONES PARA OBTENER CIUDADES =====
+const obtenerCiudades = async () => {
+  if (ciudades.value.length > 0) return; // Ya tenemos las ciudades cargadas
+  
+  cargandoCiudades.value = true;
+  try {
+    const response = await $api('/ciudades', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    ciudades.value = Array.isArray(response) ? response : [];
+  } catch (error) {
+    console.error('Error al obtener ciudades:', error);
+    showToastMessage('Error al cargar la lista de ciudades', 'error');
+  } finally {
+    cargandoCiudades.value = false;
+  }
+};
+
 // ===== FUNCIONES PARA BÚSQUEDA DE USUARIOS =====
 const abrirModalBuscarUsuario = () => {
   mostrarModalBuscarUsuario.value = true
   terminoBusquedaUsuario.value = ''
   usuariosEncontrados.value = []
+  // Forzar la actualización del DOM si es necesario
+  nextTick(() => {
+    const searchInput = document.querySelector('input[placeholder="Buscar por nombre"]')
+    if (searchInput) {
+      searchInput.focus()
+    }
+  })
 }
 
 const cerrarModalBuscarUsuario = () => {
@@ -3147,7 +4694,7 @@ const cerrarModalBuscarUsuario = () => {
   buscandoUsuarios.value = false
 }
 
-const seleccionarUsuario = async (usuario) => {
+const seleccionarReferentePredeterminado = async (usuario) => {
   try {
     // Primero obtenemos el ID de la configuración existente
     const configResponse = await $api('/config/valor/referidor_predeterminado', {
@@ -3279,9 +4826,16 @@ const resetearFormularioEnvio = () => {
   nombreRolDestinoObject.value = null
   tipoEnvio.value = ''
   tipoEnvioObject.value = null
+  ciudadSeleccionada.value = null
+  rolCiudadSeleccionado.value = null
 }
 
 const enviarNotificacion = async () => {
+  if (!tipoEnvio.value) {
+    showToastMessage('Por favor selecciona un tipo de envío', 'error')
+    return
+  }
+  
   if (!puedeEnviar.value) {
     showToastMessage('Por favor completa la información de destino', 'error')
     return
@@ -3298,7 +4852,13 @@ const enviarNotificacion = async () => {
     if (tipoEnvio.value === 'usuario') {
       payload.id_usuario = idUsuarioDestino.value
     } else if (tipoEnvio.value === 'rol') {
-      payload.nombre_rol = nombreRolDestino.value
+      payload.nombre_rol = nombreRolDestinoObject.value.value
+    } else if (tipoEnvio.value === 'ciudad') {
+      payload.id_ciudad = ciudadSeleccionada.value.id_ciudad
+      // Si se seleccionó un rol para filtrar, lo agregamos al payload
+      if (rolCiudadSeleccionado.value) {
+        payload.nombre_rol = rolCiudadSeleccionado.value.value
+      }
     } else if (tipoEnvio.value === 'global') {
       payload.global = true
     }
@@ -3318,7 +4878,11 @@ const enviarNotificacion = async () => {
       // Mensaje mejorado con información del tipo de envío
       const tipoEnvioTexto = response.data.tipo_envio || 
         (tipoEnvio.value === 'usuario' ? 'usuario individual' : 
-         tipoEnvio.value === 'rol' ? `rol ${nombreRolDestino.value}` : 
+         tipoEnvio.value === 'rol' ? `rol ${nombreRolDestinoObject.value?.label || ''}` : 
+         tipoEnvio.value === 'ciudad' ? 
+           (ciudadSeleccionada.value?.nombre ? 
+             `ciudad ${ciudadSeleccionada.value.nombre}${rolCiudadSeleccionado.value ? ` (rol: ${rolCiudadSeleccionado.value.label})` : ''}` : 
+             'ciudad') : 
          'todos los usuarios')
       
       showToastMessage(
@@ -3369,7 +4933,7 @@ const eliminarNotificacion = async () => {
         'Accept': 'application/json',
         'Authorization': `Bearer ${auth.token}`
       }
-    })
+    });
 
     if (response.success) {
       showToastMessage('Notificación eliminada exitosamente', 'success')
@@ -3522,7 +5086,8 @@ function nuevoServicio() {
   formServicio.value = {
     nombre: '',
     descripcion: '',
-    estado: true
+    estado: true,
+    ciudades_seleccionadas: []
   }
   mostrarModalNuevoServicio.value = true
 }
@@ -3533,7 +5098,8 @@ function editarServicio(servicio) {
   formServicio.value = {
     nombre: servicio.nombre,
     descripcion: servicio.descripcion || '',
-    estado: servicio.estado
+    estado: servicio.estado,
+    ciudades_seleccionadas: servicio.ciudades ? servicio.ciudades.map(c => ({ ...c, nombre: c.nombre_ciudad })) : []
   }
   mostrarModalNuevoServicio.value = true
 }
@@ -3558,7 +5124,7 @@ async function guardarServicio() {
     
     const response = await $api(url, {
       baseURL: config.public.apiBase,
-      method,
+      method: method,
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -3567,7 +5133,8 @@ async function guardarServicio() {
       body: JSON.stringify({
         nombre: formServicio.value.nombre,
         descripcion: formServicio.value.descripcion || null,
-        estado: formServicio.value.estado ? 1 : 0
+        estado: formServicio.value.estado ? 1 : 0,
+        id_ciudades: formServicio.value.ciudades_seleccionadas.map(c => c.id_ciudad)
       })
     });
 
@@ -3585,10 +5152,10 @@ async function guardarServicio() {
   } catch (error) {
     console.error('Error al guardar servicio:', error);
     
-    // Mostrar mensaje de error más descriptivo
+    // Mostrar mensaje de error detallado
     const errorMessage = error.data?.message || 
-                       error.response?._data?.message || 
-                       'Error al guardar el servicio. Por favor, inténtalo de nuevo.';
+                         error.response?._data?.message || 
+                         'Error al guardar el servicio';
     
     showToastMessage(errorMessage, 'error');
     return false;
@@ -3711,6 +5278,423 @@ function cambiarPagina(nuevaPagina, event) {
   return false;
 }
 
+// ===== FUNCIONES PARA GESTIÓN DE PAQUETES =====
+
+// Función para formatear números con separadores de miles
+function formatNumber(value) {
+  if (value === null || value === undefined) return '0';
+  return new Intl.NumberFormat('es-HN').format(value);
+}
+
+// Cargar lista de paquetes
+async function cargarPaquetes() {
+  let data;
+  try {
+    paquetesCargando.value = true;
+    const auth = useAuthStore();
+    
+    if (!auth.token) {
+      throw new Error('No se encontró el token de autenticación');
+    }
+    
+    const response = await $api('/paquetes', {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+    
+    if (!response) {
+      throw new Error('La respuesta del servidor está vacía');
+    }
+    
+    data = response;
+    
+    if (!Array.isArray(data)) {
+      console.warn('Se esperaba un arreglo de paquetes, se recibió:', data);
+      data = [];
+    }
+    
+    paquetes.value = data.map(paquete => ({
+      ...paquete,
+      // Asegurarse de que el estado sea booleano
+      estado: Boolean(paquete.estado),
+      // Asegurarse de que el costo sea un número
+      costo: parseFloat(paquete.costo) || 0
+    }));
+    
+    return data;
+  } catch (error) {
+    console.error('Error en cargarPaquetes:', {
+      error: error.message,
+      response: data,
+      stack: error.stack
+    });
+    showToastMessage('Error al cargar los paquetes', 'error');
+    throw error;
+  } finally {
+    paquetesCargando.value = false;
+  }
+}
+
+// Abrir modal para nuevo paquete
+function nuevoPaquete() {
+  paqueteEditando.value = null;
+  paqueteForm.value = {
+    nombre: '',
+    descripcion: '',
+    costo: '',
+    cantidad: null,
+    estado: true,
+    ciudades_seleccionadas: [],
+    imagen: null,
+    imagen_previa: null,
+    imagen_public_id: null
+  };
+  mostrarModalNuevoPaquete.value = true;
+}
+
+// Abrir modal para editar paquete
+function editarPaquete(paquete) {
+  paqueteEditando.value = paquete;
+  paqueteForm.value = {
+    nombre: paquete.nombre,
+    descripcion: paquete.descripcion || '',
+    costo: paquete.costo,
+    cantidad: paquete.cantidad || null,
+    estado: paquete.estado,
+    ciudades_seleccionadas: paquete.ciudades ? paquete.ciudades.map(c => ({ ...c, nombre: c.nombre_ciudad })) : [],
+    imagen: null,
+    imagen_previa: paquete.imagen_url || null,
+    imagen_public_id: paquete.imagen_public_id || null
+  };
+  mostrarModalNuevoPaquete.value = true;
+}
+
+// Cerrar modal de paquete
+function cerrarModalPaquete() {
+  mostrarModalNuevoPaquete.value = false;
+  paqueteEditando.value = null;
+  paqueteForm.value = {
+    nombre: '',
+    descripcion: '',
+    costo: '',
+    cantidad: null,
+    estado: true
+  };
+}
+
+// Función para manejar la selección de imagen
+function manejarCambioImagen(event) {
+  const file = event.target.files[0];
+  if (file) {
+    // Validar tipo de archivo
+    if (!file.type.match('image.*')) {
+      showToastMessage('Por favor, selecciona un archivo de imagen válido', 'error');
+      return;
+    }
+    
+    // Validar tamaño (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      showToastMessage('La imagen no debe superar los 10MB', 'error');
+      return;
+    }
+    
+    // Actualizar el formulario
+    paqueteForm.value.imagen = file;
+    
+    // Crear vista previa
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      paqueteForm.value.imagen_previa = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Función para eliminar la imagen seleccionada
+async function eliminarImagen() {
+  try {
+    // Si estamos editando un paquete y tiene una imagen en el backend
+    if (paqueteEditando.value && paqueteEditando.value.imagen_public_id) {
+      const auth = useAuthStore();
+      
+      // Enviar petición para eliminar la imagen del backend
+      await $api(`/paquetes/imagen/${paqueteEditando.value.id_paquete}`, {
+        method: 'DELETE',
+        baseURL: config.public.apiBase,
+        headers: {
+          'Authorization': `Bearer ${auth.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          public_id: paqueteEditando.value.imagen_public_id
+        })
+      });
+      
+      // Actualizar el paquete en el frontend
+      paqueteEditando.value.imagen_url = null;
+      paqueteEditando.value.imagen_public_id = null;
+    }
+    
+    // Limpiar el formulario
+    paqueteForm.value.imagen = null;
+    paqueteForm.value.imagen_previa = null;
+    paqueteForm.value.imagen_public_id = null;
+    
+    // Limpiar el input file
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    showToastMessage('Imagen eliminada correctamente', 'success');
+  } catch (error) {
+    console.error('Error al eliminar la imagen:', error);
+    const errorMessage = error.data?.message || 
+                        error.response?._data?.message || 
+                        'Error al eliminar la imagen';
+    showToastMessage(errorMessage, 'error');
+  }
+}
+
+// Guardar o actualizar paquete
+async function guardarPaquete() {
+  if (guardandoPaquete.value) return;
+  guardandoPaquete.value = true;
+  
+  try {
+    // Validar campos obligatorios
+    if (!paqueteForm.value.nombre || !paqueteForm.value.costo) {
+      showToastMessage('El nombre y el costo son campos obligatorios', 'error');
+      return;
+    }
+
+    // Validar que el costo sea un número válido
+    const costo = parseFloat(paqueteForm.value.costo);
+    if (isNaN(costo) || costo < 0) {
+      showToastMessage('El costo debe ser un número válido mayor o igual a cero', 'error');
+      return;
+    }
+
+    const auth = useAuthStore();
+    const url = paqueteEditando.value 
+      ? `/paquetes/${paqueteEditando.value.id_paquete}`
+      : '/paquetes';
+    
+    const method = paqueteEditando.value ? 'PUT' : 'POST';
+    
+    // Crear FormData para enviar archivos
+    const formData = new FormData();
+    
+    // Función auxiliar para agregar campos al FormData manejando valores nulos
+    const appendFormData = (key, value) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
+    };
+
+    // Agregar campos al FormData
+    appendFormData('nombre', paqueteForm.value.nombre.trim());
+    appendFormData('descripcion', paqueteForm.value.descripcion.trim());
+    appendFormData('costo', costo);
+    
+    // Manejar cantidad: si está vacío, no se envía el campo (el backend lo manejará como null)
+    if (paqueteForm.value.cantidad) {
+      appendFormData('cantidad', parseInt(paqueteForm.value.cantidad, 10));
+    }
+    
+    // Estado siempre como booleano
+    appendFormData('estado', paqueteForm.value.estado === true || paqueteForm.value.estado === 'true');
+    
+    // Agregar ciudades seleccionadas
+    if (paqueteForm.value.ciudades_seleccionadas && paqueteForm.value.ciudades_seleccionadas.length > 0) {
+      paqueteForm.value.ciudades_seleccionadas.forEach((ciudad, index) => {
+        formData.append(`id_ciudades[${index}]`, ciudad.id_ciudad);
+      });
+    }
+    
+    // Agregar la imagen si existe
+    if (paqueteForm.value.imagen) {
+      // Usamos 'imagen' como nombre de campo para que coincida con el backend
+      formData.append('imagen', paqueteForm.value.imagen);
+    } else if (paqueteEditando.value && paqueteForm.value.imagen_public_id) {
+      // Si estamos editando y no hay una nueva imagen, pero hay un public_id, lo enviamos
+      formData.append('imagen_public_id', paqueteForm.value.imagen_public_id);
+    }
+
+    // Realizar la petición
+    const response = await $api(url, {
+      baseURL: config.public.apiBase,
+      method: method,
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+        // No establecer Content-Type, se establecerá automáticamente con el boundary
+      },
+      body: formData
+    });
+
+    if (!response) {
+      throw new Error('No se recibió respuesta del servidor');
+    }
+
+    // Mostrar mensaje de éxito
+    showToastMessage(
+      paqueteEditando.value 
+        ? 'Paquete actualizado correctamente' 
+        : 'Paquete creado correctamente',
+      'success'
+    );
+    
+    // Recargar la lista de paquetes
+    await cargarPaquetes();
+    
+    // Cerrar el modal
+    cerrarModalPaquete();
+    
+    return true;
+  } catch (error) {
+    console.error('Error al guardar el paquete:', error);
+    
+    // Mostrar mensaje de error detallado
+    const errorMessage = error.data?.message || 
+                         error.response?._data?.message || 
+                         'Error al guardar el paquete';
+    
+    showToastMessage(errorMessage, 'error');
+    return false;
+  } finally {
+    guardandoPaquete.value = false;
+  }
+}
+
+// Mostrar confirmación para eliminar paquete
+function confirmarEliminarPaquete(paquete) {
+  paqueteAEliminar.value = paquete;
+  mostrarModalConfirmacionEliminarPaquete.value = true;
+}
+
+// Eliminar un paquete
+async function eliminarPaquete() {
+  if (!paqueteAEliminar.value) {
+    showToastMessage('No se ha seleccionado ningún paquete para eliminar', 'error');
+    return false;
+  }
+
+  try {
+    const auth = useAuthStore();
+    const response = await $api(`/paquetes/${paqueteAEliminar.value.id_paquete}`, {
+      baseURL: config.public.apiBase,
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    });
+
+    if (!response) {
+      throw new Error('No se recibió respuesta del servidor');
+    }
+
+    // Mostrar mensaje de éxito
+    showToastMessage('Paquete eliminado correctamente', 'success');
+    
+    // Recargar la lista de paquetes
+    await cargarPaquetes();
+    
+    // Cerrar el modal de confirmación
+    mostrarModalConfirmacionEliminarPaquete.value = false;
+    paqueteAEliminar.value = null;
+    
+    return true;
+  } catch (error) {
+    console.error('Error al eliminar el paquete:', error);
+    
+    // Mostrar mensaje de error detallado
+    const errorMessage = error.data?.message || 
+                         error.response?._data?.message || 
+                         'Error al eliminar el paquete';
+    
+    showToastMessage(errorMessage, 'error');
+    return false;
+  }
+}
+
+// Confirmar cambio de estado de un paquete
+function confirmarCambioEstadoPaquete(paquete, activar) {
+  paqueteAEliminar.value = paquete; // Reutilizamos esta variable para el paquete seleccionado
+  tituloConfirmacion.value = activar ? 'Activar Paquete' : 'Desactivar Paquete';
+  mensajeConfirmacion.value = `¿Estás seguro de que deseas ${activar ? 'activar' : 'desactivar'} el paquete "${paquete.nombre}"?`;
+  accionConfirmar.value = () => cambiarEstadoPaquete(paquete, activar);
+  mostrarModalConfirmacion.value = true;
+}
+
+// Cambiar estado de un paquete
+async function cambiarEstadoPaquete(paqueteOrId, activar) { 
+  const paqueteId = typeof paqueteOrId === 'object' ? paqueteOrId.id_paquete : paqueteOrId;
+  
+  if (paqueteId === undefined || paqueteId === null || paqueteId === '') {
+    console.error('ID de paquete no válido (undefined/null/vacío):', paqueteId);
+    showToastMessage('Error: No se pudo identificar el paquete seleccionado', 'error');
+    return false;
+  }
+  
+  try {
+    const auth = useAuthStore();
+    const response = await $api(`/paquetes/desactivar/${paqueteId}`, {
+      baseURL: config.public.apiBase,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({
+        estado: activar
+      })
+    });
+
+    if (response && response.success) {
+      showToastMessage(activar ? 'Paquete activado correctamente' : 'Paquete desactivado correctamente', 'success');
+      await cargarPaquetes();
+      return true;
+    } else {
+      showToastMessage(response.message || 'Error al actualizar el estado del paquete', 'error');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error al cambiar el estado del paquete:', error);
+    showToastMessage('Error al actualizar el estado del paquete. Por favor, inténtalo de nuevo.', 'error');
+    return false;
+  }
+}
+
+// Cambiar de página en la paginación de paquetes
+function cambiarPaginaPaquetes(nuevaPagina, event) {
+  // Prevenir el comportamiento por defecto del botón
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  // Validar que la página esté dentro de los límites
+  if (nuevaPagina < 1 || nuevaPagina > paginacionPaquetesCalculada.value.totalPaginas) {
+    return false;
+  }
+  
+  // Actualizar solo la página actual en el estado reactivo
+  paginacionPaquetes.paginaActual = nuevaPagina;
+  
+  // Desplazamiento suave al principio de la lista de paquetes
+  const paquetesContainer = document.querySelector('.paquetes-container');
+  if (paquetesContainer) {
+    paquetesContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  return false;
+}
+
 // ===== UTILIDADES =====
 const formatearFecha = (fecha) => {
   return new Date(fecha).toLocaleString('es-ES', {
@@ -3770,7 +5754,9 @@ onMounted(async () => {
       cargarServicios().catch(() => showToastMessage('Error al cargar los servicios', 'error')),
       cargarCiudades().catch(() => showToastMessage('Error al cargar las ciudades', 'error')),
       cargarNotificaciones().catch(() => showToastMessage('Error al cargar las notificaciones', 'error')),
-      cargarReferidorPredeterminado().catch(() => showToastMessage('Error al cargar el referidor predeterminado', 'error'))
+      cargarCorrelativos().catch(() => showToastMessage('Error al cargar los correlativos', 'error')),
+      cargarReferidorPredeterminado().catch(() => showToastMessage('Error al cargar el referidor predeterminado', 'error')),
+      cargarPaquetes().catch(() => showToastMessage('Error al cargar los paquetes', 'error'))
     ])
   } catch (error) {
     window.location.reload()
@@ -3862,12 +5848,12 @@ input, select, textarea {
 /* Estilos para vue-multiselect en filtros de admin */
 .multiselect-admin-filter {
   position: relative;
-  z-index: 50;
+  z-index: auto;
 }
 
 .multiselect-admin-filter .multiselect__tags {
   min-height: 44px;
-  padding: 1px 40px 1px 12px;
+  padding: 6px 40px 6px 12px;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   background-color: #f9fafb;
@@ -3875,7 +5861,75 @@ input, select, textarea {
   transition: all 0.2s ease;
   color: #111827;
   display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.multiselect-admin-filter .multiselect__tag {
+  background: #1e40af; /* Azul más oscuro para mejor contraste */
+  color: white;
+  border-radius: 0.375rem; /* 6px - para coincidir con otros bordes redondeados */
+  padding: 0.25rem 0.5rem; /* 4px 8px */
+  margin: 0.125rem; /* 2px */
+  font-size: 0.75rem; /* 12px */
+  display: inline-flex;
   align-items: center;
+  transition: all 0.2s ease;
+  border: 1px solid #1e3a8a; /* Borde sutil */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.multiselect-admin-filter .multiselect__tag:hover {
+  background: #1e3a8a; /* Un tono ligeramente más oscuro al pasar el mouse */
+}
+
+.multiselect-admin-filter .multiselect__tag-icon {
+  margin-left: 0.375rem; /* 6px */
+  cursor: pointer;
+  opacity: 0.8;
+  font-style: normal;
+  font-size: 0.625rem; /* 10px */
+  line-height: 1;
+  transition: all 0.2s ease;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-right: -2px;
+}
+
+.multiselect-admin-filter .multiselect__tag-icon:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Estilos para el modo oscuro */
+.dark .multiselect-admin-filter .multiselect__tag {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #f3f4f6;
+}
+
+.dark .multiselect-admin-filter .multiselect__tag:hover {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.dark .multiselect-admin-filter .multiselect__tag-icon:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.multiselect-admin-filter .multiselect__select {
+  top: 50%;
+  transform: translateY(-50%);
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background-size: 10px;
 }
 
 .dark .multiselect-admin-filter .multiselect__tags {
@@ -3885,13 +5939,15 @@ input, select, textarea {
 }
 
 .multiselect-admin-filter .multiselect__content-wrapper {
-  position: absolute; 
-  z-index: 30;
+  position: absolute;
+  z-index: 9999;
   background: white;
-  border: 1px solid #d1d5db;
+  border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   margin-top: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  min-width: 200px;
 }
 
 .dark .multiselect-admin-filter .multiselect__content-wrapper {

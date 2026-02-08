@@ -21,10 +21,7 @@
           <!-- Description -->
           <div class="mt-4 space-y-2">
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Lo sentimos, tu cuenta ha sido deshabilitada.
-            </p>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              Si crees que esto es un error, por favor contacta al administrador.
+              Lo sentimos, tu cuenta está temporalmente deshabilitada. Reintenta más tarde.
             </p>
           </div>
 
@@ -33,7 +30,7 @@
             <button 
               @click="goToHome" 
               class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-              Volver al Inicio
+              Reintentar
             </button>
           </div> 
         </div>

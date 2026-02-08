@@ -19,17 +19,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const auth = useAuthStore();
   const currentPath = to.path;
   const publicPaths = [
-    '/', 
-    '/registro', 
-    '/auth', 
+    '/',
+    '/registro',
+    '/auth',
     '/usuario-deshabilitado',
     '/reset-password',
     '/forgot-password'
   ];
-  
+
   // Verificar si la ruta actual es una ruta de restablecimiento de contraseña
   const isResetPasswordPath = currentPath.startsWith('/reset-password/');
-  
+
   // 1. Si es una ruta pública o de restablecimiento de contraseña, permitir acceso
   if (publicPaths.includes(currentPath) || isResetPasswordPath) {
     return;
@@ -50,13 +50,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (!auth.token) {
     try {
       const refreshed = await auth.refreshToken();
-      
+
       if (!refreshed) {
         if (currentPath !== '/') {
           return navigateTo('/', { replace: true });
         }
         return;
-      } 
+      }
     } catch (error) {
       console.error('❌ [auth.global] Error al renovar token:', error);
       return navigateTo('/', { replace: true });
@@ -82,11 +82,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // 6. Obtener el rol del usuario
-  const userRole = (auth.user?.rol?.nombre_rol?.toLowerCase() as UserRole) || 'usuario';
-  
+  const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
+
   // 7. Obtener el dashboard correspondiente al rol
   const dashboardPath = getDashboardPath(userRole);
-  
+
   // 8. Si ya está en su dashboard, permitir acceso
   if (currentPath === dashboardPath) {
     return;
@@ -101,12 +101,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   };
 
   // 10. Verificar si la ruta actual está permitida para el rol
-  const isPathAllowed = allowedPaths[userRole]?.some(path => 
+  const isPathAllowed = allowedPaths[userRole]?.some(path =>
     currentPath === path || currentPath.startsWith(path + '/')
   );
 
   // 11. Si la ruta no está permitida, redirigir al dashboard
   if (!isPathAllowed) {
     return navigateTo(dashboardPath, { replace: true });
-  } 
+  }
 });

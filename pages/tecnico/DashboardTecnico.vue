@@ -265,10 +265,10 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 // SEO and Meta
 useHead({
-  title: 'HogarSeguro - Panel Técnico',
+  title: 'MiSeguro - Panel Técnico',
   meta: [
     { name: 'description', content: 'Panel de Técnico - Gestiona tus servicios y asignaciones' },
-    { name: 'keywords', content: 'HogarSeguro, Panel Técnico, Técnico, Servicios, Asignaciones' },  
+    { name: 'keywords', content: 'MiSeguro, Panel Técnico, Técnico, Servicios, Asignaciones' },  
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
