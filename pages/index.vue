@@ -1293,8 +1293,7 @@ const loadServices = async () => {
     
     const data = await response.json()
     
-    if (!Array.isArray(data)) {
-      console.error('La respuesta no es un array:', data)
+    if (!Array.isArray(data)) { 
       throw new Error('Formato de respuesta inesperado: se esperaba un array de servicios')
     }
     
