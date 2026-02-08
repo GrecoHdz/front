@@ -1465,11 +1465,19 @@ const handleAuth = async () => {
     if (isLogin.value) {
       // Lógica de login
       try {
-        // Usar el store de autenticación para el login
-        const loginResult = await authStore.login({
+        const loginData = {
           identidad: form.value.identidad,
           password: form.value.password
-        }); 
+        };
+        
+        // Mostrar datos que se enviarán al backend
+        console.log('Datos enviados al backend (login):', JSON.stringify(loginData, null, 2));
+        
+        // Usar el store de autenticación para el login
+        const loginResult = await authStore.login(loginData);
+        
+        // Mostrar respuesta del login
+        console.log('Respuesta del login:', loginResult);
         
         if (loginResult?.success) {
           // Mostrar estado de éxito en el spinner
@@ -1537,6 +1545,9 @@ const handleAuth = async () => {
         
         // Realizar la petición de registro
         
+        // Mostrar datos que se enviarán al backend
+        console.log('Datos enviados al backend (registro):', JSON.stringify(registerData, null, 2));
+        
         // Usar fetch directamente para tener más control sobre la respuesta
         const response = await fetch(`${config.public.apiBase}/usuarios/nuevo`, {
           method: 'POST',
@@ -1547,8 +1558,16 @@ const handleAuth = async () => {
           body: JSON.stringify(registerData)
         });
         
+        // Mostrar respuesta del servidor
+        console.log('Respuesta del servidor (registro):', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        
         // Obtener la respuesta como texto primero para depuración
         const responseText = await response.text();
+        console.log('Cuerpo de la respuesta (registro):', responseText);
         
         // Intentar parsear la respuesta como JSON
         let responseData;
