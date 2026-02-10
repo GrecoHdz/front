@@ -1158,17 +1158,13 @@ const copyReferralLink = async () => {
 }
 
 const shareWhatsApp = () => {
-  const message = `¡Hola! 👋 Te invito a conocer MiSeguro, el mejor servicio de reparaciones para tu hogar. 
+  const message = `¡Hola! 👋 Te invito a conocer la plataforma MiSeguro, el mejor servicio de reparaciones para tu hogar. 
 
 🏠 Servicios profesionales
 💰 Precios justos
 ⚡ Atención rápida
 
-Usa mi código de referido: ${userReferralCode.value}
-
-Regístrate aquí: ${referralLink.value}
-
-¡Ambos ganamos cuando te registres! 🎉`
+Regístrate aquí: ${referralLink.value}`
 
   const encodedMessage = encodeURIComponent(message)
   window.open(`https://wa.me/?text=${encodedMessage}`, '_blank')
@@ -1177,7 +1173,7 @@ Regístrate aquí: ${referralLink.value}
 const shareGeneral = async () => {
   const shareData = {
     title: 'MiSeguro - Servicios para tu hogar',
-    text: `¡Únete a MiSeguro con mi código ${userReferralCode.value} y ambos ganamos!`,
+    text: `¡Únete a MiSeguro ${userReferralCode.value}`,
     url: referralLink.value
   }
 
