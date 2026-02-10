@@ -2120,7 +2120,7 @@ input, textarea, select {
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { debounce } from 'lodash'
+import { debounce } from 'lodash-es'
 import Multiselect from 'vue-multiselect'
 import { useHead, useCookie } from '#imports'
 import { useRouter, useRoute } from 'vue-router'
@@ -2141,7 +2141,7 @@ useHead({
   title: 'MiSeguro - Gestión de Usuarios',
   meta: [
     { name: 'description', content: 'Gestión de usuarios del sistema MiSeguro - Administrar usuarios, técnicos y administradores' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no'}
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no'}
   ]
 })
 

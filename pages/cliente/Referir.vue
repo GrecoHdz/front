@@ -765,7 +765,7 @@ const toast = ref({
 
 const referralLink = computed(() => {
   const userId = userCookie.value?.id_usuario || ''
-  return `https://MiSeguro.hn/registro?ref=${userId}`
+  return `https://miseguro.vercel.app/?ref=${userId}`
 })
 
 const maxWithdrawableAmount = computed(() => {

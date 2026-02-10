@@ -29,12 +29,12 @@
         <div class="flex items-center space-x-2">
           <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
             <div class="w-5 h-5 bg-white rounded-lg flex items-center justify-center">
-              <span class="text-emerald-600 font-bold text-xs">📊</span>
+              <span class="text-emerald-600 font-bold text-xs">🏠</span>
             </div>
           </div>
           <div>
-            <h1 class="text-lg font-black text-white">Reportes</h1>
-            <p class="text-emerald-100 text-xs">Panel de reportes</p>
+            <h1 class="text-lg font-black text-white">Dashboard</h1>
+            <p class="text-emerald-100 text-xs">Panel de control</p>
           </div>
         </div>
         

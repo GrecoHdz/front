@@ -2655,7 +2655,7 @@ useHead({
   title: 'MiSeguro - Configuraciones',
   meta: [
     { name: 'description', content: 'Configuraciones del sistema MiSeguro - Administrar configuraciones' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' }
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })
 

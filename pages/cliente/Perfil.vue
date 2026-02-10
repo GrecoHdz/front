@@ -544,7 +544,7 @@
       </div>
     </Transition>
 
-    <!-- Modal de Términos y Condiciones -->
+<!-- Modal de Términos y Condiciones (PARA CLIENTES Y TÉCNICOS) -->
 <div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
   <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
     
@@ -568,7 +568,7 @@
       <section>
         <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
         <p>
-          Al registrarse y utilizar la plataforma MiSeguro, el usuario (cliente o técnico) acepta de forma expresa
+          Al registrarse y utilizar la plataforma MiSeguro, usted acepta de forma expresa
           estos Términos y Condiciones. Si no está de acuerdo con alguno de ellos, deberá abstenerse de utilizar la plataforma.
         </p>
       </section>
@@ -586,40 +586,22 @@
       </section>
 
       <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Modelo de Cobro y Pago Centralizado</h4>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Medios de Pago</h4>
         <p>
-          Por razones operativas, de seguridad y control, todos los pagos de los servicios solicitados a través de la plataforma
-          deberán realizarse exclusivamente mediante transferencia bancaria o medios electrónicos autorizados
-          a las cuentas oficiales de MiSeguro.
+          Todos los pagos de los servicios solicitados a través de la plataforma deberán realizarse exclusivamente 
+          mediante transferencia bancaria o medios electrónicos autorizados a las cuentas oficiales de MiSeguro.
         </p>
         <p class="mt-2">
-          MiSeguro actúa como intermediario tecnológico y agente de gestión de pagos, facilitando el recaudo de los montos acordados 
-          entre cliente y técnico independiente. MiSeguro factura únicamente sus comisiones, cargos propios y servicios adicionales 
-          ofrecidos por la plataforma, y gestiona la transferencia al técnico independiente del valor correspondiente a la mano de obra 
-          efectivamente prestada por éste.
-        </p>
-        <p class="mt-2">
-          Los montos recaudados por MiSeguro correspondientes a la mano de obra del técnico independiente constituyen
-          <strong>fondos de terceros</strong> administrados temporalmente por la plataforma en calidad de agente de gestión de pago,
-          y no representan ingresos propios de MiSeguro, reconociéndose contablemente como pasivos hasta su liquidación
-          al técnico correspondiente.
+          <strong>Importante:</strong> Cualquier pago realizado fuera de la plataforma, en efectivo o a cuentas no autorizadas, 
+          no será reconocido por MiSeguro y no generará derechos de reclamo, garantía, crédito o soporte.
         </p>
       </section>
 
       <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio y Distribución</h4>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio</h4>
         <p>
-          El precio de la mano de obra es definido directamente por el técnico y aceptado por el cliente antes
-          de la ejecución del servicio.
-        </p>
-        <p class="mt-2">
-          La distribución del pago entre el técnico y MiSeguro es <strong>variable</strong> y será determinada
-          por la plataforma según el tipo de servicio, categoría, promociones u otros criterios operativos,
-          los cuales serán informados al técnico previo a la aceptación del trabajo.
-        </p>
-        <p class="mt-2">
-          La comisión de MiSeguro se calcula sobre el valor total de la mano de obra acordada,
-          independientemente de descuentos, créditos o beneficios aplicados al cliente.
+          El precio de la mano de obra es definido por el técnico y deberá ser aceptado por el cliente antes
+          de la ejecución del servicio. El precio incluye la comisión de la plataforma por intermediación.
         </p>
       </section>
 
@@ -634,11 +616,8 @@
           <li>No es dinero en efectivo</li>
           <li>No es transferible</li>
           <li>Solo puede utilizarse para pagar servicios dentro de MiSeguro</li>
+          <li>Reduce el monto a pagar por el cliente, sin afectar el pago al técnico</li>
         </ul>
-        <p class="mt-2">
-          El uso del crédito reduce únicamente el monto a pagar por el cliente,
-          pero no afecta el valor total de la mano de obra ni el pago correspondiente al técnico.
-        </p>
         <p class="mt-2">
           La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
           el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
@@ -649,58 +628,12 @@
         <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
         <p>
           En caso de que el cliente no cuente con una membresía activa, se cobrará una tarifa fija por visita técnica,
-          cuyo valor será informado previamente al cliente.
-        </p>
-        <p class="mt-2">
-          Esta tarifa corresponde a un servicio de gestión y coordinación prestado por MiSeguro y será documentada
-          mediante recibo por honorarios profesionales, conforme al régimen fiscal aplicable a la plataforma.
+          cuyo valor será informado previamente.
         </p>
       </section>
 
       <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Pagos al Técnico</h4>
-        <p>
-          MiSeguro realizará el pago al técnico independiente una vez confirmado el pago del cliente
-          y finalizado el servicio, descontando la comisión correspondiente.
-        </p>
-        <p class="mt-2">
-          Los pagos se efectuarán únicamente a la cuenta bancaria registrada por el técnico en la plataforma
-          y podrán tardar hasta cinco (5) días hábiles.
-        </p>
-        <p class="mt-2">
-          El técnico reconoce que es el único responsable de la emisión de los comprobantes fiscales 
-          correspondientes por los servicios técnicos prestados al cliente, así como del cumplimiento de sus 
-          obligaciones tributarias ante el Servicio de Administración de Rentas (SAR). La falta de emisión de 
-          comprobantes fiscales por parte del técnico no altera la naturaleza de intermediación de MiSeguro 
-          ni convierte dichos montos en ingresos propios de la plataforma.
-        </p>
-        <p class="mt-2 font-medium">
-          La constancia de transferencia bancaria realizada a la cuenta registrada por el técnico constituye
-          prueba plena de pago.
-        </p>
-        <p class="mt-2">
-          La transferencia realizada a la cuenta registrada por el técnico se considerará válida y liberatoria
-          para MiSeguro, aun cuando el técnico alegue desconocimiento, falta de notificación o no aceptación
-          expresa de la liquidación electrónica.
-        </p>
-        <p class="mt-2">
-          El técnico es el único responsable de la veracidad y exactitud de los datos bancarios proporcionados.
-          MiSeguro no será responsable por errores en la información suministrada por el técnico que resulten
-          en transferencias a cuentas incorrectas, inexistentes o de terceros.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Pagos No Autorizados</h4>
-        <p>
-          Cualquier pago realizado fuera de la plataforma, en efectivo, a cuentas no autorizadas
-          o directamente al técnico, no será reconocido por MiSeguro y no generará derechos de reclamo,
-          garantía, crédito o soporte.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Limitación de Responsabilidad</h4>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Limitación de Responsabilidad</h4>
         <p>
           Los servicios son prestados por técnicos independientes. MiSeguro no garantiza el resultado final del servicio,
           salvo en los casos expresamente establecidos por la plataforma.
@@ -712,7 +645,7 @@
       </section>
 
       <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Privacidad y Protección de Datos</h4>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Privacidad y Protección de Datos</h4>
         <p>
           Los datos personales serán tratados conforme a la Política de Privacidad de MiSeguro
           y utilizados únicamente para la operación y mejora de la plataforma.
@@ -720,7 +653,7 @@
       </section>
 
       <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Modificaciones</h4>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Modificaciones</h4>
         <p>
           MiSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
           Las modificaciones entrarán en vigor desde su publicación en la plataforma.
@@ -728,7 +661,7 @@
       </section>
 
       <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Ley Aplicable y Jurisdicción</h4>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Ley Aplicable y Jurisdicción</h4>
         <p>
           Estos Términos se rigen por las leyes de la República de Honduras.
           Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
@@ -1367,9 +1300,9 @@ const fetchContactInfo = async () => {
         console.error(`Error al obtener ${contact.type}:`, error)
         // Mostrar un mensaje de error específico para cada campo
         if (contact.type === 'email') {
-          updateContactInfo('email', 'soporte@MiSeguro.com')
+          updateContactInfo('email', 'contactomisegurohn@gmail.com')
         } else if (contact.type === 'phone') {
-          updateContactInfo('phone', '+504 1234-5678')
+          updateContactInfo('phone', '+504 9451-7811')
         }
       }
     })
@@ -1379,8 +1312,8 @@ const fetchContactInfo = async () => {
   } catch (error) {
     console.error('Error general al obtener información de contacto:', error)
     // Establecer valores por defecto en caso de error general
-    updateContactInfo('email', 'soporte@MiSeguro.com')
-    updateContactInfo('phone', '+504 1234-5678')
+    updateContactInfo('email', 'contactomisegurohn@gmail.com')
+    updateContactInfo('phone', '+504 9451-7811')
   }
 }
 

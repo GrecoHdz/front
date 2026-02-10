@@ -48,7 +48,7 @@
                     </div>
                   </div>
                   <div class="flex justify-between items-center">
-                  <h2 class="text-[16px] sm:text-xs md:text-2xl font-bold text-gray-900 dark:text-white">Resumen</h2>
+                  <h2 class="text-[14px] sm:text-xs md:text-base font-bold sm:font-black">Resumen</h2>
                   <div class="flex items-center space-x-1 sm:space-x-2">
                     <div class="relative">
                       <input 
@@ -463,7 +463,7 @@ useHead({
   title: 'MiSeguro - Panel Administrativo',
   meta: [
     { name: 'description', content: 'Panel de administración de MiSeguro - Gestión completa del sistema' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' }
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })
 
