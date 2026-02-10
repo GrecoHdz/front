@@ -2627,7 +2627,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es'
 
 // Función para validar formato de correo electrónico
 const isValidEmail = (email) => {
