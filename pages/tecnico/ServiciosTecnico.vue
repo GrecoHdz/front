@@ -409,7 +409,7 @@
                          min="0"
                          class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
                          placeholder="0">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Este monto es solo para referencia del cliente y no suma al total a pagar por el cliente</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Si aplica, este monto es solo para referencia del cliente y no suma al total a pagar por el cliente</p>
                 </div>
 
                 <!-- Total -->

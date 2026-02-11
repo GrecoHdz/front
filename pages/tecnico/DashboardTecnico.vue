@@ -247,6 +247,21 @@
                 </div>
               </button>
             </div>
+            <div class="grid grid-cols-2 gap-2 sm:gap-4 mt-2 sm:mt-3">
+              <button @click="navigateTo('/tecnico/Referir')" class="bg-dark dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 text-left h-full">
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">Referir</p>
+                    <p class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate">Compartir enlace</p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </section>
         </main>
       </div>

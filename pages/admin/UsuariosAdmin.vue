@@ -415,9 +415,18 @@
                       <!-- Header -->
                       <div class="flex items-start justify-between">
                         <div class="flex items-center space-x-2">
-                          <div class="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs shadow-sm"
-                               :class="technician.estado === 'inactivo' || technician.estado === 'deshabilitado' ? 'bg-red-500' : 'bg-blue-500'">
-                            <span>🔧</span>
+                          <div class="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+                            <img 
+                              v-if="technician.imagen_url" 
+                              :src="technician.imagen_url" 
+                              :alt="'Foto de ' + (technician.nombre || 'técnico')"
+                              class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                              @click.stop="showImagePreview(technician.imagen_url)"
+                              onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500\'><span class=\'text-xs\'>' + (this.alt.split(' ').map(n => n[0]).join('').toUpperCase() || 'T') + '</span></div>';"
+                            />
+                            <div v-else class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500">
+                              <span class="text-xs">{{ (technician.nombre || 'T')[0].toUpperCase() }}</span>
+                            </div>
                           </div>
                           <div class="min-w-0">
                             <h3 class="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[120px]">
@@ -1907,6 +1916,38 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de vista previa de imagen -->
+  <Transition
+    enter-active-class="ease-out duration-300"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-active-class="ease-in duration-200"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
+  >
+    <div 
+      v-if="imagePreview.show" 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      @click.self="closeImagePreview"
+    >
+      <div class="relative max-w-4xl w-full max-h-[90vh]">
+        <button 
+          @click="closeImagePreview"
+          class="absolute -top-3 -right-3 text-white hover:text-gray-300 transition-colors bg-black/80 hover:bg-black rounded-full p-2 z-10"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <img 
+          :src="imagePreview.url" 
+          alt="Vista previa"
+          class="max-w-full max-h-[80vh] mx-auto object-contain"
+        />
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <style scoped>
@@ -2156,6 +2197,12 @@ const loadingStats = ref(false)
 const isSaving = ref(false)
 const isEditing = ref(false)
 const isDeleting = ref(false) // Added missing reactive reference
+
+// Estado para la vista previa de imágenes
+const imagePreview = ref({
+  show: false,
+  url: ''
+})
 
 // Estadísticas
 const stats = ref({
@@ -2717,6 +2764,22 @@ const isTechnician = computed(() => {
   
   return roleName.includes('tecnico') || roleName.includes('técnico');
 })
+
+// ===== FUNCIONES PARA VISTA PREVIA DE IMAGEN =====
+const showImagePreview = (imageUrl) => {
+  if (!imageUrl) return
+  imagePreview.value = {
+    show: true,
+    url: imageUrl
+  }
+}
+
+const closeImagePreview = () => {
+  imagePreview.value = {
+    show: false,
+    url: ''
+  }
+}
 
 // ===== FUNCIONES DE UTILIDAD =====
 const getUserInitial = (name) => {
