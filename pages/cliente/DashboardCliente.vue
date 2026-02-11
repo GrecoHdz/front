@@ -351,19 +351,28 @@
     <!-- Paquetes por Membresía - Imagen balanceada -->
 <section v-if="paquetesMantenimiento?.length" class="px-4 mb-10">
   <!-- Header -->
-  <div class="mb-6">
-    <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-      Mercado de Paquetes
-    </h3>
-    <p class="text-sm text-gray-600 dark:text-gray-300">
-      Compra paquetes o canjéalos con tu crédito
-    </p>
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+        Mercado de Paquetes
+      </h3>
+      <p class="text-sm text-gray-600 dark:text-gray-300">
+        Compra paquetes o canjéalos con tu crédito
+      </p>
+    </div>
+    <button 
+      v-if="paquetesMantenimiento.length > 4"
+      @click="navigateTo('/cliente/Marketplace')" 
+      class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+    >
+      Ver todos
+    </button>
   </div>
 
   <!-- Grid 2 columnas -->
   <div class="grid grid-cols-2 gap-3">
     <div
-      v-for="paquete in paquetesMantenimiento"
+      v-for="paquete in paquetesMantenimiento.slice(0, 4)"
       :key="paquete.id"
       class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden hover:shadow-lg transition"
     >

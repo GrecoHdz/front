@@ -1948,6 +1948,28 @@ const handleReferral = async (userId) => {
     if (!response.ok) {
       throw new Error('Error al registrar el referido');
     }
+
+    // Obtener los datos del referido para la notificación
+    const referidoData = await response.json();
+    
+    // Enviar notificación al referidor
+    if (referralCode && referidoData) {
+      try {
+        await fetch(`${config.public.apiBase}/notificaciones/enviar`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id_usuario: referralCode,
+            titulo: 'Nuevo referido'
+          })
+        });
+      } catch (notificationError) {
+        console.error('Error al enviar notificación al referidor:', notificationError);
+        // No interrumpir el flujo por errores en las notificaciones
+      }
+    }
   } catch (error) {
     console.error('Error en handleReferral:', error);
   }
