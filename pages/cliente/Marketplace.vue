@@ -36,6 +36,23 @@
           >
         </div>
       </div>
+
+      <!-- Filtros Globales (Sticky con Header) -->
+      <div class="px-4 pb-3">
+         <div class="flex gap-2 overflow-x-auto no-scrollbar">
+            <button 
+               v-for="filtro in filtersList" 
+               :key="filtro.id"
+               @click="activeFilter = filtro.id"
+               class="px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all border active:scale-95"
+               :class="activeFilter === filtro.id 
+                  ? 'bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900 dark:border-white shadow-md' 
+                  : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700 dark:text-gray-400'"
+            >
+               {{ filtro.label }}
+            </button>
+         </div>
+      </div>
     </header>
 
     <main class="space-y-6 pb-24 pt-4">
@@ -52,7 +69,7 @@
       <div v-else>
          
          <!-- 1. Mis Paquetes (Carril Horizontal) -->
-         <section v-if="ownedPackages.length > 0 && !searchQuery" class="pl-4">
+         <section v-if="showLanes && ownedPackages.length > 0" class="pl-4">
             <div class="flex items-center justify-between pr-4 mb-3">
                <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Mis Paquetes</h2>
             </div>
@@ -88,7 +105,8 @@
          </section>
 
          <!-- 2. Carril 1: Destacados (4 items) -->
-         <section v-if="!searchQuery && lane1.length > 0" class="pl-4">
+         <!-- 2. Carril 1: Destacados (4 items) -->
+         <section v-if="showLanes && lane1.length > 0" class="pl-4">
             <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">Destacados</h2>
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
@@ -127,7 +145,8 @@
          </section>
 
          <!-- 3. Carril 2: Recomendados (4 items) -->
-         <section v-if="!searchQuery && lane2.length > 0" class="pl-4">
+         <!-- 3. Carril 2: Recomendados (4 items) -->
+         <section v-if="showLanes && lane2.length > 0" class="pl-4">
             <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">Te podría interesar</h2>
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
@@ -156,7 +175,8 @@
          </section>
 
          <!-- 3.5. Carril Especial "Hogar" (Filtro 'casa') -->
-         <section v-if="!searchQuery && laneHome.length > 0" class="pl-4">
+         <!-- 3.5. Carril Especial "Hogar" (Filtro 'casa') -->
+         <section v-if="showLanes && laneHome.length > 0" class="pl-4">
             <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">Especial Hogar 🏠</h2>
             <div class="flex overflow-x-auto gap-4 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
@@ -188,7 +208,7 @@
          <section class="px-4">
             <div class="flex items-center justify-between mb-3">
                <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">
-                  {{ searchQuery ? 'Resultados' : 'Explorar Todo' }}
+                  {{ (searchQuery || activeFilter !== 'todos') ? 'Resultados' : 'Explorar Todo' }}
                </h2>
                <span class="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{{ gridPackages.length }}</span>
             </div>
@@ -213,6 +233,11 @@
                         />
                         <div v-else class="w-full h-full flex items-center justify-center text-xl">✨</div>
                         
+                        <!-- Etiqueta Canjeable -->
+                        <div v-if="userCredit >= paquete.costo" class="absolute top-2 left-2 bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm z-10">
+                           CANJEABLE
+                        </div>
+
                         <!-- Mini Badge de Precio -->
                         <div class="absolute bottom-1 right-1 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
                            L. {{ formatNumber(paquete.costo) }}
@@ -223,16 +248,9 @@
                         {{ paquete.nombre }}
                      </h3>
                      
-                     <div class="mt-auto pt-1">
-                        <p v-if="userCredit >= paquete.costo" class="text-[9px] text-emerald-600 font-bold flex items-center">
-                           <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1"></span>
-                           Canjeable
-                        </p>
-                        <p v-else class="text-[9px] text-blue-600 font-bold flex items-center">
-                           <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1"></span>
-                           Adquirir
-                        </p>
-                     </div>
+                     <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate mt-0.5 leading-tight opacity-80">
+                        {{ paquete.descripcion }}
+                     </p>
                   </div>
                </div>
             </div>
@@ -247,73 +265,77 @@
     </main>
 
     <!-- Bottom Sheet Detalle (Misma lógica, diseño limpio) -->
-    <div 
-      v-if="selectedDetailPackage" 
-      class="fixed inset-0 z-50 flex flex-col justify-end isolate"
-    >
-      <div 
-        class="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity"
-        @click="closeDetail"
-      ></div>
+    <Transition name="bottom-sheet">
+       <div 
+         v-if="selectedDetailPackage" 
+         class="fixed inset-0 z-50 flex flex-col justify-end isolate"
+       >
+         <!-- Backdrop -->
+         <div 
+           class="absolute inset-0 bg-black/60 backdrop-blur-[2px] bs-backdrop"
+           @click="closeDetail"
+         ></div>
 
-      <div class="relative w-full bg-white dark:bg-gray-900 rounded-t-[2rem] shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-slide-up-spring">
-        <div class="w-full flex justify-center pt-3 pb-1" @click="closeDetail">
-           <div class="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
-        </div>
-
-        <div class="overflow-y-auto p-6 pb-28">
-           <div class="aspect-video w-full rounded-2xl bg-gray-100 dark:bg-gray-800 mb-6 overflow-hidden relative shadow-inner">
-              <img 
-                 v-if="selectedDetailPackage.imagen"
-                 :src="getOptimizedImage(selectedDetailPackage.imagen, 800, 500)" 
-                 class="w-full h-full object-cover"
-              />
-              <!-- Float buttons on image -->
-              <button 
-                 @click="closeDetail"
-                 class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center backdrop-blur-md"
-              >
-                 ✕
-              </button>
+         <!-- Conteido -->
+         <div class="relative w-full bg-white dark:bg-gray-900 rounded-t-[2rem] shadow-2xl overflow-hidden max-h-[85vh] flex flex-col bs-content">
+           <div class="w-full flex justify-center pt-3 pb-1" @click="closeDetail">
+              <div class="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
            </div>
 
-           <div class="flex justify-between items-start mb-4">
-              <h2 class="text-xl font-black text-gray-900 dark:text-white leading-tight w-full">
-                 {{ selectedDetailPackage.nombre }}
-              </h2>
+           <div class="overflow-y-auto p-6 pb-28">
+              <div class="aspect-video w-full rounded-2xl bg-gray-100 dark:bg-gray-800 mb-6 overflow-hidden relative shadow-inner">
+                 <img 
+                    v-if="selectedDetailPackage.imagen"
+                    :src="getOptimizedImage(selectedDetailPackage.imagen, 800, 500)" 
+                    class="w-full h-full object-cover"
+                 />
+                 <!-- Float buttons on image -->
+                 <button 
+                    @click="closeDetail"
+                    class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center backdrop-blur-md"
+                 >
+                    ✕
+                 </button>
+              </div>
+
+              <div class="flex justify-between items-start mb-4">
+                 <h2 class="text-xl font-black text-gray-900 dark:text-white leading-tight w-full">
+                    {{ selectedDetailPackage.nombre }}
+                 </h2>
+              </div>
+
+              <div class="prose prose-sm dark:prose-invert text-gray-600 dark:text-gray-300">
+                 <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Acerca del paquete</h3>
+                 <p class="text-sm leading-relaxed">{{ selectedDetailPackage.descripcion || 'Sin descripción detallada.' }}</p>
+              </div>
            </div>
 
-           <div class="prose prose-sm dark:prose-invert text-gray-600 dark:text-gray-300">
-              <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Acerca del paquete</h3>
-              <p class="text-sm leading-relaxed">{{ selectedDetailPackage.descripcion || 'Sin descripción detallada.' }}</p>
+           <div class="absolute bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
+              <div v-if="tienePaquete(selectedDetailPackage.id)">
+                 <button 
+                    @click="initiateUse(selectedDetailPackage)"
+                    :disabled="getEstadoPaquete(selectedDetailPackage.id) !== 'Adquirido'"
+                    class="w-full py-3.5 rounded-xl font-black text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg"
+                 >
+                    {{ getEstadoPaquete(selectedDetailPackage.id) === 'En uso' ? 'En Uso' : 'Usar Paquete' }}
+                 </button>
+              </div>
+              
+              <div v-else class="flex gap-3">
+                 <button 
+                    @click="initiatePurchase(selectedDetailPackage)"
+                    class="flex-1 py-3.5 rounded-xl font-black text-base text-white shadow-xl active:scale-95 transition-transform"
+                    :class="userCredit >= selectedDetailPackage.costo ? 'bg-gradient-to-r from-blue-600 to-indigo-600' : 'bg-gray-900 dark:bg-gray-700'"
+                 >
+                    <span v-if="userCredit >= selectedDetailPackage.costo">Canjear </span>
+                    <span v-else>Adquirir </span>
+                    <span>L. {{ formatNumber(selectedDetailPackage.costo) }}</span>
+                 </button>
+              </div>
            </div>
-        </div>
-
-        <div class="absolute bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
-           <div v-if="tienePaquete(selectedDetailPackage.id)">
-              <button 
-                 @click="initiateUse(selectedDetailPackage)"
-                 :disabled="getEstadoPaquete(selectedDetailPackage.id) !== 'Adquirido'"
-                 class="w-full py-3.5 rounded-xl font-black text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg"
-              >
-                 {{ getEstadoPaquete(selectedDetailPackage.id) === 'En uso' ? 'En Uso' : 'Usar Paquete' }}
-              </button>
-           </div>
-           
-           <div v-else class="flex gap-3">
-              <button 
-                 @click="initiatePurchase(selectedDetailPackage)"
-                 class="flex-1 py-3.5 rounded-xl font-black text-base text-white shadow-xl active:scale-95 transition-transform"
-                 :class="userCredit >= selectedDetailPackage.costo ? 'bg-gradient-to-r from-blue-600 to-indigo-600' : 'bg-gray-900 dark:bg-gray-700'"
-              >
-                 <span v-if="userCredit >= selectedDetailPackage.costo">Canjear </span>
-                 <span v-else>Adquirir </span>
-                 <span>L. {{ formatNumber(selectedDetailPackage.costo) }}</span>
-              </button>
-           </div>
-        </div>
-      </div>
-    </div>
+         </div>
+       </div>
+    </Transition>
 
     <!-- Modals (Sin cambios funcionales, solo estilo mínimo) -->
     
@@ -322,7 +344,7 @@
        <div v-if="showConfirmarUsoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
           <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center animate-pop-in">
              <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🚀</div>
-             <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">Activar Paquete</h3>
+             <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">Usar Paquete</h3>
              <p class="text-xs text-gray-500 mb-6">{{ selectedPaquete?.nombre }}</p>
              <button @click="usarPaquete(selectedPaquete)" :disabled="isProcessingPayment" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-sm mb-2">
                 {{ isProcessingPayment ? 'Activando...' : 'Confirmar' }}
@@ -468,6 +490,15 @@ const isLoading = ref(true)
 const toast = ref({ show: false })
 const userCredit = ref(0)
 const searchQuery = ref('')
+const activeFilter = ref('todos')
+
+const filtersList = [
+   { id: 'todos', label: 'Todos' },
+   { id: 'utilizados', label: 'Utilizados' },
+   { id: 'canjeables', label: 'Canjeables' },
+   { id: 'auto', label: 'Auto' },
+   { id: 'productos', label: 'Productos' }
+]
 
 const paquetesMantenimiento = ref([])
 const paquetesUsuario = ref([])
@@ -500,22 +531,46 @@ const displayPackages = computed(() => {
   return list
 })
 
+const showLanes = computed(() => !searchQuery.value && activeFilter.value === 'todos')
+
 const ownedPackages = computed(() => {
    return paquetesMantenimiento.value.filter(p => tienePaquete(p.id))
 })
 
+const filteredPackages = computed(() => {
+   let list = displayPackages.value
+   const f = activeFilter.value
+   
+   if (f === 'utilizados') {
+      // Filtrar paquetes que tengan registro 'utilizado' en historial
+      const usedIds = new Set(paquetesUsuario.value.filter(pu => pu.estado === 'utilizado').map(pu => pu.id_paquete))
+      list = list.filter(p => usedIds.has(p.id))
+   } else if (f === 'canjeables') {
+      list = list.filter(p => userCredit.value >= p.costo)
+   } else if (f === 'auto') {
+      list = list.filter(p => (p.nombre + p.descripcion).toLowerCase().includes('auto'))
+   } else if (f === 'productos') {
+      list = list.filter(p => (p.nombre + p.descripcion).toLowerCase().includes('producto'))
+   }
+   return list
+})
+
 // 1. Fuente de paquetes "Hogar" (Exclusivos)
 const homePackagesSource = computed(() => {
-   return displayPackages.value.filter(p => 
+   const list = displayPackages.value.filter(p => 
       p.descripcion?.toLowerCase().includes('casa') || p.nombre?.toLowerCase().includes('casa')
    )
+   // Randomizar
+   return list.sort(() => Math.random() - 0.5)
 })
 
 // 2. Fuente de "Otros" paquetes (Sin los de Hogar)
 const otherPackagesSource = computed(() => {
-   return displayPackages.value.filter(p => 
+   const list = displayPackages.value.filter(p => 
       !p.descripcion?.toLowerCase().includes('casa') && !p.nombre?.toLowerCase().includes('casa')
    )
+   // Randomizar
+   return list.sort(() => Math.random() - 0.5)
 })
 
 const laneHome = computed(() => {
@@ -534,7 +589,7 @@ const lane2 = computed(() => {
 })
 
 const gridPackages = computed(() => {
-   if (searchQuery.value) return displayPackages.value
+   if (searchQuery.value || activeFilter.value !== 'todos') return filteredPackages.value
    
    // El grid muestra el resto de "Otros" + el resto de "Hogar" si hubiera más de 5
    // Pero para simplificar y evitar repetir lógica compleja:
@@ -775,4 +830,35 @@ onMounted(async () => {
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* Bottom Sheet Transitions using <Transition> wrapper */
+/* Control parent duration */
+.bottom-sheet-enter-active, 
+.bottom-sheet-leave-active {
+   transition-duration: 0.4s;
+}
+
+/* Backdrop Fade */
+.bottom-sheet-enter-active .bs-backdrop { transition: opacity 0.4s ease; }
+.bottom-sheet-enter-from .bs-backdrop { opacity: 0; }
+.bottom-sheet-enter-to .bs-backdrop { opacity: 1; }
+
+.bottom-sheet-leave-active .bs-backdrop { transition: opacity 0.3s ease; }
+.bottom-sheet-leave-from .bs-backdrop { opacity: 1; }
+.bottom-sheet-leave-to .bs-backdrop { opacity: 0; }
+
+
+/* Content Slide */
+.bottom-sheet-enter-active .bs-content {
+   animation: slide-up-spring 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+}
+
+.bottom-sheet-leave-active .bs-content {
+   transition: transform 0.3s ease-in;
+   transform: translateY(0);
+}
+
+.bottom-sheet-leave-to .bs-content {
+   transform: translateY(100%);
+}
 </style>

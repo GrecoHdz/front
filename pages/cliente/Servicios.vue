@@ -36,27 +36,27 @@
       <!-- Content Container with max-w-2xl -->
       <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900 relative">
         <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
-      <div class="pb-4">
+      <div class="pb-20 space-y-3">
           <!-- Main Content -->
-          <main class="pb-4">
+          <main class="pb-2">
           
           <!-- Stats Overview -->
           <section class="px-4 py-3">
             <div class="grid grid-cols-3 gap-2 mb-3">
               <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
                 <div class="text-lg font-black text-blue-600 dark:text-blue-400 mb-1">{{ totalServices }}</div>
-              <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Total</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Total</p>
+              </div>
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
+                <div class="text-lg font-black text-green-600 dark:text-green-400 mb-1">{{ completedServices }}</div>
+                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Completados</p>
+              </div>
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
+                <div class="text-lg font-black text-orange-600 dark:text-orange-400 mb-1">{{ pendingServices }}</div>
+                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Pendientes</p>
+              </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-              <div class="text-lg font-black text-green-600 dark:text-green-400 mb-1">{{ completedServices }}</div>
-              <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Completados</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-              <div class="text-lg font-black text-orange-600 dark:text-orange-400 mb-1">{{ pendingServices }}</div>
-              <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Pendientes</p>
-            </div>
-          </div>
-        </section> 
+          </section> 
 
         <!-- Services List -->
         <section class="px-4">
@@ -142,6 +142,18 @@
             <button @click="resetFilters" class="px-3 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors text-sm">
               Limpiar filtros
             </button>
+          </div>
+
+          <!-- Load More Button -->
+          <div v-if="hasMoreServices && !isLoading && filteredServices.length > 0" class="flex justify-center mt-6 mb-4">
+             <button 
+                @click="loadMoreServices" 
+                :disabled="isLoadingMore"
+                class="px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-all duration-200"
+             >
+                <div v-if="isLoadingMore" class="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                <span>{{ isLoadingMore ? 'Cargando...' : 'Cargar más servicios' }}</span>
+             </button>
           </div>
         </section>
         </main>
@@ -1856,7 +1868,7 @@ useHead({
   meta: [
     { name: 'description', content: 'Panel de Servicios - Gestiona tus servicios y membresía' },
     { name: 'keywords', content: 'dashboard, MiSeguro, servicios, membresía, panel de control' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
 
@@ -1937,7 +1949,13 @@ const servicesData = ref({
 })
 const allServices = ref([])
 const serviceTypes = ref([])
+
 const isLoadingServiceTypes = ref(false)
+
+// Estados de paginación
+const currentPage = ref(1)
+const hasMoreServices = ref(false)
+const isLoadingMore = ref(false)
 
 // Estados de modales
 const showServiceModal = ref(false)
@@ -2359,12 +2377,20 @@ const fetchMembresiaBeneficios = async () => {
 };
  
 
-const loadServices = async () => {
+const loadServices = async (reset = true) => {
   try {
     const userCookieValue = useCookie('user').value
     if (!userCookieValue?.id_usuario) {
       console.error('No se encontró ID de usuario')
       return
+    }
+
+    if (reset) {
+        currentPage.value = 1
+        isLoading.value = true
+        hasMoreServices.value = false
+    } else {
+        isLoadingMore.value = true
     }
 
     const response = await $api(`/solicitudservicio/usuario/${userCookieValue.id_usuario}`, {
@@ -2373,10 +2399,23 @@ const loadServices = async () => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${useCookie('token').value}`
+      },
+      params: {
+          page: currentPage.value,
+          limit: 3
       }
     })
 
-    servicesData.value = response;
+    if (reset) {
+        servicesData.value = response;
+    } else {
+        // Update totals but keep accumulation logic separation
+        servicesData.value.total = response.total;
+        servicesData.value.finalizadas = response.finalizadas;
+        servicesData.value.pendientes = response.pendientes;
+    }
+
+    hasMoreServices.value = response.hasMore;
     
     // Verificar el estado de los pagos para cada solicitud
     const solicitudesConPago = await Promise.all(response.solicitudes.map(async (solicitud) => {
@@ -2459,7 +2498,7 @@ const loadServices = async () => {
     }));
     
     // Mapear los servicios con la información de pago actualizada
-    allServices.value = solicitudesConPago.map(solicitud => {
+    const newMappedServices = solicitudesConPago.map(solicitud => {
       const servicioMapeado = mapApiServiceToLocal(solicitud);
       // Agregar el nombre del técnico si está disponible
       if (solicitud.tecnico?.nombre) {
@@ -2467,11 +2506,27 @@ const loadServices = async () => {
       }
       return servicioMapeado;
     });
+
+    if (reset) {
+        allServices.value = newMappedServices
+    } else {
+        // Append new services
+        allServices.value = [...allServices.value, ...newMappedServices]
+    }
     
   } catch (error) {
     console.error('Error cargando servicios:', error)
-    showError('Error al cargar los servicios')
+    // showError('Error al cargar los servicios') // Optional: suppress if incremental load fails?
+  } finally {
+      isLoading.value = false
+      isLoadingMore.value = false
   }
+}
+
+const loadMoreServices = async () => {
+    if (isLoadingMore.value || !hasMoreServices.value) return;
+    currentPage.value++
+    await loadServices(false)
 }
 
 const loadServiceTypes = async () => {

@@ -1147,7 +1147,7 @@ useHead({
   meta: [
     { name: 'description', content: 'Panel de control de MiSeguro - Gestiona tus servicios y membresía' },
     { name: 'keywords', content: 'dashboard, MiSeguro, servicios, membresía, panel de control' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
 

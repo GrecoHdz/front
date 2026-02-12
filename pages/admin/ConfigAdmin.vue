@@ -371,7 +371,7 @@
             <button 
               @click="mostrarModalNuevaCuenta = true; cargarCuentas()"
               class="px-4 py-2 text-sm bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors">
-              + Nueva Cuenta
+              + Nueva
             </button>
           </div>
 
@@ -499,7 +499,7 @@
             <button 
               @click="mostrarModalNuevoBeneficio = true; cargarBeneficios()"
               class="px-4 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors">
-              + Nuevo Beneficio
+              + Nuevo
             </button>
           </div>
 
@@ -623,18 +623,18 @@
             <button 
               @click="mostrarModalNuevoServicio = true; cargarServicios()"
               class="px-4 py-2 text-sm bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors">
-              + Nuevo Servicio
+              + Nuevo
             </button>
           </div>
 
           <!-- Filtros y búsqueda -->
-          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4 relative z-20">
-            <div class="relative flex-1 min-w-0">
+          <div class="mb-4 sm:mb-6 flex flex-col gap-0 relative z-20">
+            <div class="relative w-full">
               <input
                 v-model="filtroBusqueda"
                 type="text"
                 placeholder="Buscar..."
-                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base transition-all"
+                class="w-full pl-9 pr-4 h-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base transition-all"
               >
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -643,23 +643,44 @@
               </div>
             </div>
             
-            <multiselect 
-              v-model="filtroEstadoObject"
-              :options="estadoOptions"
-              :searchable="false"
-              :close-on-select="true"
-              :show-labels="false"
-              placeholder="Todos"
-              label="label"
-              track-by="value"
-              class="multiselect-admin-filter w-32"
-              :custom-label="getEstadoLabel"
-              :options-limit="100"
-            >
-              <template #singleLabel="{ option }">
-                <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
-              </template>
-            </multiselect>
+            <div class="flex gap-4">
+              <div class="w-1/2">
+                <multiselect 
+                  v-model="filtroEstadoObject"
+                  :options="estadoOptions"
+                  :searchable="false"
+                  :close-on-select="true"
+                  :show-labels="false"
+                  placeholder="Estado"
+                  label="label"
+                  track-by="value"
+                  class="multiselect-admin-filter w-full"
+                  :custom-label="getEstadoLabel"
+                  :options-limit="100"
+                >
+                  <template #singleLabel="{ option }">
+                    <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
+                  </template>
+                </multiselect>
+              </div>
+              <div class="w-1/2">
+                <multiselect 
+                  v-model="filtroCiudadServicio"
+                  :options="ciudades"
+                  :searchable="false"
+                  :close-on-select="true"
+                  :show-labels="false"
+                  placeholder="Ciudad"
+                  label="nombre"
+                  track-by="id_ciudad"
+                  class="multiselect-admin-filter w-full"
+                >
+                  <template #singleLabel="{ option }">
+                    <span class="text-xs truncate">{{ option.nombre }}</span>
+                  </template>
+                </multiselect>
+              </div>
+            </div>
           </div>
 
           <!-- Lista de servicios -->
@@ -793,7 +814,7 @@
             <button 
               @click="mostrarModalNuevaCiudad = true; cargarCiudades()"
               class="px-4 py-2 text-sm bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors">
-              + Nueva Ciudad
+              + Nueva
             </button>
           </div>
 
@@ -909,18 +930,18 @@
             <button 
               @click="nuevoPaquete"
               class="px-4 py-2 text-sm bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors">
-              + Nuevo Paquete
+              + Nuevo
             </button>
           </div>
 
           <!-- Filtros y búsqueda -->
-          <div class="mb-4 sm:mb-6 flex flex-row gap-2 sm:gap-4 relative z-20">
-            <div class="relative flex-1 min-w-0">
+          <div class="mb-4 sm:mb-6 flex flex-col gap-0 relative z-20">
+            <div class="relative w-full">
               <input
                 v-model="filtroBusquedaPaquetes"
                 type="text"
                 placeholder="Buscar paquetes..."
-                class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm sm:text-base transition-all"
+                class="w-full pl-9 pr-4 h-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm sm:text-base transition-all"
               >
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -929,23 +950,44 @@
               </div>
             </div>
             
-            <multiselect 
-              v-model="filtroEstadoPaquetesObject"
-              :options="estadoOptions"
-              :searchable="false"
-              :close-on-select="true"
-              :show-labels="false"
-              placeholder="Todos"
-              label="label"
-              track-by="value"
-              class="multiselect-admin-filter w-32"
-              :custom-label="getEstadoLabel"
-              :options-limit="100"
-            >
-              <template #singleLabel="{ option }">
-                <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
-              </template>
-            </multiselect>
+            <div class="flex gap-4">
+              <div class="w-1/2">
+                <multiselect 
+                  v-model="filtroEstadoPaquetesObject"
+                  :options="estadoOptions"
+                  :searchable="false"
+                  :close-on-select="true"
+                  :show-labels="false"
+                  placeholder="Estado"
+                  label="label"
+                  track-by="value"
+                  class="multiselect-admin-filter w-full"
+                  :custom-label="getEstadoLabel"
+                  :options-limit="100"
+                >
+                  <template #singleLabel="{ option }">
+                    <span class="text-xs truncate">{{ getEstadoLabel(option) }}</span>
+                  </template>
+                </multiselect>
+              </div>
+              <div class="w-1/2">
+                <multiselect 
+                  v-model="filtroCiudadPaquete"
+                  :options="ciudades"
+                  :searchable="false"
+                  :close-on-select="true"
+                  :show-labels="false"
+                  placeholder="Ciudad"
+                  label="nombre"
+                  track-by="id_ciudad"
+                  class="multiselect-admin-filter w-full"
+                >
+                  <template #singleLabel="{ option }">
+                    <span class="text-xs truncate">{{ option.nombre }}</span>
+                  </template>
+                </multiselect>
+              </div>
+            </div>
           </div>
 
           <!-- Lista de paquetes -->
@@ -1097,7 +1139,7 @@
               <button 
                 @click="mostrarFormularioCrear = !mostrarFormularioCrear"
                 class="px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
-                {{ mostrarFormularioCrear ? 'Cancelar' : 'Crear/Eliminar Leídas' }}
+                {{ mostrarFormularioCrear ? 'Cancelar' : 'Crear' }}
               </button>
             </div>
           </div>
@@ -1655,10 +1697,12 @@
                   label="nombre"
                   track-by="id_ciudad"
                   class="multiselect-admin-filter"
+                  :show-labels="false"
                 >
-                  <template #selection="{ values, isOpen }">
-                    <span class="multiselect__single" v-if="values.length && !isOpen">
-                      {{ values.length }} ciudades seleccionadas
+                  <template #tag="{ option, remove }">
+                    <span class="multiselect__tag">
+                      {{ option.nombre }}
+                      <i class="multiselect__tag-icon" @click="remove(option)">✕</i>
                     </span>
                   </template>
                 </multiselect>
@@ -2836,6 +2880,7 @@ const paqueteEditando = ref(null);
 const mostrarModalNuevoPaquete = ref(false);
 const filtroBusquedaPaquetes = ref('');
 const filtroEstadoPaquetesObject = ref(null);
+const filtroCiudadPaquete = ref(null);
 const paqueteAEliminar = ref(null);
 const mostrarModalConfirmacionEliminarPaquete = ref(false);
 
@@ -2870,6 +2915,7 @@ const formServicio = ref({
 const filtroBusqueda = ref('')
 const filtroEstado = ref('')
 const filtroEstadoObject = ref(null)
+const filtroCiudadServicio = ref(null)
 
 // Opciones para el filtro de estado
 const estadoOptions = [
@@ -3038,9 +3084,18 @@ const paquetesFiltrados = computed(() => {
   }
   
   // Aplicar filtro de estado
-  if (filtroEstadoPaquetesObject.value && filtroEstadoPaquetesObject.value.value !== undefined) {
-    const estadoFiltro = filtroEstadoPaquetesObject.value.value;
+  if (filtroEstadoPaquetesObject.value && filtroEstadoPaquetesObject.value.value !== '') {
+    const estadoFiltro = filtroEstadoPaquetesObject.value.value === '1';
     resultado = resultado.filter(paquete => paquete.estado === estadoFiltro);
+  }
+  
+  // Aplicar filtro de ciudad
+  if (filtroCiudadPaquete.value) {
+    const ciudadId = filtroCiudadPaquete.value.id_ciudad;
+    resultado = resultado.filter(paquete => 
+      paquete.ciudades && 
+      paquete.ciudades.some(c => c.id_ciudad === ciudadId)
+    );
   }
   
   return resultado;
@@ -3084,9 +3139,18 @@ const serviciosFiltrados = computed(() => {
   }
   
   // Aplicar filtro de estado
-  if (filtroEstado.value !== '') {
-    const estadoFiltro = filtroEstado.value === '1'
+  if (filtroEstadoObject.value && filtroEstadoObject.value.value !== '') {
+    const estadoFiltro = filtroEstadoObject.value.value === '1'
     resultado = resultado.filter(servicio => servicio.estado === estadoFiltro)
+  }
+  
+  // Aplicar filtro de ciudad
+  if (filtroCiudadServicio.value) {
+    const ciudadId = filtroCiudadServicio.value.id_ciudad;
+    resultado = resultado.filter(servicio => 
+      servicio.ciudades && 
+      servicio.ciudades.some(c => c.id_ciudad === ciudadId)
+    );
   }
   
   return resultado
@@ -5851,9 +5915,9 @@ input, select, textarea {
   z-index: auto;
 }
 
-.multiselect-admin-filter .multiselect__tags {
-  min-height: 44px;
-  padding: 6px 40px 6px 12px;
+.multiselect-admin-filter :deep(.multiselect__tags) {
+  min-height: 40px; /* Ajustado para coincidir con el input de búsqueda (40px) */
+  padding: 5px 40px 5px 12px;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   background-color: #f9fafb;
@@ -5861,12 +5925,12 @@ input, select, textarea {
   transition: all 0.2s ease;
   color: #111827;
   display: flex;
-  align-items: flex-start;
+  align-items: center; /* Centrar items verticalmente */
   flex-wrap: wrap;
   gap: 4px;
 }
 
-.multiselect-admin-filter .multiselect__tag {
+.multiselect-admin-filter :deep(.multiselect__tag) {
   background: #1e40af; /* Azul más oscuro para mejor contraste */
   color: white;
   border-radius: 0.375rem; /* 6px - para coincidir con otros bordes redondeados */
@@ -5880,11 +5944,11 @@ input, select, textarea {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.multiselect-admin-filter .multiselect__tag:hover {
+.multiselect-admin-filter :deep(.multiselect__tag:hover) {
   background: #1e3a8a; /* Un tono ligeramente más oscuro al pasar el mouse */
 }
 
-.multiselect-admin-filter .multiselect__tag-icon {
+.multiselect-admin-filter :deep(.multiselect__tag-icon) {
   margin-left: 0.375rem; /* 6px */
   cursor: pointer;
   opacity: 0.8;
@@ -5901,29 +5965,29 @@ input, select, textarea {
   margin-right: -2px;
 }
 
-.multiselect-admin-filter .multiselect__tag-icon:hover {
+.multiselect-admin-filter :deep(.multiselect__tag-icon:hover) {
   opacity: 1;
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.1);
 }
 
 /* Estilos para el modo oscuro */
-.dark .multiselect-admin-filter .multiselect__tag {
+.dark .multiselect-admin-filter :deep(.multiselect__tag) {
   background: #1e3a8a;
   border-color: #1e3a8a;
   color: #f3f4f6;
 }
 
-.dark .multiselect-admin-filter .multiselect__tag:hover {
+.dark .multiselect-admin-filter :deep(.multiselect__tag:hover) {
   background: #1e3a8a;
   border-color: #1e3a8a;
 }
 
-.dark .multiselect-admin-filter .multiselect__tag-icon:hover {
+.dark .multiselect-admin-filter :deep(.multiselect__tag-icon:hover) {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.multiselect-admin-filter .multiselect__select {
+.multiselect-admin-filter :deep(.multiselect__select) {
   top: 50%;
   transform: translateY(-50%);
   right: 8px;
@@ -5932,13 +5996,13 @@ input, select, textarea {
   background-size: 10px;
 }
 
-.dark .multiselect-admin-filter .multiselect__tags {
+.dark .multiselect-admin-filter :deep(.multiselect__tags) {
   background-color: #374151;
   border-color: #4b5563;
   color: #f9fafb;
 }
 
-.multiselect-admin-filter .multiselect__content-wrapper {
+.multiselect-admin-filter :deep(.multiselect__content-wrapper) {
   position: absolute;
   z-index: 9999;
   background: white;
@@ -5950,37 +6014,37 @@ input, select, textarea {
   min-width: 200px;
 }
 
-.dark .multiselect-admin-filter .multiselect__content-wrapper {
+.dark .multiselect-admin-filter :deep(.multiselect__content-wrapper) {
   background: #374151;
   border-color: #4b5563;
 }
 
-.multiselect-admin-filter .multiselect__content {
+.multiselect-admin-filter :deep(.multiselect__content) {
   max-height: 200px;
   overflow-y: auto;
 }
 
-.multiselect-admin-filter .multiselect__element {
+.multiselect-admin-filter :deep(.multiselect__element) {
   padding: 8px 12px;
   font-size: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.multiselect-admin-filter .multiselect__element:hover {
+.multiselect-admin-filter :deep(.multiselect__element:hover) {
   background-color: #f3f4f6;
 }
 
-.dark .multiselect-admin-filter .multiselect__element:hover {
+.dark .multiselect-admin-filter :deep(.multiselect__element:hover) {
   background-color: #4b5563;
 }
 
-.multiselect-admin-filter .multiselect__element--selected {
+.multiselect-admin-filter :deep(.multiselect__element--selected) {
   background-color: #3b82f6;
   color: white;
 }
 
-.multiselect-admin-filter .multiselect__element--selected:hover {
+.multiselect-admin-filter :deep(.multiselect__element--selected:hover) {
   background-color: #2563eb;
 }
 </style>
