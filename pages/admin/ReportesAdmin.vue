@@ -2242,8 +2242,8 @@ const loadWithdrawals = async (page = 1) => {
         status: mapApiStatusToFrontend(item.estado),
         amount: item.monto || 0,
         date: item.fecha,
-        technician: item.nombre_usuario || 'Técnico desconocido',
-        bankDetails: item.descripcion || 'Retiro de fondos'
+        technician: item.nombre_usuario || 'Usuario desconocido',
+        bankDetails: item.descripcion || (item.tipo === 'retiro_referido' ? 'Retiro de fondos por referido' : 'Retiro de fondos')
       }));
       
       withdrawals.value = transformedData;
@@ -2777,11 +2777,11 @@ const searchById = async () => {
             amount: item.monto || 0,
             date: item.fecha,
             technician: item.nombre_usuario || 'Técnico desconocido',
-            bankDetails: item.descripcion || 'Retiro de fondos',
+            bankDetails: item.descripcion || (item.tipo === 'retiro_referido' ? 'Retiro de fondos por referido' : 'Retiro de fondos'),
             // Agregar campos adicionales que podrían necesitarse
-            client: item.nombre_usuario || 'Técnico',
-            service: 'Retiro de fondos',
-            category: 'retiro'
+            client: item.nombre_usuario || 'Usuario',
+            service: item.tipo === 'retiro_referido' ? 'Retiro de Referido' : 'Retiro de fondos',
+            category: item.tipo
           }));
 
           withdrawals.value = transformedData;
@@ -2948,7 +2948,7 @@ const getStatusColor = (status, tipo) => {
       return 'text-yellow-400';
     }
     
-    if (tipo === 'retiro' && statusLower === 'completado') {
+    if ((tipo === 'retiro' || tipo === 'retiro_referido') && statusLower === 'completado') {
       return 'text-red-400';
     }
     
@@ -3219,7 +3219,8 @@ const getTransactionIcon = (type) => {
     switch (type) {
       case 'ingreso': 
       case 'ingreso_referido': return '💰';
-      case 'retiro': return '💳';
+      case 'retiro':
+      case 'retiro_referido': return '💳';
       case 'commission': return '💰';
       case 'withdrawal': return '💳';
       case 'refund': return '↩️';
@@ -3236,7 +3237,8 @@ const getTransactionIconClass = (type) => {
     switch (type) {
       case 'ingreso':
       case 'ingreso_referido': return 'bg-green-500';
-      case 'retiro': return 'bg-red-500';
+      case 'retiro':
+      case 'retiro_referido': return 'bg-red-500';
       case 'commission': return 'bg-green-500';
       case 'withdrawal': return 'bg-red-500';
       case 'refund': return 'bg-yellow-500';
@@ -3279,6 +3281,7 @@ const getTransactionTitle = (transaction) => {
       case 'ingreso_referido':
         return transaction.descripcion || 'Ingreso por referido';
       case 'retiro':
+      case 'retiro_referido':
         return 'Retiro de fondos'; // Siempre muestra este texto para retiros
       default:
         return transaction.descripcion || 'Transacción';
@@ -3344,7 +3347,7 @@ const getNetBalance = () => {
 // ===== FUNCIONES DE MODAL =====
 const showItemDetails = (item) => {
   try {
-    if (item.tipo === 'retiro') {
+    if (item.tipo === 'retiro' || item.tipo === 'retiro_referido') {
       selectedWithdrawal.value = item;
       showWithdrawalModal.value = true;
     } else {
@@ -5108,7 +5111,7 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
       estado: v?.estado || 'Pendiente'
     })),
     ...(withdrawalsData?.data || []).map((r) => ({
-      tipo: 'Retiro',
+      tipo: r?.tipo === 'retiro_referido' ? 'Retiro Referido' : 'Retiro',
       fecha: r?.fecha || new Date().toISOString(),
       descripcion: r?.descripcion || 'Retiro de fondos',
       monto: -Math.abs(parseFloat(r?.monto || 0)),
@@ -5457,6 +5460,23 @@ const approvePayment = async (id) => {
           headers,
           body: { estado: 'completado' }
         });
+
+        // si se acepta el retiro haz que el monto se sume al credito
+        if (idUsuario && payment.monto) {
+          try {
+            await $api('/credito', {
+              baseURL: config.public.apiBase,
+              method: 'POST',
+              headers,
+              body: {
+                id_usuario: idUsuario,
+                monto_credito: Math.abs(parseFloat(payment.monto))
+              }
+            });
+          } catch (error) {
+            console.error('❌ Error al sumar crédito al usuario:', error);
+          }
+        }
         break;
     }
 
@@ -5630,6 +5650,7 @@ const rejectPayment = async (id) => {
           headers,
           body: { estado: 'rechazado' }
         });
+
         break;
     }
 

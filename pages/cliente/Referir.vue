@@ -1271,6 +1271,7 @@ const processWithdraw = async () => {
       id_usuario: userCookie.value.id_usuario,
       tipo: 'retiro_referido',
       monto: montoMaximoRetiro,
+      total_retirado: montoRetiro,
       descripcion: `Retiro de ${montoMaximoRetiro} a: ${withdrawForm.value.bankDetails}`
     };  
     
@@ -1333,21 +1334,6 @@ const processWithdraw = async () => {
       
       if (montoCredito > 0) {
         try { 
-          const creditRequestBody = {
-            id_usuario: userCookie.value.id_usuario,
-            monto_credito: montoCredito
-          }; 
-          
-          await $api('/credito', {
-            baseURL: config.public.apiBase,
-            method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${auth.token}`
-            },
-            body: creditRequestBody
-          });
           
           showSuccess('¡Retiro Solicitado!', 'El pago puede tardar hasta 72 horas en procesarse.');
         } catch (creditError) {

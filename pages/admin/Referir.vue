@@ -750,7 +750,7 @@
           </div>
 
           <!-- Términos y Condiciones (Visible en ambas pero estilizado) -->
-          <section class="px-4 mb-20">
+          <section class="px-4 mt-10 mb-20">
             <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-800 shadow-sm">
                 <div class="flex items-start space-x-2">
                   <div class="text-amber-500 text-lg flex-shrink-0">📋</div>
@@ -1520,7 +1520,7 @@ const processTechnicianWithdraw = async () => {
     const userId = userCookie.value.id_usuario
     const requestBody = {
       id_usuario: userId,
-      tipo: 'retiro_referido', // O el tipo que use el sistema para retiros de técnicos
+      tipo: 'retiro', // O el tipo que use el sistema para retiros de técnicos
       monto: technicianWithdrawForm.value.amount,
       descripcion: `Retiro de comisiones (Paquetes) a: ${technicianWithdrawForm.value.bankDetails}`
     }
@@ -1967,6 +1967,7 @@ const processWithdraw = async () => {
       id_usuario: userCookie.value.id_usuario,
       tipo: 'retiro_referido',
       monto: montoMaximoRetiro,
+      total_retirado: montoRetiro,
       descripcion: `Retiro de ${montoMaximoRetiro} a: ${withdrawForm.value.bankDetails}`
     };  
     
@@ -2029,21 +2030,6 @@ const processWithdraw = async () => {
       
       if (montoCredito > 0) {
         try { 
-          const creditRequestBody = {
-            id_usuario: userCookie.value.id_usuario,
-            monto_credito: montoCredito
-          }; 
-          
-          await $api('/credito', {
-            baseURL: config.public.apiBase,
-            method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${auth.token}`
-            },
-            body: creditRequestBody
-          });
           
           showSuccess('¡Retiro Solicitado!', 'El pago puede tardar hasta 72 horas en procesarse.');
         } catch (creditError) {
