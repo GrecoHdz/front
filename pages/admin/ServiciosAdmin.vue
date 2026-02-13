@@ -1076,7 +1076,13 @@
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1 min-w-0">
-                    <p class="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{{ tech.nombre }}</p>
+                    <div class="flex items-center space-x-2">
+                      <p class="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{{ tech.nombre }}</p>
+                      <span v-if="tech.tipo_usuario && tech.tipo_usuario !== 'Tecnico'" 
+                            class="text-[8px] px-1 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 font-bold uppercase">
+                        {{ tech.tipo_usuario }}
+                      </span>
+                    </div>
                     <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{{ tech.ciudad?.nombre_ciudad }}</p>
                   </div>
                   <div class="flex items-center space-x-2 ml-2">
@@ -1742,15 +1748,16 @@
     
   </div>
 
-  <!-- Package Assignment Modal -->
+  <!-- Modal de Liquidación (Personal para Liquidar Paquete) -->
   <Transition
     name="modal"
     enter-active-class="modal-enter-active"
     leave-active-class="modal-leave-active"
     enter-from-class="modal-enter-from"
     leave-to-class="modal-leave-to">
-    <div v-if="showPackageAssignmentModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showPackageAssignmentModal = false"></div>
+    <div v-if="showLiquidacionModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showLiquidacionModal = false"></div>
+      
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[90%] sm:w-[92%] max-w-[320px] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
         <!-- Header -->
         <div class="flex items-center justify-between p-2 sm:p-3 pb-0 border-b border-gray-200 dark:border-gray-700">
@@ -1761,7 +1768,7 @@
             <h3 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Asignar Técnico</h3>
           </div>
           <button 
-            @click="showPackageAssignmentModal = false" 
+            @click="showLiquidacionModal = false" 
             class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
             aria-label="Cerrar modal"
           >
@@ -1771,29 +1778,29 @@
           </button>
         </div>
           
-        <!-- // Filtro por ciudad -->
-        <!-- <div class="px-2">
-          <multiselect 
-            id="cityFilter"
-            v-model="selectedTechCityObject"
-            :options="availableCities"
-            :searchable="false"
-            :close-on-select="true"
-            :show-labels="false"
-            placeholder="Buscar por ciudad"
-            class="multiselect-admin-filter"
-            :custom-label="getTechCityLabel"
-            :options-limit="100"
-            :disabled="availableCities.length === 0"
-            :loading="cities.length === 0"
-            @open="onMultiselectOpen" 
-            :tabindex="0"
-          >
-            <template #singleLabel="{ option }">
-              <span class="text-xs truncate">{{ getTechCityLabel(option) }}</span>
-            </template>
-          </multiselect>
-        </div> -->
+         <!-- Filtro por ciudad -->
+          <!--<div class="px-2">
+            <multiselect 
+              id="cityFilter"
+              v-model="selectedTechCityObject"
+              :options="availableCities"
+              :searchable="false"
+              :close-on-select="true"
+              :show-labels="false"
+              placeholder="Buscar por ciudad"
+              class="multiselect-admin-filter"
+              :custom-label="getTechCityLabel"
+              :options-limit="100"
+              :disabled="availableCities.length === 0"
+              :loading="cities.length === 0"
+              @open="onMultiselectOpen" 
+              :tabindex="0"
+            >
+              <template #singleLabel="{ option }">
+                <span class="text-xs truncate">{{ getTechCityLabel(option) }}</span>
+              </template>
+            </multiselect>
+          </div> -->
 
         <!-- Technicians List -->
         <div class="p-3">
@@ -1811,7 +1818,13 @@
             >
               <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                  <p class="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{{ tech.nombre }}</p>
+                  <div class="flex items-center space-x-2">
+                    <p class="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{{ tech.nombre }}</p>
+                    <span v-if="tech.tipo_usuario && tech.tipo_usuario !== 'Tecnico'" 
+                          class="text-[8px] px-1 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 font-bold uppercase">
+                      {{ tech.tipo_usuario }}
+                    </span>
+                  </div>
                   <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{{ tech.ciudad?.nombre_ciudad }}</p>
                 </div>
                 <div class="flex items-center space-x-2 ml-2">
@@ -2336,14 +2349,16 @@ const loadingPackages = ref(false)
 const isProcessingPayment = ref(false)
 const isVerifying = ref(false)
 const showDetailModal = ref(false)
-const showAssignmentModal = ref(false)
+const showLiquidacionModal = ref(false)
+const techSearchQuery = ref('')
+const isSearchingTech = ref(false)
 const showPaymentModal = ref(false)
 const showAmountDetailsModal = ref(false)
+const showAssignmentModal = ref(false)
 const showBankDetailsModal = ref(false)
 const showPaymentConfirmationModal = ref(false)
 
 // Package Assignment Modal
-const showPackageAssignmentModal = ref(false)
 const showPackageConfirmModal = ref(false) 
 const selectedPackageTechnician = ref(null)
 const isAssigningPackage = ref(false)
@@ -3156,6 +3171,72 @@ const fetchTechnicians = async (cityId = null, limit = 4, offset = 0, serviceId 
   }
 }
 
+// Función para obtener técnicos, administradores y super admins desde la API
+const fetchTechniciansAndAdmins = async (cityId = null, limit = 4, offset = 0, serviceId = null, nombre = null, estado = null) => {
+  try {
+    let url = `/usuarios/tecnicos-admins?limit=${limit}&offset=${offset}`
+    
+    // Si se proporciona un ID de ciudad, filtrar por esa ciudad
+    if (cityId) {
+      url += `&id_ciudad=${cityId}`
+    } 
+    
+    // Si se proporciona un ID de servicio, filtrar por ese servicio
+    if (serviceId) {
+      url += `&id_servicio=${serviceId}`
+    }
+    
+    // Si se proporciona un nombre, filtrar por nombre
+    if (nombre) {
+      url += `&nombre=${encodeURIComponent(nombre)}`
+    }
+    
+    // Si se proporciona un estado, filtrar por estado
+    if (estado) {
+      url += `&estado=${estado}`
+    }
+    
+    const response = await $api(url, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+
+    // La respuesta incluye técnicos, admins y super admins
+    return {
+      data: response.data || [],
+      total: response.total || 0,
+      page: response.page || 1,
+      totalPages: response.totalPages || 1,
+      hasMore: response.hasMore || false,
+      estadisticas: response.estadisticas || {
+        total_tecnicos: 0,
+        total_admins: 0,
+        total_usuarios: 0
+      }
+    }
+  } catch (error) {
+    console.error('Error al obtener técnicos y administradores:', error)
+    showError('No se pudieron cargar los técnicos y administradores')
+    // Resetear valores en caso de error
+    return { 
+      data: [], 
+      total: 0,
+      page: 1,
+      totalPages: 1,
+      hasMore: false,
+      estadisticas: {
+        total_tecnicos: 0,
+        total_admins: 0,
+        total_usuarios: 0
+      }
+    }
+  }
+}
+
 // Función para obtener el catálogo de servicios
 const fetchCatalogoServicios = async () => {
   try {
@@ -3466,7 +3547,19 @@ const changeTechPage = async (page) => {
                   selectedPackage.value?.Usuario?.id_ciudad || 
                   selectedTechCityObject.value?.id_ciudad;
     
-    await fetchTechnicians(cityId, techsPerPage, offset, serviceToAssign.value?.id_servicio);
+    const result = showLiquidacionModal.value 
+      ? await fetchTechniciansAndAdmins(cityId, techsPerPage, offset, serviceToAssign.value?.id_servicio, techSearchQuery.value)
+      : await fetchTechnicians(cityId, techsPerPage, offset, serviceToAssign.value?.id_servicio);
+    
+    // Actualizar las variables reactivas con los resultados
+    if (showLiquidacionModal.value) {
+      availableTechnicians.value = result.data || [];
+      techniciansTotal.value = result.total || 0;
+      currentTechPage.value = result.page || 1;
+      totalTechPages.value = result.totalPages || 1;
+    } else {
+      // fetchTechnicians ya actualiza las variables reactivas internamente
+    }
   } catch (error) {
     console.error('Error al cambiar de página de técnicos:', error);
     showError('No se pudieron cargar los técnicos');
@@ -4040,7 +4133,8 @@ const openPackageAssignment = async (pkg) => {
     selectedPackage.value = pkg
     selectedPackageTechnician.value = null
     isAssigningPackage.value = true
-    showPackageAssignmentModal.value = true
+    showLiquidacionModal.value = true
+    techSearchQuery.value = '' // Resetear búsqueda al abrir
     
     // Obtener el ID de la ciudad del usuario que tiene el paquete
     const cityId = pkg.Usuario?.ciudad?.id_ciudad || pkg.Usuario?.id_ciudad;
@@ -4063,8 +4157,14 @@ const openPackageAssignment = async (pkg) => {
       }
     }
     
-    // Cargar técnicos de la misma ciudad que el usuario
-    await fetchTechnicians(cityId);
+    // Cargar técnicos, administradores y super admins de la misma ciudad que el usuario
+    const result = await fetchTechniciansAndAdmins(cityId, techsPerPage, 0);
+    
+    // Actualizar las variables reactivas con los resultados
+    availableTechnicians.value = result.data || [];
+    techniciansTotal.value = result.total || 0;
+    currentTechPage.value = result.page || 1;
+    totalTechPages.value = result.totalPages || 1;
     
     // Asegurarse de que los datos estén actualizados
     await fetchActivePackages(true)
@@ -4096,7 +4196,7 @@ const selectPackageTechnician = async (tech) => {
     
     // Mostrar modal de confirmación y cerrar el modal de selección
     showPackageConfirmModal.value = true;
-    showPackageAssignmentModal.value = false;
+    showLiquidacionModal.value = false;
     
   } catch (error) {
     console.error('Error al obtener la comisión:', {
@@ -4186,7 +4286,7 @@ const confirmPackageAssignment = async () => {
 
     // Cerrar modales primero para mejor experiencia de usuario
     showPackageConfirmModal.value = false;
-    showPackageAssignmentModal.value = false;
+    showLiquidacionModal.value = false;
     
     // Mostrar mensaje de éxito
     showSuccess(`Se ha liquidado L.${montoTecnico.toFixed(2)} al técnico ${selectedPackageTechnician.value.nombre}`);
@@ -4372,13 +4472,49 @@ watch(() => selectedTechCityObject.value, async (newCity) => {
   }
   // Resetear paginación y volver a cargar técnicos
   currentTechPage.value = 1;
-  await fetchTechnicians(newCity?.id_ciudad, techsPerPage, 0, serviceToAssign.value?.id_servicio);
+  
+  if (showLiquidacionModal.value) {
+    const result = await fetchTechniciansAndAdmins(newCity?.id_ciudad, techsPerPage, 0, serviceToAssign.value?.id_servicio, techSearchQuery.value);
+    // Actualizar las variables reactivas con los resultados
+    availableTechnicians.value = result.data || [];
+    techniciansTotal.value = result.total || 0;
+    currentTechPage.value = result.page || 1;
+    totalTechPages.value = result.totalPages || 1;
+  } else if (showAssignmentModal.value) {
+    await fetchTechnicians(newCity?.id_ciudad, techsPerPage, 0, serviceToAssign.value?.id_servicio);
+  }
 });
 
 // Watch para los demás filtros (sin debounce, se ejecutan inmediatamente)
 watch([selectedStatus, selectedServiceType, selectedMonth], () => {
   currentHistoryPage.value = 1
   loadHistoryServices(1, true)
+})
+
+// Búsqueda de técnicos con debounce
+const handleTechSearch = async () => {
+  isSearchingTech.value = true
+  currentTechPage.value = 1
+  try {
+    const cityId = selectedPackage.value?.Usuario?.ciudad?.id_ciudad || 
+                  selectedPackage.value?.Usuario?.id_ciudad || 
+                  selectedTechCityObject.value?.id_ciudad;
+    
+    const result = await fetchTechniciansAndAdmins(cityId, techsPerPage, 0, serviceToAssign.value?.id_servicio, techSearchQuery.value);
+    
+    availableTechnicians.value = result.data || [];
+    techniciansTotal.value = result.total || 0;
+    totalTechPages.value = result.totalPages || 1;
+  } finally {
+    isSearchingTech.value = false
+  }
+}
+
+const debouncedTechSearch = useDebounceFn(handleTechSearch, 600)
+
+// Watch para buscar cuando cambie el query de búsqueda de técnicos
+watch(() => techSearchQuery.value, () => {
+  debouncedTechSearch()
 })
 
 // ===== INICIALIZACIÓN =====

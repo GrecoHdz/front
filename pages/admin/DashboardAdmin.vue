@@ -718,7 +718,7 @@ const quickActions = computed(() => {
       id: 'reports',
       title: 'Referidos',
       description: 'Gestionar referidos',
-      icon: '🤝',
+      icon: '🫂',
       bgColor: 'bg-purple-100 dark:bg-purple-900/30',
       route: '/admin/referir',
       badge: null,

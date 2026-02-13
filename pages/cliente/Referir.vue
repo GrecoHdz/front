@@ -801,7 +801,7 @@ const filteredEarnings = computed(() => {
 })
 
 const filteredWithdrawals = computed(() => {
-  const withdrawals = withdrawalsHistory.value.filter(w => w.tipo === 'retiro');
+  const withdrawals = withdrawalsHistory.value.filter(w => w.tipo === 'retiro' || w.tipo === 'retiro_referido');
   withdrawalCounter.value = withdrawals.length;
   return withdrawals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 })
@@ -1070,7 +1070,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
         movementsHistory.value = loadMore 
           ? [...movementsHistory.value, ...(response.data || [])] 
           : (response.data || [])
-      } else if (tipo === 'retiro') {
+      } else if (tipo === 'retiro' || tipo === 'retiro_referido') {
         withdrawalsHistory.value = loadMore 
           ? [...withdrawalsHistory.value, ...(response.data || [])] 
           : (response.data || [])
@@ -1118,7 +1118,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
 
 const setActiveTab = async (tab) => {
   activeTab.value = tab
-  const tipo = tab === 'ingresos' ? 'ingreso_referido' : 'retiro'
+  const tipo = tab === 'ingresos' ? 'ingreso_referido' : 'retiro_referido'
   await loadMovements(tipo)
 }
 
@@ -1130,7 +1130,7 @@ const handleMonthChange = async (event, tab) => {
     await loadMovements('ingreso_referido', newMonth)
   } else {
     selectedWithdrawMonth.value = newMonth
-    await loadMovements('retiro', newMonth)
+    await loadMovements('retiro_referido', newMonth)
   }
 }
 
@@ -1143,7 +1143,7 @@ const loadMoreEarnings = async () => {
 
 const loadMoreWithdrawals = async () => {
   if (hasMoreMovements.value) {
-    await loadMovements('retiro', selectedWithdrawMonth.value, true)
+    await loadMovements('retiro_referido', selectedWithdrawMonth.value, true)
   }
 }
 
@@ -1269,7 +1269,7 @@ const processWithdraw = async () => {
     
     const requestBody = {
       id_usuario: userCookie.value.id_usuario,
-      tipo: 'retiro',
+      tipo: 'retiro_referido',
       monto: montoMaximoRetiro,
       descripcion: `Retiro de ${montoMaximoRetiro} a: ${withdrawForm.value.bankDetails}`
     };  
@@ -1442,7 +1442,7 @@ watch([selectedMonth, selectedWithdrawMonth], async ([newMonth, newWithdrawMonth
   if (newMonth !== oldMonth && activeTab.value === 'ingresos') {
     await loadMovements('ingreso_referido', newMonth)
   } else if (newWithdrawMonth !== oldWithdrawMonth && activeTab.value === 'retiros') {
-    await loadMovements('retiro', newWithdrawMonth)
+    await loadMovements('retiro_referido', newWithdrawMonth)
   }
 })
 

@@ -38,29 +38,90 @@
                   <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3">
                     <span class="text-3xl">💰</span>
                   </div>
-                  <h1 class="text-2xl font-black mb-2">¡Gana Dinero Refiriendo!</h1>
-                  <p class="text-white/90 font-medium mb-5 text-sm">
-                    Invita a tus amigos y familiares a MiSeguro y recibe el <span class="font-black">{{ referralReward }}%</span> de cada servicio que paguen 
+                  <h1 class="text-2xl font-black mb-2">Mi Centro de Ganancias</h1>
+                  <p class="text-white/90 font-medium text-sm">
+                    Gestiona tus referidos y comisiones por servicios en un solo lugar.
                   </p>
-                  
-                  <!-- Stats -->
-                  <div class="grid grid-cols-3 gap-3"> 
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                      <div class="text-xl font-black">L. {{ stats.totalEarnings.toLocaleString('es-HN') }}</div>
-                      <div class="text-xs text-white/80">Total Ganado</div>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                      <div class="text-xl font-black">L. {{ stats.retirado.toLocaleString('es-HN') }}</div>
-                      <div class="text-xs text-white/80">Total Retirado</div>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                      <div class="text-xl font-black">L. {{ stats.availableBalance.toLocaleString('es-HN') }}</div>
-                      <div class="text-xs text-white/80">Disponible</div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </section>
+
+            <!-- Main Navigation Tabs -->
+            <section class="px-4 mb-4">
+              <div class="bg-gray-200/50 dark:bg-gray-800/50 p-1.5 rounded-2xl flex items-center gap-1 backdrop-blur-sm">
+                <button 
+                  @click="mainActiveTab = 'referidos'"
+                  :class="[
+                    'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all duration-300',
+                    mainActiveTab === 'referidos' 
+                      ? 'bg-white dark:bg-gray-700 shadow-lg text-purple-600 dark:text-purple-400 scale-[1.02]' 
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-700/50'
+                  ]"
+                >
+                  <span class="text-xl">🤝</span>
+                  <span>Referidos</span>
+                </button>
+                <button 
+                  @click="mainActiveTab = 'paquetes'"
+                  :class="[
+                    'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all duration-300',
+                    mainActiveTab === 'paquetes' 
+                      ? 'bg-white dark:bg-gray-700 shadow-lg text-emerald-600 dark:text-emerald-400 scale-[1.02]' 
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-700/50'
+                  ]"
+                >
+                  <span class="text-xl">📦</span>
+                  <span>Paquetes</span>
+                </button>
+              </div>
+            </section>
+
+            <!-- SECCIÓN PROGRAMA DE REFERIDOS -->
+            <div v-if="mainActiveTab === 'referidos'" class="space-y-4 animate-fade-in">
+              <!-- Balance y Ganancias Referidos -->
+              <section class="px-4">
+                <div class="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                  <!-- Decoration -->
+                  <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                  
+                  <div class="relative">
+                    <div class="flex items-center justify-between mb-4">
+                      <div>
+                        <p class="text-purple-100 text-sm font-medium">Balance Disponible</p>
+                        <p class="text-3xl font-black">L. {{ formatCurrency(stats.availableBalance) }}</p>
+                        <span v-if="withdrawalPercentage > 0" class="block text-[10px] text-purple-100/80 mt-1">
+                          Retirable ({{ withdrawalPercentage }}%): L. {{ formatCurrency(maxWithdrawableAmount) }}
+                        </span>
+                      </div>
+                      <button 
+                        @click="showWithdrawModal = true"
+                        :disabled="!canWithdrawFromTotal"
+                        class="bg-white/20 hover:bg-white/30 backdrop-blur-md px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed border border-white/10"
+                      >
+                        <template v-if="stats?.availableBalance >= minWithdrawAmount">
+                          💳 Retirar
+                        </template>
+                        <template v-else-if="stats?.availableBalance > 0">
+                          Mín. L. {{ minWithdrawAmount }}
+                        </template>
+                        <template v-else>
+                          Sin saldo
+                        </template>
+                      </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                      <div>
+                        <p class="text-purple-100/70 text-xs font-bold uppercase tracking-wider">Total Ganado</p>
+                        <p class="text-xl font-black">L. {{ formatCurrency(stats.totalEarnings) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-purple-100/70 text-xs font-bold uppercase tracking-wider">Retirado</p>
+                        <p class="text-xl font-black">L. {{ formatCurrency(stats.retirado) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
 
             <!-- Tu Código de Referido -->
             <section class="px-4 mb-4">
@@ -133,7 +194,7 @@
 
             <!-- Historial de Ingresos/Retiros con pestañas -->
             <section class="px-4 mb-6">
-              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">Historial</h2>
+              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">Historial de Ingresos/Retiros de Referidos</h2>
               <div class="flex items-center justify-between mb-4">
                 <div class="flex space-x-2">
                   <button 
@@ -358,48 +419,6 @@
                 </template>
               </div>
             </section>
-            
-            <!-- Retirar Ganancias -->
-            <section class="px-4 mb-4"> 
-              <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 relative">
-                <div class="relative">
-                  <div class="flex items-center space-x-3 mb-3">
-                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center">
-                      <span class="text-gray-700 dark:text-gray-300 text-xl">💳</span>
-                    </div>
-                    <div>
-                      <h2 class="text-xl font-black">Retirar Ganancias</h2>
-                      <p class="text-white/90 text-sm">
-                        Disponible: L. {{ (stats?.availableBalance || 0).toLocaleString('es-HN') }}
-                        <span v-if="withdrawalPercentage > 0" class="block text-xs opacity-80">
-                          Puedes retirar hasta el {{ withdrawalPercentage }}%: L. {{ (maxWithdrawableAmount || 0).toLocaleString('es-HN') }}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div class="w-full">
-                    <button 
-                      @click="showWithdrawModal = true"
-                      :disabled="!canWithdrawFromTotal"
-                      class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold text-base rounded-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    >
-                      <template v-if="stats?.availableBalance > 0">
-                        <template v-if="stats.availableBalance >= minWithdrawAmount">
-                          Retirar Ahora
-                        </template>
-                        <template v-else>
-                          Mínimo L. {{ minWithdrawAmount.toFixed(2) }}
-                        </template>
-                      </template>
-                      <template v-else>
-                        Sin saldo disponible
-                      </template>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
 
             <!-- Historial de Referidos -->
             <section class="px-4 mb-4">
@@ -479,10 +498,260 @@
                 </div>
               </div>
             </section>
+          </div>
 
-            <!-- Términos y Condiciones -->
+          <!-- SECCIÓN PAQUETES Y SERVICIOS -->
+          <div v-if="mainActiveTab === 'paquetes'" class="space-y-4 animate-fade-in">
+            <!-- Balance y Ganancias -->
+            <section class="px-4">
+              <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-green-100 text-sm font-medium">Balance Disponible</p>
+                    <p class="text-3xl font-black">L. {{ formatCurrency(technicianBalance.balanceDisponible) }}</p>
+                  </div>
+                  <button @click="openTechnicianWithdrawModal" 
+                          class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors">
+                    💳 Retirar
+                  </button>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-green-100 text-xs">Último Retiro</p>
+                    <p class="text-xl font-bold">{{ technicianBalance.ultimoRetiro !== null ? `L. ${formatCurrency(parseFloat(technicianBalance.ultimoRetiro))}` : 'N/A' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-green-100 text-xs">Último Ingreso</p>
+                    <p class="text-xl font-bold">{{ technicianBalance.ultimoIngreso !== null ? `L. ${formatCurrency(parseFloat(technicianBalance.ultimoIngreso))}` : 'N/A' }}</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Historial de Ingresos/Retiros de Paquetes -->
             <section class="px-4 mb-4">
-              <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 border border-amber-200 dark:border-amber-800">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex space-x-2">
+                  <button 
+                    @click="setTechnicianTab('ingresos')"
+                    :class="{
+                      'bg-blue-600 text-white': technicianActiveTab === 'ingresos',
+                      'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300': technicianActiveTab !== 'ingresos'
+                    }"
+                    class="px-4 py-2 rounded-l-lg font-medium text-sm transition-colors"
+                  >
+                    Ingresos
+                  </button>
+                  <button 
+                    @click="setTechnicianTab('retiros')"
+                    :class="{
+                      'bg-blue-600 text-white': technicianActiveTab === 'retiros',
+                      'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300': technicianActiveTab !== 'retiros'
+                    }"
+                    class="px-4 py-2 rounded-r-lg font-medium text-sm transition-colors"
+                  >
+                    Retiros
+                  </button>
+                </div>
+
+                <!-- Selector de fecha tipo mes -->
+                <div class="flex items-center space-x-2">
+                  <input 
+                    type="month"
+                    v-model="technicianCurrentMonthValue"
+                    @change="handleTechnicianMonthChange($event, technicianActiveTab)"
+                    class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 px-2 py-2 w-32"
+                  />
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <!-- ==================== INGRESOS ==================== -->
+                <template v-if="technicianActiveTab === 'ingresos'">
+                  <div v-if="isLoadingTechnicianMovements" class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando ingresos...</p>
+                  </div>
+
+                  <div v-else-if="technicianEarnings.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin ingresos registrados</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ getTechnicianNoEarningsMessage() }}</p>
+                  </div>
+
+                  <template v-else>
+                    <template v-for="(earning, index) in technicianEarnings" :key="earning.id_movimiento">
+                      <div
+                        class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2 hover:shadow-md transition-shadow"
+                      >
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
+                              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p class="font-bold text-gray-900 dark:text-white text-sm">{{ earning.servicio || 'Servicio no especificado' }}</p>
+                              <p class="text-xs text-gray-600 dark:text-gray-400">
+                                {{ formatDate(earning.fecha) }} • {{ earning.colonia || 'Sin ubicación' }}
+                              </p>
+                            </div>
+                          </div>
+                          <div class="text-right">
+                            <p class="font-bold text-green-600 dark:text-green-400 text-base">+L. {{ formatCurrency(earning.monto) }}</p>
+                            <p class="text-xs" :class="getStatusColor(earning.estado)">
+                              {{ earning.estado }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    
+                    <!-- Paginación de Ingresos -->
+                    <div v-if="technicianEarnings.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                      <div class="flex items-center justify-between">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                          Página {{ technicianEarningsPagination.currentPage }} de {{ technicianEarningsPagination.totalPages }}
+                        </div>
+                        <div class="flex items-center space-x-1">
+                          <button 
+                            @click="loadTechnicianMovements(technicianEarningsPagination.currentPage - 1)" 
+                            :disabled="technicianEarningsPagination.currentPage === 1 || isLoadingTechnicianMovements"
+                            class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                            :class="{ 'cursor-not-allowed': technicianEarningsPagination.currentPage === 1 }"
+                          >
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            {{ technicianEarningsPagination.currentPage }} / {{ technicianEarningsPagination.totalPages }}
+                          </span>
+                          <button 
+                            @click="loadTechnicianMovements(technicianEarningsPagination.currentPage + 1)" 
+                            :disabled="!technicianEarningsPagination.hasMore || isLoadingTechnicianMovements"
+                            class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                            :class="{ 'cursor-not-allowed': !technicianEarningsPagination.hasMore }"
+                          >
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Resumen -->
+                    <div v-if="technicianMovementSummary" class="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/10 p-4 rounded-xl border border-green-100 dark:border-green-800/30">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-green-700 dark:text-green-300">
+                          Total {{ technicianMovementSummary.mes.toLowerCase() }}
+                        </span>
+                        <span class="text-lg font-bold text-green-800 dark:text-green-200">
+                          L. {{ formatCurrency(technicianMovementSummary.totalIngresos) }}
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </template>
+
+                <!-- ==================== RETIROS ==================== -->
+                <template v-else>
+                  <div v-if="isLoadingTechnicianMovements" class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando retiros...</p>
+                  </div>
+
+                  <div v-else-if="technicianWithdrawals.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin retiros registrados</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ getTechnicianNoWithdrawalsMessage() }}</p>
+                  </div>
+
+                  <template v-else>
+                    <template v-for="(withdrawal, index) in technicianWithdrawals" :key="withdrawal.id_movimiento">
+                      <div
+                        class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-2 hover:shadow-md transition-shadow"
+                      >
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+                              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p class="font-medium text-gray-900 dark:text-white text-sm">
+                                Retiro de Fondos
+                              </p>
+                              <p class="text-xs text-gray-600 dark:text-gray-400">
+                                {{ formatDate(withdrawal.fecha) }}
+                              </p>
+                            </div>
+                          </div>
+                          <div class="text-right">
+                            <p class="font-bold text-yellow-600 dark:text-yellow-400 text-base">L. {{ formatCurrency(withdrawal.monto) }}</p>
+                            <p class="text-xs" :class="getStatusWithDrawalColor(withdrawal.estado)">
+                              {{ withdrawal.estado }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    
+                    <!-- Paginación de Retiros -->
+                    <div v-if="technicianWithdrawals.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
+                      <div class="flex items-center justify-between">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                          Página {{ technicianWithdrawalsPagination.currentPage }} de {{ technicianWithdrawalsPagination.totalPages }}
+                        </div>
+                        <div class="flex items-center space-x-1">
+                          <button 
+                            @click="loadTechnicianMovements(technicianWithdrawalsPagination.currentPage - 1)" 
+                            :disabled="technicianWithdrawalsPagination.currentPage === 1 || isLoadingTechnicianMovements"
+                            class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                            :class="{ 'cursor-not-allowed': technicianWithdrawalsPagination.currentPage === 1 }"
+                          >
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <span class="px-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            {{ technicianWithdrawalsPagination.currentPage }} / {{ technicianWithdrawalsPagination.totalPages }}
+                          </span>
+                          <button 
+                            @click="loadTechnicianMovements(technicianWithdrawalsPagination.currentPage + 1)" 
+                            :disabled="!technicianWithdrawalsPagination.hasMore || isLoadingTechnicianMovements"
+                            class="p-1.5 rounded-full disabled:opacity-40 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                            :class="{ 'cursor-not-allowed': !technicianWithdrawalsPagination.hasMore }"
+                          >
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Resumen -->
+                    <div v-if="technicianMovementSummary" class="mt-4 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-red-700 dark:text-red-300">
+                          Total {{ technicianMovementSummary.mes }}
+                        </span>
+                        <span class="text-lg font-bold text-red-800 dark:text-red-200">
+                          L. {{ formatCurrency(technicianMovementSummary.totalRetiros) }}
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </template>
+              </div>
+            </section>
+          </div>
+
+          <!-- Términos y Condiciones (Visible en ambas pero estilizado) -->
+          <section class="px-4 mb-20">
+            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-800 shadow-sm">
                 <div class="flex items-start space-x-2">
                   <div class="text-amber-500 text-lg flex-shrink-0">📋</div>
                   <div>
@@ -632,6 +901,121 @@
         </Transition>
       </div>
     </Transition>
+
+    <!-- Modal de Retiro Técnico -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showTechnicianWithdrawModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+        <!-- Backdrop -->
+        <Transition
+          name="backdrop"
+          enter-active-class="backdrop-enter-active"
+          leave-active-class="backdrop-leave-active"
+          enter-from-class="backdrop-enter-from"
+          leave-to-class="backdrop-leave-to">
+          <div 
+            v-if="showTechnicianWithdrawModal"
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            @click="closeTechnicianWithdrawModal"
+          ></div>
+        </Transition>
+
+        <!-- Modal Content -->
+        <Transition
+          name="modal-content"
+          enter-active-class="modal-content-enter-active"
+          leave-active-class="modal-content-leave-active"
+          enter-from-class="modal-content-enter-from"
+          leave-to-class="modal-content-leave-to">
+          <div 
+            v-if="showTechnicianWithdrawModal"
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
+            @click.stop
+          >
+            <!-- Header -->
+            <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center text-base">
+                    💳
+                  </div>
+                  <div>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white">Retirar Comisiones</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Disponible: L. {{ formatCurrency(technicianBalance.balanceDisponible) }}</p>
+                  </div>
+                </div>
+                <button @click="closeTechnicianWithdrawModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-3">
+              <form @submit.prevent="processTechnicianWithdraw" class="space-y-4">
+                <!-- Monto a Retirar -->
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    Monto a Retirar
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-bold">L.</span>
+                    <input
+                      type="number"
+                      v-model="technicianWithdrawForm.amount"
+                      :max="technicianBalance.balanceDisponible"
+                      step="0.01"
+                      class="w-full pl-8 pr-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+                      placeholder="0.00"
+                      required
+                    >
+                  </div>
+                  <p class="text-[10px] text-gray-500 mt-1">Ingresa el monto que deseas retirar de tu saldo disponible.</p>
+                </div>
+
+                <!-- Datos Bancarios -->
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    Datos Bancarios
+                  </label>
+                  <textarea
+                    v-model="technicianWithdrawForm.bankDetails"
+                    rows="3"
+                    class="w-full px-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                    placeholder="Banco, tipo de cuenta, número, titular, identidad"
+                    required
+                  ></textarea>
+                </div>
+
+                <!-- Botón de envío -->
+                <button 
+                  type="submit"
+                  :disabled="isProcessingTechnicianWithdraw || technicianWithdrawForm.amount <= 0 || technicianWithdrawForm.amount > technicianBalance.balanceDisponible"
+                  class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
+                >
+                  <span v-if="!isProcessingTechnicianWithdraw">
+                    Solicitar Retiro
+                  </span>
+                  <span v-else class="flex items-center justify-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Procesando...
+                  </span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -741,6 +1125,7 @@ const withdrawalsHistory = ref([])
 
 // Estados de vista y paginación
 const activeTab = ref('ingresos')
+const mainActiveTab = ref('referidos')
 const withdrawalCounter = ref(0)
 
 // Estados de paginación para movimientos
@@ -754,10 +1139,7 @@ const referralsPagination = ref({
   totalItems: 0,
   totalPages: 1,
   itemsPerPage: 3
-})
-
-// Configuración de paginación
-const itemsPerPage = 3
+}) 
 
 // Mes actual para filtros
 const currentDate = new Date()
@@ -766,6 +1148,55 @@ const selectedWithdrawMonth = ref(`${currentDate.getFullYear()}-${String(current
 
 // Resumen de movimientos
 const movementSummary = ref(null)
+
+// ========== VARIABLES PARA BALANCE Y MOVIMIENTOS DE TÉCNICO ==========
+// Balance del técnico (ingresos por servicios/paquetes)
+const technicianBalance = ref({
+  balanceDisponible: 0,
+  ultimoRetiro: null,
+  ultimoIngreso: null
+})
+
+// Estados de carga para movimientos de técnico
+const isLoadingTechnicianMovements = ref(false)
+const showTechnicianWithdrawModal = ref(false)
+const isProcessingTechnicianWithdraw = ref(false)
+
+// Datos de movimientos de técnico
+const technicianEarnings = ref([])
+const technicianWithdrawals = ref([])
+const technicianMovementSummary = ref(null)
+
+// Tab activo para movimientos de técnico
+const technicianActiveTab = ref('ingresos')
+
+// Mes seleccionado para movimientos de técnico
+const technicianSelectedMonth = ref(`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`)
+const technicianSelectedWithdrawMonth = ref(`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`)
+
+// Paginación para movimientos de técnico
+const technicianEarningsPagination = ref({
+  currentPage: 1,
+  totalPages: 1,
+  hasMore: false,
+  totalItems: 0
+})
+
+const technicianWithdrawalsPagination = ref({
+  currentPage: 1,
+  totalPages: 1,
+  hasMore: false,
+  totalItems: 0
+})
+
+// Formulario de retiro de técnico
+const technicianWithdrawForm = ref({
+  amount: 0,
+  bankDetails: ''
+})
+
+// Configuración de paginación
+const itemsPerPage = 3
 
 // Estados de notificaciones
 const toast = ref({
@@ -801,7 +1232,7 @@ const filteredEarnings = computed(() => {
 })
 
 const filteredWithdrawals = computed(() => {
-  const withdrawals = withdrawalsHistory.value.filter(w => w.tipo === 'retiro');
+  const withdrawals = withdrawalsHistory.value.filter(w => w.tipo === 'retiro' || w.tipo === 'retiro_referido');
   withdrawalCounter.value = withdrawals.length;
   return withdrawals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 })
@@ -870,6 +1301,271 @@ const getNoWithdrawalsMessage = () => {
     return `No hay retiros registrados para ${monthName} ${selectedYear}`
   } else {
     return `No hay retiros registrados para el período seleccionado`
+  }
+}
+
+// ========== FUNCIONES PARA MOVIMIENTOS DE TÉCNICO ==========
+const getTechnicianNoEarningsMessage = () => {
+  if (!technicianSelectedMonth.value) return 'Selecciona un mes para ver los ingresos.'
+  
+  const [year, month] = technicianSelectedMonth.value.split('-').map(Number)
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ]
+  
+  if (isLoadingTechnicianMovements.value) {
+    return 'Cargando ingresos...'
+  }
+  
+  return `No se encontraron ingresos para ${monthNames[month - 1]} de ${year}.`
+}
+
+const getTechnicianNoWithdrawalsMessage = () => {
+  if (!technicianSelectedWithdrawMonth.value) return 'Selecciona un mes para ver los retiros.'
+  
+  const [year, month] = technicianSelectedWithdrawMonth.value.split('-').map(Number)
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ]
+  
+  if (isLoadingTechnicianMovements.value) {
+    return 'Cargando retiros...'
+  }
+  
+  return `No se encontraron retiros para ${monthNames[month - 1]} de ${year}.`
+}
+
+// Computed property for technician month selector
+const technicianCurrentMonthValue = computed({
+  get() {
+    const value = technicianActiveTab.value === 'ingresos' ? technicianSelectedMonth.value : technicianSelectedWithdrawMonth.value
+    return value || `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
+  },
+  set(newValue) {
+    if (technicianActiveTab.value === 'ingresos') {
+      technicianSelectedMonth.value = newValue
+    } else {
+      technicianSelectedWithdrawMonth.value = newValue
+    }
+  }
+})
+
+// Función para cambiar de tab en movimientos de técnico
+const setTechnicianTab = (tab) => {
+  technicianActiveTab.value = tab
+  loadTechnicianMovements(1)
+}
+
+// Función para manejar cambio de mes en movimientos de técnico
+const handleTechnicianMonthChange = (event, tab) => {
+  const newMonth = event.target.value
+  if (tab === 'ingresos') {
+    technicianSelectedMonth.value = newMonth
+  } else {
+    technicianSelectedWithdrawMonth.value = newMonth
+  }
+  loadTechnicianMovements(1)
+}
+
+// Función para cargar movimientos de técnico
+const loadTechnicianMovements = async (page = 1) => {
+  try {
+    isLoadingTechnicianMovements.value = true
+    const userId = userCookie.value.id_usuario
+    if (!userId) throw new Error('Error al obtener Usuario. Recargue la página.')
+
+    const movementType = technicianActiveTab.value
+    const selectedMonthValue = movementType === 'ingresos' ? technicianSelectedMonth.value : technicianSelectedWithdrawMonth.value
+    let year, monthNum
+    
+    if (selectedMonthValue) {
+      const [y, m] = selectedMonthValue.split('-')
+      year = parseInt(y)
+      monthNum = parseInt(m)
+    } else {
+      const now = new Date()
+      year = now.getFullYear()
+      monthNum = now.getMonth() + 1
+    }
+
+    const tipoMovimiento = movementType === 'ingresos' ? 'ingresos' : 'retiros'
+    const actualPage = typeof page === 'string' ? 1 : page
+    const params = { 
+      mes: monthNum, 
+      tipo: tipoMovimiento,
+      page: actualPage,
+      limit: itemsPerPage
+    }
+    
+    const response = await $api(`/movimientos/${userId}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      params: params
+    })
+    
+    if (response) {
+      // Asignar el resumen
+      technicianMovementSummary.value = response.summary || null
+      
+      const items = response.data.map(item => ({
+        id_movimiento: item.id_movimiento,
+        monto: parseFloat(item.monto) || 0,
+        fecha: item.fecha,
+        estado: movementType === 'ingresos' ? (item.estado || 'Pendiente') : (item.estado || 'pendiente').toLowerCase(),
+        ...(movementType === 'ingresos' ? {
+          servicio: item.servicio || 'Servicio no especificado',
+          colonia: item.colonia || ''
+        } : {})
+      }))
+      
+      const paginationData = response.pagination || response.meta?.pagination || {
+        currentPage: 1,
+        totalPages: 1,
+        total: items.length,
+        limit: itemsPerPage
+      }
+      
+      const pagination = {
+        currentPage: Number(paginationData.currentPage || paginationData.page || 1),
+        totalPages: Number(paginationData.totalPages || Math.ceil((paginationData.total || items.length) / (paginationData.limit || itemsPerPage))),
+        hasMore: paginationData.currentPage ? 
+          (paginationData.currentPage < (paginationData.totalPages || 1)) : 
+          (items.length >= (paginationData.limit || itemsPerPage)),
+        totalItems: Number(paginationData.total || items.length)
+      }
+
+      // Actualizar el estado con los datos obtenidos
+      if (movementType === 'ingresos') {
+        technicianEarnings.value = items
+        technicianEarningsPagination.value = pagination
+      } else {
+        technicianWithdrawals.value = items
+        technicianWithdrawalsPagination.value = pagination
+      }
+    }
+  } catch (error) {
+    console.error('Error al cargar movimientos de técnico:', error)
+    showError('No se pudieron cargar los movimientos. Por favor, inténtalo de nuevo.')
+  } finally {
+    isLoadingTechnicianMovements.value = false
+  }
+}
+
+// Función para cargar balance de técnico
+const loadTechnicianBalance = async () => {
+  try {
+    const userId = userCookie.value.id_usuario
+    if (!userId) return
+
+    const estadisticas = await $api(`/movimientos/estadisticas/${userId}`, {
+      baseURL: config.public.apiBase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+    
+    const safeNumber = (value) => {
+      const num = Number(value)
+      return isNaN(num) ? 0 : num
+    }
+    
+    technicianBalance.value.balanceDisponible = safeNumber(estadisticas.balanceDisponible)
+    technicianBalance.value.ultimoRetiro = estadisticas.ultimoRetiro !== null ? safeNumber(estadisticas.ultimoRetiro) : 0
+    technicianBalance.value.ultimoIngreso = estadisticas.ultimoIngreso !== null ? safeNumber(estadisticas.ultimoIngreso) : 0
+    
+  } catch (error) {
+    console.error('Error al cargar balance de técnico:', error)
+    showError('No se pudo cargar el balance')
+  }
+}
+
+// Función para abrir modal de retiro de técnico
+const openTechnicianWithdrawModal = () => {
+  showTechnicianWithdrawModal.value = true
+}
+
+// Función para cerrar modal de retiro de técnico
+const closeTechnicianWithdrawModal = () => {
+  showTechnicianWithdrawModal.value = false
+  technicianWithdrawForm.value = {
+    amount: 0,
+    bankDetails: ''
+  }
+}
+
+const processTechnicianWithdraw = async () => {
+  if (isProcessingTechnicianWithdraw.value) return
+  
+  if (technicianWithdrawForm.value.amount <= 0 || technicianWithdrawForm.value.amount > technicianBalance.value.balanceDisponible) {
+    showError('Monto de retiro inválido')
+    return
+  }
+  
+  if (technicianWithdrawForm.value.bankDetails.trim().length < 5) {
+    showError('Por favor ingresa los datos bancarios completos')
+    return
+  }
+
+  isProcessingTechnicianWithdraw.value = true
+  
+  try {
+    const userId = userCookie.value.id_usuario
+    const requestBody = {
+      id_usuario: userId,
+      tipo: 'retiro_referido', // O el tipo que use el sistema para retiros de técnicos
+      monto: technicianWithdrawForm.value.amount,
+      descripcion: `Retiro de comisiones (Paquetes) a: ${technicianWithdrawForm.value.bankDetails}`
+    }
+
+    const response = await $api('/movimientos', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: requestBody
+    })
+
+    if (response && response.success) {
+      // Notificar a administradores
+      try {
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          baseURL: config.public.apiBase,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
+          },
+          body: JSON.stringify({
+            titulo: 'Nueva Petición de Retiro (Técnico)',
+            nombre_rol: 'admin'
+          })
+        })
+      } catch (e) { console.error('Error enviando notificación:', e) }
+
+      showSuccess('¡Retiro Solicitado!', 'Tu solicitud de retiro de comisiones ha sido enviada con éxito.')
+      closeTechnicianWithdrawModal()
+      await loadTechnicianBalance()
+      await loadTechnicianMovements(1)
+    } else {
+      showError(response?.message || 'Error al procesar el retiro')
+    }
+  } catch (error) {
+    console.error('Error en processTechnicianWithdraw:', error)
+    showError('Ocurrió un error al procesar tu retiro')
+  } finally {
+    isProcessingTechnicianWithdraw.value = false
   }
 }
 
@@ -1070,7 +1766,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
         movementsHistory.value = loadMore 
           ? [...movementsHistory.value, ...(response.data || [])] 
           : (response.data || [])
-      } else if (tipo === 'retiro') {
+      } else if (tipo === 'retiro' || tipo === 'retiro_referido') {
         withdrawalsHistory.value = loadMore 
           ? [...withdrawalsHistory.value, ...(response.data || [])] 
           : (response.data || [])
@@ -1118,7 +1814,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
 
 const setActiveTab = async (tab) => {
   activeTab.value = tab
-  const tipo = tab === 'ingresos' ? 'ingreso_referido' : 'retiro'
+  const tipo = tab === 'ingresos' ? 'ingreso_referido' : 'retiro_referido'
   await loadMovements(tipo)
 }
 
@@ -1130,7 +1826,7 @@ const handleMonthChange = async (event, tab) => {
     await loadMovements('ingreso_referido', newMonth)
   } else {
     selectedWithdrawMonth.value = newMonth
-    await loadMovements('retiro', newMonth)
+    await loadMovements('retiro_referido', newMonth)
   }
 }
 
@@ -1143,7 +1839,7 @@ const loadMoreEarnings = async () => {
 
 const loadMoreWithdrawals = async () => {
   if (hasMoreMovements.value) {
-    await loadMovements('retiro', selectedWithdrawMonth.value, true)
+    await loadMovements('retiro_referido', selectedWithdrawMonth.value, true)
   }
 }
 
@@ -1269,7 +1965,7 @@ const processWithdraw = async () => {
     
     const requestBody = {
       id_usuario: userCookie.value.id_usuario,
-      tipo: 'retiro',
+      tipo: 'retiro_referido',
       monto: montoMaximoRetiro,
       descripcion: `Retiro de ${montoMaximoRetiro} a: ${withdrawForm.value.bankDetails}`
     };  
@@ -1442,7 +2138,7 @@ watch([selectedMonth, selectedWithdrawMonth], async ([newMonth, newWithdrawMonth
   if (newMonth !== oldMonth && activeTab.value === 'ingresos') {
     await loadMovements('ingreso_referido', newMonth)
   } else if (newWithdrawMonth !== oldWithdrawMonth && activeTab.value === 'retiros') {
-    await loadMovements('retiro', newWithdrawMonth)
+    await loadMovements('retiro_referido', newWithdrawMonth)
   }
 })
 
@@ -1461,6 +2157,10 @@ onMounted(async () => {
 
     await loadReferralData()
     await loadMovements('ingreso_referido')
+    
+    // Cargar balance y movimientos de técnico
+    await loadTechnicianBalance()
+    await loadTechnicianMovements(1)
   } catch (error) {
     window.location.reload()
   } finally {

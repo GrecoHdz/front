@@ -261,7 +261,20 @@
                   </div>
                 </div>
               </button>
-            </div>
+              <button @click="navigateTo('/tecnico/Marketplace')" class="bg-dark dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 text-left h-full">
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">Marketplace</p>
+                    <p class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate">Comprar paquete</p>
+                  </div>
+                </div>
+              </button>
+            </div> 
           </section>
         </main>
       </div>

@@ -801,7 +801,7 @@ const filteredEarnings = computed(() => {
 })
 
 const filteredWithdrawals = computed(() => {
-  const withdrawals = withdrawalsHistory.value.filter(w => w.tipo === 'retiro');
+  const withdrawals = withdrawalsHistory.value.filter(w => w.tipo === 'retiro' || w.tipo === 'retiro_referido');
   withdrawalCounter.value = withdrawals.length;
   return withdrawals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 })
