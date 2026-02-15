@@ -213,7 +213,12 @@
                           </div>
                           <div>
                             <p class="font-bold text-gray-900 dark:text-white text-sm">
-                              {{ earning.descripcion ? (earning.descripcion.includes(' - ') ? earning.descripcion.split(' - ')[1] : earning.descripcion) : 'Ingreso por referido' }}
+                              <template v-if="earning.descripcion && earning.descripcion.includes('Comisión por referido')">
+                                {{ earning.descripcion.includes('(Paquete)') ? 'Paquete' : 'Servicio' }} adquirido {{ (earning.descripcion.split(' - ')[1] || 'Usuario').split(' ').slice(0, 2).join(' ') }}
+                              </template>
+                              <template v-else>
+                                {{ earning.descripcion || 'Ingreso por referido' }}
+                              </template>
                             </p>
                             <p class="text-xs text-gray-600 dark:text-gray-400">
                               {{ formatDate(earning.fecha) }}

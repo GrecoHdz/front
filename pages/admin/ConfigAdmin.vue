@@ -333,6 +333,23 @@
               </div>
             </div>
 
+            <!-- Referido Paquete -->
+            <div>
+              <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Ganancia por Referido Paquete
+              </label>
+              <div class="relative">
+                <input
+                  v-model.number="configuracionReferidoPaquete"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-full pl-4 pr-8 py-3 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="10">
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">%</span>
+              </div>
+            </div>
+
             <!-- Retiro -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -2814,6 +2831,7 @@ const configuracionRTN = ref('')
 const configuracionDescuento = ref(0)
 const configuracionDescuentoEspecial = ref(0)
 const configuracionReferido = ref(0)
+const configuracionReferidoPaquete = ref(0)
 const configuracionRetiro = ref(0)
 const configuracionRetiroMinimo = ref(0)
 const configuracionDiasGracia = ref(14) // Valor por defecto de 14 días 
@@ -3057,6 +3075,7 @@ const hayChanges = computed(() => {
          configuracionDescuento.value !== valoresOriginales.value.porcentaje_descuento ||
          configuracionDescuentoEspecial.value !== valoresOriginales.value.porcentaje_descuento_especial ||
          configuracionReferido.value !== valoresOriginales.value.porcentaje_referido ||
+         configuracionReferidoPaquete.value !== valoresOriginales.value.porcentaje_referido_paquete ||
          configuracionRetiro.value !== valoresOriginales.value.porcentaje_retiro ||
          configuracionRetiroMinimo.value !== valoresOriginales.value.retiro_minimo
 })
@@ -4337,6 +4356,15 @@ const guardarConfiguraciones = async () => {
       })
     }
     
+    // Porcentaje referido paquete (número)
+    if (hasChanged(configuracionReferidoPaquete.value, valoresOriginales.value.porcentaje_referido_paquete, true)) {
+      cambios.push({
+        id: configuraciones.value.find(c => c.tipo_config === 'porcentaje_referido_paquete')?.id_config,
+        tipo_config: 'porcentaje_referido_paquete',
+        valor: Number(configuracionReferidoPaquete.value) || 0
+      })
+    }
+    
     // Porcentaje retiro (número)
     if (hasChanged(configuracionRetiro.value, valoresOriginales.value.porcentaje_retiro, true)) {
       cambios.push({
@@ -4470,6 +4498,9 @@ const cargarConfiguraciones = async () => {
           case 'porcentaje_referido':
             configuracionReferido.value = Number(item.valor) || 0;
             break;
+          case 'porcentaje_referido_paquete':
+            configuracionReferidoPaquete.value = Number(item.valor) || 0;
+            break;
           case 'porcentaje_retiro':
             configuracionRetiro.value = Number(item.valor) || 0;
             break;
@@ -4494,6 +4525,7 @@ const cargarConfiguraciones = async () => {
         porcentaje_descuento: Number(configuracionDescuento.value) || 0,
         porcentaje_descuento_especial: Number(configuracionDescuentoEspecial.value) || 0,
         porcentaje_referido: Number(configuracionReferido.value) || 0,
+        porcentaje_referido_paquete: Number(configuracionReferidoPaquete.value) || 0,
         porcentaje_retiro: Number(configuracionRetiro.value) || 0,
         retiro_minimo: Number(configuracionRetiroMinimo.value) || 0,
         reset_credito: Number(configuracionDiasGracia.value) || 14
