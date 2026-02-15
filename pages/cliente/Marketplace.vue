@@ -923,7 +923,9 @@ const procesarPagoPaquete = async () => {
    try {
       isProcessingPayment.value = true
       const res = await $api('/paquetes/usuarios/canjear', {
-         method: 'POST', baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` },
+         method: 'POST', 
+         baseURL: config.public.apiBase, 
+         headers: { 'Authorization': `Bearer ${auth.token}` },
          body: {
             id_paquete: selectedPaquete.value.id,
             id_usuario: userCookie.value.id_usuario,
@@ -932,6 +934,7 @@ const procesarPagoPaquete = async () => {
             numero_comprobante: numeroComprobante.value
          }
       })
+      
       if(res.success) {
          closePaquetePagoModal()
          showToast('Pago enviado', 'success')
@@ -968,10 +971,17 @@ const procesarPagoPaquete = async () => {
          
          sendWA(selectedPaquete.value, numeroComprobante.value, 'pay', idPaqueteUsuario)
          closeDetail()
+      } else {
+         // Mostrar el mensaje de error del servidor
+         showToast(res.error || 'Error al procesar el pago', 'error')
       }
    } catch(e) {
-      showToast('Error', 'error')
-   } finally { isProcessingPayment.value = false }
+      // Mostrar el mensaje de error si viene en la respuesta
+      const errorMessage = e.data?.error || e.message || 'Error al procesar el pago'
+      showToast(errorMessage, 'error')
+   } finally { 
+      isProcessingPayment.value = false 
+   }
 }
 
 const usarPaquete = async (p) => {

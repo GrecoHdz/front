@@ -275,7 +275,7 @@
                           <div>
                             <p class="font-bold text-gray-900 dark:text-white text-sm">
                               <template v-if="earning.descripcion && earning.descripcion.includes('Comisión por referido')">
-                                {{ earning.descripcion.includes('(Paquete)') ? 'Paquete' : 'Servicio' }} adquirido {{ (earning.descripcion.split(' - ')[1] || 'Usuario').split(' ').slice(0, 2).join(' ') }}
+                                {{ earning.descripcion.includes('(Paquete)') ? 'Paquete' : 'Servicio' }} adquirido {{ (earning.descripcion.split(' - ')[1] || 'Usuario').split(' ').slice(0, 3).join(' ') }}
                               </template>
                               <template v-else>
                                 {{ earning.descripcion || 'Ingreso por referido' }}
