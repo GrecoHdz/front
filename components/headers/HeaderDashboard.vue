@@ -42,25 +42,48 @@
         <NotificationsDropdown 
           @notification-click="onNotificationClick"
         />
+
+        <!-- Botón Activar Push -->
+        <button 
+           v-if="!isSubscribed" 
+           @click="handleSubscribe"
+           class="bg-white/20 text-white px-3 py-1 rounded-lg text-xs font-medium ml-2 hover:bg-white/30 transition-colors flex items-center gap-1 shadow-sm backdrop-blur-sm border border-white/10"
+           title="Recibe notificaciones incluso con la app cerrada"
+        >
+          <span>🔔</span>
+          <span class="hidden sm:inline">Activar</span>
+        </button>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store';
 import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
-import { useRuntimeConfig } from '#imports';
+import { useRuntimeConfig, useNuxtApp } from '#imports';
 import { useRouter } from 'vue-router'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import { usePushNotifications } from '~/composables/usePushNotifications';
 
 // ===== CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const isLoading = ref(false)
+const router = useRouter(); // Asegurar router importado y usado
+const { subscribe, isSubscribed, checkSubscription } = usePushNotifications();
+
+// Validar suscripción al montar
+onMounted(() => {
+  checkSubscription();
+});
+
+const handleSubscribe = async () => {
+  await subscribe();
+};
 
 // Definir eventos emitidos
 const emit = defineEmits(['availabilityChange']);

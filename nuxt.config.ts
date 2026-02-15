@@ -4,8 +4,42 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: [
     '@nuxtjs/tailwindcss',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@vite-pwa/nuxt'
   ],
+  pwa: {
+    manifest: {
+      name: 'MiSeguro',
+      short_name: 'MiSeguro',
+      description: 'Servicios técnicos profesionales a domicilio.',
+      theme_color: '#2563eb',
+      icons: [
+        {
+          src: '/favicon.ico',
+          sizes: '64x64 32x32 24x24 16x16',
+          type: 'image/x-icon'
+        },
+        {
+          src: '/pwa-192x192.png',
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: '/pwa-512x512.png',
+          sizes: '512x512',
+          type: 'image/png'
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: '/',
+      importScripts: ['/sw-push.js']
+    },
+    devOptions: {
+      enabled: true,
+      type: 'module'
+    }
+  },
 
   // Configuración de impresión
   app: {
