@@ -212,7 +212,11 @@ const onNotificationClick = async (notification) => {
 
   // Navegación por tipo de notificación
   try {
-    if (notification.tipo === 'servicios') {
+    if (notification.titulo === 'Pago de Paquete Aceptado') {
+      await navigateTo('/cliente/Marketplace');
+    } else if (notification.titulo === 'Pago de Paquete Rechazado') {
+      await navigateTo('/cliente/Marketplace');
+    } else if (notification.tipo === 'servicios') {
       await navigateTo('/cliente/Servicios');
     } else if (notification.tipo === 'membresia') { 
       await navigateTo('/cliente/DashboardCliente');

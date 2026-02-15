@@ -4041,14 +4041,7 @@ const generateReport = async (report) => {
 
     // 🗓️ 1️⃣ Obtener mes y año seleccionados
     const hasSelectedMonth = !!selectedMonthReports.value;
-    const selectedMonth = selectedMonthReports.value;
-    
-    // Mostrar parámetros de la solicitud
-    console.log('📊 Generando reporte:', {
-      reporte: report.title,
-      mesSeleccionado: selectedMonth || 'Todos los meses',
-      fecha: new Date().toISOString()
-    });
+    const selectedMonth = selectedMonthReports.value; 
     
     // Solo incluir el parámetro month si se seleccionó un mes
     const monthParam = hasSelectedMonth ? `?month=${selectedMonth}&limit=1000` : '?limit=1000';
@@ -4092,9 +4085,6 @@ const generateReport = async (report) => {
     };
 
     const urlsToConsult = needs.map(key => urlMap[key]).filter(Boolean);
-    if (urlsToConsult.length > 0) {
-      console.log('🔍 URLs a consultar:', urlsToConsult.map(url => `${config.public.apiBase}${url}`));
-    }
     
     // 📦 3️⃣ Obtener solo los datos necesarios
     const promises = {
@@ -4115,20 +4105,7 @@ const generateReport = async (report) => {
       promises.usersRes,
       promises.technicianIncomeRes,
       promises.packagePaymentsRes
-    ]);
-
-    // Mostrar resumen de datos obtenidos
-    console.log('📊 Resumen de datos obtenidos:', {
-      usuarios: usersRes?.data?.length || 0,
-      membresias: membershipRes?.data?.length || 0,
-      visitas: visitRes?.data?.length || 0,
-      cotizaciones: quotationRes?.data?.length || 0,
-      retiros: withdrawalsRes?.data?.length || 0,
-      ingresosTecnicos: Array.isArray(technicianIncomeRes?.movimientos) 
-        ? technicianIncomeRes.movimientos.length 
-        : (Array.isArray(technicianIncomeRes?.data) ? technicianIncomeRes.data.length : 0),
-      pagosPaquetes: packagePaymentsRes?.data?.length || 0
-    });
+    ]); 
 
     const usersData = {
   label: 'Usuarios',
@@ -4253,25 +4230,15 @@ const generateReport = async (report) => {
           ? `/solicitudservicio?month=${selectedMonth}`
           : '/solicitudservicio';
         
-        console.log('🔍 Consultando servicios:', `${config.public.apiBase}${serviceUrl}`);
-        console.log('🔍 Consultando paquetes utilizados:', `${config.public.apiBase}/paquetes/usuarios/utilizados`);
-        
         const [serviceRes, paquetesRes] = await Promise.all([
           // Obtener servicios
           $api(serviceUrl, {
             baseURL: config.public.apiBase,
             headers: { Authorization: `Bearer ${auth.token}` },
             onRequest: ({ options }) => {
-              console.log('📤 Enviando solicitud a:', options.url);
-              console.log('📤 Headers:', options.headers);
               return options;
             },
             onResponse: ({ response }) => {
-              console.log('📥 Respuesta de servicios:', {
-                status: response.status,
-                data: response._data,
-                headers: response.headers
-              });
               return response._data;
             }
           }).catch(err => {
@@ -4286,15 +4253,9 @@ const generateReport = async (report) => {
               'Cache-Control': 'no-cache'
             },
             onRequest: ({ options }) => {
-              console.log('📤 Enviando solicitud a paquetes utilizados:', options.url);
               return options;
             },
             onResponse: ({ response }) => {
-              console.log('📥 Respuesta de paquetes utilizados:', {
-                status: response.status,
-                data: response._data,
-                count: response._data?.length || 0
-              });
               return response._data;
             }
           }).catch(err => {
@@ -4316,12 +4277,7 @@ const generateReport = async (report) => {
 
       // ===== REPORTE DE USUARIOS =====
       case 3:
-        console.log('📊 Generando reporte de usuarios con datos:', {
-      totalUsuarios: usersData.total,
-      mes: monthName || 'Todos los meses',
-      año: year || 'Todos los años'
-    });
-    await generarReporteUsuarios(doc, { usersData, mesNombre: monthName, year });
+        await generarReporteUsuarios(doc, { usersData, mesNombre: monthName, year });
         break;
 
       // ===== REPORTE DE TRANSACCIONES =====
@@ -4336,18 +4292,7 @@ const generateReport = async (report) => {
 
       default:
         showToast('Tipo de reporte no reconocido', 'error');
-    }
-
-    // Mostrar resumen final antes de generar el PDF
-    console.log('✅ Reporte generado exitosamente:', {
-      tipoReporte: report.title,
-      totalPaginas: doc.internal.getNumberOfPages(),
-      fechaGeneracion: new Date().toISOString(),
-      parametros: {
-        mes: selectedMonth || 'Todos los meses',
-        año: year || 'Todos los años'
-      }
-    });
+    } 
     
     // 📄 7️⃣ Footer con número de página
     const totalPages = doc.internal.getNumberOfPages();

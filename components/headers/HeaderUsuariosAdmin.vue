@@ -89,7 +89,11 @@ const onNotificationClick = async (notification) => {
   
     // Navegación por tipo de notificación 
   try {
-    if (notification.tipo === 'servicios') {
+    if (notification.titulo === 'Pago de Paquete Aceptado') {
+      await navigateTo('/admin/Marketplace');
+    } else if (notification.titulo === 'Pago de Paquete Rechazado') {
+      await navigateTo('/admin/Marketplace');
+    } else if (notification.tipo === 'servicios') {
       await navigateTo('/admin/ServiciosAdmin');
     } else if (notification.tipo === 'membresia') { 
       await navigateTo('/admin/ReportesAdmin');
@@ -97,10 +101,10 @@ const onNotificationClick = async (notification) => {
       await navigateTo('/admin/ReportesAdmin');
     } else if (notification.tipo === 'usuario') { 
       await navigateTo('/admin/UsuariosAdmin');
-    } else if (notification.tipo === 'ticket') { 
-      await navigateTo('/admin/DashboardAdmin');
     } else if (notification.tipo === 'paquetes') { 
       await navigateTo('/admin/ServiciosAdmin');
+    } else if (notification.tipo === 'ticket') { 
+      await navigateTo('/admin/DashboardAdmin');
     }
   } finally {
     // Asegurarse de que el loading siempre se desactive

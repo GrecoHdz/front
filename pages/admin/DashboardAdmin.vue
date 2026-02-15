@@ -705,7 +705,7 @@ const quickActions = computed(() => {
     {
       id: 'users',
       title: 'Marketplace',
-      description: 'Ver y Marketplace Local',
+      description: 'Ver Marketplace Local',
       icon: '👥',
       bgColor: 'bg-blue-100 dark:bg-blue-900/30',
       route: '/admin/Marketplace',
