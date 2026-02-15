@@ -344,8 +344,7 @@
                         {{ selectedDetailPackage.nombre }}
                      </h2>
                      <div class="flex items-center justify-between">
-                        <p class="text-base font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">L. {{ formatNumber(selectedDetailPackage.costo) }}</p>
-                        <span v-if="userCredit >= selectedDetailPackage.costo" class="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-lg font-bold border border-emerald-500/20">SALDO DISPONIBLE</span>
+                        <p class="text-base font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">L. {{ formatNumber(selectedDetailPackage.costo) }}</p> 
                      </div>
                   </div>
 
@@ -389,9 +388,9 @@
     <!-- Modals (Sin cambios funcionales, solo estilo mínimo) -->
     
     <!-- Confirmar Uso -->
-    <Transition name="fade">
+    <Transition name="modal-pop">
        <div v-if="showConfirmarUsoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
-          <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center animate-pop-in">
+          <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center modal-content-pop">
              <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🚀</div>
              <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">Usar Paquete</h3>
              <p class="text-xs text-gray-500 mb-6">{{ selectedPaquete?.nombre }}</p>
@@ -404,9 +403,9 @@
     </Transition>
 
     <!-- Confirmar Canje -->
-    <Transition name="fade">
+    <Transition name="modal-pop">
        <div v-if="showConfirmarCanjeoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
-          <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center animate-pop-in">
+          <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center modal-content-pop">
              <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">💎</div>
              <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-4">Confirmar Canje</h3>
              <button @click="confirmarCanjeo" :disabled="isProcessingPayment" class="w-full py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm mb-2">
@@ -597,9 +596,13 @@ const auth = useAuthStore()
 const router = useRouter()
 const userCookie = useCookie('user')
 
-useHead({ 
-  title: 'Marketplace',
-  meta: [ { name: 'theme-color', content: '#ffffff' } ]
+// SEO and Meta
+useHead({
+  title: 'MiSeguro - Marketplace',
+  meta: [
+    { name: 'description', content: 'Marketplace de MiSeguro - Compra paquetes de servicios' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
+  ]
 })
 
 // --- State ---
@@ -1097,17 +1100,13 @@ onMounted(async () => {
 }
 .animate-pulse-subtle { animation: pulse-subtle 2s ease-in-out infinite; }
 
-@keyframes slide-up-spring {
+@keyframes slide-up-custom {
    0% { transform: translateY(100%); }
    100% { transform: translateY(0); }
 }
-.animate-slide-up-spring { animation: slide-up-spring 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards; }
+.animate-slide-up-custom { animation: slide-up-custom 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards; }
 
-@keyframes pop-in {
-   0% { transform: scale(0.9); opacity: 0; }
-   100% { transform: scale(1); opacity: 1; }
-}
-.animate-pop-in { animation: pop-in 0.2s ease-out forwards; }
+
 
 .slide-up-enter-active, .slide-up-leave-active { transition: transform 0.3s ease; }
 .slide-up-enter-from, .slide-up-leave-to { transform: translateY(100%); }
@@ -1115,11 +1114,29 @@ onMounted(async () => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
+/* Modal Pop (Symmetric) */
+.modal-pop-enter-active, .modal-pop-leave-active {
+   transition: opacity 0.3s ease;
+}
+.modal-pop-enter-active .modal-content-pop, .modal-pop-leave-active .modal-content-pop {
+   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-pop-enter-from, .modal-pop-leave-to {
+   opacity: 0;
+}
+.modal-pop-enter-from .modal-content-pop, .modal-pop-leave-to .modal-content-pop {
+   transform: scale(0.9);
+}
+
 /* Bottom Sheet Transitions using <Transition> wrapper */
 /* Control parent duration */
-.bottom-sheet-enter-active, 
+.bottom-sheet-enter-active,
 .bottom-sheet-leave-active {
    transition-duration: 0.4s;
+}
+
+.bs-content {
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Backdrop Fade */
@@ -1134,7 +1151,7 @@ onMounted(async () => {
 
 /* Content Slide */
 .bottom-sheet-enter-active .bs-content {
-   animation: slide-up-spring 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+   animation: slide-up-custom 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards;
 }
 
 .bottom-sheet-leave-active .bs-content {

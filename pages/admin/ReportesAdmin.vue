@@ -1396,7 +1396,7 @@ useHead({
   title: 'MiSeguro - Reportes',
   meta: [
     { name: 'description', content: 'Reportes del sistema MiSeguro - Administrar solicitudes, asignaciones y seguimiento' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no'}
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no'}
   ]
 });
 
