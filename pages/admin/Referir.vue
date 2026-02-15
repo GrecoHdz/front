@@ -194,7 +194,7 @@
 
             <!-- Historial de Ingresos/Retiros con pestañas -->
             <section class="px-4 mb-6">
-              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">Historial de Ingresos/Retiros de Referidos</h2>
+              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">Historial</h2>
               <div class="flex items-center justify-between mb-4">
                 <div class="flex space-x-2">
                   <button 
@@ -380,7 +380,7 @@
                           </div>
                         </div>
                         <div class="text-right">
-                          <p class="font-bold text-red-600 dark:text-red-400">L. {{ formatCurrency(withdrawal.monto) }}</p>
+                          <p class="font-bold" :class="getStatusWithDrawalColor(withdrawal.estado)">L. {{ formatCurrency(withdrawal.monto) }}</p>
                           <p class="text-xs" :class="getStatusWithDrawalColor(withdrawal.estado)">
                             {{ withdrawal.estado }}
                           </p>
@@ -530,6 +530,7 @@
 
             <!-- Historial de Ingresos/Retiros de Paquetes -->
             <section class="px-4 mb-4">
+              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">Historial</h2>
               <div class="flex items-center justify-between mb-3">
                 <div class="flex space-x-2">
                   <button 
@@ -689,7 +690,7 @@
                             </div>
                           </div>
                           <div class="text-right">
-                            <p class="font-bold text-yellow-600 dark:text-yellow-400 text-base">L. {{ formatCurrency(withdrawal.monto) }}</p>
+                            <p class="font-bold text-base" :class="getStatusWithDrawalColor(withdrawal.estado)">L. {{ formatCurrency(withdrawal.monto) }}</p>
                             <p class="text-xs" :class="getStatusWithDrawalColor(withdrawal.estado)">
                               {{ withdrawal.estado }}
                             </p>
@@ -1267,13 +1268,11 @@ const getStatusColor = (status) => {
 }
 
 const getStatusWithDrawalColor = (status) => {
-  const colors = {
-    'completado': 'text-green-600 dark:text-green-400',
-    'pendiente': 'text-yellow-600 dark:text-yellow-400',
-    'procesando': 'text-blue-600 dark:text-blue-400',
-    'rechazado': 'text-red-600 dark:text-red-400'
+  const s = status?.toLowerCase()
+  if (s === 'completado') {
+    return 'text-green-600 dark:text-green-400'
   }
-  return colors[status?.toLowerCase()] || 'text-gray-600 dark:text-gray-400'
+  return 'text-red-600 dark:text-red-400'
 }
 
 const getNoEarningsMessage = () => {
@@ -1522,7 +1521,7 @@ const processTechnicianWithdraw = async () => {
       id_usuario: userId,
       tipo: 'retiro', // O el tipo que use el sistema para retiros de técnicos
       monto: technicianWithdrawForm.value.amount,
-      descripcion: `Retiro de comisiones (Paquetes) a: ${technicianWithdrawForm.value.bankDetails}`
+      descripcion: `Retiro por servicios a: ${technicianWithdrawForm.value.bankDetails}`
     }
 
     const response = await $api('/movimientos', {
@@ -1537,7 +1536,7 @@ const processTechnicianWithdraw = async () => {
     })
 
     if (response && response.success) {
-      // Notificar a administradores
+      // Notificar a los administradores sobre el nuevo retiro
       try {
         await $api('/notificaciones/enviar', {
           method: 'POST',
@@ -1548,11 +1547,26 @@ const processTechnicianWithdraw = async () => {
             'Authorization': `Bearer ${auth.token}`
           },
           body: JSON.stringify({
-            titulo: 'Nueva Petición de Retiro (Técnico)',
+            titulo: 'Nueva Petición de Retiro',
             nombre_rol: 'admin'
           })
-        })
-      } catch (e) { console.error('Error enviando notificación:', e) }
+        });
+         await $api('/notificaciones/enviar', {
+          baseURL: config.public.apiBase,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${auth.token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            titulo: 'Nueva Petición de Retiro',
+            nombre_rol: 'sa'
+          })
+        });
+      } catch (error) {
+        console.error('Error al enviar notificación:', error); 
+      }
 
       showSuccess('¡Retiro Solicitado!', 'Tu solicitud de retiro de comisiones ha sido enviada con éxito.')
       closeTechnicianWithdrawModal()
@@ -1968,7 +1982,7 @@ const processWithdraw = async () => {
       tipo: 'retiro_referido',
       monto: montoMaximoRetiro,
       total_retirado: montoRetiro,
-      descripcion: `Retiro de ${montoMaximoRetiro} a: ${withdrawForm.value.bankDetails}`
+      descripcion: `Retiro por comisión de referidos a: ${withdrawForm.value.bankDetails}`
     };  
     
     let response;

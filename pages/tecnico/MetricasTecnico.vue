@@ -1893,7 +1893,7 @@ const processWithdraw = async () => {
       id_usuario: userCookie.value.id_usuario,
       tipo: 'retiro',
       monto: parseFloat(withdrawForm.amount),
-      descripcion: `Retiro a cuenta bancaria: ${withdrawForm.bankDetails}`
+      descripcion: `Retiro por servicios a cuenta: ${withdrawForm.bankDetails}`
     }
     
     const response = await $api('/movimientos', {

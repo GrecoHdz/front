@@ -31,7 +31,8 @@
           <input 
             v-model="searchQuery"
             type="text" 
-            class="block w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
+            class="block w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-xl tex
+            t-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
             placeholder="¿Qué necesitas hoy?"
           >
         </div>
@@ -130,8 +131,11 @@
                         :src="getOptimizedImage(paquete.imagen, 200, 200)" 
                         class="w-full h-full object-cover"
                      />
-                     <div v-if="userCredit >= paquete.costo" class="absolute bottom-0 left-0 right-0 bg-emerald-500/90 text-white text-[8px] font-bold text-center py-0.5">
+                     <div v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="absolute bottom-0 left-0 right-0 bg-emerald-500/90 text-white text-[8px] font-bold text-center py-0.5">
                         CANJEABLE
+                     </div>
+                     <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute bottom-0 left-0 right-0 bg-orange-500/90 text-white text-[8px] font-bold text-center py-0.5">
+                        🔥 ¡QUEDAN {{ paquete.cantidad }}!
                      </div>
                   </div>
 
@@ -170,8 +174,11 @@
                         class="w-full h-full object-cover"
                      />
                      <!-- Etiqueta Crédito -->
-                     <div v-if="userCredit >= paquete.costo" class="absolute bottom-0 left-0 right-0 bg-emerald-500/90 text-white text-[8px] font-bold text-center py-0.5">
+                     <div v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="absolute bottom-0 left-0 right-0 bg-emerald-500/90 text-white text-[8px] font-bold text-center py-0.5">
                         CANJEABLE
+                     </div>
+                     <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute bottom-0 left-0 right-0 bg-orange-500/90 text-white text-[7px] font-bold text-center py-0.5 uppercase tracking-tighter">
+                        Quedan {{ paquete.cantidad }}
                      </div>
                   </div>
                   <div class="p-2">
@@ -205,7 +212,8 @@
                      <h3 class="text-white font-bold text-lg leading-tight mb-1">{{ paquete.nombre }}</h3>
                      <div class="flex items-center space-x-2">
                         <span class="text-white font-black text-sm">L. {{ formatNumber(paquete.costo) }}</span>
-                        <span v-if="userCredit >= paquete.costo" class="text-[9px] bg-emerald-500/90 text-white px-1.5 py-0.5 rounded font-bold">Canjeable</span>
+                        <span v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="text-[9px] bg-emerald-500/90 text-white px-1.5 py-0.5 rounded font-bold">Canjeable</span>
+                        <span v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="text-[9px] bg-orange-500 text-white px-1.5 py-0.5 rounded font-bold italic animate-pulse">¡Corre! Solo quedan {{ paquete.cantidad }}</span>
                      </div>
                   </div>
                </div>
@@ -242,8 +250,14 @@
                         <div v-else class="w-full h-full flex items-center justify-center text-xl">✨</div>
                         
                         <!-- Etiqueta Canjeable -->
-                        <div v-if="userCredit >= paquete.costo" class="absolute top-2 left-2 bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm z-10">
+                        <div v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="absolute top-2 left-2 bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm z-10">
                            CANJEABLE
+                        </div>
+
+                        <!-- Etiqueta Stock Bajo -->
+                        <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute top-2 left-2 bg-orange-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm z-10 flex items-center gap-1">
+                           <span class="w-1 h-1 bg-white rounded-full animate-ping"></span>
+                           {{ paquete.cantidad }} DISPONIBLES
                         </div>
 
                         <!-- Mini Badge de Precio -->
@@ -272,72 +286,99 @@
       </div>
     </main>
 
-    <!-- Bottom Sheet Detalle (Misma lógica, diseño limpio) -->
+    <!-- Detail Panel (Imagen Grande + Altura Controlada) -->
     <Transition name="bottom-sheet">
        <div 
          v-if="selectedDetailPackage" 
          class="fixed inset-0 z-50 flex flex-col justify-end isolate"
+         @touchmove.stop
        >
-         <!-- Backdrop -->
+         <!-- Backdrop - Bloquea gestos hacia atrás -->
          <div 
-           class="absolute inset-0 bg-black/60 backdrop-blur-[2px] bs-backdrop"
+           class="absolute inset-0 bg-black/40 backdrop-blur-[1px] bs-backdrop"
            @click="closeDetail"
+           @touchmove.prevent.stop
          ></div>
 
-         <!-- Conteido -->
-         <div class="relative w-full bg-white dark:bg-gray-900 rounded-t-[2rem] shadow-2xl overflow-hidden max-h-[85vh] flex flex-col bs-content">
-           <div class="w-full flex justify-center pt-3 pb-1" @click="closeDetail">
-              <div class="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
+         <!-- Contenido Fijo (Altura Moderada) -->
+         <div 
+           class="relative w-full bg-white dark:bg-gray-900 rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] overflow-hidden max-h-[65vh] flex flex-col bs-content"
+           @touchmove.stop
+         >
+           <!-- Cabecera Técnica -->
+           <div class="w-full flex items-center justify-between px-6 py-4 absolute top-0 left-0 z-20 pointer-events-none">
+              <div class="w-10 h-1 bg-white/40 backdrop-blur-md rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-3"></div>
+              <div class="flex-1"></div>
+              <button 
+                 @click="closeDetail"
+                 class="w-9 h-9 rounded-full bg-black/30 backdrop-blur-xl text-white flex items-center justify-center active:scale-90 transition-transform pointer-events-auto"
+              >
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
            </div>
 
-           <div class="overflow-y-auto p-6 pb-28">
-              <div class="aspect-video w-full rounded-2xl bg-gray-100 dark:bg-gray-800 mb-6 overflow-hidden relative shadow-inner">
+           <!-- Área de Scroll Interno -->
+           <div class="overflow-y-auto overscroll-contain no-scrollbar">
+              <!-- Imagen Full-Bleed Panorámica (16:9) -->
+              <div class="aspect-video w-full bg-gray-100 dark:bg-gray-800 mb-6 overflow-hidden relative">
                  <img 
                     v-if="selectedDetailPackage.imagen"
-                    :src="getOptimizedImage(selectedDetailPackage.imagen, 800, 500)" 
+                    :src="getOptimizedImage(selectedDetailPackage.imagen, 1000, 600)" 
                     class="w-full h-full object-cover"
                  />
-                 <!-- Float buttons on image -->
-                 <button 
-                    @click="closeDetail"
-                    class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center backdrop-blur-md"
-                 >
-                    ✕
-                 </button>
-              </div>
+                 <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent"></div>
 
-              <div class="flex justify-between items-start mb-4">
-                 <h2 class="text-xl font-black text-gray-900 dark:text-white leading-tight w-full">
-                    {{ selectedDetailPackage.nombre }}
-                 </h2>
-              </div>
+                  <!-- Diagonal Stock Ribbon (Centrado Vertical y Horizontal) -->
+                  <div v-if="selectedDetailPackage.cantidad !== null && selectedDetailPackage.cantidad > 0 && selectedDetailPackage.cantidad < 5" 
+                     class="absolute top-0 left-0 w-32 h-32 overflow-hidden pointer-events-none z-10"
+                  >
+                     <div class="absolute top-[32px] left-[-48px] w-[170px] h-7 bg-red-600 dark:bg-red-500 shadow-lg transform -rotate-45 border-y border-white/20 flex items-center justify-center">
+                        <span class="text-[10px] font-black text-white uppercase tracking-tighter">🔥 Quedan {{ selectedDetailPackage.cantidad }}</span>
+                     </div>
+                  </div>
+               </div>
 
-              <div class="prose prose-sm dark:prose-invert text-gray-600 dark:text-gray-300">
-                 <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Acerca del paquete</h3>
-                 <p class="text-sm leading-relaxed">{{ selectedDetailPackage.descripcion || 'Sin descripción detallada.' }}</p>
-              </div>
-           </div>
+               <div class="px-6 pb-32">
+                  <div class="mb-6">
+                     <h2 class="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-1">
+                        {{ selectedDetailPackage.nombre }}
+                     </h2>
+                     <div class="flex items-center justify-between">
+                        <p class="text-base font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">L. {{ formatNumber(selectedDetailPackage.costo) }}</p>
+                        <span v-if="userCredit >= selectedDetailPackage.costo" class="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-lg font-bold border border-emerald-500/20">SALDO DISPONIBLE</span>
+                     </div>
+                  </div>
 
-           <div class="absolute bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
+                  <div class="prose prose-sm dark:prose-invert text-gray-500 dark:text-gray-400">
+                     <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Descripción</h3>
+                     <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">{{ selectedDetailPackage.descripcion || 'Sin descripción detallada.' }}</p>
+                  </div>
+               </div>
+            </div>
+
+           <!-- Pie de página fijo -->
+           <div 
+             class="absolute bottom-0 left-0 right-0 p-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800"
+             @touchmove.prevent.stop
+           >
               <div v-if="tienePaquete(selectedDetailPackage.id)">
                  <button 
                     @click="initiateUse(selectedDetailPackage)"
                     :disabled="getEstadoPaquete(selectedDetailPackage.id) !== 'Adquirido'"
-                    class="w-full py-3.5 rounded-xl font-black text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg"
+                    class="w-full py-4 rounded-2xl font-black text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xl"
                  >
-                    {{ getEstadoPaquete(selectedDetailPackage.id) === 'En uso' ? 'En Uso' : 'Usar Paquete' }}
+                    {{ getEstadoPaquete(selectedDetailPackage.id) === 'En uso' ? 'En Uso' : 'Usar Ahora' }}
                  </button>
               </div>
               
               <div v-else class="flex gap-3">
                  <button 
                     @click="initiatePurchase(selectedDetailPackage)"
-                    class="flex-1 py-3.5 rounded-xl font-black text-base text-white shadow-xl active:scale-95 transition-transform"
-                    :class="userCredit >= selectedDetailPackage.costo ? 'bg-gradient-to-r from-blue-600 to-indigo-600' : 'bg-gray-900 dark:bg-gray-700'"
+                    class="flex-1 py-4 rounded-2xl font-black text-base text-white shadow-xl active:scale-95 transition-transform"
+                    :class="userCredit >= selectedDetailPackage.costo ? 'bg-blue-600' : 'bg-gray-900 dark:bg-gray-700'"
                  >
-                    <span v-if="userCredit >= selectedDetailPackage.costo">Canjear </span>
-                    <span v-else>Adquirir </span>
-                    <span>L. {{ formatNumber(selectedDetailPackage.costo) }}</span>
+                    <span v-if="userCredit >= selectedDetailPackage.costo">Canjear Ahora</span>
+                    <span v-else>Adquirir L. {{ formatNumber(selectedDetailPackage.costo) }}</span>
                  </button>
               </div>
            </div>
@@ -389,31 +430,52 @@
                <p class="text-xs font-bold text-gray-400 mt-1">Total a transferir</p>
             </div>
 
-            <!-- Lista Bancos (Grid 2 por fila) -->
-            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Cuentas Disponibles</label>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-               <div 
-                  v-for="acc in bankAccounts" 
-                  :key="acc.id_cuenta"
-                  @click="verDatosCuenta(acc)"
-                  class="p-3 rounded-xl border transition-all flex flex-col justify-between h-24 active:scale-95 cursor-pointer"
-                  :class="selectedAccountObject?.id_cuenta === acc.id_cuenta ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700'"
-               >
-                  <div>
-                     <p class="font-bold text-xs mb-1 line-clamp-1 text-gray-900 dark:text-white uppercase">{{ acc.banco }}</p>
-                     <p class="text-[10px] text-gray-500 font-mono">{{ acc.num_cuenta }}</p>
-                  </div>
-                  <!-- Indicador de 'Ver' sutil -->
-                  <div class="mt-auto pt-2 flex justify-end">
-                     <span class="text-[9px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">VER</span>
-                  </div>
-               </div>
-            </div>
+            <!-- Grid de Bancos - Estilo Compacto 3 Columnas -->
+<label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-1">Cuentas Disponibles</label>
+<div class="grid grid-cols-3 gap-2 mb-8">
+   <div 
+      v-for="acc in bankAccounts" 
+      :key="acc.id_cuenta"
+      @click="verDatosCuenta(acc)"
+      class="relative p-3 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 flex flex-col items-center text-center gap-2 border-2"
+      :class="selectedAccountObject?.id_cuenta === acc.id_cuenta 
+        ? 'bg-blue-600 border-blue-600' 
+        : 'bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'"
+   >
+      <!-- Check badge en esquina -->
+      <div 
+         class="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 shadow-md"
+         :class="selectedAccountObject?.id_cuenta === acc.id_cuenta 
+           ? 'bg-white scale-100 opacity-100' 
+           : 'bg-transparent scale-0 opacity-0'"
+      >
+         <svg class="w-3 h-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+         </svg>
+      </div>
 
-            <div v-if="selectedAccountObject" class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl mb-6 border border-blue-100 dark:border-blue-800 flex items-center justify-between">
-               <span class="text-xs font-bold text-blue-600">Banco seleccionado: {{ selectedAccountObject.banco }}</span>
-               <button @click="verDatosCuenta(selectedAccountObject)" class="text-[10px] font-bold text-blue-600 underline">Ver Detalles</button>
-            </div>
+      <!-- Avatar/Logo del banco -->
+      <div 
+         class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200"
+         :class="selectedAccountObject?.id_cuenta === acc.id_cuenta 
+           ? 'bg-white/20' 
+           : 'bg-blue-50 dark:bg-blue-900/30'"
+      >
+         <svg class="w-5 h-5" :class="selectedAccountObject?.id_cuenta === acc.id_cuenta ? 'text-white' : 'text-blue-600 dark:text-blue-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+         </svg>
+      </div>
+
+      <!-- Nombre del banco -->
+      <p class="font-bold text-[10px] leading-tight transition-colors duration-200 line-clamp-2 w-full px-1"
+         :class="selectedAccountObject?.id_cuenta === acc.id_cuenta 
+           ? 'text-white' 
+           : 'text-gray-900 dark:text-white'"
+      >
+         {{ acc.banco }}
+      </p>
+   </div>
+</div>
 
             <!-- Input Comprobante -->
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Referencia de Pago</label>
@@ -436,38 +498,85 @@
       </div>
     </Transition>
 
-    <!-- Modal Detalle Cuenta (Nuevo) -->
-    <Transition name="fade">
-      <div v-if="showAccountDetailModal" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
-         <div class="bg-white dark:bg-gray-800 w-full max-w-[320px] rounded-3xl p-6 relative animate-pop-in">
-            <button @click="showAccountDetailModal = false" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-full text-gray-500">✕</button>
+    <!-- Modal Detalle Cuenta (Professional Fintech Redesign) -->
+    <Transition name="modal-center">
+      <div v-if="showAccountDetailModal" class="fixed inset-0 z-[80] flex items-center justify-center p-4">
+         <!-- Backdrop with deeper blur -->
+         <div class="absolute inset-0 bg-gray-950/40 backdrop-blur-xl mc-backdrop" @click="showAccountDetailModal = false"></div>
+         
+         <div class="bg-white dark:bg-gray-900 w-full max-w-[360px] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden border border-gray-100 dark:border-gray-800 mc-content">
+            <!-- Subtle Header Pattern -->
+            <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 -z-10"></div>
             
-            <div class="text-center mb-6">
-               <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-3xl mx-auto mb-3">🏦</div>
-               <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-0.5">{{ viewingAccount?.banco }}</h3>
-               <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">{{ viewingAccount?.tipo }}</span>
-            </div>
-
-            <!-- Bloque Unificado de Información -->
-            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 text-center mb-6">
-               <div class="mb-4">
-                  <p class="text-[10px] uppercase font-bold text-gray-400 mb-1 tracking-wider">Número de Cuenta</p>
-                  <p class="font-mono font-black text-2xl text-blue-600 dark:text-blue-400 tracking-tight">{{ viewingAccount?.num_cuenta }}</p>
+            <div class="p-6">
+               <!-- Header: Bank Identity -->
+               <div class="flex items-center justify-between mb-8">
+                  <div class="flex items-center gap-3">
+                     <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                     </div>
+                     <div>
+                        <h3 class="font-black text-lg text-gray-900 dark:text-white leading-none mb-1">{{ viewingAccount?.banco }}</h3>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ viewingAccount?.tipo }}</p>
+                     </div>
+                  </div>
+                  <button @click="showAccountDetailModal = false" class="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:scale-110 transition-transform">
+                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
                </div>
-               
-               <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
-                  <p class="text-[10px] uppercase font-bold text-gray-400 mb-1 tracking-wider">Beneficiario</p>
-                  <p class="font-bold text-sm text-gray-900 dark:text-white">{{ viewingAccount?.beneficiario }}</p>
+
+                <!-- Modern Account Card -->
+               <div class="relative group mb-8">
+                  <div class="absolute inset-x-0 -inset-y-0.5 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-2xl blur-sm transition duration-1000"></div>
+                  <div class="relative bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 shadow-sm">
+                     <div class="flex flex-col gap-4">
+                        <div class="flex justify-between items-start">
+                           <div>
+                              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Beneficiario</p>
+                              <p class="text-sm font-bold text-gray-900 dark:text-white">{{ viewingAccount?.beneficiario }}</p>
+                           </div>
+                           <svg class="w-6 h-6 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-50 dark:border-gray-700/50">
+                           <p class="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Número de Cuenta</p>
+                           <div class="flex items-center justify-between cursor-pointer active:opacity-60 transition-opacity" @click="handleCopyAndSelect">
+                              <p class="font-mono font-black text-sm text-gray-900 dark:text-white tracking-tight">
+                                 {{ viewingAccount?.num_cuenta }}
+                              </p>
+                              <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Professional Actions -->
+               <div class="grid grid-cols-1 gap-3">
+                  <button 
+                     @click="handleCopyAndSelect"
+                     class="group relative w-full py-4 bg-gray-900 dark:bg-blue-600 text-white rounded-xl font-bold text-sm overflow-hidden transition-all active:scale-[0.98] shadow-xl shadow-gray-900/20 dark:shadow-blue-600/30"
+                  >
+                     <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                     <div class="relative flex items-center justify-center gap-3">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        <span>Copiar número de cuenta</span>
+                     </div>
+                  </button>
+               </div>
+
+               <!-- Footer security note -->
+               <div class="mt-6 pt-4 border-t border-gray-50 dark:border-gray-800 flex items-center justify-center gap-2 opacity-50">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                  <span class="text-[8px] font-bold uppercase tracking-widest">Pago 100% Seguro</span>
                </div>
             </div>
-
-            <button 
-               @click.stop="copyToClipboard(viewingAccount?.num_cuenta)"
-               class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
-            >
-               <span>Copiar Número de Cuenta</span>
-               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-            </button>
          </div>
       </div>
     </Transition>
@@ -632,7 +741,10 @@ const isValidPaymentForm = computed(() => {
 
 // --- Methods ---
 
-const formatNumber = (val) => new Intl.NumberFormat('es-HN', { minimumFractionDigits: 2 }).format(val || 0)
+const formatAccountNumber = (val) => {
+   if (!val) return ''
+   return val.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim()
+}
 
 const getOptimizedImage = (url, w, h) => {
   if (!url) return null
@@ -656,8 +768,25 @@ const closeDetail = () => {
 
 const verDatosCuenta = (acc) => {
    viewingAccount.value = acc
+   selectedAccountObject.value = acc // Auto-seleccionar al hacer clic
    showAccountDetailModal.value = true
 }
+
+const handleCopyAndSelect = async () => {
+   if (!viewingAccount.value) return
+   const accountNumber = viewingAccount.value.num_cuenta
+   if (!accountNumber) return
+   
+   selectedAccountObject.value = viewingAccount.value
+   await copyToClipboard(accountNumber)
+   
+   // Feedback visual antes de cerrar
+   setTimeout(() => {
+      showAccountDetailModal.value = false
+   }, 1000)
+} 
+
+const formatNumber = (val) => new Intl.NumberFormat('es-HN', { minimumFractionDigits: 2 }).format(val || 0)
 
 // Transaction Triggers
 const initiatePurchase = async (p) => {
@@ -699,7 +828,8 @@ const cargarPaquetes = async () => {
       descripcion: p.descripcion,
       costo: parseFloat(p.costo),
       estado: p.estado,
-      imagen: p.imagen_url
+      imagen: p.imagen_url,
+      cantidad: p.cantidad
     }))
   } finally { cargandoPaquetes.value = false }
 }
@@ -917,7 +1047,38 @@ const sendWA = async (p, ref, type, extraId = null) => {
 
 const showToast = (m, t='success') => { toast.value = { show: true, message: m, type: t }; setTimeout(()=>toast.value.show=false, 3000) }
 const closePaquetePagoModal = () => showPaquetePagoModal.value = false
-const copyToClipboard = (t) => { navigator.clipboard.writeText(t); showToast('Copiado', 'success') }
+const copyToClipboard = async (text) => {
+   try {
+      if (!text) return
+      
+      if (navigator.clipboard && window.isSecureContext) {
+         await navigator.clipboard.writeText(text)
+         showToast('Número de cuenta copiado', 'success')
+         return
+      }
+      
+      const textArea = document.createElement("textarea")
+      textArea.value = text
+      textArea.style.position = "fixed"
+      textArea.style.left = "-9999px"
+      textArea.style.top = "0"
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textArea)
+      
+      if (successful) {
+         showToast('Número de cuenta copiado', 'success')
+      } else {
+         throw new Error('Copiado fallido')
+      }
+   } catch (err) {
+      console.error('Error al copiar:', err)
+      showToast('Error al copiar', 'error')
+   }
+}
 
 onMounted(async () => {
    await Promise.all([fetchUserCredit(), cargarPaquetes(), cargarPaquetesUsuario()])
@@ -983,5 +1144,44 @@ onMounted(async () => {
 
 .bottom-sheet-leave-to .bs-content {
    transform: translateY(100%);
+}
+
+/* Modal Center Transitions */
+.modal-center-enter-active, .modal-center-leave-active {
+   transition: opacity 0.35s ease;
+}
+
+/* Individual element timings - Snappier */
+.modal-center-enter-active .mc-backdrop, 
+.modal-center-leave-active .mc-backdrop {
+   transition: opacity 0.3s ease;
+}
+
+.modal-center-enter-active .mc-content {
+   transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal-center-leave-active .mc-content {
+   transition: all 0.25s cubic-bezier(0.32, 0, 0.67, 0);
+}
+
+/* Entry States */
+.modal-center-enter-from .mc-backdrop {
+   opacity: 0;
+}
+
+.modal-center-enter-from .mc-content {
+   opacity: 0;
+   transform: scale(0.8) translateY(60px);
+}
+
+/* Exit States */
+.modal-center-leave-to .mc-backdrop {
+   opacity: 0;
+}
+
+.modal-center-leave-to .mc-content {
+   opacity: 0;
+   transform: scale(0.9) translateY(20px);
 }
 </style>

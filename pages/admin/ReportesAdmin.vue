@@ -1834,8 +1834,8 @@ const loadMembershipPayments = async (page = 1) => {
         filterCountsCache.value[statsCacheKey] = { ...stats };
       }
       
-      const totalItems = response.total || items.length;
-      const totalPages = Math.ceil(totalItems / limit) || 1;
+      const totalItems = response.total || response.pagination?.total || response.paginacion?.total || items.length;
+      const totalPages = response.totalPages || response.pagination?.totalPages || response.paginacion?.totalPages || Math.ceil(totalItems / limit) || 1;
       
       pagination.value = {
         total: totalItems,
@@ -1983,8 +1983,8 @@ const loadVisitPayments = async (page = 1) => {
         }
       }
       
-      const totalItems = response.total || items.length;
-      const totalPages = Math.ceil(totalItems / limit) || 1;
+      const totalItems = response.total || response.pagination?.total || response.paginacion?.total || items.length;
+      const totalPages = response.totalPages || response.pagination?.totalPages || response.paginacion?.totalPages || Math.ceil(totalItems / limit) || 1;
       
       pagination.value = {
         total: totalItems,
@@ -2145,8 +2145,8 @@ const loadServicePayments = async (page = 1) => {
         }
       }
       
-      const totalItems = response.total || items.length;
-      const totalPages = Math.ceil(totalItems / limit) || 1;
+      const totalItems = response.total || response.pagination?.total || response.paginacion?.total || items.length;
+      const totalPages = response.totalPages || response.pagination?.totalPages || response.paginacion?.totalPages || Math.ceil(totalItems / limit) || 1;
       
       pagination.value = {
         total: totalItems,
@@ -2287,8 +2287,8 @@ const loadWithdrawals = async (page = 1) => {
         }
       }
       
-      const totalItems = response.total || items.length;
-      const totalPages = Math.ceil(totalItems / limit) || 1;
+      const totalItems = response.total || response.paginacion?.total || items.length;
+      const totalPages = response.totalPages || response.paginacion?.totalPages || Math.ceil(totalItems / limit) || 1;
       
       pagination.value = {
         total: totalItems,
@@ -4069,49 +4069,52 @@ const generateReport = async (report) => {
       reportTitle = `Reporte de ${monthName} ${year}`;
     } 
 
-    // Mostrar URLs que se van a consultar
-    console.log('🔍 URLs a consultar:', [
-      `/membresia${monthParam}`,
-      `/pagovisita${monthParam}`,
-      `/movimientos/retiros${monthParam}`,
-      `/cotizacion${monthParam}`,
-      `/usuarios${monthParam}`,
-      `/movimientos/ingresos/tecnicos${monthParam}`,
-      `/paquetes/usuarios/pagos${monthParam}`
-    ].map(url => `${config.public.apiBase}${url}`));
+    // 📊 2️⃣ Definir qué datos necesita cada reporte para optimizar las peticiones
+    const reportNeeds = {
+      1: ['membresia', 'visit', 'withdrawals', 'quotation', 'users', 'techIncome', 'pkgPayments'],
+      2: [], // Este reporte hace sus propias peticiones internas
+      3: ['users'],
+      4: ['membresia', 'visit', 'withdrawals'],
+      5: ['withdrawals']
+    };
+
+    const needs = reportNeeds[report.id] || [];
+
+    // Mostrar URLs que se van a consultar (solo las necesarias)
+    const urlMap = {
+      membresia: `/membresia${monthParam}`,
+      visit: `/pagovisita${monthParam}`,
+      withdrawals: `/movimientos/retiros${monthParam}`,
+      quotation: `/cotizacion${monthParam}`,
+      users: `/usuarios${monthParam}`,
+      techIncome: `/movimientos/ingresos/tecnicos${monthParam}`,
+      pkgPayments: `/paquetes/usuarios/pagos${monthParam}`
+    };
+
+    const urlsToConsult = needs.map(key => urlMap[key]).filter(Boolean);
+    if (urlsToConsult.length > 0) {
+      console.log('🔍 URLs a consultar:', urlsToConsult.map(url => `${config.public.apiBase}${url}`));
+    }
     
-    // 📦 2️⃣ Obtener datos base comunes
+    // 📦 3️⃣ Obtener solo los datos necesarios
+    const promises = {
+      membershipRes: needs.includes('membresia') ? $api(urlMap.membresia).catch(err => { console.error('❌ Error en /membresia:', err); throw err; }) : Promise.resolve(null),
+      visitRes: needs.includes('visit') ? $api(urlMap.visit).catch(err => { console.error('❌ Error en /pagovisita:', err); throw err; }) : Promise.resolve(null),
+      withdrawalsRes: needs.includes('withdrawals') ? $api(urlMap.withdrawals).catch(err => { console.error('❌ Error en /movimientos/retiros:', err); throw err; }) : Promise.resolve(null),
+      quotationRes: needs.includes('quotation') ? $api(urlMap.quotation).catch(err => { console.error('❌ Error en /cotizacion:', err); throw err; }) : Promise.resolve(null),
+      usersRes: needs.includes('users') ? $api(urlMap.users).catch(err => { console.error('❌ Error en /usuarios:', err); throw err; }) : Promise.resolve(null),
+      technicianIncomeRes: needs.includes('techIncome') ? $api(urlMap.techIncome).catch(err => { console.error('❌ Error en /movimientos (ingresos):', err); return { movimientos: [], data: [] }; }) : Promise.resolve({ movimientos: [], data: [] }),
+      packagePaymentsRes: needs.includes('pkgPayments') ? $api(urlMap.pkgPayments).catch(err => { console.error('❌ Error en /paquetes/usuarios/pagos:', err); return { data: [], estadisticas: { total: 0 } }; }) : Promise.resolve({ data: [], estadisticas: { total: 0 } })
+    };
+
     const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes, packagePaymentsRes] = await Promise.all([
-      $api(`/membresia${monthParam}`).catch(err => {
-        console.error('❌ Error en /membresia:', err);
-        throw err;
-      }),
-      $api(`/pagovisita${monthParam}`).catch(err => {
-        console.error('❌ Error en /pagovisita:', err);
-        throw err;
-      }),
-      $api(`/movimientos/retiros${monthParam}`).catch(err => {
-        console.error('❌ Error en /movimientos/retiros:', err);
-        throw err;
-      }),
-      $api(`/cotizacion${monthParam}`).catch(err => {
-        console.error('❌ Error en /cotizacion:', err);
-        throw err;
-      }),
-      $api(`/usuarios${monthParam}`).catch(err => {
-        console.error('❌ Error en /usuarios:', err);
-        throw err;
-      }),
-      // Obtener movimientos de tipo ingreso (pagos a técnicos) para restar del ingreso de la app
-      $api(`/movimientos/ingresos/tecnicos${monthParam}`).catch(err => {
-        console.error('❌ Error en /movimientos (ingresos):', err);
-        return { movimientos: [], data: [] }; // Fallback
-      }),
-      // Obtener pagos de paquetes aprobados
-      $api(`/paquetes/usuarios/pagos${monthParam}`).catch(err => {
-        console.error('❌ Error en /paquetes/usuarios/pagos:', err);
-        return { data: [], estadisticas: { total: 0 } };
-      })
+      promises.membershipRes,
+      promises.visitRes,
+      promises.withdrawalsRes,
+      promises.quotationRes,
+      promises.usersRes,
+      promises.technicianIncomeRes,
+      promises.packagePaymentsRes
     ]);
 
     // Mostrar resumen de datos obtenidos
@@ -4158,7 +4161,7 @@ const generateReport = async (report) => {
     const withdrawalsData = {
       label: 'Retiros',
       total: withdrawalsRes?.estadisticas?.total || 0,
-      data: withdrawalsRes?.data || [],
+      data: withdrawalsRes?.movimientos || withdrawalsRes?.data || [],
       stats: withdrawalsRes?.estadisticas || {}
     };
 
@@ -4184,10 +4187,19 @@ const generateReport = async (report) => {
     // Asegurar que serviceData.total refleje solo los confirmados (aunque el backend ya lo hace)
     serviceData.total = parseFloat(quotationRes?.estadisticas?.total || 0);
 
-    // 💰 4️⃣ Cálculos de balance
-    const ingresosTotales = membershipData.total + visitData.total + serviceData.total + packagePaymentsData.total;
-    const retirosTotales = withdrawalsData.total;
-    const balanceNeto = ingresosTotales - retirosTotales;
+    // 💰 4️⃣ Cálculos de balance (Solo para reporte financiero ID 1)
+    let ingredientesReporte = {};
+    if (report.id === 1) {
+      const ingresosTotales = (membershipRes?.estadisticas?.total || 0) + 
+                             (visitRes?.estadisticas?.total || 0) + 
+                             (quotationRes?.estadisticas?.total || 0) + 
+                             (packagePaymentsRes?.estadisticas?.total || 0);
+      const retirosTotales = (withdrawalsRes?.estadisticas?.total || 0);
+      const balanceNeto = ingresosTotales - retirosTotales;
+      
+      ingredientesReporte = { balanceNeto };
+    }
+    const { balanceNeto } = ingredientesReporte;
 
     // 🧾 5️⃣ Crear documento PDF usando el plugin $pdf
     const { $pdf } = useNuxtApp();
@@ -4373,11 +4385,34 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto }) => {
-  // Recalcular total de servicios usando la comisión guardada directamente
-  const totalServiciosReal = serviceData.data
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto: balanceNetoParam }) => {
+  // 1️⃣ Recalcular TODOS los totales basados en los datos filtrados que se mostrarán en las tablas
+  const totalMembresias = membershipData.data
+    .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
+    .reduce((sum, m) => sum + (parseFloat(m.monto) || 0), 0);
+    
+  const totalVisitas = visitData.data
+    .filter(v => v.estado?.toLowerCase() === 'aprobado')
+    .reduce((sum, v) => sum + (parseFloat(v.monto) || 0), 0);
+    
+  const totalServicios = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
     .reduce((sum, s) => sum + (parseFloat(s.monto_comision_app) || 0), 0);
+    
+  const totalPaquetes = packagePaymentsData.data
+    .filter(p => p.estado?.toLowerCase() !== 'rechazado')
+    .reduce((sum, p) => sum + (parseFloat(p.monto_comision) || 0), 0);
+    
+  // Cálculo de Ingresos Totales (consistente con lo que se muestra abajo)
+  const totalIngresos = totalMembresias + totalVisitas + totalServicios + totalPaquetes;
+
+  // Cálculo de Retiros Totales (solo completados o aprobados)
+  const totalRetiros = withdrawalsData.data
+    .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
+    .reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
+
+  // Balance Neto recalculado para consistencia visual
+  const balanceNeto = totalIngresos - totalRetiros;
 
   // Usar autoTable del documento
   let currentY = 40;
@@ -4390,7 +4425,6 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   currentY += 4;
 
   // 📊 Calcular porcentajes
-  const totalIngresos = membershipData.total + visitData.total + totalServiciosReal + packagePaymentsData.total;
   const calcPorcentaje = (valor) => totalIngresos > 0 ? ((valor / totalIngresos) * 100).toFixed(1) + '%' : '0%';
 
   // 📋 Tabla resumen de totales
@@ -4398,10 +4432,10 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     startY: currentY,
     head: [['Concepto', 'Total (HNL)', 'Porcentaje (%)']],
     body: [
-      ['Membresías', formatCurrency(membershipData.total), calcPorcentaje(membershipData.total)],
-      ['Visitas Técnicas', formatCurrency(visitData.total), calcPorcentaje(visitData.total)],
-      ['Venta de Paquetes', formatCurrency(packagePaymentsData.total), calcPorcentaje(packagePaymentsData.total)],
-      ['Comisión por Servicios', formatCurrency(totalServiciosReal), calcPorcentaje(totalServiciosReal)],
+      ['Membresías', formatCurrency(totalMembresias), calcPorcentaje(totalMembresias)],
+      ['Visitas Técnicas', formatCurrency(totalVisitas), calcPorcentaje(totalVisitas)],
+      ['Venta de Paquetes', formatCurrency(totalPaquetes), calcPorcentaje(totalPaquetes)],
+      ['Comisión por Servicios', formatCurrency(totalServicios), calcPorcentaje(totalServicios)],
       ['Total Ingresos', formatCurrency(totalIngresos), '-']
     ],
     theme: 'grid',
@@ -4474,24 +4508,6 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       formatCurrency(p.monto_comision)
     ]);
 
-  // Calculate totals from original data instead of formatted strings
-  const totalMembresias = membershipData.data
-    .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
-    .reduce((sum, m) => sum + (parseFloat(m.monto) || 0), 0);
-    
-  const totalVisitas = visitData.data
-    .filter(v => v.estado?.toLowerCase() === 'aprobado')
-    .reduce((sum, v) => sum + (parseFloat(v.monto) || 0), 0);
-    
-    
-  const totalServicios = totalServiciosReal;
-    
-  const totalPaquetes = packagePaymentsData.data
-    .filter(p => p.estado?.toLowerCase() !== 'rechazado')
-    .reduce((sum, p) => sum + (parseFloat(p.monto_comision) || 0), 0);
-    
-  const totalIngresosTabla = totalMembresias + totalVisitas + totalServicios + totalPaquetes;
-
   const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0 || paquetesFiltrados.length > 0;
 
   doc.autoTable({
@@ -4505,7 +4521,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
           ...serviciosFiltrados,
           [
             { content: 'TOTAL INGRESOS', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: formatCurrency(totalIngresosTabla), styles: { fontStyle: 'bold' } }
+            { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold' } }
           ]
         ]
       : [[{ content: 'No hay datos disponibles', colSpan: 6, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
@@ -4541,7 +4557,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   currentY += 4;
 
   const retirosFiltrados = withdrawalsData.data
-    .filter(r => r.estado?.toLowerCase() === 'completado')
+    .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
     .map(r => [
       formatDate(r.fecha),
       r.nombre_usuario || '-',
@@ -4561,7 +4577,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
           [
             { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
             { content: '', styles: { fontStyle: 'bold' } },
-            { content: formatCurrency(withdrawalsData.total), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }
+            { content: formatCurrency(totalRetiros), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }
           ]
         ]
       : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
@@ -4599,7 +4615,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     head: [['Concepto', 'Monto (HNL)']],
     body: [
       [{ content: 'Total Ingresos', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
-      [{ content: 'Total Retiros', styles: { fontStyle: 'bold', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(withdrawalsData.total)}`, styles: { fontStyle: 'bold', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: 'Total Retiros', styles: { fontStyle: 'bold', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetiros)}`, styles: { fontStyle: 'bold', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
       [{ content: 'GANANCIA NETA', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
        { content: formatCurrency(balanceNeto), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }]
     ],
@@ -4629,7 +4645,7 @@ const generarReporteRetiros = async (doc, withdrawalsData) => {
   currentY += 8;
 
   const retirosFiltrados = withdrawalsData.data
-    .filter(r => r.estado?.toLowerCase() === 'completado')
+    .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
     .map(r => [
       formatDate(r.fecha),
       r.nombre_usuario || '-',
@@ -4639,7 +4655,7 @@ const generarReporteRetiros = async (doc, withdrawalsData) => {
     ]);
 
   const totalRetirosReal = withdrawalsData.data
-    .filter(r => r.estado?.toLowerCase() === 'completado')
+    .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
     .reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
     
   const hayRetiros = retirosFiltrados.length > 0;
@@ -4675,9 +4691,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
   // 🔹 Título principal
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(93, 92, 222);
-  doc.setFontSize(14);
-  doc.text('REPORTE DE USUARIOS', 10, currentY);
-  currentY += 8;
+  doc.setFontSize(14);  
 
   // ============================================================
   // 1️⃣ TABLA DE CLIENTES
@@ -4689,7 +4703,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
   doc.setFontSize(12);
   doc.setTextColor(93, 92, 222);
   doc.text('Clientes Registrados', 10, currentY);
-  currentY += 8;
+  currentY += 4;
 
   const clientesBody = clientes.map(c => [
     formatDate(c.fecha_registro),
@@ -4723,18 +4737,18 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     bodyStyles: { fontSize: 8 },
     columnStyles: {
       0: { cellWidth: 25 },
-      1: { cellWidth: 35 },
+      1: { cellWidth: 'auto' },
       2: { cellWidth: 25 },
       3: { cellWidth: 30 },
-      4: { cellWidth: 25 },
-      5: { cellWidth: 22, halign: 'right' },
-      6: { cellWidth: 25, halign: 'right' }
+      4: { cellWidth: 22 },
+      5: { cellWidth: 20, halign: 'right' },
+      6: { cellWidth: 23, halign: 'right' }
     },
     margin: { left: 10, right: 10 },
     pageBreak: 'auto'
   });
 
-  currentY = doc.lastAutoTable.finalY + 5;
+  currentY = doc.lastAutoTable.finalY + 10;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4754,7 +4768,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
   doc.setFontSize(12);
   doc.setTextColor(93, 92, 222);
   doc.text('Técnicos Registrados', 10, currentY);
-  currentY += 8;
+  currentY += 4;
 
   const tecnicosBody = tecnicos.map(t => [
     formatDate(t.fecha_registro),
@@ -4785,17 +4799,17 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     bodyStyles: { fontSize: 8 },
     columnStyles: {
       0: { cellWidth: 25 },
-      1: { cellWidth: 53 },
+      1: { cellWidth: 'auto' },
       2: { cellWidth: 30 },
-      3: { cellWidth: 35 },
-      4: { cellWidth: 25 },
-      5: { cellWidth: 20, halign: 'right' }
+      3: { cellWidth: 30 },
+      4: { cellWidth: 22 },
+      5: { cellWidth: 18, halign: 'right' }
     },
     margin: { left: 10, right: 10 },
     pageBreak: 'auto'
   });
 
-  currentY = doc.lastAutoTable.finalY + 5;
+  currentY = doc.lastAutoTable.finalY + 10;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4811,7 +4825,7 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
   doc.setFontSize(12);
   doc.setTextColor(93, 92, 222);
   doc.text('Estadísticas Generales (Actuales)', 10, currentY);
-  currentY += 6;
+  currentY += 4;
 
   const statsCol1 = [
     ['Usuarios activos', stats.activos || 0],
@@ -4901,7 +4915,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
     doc.setTextColor(93, 92, 222);
     doc.setFontSize(13);
     doc.text('SERVICIOS ACTIVOS CON PAGO DE VISITA', 10, currentY);
-    currentY += 6;
+    currentY += 4;
 
     const headers = ['Fecha Solicitud', 'Cliente', 'Técnico', 'Servicio', 'Ubicación', 'Estado', 'Monto Total'];
     const rows = serviciosActivosConPago.map(s => ([
@@ -4925,7 +4939,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 5;
+    currentY = doc.lastAutoTable.finalY + 12;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4940,7 +4954,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
     doc.setTextColor(93, 92, 222);
     doc.setFontSize(13);
     doc.text('SERVICIOS ACTIVOS SIN PAGO DE VISITA', 10, currentY);
-    currentY += 6;
+    currentY += 4;
 
     const headers = ['Fecha Solicitud', 'Cliente', 'Técnico', 'Servicio', 'Ubicación', 'Estado', 'Monto Total'];
     const rows = serviciosActivosSinPago.map(s => ([
@@ -4964,7 +4978,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 5;
+    currentY = doc.lastAutoTable.finalY + 12;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -4979,7 +4993,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
     doc.setTextColor(93, 92, 222);
     doc.setFontSize(13);
     doc.text('SERVICIOS TERMINADOS', 10, currentY);
-    currentY += 6;
+    currentY += 4;
 
     const headers = ['Fecha Solicitud', 'Cliente', 'Técnico', 'Servicio', 'Ubicación', 'Estado', 'Monto Total'];
     const rows = serviciosTerminados.map(s => ([
@@ -5009,7 +5023,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       pageBreak: 'auto'
     });
 
-    currentY = doc.lastAutoTable.finalY + 5;
+    currentY = doc.lastAutoTable.finalY + 10;
   
   // Agregar nueva página si es necesario
   if (currentY > 250) {
@@ -5032,7 +5046,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
     doc.setFontSize(13);
     doc.setTextColor(93, 92, 222);
     doc.text('DESGLOSE POR TIPO DE SERVICIO', 10, currentY);
-    currentY += 5;
+    currentY += 4;
 
     doc.autoTable({
       startY: currentY,
@@ -5045,7 +5059,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       pageBreak: 'auto'
     });
     
-    currentY = doc.lastAutoTable.finalY + 5;
+    currentY = doc.lastAutoTable.finalY + 12;
   }
   
   // ========= 5️⃣ PAQUETES ADQUIRIDOS =========
@@ -5060,7 +5074,7 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
     doc.setFontSize(13);
     doc.setTextColor(93, 92, 222);
     doc.text('PAQUETES UTILIZADOS', 10, currentY);
-    currentY += 5;
+    currentY += 4;
 
     const headers = ['Fecha de Compra', 'Usuario', 'Paquete', 'Estado'];
     const rows = paquetesData.data.map(p => ([
@@ -5110,17 +5124,18 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
       monto: parseFloat(v?.monto || 0),
       estado: v?.estado || 'Pendiente'
     })),
-    ...(withdrawalsData?.data || []).map((r) => ({
+    ...(withdrawalsData?.data || []).filter(r => ['completado', 'aprobado'].includes(r?.estado?.toLowerCase())).map((r) => ({
       tipo: r?.tipo === 'retiro_referido' ? 'Retiro Referido' : 'Retiro',
       fecha: r?.fecha || new Date().toISOString(),
       descripcion: r?.descripcion || 'Retiro de fondos',
       monto: -Math.abs(parseFloat(r?.monto || 0)),
       estado: r?.estado || 'Pendiente'
-    }))
+    })),
   ].filter(Boolean);
 
   let currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 12 : 40;
   doc.setFont('helvetica', 'bold');
+
   doc.setTextColor(93, 92, 222);
   doc.setFontSize(14);
   doc.text('REPORTE DE TRANSACCIONES', 10, currentY);
