@@ -869,8 +869,18 @@ const confirmarCanjeo = async () => {
    try {
       isProcessingPayment.value = true
       const p = selectedPaquete.value
-      await $api('/credito', { method: 'POST', baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` }, body: { id_usuario: userCookie.value.id_usuario, monto_credito: -Math.abs(p.costo) } })
-      const res = await $api('/paquetes/usuarios/canjear', { method: 'POST', baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` }, body: { id_paquete: p.id, id_usuario: userCookie.value.id_usuario } })
+      await $api('/credito', { 
+         method: 'POST', 
+         baseURL: config.public.apiBase, 
+         headers: { 'Authorization': `Bearer ${auth.token}` }, 
+         body: { id_usuario: userCookie.value.id_usuario, monto_credito: -Math.abs(p.costo) } 
+      })
+      const res = await $api('/paquetes/usuarios/canjear', { 
+         method: 'POST', 
+         baseURL: config.public.apiBase, 
+         headers: { 'Authorization': `Bearer ${auth.token}` }, 
+         body: { id_paquete: p.id, id_usuario: userCookie.value.id_usuario } 
+      })
       
       if(res.success) {
          showToast('Canjeado con éxito', 'success')
@@ -913,10 +923,17 @@ const confirmarCanjeo = async () => {
          
          showConfirmarCanjeoModal.value = false
          closeDetail()
+      } else {
+         // Mostrar el mensaje de error del servidor
+         showToast(res.error || 'Error al canjear', 'error')
       }
    } catch(e) {
-      showToast('Error al canjear', 'error')
-   } finally { isProcessingPayment.value = false }
+      // Mostrar el mensaje de error si viene en la respuesta
+      const errorMessage = e.data?.error || e.message || 'Error al canjear'
+      showToast(errorMessage, 'error')
+   } finally { 
+      isProcessingPayment.value = false 
+   }
 }
 
 const procesarPagoPaquete = async () => {
