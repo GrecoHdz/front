@@ -16,9 +16,9 @@
         <div class="flex items-center justify-between mb-5">
           <div class="flex items-center space-x-2">
             <div class="relative">
-              <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
-                <div class="w-6 h-6 bg-white rounded-md flex items-center justify-center">
-                  <span class="text-emerald-600 font-bold text-sm">🏠</span>
+              <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+                <div class="w-6 h-6 rounded-md flex items-center justify-center">
+                  <img src="/pwa-192x192.png" alt="MiSeguro" class="w-full h-full object-contain" />
                 </div>
               </div>
             </div>
@@ -330,8 +330,8 @@
         </button>
         <div class="p-6">
           <div class="text-center mb-6 pt-4">
-            <div class="w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl mx-auto mb-3 flex items-center justify-center">
-              <span class="text-white text-xl">🔐</span>
+            <div class="w-14 h-14 bg-emerald-50 rounded-xl mx-auto mb-3 flex items-center justify-center border border-emerald-100 shadow-sm">
+              <img src="/favicon.ico" alt="Logo" class="w-8 h-8 object-contain" />
             </div>
             <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">
               {{ isLogin ? 'Bienvenido' : 'Únete a MiSeguro' }}
@@ -886,6 +886,16 @@ const config = useRuntimeConfig()
 const router = useRouter()
 const auth = useAuthStore()
 const userCookie = useCookie('user')
+
+// SEO and Meta
+useHead({
+  title: 'MiSeguro - Servicios Técnicos a Domicilio',
+  meta: [
+    { name: 'description', content: 'MiSeguro - Servicios Técnicos a Domicilio' }, 
+    { name: 'keywords', content: 'MiSeguro, Servicios Técnicos a Domicilio' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
+  ]
+})
 
 // Reactive data
 const showLoginModal = ref(false)

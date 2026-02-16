@@ -998,6 +998,40 @@
         </div>
       </div>
     </Transition>
+    <!-- Modal de Confirmación Activar Notificaciones -->
+    <Transition name="fade">
+      <div v-if="showSubscribeModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSubscribeModal = false"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl w-full max-w-sm relative z-10 border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-blue-500"></div>
+          
+          <div class="text-center mb-6 pt-2">
+            <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+              🔔
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¡Mantente informado!</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed px-2">
+              Activando las notificaciones te avisaremos sobre el estado de tus servicios y promociones exclusivas.
+            </p>
+          </div>
+          
+          <div class="flex flex-col gap-3">
+            <button 
+              @click="confirmSubscribe"
+              class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200 dark:shadow-none"
+            >
+              Sí, activar alertas
+            </button>
+            <button 
+              @click="showSubscribeModal = false"
+              class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
+            >
+              Ahora no
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div> 
 </template>
 <style scoped>
@@ -1322,6 +1356,7 @@ const auth = useAuthStore()
 const { subscribe, unsubscribe, isSubscribed, checkSubscription, isSupported, permission } = usePushNotifications()
 
 const showUnsubscribeModal = ref(false)
+const showSubscribeModal = ref(false)
 
 
 
@@ -1665,11 +1700,31 @@ const handleSubscribe = async () => {
 };
 
 const handleToggleNotifications = async () => {
-  if (isSubscribed.value) {
-    showUnsubscribeModal.value = true
-  } else {
-    await subscribe()
-  }
+    if (isSubscribed.value) {
+        showUnsubscribeModal.value = true
+    } else {
+        showSubscribeModal.value = true
+    }
+}
+
+const confirmSubscribe = async () => {
+    try {
+        showSubscribeModal.value = false
+        const result = await subscribe()
+        
+        if (result.success) {
+            showSuccess('¡Éxito!', 'Notificaciones activadas correctamente')
+        } else if (result.error === 'denied') {
+            showError('Permiso denegado', 'Debes permitir las notificaciones en tu navegador')
+        } else if (result.error === 'supported') {
+            showError('No soportado', 'Tu navegador no soporta notificaciones push')
+        } else {
+            showError('Error', result.error || 'No se pudieron activar las notificaciones')
+        }
+    } catch (error) {
+        console.error('Error al suscribir:', error)
+        showError('Error', 'Ocurrió un error inesperado al activar las notificaciones')
+    }
 }
 
 const confirmUnsubscribe = async () => {

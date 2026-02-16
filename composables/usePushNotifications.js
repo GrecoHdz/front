@@ -48,8 +48,7 @@ export const usePushNotifications = () => {
 
     const subscribe = async () => {
         if (!isSupported.value) {
-            alert('Tu navegador no soporta notificaciones push.');
-            return;
+            return { success: false, error: 'supported' };
         }
 
         try {
@@ -58,12 +57,10 @@ export const usePushNotifications = () => {
             permission.value = result;
 
             if (result !== 'granted') {
-                alert('Necesitas dar permiso para recibir notificaciones.');
-                return;
+                return { success: false, error: 'denied' };
             }
 
             // 2. Get VAPID key
-            // Ajustar ruta si es necesaria
             const response = await $api('/notificaciones/vapid-key', {
                 baseURL: config.public.apiBase
             });
@@ -74,9 +71,6 @@ export const usePushNotifications = () => {
 
             // 3. Subscribe to Push Manager
             const registration = await navigator.serviceWorker.ready;
-
-            // Unsubscribe existing if any (to clean up) or just use existing?
-            // Mejor usar existing si existe.
             let subscription = await registration.pushManager.getSubscription();
 
             if (!subscription) {
@@ -100,14 +94,14 @@ export const usePushNotifications = () => {
                 });
 
                 isSubscribed.value = true;
-                alert('¡Notificaciones activadas con éxito!');
+                return { success: true };
             } else {
-                console.error('No hay usuario autenticado para asociar la suscripción');
+                throw new Error('No user authenticated');
             }
 
         } catch (error) {
             console.error('Error al suscribirse a push:', error);
-            alert('Ocurrió un error al activar notificaciones: ' + error.message);
+            return { success: false, error: error.message };
         }
     };
 
