@@ -111,11 +111,53 @@ export const usePushNotifications = () => {
         }
     };
 
+    const unsubscribe = async () => {
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+
+            if (subscription) {
+                await subscription.unsubscribe();
+            }
+
+            if (auth.user) {
+                const userId = auth.user.id_usuario;
+
+                try {
+                    await $api(`/notificaciones/suscripcion?id_usuario=${userId}`, {
+                        method: 'DELETE',
+                        baseURL: config.public.apiBase,
+                        body: {
+                            id_usuario: userId
+                        }
+                    });
+                } catch (fetchError) {
+                    console.error('Error al eliminar suscripción en el servidor:', fetchError);
+                    throw fetchError;
+                }
+            }
+
+            isSubscribed.value = false;
+        } catch (error) {
+            console.error('Error al desactivar notificaciones push:', error);
+            throw error;
+        }
+    };
+
+    const dismissInvite = () => {
+        if (process.client) {
+            localStorage.setItem('push_invite_dismissed', Date.now().toString());
+        }
+    };
+
     return {
         isSupported,
         permission,
         isSubscribed,
         subscribe,
-        checkSubscription
+        unsubscribe,
+        checkSubscription,
+        dismissInvite
     };
 };
+

@@ -92,6 +92,9 @@
                 </div>
               </div>
             </section> 
+            
+            <!-- Invitación a notificaciones push -->
+            <UiPushNotificationInvite />
 
             <!-- Quick Actions -->
             <section class="px-2 sm:px-4 mb-3 sm:mb-5">

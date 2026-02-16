@@ -37,22 +37,10 @@
             <p class="text-emerald-100 text-xs">Panel de control</p>
           </div>
         </div>
-        
         <!-- Componente de notificaciones -->
         <NotificationsDropdown 
           @notification-click="onNotificationClick"
         />
-
-        <!-- Botón Activar Push -->
-        <button 
-           v-if="!isSubscribed" 
-           @click="handleSubscribe"
-           class="bg-white/20 text-white px-3 py-1 rounded-lg text-xs font-medium ml-2 hover:bg-white/30 transition-colors flex items-center gap-1 shadow-sm backdrop-blur-sm border border-white/10"
-           title="Recibe notificaciones incluso con la app cerrada"
-        >
-          <span>🔔</span>
-          <span class="hidden sm:inline">Activar</span>
-        </button>
 
       </div>
     </div>
@@ -67,23 +55,15 @@ import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 import { useRuntimeConfig, useNuxtApp } from '#imports';
 import { useRouter } from 'vue-router'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
-import { usePushNotifications } from '~/composables/usePushNotifications';
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+
 
 // ===== CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const isLoading = ref(false)
-const { subscribe, isSubscribed, checkSubscription } = usePushNotifications();
 
-// Validar suscripción al montar
-onMounted(() => {
-  checkSubscription();
-});
-
-const handleSubscribe = async () => {
-  await subscribe();
-};
 
 // Toast state
 const toast = reactive({

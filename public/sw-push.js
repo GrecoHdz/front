@@ -1,6 +1,4 @@
 self.addEventListener('push', (event) => {
-    console.log('[Service Worker] Push Received.');
-    console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
 
     const data = event.data ? event.data.json() : {};
     const title = data.title || 'Nueva notificación';

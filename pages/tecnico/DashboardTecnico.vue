@@ -50,6 +50,9 @@
             </div>
           </section>
 
+          <!-- Invitación a notificaciones push -->
+          <UiPushNotificationInvite />
+
           <!-- Stats Cards -->
           <section class="px-3 sm:px-6 mb-6">
             <div class="grid grid-cols-2 gap-2 sm:gap-4">

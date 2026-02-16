@@ -24,6 +24,9 @@
         <!-- Main Content -->
         <main class="pb-4">
       
+      <!-- Invitación a notificaciones push -->
+      <UiPushNotificationInvite />
+      
       <!-- Welcome Section -->
       <section class="px-4 py-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 relative overflow-hidden">
@@ -51,7 +54,7 @@
             </div>
           </div>
         </div>
-      </section>
+      </section> 
 
       <!-- Stats Cards -->
       <section class="px-4 mb-4">
