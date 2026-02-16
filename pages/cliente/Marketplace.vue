@@ -293,9 +293,9 @@
          class="fixed inset-0 z-50 flex flex-col justify-end isolate"
          @touchmove.stop
        >
-         <!-- Backdrop - Bloquea gestos hacia atrás -->
+         <!-- Backdrop - Optimized for performance -->
          <div 
-           class="absolute inset-0 bg-black/40 backdrop-blur-[1px] bs-backdrop"
+           class="absolute inset-0 bg-black/60 bs-backdrop"
            @click="closeDetail"
            @touchmove.prevent.stop
          ></div>
@@ -1155,34 +1155,32 @@ onMounted(async () => {
    transform: scale(0.9);
 }
 
-/* Bottom Sheet Transitions using <Transition> wrapper */
-/* Control parent duration */
-.bottom-sheet-enter-active,
-.bottom-sheet-leave-active {
-   transition-duration: 0.4s;
+/* Bottom Sheet Transitions */
+.bottom-sheet-enter-active, .bottom-sheet-leave-active {
+  transition: opacity 0.3s ease;
 }
 
 .bs-content {
   box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15) !important;
+  will-change: transform; /* Hint to browser for faster animation */
 }
 
 /* Backdrop Fade */
-.bottom-sheet-enter-active .bs-backdrop { transition: opacity 0.4s ease; }
+.bottom-sheet-enter-active .bs-backdrop { transition: opacity 0.3s ease; }
 .bottom-sheet-enter-from .bs-backdrop { opacity: 0; }
 .bottom-sheet-enter-to .bs-backdrop { opacity: 1; }
 
-.bottom-sheet-leave-active .bs-backdrop { transition: opacity 0.3s ease; }
+.bottom-sheet-leave-active .bs-backdrop { transition: opacity 0.25s ease; }
 .bottom-sheet-leave-from .bs-backdrop { opacity: 1; }
 .bottom-sheet-leave-to .bs-backdrop { opacity: 0; }
 
-
 /* Content Slide */
 .bottom-sheet-enter-active .bs-content {
-   animation: slide-up-custom 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+   animation: slide-up-custom 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 .bottom-sheet-leave-active .bs-content {
-   transition: transform 0.3s ease-in;
+   transition: transform 0.4s ease-in;
    transform: translateY(0);
 }
 

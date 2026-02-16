@@ -293,9 +293,9 @@
          class="fixed inset-0 z-50 flex flex-col justify-end isolate"
          @touchmove.stop
        >
-         <!-- Backdrop - Bloquea gestos hacia atrás -->
+         <!-- Backdrop - Optimized for performance -->
          <div 
-           class="absolute inset-0 bg-black/40 backdrop-blur-[1px] bs-backdrop"
+           class="absolute inset-0 bg-black/60 bs-backdrop"
            @click="closeDetail"
            @touchmove.prevent.stop
          ></div>
@@ -816,7 +816,9 @@ const fetchUserCredit = async () => {
   try {
     const user = userCookie.value
     if (!user) return
-    const res = await $api(`/credito/usuario/${user.id_usuario}`, { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` }})
+    const res = await $api(`/credito/usuario/${user.id_usuario}`, {
+      method: 'GET'
+    })
     if (res?.success) userCredit.value = res.data.monto_credito
   } catch(e) {}
 }
@@ -824,7 +826,13 @@ const fetchUserCredit = async () => {
 const cargarPaquetes = async () => {
   cargandoPaquetes.value = true
   try {
-    const res = await $api('/paquetes/activos', { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` }, params: { id_ciudad: userCookie.value?.id_ciudad, id_usuario: userCookie.value?.id_usuario } })
+    const res = await $api('/paquetes/activos', {
+      method: 'GET',
+      params: { 
+        id_ciudad: userCookie.value?.id_ciudad, 
+        id_usuario: userCookie.value?.id_usuario 
+      } 
+    })
     paquetesMantenimiento.value = res.map(p => ({
       id: p.id_paquete,
       nombre: p.nombre,
@@ -839,7 +847,9 @@ const cargarPaquetes = async () => {
 
 const cargarPaquetesUsuario = async () => {
    try {
-      const res = await $api(`/paquetes/usuarios/${userCookie.value.id_usuario}`, { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } })
+      const res = await $api(`/paquetes/usuarios/${userCookie.value.id_usuario}`, {
+        method: 'GET'
+      })
       if(res.success) paquetesUsuario.value = res.data
    } catch(e) {}
 }
@@ -847,7 +857,9 @@ const cargarPaquetesUsuario = async () => {
 const cargarCuentas = async () => {
    isLoadingAccounts.value = true
    try {
-      const res = await $api('/cuentas', { baseURL: config.public.apiBase })
+      const res = await $api('/cuentas', {
+        method: 'GET'
+      })
       if(Array.isArray(res)) bankAccounts.value = res
    } finally { isLoadingAccounts.value = false }
 }
@@ -871,15 +883,17 @@ const confirmarCanjeo = async () => {
       const p = selectedPaquete.value
       await $api('/credito', { 
          method: 'POST', 
-         baseURL: config.public.apiBase, 
-         headers: { 'Authorization': `Bearer ${auth.token}` }, 
-         body: { id_usuario: userCookie.value.id_usuario, monto_credito: -Math.abs(p.costo) } 
+         body: { 
+            id_usuario: userCookie.value.id_usuario, 
+            monto_credito: -Math.abs(p.costo) 
+         } 
       })
       const res = await $api('/paquetes/usuarios/canjear', { 
          method: 'POST', 
-         baseURL: config.public.apiBase, 
-         headers: { 'Authorization': `Bearer ${auth.token}` }, 
-         body: { id_paquete: p.id, id_usuario: userCookie.value.id_usuario } 
+         body: { 
+            id_paquete: p.id, 
+            id_usuario: userCookie.value.id_usuario 
+         } 
       })
       
       if(res.success) {
@@ -890,32 +904,22 @@ const confirmarCanjeo = async () => {
          // Notificar a los administradores
          try {
             await Promise.all([
+            await Promise.all([
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: {
-                     'Content-Type': 'application/json',
-                     'Accept': 'application/json',
-                     'Authorization': `Bearer ${auth.token}`
-                  },
-                  body: JSON.stringify({
+                  body: {
                      titulo: 'Paquete Adquirido',
                      nombre_rol: 'admin'
-                  })
+                  }
                }),
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: {
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Accept': 'application/json',
-                     'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
+                  body: {
                      titulo: 'Paquete Adquirido',
                      nombre_rol: 'sa'
-                  })
+                  }
                })
+            ])
             ])
          } catch (error) {
             console.error('Error al enviar notificaciones:', error)
@@ -941,8 +945,6 @@ const procesarPagoPaquete = async () => {
       isProcessingPayment.value = true
       const res = await $api('/paquetes/usuarios/canjear', {
          method: 'POST', 
-         baseURL: config.public.apiBase, 
-         headers: { 'Authorization': `Bearer ${auth.token}` },
          body: {
             id_paquete: selectedPaquete.value.id,
             id_usuario: userCookie.value.id_usuario,
@@ -965,21 +967,11 @@ const procesarPagoPaquete = async () => {
             await Promise.all([
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: { 
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+                  body: { ...notificationData, nombre_rol: 'admin' }
                }),
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: { 
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+                  body: { ...notificationData, nombre_rol: 'sa' }
                })
             ])
          } catch (notifierError) {
@@ -1007,7 +999,9 @@ const usarPaquete = async (p) => {
       const pu = paquetesUsuario.value.find(pup => pup.id_paquete === p.id && pup.estado === 'activo')
       if(!pu) throw new Error('Error')
       
-      const res = await $api(`/paquetes/usuarios/${pu.id_paquete_usuario}/activar`, { method: 'PUT', baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } })
+      const res = await $api(`/paquetes/usuarios/${pu.id_paquete_usuario}/activar`, { 
+        method: 'PUT'
+      })
       
       if(res.success) {
          showToast('Paquete Activado', 'success')
@@ -1020,23 +1014,11 @@ const usarPaquete = async (p) => {
             await Promise.all([
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: { 
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Content-Type': 'application/json',
-                     'Accept': 'application/json'
-                  },
-                  body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+                  body: { ...notificationData, nombre_rol: 'admin' }
                }),
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: { 
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Content-Type': 'application/json',
-                     'Accept': 'application/json'
-                  },
-                  body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+                  body: { ...notificationData, nombre_rol: 'sa' }
                })
             ])
          } catch (error) {
@@ -1053,7 +1035,9 @@ const usarPaquete = async (p) => {
 
 const sendWA = async (p, ref, type, extraId = null) => {
    try {
-      const res = await $api('/config/valor/numero_empresa', { baseURL: config.public.apiBase })
+      const res = await $api('/config/valor/numero_empresa', {
+        method: 'GET'
+      })
       const phone = res?.valor || '12345678'
       
       const today = new Date();
@@ -1155,34 +1139,32 @@ onMounted(async () => {
    transform: scale(0.9);
 }
 
-/* Bottom Sheet Transitions using <Transition> wrapper */
-/* Control parent duration */
-.bottom-sheet-enter-active,
-.bottom-sheet-leave-active {
-   transition-duration: 0.4s;
+/* Bottom Sheet Transitions */
+.bottom-sheet-enter-active, .bottom-sheet-leave-active {
+  transition: opacity 0.3s ease;
 }
 
 .bs-content {
   box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15) !important;
+  will-change: transform; /* Hint to browser for faster animation */
 }
 
 /* Backdrop Fade */
-.bottom-sheet-enter-active .bs-backdrop { transition: opacity 0.4s ease; }
+.bottom-sheet-enter-active .bs-backdrop { transition: opacity 0.3s ease; }
 .bottom-sheet-enter-from .bs-backdrop { opacity: 0; }
 .bottom-sheet-enter-to .bs-backdrop { opacity: 1; }
 
-.bottom-sheet-leave-active .bs-backdrop { transition: opacity 0.3s ease; }
+.bottom-sheet-leave-active .bs-backdrop { transition: opacity 0.25s ease; }
 .bottom-sheet-leave-from .bs-backdrop { opacity: 1; }
 .bottom-sheet-leave-to .bs-backdrop { opacity: 0; }
 
-
 /* Content Slide */
 .bottom-sheet-enter-active .bs-content {
-   animation: slide-up-custom 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+   animation: slide-up-custom 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 .bottom-sheet-leave-active .bs-content {
-   transition: transform 0.3s ease-in;
+   transition: transform 0.4s ease-in;
    transform: translateY(0);
 }
 

@@ -3633,12 +3633,7 @@ const cargarCiudades = async () => {
   ciudadesCargando.value = true;
   try {
     const response = await $api('/ciudad', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (response && Array.isArray(response)) {
@@ -3691,14 +3686,8 @@ const guardarCiudad = async () => {
     if (ciudadEditando.value) {
       // Actualizar ciudad existente
       response = await $api(`/ciudad/${ciudadEditando.value}`, {
-        baseURL: config.public.apiBase,
         method: 'PUT',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        },
-        body: JSON.stringify({ nombre_ciudad: formCiudad.value.nombre })
+        body: { nombre_ciudad: formCiudad.value.nombre }
       });
       
       if (response) {
@@ -3707,14 +3696,8 @@ const guardarCiudad = async () => {
     } else {
       // Crear nueva ciudad
       response = await $api('/ciudad', {
-        baseURL: config.public.apiBase,
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        },
-        body: JSON.stringify({ nombre_ciudad: formCiudad.value.nombre })
+        body: { nombre_ciudad: formCiudad.value.nombre }
       });
       
       if (response) {
@@ -3743,12 +3726,7 @@ const confirmarEliminarCiudad = (ciudad) => {
 const eliminarCiudad = async (idCiudad) => {
   try {
     await $api(`/ciudad/${idCiudad}`, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     });
     
     showToastMessage('Ciudad eliminada exitosamente', 'success');
@@ -3778,12 +3756,7 @@ const cargarCuentas = async () => {
   cuentasCargando.value = true;
   try {
     const response = await $api('/cuentas/todas', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (Array.isArray(response)) {
@@ -3851,19 +3824,13 @@ const crearCuenta = async () => {
   try {
     const response = await $api('/cuentas', {
       method: 'POST',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         banco: formCuenta.value.banco,
         beneficiario: formCuenta.value.beneficiario,
         num_cuenta: formCuenta.value.num_cuenta,
         tipo: formCuenta.value.tipo,
         activo: formCuenta.value.activo ? 1 : 0
-      })
+      }
     });
 
     showToastMessage('Cuenta bancaria creada correctamente', 'success');
@@ -3892,13 +3859,7 @@ const actualizarCuenta = async () => {
 
     const response = await $api(`/cuentas/${cuentaEditando.value}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify(datosEnviar)
+      body: datosEnviar
     }); 
 
     showToastMessage('Cuenta bancaria actualizada correctamente', 'success');
@@ -3956,12 +3917,7 @@ const eliminarCuenta = async (cuentaId) => {
   
   try {
     const response = await $api(`/cuentas/${cuentaId}`, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     });
     
     showToastMessage('Cuenta bancaria eliminada correctamente', 'success');
@@ -4006,12 +3962,7 @@ const cargarCorrelativos = async (mostrarExito = false) => {
   try {
     correlativosCargando.value = true;
     const response = await $api('/facturas/correlativos', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     if (response.success) {
       correlativos.value = response.data;
@@ -4127,14 +4078,8 @@ const guardarCorrelativo = async () => {
     const method = correlativoEditando.value ? 'PUT' : 'POST';
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
       method,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify(correlativoForm.value)
+      body: correlativoForm.value
     });
     
     if (response.success) {
@@ -4199,12 +4144,7 @@ const eliminarCorrelativo = async (id) => {
   
   try {
     const response = await $api(`/facturas/correlativos/${id}`, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     });
     
     if (response.success) {
@@ -4402,14 +4342,8 @@ const guardarConfiguraciones = async () => {
       
       try {
         const response = await $api(url, {
-          baseURL: config.public.apiBase,
           method: method,
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
+          body: payload
         });
         
         return response;
@@ -4454,12 +4388,7 @@ const guardarConfiguraciones = async () => {
 const cargarConfiguraciones = async () => {
   try {
     const response = await $api('/config', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (Array.isArray(response)) {
@@ -4542,12 +4471,7 @@ const cargarBeneficios = async () => {
   beneficiosCargando.value = true;
   try {
     const response = await $api('/membresiabeneficios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (response && response.beneficios) {
@@ -4603,17 +4527,11 @@ const crearBeneficio = async () => {
     
     const response = await $api(url, {
       method,
-      baseURL: config.public.apiBase,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         mes_requerido: formBeneficio.value.mes_requerido,
         tipo_beneficio: formBeneficio.value.tipo_beneficio,
         descripcion: formBeneficio.value.descripcion
-      })
+      }
     });
 
     showToastMessage('Beneficio creado correctamente', 'success');
@@ -4636,19 +4554,12 @@ const actualizarBeneficio = async () => {
     
     const response = await $api(url, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`,
-        'X-HTTP-Method-Override': 'PUT'
-      },
-      body: JSON.stringify({
+      body: {
         mes_requerido: formBeneficio.value.mes_requerido,
         tipo_beneficio: formBeneficio.value.tipo_beneficio,
         descripcion: formBeneficio.value.descripcion,
         _method: 'PUT' // Para compatibilidad con Laravel
-      })
+      }
     }); 
     showToastMessage('Beneficio actualizado correctamente', 'success');
     return true;
@@ -4703,12 +4614,7 @@ const eliminarBeneficio = async (beneficioId) => {
   
   try {
     const response = await $api(`/membresiabeneficios/${beneficioId}`, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     });
     
     if (response.success) {
@@ -4753,12 +4659,7 @@ const obtenerCiudades = async () => {
   cargandoCiudades.value = true;
   try {
     const response = await $api('/ciudades', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     ciudades.value = Array.isArray(response) ? response : [];
   } catch (error) {
@@ -4794,12 +4695,7 @@ const seleccionarReferentePredeterminado = async (usuario) => {
   try {
     // Primero obtenemos el ID de la configuración existente
     const configResponse = await $api('/config/valor/referidor_predeterminado', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     const configId = configResponse?.id_config;
@@ -4810,17 +4706,11 @@ const seleccionarReferentePredeterminado = async (usuario) => {
     
     // Actualizar el referidor predeterminado en el backend
     const response = await $api(`/config/${configId}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         tipo_config: 'referidor_predeterminado',
         valor: usuario.id_usuario.toString()
-      })
+      }
     });
 
     // Actualizar el referidor predeterminado localmente
@@ -4842,12 +4732,7 @@ const cargarNotificaciones = async () => {
   isLoadingNotifications.value = true
   try {
     const response = await $api('/notificaciones/manuales', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     if (response.success) {
@@ -4872,13 +4757,7 @@ const crearNotificacion = async () => {
   isCreatingNotification.value = true
   try {
     const response = await $api('/notificaciones', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json'
-      },
       body: {
         tipo: 'manual',
         titulo: nuevaNotificacion.value.titulo.trim(),
@@ -4960,13 +4839,7 @@ const enviarNotificacion = async () => {
     }
 
     const response = await $api('/notificaciones/enviar', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json'
-      },
       body: payload
     })
 
@@ -5023,12 +4896,7 @@ const confirmarEliminarNotificacion = (idNotificacion) => {
 const eliminarNotificacion = async () => {
   try {
     const response = await $api(`/notificaciones/${notificacionAEliminar.value}`, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     });
 
     if (response.success) {
@@ -5056,12 +4924,7 @@ const eliminarNotificacionesLeidas = async () => {
   isDeletingRead.value = true
   try {
     const response = await $api('/notificaciones/eliminar/leidas', {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     })
 
     if (response.success) {
@@ -5102,12 +4965,7 @@ async function eliminarServicio(servicioId) {
     const auth = useAuthStore();
     
     const response = await $api(`/servicios/${servicioId}`, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     });
     
     if (response.success) {
@@ -5130,19 +4988,9 @@ async function cargarServicios() {
   let data;
   try {
     serviciosCargando.value = true;
-    const auth = useAuthStore()
-    
-    if (!auth.token) {
-      throw new Error('No se encontró el token de autenticación');
-    }
     
     const response = await $api('/servicios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (!response) {
@@ -5219,19 +5067,13 @@ async function guardarServicio() {
     const method = servicioEditando.value ? 'PUT' : 'POST';
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
       method: method,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         nombre: formServicio.value.nombre,
         descripcion: formServicio.value.descripcion || null,
         estado: formServicio.value.estado ? 1 : 0,
         id_ciudades: formServicio.value.ciudades_seleccionadas.map(c => c.id_ciudad)
-      })
+      }
     });
 
     // Usar el mensaje del backend si está disponible
@@ -5300,16 +5142,10 @@ async function cambiarEstadoServicio(servicioId, activar) {
     
     // Realizar la petición al servidor
     const response = await $api(`/servicios/${servicioId}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         estado: activar ? 1 : 0
-      })
+      }
     });
     
     // Usar el mensaje del backend si está disponible
@@ -5387,19 +5223,9 @@ async function cargarPaquetes() {
   let data;
   try {
     paquetesCargando.value = true;
-    const auth = useAuthStore();
-    
-    if (!auth.token) {
-      throw new Error('No se encontró el token de autenticación');
-    }
     
     const response = await $api('/paquetes', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (!response) {
@@ -5520,14 +5346,9 @@ async function eliminarImagen() {
       // Enviar petición para eliminar la imagen del backend
       await $api(`/paquetes/imagen/${paqueteEditando.value.id_paquete}`, {
         method: 'DELETE',
-        baseURL: config.public.apiBase,
-        headers: {
-          'Authorization': `Bearer ${auth.token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+        body: {
           public_id: paqueteEditando.value.imagen_public_id
-        })
+        }
       });
       
       // Actualizar el paquete en el frontend
@@ -5623,12 +5444,7 @@ async function guardarPaquete() {
 
     // Realizar la petición
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
       method: method,
-      headers: {
-        'Authorization': `Bearer ${auth.token}`
-        // No establecer Content-Type, se establecerá automáticamente con el boundary
-      },
       body: formData
     });
 
@@ -5682,12 +5498,7 @@ async function eliminarPaquete() {
   try {
     const auth = useAuthStore();
     const response = await $api(`/paquetes/${paqueteAEliminar.value.id_paquete}`, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     });
 
     if (!response) {
@@ -5740,15 +5551,10 @@ async function cambiarEstadoPaquete(paqueteOrId, activar) {
   try {
     const auth = useAuthStore();
     const response = await $api(`/paquetes/desactivar/${paqueteId}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         estado: activar
-      })
+      }
     });
 
     if (response && response.success) {
@@ -5806,12 +5612,7 @@ const formatearFecha = (fecha) => {
 const cargarReferidorPredeterminado = async () => {
   try {
     const response = await $api('/config/valor/referidor_predeterminado', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response && response.usuario) {

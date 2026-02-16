@@ -5,6 +5,7 @@ export const usePushNotifications = () => {
     const isSupported = ref(false);
     const permission = ref('default');
     const isSubscribed = ref(false);
+    const isChecking = ref(true);
     const { $api } = useNuxtApp();
     const config = useRuntimeConfig();
     const auth = useAuthStore();
@@ -12,6 +13,13 @@ export const usePushNotifications = () => {
     if (process.client) {
         isSupported.value = 'serviceWorker' in navigator && 'PushManager' in window;
         permission.value = Notification.permission;
+
+        // Optimistic check from localStorage to avoid flashes
+        const savedStatus = localStorage.getItem('push_subscribed_status');
+        if (savedStatus !== null) {
+            isSubscribed.value = savedStatus === 'true';
+            // We still want to check but if it's true, we avoid showing the invite
+        }
     }
 
     const urlBase64ToUint8Array = (base64String) => {
@@ -30,12 +38,20 @@ export const usePushNotifications = () => {
     };
 
     const checkSubscription = async () => {
-        if (!process.client || !isSupported.value) return;
+        if (!process.client || !isSupported.value) {
+            isChecking.value = false;
+            return;
+        }
 
         try {
+            isChecking.value = true;
             const registration = await navigator.serviceWorker.ready;
             const subscription = await registration.pushManager.getSubscription();
-            isSubscribed.value = !!subscription;
+            const status = !!subscription;
+            isSubscribed.value = status;
+
+            // Persist for next load
+            localStorage.setItem('push_subscribed_status', status.toString());
 
             // Si ya tiene permiso y no está suscrito, preguntar automáticamente? No, mejor manual.
             if (Notification.permission === 'granted' && !subscription) {
@@ -43,6 +59,8 @@ export const usePushNotifications = () => {
             }
         } catch (error) {
             console.error('Error verificando suscripción push:', error);
+        } finally {
+            isChecking.value = false;
         }
     };
 
@@ -94,7 +112,9 @@ export const usePushNotifications = () => {
                 });
 
                 isSubscribed.value = true;
+                localStorage.setItem('push_subscribed_status', 'true');
                 return { success: true };
+
             } else {
                 throw new Error('No user authenticated');
             }
@@ -132,6 +152,7 @@ export const usePushNotifications = () => {
             }
 
             isSubscribed.value = false;
+            localStorage.setItem('push_subscribed_status', 'false');
         } catch (error) {
             console.error('Error al desactivar notificaciones push:', error);
             throw error;
@@ -148,10 +169,10 @@ export const usePushNotifications = () => {
         isSupported,
         permission,
         isSubscribed,
+        isChecking,
         subscribe,
         unsubscribe,
         checkSubscription,
         dismissInvite
     };
 };
-

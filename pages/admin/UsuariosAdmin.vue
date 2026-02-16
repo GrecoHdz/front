@@ -2165,14 +2165,13 @@ import { debounce } from 'lodash-es'
 import Multiselect from 'vue-multiselect'
 import { useHead, useCookie } from '#imports'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '~/middleware/auth.store'
+
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 
 // ===== CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
-const config = useRuntimeConfig()
-const auth = useAuthStore()
+
 const userCookie = useCookie('user')
 const router = useRouter()
 const route = useRoute()
@@ -2381,12 +2380,7 @@ const loadQuoteDetails = async (quoteId) => {
   try {
     quoteLoading.value = true
     const response = await $api(`/cotizaciones/${quoteId}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     if (response && response.success) {
@@ -2577,12 +2571,7 @@ const filterServices = async () => {
     const url = `/solicitudservicio?${params.toString()}`
     
     const data = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     }) 
     
     // Mapear la respuesta al formato esperado por la interfaz
@@ -2623,12 +2612,7 @@ const filterUserServices = async () => {
     const url = `/solicitudservicio?${params.toString()}`
     
     const data = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     }) 
     
     // Mapear la respuesta al formato esperado por la interfaz
@@ -2715,14 +2699,9 @@ const updatePassword = async () => {
     
     const response = await $api(`/usuarios/cambio-clave/${userForm.value.id_usuario}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      body: JSON.stringify({
+      body: {
         currentPassword: '',  // No requerido para admin
         newPassword: newPassword.value
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
       }
     });
     
@@ -2994,12 +2973,7 @@ const filterCredits = async () => {
        
       try {
         const response = await $api(`/movimientos/creditos/${selectedUser.value.id_usuario}?page=${creditsCurrentPage.value}&limit=${modalItemsPerPage}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         })
         
         if (response && response.success) {
@@ -3272,12 +3246,7 @@ const showReferrals = async (user, page = 1) => {
     
     // Hacer la petición a la API con paginación
     const response = await $api(`/referidos/${user.id_usuario}`, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: {
         page: page,
         limit: 5
@@ -3372,12 +3341,7 @@ const showTopTechniciansCredits = async () => {
     showTopBalancesModal.value = true
     
     const response = await $api('/movimientos/toptecnicos/creditos', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     if (response && response.success) {
@@ -3403,12 +3367,7 @@ const showTopCredits = async () => {
     
     // Obtener el ID del rol de Usuario
     const rolesResponse = await $api('/roles', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     const rolUsuario = Array.isArray(rolesResponse) 
@@ -3420,14 +3379,9 @@ const showTopCredits = async () => {
     }
     
     const response = await $api('/credito/tops', {
-      baseURL: config.public.apiBase,
       method: 'GET',
       params: {
         id_rol: rolUsuario.id_rol
-      },
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
       }
     })
     
@@ -3455,12 +3409,7 @@ const showTopReferrals = async () => {
     showTopReferralsModal.value = true
     
     const response = await $api('/referidos/top/usuarios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     if (response && response.success) {
@@ -3488,12 +3437,7 @@ const showTopBalances = async () => {
     
     // Obtener el ID del rol de Técnico
     const rolesResponse = await $api('/roles', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     const rolTecnico = Array.isArray(rolesResponse) 
@@ -3505,14 +3449,9 @@ const showTopBalances = async () => {
     }
     
     const response = await $api('/credito/tops', {
-      baseURL: config.public.apiBase,
       method: 'GET',
       params: {
         id_rol: rolTecnico.id_rol
-      },
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
       }
     })
     
@@ -3540,12 +3479,7 @@ const showTopRatings = async () => {
     showTopRatingsModal.value = true
     
     const response = await $api('/calificaciones/top-tecnicos', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     if (response.success) {
@@ -3585,11 +3519,7 @@ const loadMembresiaProgreso = async (idUsuario) => {
   try {
     loadingMembresiaProgreso.value = true
     const response = await $api(`/membresia/progreso/${idUsuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     if (response.status === 'success') {
@@ -3697,12 +3627,7 @@ const saveUser = async () => {
     };
 
     const response = await $api(`usuarios/${userForm.value.id_usuario}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: userData
     });
 
@@ -3784,12 +3709,7 @@ const updateUserPassword = async () => {
     
     // Llamar a la API para actualizar la contraseña
     await $api(`usuarios/${userForm.value.id_usuario}/cambiar-clave`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: {
         nuevaClave: newPassword.value
       }
@@ -3865,12 +3785,7 @@ const loadUsers = async (page = 1) => {
     }
     
     const response = await $api(`/usuarios/usuarios?${params.toString()}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     if (response && response.usuarios) {
@@ -3971,12 +3886,7 @@ const loadTechnicians = async (page = 1) => {
     }
 
     const response = await $api(`/usuarios/tecnicos?${params.toString()}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     // Guardar en caché
@@ -4041,12 +3951,7 @@ const loadAdministrators = async (page = 1) => {
     const url = `/usuarios/administradores?${queryString}`
 
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     if (response.success) {
@@ -4069,12 +3974,7 @@ const loadCities = async () => {
   try {
     loadingCities.value = true
     const response = await $api('/ciudad', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     availableCities.value = Array.isArray(response) 
@@ -4100,12 +4000,7 @@ const loadRoles = async () => {
     
     // Cargar roles desde la API siguiendo el estándar de peticiones HTTP del proyecto
     const response = await $api('/roles', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     // Verificar si la respuesta es un array (formato directo) o un objeto con propiedad data
@@ -4130,12 +4025,7 @@ const fetchStatistics = async () => {
   try {
     loadingStats.value = true
     const response = await $api('/usuarios/estadisticas', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     if (response.success && response.data) {

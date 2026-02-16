@@ -2318,7 +2318,7 @@
 import { ref, computed, onMounted, nextTick, reactive, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useHead, useCookie } from '#imports'
-import { useAuthStore } from '~/middleware/auth.store'
+
 import { useRouter, useRoute } from 'vue-router';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
@@ -2328,8 +2328,7 @@ import Multiselect from 'vue-multiselect'
 const { $api } = useNuxtApp();
 const router = useRouter();
 const route = useRoute();
-const config = useRuntimeConfig()
-const auth = useAuthStore()
+
 const userCookie = useCookie('user')
 
 // SEO and Meta
@@ -2473,9 +2472,7 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado)
     let rtnResponse = { success: false };
     try {
       rtnResponse = await $api(`/usuarios/verificar-rtn/${idUsuario}`, {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${auth.token}` }
+        method: 'GET'
       });
     } catch (rtnError) {
     }
@@ -2486,12 +2483,7 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado)
     if (tipoPago === 'package') {
       try {
         const comisionResponse = await $api('/config/valor/comision_por_paquete', {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         });
 
         if (comisionResponse && comisionResponse.valor) {
@@ -2529,12 +2521,7 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado)
     }
 
     const facturaResponse = await $api('/facturas', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: facturaData
     });
     
@@ -2564,12 +2551,7 @@ const confirmPaymentAction = async () => {
 
   try {
     const response = await $api(`/paquetes/usuarios/pagos/${pagoId}/${pendingPaymentAction.value}`, {
-      baseURL: config.public.apiBase,
-      method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
-      }
+      method: 'PUT'
     });
 
     if (response && response.success) {
@@ -2581,16 +2563,11 @@ const confirmPaymentAction = async () => {
         // Notificar a Usuario
         try {
           await $api('/notificaciones/enviar', {
-            baseURL: config.public.apiBase,
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${useCookie('token').value}` 
-            },
-            body: JSON.stringify({
+            body: {
               titulo: 'Pago de Paquete Rechazado',
               id_usuario: selectedPackage.value?.id_usuario
-            })
+            }
           });
         } catch (e) {
           console.error('Error notificando Usuario:', e);
@@ -2602,16 +2579,11 @@ const confirmPaymentAction = async () => {
         const adminName = userCookie.value?.nombre || 'Administrador';
         try {
           await $api('/notificaciones/enviar', {
-            baseURL: config.public.apiBase,
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${useCookie('token').value}` 
-            },
-            body: JSON.stringify({
+            body: {
               titulo: 'Pago de Paquete Aceptado',
               id_usuario: selectedPackage.value?.id_usuario
-            })
+            }
           });
         } catch (e) {
           console.error('Error notificando Usuario (Aprobación):', e);
@@ -2802,9 +2774,9 @@ const formatCurrency = (value) => {
 const loadEmpresaConfig = async () => {
   try {
     const [telefonoRes, emailRes, rtnRes] = await Promise.all([
-      $api('/config/valor/numero_empresa', { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } }).catch(() => null),
-      $api('/config/valor/correo_empresa', { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } }).catch(() => null),
-      $api('/config/valor/rtn', { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } }).catch(() => null)
+      $api('/config/valor/numero_empresa', { method: 'GET' }).catch(() => null),
+      $api('/config/valor/correo_empresa', { method: 'GET' }).catch(() => null),
+      $api('/config/valor/rtn', { method: 'GET' }).catch(() => null)
     ]);
 
     if (telefonoRes?.valor) empresaTelefono.value = telefonoRes.valor.toString();
@@ -2868,12 +2840,7 @@ const openFacturaModal = async (payment) => {
         params.append('id_pago_paquete', payment.id_pago_paquete);
 
         const response = await $api(`/facturas/relaciones/idpago?${params.toString()}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         });
 
         if (response?.status === 'success' && response.factura) {
@@ -2922,12 +2889,7 @@ const openFacturaModal = async (payment) => {
       // Obtener datos de la factura específica si hay un ID
       try {
         const response = await $api(`/facturas/${payment.id_factura}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         });
 
         if (response?.status === 'success' && response.factura) {
@@ -3024,19 +2986,13 @@ const fetchActivePackages = async (reset = false) => {
         (async () => {
           try {
             const response = await $api(`/paquetes/usuarios/estado`, {
-              baseURL: config.public.apiBase,
               method: 'GET',
-              headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${useCookie('token').value}`
-              },
               params: {
                 estado: estado === 'utilizado' ? 'utilizado,activo' : estado,
                 limit,
                 offset,
                 search: packageSearchId.value || undefined
               }
-
             });
 
             return {
@@ -3138,12 +3094,7 @@ const fetchTechnicians = async (cityId = null, limit = 4, offset = 0, serviceId 
     }
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     // Actualizar con la nueva estructura de respuesta
@@ -3197,12 +3148,7 @@ const fetchTechniciansAndAdmins = async (cityId = null, limit = 4, offset = 0, s
     }
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     // La respuesta incluye técnicos, admins y super admins
@@ -3241,11 +3187,7 @@ const fetchTechniciansAndAdmins = async (cityId = null, limit = 4, offset = 0, s
 const fetchCatalogoServicios = async () => {
   try {
     const response = await $api('/servicios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      }
+      method: 'GET'
     })
     
     // Manejar diferentes estructuras de respuesta
@@ -3303,12 +3245,7 @@ const fetchServices = async (page = 1, limit = 10, section = 'all', filters = {}
     if (filters.month) params.append('month', filters.month)
 
     const response = await $api('/solicitudservicio', {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
-      },
       query: Object.fromEntries(params)
     })
     
@@ -3497,11 +3434,7 @@ const cities = ref([])
 const fetchCities = async () => {
   try {
     const data = await $api('/ciudad', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
+      method: 'GET'
     })
     cities.value = data.map(city => ({
       id_ciudad: city.id_ciudad,
@@ -3853,32 +3786,22 @@ const confirmTechnicianAssignment = async () => {
   try { 
     // Actualizar el servicio en el backend primero
     const updateResponse = await $api(`/solicitudservicio/${serviceToAssign.value.id_solicitud}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         estado: 'asignado',
         id_tecnico: selectedTechnician.value.id_usuario
-      })
+      }
     })
 
     // Obtener el ID del técnico que se está asignando
     const idTecnico = selectedTechnician.value.id_usuario;
     
     await $api('/notificaciones/enviar', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         titulo: 'Servicio Asignado', 
         id_usuario: idTecnico
-      })
+      }
     });
 
     // Guardar referencia antes de limpiar el estado
@@ -3952,12 +3875,6 @@ const verifyPayment = async (isApproved) => {
       return
     }
     
-    const token = useCookie('token').value
-    if (!token) {
-      console.error('❌ Token de autenticación no encontrado')
-      showError('No se encontró el token de autenticación')
-      return
-    }
     
     // Deshabilitar botones mientras se procesa
     isVerifying.value = true
@@ -3976,14 +3893,8 @@ const verifyPayment = async (isApproved) => {
       
       try {
         const response = await $api(endpoint, {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(paymentPayload)
+          body: paymentPayload
         });
         
         // Si es una visita, notificar a los administradores
@@ -3991,16 +3902,11 @@ const verifyPayment = async (isApproved) => {
           try {
             // Notificar al super admin
             await $api('/notificaciones/enviar', {
-              baseURL: config.public.apiBase,
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
-              },
-              body: JSON.stringify({
+              body: {
                 titulo: 'Asignación Pendiente',
                 nombre_rol: 'sa'
-              })
+              }
             });
           } catch (notificationError) {
             console.error('❌ Error al enviar notificación al super admin:', notificationError);
@@ -4010,16 +3916,11 @@ const verifyPayment = async (isApproved) => {
           try {
             // Notificar a los administradores
             await $api('/notificaciones/enviar', {
-              baseURL: config.public.apiBase,
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
-              },
-              body: JSON.stringify({
+              body: {
                 titulo: 'Asignación Pendiente',
                 nombre_rol: 'admin'
-              })
+              }
             });
           } catch (notificationError) {
             console.error('❌ Error al enviar notificación a los administradores:', notificationError);
@@ -4041,16 +3942,11 @@ const verifyPayment = async (isApproved) => {
         }
         
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Pago de Servicio Aprobado',
             id_usuario: idUsuario
-          })
+          }
         });
       } catch (notifError) {
         console.error('Error al enviar notificación de pago aprobado:', notifError);
@@ -4063,30 +3959,19 @@ const verifyPayment = async (isApproved) => {
       const denyPayload = { id_solicitud: solicitudId, id_cotizacion: cotizacionId, id_usuario }
       
       const response = await $api(endpoint, {
-        baseURL: config.public.apiBase,
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(denyPayload)
+        body: denyPayload
       });
       
       // Notificar al cliente sobre el pago rechazado
       try { 
         
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Pago de Servicio Rechazado',
             id_usuario: id_usuario
-          })
+          }
         }); 
       } catch (notifError) {
         console.error('Error al enviar notificación de pago rechazado:', notifError);
@@ -4184,12 +4069,7 @@ const selectPackageTechnician = async (tech) => {
     
     // Obtener el porcentaje de comisión
     const comisionResponse = await $api('/config/valor/comision_por_paquete', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
-      }
+      method: 'GET'
     });
     
     comisionPorcentaje.value = parseFloat(comisionResponse.valor) || 0;
@@ -4216,12 +4096,7 @@ const confirmPackageAssignment = async () => {
     
     // 1. Enviar movimiento de ingreso
     const movimientoResponse = await $api('/movimientos', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
-      },
       body: {
         id_usuario: Number(selectedPackageTechnician.value.id_usuario),
         tipo: "ingreso",
@@ -4234,42 +4109,27 @@ const confirmPackageAssignment = async () => {
     // 2. Marcar el paquete como utilizado
     try {
       await $api(`/paquetes/usuarios/utilizado/${selectedPackage.value.id_paquete_usuario}`, {
-        baseURL: config.public.apiBase,
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${useCookie('token').value}`
-        }
+        method: 'PUT'
       });
 
       // 3. Enviar notificaciones
       try {
         // Notificación al cliente
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${useCookie('token').value}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Paquete Consumido',
             id_usuario: selectedPackage.value.id_usuario
-          })
+          }
         });
 
         // Notificación al técnico
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${useCookie('token').value}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Pago de Paquete Recibido',
             id_usuario: selectedPackageTechnician.value.id_usuario
-          })
+          }
         });
       } catch (notifError) {
         console.error('Error al enviar notificaciones:', notifError);

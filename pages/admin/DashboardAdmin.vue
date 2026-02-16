@@ -505,13 +505,8 @@ const recentActivities = ref([])
 // ===== FUNCIONES PARA ALERTAS DE CORRELATIVOS =====
 const verificarCorrelativos = async () => {
   try {
-    const response = await $fetch('/facturas/correlativos', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+    const response = await $api('/facturas/correlativos', {
+      method: 'GET'
     });
     
     if (response.success && response.alertas && response.alertas.length > 0) {
@@ -579,13 +574,7 @@ const fetchStatistics = async () => {
     
     // Realizar la petición usando $fetch según el estándar del proyecto
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      credentials: 'include',
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     if (response.success) {
@@ -742,20 +731,9 @@ const fetchSupportTickets = async () => {
   try {
     isLoading.value = true
     
-    // Obtener el token del store de autenticación
-    const token = auth.token || useCookie('auth:token')?.value
-    if (!token) {
-      throw new Error('No se encontró el token de autenticación')
-    }
-    
     // Realizar la petición a la API
     const response = await $api('/soporte', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+      method: 'GET'
     }) 
     
     // Obtener los datos de la respuesta
@@ -931,13 +909,7 @@ const loadNotifications = async () => {
     const auth = useAuthStore()
     
     const response = await $api(`/notificaciones?page=${currentActivityPage.value}&limit=5`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include'
+      method: 'GET'
     })
     
     if (response.success && response.data) {
@@ -1336,18 +1308,11 @@ const marcarComoResuelto = async (ticket) => {
     const url = `/soporte/${ticket.id_soporte || ticket.id}`
     
     const data = await $api(url, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      credentials: 'include',
-      body: JSON.stringify({
+      body: {
         estado: 0, // 0 = cerrado
         fecha_actualizacion: new Date().toISOString()
-      })
+      }
     });
     
     // El backend devuelve el ticket actualizado directamente

@@ -352,436 +352,336 @@
 
     
     <!-- Paquetes por Membresía - Imagen balanceada -->
-<section v-if="paquetesMantenimiento?.length" class="px-4 mb-10">
+<section v-if="paquetesMantenimiento?.length" class="px-4 mb-2">
   <!-- Header -->
   <div class="flex items-end justify-between mb-6">
     <div>
       <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-        Mercado de Paquetes
+        Mercado de Paquetes 💎
       </h3>
-      <p class="text-sm text-gray-600 dark:text-gray-300">
+      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
         Compra paquetes o canjéalos con tu crédito
       </p>
     </div>
     <button 
       v-if="paquetesMantenimiento.length > 4"
       @click="navigateTo('/cliente/Marketplace')" 
-      class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+      class="text-xs font-black text-blue-600 dark:text-blue-400 px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full"
     >
       Ver todos
     </button>
   </div>
 
-  <!-- Grid 2 columnas -->
-  <div class="grid grid-cols-2 gap-3">
-    <div
-      v-for="paquete in paquetesMantenimiento.slice(0, 4)"
-      :key="paquete.id"
-      class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden hover:shadow-lg transition"
+  <!-- Carril Horizontal con Scroll Manual y Auto-scroll JS -->
+  <div class="relative -mx-4">
+    <div 
+      ref="carruselRef"
+      class="flex gap-4 overflow-x-auto px-4 pb-4 no-scrollbar cursor-grab active:cursor-grabbing select-none"
+      @mouseenter="handleInteraction"
+      @mouseleave="isHovering = false"
+      @touchstart="handleInteraction"
+      @mousedown="handleInteraction"
+      @scroll="onManualScroll"
     >
-      <!-- Imagen (altura limitada) -->
-      <div class="relative w-full h-32 bg-gray-100 dark:bg-gray-700">
-        <img
-          v-if="paquete.imagen"
-          :src="getOptimizedImage(paquete.imagen, 400, 200)"
-          :alt="paquete.nombre"
-          class="w-full h-full object-cover"
-          loading="lazy"
-        />
-        <div
-          v-else
-          class="w-full h-full flex items-center justify-center text-gray-400"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M20 7l-8-4.5L4 7m16 0l-8 4.5M4 7v10l8 4.5m0 0l8-4.5" />
-          </svg>
+      <!-- Tarjeta con Diseño "Modern Glass Card" -->
+      <div
+        v-for="(paquete, index) in carouselItems"
+        :key="index"
+        @click="openPackageDetail(paquete)"
+        class="flex-shrink-0 w-52 flex flex-col rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer group relative overflow-hidden transform-gpu"
+      >
+        <!-- Imagen con Overlay de Gradiente -->
+        <div class="relative w-full h-44 overflow-hidden">
+          <img
+            v-if="paquete.imagen"
+            :src="getOptimizedImage(paquete.imagen, 500, 400)"
+            :alt="paquete.nombre"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            loading="lazy"
+          />
+          <div v-else class="w-full h-full flex items-center justify-center bg-blue-50 dark:bg-gray-700">
+             <svg class="w-12 h-12 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          </div>
+
+          <!-- Badge Premium de Propiedad -->
+          <div 
+            v-if="tienePaquete(paquete.id)"
+            class="absolute top-3 right-3 z-10"
+          >
+            <div class="px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-[9px] font-black text-white shadow-lg uppercase tracking-widest border border-white/20">
+              {{ getEstadoPaquete(paquete.id) }}
+            </div>
+          </div>
+
+          <!-- Información Flotante Inferior -->
+          <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent">
+            <h4 class="font-bold text-white text-sm line-clamp-1 group-hover:text-blue-300 transition-colors">
+              {{ paquete.nombre }}
+            </h4>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-xs font-black text-blue-400">L. {{ formatNumber(paquete.costo) }}</span>
+              <div class="flex items-center space-x-1">
+                <span class="block w-1 h-1 bg-white/50 rounded-full"></span> 
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Badge flotante -->
-        <span
-          v-if="tienePaquete(paquete.id)"
-          class="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full bg-emerald-600 text-white"
-        >
-          {{ getEstadoPaquete(paquete.id) }}
-        </span>
-      </div>
-
-      <!-- Contenido -->
-      <div class="p-3 flex flex-col flex-grow">
-        <h4 class="font-semibold text-sm text-gray-900 dark:text-white line-clamp-2 mb-1">
-          {{ paquete.nombre }}
-        </h4>
-
-        <p class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">
-          {{ paquete.descripcion || 'Beneficio por membresía' }}
-        </p>
-
-        <!-- Acciones -->
-        <div class="mt-auto">
-          <button
-            v-if="tienePaquete(paquete.id)"
-            @click.stop="handlePaqueteClick(paquete)"
-            class="w-full py-1.5 text-xs rounded-lg transition"
-            :class="{
-              'bg-emerald-600 text-white hover:bg-emerald-700': getEstadoPaquete(paquete.id) === 'Adquirido',
-              'bg-emerald-600 text-white cursor-default': getEstadoPaquete(paquete.id) === 'En uso',
-              'bg-gray-200 text-gray-400 cursor-not-allowed': ['Utilizado', 'Vencido', 'Verificando pago...'].includes(getEstadoPaquete(paquete.id))
-            }"
-            :disabled="getEstadoPaquete(paquete.id) !== 'Adquirido'"
-          >
-            {{ getEstadoPaquete(paquete.id) === 'En uso' ? 'En uso' : 'Usar paquete' }}
-          </button>
-
-          <button
-            v-else
-            @click.stop="canjearPaquete(paquete)"
-            :disabled="!paquete.estado"
-            class="w-full py-1.5 text-xs rounded-lg transition"
-            :class="{
-              'bg-blue-600 text-white hover:bg-blue-700':
-                paquete.estado && userCredit >= paquete.costo,
-              'bg-purple-600 text-white hover:bg-purple-700':
-                paquete.estado && userCredit < paquete.costo,
-              'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700':
-                !paquete.estado
-            }"
-          >
-            {{ userCredit >= paquete.costo ? 'Canjear' : 'Comprar' }}
-          </button>
+        <!-- Acciones Minimalistas -->
+        <div class="px-3 py-3 bg-white dark:bg-gray-800">
+           <button 
+             class="w-full py-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm"
+           >
+             {{ tienePaquete(paquete.id) ? 'Ver Detalles' : 'Adquirir' }}
+           </button>
         </div>
       </div>
     </div>
   </div>
   
-  <!-- Modal de confirmación de uso de paquete -->
-  <Transition
-    name="fade"
-    enter-active-class="transition-opacity duration-300 ease-out"
-    leave-active-class="transition-opacity duration-200 ease-in"
-    enter-from-class="opacity-0"
-    leave-to-class="opacity-0"
-  >
-    <div v-if="showConfirmarUsoModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 dark:bg-black/70">
-      <div 
-        class="w-full max-w-md transform transition-all duration-300 ease-out"
-        :class="{
-          'opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95': !showConfirmarUsoModal,
-          'opacity-100 translate-y-0 sm:scale-100': showConfirmarUsoModal
-        }"
-        @click.stop
-      >
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-          <div class="p-6">
-            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 dark:bg-blue-900/30">
-              <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 class="mb-2 text-xl font-semibold text-center text-gray-900 dark:text-white">¿Usar paquete?</h3>
-            <p v-if="selectedPaquete" class="mb-6 text-sm text-center text-gray-500 dark:text-gray-400">
-              ¿Estás seguro de que deseas usar el paquete <span class="font-medium text-gray-700 dark:text-gray-200">{{ selectedPaquete.nombre }}</span>?
-            </p>
-            <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3"> 
-              <button
-                type="button"
-                @click="usarPaquete(selectedPaquete)"
-                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 flex items-center justify-center"
-              >
-                <span>Sí, usar paquete</span>
-                <svg v-if="isProcessingPayment" class="w-4 h-4 ml-2 -mr-1 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </button>
-              <button
-                type="button"
-                @click="showConfirmarUsoModal = false"
-                class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-              >
-                Cancelar
-              </button>
-            </div>
+  <!-- Panel de Detalle (Marketplace Style) -->
+  <Transition name="bottom-sheet">
+     <div 
+       v-if="selectedDetailPackage" 
+       class="fixed inset-0 z-[100] flex flex-col justify-end isolate"
+       @touchmove.stop
+     >
+       <!-- Backdrop - Optimized for performance -->
+       <div 
+         class="absolute inset-0 bg-black/60 bs-backdrop"
+         @click="closeDetail"
+         @touchmove.prevent.stop
+       ></div>
+
+       <!-- Contenido (Altura Moderada) -->
+       <div 
+         class="relative w-full bg-white dark:bg-gray-900 rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] overflow-hidden max-h-[65vh] flex flex-col bs-content"
+         @touchmove.stop
+       >
+         <!-- Cabecera -->
+         <div class="w-full flex items-center justify-between px-6 py-4 absolute top-0 left-0 z-20 pointer-events-none">
+            <div class="w-10 h-1 bg-white/40 backdrop-blur-md rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-3"></div>
+            <div class="flex-1"></div>
+            <button 
+               @click="closeDetail"
+               class="w-9 h-9 rounded-full bg-black/30 backdrop-blur-xl text-white flex items-center justify-center active:scale-90 transition-transform pointer-events-auto"
+            >
+               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+         </div>
+
+         <!-- Área de Scroll Interno -->
+         <div class="overflow-y-auto overscroll-contain no-scrollbar">
+            <!-- Imagen Panorámica -->
+            <div class="aspect-video w-full bg-gray-100 dark:bg-gray-800 mb-6 overflow-hidden relative">
+               <img 
+                  v-if="selectedDetailPackage.imagen"
+                  :src="getOptimizedImage(selectedDetailPackage.imagen, 1000, 600)" 
+                  class="w-full h-full object-cover"
+               />
+               <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent"></div>
+             </div>
+
+             <div class="px-6 pb-32">
+                <div class="mb-6">
+                   <h2 class="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-1">
+                      {{ selectedDetailPackage.nombre }}
+                   </h2>
+                   <div class="flex items-center justify-between">
+                      <p class="text-base font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">L. {{ formatNumber(selectedDetailPackage.costo) }}</p> 
+                   </div>
+                </div>
+
+                <div class="prose prose-sm dark:prose-invert text-gray-500 dark:text-gray-400">
+                   <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Descripción</h3>
+                   <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">{{ selectedDetailPackage.descripcion || 'Servicio premium de mantenimiento preventivo y correctivo' }}</p>
+                </div>
+             </div>
           </div>
+
+         <!-- Pie de página fijo -->
+         <div 
+           class="absolute bottom-0 left-0 right-0 p-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800"
+           @touchmove.prevent.stop
+         >
+            <div v-if="tienePaquete(selectedDetailPackage.id)">
+               <button 
+                  @click="initiateUseFromDetail"
+                  :disabled="getEstadoPaquete(selectedDetailPackage.id) !== 'Adquirido'"
+                  class="w-full py-4 rounded-2xl font-black text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xl"
+               >
+                  {{ getEstadoPaquete(selectedDetailPackage.id) === 'En uso' ? 'En Uso' : 'Usar Ahora' }}
+               </button>
+            </div>
+            
+            <div v-else class="flex gap-3">
+               <button 
+                  @click="initiatePurchaseFromDetail"
+                  class="flex-1 py-4 rounded-2xl font-black text-base text-white shadow-xl active:scale-95 transition-transform"
+                  :class="userCredit >= selectedDetailPackage.costo ? 'bg-blue-600' : 'bg-gray-900 dark:bg-gray-700'"
+               >
+                  <span v-if="userCredit >= selectedDetailPackage.costo">Canjear Ahora</span>
+                  <span v-else>Adquirir por Transferencia</span>
+               </button>
+            </div>
+         </div>
+       </div>
+     </div>
+  </Transition>
+
+  <!-- Modals Rediseñados (Matching Marketplace) -->
+  
+  <!-- Confirmar Uso -->
+  <Transition name="modal-pop">
+     <div v-if="showConfirmarUsoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center modal-content-pop shadow-2xl">
+           <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🚀</div>
+           <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">Usar Paquete</h3>
+           <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">{{ selectedPaquete?.nombre }}</p>
+           <button @click="usarPaquete(selectedPaquete)" :disabled="isProcessingPayment" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-sm mb-2 shadow-lg shadow-blue-600/20 active:scale-95 transition-all">
+              {{ isProcessingPayment ? 'Activando...' : 'Confirmar' }}
+           </button>
+           <button @click="showConfirmarUsoModal = false" class="text-xs text-gray-400 font-bold py-2 hover:text-gray-600 transition-colors">Cancelar</button>
         </div>
-      </div>
+     </div>
+  </Transition>
+
+  <!-- Confirmar Canje -->
+  <Transition name="modal-pop">
+     <div v-if="showConfirmarCanjeoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center modal-content-pop shadow-2xl">
+           <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">💎</div>
+           <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-4">Confirmar Canje</h3>
+           <button @click="confirmarCanjeo" :disabled="isProcessingPayment" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm mb-2 shadow-lg shadow-emerald-600/20 active:scale-95 transition-all">
+              {{ isProcessingPayment ? 'Procesando...' : 'Canjear' }}
+           </button>
+           <button @click="showConfirmarCanjeoModal = false" class="text-xs text-gray-400 font-bold py-2 hover:text-gray-600 transition-colors">Cancelar</button>
+        </div>
+     </div>
+  </Transition>
+
+  <!-- Pago Transferencia Rediseñado Estilo Fintech -->
+  <Transition name="slide-up">
+    <div v-if="showPaquetePagoModal" class="fixed inset-0 z-[70] bg-white dark:bg-gray-900 flex flex-col">
+       <div class="px-4 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+          <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 bg-blue-600 rounded-full"></span>
+            <h2 class="font-black text-sm uppercase tracking-widest text-gray-500">Transferencia</h2>
+          </div>
+          <button @click="closePaquetePagoModal" class="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">✕</button>
+       </div>
+       
+       <div class="flex-1 overflow-y-auto p-6">
+          <div class="text-center mb-10">
+             <h1 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">L. {{ formatNumber(selectedPaquete?.costo) }}</h1>
+             <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em] mt-2">Monto Total a Pagar</p>
+          </div>
+
+          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-1">Cuentas Disponibles</label>
+          <div class="grid grid-cols-3 gap-3 mb-10">
+             <div 
+                v-for="acc in bankAccounts" 
+                :key="acc.id_cuenta"
+                @click="verDatosCuenta(acc)"
+                class="relative p-4 rounded-3xl transition-all duration-300 cursor-pointer active:scale-95 flex flex-col items-center text-center gap-3 border-2"
+                :class="selectedAccountObject?.id_cuenta === acc.id_cuenta 
+                  ? 'bg-blue-600 border-blue-600 shadow-xl shadow-blue-600/20' 
+                  : 'bg-gray-50 dark:bg-gray-800/50 border-transparent hover:border-gray-200 dark:hover:border-gray-700'"
+             >
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300"
+                   :class="selectedAccountObject?.id_cuenta === acc.id_cuenta ? 'bg-white/20' : 'bg-white dark:bg-gray-700 shadow-sm'">
+                   <svg class="w-6 h-6" :class="selectedAccountObject?.id_cuenta === acc.id_cuenta ? 'text-white' : 'text-blue-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                   </svg>
+                </div>
+                <p class="font-bold text-[9px] leading-tight w-full px-1 uppercase tracking-tighter"
+                   :class="selectedAccountObject?.id_cuenta === acc.id_cuenta ? 'text-white' : 'text-gray-500 dark:text-gray-400'">
+                   {{ acc.banco }}
+                </p>
+             </div>
+          </div>
+
+          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Referencia de Pago</label>
+          <div class="relative group mb-10">
+            <input 
+               v-model="numeroComprobante"
+               type="text" 
+               inputmode="numeric" 
+               placeholder="Ingrese el número de comprobante"
+               class="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 font-bold focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 transition-all outline-none"
+            >
+          </div>
+
+          <button 
+             @click="procesarPagoPaquete"
+             :disabled="!isValidPaymentForm || isProcessingPayment"
+             class="w-full py-5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black text-base rounded-2xl shadow-xl active:scale-95 transition-all disabled:opacity-30"
+          >
+             {{ isProcessingPayment ? 'Procesando...' : 'Enviar Comprobante' }}
+          </button>
+       </div>
     </div>
   </Transition>
-  
-  <!-- Modal de confirmación de canjeo de paquete -->
-  <Transition
-    name="fade"
-    enter-active-class="transition-opacity duration-300 ease-out"
-    leave-active-class="transition-opacity duration-200 ease-in"
-    enter-from-class="opacity-0"
-    leave-to-class="opacity-0"
-  >
-    <div v-if="showConfirmarCanjeoModal && selectedPaquete" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 dark:bg-black/70">
-      <div 
-        class="w-full max-w-md transform transition-all duration-300 ease-out"
-        :class="{
-          'opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95': !showConfirmarCanjeoModal,
-          'opacity-100 translate-y-0 sm:scale-100': showConfirmarCanjeoModal
-        }"
-        @click.stop
-      >
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-          <div class="p-6">
-            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 dark:bg-blue-900/30">
-              <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h3 class="mb-2 text-xl font-semibold text-center text-gray-900 dark:text-white">¿Canjear paquete?</h3>
-            <p class="mb-6 text-sm text-center text-gray-500 dark:text-gray-400">
-              ¿Estás seguro de que deseas canjear <span class="font-medium text-gray-700 dark:text-gray-200">{{ selectedPaquete.nombre }}</span> por <span class="font-bold text-blue-600 dark:text-blue-400">L. {{ selectedPaquete.costo.toLocaleString('es-HN') }}</span> de su saldo?
-            </p>
-            <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3"> 
-              <button
-                type="button"
-                @click="confirmarCanjeo"
-                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 flex items-center justify-center"
-              >
-                <span>Sí, canjear</span>
-                <svg v-if="isProcessingPayment" class="w-4 h-4 ml-2 -mr-1 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </button>
-              <button
-                type="button"
-                @click="cancelarCanjeo"
-                class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-              >
-                Cancelar
-              </button>
-            </div>
+
+  <!-- Modal Detalle Cuenta (Professional Fintech Redesign) -->
+  <Transition name="modal-center">
+    <div v-if="showAccountDetailModal" class="fixed inset-0 z-[80] flex items-center justify-center p-4">
+       <div class="absolute inset-0 bg-gray-950/60 backdrop-blur-md mc-backdrop" @click="showAccountDetailModal = false"></div>
+       
+       <div class="bg-white dark:bg-gray-900 w-full max-w-[360px] rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-gray-100 dark:border-gray-800 mc-content">
+          <div class="p-8">
+             <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-4">
+                   <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/30">
+                      <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                   </div>
+                   <div>
+                      <h3 class="font-black text-xl text-gray-900 dark:text-white leading-none mb-1">{{ viewingAccount?.banco }}</h3>
+                      <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">{{ viewingAccount?.tipo }}</p>
+                   </div>
+                </div>
+                <button @click="showAccountDetailModal = false" class="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-full text-gray-400">✕</button>
+             </div>
+
+             <div class="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 mb-8">
+                <div class="space-y-6">
+                   <div>
+                      <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Beneficiario</p>
+                      <p class="text-base font-bold text-gray-900 dark:text-white">{{ viewingAccount?.beneficiario }}</p>
+                   </div>
+                   
+                   <div class="pt-6 border-t border-gray-100 dark:border-gray-700">
+                      <p class="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Número de Cuenta</p>
+                      <div class="flex items-center justify-between cursor-pointer active:opacity-60 transition-opacity" @click="handleCopyAndSelect">
+                         <p class="font-mono font-black text-lg text-gray-900 dark:text-white tracking-tighter">
+                            {{ viewingAccount?.num_cuenta }}
+                         </p>
+                         <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+             <button 
+                @click="handleCopyAndSelect"
+                class="w-full py-5 bg-gray-900 dark:bg-blue-600 text-white rounded-2xl font-black text-sm active:scale-95 transition-all shadow-xl shadow-gray-900/10"
+             >
+                <span>Copiar y Continuar</span>
+             </button>
+
+             <div class="mt-8 pt-6 border-t border-gray-50 dark:border-gray-800 flex items-center justify-center gap-2 opacity-30">
+                <svg class="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                <span class="text-[8px] font-bold uppercase tracking-[0.3em]">Encriptación Bancaria</span>
+             </div>
           </div>
-        </div>
-      </div>
+       </div>
     </div>
   </Transition>
 </section>
- 
-
-      <!-- Modal de Pago de Paquete -->
-      <Transition
-        name="modal"
-        enter-active-class="modal-enter-active"
-        leave-active-class="modal-leave-active"
-        enter-from-class="modal-enter-from"
-        leave-to-class="modal-leave-to">
-        <div v-if="showPaquetePagoModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
-          <!-- Backdrop con animación -->
-          <Transition
-            name="backdrop"
-            enter-active-class="backdrop-enter-active"
-            leave-active-class="backdrop-leave-active"
-            enter-from-class="backdrop-enter-from"
-            leave-to-class="backdrop-leave-to"
-          >
-            <div 
-              v-if="showPaquetePagoModal"
-              class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              @click="closePaquetePagoModal"
-            ></div>
-          </Transition>
-
-          <!-- Contenido del modal con animación -->
-          <Transition
-            name="modal-content"
-            enter-active-class="modal-content-enter-active"
-            leave-active-class="modal-content-leave-active"
-            enter-from-class="modal-content-enter-from"
-            leave-to-class="modal-content-leave-to">
-            <div 
-              v-if="showPaquetePagoModal"
-              class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
-              @click.stop
-            >
-              <!-- Header del modal con botón de cerrar -->
-              <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 px-4 py-0.5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Pagar Paquete</h3>
-                <button 
-                  @click="closePaquetePagoModal"
-                  class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors p-1 -mr-1"
-                  aria-label="Cerrar modal"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <!-- Contenido principal del modal -->
-              <div class="p-3">
-                <!-- Resumen del paquete -->
-                <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
-                  <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Detalles del Paquete</h4>
-                  <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center text-base">
-                      📦
-                    </div>
-                    <div>
-                      <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ selectedPaquete?.nombre }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedPaquete?.descripcion || 'Paquete de servicio' }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Desglose de pago -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-3">
-                  <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
-                  <div class="space-y-2 text-sm">
-                    <div class="flex justify-between items-center">
-                      <span class="text-blue-700 dark:text-blue-300">Costo del paquete:</span>
-                      <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ formatNumber(selectedPaquete?.costo || 0) }}</span>
-                    </div> 
-                    <hr class="border-blue-200 dark:border-blue-700">
-                    <div class="flex justify-between items-center">
-                      <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
-                      <span class="font-bold text-blue-800 dark:text-blue-200 text-base">L. {{ formatNumber(selectedPaquete?.costo || 0) }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cuentas -->
-                <div class="space-y-2 mb-3">
-                  <label for="bank-account-package" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Transferencia
-                  </label>
-
-                  <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
-                  </div>
-
-                  <div v-else class="space-y-3">
-                    <multiselect
-                      id="bank-account-package"
-                      v-model="selectedAccountObject"
-                      :options="bankAccounts"
-                      :searchable="false"
-                      :close-on-select="true"
-                      :show-labels="false"
-                      placeholder="Selecciona una cuenta"
-                      label="banco"
-                      track-by="id_cuenta"
-                      class="multiselect-custom"
-                      :class="{ 'multiselect--active': selectedAccountObject }"
-                      :select-label="''"
-                      :deselect-label="''"
-                      :selected-label="''"
-                      :custom-label="getAccountLabel"
-                      @search-change="$event && $event.stopPropagation()"
-                      @search-focus="(e) => e && e.target && e.target.blur()"
-                      @touchstart.native.stop
-                      @click.native.stop
-                      :options-limit="100"
-                      :disabled="bankAccounts.length === 0"
-                      :loading="isLoadingAccounts"
-                    >
-                      <template #singleLabel="{ option }">
-                        <span class="text-xs truncate">{{ getAccountLabel(option) }}</span>
-                      </template>
-                    </multiselect>
-
-                    <!-- Detalles -->
-                    <div 
-                      v-if="selectedAccountObject" 
-                      class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
-                    >
-                      <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Detalles de la cuenta:
-                      </h4>
-                      <div class="space-y-1">
-                        <div class="flex justify-between">
-                          <span class="text-xs text-gray-500 dark:text-gray-400">Nombre:</span>
-                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ selectedAccountObject.banco }}</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                          <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
-                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ selectedAccountObject.beneficiario }}</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                          <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
-                          <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ selectedAccountObject.tipo }}</span>
-                        </div>
-
-                        <div class="flex justify-between items-center">
-                          <span class="text-xs text-gray-500 dark:text-gray-400">Cuenta:</span>
-                          <div class="flex items-center space-x-2">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
-                              {{ selectedAccountObject.num_cuenta }}
-                            </span>
-                            <button 
-                              v-if="selectedAccountObject.num_cuenta.length > 10"
-                              @click="copyToClipboard(selectedAccountObject.num_cuenta)"
-                              class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-                              :title="'Copiar ' + selectedAccountObject.num_cuenta"
-                            >
-                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p v-if="bankAccounts.length === 0" class="text-xs text-red-500 mt-1">
-                      No hay cuentas bancarias disponibles. Por favor contacta al administrador.
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Campo de número de comprobante -->
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Número de Comprobante
-                    <span class="text-red-500">*</span>
-                  </label>
-                  <div class="relative">
-                    <input
-                      v-model="numeroComprobante"
-                      type="text"
-                      inputmode="numeric"
-                      pattern="\d*"
-                      placeholder="Ingresa el número de comprobante"
-                      class="w-full px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                      :disabled="isProcessingPayment"
-                    /> 
-                  </div>
-                </div>
-
-                <!-- Botón de pago -->
-                <button
-                  @click="procesarPagoPaquete"
-                  :disabled="isProcessingPayment || bankAccounts.length === 0 || !numeroComprobante"
-                  class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  <span v-if="!isProcessingPayment">
-                    Pagar L. {{ formatNumber(selectedPaquete?.costo || 0) }}
-                  </span>
-                  <span v-else class="flex items-center">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Procesando pago...
-                  </span>
-                </button>
-
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Realiza la transferencia e ingresa el número de comprobante. Una vez enviado serás redirigido a WhatsApp para adjuntar la captura.
-                </p>
-              </div>
-            </div>
-          </Transition>
-        </div>
-      </Transition>
 
       <!-- Quick Actions -->
       <section class="px-4 mb-4">
@@ -1125,10 +1025,99 @@ html .multiselect-custom .multiselect__tags {
 .multiselect-custom .multiselect__spinner::after {
   border-color: white transparent transparent;
 }
+
+/* Ocultar barra de scroll pero mantener funcionalidad */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.cursor-grab { cursor: grab; }
+.cursor-grabbing { cursor: grabbing; }
+
+/* Bottom Sheet Transitions */
+.bottom-sheet-enter-active, .bottom-sheet-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.bs-content {
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15) !important;
+  will-change: transform; /* Hint to browser for faster animation */
+}
+
+.bottom-sheet-enter-active .bs-backdrop { transition: opacity 0.3s ease; }
+.bottom-sheet-enter-from .bs-backdrop { opacity: 0; }
+.bottom-sheet-enter-to .bs-backdrop { opacity: 1; }
+
+.bottom-sheet-leave-active .bs-backdrop { transition: opacity 0.25s ease; }
+.bottom-sheet-leave-from .bs-backdrop { opacity: 1; }
+.bottom-sheet-leave-to .bs-backdrop { opacity: 0; }
+
+.bottom-sheet-enter-active .bs-content {
+  animation: slide-up-custom 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.bottom-sheet-leave-active .bs-content {
+  transition: transform 0.4s ease-in;
+  transform: translateY(0);
+}
+
+.bottom-sheet-leave-to .bs-content {
+  transform: translateY(100%);
+}
+
+@keyframes slide-up-custom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Carrusel Auto-scroll */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Modal Pop (Symmetric) */
+.modal-pop-enter-active, .modal-pop-leave-active {
+   transition: opacity 0.3s ease;
+}
+.modal-pop-enter-active .modal-content-pop, .modal-pop-leave-active .modal-content-pop {
+   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-pop-enter-from, .modal-pop-leave-to {
+   opacity: 0;
+}
+.modal-pop-enter-from .modal-content-pop, .modal-pop-leave-to .modal-content-pop {
+   transform: scale(0.9);
+}
+
+/* Slide Up (Fintech Modal) */
+.slide-up-enter-active, .slide-up-leave-active { transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1); }
+.slide-up-enter-from, .slide-up-leave-to { transform: translateY(100%); }
+
+/* Modal Center Transitions */
+.modal-center-enter-active, .modal-center-leave-active {
+   transition: opacity 0.35s ease;
+}
+.modal-center-enter-active .mc-backdrop, 
+.modal-center-leave-active .mc-backdrop {
+   transition: opacity 0.3s ease;
+}
+.modal-center-enter-active .mc-content {
+   transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-center-leave-active .mc-content {
+   transition: all 0.25s cubic-bezier(0.32, 0, 0.67, 0);
+}
+.modal-center-enter-from .mc-backdrop { opacity: 0; }
+.modal-center-enter-from .mc-content { opacity: 0; transform: scale(0.8) translateY(60px); }
+.modal-center-leave-to .mc-backdrop { opacity: 0; }
+.modal-center-leave-to .mc-content { opacity: 0; transform: scale(0.9) translateY(20px); }
 </style>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
@@ -1220,6 +1209,9 @@ const getServiceLabel = (option) => {
 
 // Estados de notificaciones
 const recentServicesData = ref([]);
+const paquetesMantenimiento = ref([]);
+const paquetesUsuario = ref([]);
+const cargandoPaquetes = ref(true);
 
 const toast = ref({
   show: false,
@@ -1331,6 +1323,24 @@ const benefitsToShow = computed(() => {
       descripcion: benefit.descripcion || '',
       savings: benefit.savings || ''
     }));
+})
+
+// Memoria persistente para los paquetes aleatorios (evita re-shuffles constantes)
+const displayedPaquetes = ref([])
+
+// Solo barajar cuando los paquetes de mantenimiento cambian
+watch(paquetesMantenimiento, (newVal) => {
+  if (newVal?.length > 0) {
+    displayedPaquetes.value = [...newVal]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4)
+  }
+}, { immediate: true, deep: true })
+
+// Lista duplicada para el scroll infinito (estable)
+const carouselItems = computed(() => {
+  if (!displayedPaquetes.value.length) return []
+  return [...displayedPaquetes.value, ...displayedPaquetes.value]
 })
 
 // Computed para obtener el mes actual relativo al inicio de la membresía
@@ -1820,10 +1830,6 @@ const renovarMembresia = () => {
   navigateTo('/cliente/perfil#membresia')
 }
 
-// Lista de paquetes de mantenimiento disponibles
-const paquetesMantenimiento = ref([]);
-const paquetesUsuario = ref([]);
-const cargandoPaquetes = ref(true);
 
 // Estado para manejar la carga de imágenes
 const imageLoaded = ref({});
@@ -1852,8 +1858,128 @@ const handleImageError = (paqueteId) => {
   imageLoaded.value[paqueteId] = 'error';
 };
 
+// Carrusel Auto-scroll Logic
+const carruselRef = ref(null);
+const isHovering = ref(false);
+const isInteracting = ref(false);
+let animationFrame = null;
+let currentScroll = 0;
+let resumeTimeout = null;
+let isAutoScrolling = false;
+
+const handleInteraction = () => {
+  isInteracting.value = true;
+  if (resumeTimeout) clearTimeout(resumeTimeout);
+  
+  resumeTimeout = setTimeout(() => {
+    isInteracting.value = false;
+    // Sincronizar posición final
+    if (carruselRef.value) currentScroll = carruselRef.value.scrollLeft;
+  }, 2000);
+};
+
+const onManualScroll = () => {
+  if (!isAutoScrolling) {
+    handleInteraction();
+  }
+};
+
+const startAutoScroll = () => {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  
+  const scroll = () => {
+    // Si el modal está abierto, NO ejecutar el siguiente frame para ahorrar recursos
+    if (selectedDetailPackage.value) {
+      animationFrame = null;
+      return;
+    }
+
+    if (carruselRef.value) {
+      if (!isHovering.value && !isInteracting.value) {
+        // Incrementar posición con precisión decimal
+        currentScroll += 0.6; 
+        
+        const halfWidth = carruselRef.value.scrollWidth / 2;
+        
+        if (currentScroll >= halfWidth) {
+          currentScroll = 0;
+        }
+        
+        isAutoScrolling = true;
+        carruselRef.value.scrollLeft = currentScroll;
+        // Pequeño delay para que el evento scroll no detecte esto como manual inmediatamente
+        requestAnimationFrame(() => { isAutoScrolling = false; });
+      } else {
+        // Sincronizar currentScroll con la posición real mientras el usuario interactúa
+        currentScroll = carruselRef.value.scrollLeft;
+      }
+    }
+    animationFrame = requestAnimationFrame(scroll);
+  };
+  
+  animationFrame = requestAnimationFrame(scroll);
+};
+
+const stopAutoScroll = () => {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+};
+
+// Reiniciar scroll si cambian los paquetes o al montar
+watch(displayedPaquetes, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    nextTick(() => {
+      startAutoScroll();
+    });
+  }
+});
+
+onMounted(() => {
+  if (displayedPaquetes.value?.length > 0) {
+    startAutoScroll();
+  }
+});
+
+onUnmounted(() => {
+  stopAutoScroll();
+});
+
+// Detail Sheet Logic
+const selectedDetailPackage = ref(null)
+
+const openPackageDetail = (p) => {
+  selectedDetailPackage.value = p
+  document.body.style.overflow = 'hidden'
+  isHovering.value = true;
+  stopAutoScroll(); // Apagar el loop completamente
+}
+
+const closeDetail = () => {
+  selectedDetailPackage.value = null
+  document.body.style.overflow = ''
+  isHovering.value = false;
+  startAutoScroll(); // Reiniciar el loop
+}
+
+const initiatePurchaseFromDetail = () => {
+  const p = selectedDetailPackage.value
+  closeDetail()
+  setTimeout(() => {
+    canjearPaquete(p)
+  }, 300)
+}
+
+const initiateUseFromDetail = () => {
+  const p = selectedDetailPackage.value
+  closeDetail()
+  setTimeout(() => {
+    handlePaqueteClick(p)
+  }, 300)
+}
+
 // Estado del modal de pago de paquete
 const showPaquetePagoModal = ref(false);
+const showAccountDetailModal = ref(false);
+const viewingAccount = ref(null);
 const showConfirmarUsoModal = ref(false);
 const showConfirmarCanjeoModal = ref(false);
 const selectedPaquete = ref(null);
@@ -1862,6 +1988,31 @@ const bankAccounts = ref([]);
 const selectedAccountObject = ref(null);
 const isProcessingPayment = ref(false);
 const numeroComprobante = ref('');
+
+
+const verDatosCuenta = (acc) => {
+   viewingAccount.value = acc
+   selectedAccountObject.value = acc // Auto-seleccionar al hacer clic
+   showAccountDetailModal.value = true
+}
+
+const handleCopyAndSelect = async () => {
+   if (!viewingAccount.value) return
+   const accountNumber = viewingAccount.value.num_cuenta
+   if (!accountNumber) return
+   
+   selectedAccountObject.value = viewingAccount.value
+   await copyToClipboard(accountNumber)
+   
+   // Feedback visual antes de cerrar
+   setTimeout(() => {
+      showAccountDetailModal.value = false
+   }, 1000)
+}
+
+const isValidPaymentForm = computed(() => {
+  return selectedAccountObject.value && numeroComprobante.value?.length > 3
+})
 
 // Función para cargar los paquetes activos desde la API
 const cargarPaquetesActivos = async () => {
@@ -1911,6 +2062,7 @@ const cargarPaquetesActivos = async () => {
 onMounted(async () => {
   await cargarPaquetesActivos();
   await cargarPaquetesUsuario();
+  startAutoScroll();
 });
 
 const canjearPaquete = async (paquete) => {

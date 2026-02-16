@@ -1575,28 +1575,13 @@ const loadEmpresaConfig = async () => {
     // Obtener configuraciones básicas de la empresa
     const [telefonoRes, emailRes, rtnRes] = await Promise.all([
       $api('/config/valor/numero_empresa', {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       }),
       $api('/config/valor/correo_empresa', {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       }),
       $api('/config/valor/rtn', {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       })
     ]);
 
@@ -1766,12 +1751,7 @@ const loadMembershipPayments = async (page = 1) => {
     const url = `/membresia?${params.toString()}`;
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     }); 
 
     if (response?.success && response.data) {
@@ -1920,12 +1900,7 @@ const loadVisitPayments = async (page = 1) => {
     const url = `/pagovisita?${params.toString()}`;
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.success && response.data) {
@@ -2063,12 +2038,7 @@ const loadServicePayments = async (page = 1) => {
     const url = `/cotizacion?${params.toString()}`;
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.success && response.data) {
@@ -2225,12 +2195,7 @@ const loadWithdrawals = async (page = 1) => {
     const url = `/movimientos/retiros?${params.toString()}`;
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.movimientos) {
@@ -2338,12 +2303,7 @@ const loadTransactions = async (page = 1) => {
     }
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.success) {
@@ -2682,12 +2642,7 @@ const searchById = async () => {
     } 
     
     const response = await $api(endpoint, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: params
     }); 
 
@@ -3043,9 +2998,7 @@ const loadPendingBilling = async () => {
     isLoadingData.value = true;
     const month = billingMonth.value;
     
-    const response = await $api(`/facturas/pendientes?month=${month}`, {
-      headers: { Authorization: `Bearer ${auth.token}` }
-    });
+    const response = await $api(`/facturas/pendientes?month=${month}`);
 
     if (response?.status === 'success') {
       pendingBillingItems.value = response.data || [];
@@ -3061,9 +3014,7 @@ const loadPendingBilling = async () => {
 const fetchActiveCorrelativo = async () => {
   try {
     isLoadingCorrelativo.value = true;
-    const response = await $api('/facturas/estado-correlativo', {
-      headers: { Authorization: `Bearer ${auth.token}` }
-    });
+    const response = await $api('/facturas/estado-correlativo');
     if (response?.status === 'success') {
       activeCorrelativo.value = response.data;
     }
@@ -3120,14 +3071,8 @@ const saveFactura = async ({ form, next }) => {
     };
 
     const response = await $api('/facturas', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
+      body: payload
     });
 
     if (response?.status === 'success') {
@@ -3402,12 +3347,7 @@ const openFacturaModal = async (payment) => {
         if (payment.id_pagovisita) params.append('id_pagovisita', payment.id_pagovisita);
 
         const response = await $api(`/facturas/relaciones/idpago?${params.toString()}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         });
 
         if (response?.status === 'success' && response.factura) {
@@ -3452,12 +3392,7 @@ const openFacturaModal = async (payment) => {
       // Obtener datos de la factura específica si hay un ID
       try {
         const response = await $api(`/facturas/${payment.id_factura}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         });
 
         if (response?.status === 'success' && response.factura) {
@@ -3657,12 +3592,7 @@ const updatePlatformStats = async () => {
     }
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.success && response.data) {
@@ -3869,12 +3799,7 @@ const updateChart = (chartData) => {
 const loadServiceTypesData = async () => {
   try { 
     const response = await $api('/solicitudservicio/grafica/servicios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.success && response.data && window.currentChart) {
@@ -3895,12 +3820,7 @@ const loadServiceTypesData = async () => {
 const loadServicesPerMonthData = async () => {
   try { 
     const response = await $api('/solicitudservicio/grafica/servicios-por-mes', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.success && response.data && window.currentChart) {
@@ -3919,12 +3839,7 @@ const loadServicesPerMonthData = async () => {
 const loadUserGrowthData = async () => {
   try { 
     const response = await $api('/usuarios/grafica/crecimiento-usuarios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.success && response.data && window.currentChart) {
@@ -3943,12 +3858,7 @@ const loadUserGrowthData = async () => {
 const loadServicesByCityData = async () => {
   try { 
     const response = await $api('/solicitudservicio/grafica/servicios-por-ciudad', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response?.success && response.data && window.currentChart) {
@@ -5123,12 +5033,7 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
     let rtnResponse;
     try {
       rtnResponse = await $api(`/usuarios/verificar-rtn/${idUsuario}`, {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       });
     } catch (error) {
       rtnResponse = { success: false };
@@ -5141,12 +5046,7 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
     if (tipoPago === 'services') {
       try {
         const configResponse = await $api('/config/valor/comision_por_servicio', {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         });
         
         // El usuario indicó el formato directo, pero mantenemos soporte defensivo para .data
@@ -5197,13 +5097,7 @@ const crearFacturaParaPago = async (idUsuario, payment, tipoPago, idRelacionado,
 
     // Crear la factura
     const facturaResponse = await $api('/facturas', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: facturaData
     });
 
@@ -5264,9 +5158,7 @@ const approvePayment = async (id) => {
       case 'membership':
         // Update membership status
         response = await $api(`/membresia/${payment.id_membresia || payment.id}`, {
-          baseURL: config.public.apiBase,
           method: 'PUT',
-          headers,
           body: { estado: 'activa' }
         });
 
@@ -5277,13 +5169,7 @@ const approvePayment = async (id) => {
         }; 
         
         const creditResponse = await $api('/credito', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
           body: creditRequestBody
         });
 
@@ -5294,9 +5180,7 @@ const approvePayment = async (id) => {
       case 'visits':
         // Usar el endpoint correcto de confirmación de pago de visita
         response = await $api('/pagovisita/confirmar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers,
           body: {
             id_solicitud: payment.id_solicitud || payment.solicitud?.id_solicitud || payment.id,
             id_cotizacion: payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion
@@ -5310,16 +5194,11 @@ const approvePayment = async (id) => {
         if (response?.success) {
           try {
             await $api('/notificaciones/enviar', {
-              baseURL: config.public.apiBase,
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.token}`
-              },
-              body: JSON.stringify({
+              body: {
                 titulo: 'Asignación Pendiente',
                  nombre_rol: 'sa'
-              })
+              }
             });
           } catch (notificationError) {
             console.error('❌ Error al enviar notificación al técnico:', notificationError);
@@ -5327,16 +5206,11 @@ const approvePayment = async (id) => {
           }
           try {
             await $api('/notificaciones/enviar', {
-              baseURL: config.public.apiBase,
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.token}`
-              },
-              body: JSON.stringify({
+              body: {
                 titulo: 'Asignación Pendiente',
                  nombre_rol: 'admin'
-              })
+              }
             });
           } catch (notificationError) {
             console.error('❌ Error al enviar notificación al técnico:', notificationError);
@@ -5356,9 +5230,7 @@ const approvePayment = async (id) => {
 
         // Aprobar el pago del servicio
         response = await $api('/pagoservicio/aceptar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers,
           body: {
             id_solicitud: solicitudId,
             id_cotizacion: cotizacionId
@@ -5372,16 +5244,11 @@ const approvePayment = async (id) => {
         if (response?.success && payment.solicitud?.tecnico?.id_usuario) {
           try {
             await $api('/notificaciones/enviar', {
-              baseURL: config.public.apiBase,
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.token}`
-              },
-              body: JSON.stringify({
+              body: {
                 titulo: 'Pago de servicio recibido',
                 id_usuario: payment.solicitud.tecnico.id_usuario
-              })
+              }
             });
           } catch (notificationError) {
             console.error('❌ Error al enviar notificación al técnico:', notificationError);
@@ -5393,16 +5260,11 @@ const approvePayment = async (id) => {
         if (response?.success && response.detalles?.id_referidor) {
           try {
             await $api('/notificaciones/enviar', {
-              baseURL: config.public.apiBase,
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.token}`
-              },
-              body: JSON.stringify({
+              body: {
                 titulo: 'Comisión por referido recibida',
                 id_usuario: response.detalles.id_referidor
-              })
+              }
             });
           } catch (notificationError) {
             console.error('❌ Error al enviar notificación al referidor:', notificationError);
@@ -5415,9 +5277,7 @@ const approvePayment = async (id) => {
       case 'withdrawals':
         const withdrawalId = payment.id_movimiento || payment.id;
         response = await $api(`/movimientos/${withdrawalId}`, {
-          baseURL: config.public.apiBase,
           method: 'PUT',
-          headers,
           body: { estado: 'completado' }
         });
 
@@ -5425,9 +5285,7 @@ const approvePayment = async (id) => {
         if (idUsuario && payment.monto) {
           try {
             await $api('/credito', {
-              baseURL: config.public.apiBase,
               method: 'POST',
-              headers,
               body: {
                 id_usuario: idUsuario,
                 monto_credito: Math.abs(parseFloat(payment.monto))
@@ -5548,9 +5406,7 @@ const rejectPayment = async (id) => {
     switch (activeTab.value) {
       case 'membership':
         response = await $api(`/membresia/${payment.id_membresia || payment.id}`, {
-          baseURL: config.public.apiBase,
           method: 'PUT',
-          headers,
           body: { estado: 'rechazada' }
         });
         break;
@@ -5558,9 +5414,7 @@ const rejectPayment = async (id) => {
       case 'visits':
         // Usar el endpoint correcto de denegación de pago de visita
         response = await $api('/pagovisita/denegar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers,
           body: {
             id_solicitud: payment.id_solicitud || payment.solicitud?.id_solicitud || payment.id,
             id_cotizacion: payment.id_cotizacion || payment.cotizacion?.id || payment.cotizacion?.id_cotizacion,
@@ -5571,9 +5425,7 @@ const rejectPayment = async (id) => {
         // Actualizar el estado de la solicitud a pendiente_pagovisita
         try {
           await $api(`/solicitudservicio/${payment.solicitud?.id_solicitud || payment.id_solicitud || payment.id}`, {
-            baseURL: config.public.apiBase,
             method: 'PUT',
-            headers,
             body: { estado: 'pendiente_pagovisita' }
           });
         } catch (error) {
@@ -5591,9 +5443,7 @@ const rejectPayment = async (id) => {
                            payment.cotizaciones?.[0]?.id_cotizacion;
 
         response = await $api('/pagoservicio/denegar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers,
           body: {
             id_solicitud: solicitudId,
             id_cotizacion: cotizacionId,
@@ -5605,9 +5455,7 @@ const rejectPayment = async (id) => {
       case 'withdrawals':
         const withdrawalId = payment.id_movimiento || payment.id;
         response = await $api(`/movimientos/${withdrawalId}`, {
-          baseURL: config.public.apiBase,
           method: 'PUT',
-          headers,
           body: { estado: 'rechazado' }
         });
 
@@ -5640,16 +5488,11 @@ const rejectPayment = async (id) => {
 
       if (idUsuario) {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo,
             id_usuario: idUsuario
-          })
+          }
         });
       }
     } catch (notifError) {

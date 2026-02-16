@@ -279,16 +279,117 @@
               </button>
             </div> 
           </section>
+
+          <!-- Paquetes por Membresía -->
+          <section v-if="paquetesMantenimiento?.length" class="px-4 mb-2">
+            <!-- Header -->
+            <div class="flex items-end justify-between mb-6">
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                  Mercado de Paquetes 💎
+                </h3>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Compra paquetes o canjéalos con tu crédito
+                </p>
+              </div>
+              <button 
+                v-if="paquetesMantenimiento.length > 4"
+                @click="navigateTo('/tecnico/Marketplace')" 
+                class="text-xs font-black text-blue-600 dark:text-blue-400 px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full"
+              >
+                Ver todos
+              </button>
+            </div>
+
+            <!-- Carril Horizontal -->
+            <div class="relative -mx-4">
+              <div 
+                ref="carruselRef"
+                class="flex gap-4 overflow-x-auto px-4 pb-4 no-scrollbar cursor-grab active:cursor-grabbing select-none"
+                @mouseenter="isHovering = true"
+                @mouseleave="isHovering = false"
+                @touchstart="handleInteraction"
+                @mousedown="handleInteraction"
+                @scroll="onManualScroll"
+              >
+                <div
+                  v-for="(paquete, index) in carouselItems"
+                  :key="index"
+                  @click="openPackageDetail(paquete)"
+                  class="flex-shrink-0 w-52 flex flex-col rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer group relative overflow-hidden transform-gpu"
+                >
+                  <div class="relative w-full h-44 overflow-hidden">
+                    <img
+                      v-if="paquete.imagen"
+                      :src="getOptimizedImage(paquete.imagen, 500, 400)"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      loading="lazy"
+                    />
+                    <div v-else class="w-full h-full flex items-center justify-center bg-blue-50 dark:bg-gray-700 text-2xl">📦</div>
+                    
+                    <!-- Badge Proprietary -->
+                    <div v-if="tienePaquete(paquete.id)" class="absolute top-3 right-3 z-10">
+                      <div class="px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-[9px] font-black text-white shadow-lg uppercase tracking-widest border border-white/20">
+                        {{ getEstadoPaquete(paquete.id) }}
+                      </div>
+                    </div>
+
+                    <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent">
+                      <h4 class="font-bold text-white text-sm line-clamp-1 truncate">{{ paquete.nombre }}</h4>
+                      <p class="text-xs font-black text-blue-400">L. {{ formatNumber(paquete.costo) }}</p>
+                    </div>
+                  </div>
+                  <div class="px-3 py-3 bg-white dark:bg-gray-800">
+                    <button class="w-full py-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                      Ver Detalles
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </main>
       </div>
     </div>
+
+    <!-- Detail Panel -->
+    <Transition name="bottom-sheet">
+      <div v-if="selectedDetailPackage" class="fixed inset-0 z-[100] flex flex-col justify-end isolate" @touchmove.stop>
+        <div class="absolute inset-0 bg-black/60 bs-backdrop" @click="closeDetail"></div>
+        <div class="relative w-full bg-white dark:bg-gray-900 rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] overflow-hidden max-h-[85vh] flex flex-col bs-content">
+          <div class="w-full flex items-center justify-between px-6 py-4 absolute top-0 left-0 z-20 pointer-events-none">
+            <div class="w-10 h-1 bg-white/40 backdrop-blur-md rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-3"></div>
+            <div class="flex-1"></div>
+            <button @click="closeDetail" class="w-9 h-9 rounded-full bg-black/30 backdrop-blur-xl text-white flex items-center justify-center active:scale-90 transition-transform pointer-events-auto">✕</button>
+          </div>
+          <div class="overflow-y-auto overscroll-contain no-scrollbar">
+            <div class="aspect-video w-full bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
+              <img v-if="selectedDetailPackage.imagen" :src="getOptimizedImage(selectedDetailPackage.imagen, 1000, 600)" class="w-full h-full object-cover" />
+            </div>
+            <div class="px-6 pb-32 pt-6">
+              <h2 class="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-1">{{ selectedDetailPackage.nombre }}</h2>
+              <p class="text-base font-black text-blue-600 mb-4">L. {{ formatNumber(selectedDetailPackage.costo) }}</p>
+              <div class="prose prose-sm dark:prose-invert text-gray-500 dark:text-gray-400">
+                <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Descripción</h3>
+                <p class="text-base leading-relaxed">{{ selectedDetailPackage.descripcion || 'Sin descripción.' }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 p-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
+            <button @click="navigateTo('/tecnico/Marketplace')" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-base shadow-xl">
+              Ir al Marketplace
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <FootersFooterTecnico />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue'
@@ -335,6 +436,21 @@ const toast = ref({
   type: 'info',
   duration: 5000
 })
+
+// === Carrusel de Paquetes State ===
+const paquetesMantenimiento = ref([])
+const paquetesUsuario = ref([])
+const displayedPaquetes = ref([])
+const cargandoPaquetes = ref(true)
+const imageLoaded = ref({})
+const carruselRef = ref(null)
+const isHovering = ref(false)
+const isInteracting = ref(false)
+let animationFrame = null
+let currentScroll = 0
+let resumeTimeout = null
+let isAutoScrolling = false
+const selectedDetailPackage = ref(null)
 
 // ===== FUNCIONES DE UTILIDAD =====
 const formatRelativeDate = (dateString) => {
@@ -427,6 +543,151 @@ const showError = (message) => {
     duration: 8000
   })
 }
+
+// === Carrusel de Paquetes Logic ===
+const getOptimizedImage = (url, w, h) => {
+  if (!url) return null;
+  if (url.includes('cloudinary')) {
+    const parts = url.split('/upload/');
+    return `${parts[0]}/upload/c_fill,w_${w},h_${h},f_auto,q_auto/${parts[1]}`;
+  }
+  return url;
+};
+
+const handleInteraction = () => {
+  isInteracting.value = true;
+  if (resumeTimeout) clearTimeout(resumeTimeout);
+  resumeTimeout = setTimeout(() => {
+    isInteracting.value = false;
+    if (carruselRef.value) currentScroll = carruselRef.value.scrollLeft;
+  }, 2000);
+};
+
+const onManualScroll = () => {
+  if (!isAutoScrolling) handleInteraction();
+};
+
+const startAutoScroll = () => {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  const scroll = () => {
+    if (selectedDetailPackage.value) {
+      animationFrame = null;
+      return;
+    }
+    if (carruselRef.value) {
+      if (!isHovering.value && !isInteracting.value) {
+        currentScroll += 0.6; 
+        const halfWidth = carruselRef.value.scrollWidth / 2;
+        if (currentScroll >= halfWidth) currentScroll = 0;
+        isAutoScrolling = true;
+        carruselRef.value.scrollLeft = currentScroll;
+        requestAnimationFrame(() => { isAutoScrolling = false; });
+      } else {
+        currentScroll = carruselRef.value.scrollLeft;
+      }
+    }
+    animationFrame = requestAnimationFrame(scroll);
+  };
+  animationFrame = requestAnimationFrame(scroll);
+};
+
+const stopAutoScroll = () => {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+};
+
+const cargarPaquetesActivos = async () => {
+  try {
+    cargandoPaquetes.value = true;
+    const userCookie = useCookie('user').value;
+    const id_ciudad = userCookie?.id_ciudad;
+    const id_usuario = userCookie?.id_usuario;
+
+    const response = await $api('/paquetes/activos', {
+      baseURL: config.public.apiBase,
+      headers: { 'Authorization': `Bearer ${auth.token}` },
+      params: { ...(id_ciudad && { id_ciudad }), ...(id_usuario && { id_usuario }) }
+    });
+    
+    paquetesMantenimiento.value = response.map(paquete => ({
+      id: paquete.id_paquete,
+      nombre: paquete.nombre,
+      descripcion: paquete.descripcion,
+      costo: parseFloat(paquete.costo),
+      estado: paquete.estado,
+      disponible: paquete.disponible !== false,
+      imagen: paquete.imagen_url || null
+    }));
+  } catch (error) {
+    console.error('Error al cargar paquetes:', error);
+  } finally {
+    cargandoPaquetes.value = false;
+  }
+};
+
+const cargarPaquetesUsuario = async () => {
+  try {
+    const userCookie = useCookie('user').value;
+    if (!userCookie?.id_usuario) return;
+    const response = await $api(`/paquetes/usuarios/usuario/${userCookie.id_usuario}`, {
+      baseURL: config.public.apiBase,
+      headers: { 'Authorization': `Bearer ${auth.token}` }
+    });
+    paquetesUsuario.value = response;
+  } catch (error) {
+    console.error('Error al cargar paquetes del usuario:', error);
+  }
+};
+
+const tienePaquete = (paqueteId) => {
+  return paquetesUsuario.value.some(p => p.id_paquete === paqueteId && p.estado !== 'canjeado');
+};
+
+const getEstadoPaquete = (paqueteId) => {
+  const paquetes = paquetesUsuario.value.filter(p => p.id_paquete === paqueteId);
+  if (paquetes.length === 0) return '';
+  if (paquetes.some(p => p.estado === 'verificando_pago')) return 'Verificando';
+  if (paquetes.some(p => p.estado === 'activo')) return 'Adquirido';
+  if (paquetes.some(p => p.estado === 'utilizando')) return 'En uso';
+  return '';
+};
+
+const openPackageDetail = (p) => {
+  selectedDetailPackage.value = p;
+  document.body.style.overflow = 'hidden';
+  isHovering.value = true;
+  stopAutoScroll();
+};
+
+const closeDetail = () => {
+  selectedDetailPackage.value = null;
+  document.body.style.overflow = '';
+  isHovering.value = false;
+  startAutoScroll();
+};
+
+const formatNumber = (val) => new Intl.NumberFormat('es-HN', { minimumFractionDigits: 2 }).format(val || 0);
+
+// Watchers and Computed for Carousel
+watch(paquetesMantenimiento, (newVal) => {
+  if (newVal?.length > 0) {
+    displayedPaquetes.value = [...newVal]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4);
+  }
+}, { immediate: true, deep: true });
+
+watch(displayedPaquetes, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    nextTick(() => {
+      startAutoScroll();
+    });
+  }
+});
+
+const carouselItems = computed(() => {
+  if (!displayedPaquetes.value.length) return [];
+  return [...displayedPaquetes.value, ...displayedPaquetes.value];
+});
 
 // ===== FUNCIONES DE CARGA DE DATOS =====
 const fetchServices = async (page = 1) => {
@@ -664,7 +925,9 @@ const initializeDashboard = async () => {
     await Promise.all([
       fetchServices(1),
       fetchAvailability(),
-      fetchReviews()
+      fetchReviews(),
+      cargarPaquetesActivos(),
+      cargarPaquetesUsuario()
     ])
   } catch (error) { 
     window.location.reload() 
@@ -674,8 +937,33 @@ const initializeDashboard = async () => {
 onMounted(() => {
   initializeDashboard()
 })
+
+onUnmounted(() => {
+  stopAutoScroll()
+})
 </script>
 
 <style scoped>
 /* Estilos específicos del componente */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.cursor-grab { cursor: grab; }
+.cursor-grabbing { cursor: grabbing; }
+
+.bottom-sheet-enter-active, .bottom-sheet-leave-active { transition: opacity 0.3s ease; }
+.bs-content { box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15) !important; will-change: transform; }
+.bottom-sheet-enter-active .bs-backdrop { transition: opacity 0.3s ease; }
+.bottom-sheet-enter-from .bs-backdrop { opacity: 0; }
+.bottom-sheet-enter-to .bs-backdrop { opacity: 1; }
+.bottom-sheet-leave-active .bs-backdrop { transition: opacity 0.25s ease; }
+.bottom-sheet-leave-from .bs-backdrop { opacity: 1; }
+.bottom-sheet-leave-to .bs-backdrop { opacity: 0; }
+.bottom-sheet-enter-active .bs-content { animation: slide-up-custom 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+.bottom-sheet-leave-active .bs-content { transition: transform 0.4s ease-in; transform: translateY(0); }
+.bottom-sheet-leave-to .bs-content { transform: translateY(100%); }
+@keyframes slide-up-custom { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-pop-enter-active, .modal-pop-leave-active { transition: opacity 0.3s ease; }
+.modal-pop-enter-active .modal-content-pop, .modal-pop-leave-active .modal-content-pop { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.modal-pop-enter-from, .modal-pop-leave-to { opacity: 0; }
+.modal-pop-enter-from .modal-content-pop, .modal-pop-leave-to .modal-content-pop { transform: scale(0.9); }
 </style>

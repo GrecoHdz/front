@@ -51,11 +51,12 @@
 import { ref, onMounted, computed } from 'vue';
 import { usePushNotifications } from '~/composables/usePushNotifications';
 
-const { isSupported, isSubscribed, permission, subscribe, checkSubscription } = usePushNotifications();
+const { isSupported, isSubscribed, permission, isChecking, subscribe, checkSubscription } = usePushNotifications();
 const isDismissed = ref(false);
 
 const isVisible = computed(() => {
-  return isSupported.value && 
+  return !isChecking.value &&
+         isSupported.value && 
          !isSubscribed.value && 
          permission.value !== 'denied' && 
          !isDismissed.value;

@@ -4,8 +4,8 @@ self.addEventListener('push', (event) => {
     const title = data.title || 'Nueva notificación';
     const options = {
         body: data.body || '',
-        icon: '/favicon.ico', // Placeholder for now
-        badge: '/favicon.ico',
+        icon: '/pwa-192x192.png',
+        badge: '/pwa-192x192.png',
         data: data.data || {},
         vibrate: [100, 50, 100],
         actions: [
