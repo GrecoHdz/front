@@ -25,6 +25,9 @@
           <!-- Main Content -->
           <main class="pb-4">
 
+            <!-- Invitación a notificaciones push -->
+            <UiPushNotificationInvite />
+            
             <!-- Hero Section -->
             <section class="px-2 sm:px-4 py-3 sm:py-6">
               <div class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 rounded-xl sm:rounded-3xl p-3 sm:p-6 text-white relative overflow-hidden">
@@ -91,10 +94,7 @@
                   </div>
                 </div>
               </div>
-            </section> 
-            
-            <!-- Invitación a notificaciones push -->
-            <UiPushNotificationInvite />
+            </section>  
 
             <!-- Quick Actions -->
             <section class="px-2 sm:px-4 mb-3 sm:mb-5">

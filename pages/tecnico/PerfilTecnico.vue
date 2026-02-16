@@ -249,100 +249,187 @@
         </div>
       </div>
 
-      <!-- Gestión de Servicios -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow border border-gray-200 dark:border-gray-700 mb-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Mis Servicios</h3>
-          <button 
-            @click="showServiceModal = !showServiceModal"
-            class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            {{ showServiceModal ? 'Cerrar' : 'Agregar' }}
-          </button>
+      <!-- Gestión de Servicios (Rediseñado) -->
+      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700/50 mb-6 transition-all duration-300">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+              🛠️
+            </div>
+            <div>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">Mis Especialidades</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Servicios que ofreces actualmente</p>
+            </div>
+          </div>
+          <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full">
+            {{ technicianServices.length }} Activos
+          </span>
         </div>
         
-        <!-- Servicios asignados -->
-        <div class="mb-4">
-          <div v-if="loadingServices" class="text-center py-4">
-            <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+        <!-- Servicios asignados (Grid Moderno) -->
+        <div class="relative">
+          <div v-if="loadingServices" class="flex flex-col items-center justify-center py-12">
+            <div class="relative">
+              <div class="w-12 h-12 border-4 border-blue-100 dark:border-gray-700 rounded-full"></div>
+              <div class="absolute top-0 w-12 h-12 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            <p class="mt-4 text-sm text-gray-500 font-medium">Sincronizando tus servicios...</p>
           </div>
           
-          <div v-else-if="technicianServices.length === 0" class="text-center py-6 text-gray-500">
-            <p class="text-sm">No tienes servicios asignados</p>
+          <div v-else-if="technicianServices.length === 0" class="text-center py-10 bg-gray-50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <div class="text-4xl mb-3">✨</div>
+            <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">¿Aún no tienes servicios?</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 px-6">Agrega tus habilidades para empezar a recibir solicitudes de clientes cercanos.</p>
             <button 
               @click="showServiceModal = true"
-              class="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg hover:shadow-blue-200/50"
             >
-              Agregar servicios
+              Comenzar ahora
             </button>
           </div>
           
-          <div v-else class="space-y-2">
+          <div v-else class="grid grid-cols-2 gap-2 sm:gap-3">
             <div 
               v-for="service in technicianServices" 
               :key="service.id_servicio"
-              class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+              class="group relative p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-700 rounded-2xl border border-transparent hover:border-blue-100 dark:hover:border-blue-900/30 transition-all duration-300 hover:shadow-md"
             >
-              <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                  <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 text-center sm:text-left">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110 flex-shrink-0">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
-                <div>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ service.nombre }}</p>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate w-full">{{ service.nombre }}</p>
+                  <p class="hidden sm:block text-[10px] text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wider">Habilitado</p>
                 </div>
+                <button 
+                  @click="removeServiceFromTechnician(service.id_tecnico_servicio)"
+                  class="absolute top-1 right-1 p-1.5 sm:relative sm:top-0 sm:right-0 sm:opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                  title="Eliminar servicio"
+                >
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
-              <button 
-                @click="removeServiceFromTechnician(service.id_tecnico_servicio)"
-                class="text-gray-400 hover:text-red-500 transition-colors"
-                title="Eliminar servicio"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </div>
+            
+            <!-- Card de Acción Rápida para añadir -->
+            <button 
+              @click="showServiceModal = true"
+              class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-800 rounded-2xl bg-white dark:bg-gray-800 transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10 group"
+            >
+              <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 group-hover:bg-blue-500 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <span class="text-[10px] sm:text-sm font-bold text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 text-center">Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de Gestión de Servicios (Inyectado al final antes de script) -->
+      <Transition name="fade">
+        <div v-if="showServiceModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-md" @click="showServiceModal = false"></div>
+          <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-lg relative z-20 shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700 animate-slide-up">
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+              <div>
+                <h3 class="text-xl font-black text-gray-900 dark:text-white">Ampliar tu Perfil</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Selecciona servicios disponibles en tu ciudad</p>
+              </div>
+              <button @click="showServiceModal = false" class="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-          </div>
-        </div>
-        
-        <!-- Panel para agregar servicios -->
-        <div v-if="showServiceModal" class="border-t pt-4 dark:border-gray-700">
-          <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Agregar nuevos servicios</h4>
-          
-          <div v-if="loadingServices" class="text-center py-4">
-            <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
-          </div>
-          
-          <div v-else-if="availableServices.length === 0" class="text-center py-4 text-gray-500">
-            <p class="text-sm">No hay servicios disponibles</p>
-          </div>
-          
-          <div v-else class="space-y-2 max-h-60 overflow-y-auto">
-            <div 
-              v-for="service in availableServices" 
-              :key="service.id_servicio"
-              class="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors"
-            >
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ service.nombre }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ service.descripcion }}</p>
+
+            <div class="p-6 pt-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              <div v-if="loadingServices" class="py-20 text-center">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
               </div>
-              <button 
-                v-if="!isServiceAssigned(service.id_servicio)"
-                @click="assignServiceToTechnician(service.id_servicio)"
-                class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              >
-                Agregar
-              </button>
-              <span 
-                v-else
-                class="px-3 py-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded"
-              >
-                Ya asignado
-              </span>
+              
+              <div v-else-if="availableServices.length === 0" class="py-12 text-center">
+                <div class="text-4xl mb-4">🏠</div>
+                <p class="text-gray-900 dark:text-white font-bold">Sin servicios adicionales para tu zona</p>
+                <p class="text-xs text-gray-500">Te avisaremos cuando haya nuevas categorías disponibles.</p>
+              </div>
+              
+              <div v-else class="space-y-3">
+                <div 
+                  v-for="service in availableServices" 
+                  :key="service.id_servicio"
+                  class="group flex items-center justify-between p-4 rounded-2xl transition-all duration-200"
+                  :class="isServiceAssigned(service.id_servicio) ? 'bg-gray-50 dark:bg-gray-900/50 opacity-60' : 'bg-white dark:bg-gray-700 hover:shadow-lg border border-gray-100 dark:border-gray-600'"
+                >
+                  <div class="flex-1">
+                    <p class="text-sm font-black text-gray-900 dark:text-white">{{ service.nombre }}</p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">{{ service.descripcion }}</p>
+                  </div>
+                  
+                  <div class="ml-4">
+                    <button 
+                      v-if="!isServiceAssigned(service.id_servicio)"
+                      @click="assignServiceToTechnician(service.id_servicio)"
+                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl transition-all active:scale-95 flex items-center gap-2"
+                    >
+                      Añadir <span class="text-lg leading-none">+</span>
+                    </button>
+                    <span 
+                      v-else
+                      class="px-3 py-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px] font-black rounded-lg flex items-center gap-1"
+                    >
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                      ACTIVO
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+      </Transition>
+
+      <!-- Push Notifications Settings -->
+      <div v-if="isSupported" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4 transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-xl">
+              🔔
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-gray-900 dark:text-white">Notificaciones Push</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Recibe alertas en tiempo real</p>
+            </div>
+          </div>
+          
+          <!-- Toggle Switch -->
+          <button 
+            @click="handleToggleNotifications"
+            :disabled="permission === 'denied'"
+            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            :class="isSubscribed ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'"
+          >
+            <span
+              class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm"
+              :class="isSubscribed ? 'translate-x-6' : 'translate-x-1'"
+            />
+          </button>
+        </div>
+
+        <div class="mt-4">
+          <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+            Activa las notificaciones para recibir actualizaciones sobre tus pedidos y mensajes incluso si no tienes la aplicación abierta.
+          </p>
+          
+          <p v-if="permission === 'denied'" class="mt-2 text-[10px] text-red-500 dark:text-red-400">
+            ⚠️ Permisos bloqueados en el navegador. Por favor, habilítalos en los ajustes del sitio.
+          </p>
         </div>
       </div>
 
@@ -1032,6 +1119,73 @@
     </div>
   </div>
 </Transition>
+    <!-- Modal de Confirmación Desactivar Notificaciones -->
+    <Transition name="fade">
+      <div v-if="showUnsubscribeModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showUnsubscribeModal = false"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl w-full max-w-sm relative z-10 border border-gray-100 dark:border-gray-700">
+          <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+              🔕
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¿Desactivar notificaciones?</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed px-2">
+              Dejarás de recibir avisos importantes sobre tus servicios y membresías en tiempo real.
+            </p>
+          </div>
+          
+          <div class="flex flex-col gap-3">
+            <button 
+              @click="confirmUnsubscribe"
+              class="w-full py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-red-200 dark:shadow-none"
+            >
+              Sí, desactivar
+            </button>
+            <button 
+              @click="showUnsubscribeModal = false"
+              class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
+            >
+              Mantener activas
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Modal de Confirmación Activar Notificaciones -->
+    <Transition name="fade">
+      <div v-if="showSubscribeModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSubscribeModal = false"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl w-full max-w-sm relative z-10 border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-blue-500"></div>
+          
+          <div class="text-center mb-6 pt-2">
+            <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+              🔔
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¡Mantente informado!</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed px-2">
+              Activando las notificaciones te avisaremos sobre el estado de tus servicios y promociones exclusivas.
+            </p>
+          </div>
+          
+          <div class="flex flex-col gap-3">
+            <button 
+              @click="confirmSubscribe"
+              class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200 dark:shadow-none"
+            >
+              Sí, activar alertas
+            </button>
+            <button 
+              @click="showSubscribeModal = false"
+              class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
+            >
+              Ahora no
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
   
 </template>
@@ -1043,6 +1197,8 @@ import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Multiselect from 'vue-multiselect'
+import { usePushNotifications } from '~/composables/usePushNotifications'
+
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
@@ -1073,6 +1229,10 @@ const isTerminosModalOpen = ref(false)
 const isContratoTecnicoModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
+const { subscribe, unsubscribe, isSubscribed, checkSubscription, isSupported, permission } = usePushNotifications()
+const showUnsubscribeModal = ref(false)
+const showSubscribeModal = ref(false)
+
 
 // Variables para gestión de servicios
 const availableServices = ref([])
@@ -1753,6 +1913,47 @@ const handleLogout = async () => {
   }
 }
 
+const handleToggleNotifications = async () => {
+    if (isSubscribed.value) {
+        showUnsubscribeModal.value = true
+    } else {
+        showSubscribeModal.value = true
+    }
+}
+
+const confirmSubscribe = async () => {
+    try {
+        showSubscribeModal.value = false
+        const result = await subscribe()
+        
+        if (result.success) {
+            showSuccess('¡Éxito!', 'Notificaciones activadas correctamente')
+        } else if (result.error === 'denied') {
+            showError('Permiso denegado', 'Debes permitir las notificaciones en tu navegador')
+        } else if (result.error === 'supported') {
+            showError('No soportado', 'Tu navegador no soporta notificaciones push')
+        } else {
+            showError('Error', result.error || 'No se pudieron activar las notificaciones')
+        }
+    } catch (error) {
+        console.error('Error al suscribir:', error)
+        showError('Error', 'Ocurrió un error inesperado al activar las notificaciones')
+    }
+}
+
+const confirmUnsubscribe = async () => {
+  try {
+    await unsubscribe()
+    showUnsubscribeModal.value = false
+    toast.value.show = true
+    toast.value.message = 'Notificaciones desactivadas'
+    toast.value.type = 'info'
+  } catch (error) {
+    console.error('Error al desactivar:', error)
+  }
+}
+
+
 // ===== WATCHERS =====
 // Watch para sincronizar id_ciudad con ciudadSeleccionada
 watch(() => user.value.id_ciudad, (newId) => {
@@ -1808,6 +2009,7 @@ const checkAuthAndLoad = async () => {
 
 onMounted(() => {
   checkAuthAndLoad()
+  checkSubscription()
 })
 
 </script>

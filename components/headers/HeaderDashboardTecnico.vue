@@ -53,8 +53,7 @@ import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 import { useRuntimeConfig } from '#imports';
 import { useRouter } from 'vue-router';
-import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
-import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
+import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'; 
 
 
 // ===== CONFIGURACIÓN =====
