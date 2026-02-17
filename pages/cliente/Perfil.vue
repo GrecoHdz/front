@@ -1426,12 +1426,7 @@ const fetchContactInfo = async () => {
     const requests = contactInfo.value.map(async (contact) => {
       try {
         const response = await $api(`/config/valor/${contact.configKey}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         })
         
         // Actualizar el valor correspondiente
@@ -1463,12 +1458,7 @@ const fetchContactInfo = async () => {
 const cargarCiudades = async () => {
   try {
     const data = await $api('/ciudad', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     }) 
     
     if (Array.isArray(data)) {
@@ -1517,12 +1507,7 @@ const fetchUserData = async () => {
     const userData = userCookie.value
     
     const data = await $api(`/usuarios/id/${userData.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      credentials: 'include',
-      headers: {
-        'Authorization': `Bearer ${auth.token}`,
-        'Accept': 'application/json'
-      }
+      method: 'GET'
     })
     
     if (!data) {
@@ -1845,12 +1830,7 @@ const saveProfile = async () => {
     
     const response = await $api(`/usuarios/${user.value.id_usuario}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      body: userData,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      body: userData
     });
     
     // Actualizar los datos originales con los nuevos valores
@@ -1926,14 +1906,9 @@ const updatePassword = async () => {
     
     const response = await $api(`/usuarios/cambio-clave/${user.value.id_usuario}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      body: JSON.stringify({
+      body: {
         currentPassword: currentPassword.value,
         newPassword: newPassword.value
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
       }
     }); 
     
@@ -2019,13 +1994,7 @@ const calcularProgreso = (fechaInicio) => {
 const updateMembershipToExpired = async (membresiaId) => {
   try {
     await $api(`/membresia/${membresiaId}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: {
         estado: 'vencida'
       }
@@ -2050,12 +2019,7 @@ const fetchMembershipData = async () => {
   
   try {
     const data = await $api(`/membresia/${userId}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     // Verificar si hay datos y si la respuesta es exitosa
@@ -2133,12 +2097,7 @@ const fetchMembershipCost = async () => {
   isLoadingMembershipCost.value = true;
   try {
     const data = await $api('/config/valor/membresia', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (data) {
@@ -2198,12 +2157,7 @@ const fetchBankAccounts = async () => {
   isLoadingAccounts.value = true;
   try {
     const data = await $api('/cuentas', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (data) {
@@ -2237,13 +2191,7 @@ const empresaPhoneNumber = ref('');
 const fetchEmpresaPhoneNumber = async () => {
   try {
     const response = await $api('/config/valor/numero_empresa', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response && response.valor) {
@@ -2325,11 +2273,6 @@ const confirmRenewal = async () => {
 
     const data = await $api('/membresia', {
       method: 'POST',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: requestData
     });
 
@@ -2337,28 +2280,17 @@ const confirmRenewal = async () => {
     try {
       await $api('/notificaciones/enviar', {
         method: 'POST',
-        baseURL: config.public.apiBase,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        },
-        body: JSON.stringify({
+        body: {
           titulo: 'Pago por membresía recibido',
           nombre_rol: 'admin'
-        })
+        }
       });
       await $api('/notificaciones/enviar', {
-        baseURL: config.public.apiBase,
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${auth.token}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+        body: {
           titulo: 'Pago por membresía recibido',
           nombre_rol: 'sa'
-        })
+        }
       });
     } catch (error) {
       console.error('Error al enviar notificación:', error);

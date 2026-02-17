@@ -1051,12 +1051,7 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
     
     // Si no hay datos en caché o es una recarga forzada, hacer la petición a la API
     const response = await $api(`/movimientos/${userId}`, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: params
     }); 
     
@@ -1227,12 +1222,7 @@ const loadReviews = async (page = 1, forceRefresh = false) => {
     
     // Si no hay datos en caché o son viejos, hacer la petición a la API
     const response = await $api(`/calificaciones/usuario/${userId}`, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: {
         page: page,
         limit: reviewsPagination.value.itemsPerPage
@@ -1296,12 +1286,7 @@ const loadReviews = async (page = 1, forceRefresh = false) => {
 const loadAverageRating = async () => {
   try {
     const data = await $api(`/calificaciones/promedio/${currentUser.value.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     // Asumimos que la respuesta es un número directamente (ej. 4.2)
@@ -1319,12 +1304,7 @@ const loadEstadisticasGenerales = async () => {
     // Cargar estadísticas generales
     const [estadisticas] = await Promise.all([
       $api(`/movimientos/estadisticas/${currentUser.value.id_usuario}`, {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       }),
       loadAverageRating() // Cargar la calificación promedio en paralelo
     ]);
@@ -1361,12 +1341,7 @@ const loadServicesByType = async () => {
     }
     
     const response = await $api(`/movimientos/servicios/tipo/${userCookie.value.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     }) 
 
     // La API devuelve el array directamente, no anidado en .data
@@ -1405,12 +1380,7 @@ const loadServicesByType = async () => {
 const loadMonthlyIncomes = async () => {
   try {
     const data = await $api(`/movimientos/ingresos/mensuales/${userCookie.value.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     monthlyIncomes.value = data || []
@@ -1454,12 +1424,7 @@ const loadMonthlyIncomes = async () => {
 const loadMonthlyServices = async () => {
   try {
     const data = await $api(`/movimientos/servicios/mensuales/${userCookie.value.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     monthlyServices.value = data || []
@@ -1897,13 +1862,7 @@ const processWithdraw = async () => {
     }
     
     const response = await $api('/movimientos', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: requestBody
     })
 
@@ -1913,30 +1872,18 @@ const processWithdraw = async () => {
     // Notificar a los administradores sobre la nueva petición de retiro
     try {
       await $api('/notificaciones/enviar', {
-        baseURL: config.public.apiBase,
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        },
-        body: JSON.stringify({
+        body: {
           titulo: 'Nueva Petición de Retiro',
           nombre_rol: 'admin'
-        })
+        }
       })
       await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${auth.token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Nueva Petición de Retiro',
             nombre_rol: 'sa'
-          })
+          }
         });
     } catch (error) {
       console.error('Error al enviar notificación a administradores:', error);

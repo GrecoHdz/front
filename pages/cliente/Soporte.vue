@@ -365,8 +365,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { useHead, useCookie, useRouter, useRuntimeConfig } from '#imports'
-import { useAuthStore } from '~/middleware/auth.store'
+import { useHead, useCookie } from '#imports'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 import Multiselect from 'vue-multiselect'
@@ -375,11 +374,8 @@ import Multiselect from 'vue-multiselect'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
-const auth = useAuthStore()
-const router = useRouter()
-const config = useRuntimeConfig()
+
 const userCookie = useCookie('user')
-const tokenCookie = useCookie('token')
 
 // SEO and Meta
 useHead({
@@ -543,12 +539,7 @@ const fetchContactInfo = async () => {
     const requests = contactInfo.value.map(async (contact) => {
       try {
         const response = await $api(`/config/valor/${contact.configKey}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          }
+          method: 'GET'
         })
         
         // Actualizar el valor correspondiente
@@ -590,12 +581,7 @@ const cargarServiciosFinalizados = async () => {
   
   try {
     const response = await $api(`/solicitudservicio/usuario/${userCookie.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${tokenCookie.value}`
-      }
+      method: 'GET'
     })
     
     const servicios = Array.isArray(response) ? response : response?.solicitudes || []
@@ -642,42 +628,25 @@ const submitForm = async () => {
     
     // Enviar el ticket de soporte
     const response = await $api('/soporte', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      body: dataToSend,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      body: dataToSend
     })
     
     // Enviar notificación a los administradores
     try {
       await $api('/notificaciones/enviar', {
-        baseURL: config.public.apiBase,
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        },
-        body: JSON.stringify({
+        body: {
           titulo: 'Nuevo Ticket',
           nombre_rol: 'admin'
-        })
+        }
       });
       await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${auth.token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Nuevo Ticket',
             nombre_rol: 'sa'
-          })
+          }
         });
     } catch (error) {
       console.error('Error al enviar notificación:', error);

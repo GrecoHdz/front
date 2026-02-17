@@ -1857,7 +1857,6 @@ import Multiselect from 'vue-multiselect'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
-const config = useRuntimeConfig()
 const auth = useAuthStore()
 const router = useRouter()
 const userCookie = useCookie('user')
@@ -2352,11 +2351,7 @@ const fetchMembresiaBeneficios = async () => {
     isLoadingBeneficios.value = true;
     
     const response = await $api('/membresiabeneficios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
+      method: 'GET'
     });
      
     
@@ -2394,12 +2389,7 @@ const loadServices = async (reset = true) => {
     }
 
     const response = await $api(`/solicitudservicio/usuario/${userCookieValue.id_usuario}`, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
-      },
       params: {
           page: currentPage.value,
           limit: 3
@@ -2423,11 +2413,7 @@ const loadServices = async (reset = true) => {
       if (solicitud.estado === 'pendiente_pagovisita') {
         try {
           const pagoResponse = await $api(`/pagovisita/solicitud/${solicitud.id_solicitud}`, {
-            baseURL: config.public.apiBase,
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${useCookie('token').value}`
-            }
+            method: 'GET'
           });
           
           // Extraer el estado del pago de la respuesta anidada
@@ -2459,12 +2445,7 @@ const loadServices = async (reset = true) => {
       if (solicitud.estado === 'pendiente_pagoservicio') {
         try {
           const response = await $api(`/cotizacion/solicitud/${solicitud.id_solicitud}`, {
-            baseURL: config.public.apiBase,
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${useCookie('token').value}`
-            }
+            method: 'GET'
           });
           
           // Verificar si la respuesta tiene el formato esperado
@@ -2536,12 +2517,7 @@ const loadServiceTypes = async () => {
     const id_ciudad = userRole?.id_ciudad
     
     const data = await $api('/servicios/activos', {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: id_ciudad ? { id_ciudad } : {}
     })
     
@@ -2565,12 +2541,7 @@ const fetchQuotationData = async (solicitudId) => {
     const token = useCookie('token').value
     
     const response = await $api(`/cotizacion/solicitud/${solicitudId}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+      method: 'GET'
     })
     
     // Verificar si la respuesta tiene la estructura esperada
@@ -2609,12 +2580,7 @@ const fetchBankAccounts = async () => {
   isLoadingAccounts.value = true;
   try {
     const data = await $api('/cuentas', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (data) {
@@ -2640,12 +2606,7 @@ const fetchBankAccounts = async () => {
 const fetchVisitCost = async () => {
   try {
     const data = await $api('/config/valor/visita_tecnico', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (data) {
@@ -2824,15 +2785,11 @@ const fetchMembresiaProgreso = async (userId) => {
     // Obtener progreso de membresía
     const [membresiaResponse, creditoResponse] = await Promise.all([
       $api(`/membresia/progreso/${userId}`, {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers
+        method: 'GET'
       }),
       // Obtener crédito del usuario
       $api(`/credito/usuario/${userId}`, {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers
+        method: 'GET'
       }).catch(error => {
         console.error('[fetchMembresiaProgreso] Error al obtener crédito del usuario:', error);
         return { success: false, data: { monto_credito: 0 } };
@@ -2944,85 +2901,44 @@ const submitRating = async () => {
 
     // 1. Enviar la calificación
     const response = await $api('/calificaciones', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(ratingData)
+      body: ratingData
     })
     
     try {
       // Actualizar el estado del servicio a 'calificado' directamente
       const updateResponse = await $api(`/solicitudservicio/${currentService.id}`, {
-        baseURL: config.public.apiBase,
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        body: {
           estado: 'calificado'
-        })
+        }
       }) 
 
       // Notificar al técnico sobre la calificación
       try {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Calificacion Recibida',
             id_usuario: currentService.technician
-          })
+          }
         });
-      } catch (error) {
-        console.error('Error al enviar notificación al técnico:', error);
-        // No mostrar error al usuario para no afectar su experiencia
-      }
-
-      // Notificar a los admins sobre la calificación
-      try {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Calificacion Recibida',
             nombre_rol: 'admin'
-          })
+          }
         });
-      } catch (error) {
-        console.error('Error al enviar notificación a los admin:', error);
-        // No mostrar error al usuario para no afectar su experiencia
-      }
-      try {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Calificacion Recibida',
             nombre_rol: 'sa'
-          })
+          }
         });
       } catch (error) {
-        console.error('Error al enviar notificación a los admin:', error);
-        // No mostrar error al usuario para no afectar su experiencia
+        console.error('Error al enviar notificaciones de calificación:', error);
       }
 
       // Actualizar el estado local
@@ -3071,14 +2987,8 @@ const acceptQuotation = async () => {
     const cotizacionUpdate = { estado: 'aceptado' }; 
     
     const cotizacionResponse = await $api(`/cotizacion/${cotizacionId}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(cotizacionUpdate)
+      body: cotizacionUpdate
     }); 
     
     // 2. Actualizar el estado de la solicitud 
@@ -3087,14 +2997,8 @@ const acceptQuotation = async () => {
     const solicitudUpdate = { estado: 'en_proceso' }; 
     
     const solicitudResponse = await $api(`/solicitudservicio/${selectedServiceId.value}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(solicitudUpdate)
+      body: solicitudUpdate
     }); 
     
     // 3. Registrar movimiento
@@ -3106,12 +3010,7 @@ const acceptQuotation = async () => {
     if (!idTecnico) throw new Error('No se encontró el ID del técnico en la solicitud de servicio');
     
     const configResponse = await $api('/config/valor/comision_por_servicio', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+      method: 'GET'
     });
     
     if (!configResponse?.valor) throw new Error('No se pudo obtener el porcentaje de comisión');
@@ -3140,14 +3039,8 @@ const acceptQuotation = async () => {
     };
     
     const movimientoResponse = await $api('/movimientos', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(movimientoData)
+      body: movimientoData
     });
     
     // Notificar al técnico sobre la cotización aceptada
@@ -3157,17 +3050,11 @@ const acceptQuotation = async () => {
       
       if (idTecnico) {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Cotización Aceptada',
             id_usuario: idTecnico
-          })
+          }
         });
       }
     } catch (error) {
@@ -3220,32 +3107,20 @@ const rejectQuotation = async () => {
     
     // 1. Rechazar la cotización
     await $api(`/cotizacion/${cotizacionId}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
+      body: {
         estado: 'rechazado'
-      })
+      }
     });
     
     // 2. Actualizar el estado de la solicitud a 'pendiente_asignacion'
     if (selectedServiceId.value) {
       try {
         await $api(`/solicitudservicio/${selectedServiceId.value}`, {
-          baseURL: config.public.apiBase,
           method: 'PUT',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          body: {
             estado: 'pendiente_asignacion'
-          })
+          }
         });
       } catch (updateError) {
         console.error('Error al actualizar el estado de la solicitud:', updateError);
@@ -3259,17 +3134,11 @@ const rejectQuotation = async () => {
       
       if (idTecnico) {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Cotización Rechazada',
             id_usuario: idTecnico
-          })
+          }
         });
       }
     } catch (error) {
@@ -3348,14 +3217,9 @@ const processVisitPayment = async () => {
     const authToken = useCookie('token').value;
     
     const response = await $api('/pagovisita', {
-  method: 'POST',
-  baseURL: config.public.apiBase,
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${authToken}`
-  },
-  body: requestData
-});
+      method: 'POST',
+      body: requestData
+    });
  
 // Asignar el id_pagovisita al selectedService
 if (response?.data?.id_pagovisita) {
@@ -3367,12 +3231,7 @@ if (response?.data?.id_pagovisita) {
     try {
       await $api(`/solicitudservicio/${selectedService.value.id}`, {
         method: 'PUT',
-        baseURL: config.public.apiBase,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ estado: 'verificando_pagovisita' })
+        body: { estado: 'verificando_pagovisita' }
       }); 
     } catch (updateError) {
       console.error('Error al actualizar el estado de la solicitud:', updateError);
@@ -3384,33 +3243,21 @@ if (response?.data?.id_pagovisita) {
     // Notificar a los administradores sobre el pago de visita recibido
     try {
       await $api('/notificaciones/enviar', {
-        baseURL: config.public.apiBase,
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        body: {
           titulo: 'Pago de visita recibido',
           nombre_rol: 'admin'
-        })
+        }
       });
-       await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Pago de visita recibido',
-            nombre_rol: 'sa'
-          })
-        });
+      await $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: {
+          titulo: 'Pago de visita recibido',
+          nombre_rol: 'sa'
+        }
+      });
     } catch (error) {
-      console.error('Error al enviar notificación a SA:', error);
+      console.error('Error al enviar notificaciones de pago de visita:', error);
     }  
     
     // Mostrar mensaje de éxito
@@ -3496,13 +3343,8 @@ const processPayment = async () => {
 
   try {
     const response = await $api('/pagoservicio/procesar', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${useCookie('token').value}`
-      },
-      body: JSON.stringify(payload)
+      body: payload
     });
 
 // Asignar el id_cotizacion al selectedService
@@ -3512,39 +3354,22 @@ if (response?.detalles?.id_cotizacion) {
     
     // Notificar a los administradores sobre el pago de servicio recibido 
     try {
-      const responseAdmin = await $api('/notificaciones/enviar', {
-        baseURL: config.public.apiBase,
+      await $api('/notificaciones/enviar', {
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${useCookie('token').value}`
-        },
-        body: JSON.stringify({
+        body: {
           titulo: 'Pago de servicio recibido',
           nombre_rol: 'admin'
-        })
+        }
+      }); 
+      await $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: {
+          titulo: 'Pago de servicio recibido',
+          nombre_rol: 'sa'
+        }
       }); 
     } catch (error) {
-      console.error('Error al enviar notificación a administradores:', error);
-    }  
-    
-    try {
-      const responseSA = await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${useCookie('token').value}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Pago de servicio recibido',
-            nombre_rol: 'sa'
-          })
-        }); 
-    } catch (error) {
-      console.error('Error al enviar notificación a SA:', error);
+      console.error('Error al enviar notificaciones de pago de servicio:', error);
     }  
     
     //Enviar mensaje por WhatsApp
@@ -3605,16 +3430,10 @@ const cancelarSolicitud = async () => {
     // Actualizar el estado del servicio a cancelado
     const response = await $api(`/solicitudservicio/${selectedServiceId.value}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
+      body: {
         estado: 'cancelado',
         comentario: cancelAdditionalInfo.value.trim()
-      })
+      }
     });
 
     // Notificar al técnico si está asignado, de lo contrario notificar a los administradores
@@ -3622,77 +3441,31 @@ const cancelarSolicitud = async () => {
       if (currentService?.technician) {
         // Notificar al técnico asignado
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Servicio Cancelado',
             id_usuario: currentService.technician
-          })
-        });
-        // Notificar a los administradores cuando no hay técnico asignado
-        await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Servicio Cancelado',
-            nombre_rol: 'admin'
-          })
-        });
-         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Servicio Cancelado',
-            nombre_rol: 'sa'
-          })
-        });
-      } else {
-        // Notificar a los administradores cuando no hay técnico asignado
-        await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Servicio Cancelado',
-            nombre_rol: 'admin'
-          })
-        });
-         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            titulo: 'Servicio Cancelado',
-            nombre_rol: 'sa'
-          })
+          }
         });
       }
+      
+      // Notificar a los administradores
+      await $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: {
+          titulo: 'Servicio Cancelado',
+          nombre_rol: 'admin'
+        }
+      });
+      await $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: {
+          titulo: 'Servicio Cancelado',
+          nombre_rol: 'sa'
+        }
+      });
     } catch (notificationError) {
       console.error('Error al enviar notificación:', notificationError);
-      // No mostrar error al usuario para no afectar su experiencia
     }
 
     closeCancelModal()
@@ -3810,11 +3583,7 @@ const fetchTecnicoRating = async (idTecnico) => {
     const token = useCookie('token').value
     
     const response = await $api(`/calificaciones/usuario/${idTecnico}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      method: 'GET'
     }) 
     
     // La API devuelve el número directamente (sin success wrapper)
@@ -3848,12 +3617,7 @@ const empresaPhoneNumber = ref('');
 const fetchEmpresaPhoneNumber = async () => {
   try {
     const response = await $api('/config/valor/numero_empresa', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+      method: 'GET'
     });
     
     if (response && response.valor) {

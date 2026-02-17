@@ -169,12 +169,8 @@ export default {
         const config = useRuntimeConfig();
         
         // Verificar si el token es válido
-        const response = await $fetch(`/auth/verify-reset-token/${this.token}`, {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
+        const response = await this.$api(`/auth/verify-reset-token/${this.token}`, {
+          method: 'GET'
         });
         
         this.isTokenValid = response.valid || false;
@@ -210,16 +206,11 @@ export default {
       try {
         const config = useRuntimeConfig();
         
-        const data = await $fetch(`/auth/reset-password/${this.token}`, {
-          baseURL: config.public.apiBase,
+        const data = await this.$api(`/auth/reset-password/${this.token}`, {
           method: 'POST',
-          body: JSON.stringify({ 
+          body: { 
             password: this.password,
             token: this.token
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
           }
         });
         

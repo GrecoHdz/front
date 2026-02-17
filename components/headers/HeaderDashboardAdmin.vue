@@ -87,13 +87,7 @@ const onNotificationClick = async (notification) => {
 
   try {
     const response = await $api('/notificaciones/marcar/individual', {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: {
         id_destinatario_notificacion: notification.id
       }

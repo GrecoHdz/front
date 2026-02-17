@@ -643,7 +643,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
-import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 
@@ -651,8 +650,6 @@ import Toast from '~/components/ui/Toast.vue'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
-const config = useRuntimeConfig()
-const auth = useAuthStore()
 const router = useRouter()
 const userCookie = useCookie('user')
 
@@ -888,12 +885,7 @@ const loadReferralData = async () => {
     // Cargar configuración de monto mínimo de retiro
     try {
       const minWithdrawConfig = await $api('/config/valor/retiro_minimo', {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       });
       minWithdrawAmount.value = parseFloat(minWithdrawConfig?.valor || 0);
     } catch (error) {
@@ -903,28 +895,13 @@ const loadReferralData = async () => {
 
     const [configData, porcentajeRetiroData, ingresosData] = await Promise.all([
       $api('/config/valor/porcentaje_referido', {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       }),
       $api('/config/valor/porcentaje_retiro', {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       }),
       $api(`/movimientos/ingresos/referidos/${user.id_usuario}`, {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       })
     ]) 
 
@@ -984,12 +961,7 @@ const loadReferrals = async (page = 1) => {
 
   try {
     const response = await $api(`/referidos/${user.id_usuario}`, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       query: {
         page: page,
         limit: referralsPagination.value.itemsPerPage
@@ -1054,12 +1026,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
     const monthNumber = selectedMonthValue.split('-')[1]
     
     const response = await $api(`/movimientos/historial/referidos/${user.id_usuario}`, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       query: {
         mes: parseInt(monthNumber),
         tipo: tipo,
@@ -1238,12 +1205,7 @@ const processWithdraw = async () => {
     let minWithdrawAmount = 0;
     try {
       const minWithdrawConfig = await $api('/config/valor/retiro_minimo', {
-        baseURL: config.public.apiBase,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        }
+        method: 'GET'
       });
       minWithdrawAmount = parseFloat(minWithdrawConfig?.valor || 0);
     } catch (error) {
@@ -1281,13 +1243,7 @@ const processWithdraw = async () => {
     let response;
     try {
       response = await $api('/movimientos', {
-        baseURL: config.public.apiBase,
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        },
         body: requestBody
       });
     } catch (error) {
@@ -1302,29 +1258,17 @@ const processWithdraw = async () => {
       try {
         await $api('/notificaciones/enviar', {
           method: 'POST',
-          baseURL: config.public.apiBase,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Nueva Petición de Retiro',
             nombre_rol: 'admin'
-          })
+          }
         });
          await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${auth.token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Nueva Petición de Retiro',
             nombre_rol: 'sa'
-          })
+          }
         });
       } catch (error) {
         console.error('Error al enviar notificación:', error); 

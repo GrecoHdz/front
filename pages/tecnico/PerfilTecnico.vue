@@ -1383,12 +1383,7 @@ const cargarCiudades = async () => {
   try {
     loadingCiudades.value = true
     const data = await $api('/ciudad', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     }) 
     
     if (Array.isArray(data)) {
@@ -1413,12 +1408,7 @@ const fetchAvailableServices = async () => {
     const id_ciudad = userVal?.id_ciudad
 
     const response = await $api('/servicios/activos', {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: id_ciudad ? { id_ciudad } : {}
     })
     
@@ -1441,12 +1431,7 @@ const fetchTechnicianServices = async () => {
     if (!userId) return
     
     const response = await $api(`/tecnicoServicio/${userId}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     if (response.success && response.data) {
@@ -1470,17 +1455,11 @@ const assignServiceToTechnician = async (serviceId) => {
     }
     
     const response = await $api('/tecnicoServicio', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         id_tecnico: userId,
         id_servicio: serviceId
-      })
+      }
     })
     
     if (response.success) {
@@ -1504,12 +1483,7 @@ const assignServiceToTechnician = async (serviceId) => {
 const removeServiceFromTechnician = async (tecnicoServicioId) => {
   try {
     const response = await $api(`/tecnicoServicio/${tecnicoServicioId}`, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     })
     
     if (response.success) {
@@ -1545,14 +1519,7 @@ const fetchUserData = async () => {
       return false
     }
     
-    const data = await $api(`/usuarios/id/${userCookie.value.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      credentials: 'include',
-      headers: {
-        'Authorization': `Bearer ${auth.token}`,
-        'Accept': 'application/json'
-      }
-    })
+    const data = await $api(`/usuarios/id/${userCookie.value.id_usuario}`)
     
     if (!data) {
       throw new Error('No se recibieron datos del usuario')
@@ -1667,12 +1634,7 @@ const uploadProfileImage = async (file) => {
     isUploading.value = true
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: formData
     })
     
@@ -1725,12 +1687,7 @@ const deleteProfileImage = async () => {
     isUploading.value = true
     
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'DELETE'
     }) 
 
     if (response.success) {
@@ -1778,12 +1735,7 @@ const saveProfile = async () => {
     
     const response = await $api(`/usuarios/${userCookie.value.id_usuario}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      body: userData,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      body: userData
     });
     
     originalUserData.value = { ...user.value };
@@ -1848,14 +1800,9 @@ const updatePassword = async () => {
   try {
     const response = await $api(`/usuarios/cambio-clave/${userCookie.value.id_usuario}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      body: JSON.stringify({
+      body: {
         currentPassword: currentPassword.value,
         newPassword: newPassword.value
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
       }
     }); 
     

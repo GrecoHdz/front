@@ -1120,7 +1120,7 @@ html .multiselect-custom .multiselect__tags {
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
-import { useAuthStore } from '~/middleware/auth.store'
+
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Multiselect from 'vue-multiselect' 
 
@@ -1128,8 +1128,7 @@ import Multiselect from 'vue-multiselect'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
-const config = useRuntimeConfig()
-const auth = useAuthStore()
+
 const router = useRouter()
 const userCookie = useCookie('user')
 
@@ -1455,12 +1454,7 @@ const fetchUserCredit = async () => {
     if (!user?.id_usuario) return
     
     const response = await $api(`/credito/usuario/${user.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     if (response?.success && response.data) {
@@ -1487,12 +1481,7 @@ const fetchMembershipProgress = async () => {
     }
 
     const response = await $api(`/membresia/progreso/${userData.id_usuario}`, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       ignoreResponseError: true
     }).catch(() => null)
 
@@ -1533,12 +1522,7 @@ const fetchMembershipData = async () => {
 
   try {
     const response = await $api(`/membresia/${userData.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     // Caso: no hay membresía activa
@@ -1636,12 +1620,7 @@ const fetchTotalSolicitudes = async () => {
     if (!user || !user.id_usuario) return
 
     const response = await $api(`/solicitudservicio/usuario/${user.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     if (response && typeof response.total === 'number') {
@@ -1660,12 +1639,7 @@ const fetchServices = async () => {
     const id_ciudad = user?.id_ciudad
     
     const data = await $api('/servicios', {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: id_ciudad ? { id_ciudad } : {}
     })
     
@@ -1692,12 +1666,7 @@ const fetchBeneficios = async () => {
   
   try {
     const response = await $api('/membresiabeneficios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     // Asegurarse de que la respuesta tenga la estructura esperada
@@ -1753,12 +1722,7 @@ const formatNumber = (value) => {
 const fetchEmpresaPhoneNumber = async () => {
   try {
     const response = await $api('/config/valor/numero_empresa', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+      method: 'GET'
     });
     
     if (response && response.valor) {
@@ -2023,10 +1987,6 @@ const cargarPaquetesActivos = async () => {
     const id_usuario = user?.id_usuario;
 
     const response = await $api('/paquetes/activos', {
-      baseURL: config.public.apiBase,
-      headers: {
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: {
         ...(id_ciudad && { id_ciudad }),
         ...(id_usuario && { id_usuario })
@@ -2100,11 +2060,6 @@ const confirmarCanjeo = async () => {
     // Primero, descontar el crédito
     const creditoResponse = await $api('/credito', {
       method: 'POST',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json'
-      },
       body: { 
         id_usuario: user.id_usuario,
         monto_credito: -Math.abs(paquete.costo)
@@ -2123,11 +2078,6 @@ const confirmarCanjeo = async () => {
 
     const response = await $api('/paquetes/usuarios/canjear', {
       method: 'POST',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json'
-      },
       body: requestData
     }); 
     
@@ -2143,31 +2093,19 @@ const confirmarCanjeo = async () => {
         const user = useCookie('user').value;
         await $api('/notificaciones/enviar', {
           method: 'POST',
-          baseURL: config.public.apiBase,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Paquete Adquirido',
             nombre_rol: 'admin'
-            })
+            }
         });
 
         // Notificar también al super admin
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${auth.token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Paquete Adquirido',
             nombre_rol: 'sa'
-          })
+          }
         });
       } catch (error) {
         console.error('Error al enviar notificaciones:', error);
@@ -2206,7 +2144,6 @@ const cargarCuentasBancarias = async () => {
   isLoadingAccounts.value = true;
   try {
     const response = await $api('/cuentas', {
-      baseURL: config.public.apiBase,
       method: 'GET'
     });
 
@@ -2320,21 +2257,11 @@ const procesarPagoPaquete = async () => {
           await Promise.all([
             $api('/notificaciones/enviar', {
               method: 'POST',
-              baseURL: config.public.apiBase,
-              headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+              body: { ...notificationData, nombre_rol: 'admin' }
             }),
             $api('/notificaciones/enviar', {
               method: 'POST',
-              baseURL: config.public.apiBase,
-              headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+              body: { ...notificationData, nombre_rol: 'sa' }
             })
           ]);
         } catch (notifierError) {
@@ -2375,10 +2302,7 @@ const cargarPaquetesUsuario = async () => {
     }
 
     const response = await $api(`/paquetes/usuarios/${user.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      headers: {
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (response.success && response.data) {
@@ -2452,12 +2376,7 @@ const usarPaquete = async (paquete) => {
     }
 
     const response = await $api(`/paquetes/usuarios/${paqueteUsuario.id_paquete_usuario}/activar`, {
-      method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json'
-      }
+      method: 'PUT'
     });
 
     if (response.success) {
@@ -2484,23 +2403,11 @@ const usarPaquete = async (paquete) => {
         await Promise.all([
           $api('/notificaciones/enviar', {
             method: 'POST',
-            baseURL: config.public.apiBase,
-            headers: { 
-              'Authorization': `Bearer ${auth.token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+            body: { ...notificationData, nombre_rol: 'admin' }
           }),
           $api('/notificaciones/enviar', {
             method: 'POST',
-            baseURL: config.public.apiBase,
-            headers: { 
-              'Authorization': `Bearer ${auth.token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+            body: { ...notificationData, nombre_rol: 'sa' }
           })
         ]);
       } catch (error) {
@@ -2540,12 +2447,7 @@ const resetCredito = async () => {
     }
 
     const response = await $api(`/credito/reset/${userData.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'PUT'
     })
 
     if (response && response.success) {  
@@ -2602,13 +2504,7 @@ const handleRequestService = async () => {
 
     const response = await $api('/solicitudservicio', {
       method: 'POST',
-      baseURL: config.public.apiBase,
-      body: JSON.stringify(requestData),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      body: requestData
     })
 
     // Enviar notificación según el tipo de membresía
@@ -2619,28 +2515,16 @@ const handleRequestService = async () => {
 
       await $api('/notificaciones/enviar', {
         method: 'POST',
-        baseURL: config.public.apiBase,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${auth.token}`
-        },
-        body: JSON.stringify(notificationData)
+        body: notificationData
       })
 
       if (tieneMembresiaActiva) {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${auth.token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Asignación Pendiente',
             nombre_rol: 'sa'
-          })
+          }
         });
       }
     } catch (error) {
@@ -2693,12 +2577,7 @@ const handleRequestService = async () => {
 const getCreditResetPeriod = async () => {
   try {
     const response = await $api('/config/valor/reset_credito', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (response && response.valor) {
@@ -2717,13 +2596,7 @@ const updateMembershipToExpired = async (membresiaId) => {
   try { 
     
     const response = await $api(`/membresia/${membresiaId}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: {
         estado: 'vencida'
       },

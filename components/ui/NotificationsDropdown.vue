@@ -536,11 +536,7 @@ const obtenerNotificaciones = async (page = 1, forceRefresh = false) => {
     const url = `/notificaciones/usuario/${auth.user.id_usuario}?page=${page}&limit=${props.itemsPerPage}`;
     
     const response = await $api(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
     
     if (response && response.success) {
@@ -594,14 +590,8 @@ const marcarTodasComoLeidas = async () => {
     };
     
     const response = await $api('/notificaciones/marcar/leidas', {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
+      body: requestData
     });
 
     if (response.success) {
@@ -687,11 +677,7 @@ const verificarPerfilTecnico = async () => {
 
     // Realizar la petición para verificar el perfil del técnico
     const response = await $api(`/usuarios/verificar-perfil-tecnico/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     // Actualizar los estados según la respuesta
@@ -711,12 +697,7 @@ const verificarPerfilTecnico = async () => {
 const verificarPagosPendientes = async () => {
   try {
     const response = await $api(`/solicitudservicio/pagos-pendientes/${auth.user.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     });
 
     if (response && response.success && response.hasPendingPayments) {

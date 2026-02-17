@@ -66,37 +66,6 @@ const { $api } = useNuxtApp();
 // Definir eventos emitidos
 const emit = defineEmits(['availabilityChange']);
 
-// Verificar perfil al montar el componente
-const verificarPerfilTecnico = async () => {
-  try {
-    // Obtener el ID del usuario autenticado
-    const userId = auth.user?.id_usuario;
-    if (!userId) return;
-
-    // Realizar la petición para verificar el perfil del técnico
-    const response = await $api(`/usuarios/verificar-perfil-tecnico/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
-    });
-
-    // Si el perfil no está completo, mostrar notificación
-    if (!response.perfil_completo) {
-      showToast('Por favor completa tu perfil para ofrecer servicios', 'warning', 5000);
-    }
-  } catch (error) {
-    console.error('Error al verificar perfil de técnico:', error);
-  }
-};
-
-// Verificar perfil cuando el componente se monta
-onMounted(() => {
-  if (auth.user?.id_rol === 2) { // Asumiendo que 2 es el ID del rol de técnico
-    verificarPerfilTecnico();
-  }
-});
 
 // Toast state
 const toast = reactive({
@@ -121,12 +90,7 @@ const onNotificationClick = async (notification) => {
 
   try {
     const response = await $api('/notificaciones/marcar/individual', {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: {
         id_destinatario_notificacion: notification.id
       }

@@ -816,7 +816,7 @@ const fetchUserCredit = async () => {
   try {
     const user = userCookie.value
     if (!user) return
-    const res = await $api(`/credito/usuario/${user.id_usuario}`, { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` }})
+    const res = await $api(`/credito/usuario/${user.id_usuario}`)
     if (res?.success) userCredit.value = res.data.monto_credito
   } catch(e) {}
 }
@@ -824,7 +824,7 @@ const fetchUserCredit = async () => {
 const cargarPaquetes = async () => {
   cargandoPaquetes.value = true
   try {
-    const res = await $api('/paquetes/activos', { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` }, params: { id_ciudad: userCookie.value?.id_ciudad, id_usuario: userCookie.value?.id_usuario } })
+    const res = await $api('/paquetes/activos', { params: { id_ciudad: userCookie.value?.id_ciudad, id_usuario: userCookie.value?.id_usuario } })
     paquetesMantenimiento.value = res.map(p => ({
       id: p.id_paquete,
       nombre: p.nombre,
@@ -839,7 +839,7 @@ const cargarPaquetes = async () => {
 
 const cargarPaquetesUsuario = async () => {
    try {
-      const res = await $api(`/paquetes/usuarios/${userCookie.value.id_usuario}`, { baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } })
+      const res = await $api(`/paquetes/usuarios/${userCookie.value.id_usuario}`)
       if(res.success) paquetesUsuario.value = res.data
    } catch(e) {}
 }
@@ -847,7 +847,7 @@ const cargarPaquetesUsuario = async () => {
 const cargarCuentas = async () => {
    isLoadingAccounts.value = true
    try {
-      const res = await $api('/cuentas', { baseURL: config.public.apiBase })
+      const res = await $api('/cuentas')
       if(Array.isArray(res)) bankAccounts.value = res
    } finally { isLoadingAccounts.value = false }
 }
@@ -871,14 +871,10 @@ const confirmarCanjeo = async () => {
       const p = selectedPaquete.value
       await $api('/credito', { 
          method: 'POST', 
-         baseURL: config.public.apiBase, 
-         headers: { 'Authorization': `Bearer ${auth.token}` }, 
          body: { id_usuario: userCookie.value.id_usuario, monto_credito: -Math.abs(p.costo) } 
       })
       const res = await $api('/paquetes/usuarios/canjear', { 
          method: 'POST', 
-         baseURL: config.public.apiBase, 
-         headers: { 'Authorization': `Bearer ${auth.token}` }, 
          body: { id_paquete: p.id, id_usuario: userCookie.value.id_usuario } 
       })
       
@@ -892,29 +888,17 @@ const confirmarCanjeo = async () => {
             await Promise.all([
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: {
-                     'Content-Type': 'application/json',
-                     'Accept': 'application/json',
-                     'Authorization': `Bearer ${auth.token}`
-                  },
-                  body: JSON.stringify({
+                  body: {
                      titulo: 'Paquete Adquirido',
                      nombre_rol: 'admin'
-                  })
+                  }
                }),
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: {
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Accept': 'application/json',
-                     'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
+                  body: {
                      titulo: 'Paquete Adquirido',
                      nombre_rol: 'sa'
-                  })
+                  }
                })
             ])
          } catch (error) {
@@ -941,8 +925,6 @@ const procesarPagoPaquete = async () => {
       isProcessingPayment.value = true
       const res = await $api('/paquetes/usuarios/canjear', {
          method: 'POST', 
-         baseURL: config.public.apiBase, 
-         headers: { 'Authorization': `Bearer ${auth.token}` },
          body: {
             id_paquete: selectedPaquete.value.id,
             id_usuario: userCookie.value.id_usuario,
@@ -965,21 +947,11 @@ const procesarPagoPaquete = async () => {
             await Promise.all([
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: { 
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+                  body: { ...notificationData, nombre_rol: 'admin' }
                }),
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: { 
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+                  body: { ...notificationData, nombre_rol: 'sa' }
                })
             ])
          } catch (notifierError) {
@@ -1007,7 +979,7 @@ const usarPaquete = async (p) => {
       const pu = paquetesUsuario.value.find(pup => pup.id_paquete === p.id && pup.estado === 'activo')
       if(!pu) throw new Error('Error')
       
-      const res = await $api(`/paquetes/usuarios/${pu.id_paquete_usuario}/activar`, { method: 'PUT', baseURL: config.public.apiBase, headers: { 'Authorization': `Bearer ${auth.token}` } })
+      const res = await $api(`/paquetes/usuarios/${pu.id_paquete_usuario}/activar`, { method: 'PUT' })
       
       if(res.success) {
          showToast('Paquete Activado', 'success')
@@ -1020,23 +992,11 @@ const usarPaquete = async (p) => {
             await Promise.all([
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: { 
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Content-Type': 'application/json',
-                     'Accept': 'application/json'
-                  },
-                  body: JSON.stringify({ ...notificationData, nombre_rol: 'admin' })
+                  body: { ...notificationData, nombre_rol: 'admin' }
                }),
                $api('/notificaciones/enviar', {
                   method: 'POST',
-                  baseURL: config.public.apiBase,
-                  headers: { 
-                     'Authorization': `Bearer ${auth.token}`,
-                     'Content-Type': 'application/json',
-                     'Accept': 'application/json'
-                  },
-                  body: JSON.stringify({ ...notificationData, nombre_rol: 'sa' })
+                  body: { ...notificationData, nombre_rol: 'sa' }
                })
             ])
          } catch (error) {
@@ -1053,7 +1013,7 @@ const usarPaquete = async (p) => {
 
 const sendWA = async (p, ref, type, extraId = null) => {
    try {
-      const res = await $api('/config/valor/numero_empresa', { baseURL: config.public.apiBase })
+      const res = await $api('/config/valor/numero_empresa')
       const phone = res?.valor || '12345678'
       
       const today = new Date();

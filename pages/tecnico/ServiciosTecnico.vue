@@ -1040,12 +1040,7 @@ const loadServices = async (loadMore = false) => {
     }
     
     const response = await $api(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}`, {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       query: {
         offset: currentOffset.value,
         limit: itemsPerPage
@@ -1100,12 +1095,7 @@ const loadServiceTypes = async () => {
     const id_ciudad = user?.id_ciudad
 
     const data = await $api('/servicios/activos', {
-      baseURL: config.public.apiBase,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       params: id_ciudad ? { id_ciudad } : {}
     })
     
@@ -1129,12 +1119,7 @@ const loadServiceTypes = async () => {
 const loadCalificacion = async (idSolicitud) => {
   try {  
     const response = await $api(`/calificaciones/solicitud/${idSolicitud}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     if (Array.isArray(response) && response.length > 0) {
@@ -1164,12 +1149,7 @@ const loadQuotationDetails = async () => {
     isLoading.value = true
     
     const response = await $api(`cotizacion/solicitud/${selectedService.value.id}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
 
     if (response && response.status === 'success' && response.data) {
@@ -1296,26 +1276,14 @@ const submitQuotation = async () => {
     };
     
     const updateResponse = await $api(`/solicitudservicio/${selectedService.value.id}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: { estado: 'pendiente_cotizacion' }
     });
     
     updateSuccessful = true;
     
     const cotizacionResponse = await $api('/cotizacion', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: cotizacionData
     });
     
@@ -1325,17 +1293,11 @@ const submitQuotation = async () => {
       
       if (userId) {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Cotización Recibida',
             id_usuario: userId
-          })
+          }
         });
       } else {
       }
@@ -1359,13 +1321,7 @@ const submitQuotation = async () => {
     if (updateSuccessful) {
       try {
         await $api(`/solicitudservicio/${selectedService.value.id}`, {
-          baseURL: config.public.apiBase,
           method: 'PUT',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
           body: { estado: 'asignado' }
         });
       } catch (revertError) {
@@ -1414,14 +1370,8 @@ const updateQuotation = async () => {
     } 
     
     const response = await $api(`/cotizacion/${currentQuotation.value.id}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify(requestData)
+      body: requestData
     })
     
     if ((response && response.status === 'success') || (Array.isArray(response) && response.length > 0)) {
@@ -1431,17 +1381,11 @@ const updateQuotation = async () => {
         
         if (userId) {
           await $api('/notificaciones/enviar', {
-            baseURL: config.public.apiBase,
             method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${auth.token}`
-            },
-            body: JSON.stringify({
+            body: {
               titulo: 'Cotización Editada',
               id_usuario: userId
-            })
+            }
           });
         } else {
           console.warn('No se pudo obtener el ID del usuario para notificar sobre la actualización de la cotización');
@@ -1496,11 +1440,6 @@ const confirmCompleteService = async () => {
   try {
     const response = await $api(`/solicitudservicio/${selectedService.value.id}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: {
         estado: 'pendiente_pagoservicio',
         comentario: completeServiceComment.value || 'Completado'
@@ -1513,17 +1452,11 @@ const confirmCompleteService = async () => {
       
       if (userId) {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Pago de Servicio Pendiente',
             id_usuario: userId
-          })
+          }
         });
       } else {
         console.warn('No se pudo obtener el ID del usuario para notificar sobre la finalización del servicio');
@@ -1555,11 +1488,6 @@ const cancelService = async () => {
   try {
     const response = await $api(`/solicitudservicio/${selectedService.value.id}`, {
       method: 'PUT',
-      baseURL: config.public.apiBase,
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
       body: {
         estado: 'pendiente_asignacion'
       }
@@ -1571,17 +1499,11 @@ const cancelService = async () => {
       
       if (userId) {
         await $api('/notificaciones/enviar', {
-          baseURL: config.public.apiBase,
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth.token}`
-          },
-          body: JSON.stringify({
+          body: {
             titulo: 'Servicio Cancelado',
             id_usuario: userId
-          })
+          }
         });
       } else {
         console.warn('No se pudo obtener el ID del usuario para notificar sobre la cancelación del servicio');
@@ -1649,11 +1571,7 @@ const initializeDarkMode = () => {
 const loadCommission = async () => {
   try {
     const response = await $api('/config/valor/comision_por_servicio', {
-      baseURL: config.public.apiBase,
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     if (response && response.valor) {
       commissionPercentage.value = parseFloat(response.valor)

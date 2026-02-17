@@ -603,8 +603,6 @@ const cargarPaquetesActivos = async () => {
     const id_usuario = userCookie?.id_usuario;
 
     const response = await $api('/paquetes/activos', {
-      baseURL: config.public.apiBase,
-      headers: { 'Authorization': `Bearer ${auth.token}` },
       params: { ...(id_ciudad && { id_ciudad }), ...(id_usuario && { id_usuario }) }
     });
     
@@ -622,21 +620,7 @@ const cargarPaquetesActivos = async () => {
   } finally {
     cargandoPaquetes.value = false;
   }
-};
-
-const cargarPaquetesUsuario = async () => {
-  try {
-    const userCookie = useCookie('user').value;
-    if (!userCookie?.id_usuario) return;
-    const response = await $api(`/paquetes/usuarios/usuario/${userCookie.id_usuario}`, {
-      baseURL: config.public.apiBase,
-      headers: { 'Authorization': `Bearer ${auth.token}` }
-    });
-    paquetesUsuario.value = response;
-  } catch (error) {
-    console.error('Error al cargar paquetes del usuario:', error);
-  }
-};
+}; 
 
 const tienePaquete = (paqueteId) => {
   return paquetesUsuario.value.some(p => p.id_paquete === paqueteId && p.estado !== 'canjeado');
@@ -689,6 +673,45 @@ const carouselItems = computed(() => {
   return [...displayedPaquetes.value, ...displayedPaquetes.value];
 });
 
+// ===== VERIFICACIÓN DE PERFIL =====
+const verificarPerfilTecnico = async () => {
+  try {
+    const userId = auth.user?.id_usuario;
+    if (!userId) return; 
+    
+    const response = await $api(`/usuarios/verificar-perfil-tecnico/${userId}`, {
+      method: 'GET'
+    }); 
+
+    if (response && response.perfil_completo === false) {
+      let message = 'Por favor completa tu perfil para ofrecer servicios';
+      
+      if (!response.tiene_imagen && !response.tiene_servicios) {
+        message = 'Por favor completa tu perfil de lo contrario no se te asignarán trabajos';
+      } else if (!response.tiene_imagen) {
+        message = 'Por favor sube una foto de perfil de lo contrario no se te asignarán trabajos';
+      } else if (!response.tiene_servicios) {
+        message = 'Por favor selecciona los servicios que ofreces en tu Perfil';
+      }
+
+      showToast({
+        message: message,
+        type: 'warning',
+        duration: 8000
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error al verificar perfil de técnico:', error);
+  }
+};
+
+// Observar cambios en el usuario para verificar el perfil
+watch(() => auth.user, (newUser) => {
+  if (newUser && newUser.role === 'tecnico') {
+    verificarPerfilTecnico();
+  }
+}, { immediate: true });
+
 // ===== FUNCIONES DE CARGA DE DATOS =====
 const fetchServices = async (page = 1) => {
   try {
@@ -699,12 +722,7 @@ const fetchServices = async (page = 1) => {
     const offset = (page - 1) * itemsPerPage
     
     const response = await $api(`/solicitudservicio/tecnico/${userCookieValue.id_usuario}?offset=${offset}&limit=${itemsPerPage}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     // Manejar la respuesta de la API con paginación
@@ -761,12 +779,7 @@ const fetchAvailability = async () => {
     }
     
     const response = await $api(`/usuarios/id/${userId}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     // Actualizar el estado local basado en el valor de 'estado' del backend
@@ -796,16 +809,10 @@ const updateAvailability = async () => {
     const newStatus = isAvailable.value ? 'inactivo' : 'activo'
     
     await $api(`/usuarios/${userId}`, {
-      baseURL: config.public.apiBase,
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
+      body: {
         estado: newStatus
-      })
+      }
     })
     
     // Actualizar el estado local
@@ -843,12 +850,7 @@ const fetchReviews = async (loadMore = false) => {
     
     // Obtener la calificación promedio directamente del endpoint
     const rating = await $api(`/calificaciones/promedio/${userId}`, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     // Actualizar la calificación promedio en las estadísticas
@@ -926,8 +928,7 @@ const initializeDashboard = async () => {
       fetchServices(1),
       fetchAvailability(),
       fetchReviews(),
-      cargarPaquetesActivos(),
-      cargarPaquetesUsuario()
+      cargarPaquetesActivos()
     ])
   } catch (error) { 
     window.location.reload() 

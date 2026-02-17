@@ -1169,12 +1169,7 @@ const fetchDiscountPercentage = async () => {
   try {
     
     const response = await $api('/config/valor/porcentaje_descuento', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+      method: 'GET'
     })
     
     if (response && response.valor) {
@@ -1207,12 +1202,7 @@ const loadMembershipBenefits = async () => {
     }
     
     const data = await $api('/membresiabeneficios', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+      method: 'GET'
     })
     
     // Actualizar los valores de configuración si vienen en la respuesta
@@ -1286,22 +1276,9 @@ const loadServices = async () => {
   try {
     isLoadingServices.value = true 
     
-    const response = await fetch(`${config.public.apiBase}/servicios/activos`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include' // Importante para incluir cookies si es necesario
+    const data = await $api('/servicios/activos', {
+      method: 'GET'
     })
-    
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Error en la respuesta del servidor:', response.status, errorText)
-      throw new Error(`Error del servidor: ${response.status} ${response.statusText}`)
-    }
-    
-    const data = await response.json()
     
     if (!Array.isArray(data)) { 
       throw new Error('Formato de respuesta inesperado: se esperaba un array de servicios')
@@ -1423,15 +1400,10 @@ const handlePasswordReset = async () => {
 
     // Enviar solicitud de recuperación de contraseña
     const response = await $api('/auth/forgot-password', {
-      baseURL: config.public.apiBase,
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
+      body: {
         email: emailForPasswordReset.value
-      })
+      }
     })
 
     // Mostrar mensaje de éxito
@@ -1550,46 +1522,20 @@ const handleAuth = async () => {
         // Realizar la petición de registro
         
         // Usar fetch directamente para tener más control sobre la respuesta
-        const response = await fetch(`${config.public.apiBase}/usuarios/nuevo`, {
+        const response = await $api('/usuarios/nuevo', {
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(registerData)
+          body: registerData
         }); 
         
-        // Obtener la respuesta como texto primero para depuración
-        const responseText = await response.text();
+        // La respuesta del interceptor $api ya es el objeto parseado, pero el código original esperaba un fetch response
+        // Así que simularemos la estructura mínima necesaria para que el código siguiente no rompa
+        const responseData = response;
         
-        // Intentar parsear la respuesta como JSON
-        let responseData;
-        try {
-          responseData = responseText ? JSON.parse(responseText) : {};
-        } catch (e) {
-          throw new Error('Error al procesar la respuesta del servidor');
-        }
-        
-        // Verificar si hay un error en la respuesta
-        if (!response.ok) {
+        // Simular response.ok para el flujo de error original
+        if (responseData.error || responseData.status === 'error') {
           const errorMessage = responseData.message || 'Error en el registro';
-          
-          // Crear un objeto de error con toda la información disponible
           const error = new Error(errorMessage);
-          error.response = response;
           error.data = responseData;
-          error.statusCode = response.status;
-          
-          // Incluir el mensaje SQL si está disponible
-          if (responseData.sqlMessage) {
-            error.message = responseData.sqlMessage;
-          }
-          
-          // Si hay un campo específico con error, resaltarlo en el formulario
-          if (responseData.field) {
-            formErrors.value[responseData.field] = error.message;
-          }
-          
           throw error;
         }
         
@@ -1643,29 +1589,21 @@ const handleAuth = async () => {
         const sendAdminNotifications = async () => {
           try {
             // Notificación para administradores
-            await fetch(`${config.public.apiBase}/notificaciones/enviar`, {
+            await $api('/notificaciones/enviar', {
               method: 'POST',
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
+              body: {
                 titulo: 'Nuevo registro',
                 nombre_rol: 'admin'
-              })
+              }
             });
             
             // Notificación para super administradores
-            await fetch(`${config.public.apiBase}/notificaciones/enviar`, {
+            await $api('/notificaciones/enviar', {
               method: 'POST',
-              headers: { 
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
+              body: {
                 titulo: 'Nuevo registro',
                 nombre_rol: 'sa'
-              })
+              }
             });
           } catch (error) {
             // No interrumpir el flujo por errores en las notificaciones
@@ -1919,12 +1857,7 @@ const handleReferral = async (userId) => {
     if (!referralCode) {
       try {
         const response = await $api('/config/valor/referidor_predeterminado', {
-          baseURL: config.public.apiBase,
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+          method: 'GET'
         });
         
         if (response && response.valor) {
@@ -1947,33 +1880,23 @@ const handleReferral = async (userId) => {
     };
     
     // Registrar el referido
-    const response = await fetch(`${config.public.apiBase}/referidos/nuevo`, {
+    const referidoResult = await $api('/referidos/nuevo', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(referralData)
+      body: referralData
     });
     
-    if (!response.ok) {
-      throw new Error('Error al registrar el referido');
-    }
-
     // Obtener los datos del referido para la notificación
-    const referidoData = await response.json();
+    const referidoData = referidoResult;
     
     // Enviar notificación al referidor
     if (referralCode && referidoData) {
       try {
-        await fetch(`${config.public.apiBase}/notificaciones/enviar`, {
+        await $api('/notificaciones/enviar', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+          body: {
             id_usuario: referralCode,
             titulo: 'Nuevo referido'
-          })
+          }
         });
       } catch (notificationError) {
         console.error('Error al enviar notificación al referidor:', notificationError);
@@ -1993,12 +1916,7 @@ const empresaPhoneNumber = ref('');
 const fetchEmpresaPhoneNumber = async () => {
   try {
     const response = await $api('/config/valor/numero_empresa', {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+      method: 'GET'
     });
     
     if (response && response.valor) {

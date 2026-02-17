@@ -1028,7 +1028,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
-import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 
@@ -1036,8 +1035,6 @@ import Toast from '~/components/ui/Toast.vue'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
-const config = useRuntimeConfig()
-const auth = useAuthStore()
 const router = useRouter()
 const userCookie = useCookie('user')
 
