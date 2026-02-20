@@ -33,7 +33,8 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: '/',
-      importScripts: ['/sw-push.js']
+      importScripts: ['/sw-push.js'],
+      globPatterns: ['**/*.{js,css,html,png,jpg,jpeg,svg,json,woff2,woff}'],
     },
     devOptions: {
       enabled: true,

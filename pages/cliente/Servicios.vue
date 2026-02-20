@@ -38,93 +38,120 @@
         <!-- Add padding at the bottom to prevent content from being hidden behind the fixed footer -->
       <div class="pb-20 space-y-3">
           <!-- Main Content -->
-          <main class="pb-2">
+          <main class="pb-4">
           
-          <!-- Stats Overview -->
-          <section class="px-4 py-3">
-            <div class="grid grid-cols-3 gap-2 mb-3">
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-                <div class="text-lg font-black text-blue-600 dark:text-blue-400 mb-1">{{ totalServices }}</div>
-                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Total</p>
+          <!-- Stats Overview / Tabs -->
+          <section class="p-3 sm:px-4 sm:py-4">
+            <div class="grid grid-cols-2 gap-3">
+              <!-- Active Services Tab -->
+              <div @click="switchTab('active')" 
+                   class="cursor-pointer transition-all duration-300"
+                   :class="currentTab === 'active' ? 'scale-105' : 'opacity-60 grayscale-[0.5]'">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden">
+                  <div v-if="currentTab === 'active'" class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+                  <div class="text-xl font-black text-blue-600 dark:text-blue-400 mb-0.5">{{ pendingServices }}</div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Activos</p>
+                </div>
               </div>
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-                <div class="text-lg font-black text-green-600 dark:text-green-400 mb-1">{{ completedServices }}</div>
-                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Completados</p>
-              </div>
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-                <div class="text-lg font-black text-orange-600 dark:text-orange-400 mb-1">{{ pendingServices }}</div>
-                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Pendientes</p>
+              
+              <!-- Finished Services Tab -->
+              <div @click="switchTab('finished')" 
+                   class="cursor-pointer transition-all duration-300"
+                   :class="currentTab === 'finished' ? 'scale-105' : 'opacity-60 grayscale-[0.5]'">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden">
+                  <div v-if="currentTab === 'finished'" class="absolute bottom-0 left-0 right-0 h-1 bg-green-500"></div>
+                  <div class="text-xl font-black text-green-600 dark:text-green-400 mb-0.5">{{ completedServices }}</div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Finalizados</p>
+                </div>
               </div>
             </div>
           </section> 
 
+          <!-- Tabs Indicator (Visual Separator) -->
+          <div class="px-4 mb-4">
+            <h2 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center"> 
+              <span class="ml-2 h-px flex-1 bg-gray-100 dark:bg-gray-800"></span>
+            </h2>
+          </div> 
+
         <!-- Services List -->
         <section class="px-4">
-          <div class="space-y-3">
+          <div class="space-y-4">
             <div v-for="service in filteredServices" :key="service.id"
                  @click="openServiceModal(service)"
-                 class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer relative">
+                 class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden">
+              
+              <!-- Animated Top Border for Active Services (Subtle) -->
+              <div v-if="currentTab === 'active'" 
+                   class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 bg-[length:200%_auto] animate-gradient-x opacity-70">
+              </div>
 
               
               <!-- Service Header -->
-              <div class="flex items-start justify-between">
+              <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center space-x-2">
-                  <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
+                  <div class="w-9 h-9 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-base shadow-sm">
                     {{ service.icon }}
                   </div>
                   <div class="min-w-0">
-                    <p class="font-bold text-gray-900 dark:text-white text-xs truncate max-w-[125px] sm:max-w-none">{{ service.title }}</p>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400">#{{ formatDateDDMMYY(service.rawDate) }}-{{ service.id }}</p>
+                    <p class="font-bold text-gray-900 dark:text-white text-xs truncate max-w-[150px] sm:max-w-none">{{ service.title }}</p>
+                    <p class="text-[9px] text-gray-500 dark:text-gray-400 font-medium">#{{ formatDateDDMMYY(service.rawDate) }}-{{ service.id }}</p>
                   </div>
                 </div>
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center space-x-1">
-                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" :class="getStatusColor(service.status)">
+                <div class="flex flex-col items-end gap-1">
+                  <span class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm" :class="getStatusColor(service.status)">
                     {{ service.status }}
                   </span>
-                  </div>
-                  <div class="flex flex-wrap justify-end gap-1">
-                    <span v-if="service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita || service.rawStatus === 'pendiente_pagoservicio'" class="inline-flex items-center px-1.5 py-0.5 rounded border border-amber-300 dark:border-amber-600 text-[10px] font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300">
-                      <svg class="w-2.5 h-2.5 mr-0.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                      </svg>
-                      Pago Pendiente
+                  
+                  <!-- Badges for extra info -->
+                  <div class="flex flex-col items-end gap-1">
+                    <span v-if="service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita || service.rawStatus === 'pendiente_pagoservicio'" class="animate-pulse inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500 dark:border-amber-500 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 uppercase tracking-wide shadow-sm">
+                      🟡 Pago Pendiente
                     </span>
-                    <span v-if="service.rawStatus === 'pendiente_cotizacion'" class="inline-flex items-center px-1.5 py-0.5 rounded border border-amber-300 dark:border-amber-600 text-[10px] font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300">
-                      <svg class="w-2.5 h-2.5 mr-0.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                      </svg>
-                      Cotización Lista
+                    <span v-if="service.rawStatus === 'pendiente_cotizacion'" class="animate-pulse inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500 dark:border-amber-500 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 uppercase tracking-wide shadow-sm">
+                      🟡 {{ service.title === 'Taxi VIP' ? 'Tarifa Lista' : 'Cotización Lista' }}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <!-- Location and Schedule -->
-              <div class="space-y-2 mb-2">
-                <!-- Extended Location -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
-                  <p class="text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">📍 UBICACIÓN</p>
-                  <p class="text-blue-800 dark:text-blue-200 text-sm font-semibold">{{ service.fullLocation.colonia }}</p>
-                  <p class="text-blue-700 dark:text-blue-300 text-xs">{{ service.fullLocation.direccion }}</p>
-                </div> 
+              <!-- Location and Schedule Grid -->
+              <div class="mb-3">
+                 <!-- Taxi VIP Special Layout -->
+                 <div v-if="service.title === 'Taxi VIP'" class="grid grid-cols-2 gap-2">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">📍 Recogida</p>
+                      <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.fullLocation.colonia }}</p>
+                    </div>
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                      <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-0.5">🏁 Destino</p>
+                      <p class="font-bold text-emerald-900 dark:text-emerald-200 text-[10px] truncate">{{ service.fullLocation.direccion }}</p>
+                    </div>
+                 </div>
+
+                 <!-- Standard Service Layout -->
+                 <div v-else class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                    <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">📍 Ubicación</p>
+                    <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.fullLocation.colonia }}</p>
+                    <p class="text-blue-800 dark:text-blue-300 text-[10px] truncate">{{ service.fullLocation.direccion }}</p>
+                 </div>
               </div>
               
               <!-- Service Description -->
-              <p class="text-gray-700 dark:text-gray-300 text-sm mb-2 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
-                {{ service.description }}
+              <p class="text-gray-700 dark:text-gray-300 text-[11px] mb-3 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg italic line-clamp-2">
+                "{{ service.description }}"
               </p> 
 
-              <!-- Action Buttons -->
-              <div class="flex items-center justify-between">
+              <!-- Action Footer -->
+              <div class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-gray-700/50">
                 <div class="flex items-center space-x-2">
-                  <span class="text-gray-500 dark:text-gray-400 text-xs">{{ service.date }}</span>
+                  <span class="text-gray-400 text-[9px] font-medium">{{ service.date }}</span>
                 </div>
-                <div class="flex items-center space-x-2">
-                  <span class="text-blue-600 dark:text-blue-400 text-xs font-bold">
-                    {{ service.rawStatus === 'finalizado' ? 'Calificar Servicio' : 'Ver detalles' }}
+                <div class="flex items-center space-x-1">
+                  <span class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                    {{ service.rawStatus === 'finalizado' ? (service.title === 'Taxi VIP' ? 'Calificar Viaje' : 'Calificar Servicio') : 'Ver detalles' }}
                   </span>
-                  <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-3 h-3 text-blue-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                   </svg>
                 </div>
@@ -133,29 +160,31 @@
           </div>
 
           <!-- Empty State -->
-          <div v-if="filteredServices.length === 0" class="text-center py-6">
-            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
+          <div v-if="filteredServices.length === 0" class="text-center py-10">
+            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-2xl mx-auto mb-3 flex items-center justify-center opacity-50">
               <span class="text-2xl">🔍</span>
             </div>
-            <h3 class="text-base font-black text-gray-900 dark:text-white mb-2">No hay servicios</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-3 text-sm">No se encontraron servicios con los filtros seleccionados</p>
-            <button @click="resetFilters" class="px-3 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors text-sm">
+            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">No hay servicios</h3>
+            <p class="text-gray-500 dark:text-gray-500 mb-3 text-[10px]">No se encontraron servicios con los filtros</p>
+            <button @click="resetFilters" class="px-3 py-1.5 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors text-[10px] uppercase tracking-wider">
               Limpiar filtros
             </button>
           </div>
 
           <!-- Load More Button -->
-          <div v-if="hasMoreServices && !isLoading && filteredServices.length > 0" class="flex justify-center mt-6 mb-4">
+          <div v-if="hasMoreServices && !isLoading && filteredServices.length > 0" class="mt-6 mb-4">
              <button 
                 @click="loadMoreServices" 
                 :disabled="isLoadingMore"
-                class="px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-all duration-200"
+                class="w-full py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 shadow-sm transition-all flex items-center justify-center space-x-2"
              >
-                <div v-if="isLoadingMore" class="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                <div v-if="isLoadingMore" class="animate-spin h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                 <span>{{ isLoadingMore ? 'Cargando...' : 'Cargar más servicios' }}</span>
+                <svg v-if="!isLoadingMore" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
              </button>
           </div>
         </section>
+        
         </main>
       </div> 
     </div> 
@@ -250,9 +279,11 @@
           </div>
         </div>
 
-        <!-- 2. Técnico Asignado -->
+        <!-- 2. Técnico/Conductor Asignado -->
         <div v-if="selectedService.technician && selectedService.rawStatus === 'asignado'" class="mb-4">
-          <h4 class="text-sm font-black text-gray-900 dark:text-white mb-2">Técnico Asignado</h4>
+          <h4 class="text-sm font-black text-gray-900 dark:text-white mb-2">
+            {{ selectedService.title === 'Taxi VIP' ? 'Conductor Asignado' : 'Técnico Asignado' }}
+          </h4>
           <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
             <div class="flex items-center space-x-2 mb-2">
               <button 
@@ -283,7 +314,7 @@
               <div>
                 <div class="flex flex-col">
                   <h5 class="font-bold text-emerald-800 dark:text-emerald-200 text-sm">
-                    {{ selectedService.technicianName || 'Técnico' }}
+                    {{ selectedService.technicianName || (selectedService.title === 'Taxi VIP' ? 'Conductor' : 'Técnico') }}
                   </h5>
                   <div class="flex items-center space-x-1">
                     <span class="flex">
@@ -385,7 +416,9 @@
               >
                 <div class="flex items-center space-x-2">
                   <span class="text-base">📝</span>
-                  <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">Ver Cotización y Diagnóstico</span>
+                  <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">
+                    {{ selectedService.title === 'Taxi VIP' ? 'Ver Detalles del Viaje' : 'Ver Cotización y Diagnóstico' }}
+                  </span>
                 </div>
                 <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -402,7 +435,9 @@
               >
                 <div class="flex items-center space-x-2">
                   <span class="text-base">⭐</span>
-                  <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">Calificar Servicio</span>
+                  <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">
+                    {{ selectedService.title === 'Taxi VIP' ? 'Calificar Viaje' : 'Calificar Servicio' }}
+                  </span>
                 </div>
                 <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -784,16 +819,16 @@
               </template>
 
               <!-- Mostrar crédito de membresía si aplica -->
-              <template v-if="shouldShowCreditBenefit && membresiaProgreso?.monto_credito > 0">
-  <div class="space-y-1">
-    <div class="flex justify-between items-center">
-      <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
-      <span class="font-bold text-emerald-600 dark:text-emerald-400">
-        -L. {{ parseFloat(membresiaProgreso?.monto_credito || 0).toFixed(2) }}
-      </span>
-    </div>
-  </div>
-</template>
+              <template v-if="shouldShowCreditBenefit && creditApplied > 0">
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center">
+                    <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                      -L. {{ parseFloat(creditApplied || 0).toFixed(2) }}
+                    </span>
+                  </div>
+                </div>
+              </template>
 
               <div class="flex justify-between items-center pt-2 mt-2 
                           border-t border-blue-200 dark:border-blue-700">
@@ -844,7 +879,7 @@
                 :loading="isLoadingAccounts"
               >
                 <template #singleLabel="{ option }">
-                  <span class="text-xs truncate">{{ getAccountLabel(option) }}</span>
+                  <span class="text-xs truncate text-gray-500 dark:text-gray-400 font-bold">{{ getAccountLabel(option) }}</span>
                 </template>
               </multiselect>
 
@@ -860,7 +895,7 @@
 
                   <div class="flex justify-between">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Nombre:</span>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.banco }}</span>
+                    <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ getSelectedAccount.banco }}</span>
                   </div>
 
                   <div class="flex justify-between">
@@ -945,6 +980,210 @@
 
       </div>
 
+    </Transition>
+  </div>
+</Transition>
+
+<!-- Taxi VIP Payment Modal -->
+<Transition
+  name="modal"
+  enter-active-class="modal-enter-active"
+  leave-active-class="modal-leave-active"
+  enter-from-class="modal-enter-from"
+  leave-to-class="modal-leave-to">
+
+  <div 
+    v-if="showTaxiPaymentModal"
+    class="fixed inset-0 z-50 flex items-start justify-center p-2 sm:p-3 overflow-y-auto"
+  >
+    <!-- Backdrop -->
+    <Transition
+      name="backdrop"
+      enter-active-class="backdrop-enter-active"
+      leave-active-class="backdrop-leave-active"
+      enter-from-class="backdrop-enter-from"
+      leave-to-class="backdrop-leave-to">
+      <div 
+        v-if="showTaxiPaymentModal"
+        class="absolute inset-0 bg-black/70 backdrop-blur-md"
+        @click="closePaymentModal"
+      ></div>
+    </Transition>
+
+    <!-- Content -->
+    <Transition
+      name="modal-content"
+      enter-active-class="modal-content-enter-active"
+      leave-active-class="modal-content-leave-active"
+      enter-from-class="modal-content-enter-from"
+      leave-to-class="modal-content-leave-to">
+
+      <div 
+        v-if="showTaxiPaymentModal"
+        class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto relative z-10 border border-gray-100 dark:border-gray-700"
+        @click.stop
+      >
+        <!-- Header -->
+        <div class="sticky top-0 bg-yellow-400 dark:bg-yellow-500 p-4 border-b border-yellow-500 rounded-t-3xl z-20">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-black rounded-2xl flex items-center justify-center shadow-lg transform rotate-3">
+                <span class="text-xl">🚕</span>
+              </div>
+              <div>
+                <h3 class="text-lg font-black text-black leading-none">Pagar Mi Viaje</h3>
+                <p class="text-[10px] font-bold text-black/60 uppercase tracking-[0.2em] mt-1">Recibo #{{ selectedService.id }}</p>
+              </div>
+            </div>
+            <button @click="closePaymentModal" class="bg-black/10 hover:bg-black/20 p-2 rounded-full transition-colors">
+              <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-5">
+          <!-- Summary Card -->
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
+             <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                   <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                   <div class="w-8 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
+                   <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                </div>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-shadow-sm">{{ selectedService.date }}</span>
+             </div>
+             
+             <div class="space-y-2">
+                <div class="flex items-start space-x-3">
+                   <span class="text-xs">🟢</span>
+                   <p class="text-xs font-bold text-gray-700 dark:text-gray-300 truncate">{{ selectedService.fullLocation?.colonia || 'Punto de partida' }}</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                   <span class="text-xs">🔴</span>
+                   <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ selectedService.fullLocation?.direccion || 'Destino final' }}</p>
+                </div>
+             </div>
+          </div>
+
+          <!-- Price Breakdown -->
+          <div class="bg-black dark:bg-gray-900 rounded-3xl p-6 shadow-xl space-y-4">
+            <h4 class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em] text-center">Detalle de la Tarifa</h4>
+            
+            <div v-if="isLoadingQuotation" class="flex justify-center py-4">
+               <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500"></div>
+            </div>
+            
+            <div v-else class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-400 text-sm font-medium">Tarifa del Viaje</span>
+                <span class="text-white font-bold">L. {{ parseFloat(quotationData?.monto_manodeobra || 0).toFixed(2) }}</span>
+              </div>
+
+              <!-- Discounts -->
+              <template v-if="shouldShowDiscountBenefit">
+                <div v-if="membresiaProgreso?.aplica_descuento_especial" class="flex justify-between items-center text-amber-400 text-xs">
+                  <span class="font-medium">Beneficio Especial ({{ membresiaProgreso.porcentaje_descuento_especial }}%)</span>
+                  <span class="font-black">-L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (parseFloat(membresiaProgreso.porcentaje_descuento_especial) / 100)).toFixed(2) }}</span>
+                </div>
+                <div v-else class="flex justify-between items-center text-yellow-400 text-xs text-shadow-sm">
+                  <span class="font-medium">Descuento Membresía ({{ membresiaProgreso.porcentaje_descuento }}%)</span>
+                  <span class="font-black">-L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (discountPercentage / 100)).toFixed(2) }}</span>
+                </div>
+              </template>
+
+              <div v-if="shouldShowCreditBenefit && creditApplied > 0" class="flex justify-between items-center text-emerald-400 text-xs text-shadow-sm">
+                <span class="font-medium">Crédito Aplicado</span>
+                <span class="font-black">-L. {{ parseFloat(creditApplied || 0).toFixed(2) }}</span>
+              </div>
+
+              <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                <span class="text-white text-base font-black uppercase tracking-widest">A PAGAR</span>
+                <span class="text-2xl font-black text-yellow-400">L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Options -->
+          <div class="space-y-4">
+            <div class="flex items-center space-x-2 px-1">
+               <span class="text-sm">🏦</span>
+               <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cuenta de Transferencia</label>
+            </div>
+
+            <div v-if="isLoadingAccounts" class="p-6 bg-gray-50 dark:bg-gray-700/30 rounded-2xl flex flex-col items-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-2 border-yellow-500 border-t-transparent"></div>
+            </div>
+
+            <div v-else class="space-y-3">
+              <multiselect
+                v-model="selectedAccountObject"
+                :options="bankAccounts"
+                :searchable="false"
+                :close-on-select="true"
+                :show-labels="false"
+                placeholder="Elige una cuenta bancaria"
+                label="banco"
+                track-by="id_cuenta"
+                class="multiselect-custom taxi-select"
+                :custom-label="getAccountLabel"
+              >
+                <template #singleLabel="{ option }">
+                  <span class="text-xs font-bold text-blue-600 dark:text-blue-400">{{ getAccountLabel(option) }}</span>
+                </template>
+              </multiselect>
+
+              <!-- Account Details -->
+              <div v-if="getSelectedAccount" class="p-4 bg-yellow-50 dark:bg-yellow-900/10 rounded-2xl border-2 border-yellow-100 dark:border-yellow-900/20">
+                <div class="grid grid-cols-2 gap-y-2 text-[10px]">
+                  <div>
+                    <p class="text-gray-500 uppercase font-black tracking-tighter">Banco</p>
+                    <p class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ getSelectedAccount.banco }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500 uppercase font-black tracking-tighter">Titular</p>
+                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ getSelectedAccount.titular }}</p>
+                  </div>
+                  <div class="col-span-2 pt-2 border-t border-yellow-200 dark:border-yellow-900/30 flex justify-between items-center">
+                    <div>
+                      <p class="text-gray-500 uppercase font-black tracking-tighter">Número de Cuenta</p>
+                      <p class="text-sm font-mono font-black text-gray-900 dark:text-white">{{ getSelectedAccount.numero_cuenta }}</p>
+                    </div>
+                    <button @click="copyToClipboard(getSelectedAccount.numero_cuenta)" class="bg-yellow-400 p-2 rounded-xl hover:scale-110 transition-transform">
+                      <svg class="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comprobante Input -->
+              <div class="space-y-2">
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Número de Referencia</label>
+                <input
+                  v-model="comprobante"
+                  type="text"
+                  class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-yellow-400 rounded-2xl text-sm font-black transition-all outline-none"
+                  placeholder="Ingresa el número de comprobante"
+                >
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <button 
+              @click="processPayment"
+              :disabled="!selectedAccount || !comprobante || isProcessingPayment"
+              class="w-full py-5 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 transform hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:transform-none text-xs uppercase tracking-[0.2em] flex items-center justify-center space-x-2"
+            >
+              <span v-if="!isProcessingPayment">PAGAR MI VIAJE L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+              <div v-else class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+            </button>
+            <p class="text-[10px] text-gray-400 text-center font-bold px-4 leading-tight italic">
+               Al pagar, serás redirigido para adjuntar tu comprobante y completar tu viaje.
+            </p>
+          </div>
+        </div>
+      </div>
     </Transition>
   </div>
 </Transition>
@@ -1197,7 +1436,7 @@
                   </div>
                   
                   <!-- Estimación de materiales -->
-                  <div class="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
+                  <div v-if="Number(quotationData?.monto_materiales) > 0" class="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
                     <div class="flex items-start space-x-1">
                       <svg class="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 100 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
@@ -1215,6 +1454,29 @@
                     </div>
                   </div>
                   
+                  <!-- Descuento Membresía -->
+                  <div v-if="shouldShowDiscountBenefit && (parseFloat(membresiaProgreso?.porcentaje_descuento || 0) > 0 || parseFloat(membresiaProgreso?.porcentaje_descuento_especial || 0) > 0)" class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <div>
+                      <p class="text-xs font-medium text-green-600 dark:text-green-400">
+                        Descuento Membresía ({{ parseFloat(membresiaProgreso?.aplica_descuento_especial ? membresiaProgreso?.porcentaje_descuento_especial : membresiaProgreso?.porcentaje_descuento) }}%)
+                      </p>
+                    </div>
+                    <span class="text-xs font-bold text-green-600 dark:text-green-400">
+                      - L. {{ formatCurrency((parseFloat(quotationData?.monto_manodeobra || 0) * (parseFloat(membresiaProgreso?.aplica_descuento_especial ? membresiaProgreso?.porcentaje_descuento_especial : membresiaProgreso?.porcentaje_descuento) / 100))) }}
+                    </span>
+                  </div>
+
+                  <!-- Crédito Aplicado -->
+                  <div v-if="shouldShowCreditBenefit && parseFloat(membresiaProgreso?.monto_credito || 0) > 0" class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <div>
+                      <p class="text-xs font-medium text-green-600 dark:text-green-400">Crédito Aplicado</p>
+                      <p class="text-[10px] text-gray-400">Saldo: L. {{ formatCurrency(membresiaProgreso?.monto_credito || 0) }}</p>
+                    </div>
+                    <span class="text-xs font-bold text-green-600 dark:text-green-400">
+                      - L. {{ formatCurrency(Math.min((parseFloat(quotationData?.monto_manodeobra || 0) * (1 - (parseFloat(membresiaProgreso?.aplica_descuento_especial ? membresiaProgreso?.porcentaje_descuento_especial : membresiaProgreso?.porcentaje_descuento || 0) / 100))), parseFloat(membresiaProgreso?.monto_credito || 0))) }}
+                    </span>
+                  </div>
+
                   <!-- Total -->
                   <div class="flex justify-between items-center pt-2">
                     <div>
@@ -1223,7 +1485,7 @@
                     </div>
                     <div class="text-right">
                       <p class="text-base font-bold text-blue-600 dark:text-blue-400">
-                        L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
+                        L. {{ formatCurrency(getDiscountedPrice()) }}
                       </p>
                     </div>
                   </div>
@@ -1274,6 +1536,160 @@
                 <span>{{ isProcessingQuotation ? 'Procesando...' : 'Aceptar' }}</span>
               </button>
             </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
+
+  <!-- Modal de Cotización Taxi VIP -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to">
+    <div v-if="showTaxiQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+      <!-- Backdrop con animación -->
+      <Transition
+        name="backdrop"
+        enter-active-class="backdrop-enter-active"
+        leave-active-class="backdrop-leave-active"
+        enter-from-class="backdrop-enter-from"
+        leave-to-class="backdrop-leave-to">
+        <div 
+          v-if="showTaxiQuotationModal"
+          class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          @click="showTaxiQuotationModal = false"
+        ></div>
+      </Transition>
+
+      <!-- Contenido del modal con animación -->
+      <Transition
+        name="modal-content"
+        enter-active-class="modal-content-enter-active"
+        leave-active-class="modal-content-leave-active"
+        enter-from-class="modal-content-enter-from"
+        leave-to-class="modal-content-leave-to">
+        <div 
+          v-if="showTaxiQuotationModal"
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto relative z-10 border border-gray-100 dark:border-gray-700"
+          @click.stop
+        >
+          <!-- Encabezado con Icono de Taxi -->
+          <div class="sticky top-0 bg-yellow-400 dark:bg-yellow-500 p-4 border-b border-yellow-500 rounded-t-2xl z-20 overflow-hidden">
+            <!-- Patrón de taxi de fondo -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none flex flex-wrap">
+               <div v-for="i in 100" :key="i" class="w-4 h-4 border border-black"></div>
+            </div>
+            
+            <div class="relative flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center shadow-lg transform -rotate-3">
+                  <span class="text-2xl">🚕</span>
+                </div>
+                <div>
+                  <h3 class="text-lg font-black text-black">Tarifa de Viaje</h3>
+                  <p class="text-[9px] font-bold text-black/60 uppercase tracking-[0.2em]">Taxi VIP #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
+                </div>
+              </div>
+              <button @click="showTaxiQuotationModal = false" class="bg-black/10 hover:bg-black/20 p-2 rounded-full transition-colors">
+                <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido principal -->
+          <div class="p-5 space-y-6">
+            <!-- Cargando -->
+            <div v-if="isLoadingQuotation" class="flex justify-center items-center py-12">
+              <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-yellow-500"></div>
+            </div>
+            
+            <template v-else>
+              <!-- Info del Conductor -->
+              <div v-if="selectedService.tecnico" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-700">
+                <img 
+                  :src="getOptimizedImage(selectedService.tecnico.imagen_url, 60, 60)" 
+                  class="w-12 h-12 rounded-xl object-cover shadow-sm"
+                  @error="handleImageError"
+                >
+                <div>
+                  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tu Conductor</p>
+                  <p class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedService.tecnico.nombre }}</p>
+                </div>
+              </div>
+
+              <!-- Visualización de Ruta -->
+              <div class="relative space-y-4">
+                <div class="flex items-start space-x-3">
+                  <div class="mt-1 flex flex-col items-center">
+                    <div class="w-3 h-3 rounded-full border-2 border-green-500 bg-white shadow-sm"></div>
+                    <div class="w-0.5 h-10 border-l-2 border-dotted border-gray-300 dark:border-gray-600"></div>
+                  </div>
+                  <div class="flex-1 bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl">
+                    <p class="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">Origen</p>
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ selectedService.fullLocation?.colonia || 'Punto de partida' }}</p>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="mt-1">
+                    <div class="w-3 h-3 bg-red-500 rounded-sm shadow-sm transform rotate-45"></div>
+                  </div>
+                  <div class="flex-1 bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl">
+                    <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Destino</p>
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ selectedService.fullLocation?.direccion || 'Destino final' }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tarifa Principal -->
+              <div class="bg-black dark:bg-gray-900 rounded-3xl p-6 shadow-2xl transform hover:scale-[1.02] transition-transform">
+                <div class="flex flex-col items-center text-center">
+                  <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em] mb-2 text-shadow">Coste Total del Viaje</p>
+                  <div class="flex items-baseline space-x-1">
+                    <span class="text-2xl font-black text-white">L.</span>
+                    <span class="text-5xl font-black text-white tracking-tighter">{{ formatCurrency(quotationData?.monto_manodeobra || '0.00').split('.')[0] }}</span>
+                    <span class="text-2xl font-black text-white/50">.{{ formatCurrency(quotationData?.monto_manodeobra || '0.00').split('.')[1] }}</span>
+                  </div>
+                  <div v-if="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-4 flex items-center space-x-2 bg-white/10 px-3 py-1 rounded-full">
+                    <span class="text-[10px] font-bold text-yellow-400">PAGO VÍA APP: L. {{ getDiscountedPrice() }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notas del Conductor -->
+              <div v-if="quotationData?.comentario" class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border-l-4 border-blue-500">
+                <div class="flex space-x-3">
+                   <span class="text-xl">💬</span>
+                   <div>
+                     <p class="text-[10px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-widest mb-1">Mensaje del conductor</p>
+                     <p class="text-sm font-medium text-blue-900 dark:text-blue-100 italic">"{{ quotationData.comentario }}"</p>
+                   </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Acciones -->
+          <div v-if="!isLoadingQuotation" class="p-5 pt-0 grid grid-cols-2 gap-3 pb-8">
+            <button 
+              @click="confirmRejectQuotation"
+              :disabled="isProcessingQuotation"
+              class="py-4 px-4 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-xs uppercase tracking-widest disabled:opacity-50"
+            >
+              CANCELA VIAJE
+            </button>
+            <button 
+              @click="acceptQuotation"
+              :disabled="isProcessingQuotation"
+              class="py-4 px-4 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-2xl transition-all transform hover:shadow-xl active:scale-95 text-xs uppercase tracking-widest flex items-center justify-center space-x-2 disabled:opacity-50 shadow-lg shadow-yellow-500/20"
+            >
+              <span v-if="!isProcessingQuotation">ACEPTAR VIAJE</span>
+              <div v-else class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+            </button>
           </div>
         </div>
       </Transition>
@@ -1359,6 +1775,84 @@
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <span>{{ isProcessingQuotation ? 'Procesando...' : 'Sí, rechazar' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
+
+  <!-- Modal de Confirmación de Rechazo Taxi VIP -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to"
+  >
+    <div v-if="showTaxiRejectConfirmation" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+      <!-- Backdrop con animación -->
+      <Transition
+        name="backdrop"
+        enter-active-class="backdrop-enter-active"
+        leave-active-class="backdrop-leave-active"
+        enter-from-class="backdrop-enter-from"
+        leave-to-class="backdrop-leave-to"
+      >
+        <div 
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          @click="showTaxiRejectConfirmation = false"
+        ></div>
+      </Transition>
+
+      <!-- Contenido del modal -->
+      <Transition
+        name="modal-content"
+        enter-active-class="modal-content-enter-active"
+        leave-active-class="modal-content-leave-active"
+        enter-from-class="modal-content-enter-from"
+        leave-to-class="modal-content-leave-to"
+      >
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden border border-gray-100 dark:border-gray-700">
+          <!-- Encabezado con Icono -->
+          <div class="bg-yellow-400 p-4 flex items-center space-x-3">
+            <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center shadow-lg transform -rotate-3">
+              <span class="text-xl">🚕</span>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-black leading-tight">¿No te convence la tarifa?</h3>
+              <p class="text-[10px] font-bold text-black/60 uppercase tracking-wider">CANCELACIÓN DE VIAJE</p>
+            </div>
+          </div>
+
+          <!-- Cuerpo -->
+          <div class="p-5">
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl mb-4 text-center">
+              <p class="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                Al cancelar este viaje, buscaremos un nuevo conductor disponible cerca de ti.
+              </p>
+            </div>
+            
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center mb-5 italic">
+              "Queremos asegurarnos de que recibas el mejor servicio al precio justo."
+            </p>
+            
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                @click="showTaxiRejectConfirmation = false"
+                class="py-3 px-4 text-xs font-black text-gray-500 uppercase tracking-widest bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-all"
+                :disabled="isProcessingQuotation"
+              >
+                Volver
+              </button>
+              <button
+                @click="rejectQuotation"
+                class="py-3 px-4 text-xs font-black text-white uppercase tracking-widest bg-black dark:bg-yellow-500 dark:text-black rounded-xl hover:shadow-lg active:scale-95 transition-all flex items-center justify-center space-x-2"
+                :disabled="isProcessingQuotation"
+              >
+                <div v-if="isProcessingQuotation" class="w-3 h-3 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin"></div>
+                <span>{{ isProcessingQuotation ? 'PROCESANDO' : 'SÍ, CANCELAR' }}</span>
               </button>
             </div>
           </div>
@@ -1883,21 +2377,50 @@ const serviceFilters = [
   { key: 'cancelled', label: 'Cancelados' }
 ]
 
+const currentTab = ref('active')
+const toast = ref({
+    show: false,
+    message: '',
+    type: 'success',
+    duration: 3000
+})
 const datePeriods = [
-  { key: 'all', label: 'Todo' },
-  { key: 'week', label: 'Esta semana' },
-  { key: 'month', label: 'Este mes' },
-  { key: 'quarter', label: 'Últimos 3m' }
+    { label: 'Todos', value: 'all' },
+    { label: 'Hoy', value: 'today' },
+    { label: 'Esta semana', value: 'week' },
+    { label: 'Este mes', value: 'month' },
+    { key: 'quarter', label: 'Últimos 3m' }
 ]
 
+const switchTab = async (tab) => {
+    if (currentTab.value === tab) return
+    currentTab.value = tab
+    // Reset services and pagination
+    allServices.value = []
+    currentPage.value = 1
+    hasMoreServices.value = true
+    await loadServices(true)
+}
+
 // Service steps
-const serviceSteps = [
-  { id: 1, title: 'Solicitud recibida', description: 'Tu solicitud ha sido registrada' },
-  { id: 2, title: 'Técnico asignado', description: 'Se asignó el mejor técnico' },
-  { id: 3, title: 'Diagnóstico y Cotización', description: 'Evaluación y cotización' },
-  { id: 4, title: 'Servicio en Curso', description: 'Trabajo en progreso' },
-  { id: 5, title: 'Servicio Completado', description: 'Servicio finalizado' }
-]
+const serviceSteps = computed(() => {
+  if (selectedService.value?.title === 'Taxi VIP') {
+    return [
+      { id: 1, title: 'Solicitud recibida', description: 'Tu solicitud de viaje ha sido registrada' },
+      { id: 2, title: 'Conductor asignado', description: 'Se asignó el mejor conductor para ti' },
+      { id: 3, title: 'Tarifa Enviada', description: 'El conductor ha enviado la tarifa de tu viaje' },
+      { id: 4, title: 'Viaje en Curso', description: 'Vas en camino a tu destino' },
+      { id: 5, title: 'Viaje Completado', description: 'Has llegado a tu destino' }
+    ]
+  }
+  return [
+    { id: 1, title: 'Solicitud recibida', description: 'Tu solicitud ha sido registrada' },
+    { id: 2, title: 'Técnico asignado', description: 'Se asignó el mejor técnico' },
+    { id: 3, title: 'Diagnóstico y Cotización', description: 'Evaluación y cotización' },
+    { id: 4, title: 'Servicio en Curso', description: 'Trabajo en progreso' },
+    { id: 5, title: 'Servicio Completado', description: 'Servicio finalizado' }
+  ]
+})
 
 // Títulos y textos para el modal de cancelación
 const cancelModalTexts = {
@@ -1927,6 +2450,7 @@ const cancelModalTexts = {
 const isLoading = ref(true)
 const discountPercentage = ref(10) // Porcentaje de descuento regular (valor por defecto 10%)
 const specialDiscountPercentage = ref(15) // Porcentaje de descuento especial (valor por defecto 15%)
+const creditApplied = ref(0) // Monto de crédito realmente aplicado en el servicio actual
 const userData = ref({
   id: null,
   identidad: '',
@@ -1959,9 +2483,11 @@ const isLoadingMore = ref(false)
 // Estados de modales
 const showServiceModal = ref(false)
 const showPaymentModal = ref(false) 
+const showTaxiPaymentModal = ref(false)
 const showVisitPaymentModal = ref(false)
 const showCancelModal = ref(false)
 const showQuotationModal = ref(false)
+const showTaxiQuotationModal = ref(false)
 const showRatingModal = ref(false) 
 const showImageModal = ref(false)
 const selectedImage = ref('') 
@@ -1979,6 +2505,7 @@ const isLoadingQuotation = ref(false)
 const isProcessingQuotation = ref(false)
 const isRejectingQuotation = ref(false)
 const showRejectConfirmation = ref(false)
+const showTaxiRejectConfirmation = ref(false)
 const rejectReason = ref('') 
 
 // Estados de filtros
@@ -2010,11 +2537,7 @@ const isProcessingVisitPayment = ref(false) // Estado para el procesamiento del 
 const membresiaProgreso = ref(null)
 const isLoadingMembresia = ref(false)
 const visitCost = ref(0)
-const toast = ref({
-  show: false,
-  message: '',
-  type: 'success'
-})
+
 
 // Función para obtener la etiqueta de la cuenta bancaria
 const getAccountLabel = (option) => {
@@ -2100,14 +2623,15 @@ const getSelectedAccount = computed(() => {
 
 const getCancelButtonText = computed(() => {
   const status = selectedService.value?.rawStatus || 'default'
+  const isTaxi = selectedService.value?.title === 'Taxi VIP'
   
-  if (status === 'cancelado') return 'Servicio Cancelado'
-  if (status === 'completado') return 'Servicio Completado'
+  if (status === 'cancelado') return isTaxi ? 'Viaje Cancelado' : 'Servicio Cancelado'
+  if (status === 'completado') return isTaxi ? 'Viaje Completado' : 'Servicio Completado'
   if (status === 'en_proceso') return 'Reportar Problema'
-  if (status === 'asignado') return 'Solicitar Cancelación'
-  if (status === 'pendiente_pago') return 'Cancelar Servicio'
+  if (status === 'asignado') return isTaxi ? 'Solicitar Cancelación' : 'Solicitar Cancelación'
+  if (status === 'pendiente_pago') return isTaxi ? 'Cancelar Viaje' : 'Cancelar Servicio'
   
-  return 'Cancelar Servicio'
+  return isTaxi ? 'Cancelar Viaje' : 'Cancelar Servicio'
 })
 
 // Computed properties para determinar si mostrar los beneficios
@@ -2218,6 +2742,12 @@ const getCurrentStepNumber = (status) => {
   return statusToStep[status] || 1
 }
 
+const isActionRequired = (service) => {
+  return (service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita) || 
+         service.rawStatus === 'pendiente_pagoservicio' || 
+         service.rawStatus === 'pendiente_cotizacion';
+}
+
 const getStepStatus = (stepId, rawStatus) => {
   const currentStep = getCurrentStepNumber(rawStatus)
   
@@ -2292,10 +2822,10 @@ const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
   const statusMap = {
     'pendiente_pagovisita': 'Pago de la Visita',
     'verificando_pagovisita': 'Verificando Pago de la Visita',
-    'pendiente_asignacion': 'Esperando Asignación de Técnico',
-    'asignado': 'Técnico Asignado',
-    'pendiente_cotizacion': 'Diagnóstico Realizado',
-    'en_proceso': 'Servicio en Curso',
+    'pendiente_asignacion': servicio.title === 'Taxi VIP' ? 'Esperando Conductor' : 'Esperando Asignación de Técnico',
+    'asignado': servicio.title === 'Taxi VIP' ? 'Conductor Asignado' : 'Técnico Asignado',
+    'pendiente_cotizacion': servicio.title === 'Taxi VIP' ? 'Tarifa Recibida' : 'Diagnóstico Realizado',
+    'en_proceso': servicio.title === 'Taxi VIP' ? 'Viaje Programado' : 'Servicio en Curso',
     'pendiente_pagoservicio': 'Pago del Servicio',
     'verificando_pagoservicio': 'Verificando Pago del Servicio',
     'finalizado': 'Servicio Completado',
@@ -2321,7 +2851,8 @@ const mapApiServiceToLocal = (apiService) => {
     icon: getServiceIcon(apiService.id_servicio),
     status: mapApiStatusToLocal(apiService.estado, { 
       pagovisitaRechazado,
-      cotizacion_estado: apiService.cotizacion_estado 
+      cotizacion_estado: apiService.cotizacion_estado,
+      title: apiService.servicio?.nombre || 'Servicio General'
     }),
     rawStatus: apiService.estado,
     rawDate: apiService.fecha_solicitud,
@@ -2388,12 +2919,14 @@ const loadServices = async (reset = true) => {
         isLoadingMore.value = true
     }
 
+    const params = {
+      page: currentPage.value,
+      limit: 10,
+      status: currentTab.value // Send 'active' or 'finished'
+    }
     const response = await $api(`/solicitudservicio/usuario/${userCookieValue.id_usuario}`, {
       method: 'GET',
-      params: {
-          page: currentPage.value,
-          limit: 3
-      }
+      params: params
     })
 
     if (reset) {
@@ -2662,7 +3195,13 @@ const openPaymentModal = async (service) => {
   try {
     // Actualizar el ID del servicio seleccionado en lugar de la propiedad computada
     selectedServiceId.value = service?.id || null
-    showPaymentModal.value = true
+    
+    // Mostrar el modal según el tipo de servicio
+    if (service?.title === 'Taxi VIP') {
+      showTaxiPaymentModal.value = true
+    } else {
+      showPaymentModal.value = true
+    }
     
     // Resetear datos de membresía
     membresiaProgreso.value = null
@@ -2689,9 +3228,35 @@ const openPaymentModal = async (service) => {
 
 const closePaymentModal = () => {
   showPaymentModal.value = false
+  showTaxiPaymentModal.value = false
   selectedAccount.value = ''
   comprobante.value = ''
   isProcessingPayment.value = false
+}
+
+const getDiscountedPrice = () => {
+  const amount = parseFloat(quotationData.value?.monto_manodeobra || 0)
+  if (!amount) return '0.00'
+  
+  let discountPercent = 0
+  
+  if (shouldShowDiscountBenefit.value) {
+    if (membresiaProgreso.value?.aplica_descuento_especial) {
+      discountPercent = parseFloat(membresiaProgreso.value.porcentaje_descuento_especial || 0)
+    } else if (membresiaProgreso.value?.porcentaje_descuento) {
+      discountPercent = parseFloat(membresiaProgreso.value.porcentaje_descuento || 0)
+    }
+  }
+  
+  const discount = amount * (discountPercent / 100)
+  let currentTotal = amount - discount
+  
+  if (shouldShowCreditBenefit.value) {
+    const availableCredit = parseFloat(membresiaProgreso.value?.monto_credito || 0)
+    currentTotal = Math.max(0, currentTotal - availableCredit) 
+  }
+  
+  return currentTotal.toFixed(2)
 }
 
 const openQuotationModal = async (service) => {
@@ -2706,11 +3271,21 @@ const openQuotationModal = async (service) => {
     selectedServiceId.value = service.id;
     selectedServiceRef.value = service;
     
-    // Cargar los datos de la cotización
-    await fetchQuotationData(service.id);
+    // Cargar los datos de la cotización y membresía en paralelo
+    const promises = [fetchQuotationData(service.id)];
     
-    // Mostrar el modal de cotización
-    showQuotationModal.value = true;
+    if (userData.value?.id_usuario) {
+      promises.push(fetchMembresiaProgreso(userData.value.id_usuario));
+    }
+    
+    await Promise.all(promises);
+    
+    // Mostrar el modal según el tipo de servicio
+    if (service.title === 'Taxi VIP') {
+      showTaxiQuotationModal.value = true;
+    } else {
+      showQuotationModal.value = true;
+    }
   } catch (error) {
     console.error('Error al abrir el modal de cotización:', error);
     showError('No se pudo cargar la cotización. Por favor, inténtalo de nuevo.');
@@ -2736,10 +3311,13 @@ const closeAllModals = () => {
   // Cerrar todos los modales
   showServiceModal.value = false
   showPaymentModal.value = false
+  showTaxiPaymentModal.value = false
   showVisitPaymentModal.value = false
   showCancelModal.value = false
   showQuotationModal.value = false
+  showTaxiQuotationModal.value = false
   showRejectConfirmation.value = false
+  showTaxiRejectConfirmation.value = false
   showRatingModal.value = false
   
   // Limpiar el servicio seleccionado
@@ -2802,6 +3380,7 @@ const fetchMembresiaProgreso = async (userId) => {
     // Verificar si la respuesta de membresía tiene el formato esperado
     if (membresiaResponse?.status === 'success') {
       membresiaProgreso.value = {
+        tiene_membresia: true,
         monto_credito: parseFloat(creditoUsuario.monto_credito || 0),
         mesesProgreso: parseInt(membresiaResponse.mesesProgreso || 0),
         montoTotal: parseFloat(membresiaResponse.montoTotal || 0),
@@ -2814,6 +3393,7 @@ const fetchMembresiaProgreso = async (userId) => {
     } else {
       // Si no hay datos de membresía, usar solo el crédito del usuario
       membresiaProgreso.value = {
+        tiene_membresia: false,
         monto_credito: parseFloat(creditoUsuario.monto_credito || 0),
         mesesProgreso: 0,
         montoTotal: 0,
@@ -3063,6 +3643,7 @@ const acceptQuotation = async () => {
     
     // Cerrar modal y recargar datos
     showQuotationModal.value = false;
+    showTaxiQuotationModal.value = false;
     
     await new Promise(resolve => setTimeout(resolve, 300)); // esperar animación
     await loadServices();
@@ -3083,7 +3664,11 @@ const acceptQuotation = async () => {
 }
 
 const confirmRejectQuotation = () => {
-  showRejectConfirmation.value = true;
+  if (selectedService.value.title === 'Taxi VIP') {
+    showTaxiRejectConfirmation.value = true
+  } else {
+    showRejectConfirmation.value = true
+  }
 }
 
 const rejectQuotation = async () => {
@@ -3101,6 +3686,7 @@ const rejectQuotation = async () => {
     
     // Cerrar el modal de confirmación
     showRejectConfirmation.value = false;
+    showTaxiRejectConfirmation.value = false;
     
     // Deshabilitar botones mientras se procesa
     isProcessingQuotation.value = true
@@ -3127,26 +3713,47 @@ const rejectQuotation = async () => {
       }
     }
     
-    // Notificar al técnico sobre la cotización rechazada
+    // Notificar al técnico y administradores sobre la cotización rechazada
     try {
       const servicioActual = servicesData.value.solicitudes.find(s => s.id_solicitud === selectedServiceId.value);
       const idTecnico = servicioActual?.id_tecnico;
+      const isTaxi = selectedService.value?.title === 'Taxi VIP';
+      const tituloNotif = isTaxi ? 'Tarifa Rechazada' : 'Cotización Rechazada';
       
+      // Notificar al técnico/conductor
       if (idTecnico) {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: 'Cotización Rechazada',
+            titulo: tituloNotif,
             id_usuario: idTecnico
           }
         });
       }
+
+      // Notificar a administradores
+      await $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: {
+          titulo: tituloNotif,
+          nombre_rol: 'admin'
+        }
+      });
+
+      await $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: {
+          titulo: tituloNotif,
+          nombre_rol: 'sa'
+        }
+      });
     } catch (error) {
-      console.error('Error al enviar notificación de rechazo al técnico:', error);
+      console.error('Error al enviar notificaciones de rechazo:', error);
     }
     
     // Cerrar el modal de cotización
     showQuotationModal.value = false
+    showTaxiQuotationModal.value = false
     
     // Esperar a que la animación del modal termine
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -3317,7 +3924,7 @@ const processPayment = async () => {
     id_solicitud: Number(selectedService.value.id),
     id_cuenta: Number(selectedAccount.value),
     // CORRECCIÓN: Usar monto_credito en lugar de monto_credito_mostrado
-    monto_credito: Number(parseFloat(membresiaProgreso.value?.monto_credito || 0)),
+    monto_credito: Number(parseFloat(creditApplied.value || 0)),
     num_comprobante: comprobante.value,
     monto_manodeobra: Number(totalAPagar.value) || 0,
     id_usuario: auth.user.id_usuario,
@@ -3515,24 +4122,39 @@ const totalAPagar = ref(0)
 const calcularTotal = () => {
   try {
     const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0) || 0;
-    let total = montoManodeObra;
+    let currentTotal = montoManodeObra;
 
-    // Aplicar descuento si existe
-    const porcentajeDescuento = parseFloat(membresiaProgreso.value?.porcentaje_descuento || 0) || 0;
-    if (porcentajeDescuento > 0) {
-      const montoDescuentoAplicado = montoManodeObra * (porcentajeDescuento / 100);
-      total -= montoDescuentoAplicado; 
+    // 1. Determinar el porcentaje de descuento a aplicar
+    let pct = 0;
+    if (shouldShowDiscountBenefit.value) {
+      if (membresiaProgreso.value?.aplica_descuento_especial && membresiaProgreso.value?.porcentaje_descuento_especial) {
+        pct = parseFloat(membresiaProgreso.value.porcentaje_descuento_especial);
+      } else {
+        pct = parseFloat(membresiaProgreso.value?.porcentaje_descuento || 0);
+      }
     }
 
-    // Aplicar crédito si corresponde
-if (shouldShowCreditBenefit.value && membresiaProgreso.value?.monto_credito) {
-  const montoCredito = parseFloat(membresiaProgreso.value.monto_credito) || 0;
-  total = Math.max(0, total - montoCredito);
-} 
+    // 2. Calcular y restar el descuento
+    if (pct > 0) {
+      const montoDescuento = montoManodeObra * (pct / 100);
+      currentTotal -= montoDescuento;
+    }
 
-    return total;
+    // 3. Aplicar crédito, pero solo hasta que el total sea 0
+    let actualCreditUsed = 0;
+    if (shouldShowCreditBenefit.value && membresiaProgreso.value?.monto_credito > 0) {
+      const montoCreditoDisponible = parseFloat(membresiaProgreso.value.monto_credito);
+      actualCreditUsed = Math.min(currentTotal, montoCreditoDisponible);
+      currentTotal -= actualCreditUsed;
+    }
+
+    // Guardar el crédito realmente aplicado para mostrarlo en el template
+    creditApplied.value = actualCreditUsed;
+    
+    return currentTotal;
   } catch (error) {
     console.error('Error en calcularTotal:', error);
+    creditApplied.value = 0;
     return 0;
   }
 };

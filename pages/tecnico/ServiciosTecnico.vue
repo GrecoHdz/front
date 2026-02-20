@@ -40,85 +40,110 @@
         <main class="pb-4">
           
           <!-- Stats Overview -->
-          <section class="px-3 sm:px-4 py-3 sm:py-4">
-            <div class="grid grid-cols-3 gap-2 mb-3 sm:mb-4">
-              <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-                <div class="text-lg sm:text-xl font-black text-orange-600 dark:text-orange-400 mb-1">{{ stats.total }}</div>
-                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Total</p>
+          <section class="p-3 sm:px-4 sm:py-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div @click="currentTab = 'active'" 
+                   class="cursor-pointer transition-all duration-300"
+                   :class="currentTab === 'active' ? 'scale-105' : 'opacity-60 grayscale-[0.5]'">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden">
+                  <div v-if="currentTab === 'active'" class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+                  <div class="text-xl font-black text-blue-600 dark:text-blue-400 mb-0.5">{{ apiResponse.activas }}</div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Activos</p>
+                </div>
               </div>
-              <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-                <div class="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-400 mb-1">{{ stats.activas }}</div>
-                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Asignados</p>
-              </div>
-              <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
-                <div class="text-lg sm:text-xl font-black text-green-600 dark:text-green-400 mb-1">{{ stats.finalizadas }}</div>
-                <p class="text-xs text-gray-600 dark:text-gray-400 font-bold">Finalizadas</p>
+              <div @click="currentTab = 'finished'" 
+                   class="cursor-pointer transition-all duration-300"
+                   :class="currentTab === 'finished' ? 'scale-105' : 'opacity-60 grayscale-[0.5]'">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden">
+                  <div v-if="currentTab === 'finished'" class="absolute bottom-0 left-0 right-0 h-1 bg-green-500"></div>
+                  <div class="text-xl font-black text-green-600 dark:text-green-400 mb-0.5">{{ apiResponse.finalizadas }}</div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Finalizados</p>
+                </div>
               </div>
             </div>
           </section> 
 
+          <!-- Tabs Indicator -->
+          <div class="px-4 mb-4">
+            <h2 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center"> 
+              <span class="ml-2 h-px flex-1 bg-gray-100 dark:bg-gray-800"></span>
+            </h2>
+          </div> 
+
           <!-- Services List -->
-          <section class="px-3 sm:px-4">
-            <div class="space-y-2 sm:space-y-3">
+          <section class="px-4">
+            <div class="space-y-5">
               <div v-for="service in filteredServices" :key="service.id"
                    @click="openServiceModal(service)"
-                   class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border-t-4 border-blue-500 dark:border-blue-600 border-b border-l border-r border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer relative group">
-                <!-- Barra superior de estado -->
-                <div class="absolute top-0 left-0 right-0 h-1 rounded-t-lg" 
-                     :class="{
-                       'bg-blue-500': ['asignado', 'pendiente_cotizacion', 'en_proceso'].includes(service.rawStatus),
-                       'bg-green-500': ['pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(service.rawStatus),
-                       'bg-red-500': ['cancelado'].includes(service.rawStatus)
-                     }">
+                   class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden">
+                
+                <!-- Animated Top Border for Active Services (Subtle) -->
+                <div v-if="currentTab === 'active'" 
+                     class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 bg-[length:200%_auto] animate-gradient-x opacity-70">
                 </div>
 
                 <!-- Service Header -->
-                <div class="flex items-start justify-between mb-2 sm:mb-3">
-                  <div class="flex items-center space-x-2 sm:space-x-3">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg sm:rounded-xl flex items-center justify-center text-lg sm:text-xl">
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-9 h-9 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-base shadow-sm">
                       {{ service.icon }}
                     </div>
-                    <div>
-                      <p class="font-black text-gray-900 dark:text-white text-sm sm:text-base">{{ service.title }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ service.date }} • #{{ service.serviceNumber }}</p>
+                    <div class="min-w-0">
+                      <p class="font-bold text-gray-900 dark:text-white text-xs truncate">{{ service.title }}</p>
+                      <p class="text-[9px] text-gray-500 dark:text-gray-400 font-medium">#{{ service.serviceNumber }}</p>
                     </div>
                   </div>
-                  <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold px-2 sm:px-2.5 py-0.5 rounded-full" :class="getStatusColor(service.rawStatus)">
+                  <div class="flex flex-col items-end">
+                    <span class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm" :class="getStatusColor(service.rawStatus)">
                       {{ service.status }}
                     </span>
                   </div>
                 </div>
 
-                <!-- Cliente Info -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-2.5 sm:p-3 rounded-lg mb-2 sm:mb-3">
-                  <p class="text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">👤 CLIENTE</p>
-                  <p class="text-blue-800 dark:text-blue-200 text-xs sm:text-sm font-semibold">{{ service.customer.name }}</p>
-                  <p class="text-blue-700 dark:text-blue-300 text-xs">{{ service.customer.phone }}</p> 
-                </div>
-                
-                <!-- Location -->
-                <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 sm:p-3 rounded-lg mb-2 sm:mb-3">
-                  <p class="text-gray-600 dark:text-gray-400 text-xs font-bold mb-1">📍 UBICACIÓN</p>
-                  <p class="text-gray-800 dark:text-gray-200 text-xs sm:text-sm font-semibold">{{ service.location.neighborhood }}</p>
-                  <p class="text-gray-700 dark:text-gray-300 text-xs">{{ service.location.address }}</p>
+                <!-- Location & Client Grid (Double Divs) -->
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                  <div v-if="service.title === 'Taxi VIP'" class="grid grid-cols-2 gap-2 col-span-2">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">📍 Recogida</p>
+                      <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.location?.neighborhood }}</p>
+                    </div>
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                      <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-0.5">🏁 Destino</p>
+                      <p class="font-bold text-emerald-900 dark:text-emerald-200 text-[10px] truncate">{{ service.location?.address }}</p>
+                    </div>
+                  </div>
+                  <div v-else class="grid grid-cols-2 gap-2 col-span-2">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">👤 Cliente</p>
+                      <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.customer.name }}</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg border border-gray-100 dark:border-gray-600/50">
+                      <p class="text-gray-600 dark:text-gray-400 text-[10px] font-black uppercase mb-0.5">📍 Ubicación</p>
+                      <p class="font-bold text-gray-900 dark:text-white text-[10px] truncate">{{ service.location?.neighborhood }}</p>
+                    </div>
+                  </div>
                 </div>
                 
                 <!-- Service Description -->
-                <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3 bg-gray-50 dark:bg-gray-700/50 p-2.5 sm:p-3 rounded-lg">
-                  {{ service.description }}
+                <p class="text-gray-700 dark:text-gray-300 text-[11px] mb-3 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg italic line-clamp-2">
+                  "{{ service.description }}"
                 </p> 
 
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-between">
+                <!-- Action Footer -->
+                <div class="flex items-center justify-between pt-1 border-t border-gray-50 dark:border-gray-700/50">
                   <div class="flex items-center space-x-2">
-                    <span class="text-gray-500 dark:text-gray-400 text-xs">{{ getTimeAgo(service.rawDate) }}</span>
+                    <span class="text-gray-400 text-[9px] font-medium">{{ service.date }}</span>
                   </div>
-                  <div class="flex items-center space-x-1 sm:space-x-2">
-                    <span v-if="service.rawStatus === 'asignado'" class="text-green-600 dark:text-green-400 text-xs font-bold">Crear cotización</span>
-                    <span v-else-if="service.rawStatus === 'en_proceso'" class="text-green-600 dark:text-green-400 text-xs font-bold">Completar Servicio</span>
-                    <span v-else class="text-blue-600 dark:text-blue-400 text-xs font-bold">Ver detalles</span>
-                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="flex items-center space-x-1">
+                    <span :class="[
+                      service.rawStatus === 'asignado' 
+                        ? 'text-white bg-indigo-600 px-2 py-0.5 rounded shadow-lg shadow-indigo-500/30' 
+                        : 'text-blue-600 dark:text-blue-400',
+                      'text-[10px] font-black uppercase tracking-widest'
+                    ]">
+                      {{ service.rawStatus === 'asignado' ? 'Cotizar' : (service.rawStatus === 'en_proceso' ? 'Finalizar' : 'Ver detalles') }}
+                    </span>
+                    <svg class="w-3 h-3 text-blue-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                   </div>
@@ -127,32 +152,19 @@
             </div>
 
             <!-- Empty State -->
-            <div v-if="filteredServices.length === 0" class="text-center py-6 sm:py-8">
-              <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-lg sm:rounded-xl mx-auto mb-2 sm:mb-3 flex items-center justify-center">
-                <span class="text-2xl sm:text-3xl">🔍</span>
+            <div v-if="filteredServices.length === 0" class="text-center py-10">
+              <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-2xl mx-auto mb-3 flex items-center justify-center opacity-50">
+                <span class="text-2xl">�</span>
               </div>
-              <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">No hay servicios asignados</h3>
-              <p class="text-gray-600 dark:text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">No tienes servicios asignados con los filtros seleccionados</p>
-              <button @click="resetFilters" class="px-3 sm:px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors text-xs sm:text-sm">
-                Limpiar filtros
-              </button>
+              <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">No hay servicios</h3>
             </div>
 
-            <!-- Botón Ver más -->
-            <div v-if="hasMore && !isLoading" class="mt-4 text-center">
-              <button 
-                @click="loadServices(true)" 
-                :disabled="isLoadingMore"
-                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed w-full max-w-xs mx-auto flex items-center justify-center"
-              >
-                <span v-if="!isLoadingMore">Ver más servicios</span>
-                <span v-else class="flex items-center justify-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Cargando...
-                </span>
+            <!-- Load More -->
+            <div v-if="hasMore && !isLoading" class="mt-6">
+              <button @click="loadServices(true)" :disabled="isLoadingMore"
+                class="w-full py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 shadow-sm transition-all flex items-center justify-center space-x-2">
+                <span>{{ isLoadingMore ? 'Cargando...' : 'Cargar más' }}</span>
+                <svg v-if="!isLoadingMore" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
               </button>
             </div>
           </section>
@@ -239,14 +251,26 @@
               <!-- Location Details -->
               <div class="mb-4 sm:mb-6">
                 <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">Ubicación del Servicio</h4>
-                <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 sm:p-3 rounded-lg sm:rounded-xl">
+                
+                <div v-if="selectedService.title === 'Taxi VIP'" class="grid grid-cols-2 gap-3">
+                  <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border-l-4 border-blue-500">
+                    <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-1">📍 Recogida</p>
+                    <p class="font-bold text-gray-900 dark:text-white text-[12px] sm:text-xs md:text-base">{{ selectedService.location?.neighborhood }}</p>
+                  </div>
+                  <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border-l-4 border-emerald-500">
+                    <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-1">🏁 Destino</p>
+                    <p class="font-bold text-gray-900 dark:text-white text-[12px] sm:text-xs md:text-base">{{ selectedService.location?.address }}</p>
+                  </div>
+                </div>
+
+                <div v-else class="bg-gray-50 dark:bg-gray-700/50 p-2.5 sm:p-3 rounded-lg sm:rounded-xl">
                   <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ selectedService.location?.neighborhood }}</p>
                   <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mt-1">{{ selectedService.location?.address }}</p> 
                 </div>
               </div>
 
               <!-- Service Description -->
-              <div class="mb-4 sm:mb-6">
+              <div v-if="selectedService.title !== 'Taxi VIP'" class="mb-4 sm:mb-6">
                 <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">Descripción del Problema</h4>
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 sm:p-3 rounded-lg">
                   <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm">{{ selectedService.description }}</p>
@@ -331,7 +355,7 @@
       </div>
     </Transition>
 
-    <!-- Quotation Modal -->
+    <!-- Standard Quotation Modal -->
     <Transition
       name="modal"
       enter-active-class="modal-enter-active"
@@ -440,6 +464,135 @@
                     </svg>
                     Enviando...
                   </span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Taxi VIP Quotation Modal -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showTaxiQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <Transition
+          name="backdrop"
+          enter-active-class="backdrop-enter-active"
+          leave-active-class="backdrop-leave-active"
+          enter-from-class="backdrop-enter-from"
+          leave-to-class="backdrop-leave-to">
+          <div 
+            v-if="showTaxiQuotationModal"
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            @click="showTaxiQuotationModal = false"
+          ></div>
+        </Transition>
+
+        <Transition
+          name="modal-content"
+          enter-active-class="modal-content-enter-active"
+          leave-active-class="modal-content-leave-active"
+          enter-from-class="modal-content-enter-from"
+          leave-to-class="modal-content-leave-to">
+          <div 
+            v-if="showTaxiQuotationModal"
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+            @click.stop>
+            
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-500/10 to-indigo-500/10">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-blue-500/30">
+                    🚕
+                  </div>
+                  <div>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">Precio de Viaje</h3>
+                    <p class="text-[10px] text-gray-400 font-bold">Taxi VIP • REF: #{{ selectedService?.serviceNumber }}</p>
+                  </div>
+                </div>
+                <button @click="showTaxiQuotationModal = false" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quotation Form -->
+            <div class="p-4">
+              <form @submit.prevent="submitQuotation" class="space-y-4">
+                <!-- Location Info (Read-only) -->
+                <div class="grid grid-cols-1 gap-2 bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-xl border border-blue-100/50 dark:border-blue-800/50">
+                   <div class="flex items-start space-x-3">
+                      <div class="mt-1 w-2 h-2 rounded-full bg-blue-500 ring-4 ring-blue-500/20"></div>
+                      <div class="min-w-0">
+                         <p class="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Recogida</p>
+                         <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ selectedService?.location?.neighborhood }}</p>
+                      </div>
+                   </div>
+                   <div class="flex items-start space-x-3 mt-2 border-t border-blue-100/30 dark:border-blue-800/30 pt-2">
+                      <div class="mt-1 w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></div>
+                      <div class="min-w-0">
+                         <p class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Destino</p>
+                         <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ selectedService?.location?.address }}</p>
+                      </div>
+                   </div>
+                </div>
+
+                <!-- Price Field -->
+                <div class="relative">
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Monto del Viaje (L.)</label>
+                  <div class="relative group">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400 group-focus-within:text-blue-500 transition-colors">L.</div>
+                    <input v-model.number="quotationForm.monto_manodeobra" 
+                           type="number" 
+                           step="1" 
+                           min="0" 
+                           required
+                           class="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-2xl font-black text-gray-900 dark:text-white transition-all outline-none" 
+                           placeholder="0">
+                  </div>
+                </div>
+
+                <!-- Comment Field -->
+                <div>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Notas del Viaje</label>
+                  <textarea v-model="quotationForm.comentario" 
+                            rows="2" 
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-sm font-medium text-gray-900 dark:text-white transition-all outline-none resize-none" 
+                            placeholder="Ej: Ford Escape Gris, llego en 5 min..."></textarea>
+                </div>
+
+                <!-- Earning Preview -->
+                <div class="bg-blue-600 rounded-2xl p-4 shadow-xl shadow-blue-500/30 text-white">
+                  <div class="flex justify-between items-center mb-1 opacity-80">
+                    <span class="text-[10px] font-black uppercase tracking-widest">Tu Ganancia Estimada</span>
+                    <span class="text-[10px] font-bold">({{ 100 - commissionPercentage }}%)</span>
+                  </div>
+                  <div class="flex justify-between items-end">
+                    <div class="text-3xl font-black">L. {{ (Number(quotationForm.monto_manodeobra || 0) * ((100 - commissionPercentage) / 100)).toFixed(0) }}</div>
+                    <div class="text-[10px] font-bold bg-white/20 px-2 py-1 rounded-lg backdrop-blur-sm">PROCESADO VÍA APP</div>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" 
+                        :disabled="isSubmittingQuotation || !quotationForm.monto_manodeobra"
+                        class="group relative w-full py-4 bg-gray-900 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50">
+                  <div v-if="!isSubmittingQuotation" class="relative z-10 flex items-center justify-center space-x-2">
+                    <span class="uppercase tracking-[0.2em] text-xs">Confirmar Precio</span>
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                  </div>
+                  <div v-else class="flex items-center justify-center">
+                    <svg class="animate-spin h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity translate-y-full group-hover:translate-y-0 duration-300"></div>
                 </button>
               </form>
             </div>
@@ -702,6 +855,7 @@ const showFilters = ref(false)
 const isLoadingServiceTypes = ref(false)
 const showServiceModal = ref(false)
 const showQuotationModal = ref(false)
+const showTaxiQuotationModal = ref(false)
 const showViewQuotationModal = ref(false)
 const showCancelConfirmation = ref(false)
 const showCompleteConfirmation = ref(false)
@@ -715,8 +869,14 @@ const hasMore = ref(false)
 
 // Filtros
 const currentFilter = ref('all')
+const currentTab = ref('active') // 'active' o 'finished'
 const currentDateFilter = ref('all')
 const selectedServiceTypes = ref([])
+
+// Observar cambios en la pestaña para recargar
+watch(currentTab, () => {
+  loadServices()
+})
 
 // Comentarios y estados
 const completeServiceComment = ref('')
@@ -772,44 +932,19 @@ const toast = ref({
 const totalServices = computed(() => apiResponse.value.total)
 
 const stats = computed(() => {
-  const solicitudes = apiResponse.value.solicitudes || []
-  const asignados = solicitudes.filter(s => 
-    s.estado === 'asignado' || 
-    s.estado === 'pendiente_cotizacion' || 
-    s.estado === 'en_proceso'
-  ).length
-  
-  const finalizadas = solicitudes.filter(s => 
-    s.estado === 'finalizado' || 
-    s.estado === 'calificado' || 
-    s.estado === 'pendiente_pagoservicio' || 
-    s.estado === 'verificando_pagoservicio'
-  ).length
-  
   return {
-    total: solicitudes.length,
-    activas: asignados,
-    finalizadas: finalizadas
+    total: apiResponse.value.total || 0,
+    activas: apiResponse.value.activas || 0,
+    finalizadas: apiResponse.value.finalizadas || 0
   }
 })
 
 const filteredServices = computed(() => {
   let solicitudes = [...(apiResponse.value.solicitudes || [])]
   
-  if (currentFilter.value === 'asignado') {
-    solicitudes = solicitudes.filter(s => 
-      s.estado === 'asignado' || 
-      s.estado === 'pendiente_cotizacion' || 
-      s.estado === 'en_proceso'
-    )
-  } else if (currentFilter.value === 'finalizado') {
-    solicitudes = solicitudes.filter(s => 
-      s.estado === 'finalizado' || 
-      s.estado === 'calificado' || 
-      s.estado === 'pendiente_pagoservicio' || 
-      s.estado === 'verificando_pagoservicio'
-    )
-  } else if (currentFilter.value !== 'all') {
+  // El filtrado por estado (active/finished) ya lo hace el API
+  
+  if (currentFilter.value !== 'all' && currentFilter.value !== 'asignado' && currentFilter.value !== 'finalizado') {
     solicitudes = solicitudes.filter(s => s.estado === currentFilter.value)
   }
   
@@ -912,12 +1047,13 @@ const getServiceIcon = (estado) => {
   return iconMap[estado] || '🔧'
 }
 
-const mapApiStatusToLocal = (apiStatus) => {
+const mapApiStatusToLocal = (apiStatus, title = '') => {
+  const isTaxi = title === 'Taxi VIP';
   const statusMap = {
     'pendiente_asignacion': 'Cotización Rechazada',
     'asignado': 'Asignado',
-    'pendiente_cotizacion': 'Cotización Enviada',
-    'en_proceso': 'En Progreso',
+    'pendiente_cotizacion': isTaxi ? 'Tarifa Recibida' : 'Cotización Enviada',
+    'en_proceso': isTaxi ? 'Viaje Programado' : 'En Progreso',
     'pendiente_pagoservicio': 'Finalizado',
     'verificando_pagoservicio': 'Finalizado',
     'finalizado': 'Finalizado',
@@ -933,7 +1069,7 @@ const mapSolicitudToService = (solicitud) => {
     id: solicitud.id_solicitud,
     title: solicitud.servicio?.nombre || 'Servicio General',
     description: solicitud.descripcion || 'Sin descripción',
-    status: mapApiStatusToLocal(solicitud.estado || 'pendiente'),
+    status: mapApiStatusToLocal(solicitud.estado || 'pendiente', solicitud.servicio?.nombre),
     rawStatus: solicitud.estado || 'pendiente',
     serviceNumber: `${formatDateDDMMYY(solicitud.fecha_solicitud)}-${solicitud.id_solicitud}`,
     icon: getServiceIcon(solicitud.estado),
@@ -1043,7 +1179,8 @@ const loadServices = async (loadMore = false) => {
       method: 'GET',
       query: {
         offset: currentOffset.value,
-        limit: itemsPerPage
+        limit: itemsPerPage,
+        tab: currentTab.value // Enviamos la pestaña actual al API
       }
     })
 
@@ -1224,7 +1361,12 @@ const openQuotationModal = async () => {
       monto_manodeobra: 0,
       monto_materiales: 0
     }
-    showQuotationModal.value = true
+    
+    if (selectedService.value.title === 'Taxi VIP') {
+      showTaxiQuotationModal.value = true
+    } else {
+      showQuotationModal.value = true
+    }
   } else if (selectedService.value.rawStatus === 'pendiente_cotizacion') {
     try {
       await loadQuotationDetails()
@@ -1257,7 +1399,12 @@ const confirmCancelService = () => {
 
 // ===== FUNCIONES DE ACCIONES =====
 const submitQuotation = async () => {
-  if (!quotationForm.value.comentario.trim() || quotationForm.value.monto_manodeobra === null || quotationForm.value.monto_manodeobra === undefined || quotationForm.value.monto_manodeobra < 0) {
+  // Validación específica: El comentario es obligatorio para servicios normales, opcional para Taxi VIP
+  const isTaxi = selectedService.value?.title === 'Taxi VIP'
+  const isCommentEmpty = !quotationForm.value.comentario || !quotationForm.value.comentario.trim()
+  const isAmountInvalid = quotationForm.value.monto_manodeobra === null || quotationForm.value.monto_manodeobra === undefined || quotationForm.value.monto_manodeobra < 0
+
+  if ((!isTaxi && isCommentEmpty) || isAmountInvalid) {
     showToast('Por favor completa todos los campos requeridos', 'error')
     return
   }
@@ -1269,7 +1416,7 @@ const submitQuotation = async () => {
     
     const cotizacionData = {
       id_solicitud: selectedService.value.id,
-      comentario: quotationForm.value.comentario.trim(),
+      comentario: isCommentEmpty && isTaxi ? 'Servicio Taxi VIP' : quotationForm.value.comentario.trim(),
       monto_manodeobra: parseFloat(quotationForm.value.monto_manodeobra),
       monto_materiales: parseFloat(quotationForm.value.monto_materiales) || 0,
       fecha: new Date().toISOString()
@@ -1307,6 +1454,7 @@ const submitQuotation = async () => {
     showToast('Cotización enviada correctamente', 'success')
     
     closeQuotationModal()
+    showTaxiQuotationModal.value = false // Cerrar también el de taxi si se usó
     closeServiceModal()
     await loadServices()
     return true
@@ -1698,5 +1846,26 @@ input, textarea, select {
   .max-w-xl {
     max-width: 100%;
   }
+}
+
+/* Animación de Gradiente Horizontal */
+@keyframes gradient-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+/* Efecto de Elevación Activa */
+.active-service-card {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.active-service-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 </style>

@@ -315,7 +315,7 @@
               
               <div>
                 <textarea v-model="serviceFormData.description" 
-                         placeholder="Describe el problema o servicio que necesitas..."
+                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? '¿Cuántas personas van y en cuánto tiempo lo necesitan?' : 'Describe el problema o servicio que necesitas...'"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
               </div>
@@ -324,13 +324,13 @@
                 <div>
                   <input v-model="serviceFormData.colonia" 
                          type="text"
-                         placeholder="Colonia"
+                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? 'Lugar de recogida' : 'Colonia'"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
                 </div>
                 <div>
                   <input v-model="serviceFormData.direccion" 
                          type="text"
-                         placeholder="Dirección precisa"
+                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? 'Lugar de destino' : 'Dirección precisa'"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
                 </div>
               </div>

@@ -529,6 +529,21 @@
                   </span>
                 </p>
             </div>
+
+            <!-- Forma de Pago (solo para servicios) -->
+            <div v-if="selectedFacturaPayment.id_cotizacion" class="mt-6 pt-4 border-t border-gray-200">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-2">FORMA DE PAGO</span>
+                <div class="space-y-1 text-xs text-gray-700">
+                    <p class="flex justify-between">
+                        <span>Efectivo recibido:</span>
+                        <span class="font-medium">{{ formatCurrency(Math.max(0, (parseFloat(selectedFacturaPayment.monto_manodeobra) || 0) - (parseFloat(selectedFacturaPayment.descuento_membresia) || 0) - (parseFloat(selectedFacturaPayment.credito_usado) || 0))) }}</span>
+                    </p>
+                    <p class="flex justify-between" v-if="selectedFacturaPayment.credito_usado > 0">
+                        <span>Crédito de membresía aplicado:</span>
+                        <span class="font-medium">{{ formatCurrency(selectedFacturaPayment.credito_usado || 0) }}</span>
+                    </p>
+                </div>
+            </div>
         </div>
         
         <!-- Details & Fiscal Data (Stacked Rows) -->
@@ -806,7 +821,7 @@
                   {{ formatCurrency(platformStats.totalRevenue || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
-                  Ingresos Totales
+                  Ingresos Netos Totales
                 </p>
               </div>
             </div>
@@ -880,7 +895,7 @@
             </div>
           </div>
 
-          <!-- Retiros -->
+          <!-- comisiones -->
           <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
             <div class="flex items-center space-x-2 sm:space-x-3">
               <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
@@ -888,10 +903,10 @@
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
-                  {{ formatCurrency(platformStats.totalWithdrawals || 0) }}
+                  {{ formatCurrency(platformStats.totalCommissions || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
-                  Retiros
+                  Comisiones
                 </p>
               </div>
             </div>
@@ -1058,7 +1073,7 @@
 
                 <!-- Balance Neto -->
                 <div class="text-right">
-                  <p class="text-xs text-gray-600 dark:text-gray-300">Balance Neto</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-300">Balance en Banco</p>
                   <p class="text-sm font-bold" :class="getBalanceClass()">
                     {{ getNetBalance() }}
                   </p>
@@ -3940,6 +3955,14 @@ const availableReports = ref([
     iconClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
     generating: false
   },
+  {
+    id: 5,
+    title: 'Reporte de Retiros Detallado',
+    description: 'Resumen de retiros de técnicos y referidores',
+    icon: '💸',
+    iconClass: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+    generating: false
+  },
 ]); 
 
 const generateReport = async (report) => {
@@ -3974,7 +3997,7 @@ const generateReport = async (report) => {
 
     // 📊 2️⃣ Definir qué datos necesita cada reporte para optimizar las peticiones
     const reportNeeds = {
-      1: ['membresia', 'visit', 'withdrawals', 'quotation', 'users', 'techIncome', 'pkgPayments'],
+      1: ['membresia', 'visit', 'withdrawals', 'quotation', 'users', 'techIncome', 'pkgPayments', 'referralIncome'],
       2: [], // Este reporte hace sus propias peticiones internas
       3: ['users'],
       4: ['membresia', 'visit', 'withdrawals'],
@@ -3991,7 +4014,8 @@ const generateReport = async (report) => {
       quotation: `/cotizacion${monthParam}`,
       users: `/usuarios${monthParam}`,
       techIncome: `/movimientos/ingresos/tecnicos${monthParam}`,
-      pkgPayments: `/paquetes/usuarios/pagos${monthParam}`
+      pkgPayments: `/paquetes/usuarios/pagos${monthParam}`,
+      referralIncome: `/movimientos${monthParam}&tipo=ingreso_referido&estado=completado`
     };
 
     const urlsToConsult = needs.map(key => urlMap[key]).filter(Boolean);
@@ -4004,17 +4028,19 @@ const generateReport = async (report) => {
       quotationRes: needs.includes('quotation') ? $api(urlMap.quotation).catch(err => { console.error('❌ Error en /cotizacion:', err); throw err; }) : Promise.resolve(null),
       usersRes: needs.includes('users') ? $api(urlMap.users).catch(err => { console.error('❌ Error en /usuarios:', err); throw err; }) : Promise.resolve(null),
       technicianIncomeRes: needs.includes('techIncome') ? $api(urlMap.techIncome).catch(err => { console.error('❌ Error en /movimientos (ingresos):', err); return { movimientos: [], data: [] }; }) : Promise.resolve({ movimientos: [], data: [] }),
-      packagePaymentsRes: needs.includes('pkgPayments') ? $api(urlMap.pkgPayments).catch(err => { console.error('❌ Error en /paquetes/usuarios/pagos:', err); return { data: [], estadisticas: { total: 0 } }; }) : Promise.resolve({ data: [], estadisticas: { total: 0 } })
+      packagePaymentsRes: needs.includes('pkgPayments') ? $api(urlMap.pkgPayments).catch(err => { console.error('❌ Error en /paquetes/usuarios/pagos:', err); return { data: [], estadisticas: { total: 0 } }; }) : Promise.resolve({ data: [], estadisticas: { total: 0 } }),
+      referralIncomeRes: needs.includes('referralIncome') ? $api(urlMap.referralIncome).catch(err => { console.error('❌ Error en /movimientos (referidos):', err); return { movimientos: [], data: [] }; }) : Promise.resolve({ movimientos: [], data: [] })
     };
 
-    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes, packagePaymentsRes] = await Promise.all([
+    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes, packagePaymentsRes, referralIncomeRes] = await Promise.all([
       promises.membershipRes,
       promises.visitRes,
       promises.withdrawalsRes,
       promises.quotationRes,
       promises.usersRes,
       promises.technicianIncomeRes,
-      promises.packagePaymentsRes
+      promises.packagePaymentsRes,
+      promises.referralIncomeRes
     ]); 
 
     const usersData = {
@@ -4062,6 +4088,9 @@ const generateReport = async (report) => {
     const rawTechData = technicianIncomeRes?.movimientos || technicianIncomeRes?.data || [];
     const technicianIncomeData = Array.isArray(rawTechData) ? rawTechData : [];
 
+    const rawReferralData = referralIncomeRes?.movimientos || referralIncomeRes?.data?.movimientos || referralIncomeRes?.data || [];
+    const referralIncomeData = Array.isArray(rawReferralData) ? rawReferralData : [];
+
     const serviceData = {
       label: 'Servicios',
       total: quotationRes?.estadisticas?.total || 0,
@@ -4075,16 +4104,38 @@ const generateReport = async (report) => {
     serviceData.total = parseFloat(quotationRes?.estadisticas?.total || 0);
 
     // 💰 4️⃣ Cálculos de balance (Solo para reporte financiero ID 1)
+    // Usamos el mismo endpoint que la UI para garantizar consistencia de datos
     let ingredientesReporte = {};
     if (report.id === 1) {
-      const ingresosTotales = (membershipRes?.estadisticas?.total || 0) + 
-                             (visitRes?.estadisticas?.total || 0) + 
-                             (quotationRes?.estadisticas?.total || 0) + 
-                             (packagePaymentsRes?.estadisticas?.total || 0);
-      const retirosTotales = (withdrawalsRes?.estadisticas?.total || 0);
-      const balanceNeto = ingresosTotales - retirosTotales;
-      
-      ingredientesReporte = { balanceNeto };
+      try {
+        // Construir los params del reporte igual que la UI
+        const reporteParams = hasSelectedMonth
+          ? `?mesActual=${selectedMonth}&fechaInicio=${selectedMonth}-01&fechaFin=${selectedMonth}-${new Date(year, month, 0).getDate()}`
+          : '';
+        const reporteRes = await $api(`/movimientos/reporte/ingresos${reporteParams}`).catch(err => {
+          console.error('❌ Error al obtener reporte ingresos para PDF:', err);
+          return null;
+        });
+
+        if (reporteRes?.success && reporteRes?.data?.resumen) {
+          const resumen = reporteRes.data.resumen;
+          // 'retiros' en el resumen ahora = ingresos de técnicos (deudas)
+          const deudasTecnicos = parseFloat(resumen.retiros || 0);
+          const comisionesReferidos = parseFloat(resumen.comisiones || 0);
+          const balanceNeto = parseFloat(resumen.gananciaNeta || 0);
+          ingredientesReporte = { balanceNeto, deudasTecnicos, comisionesReferidos };
+        } else {
+          // Fallback: calcular básico sin deudas
+          const ingresosTotales = (membershipRes?.estadisticas?.total || 0) +
+            (visitRes?.estadisticas?.total || 0) +
+            (quotationRes?.estadisticas?.total || 0) +
+            (packagePaymentsRes?.estadisticas?.total || 0);
+          ingredientesReporte = { balanceNeto: ingresosTotales, deudasTecnicos: 0, comisionesReferidos: 0 };
+        }
+      } catch (e) {
+        console.error('❌ Error en cálculo de balance PDF:', e);
+        ingredientesReporte = { balanceNeto: 0, deudasTecnicos: 0, comisionesReferidos: 0 };
+      }
     }
     const { balanceNeto } = ingredientesReporte;
 
@@ -4125,11 +4176,14 @@ const generateReport = async (report) => {
           visitData,
           serviceData,
           withdrawalsData,
-          technicianIncomeData, // Pasamos los datos de ingresos técnicos
-          packagePaymentsData, // Pasamos los datos de pagos de paquetes
+          technicianIncomeData,
+          referralIncomeData,
+          packagePaymentsData,
           mesNombre: monthName,
           year,
-          balanceNeto
+          balanceNeto,
+          deudasTecnicos: ingredientesReporte.deudasTecnicos || 0,
+          comisionesReferidos: ingredientesReporte.comisionesReferidos || 0
         });
         break;
 
@@ -4240,7 +4294,7 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto: balanceNetoParam }) => {
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], referralIncomeData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto: balanceNetoParam, deudasTecnicos = 0, comisionesReferidos = 0 }) => {
   // 1️⃣ Recalcular TODOS los totales basados en los datos filtrados que se mostrarán en las tablas
   const totalMembresias = membershipData.data
     .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
@@ -4250,9 +4304,16 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     .filter(v => v.estado?.toLowerCase() === 'aprobado')
     .reduce((sum, v) => sum + (parseFloat(v.monto) || 0), 0);
     
+  // Calcular efectivo real recibido de servicios (lo que pagó el cliente)
   const totalServicios = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
-    .reduce((sum, s) => sum + (parseFloat(s.monto_comision_app) || 0), 0);
+    .reduce((sum, s) => {
+      const manoObra = parseFloat(s.monto_manodeobra) || 0;
+      const descuento = parseFloat(s.descuento_membresia) || 0;
+      const credito = parseFloat(s.credito_usado) || 0;
+      const efectivoReal = Math.max(0, manoObra - descuento - credito);
+      return sum + efectivoReal;
+    }, 0);
     
   const totalPaquetes = packagePaymentsData.data
     .filter(p => p.estado?.toLowerCase() !== 'rechazado')
@@ -4261,13 +4322,14 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   // Cálculo de Ingresos Totales (consistente con lo que se muestra abajo)
   const totalIngresos = totalMembresias + totalVisitas + totalServicios + totalPaquetes;
 
-  // Cálculo de Retiros Totales (solo completados o aprobados)
+  // Cálculo de Retiros Totales (solo completados o aprobados) — para la tabla de retiros
   const totalRetiros = withdrawalsData.data
     .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
     .reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
 
-  // Balance Neto recalculado para consistencia visual
-  const balanceNeto = totalIngresos - totalRetiros;
+  // Ganancia Neta REAL (Contabilidad de Devengado):
+  // Ingresos Brutos - Lo que se le debe a técnicos - Comisiones de referidores
+  const balanceNeto = balanceNetoParam ?? (totalIngresos - deudasTecnicos - comisionesReferidos);
 
   // Usar autoTable del documento
   let currentY = 40;
@@ -4290,7 +4352,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       ['Membresías', formatCurrency(totalMembresias), calcPorcentaje(totalMembresias)],
       ['Visitas Técnicas', formatCurrency(totalVisitas), calcPorcentaje(totalVisitas)],
       ['Venta de Paquetes', formatCurrency(totalPaquetes), calcPorcentaje(totalPaquetes)],
-      ['Comisión por Servicios', formatCurrency(totalServicios), calcPorcentaje(totalServicios)],
+      ['Efectivo por Servicios', formatCurrency(totalServicios), calcPorcentaje(totalServicios)],
       ['Total Ingresos', formatCurrency(totalIngresos), '-']
     ],
     theme: 'grid',
@@ -4341,14 +4403,17 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const serviciosFiltrados = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
     .map(s => {
-        const montoNeto = parseFloat(s.monto_comision_app) || 0;
+        const manoObra = parseFloat(s.monto_manodeobra) || 0;
+        const descuento = parseFloat(s.descuento_membresia) || 0;
+        const credito = parseFloat(s.credito_usado) || 0;
+        const efectivoReal = Math.max(0, manoObra - descuento - credito);
         return [
           formatDate(s.fecha), 
-          'Comisión por Servicio', 
+          'Efectivo por Servicio', 
           s.solicitud?.cliente?.nombre || '-', 
           s.facturaRelacion?.factura?.estado || 'PENDIENTE',
           s.facturaRelacion?.factura?.numero_factura_correlativo || '-',
-          formatCurrency(montoNeto)
+          formatCurrency(efectivoReal)
         ];
     });
 
@@ -4364,6 +4429,47 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     ]);
 
   const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0 || paquetesFiltrados.length > 0;
+
+  // 📊 Costos Operativos (Pasivos / Retiros)
+  // Lógica Final basada en datos reales de BD:
+  // 1. Técnicos: Se muestran sus INGRESOS como "Pendiente" (Pasivo de la empresa).
+  // 2. Referidos: Se muestran sus INGRESOS como "Pendiente" (Pasivo de la empresa), ya que no hay retiros registrados.
+  
+  // A. Ingresos Técnicos
+  const tecnicosOps = technicianIncomeData.map(t => ({
+      fecha: t.fecha,
+      beneficiario: t.nombre_usuario || t.usuario?.nombre || 'Técnico',
+      tipo: 'Servicio',
+      descripcion: t.nombre_servicio ? `Ingreso por ${t.nombre_servicio}` : (t.descripcion || 'Ingreso por servicio completado'),
+      estado: 'Pendiente', // Mostramos como pendiente de pago por defecto para reflejar pasivo
+      fechaRetiro: '-',
+      monto: parseFloat(t.monto) || 0,
+    }));
+
+  // B. Ingresos Referidos (Comisiones Generadas)
+  const referidosOps = referralIncomeData.map(r => ({
+      fecha: r.fecha,
+      beneficiario: r.nombre_usuario || r.usuario?.nombre || 'Referidor',
+      tipo: 'Comisión',
+      descripcion: r.servicio ? `Comisión por ${r.servicio} (Comisión)` : (r.descripcion ? `${r.descripcion} (Comisión)` : 'Comisión por referido (Comisión)'),
+      estado: 'Pendiente', // Es una deuda generada
+      fechaRetiro: '-',
+      monto: parseFloat(r.monto) || 0,
+    }));
+
+  const operationalCosts = [
+    ...tecnicosOps,
+    ...referidosOps
+  ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+  const totalCostosOperativos = operationalCosts.reduce((sum, c) => sum + c.monto, 0);
+
+  // Recalcular Balance Neto
+  // Aquí usamos el total de costos devengados (400.00) para calcular la utilidad real.
+  const balanceNetoFinal = totalIngresos - totalCostosOperativos;
+
+
+  // ... (código existente de Detalle de Ingresos) ...
 
   doc.autoTable({
     startY: currentY,
@@ -4384,22 +4490,21 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
     columnStyles: { 
-      0: { cellWidth: 20, halign: 'center' }, 
-      1: { cellWidth: 35, halign: 'center' }, 
-      2: { cellWidth: 35, halign: 'center' }, 
-      3: { cellWidth: 25, halign: 'center' }, 
-      4: { cellWidth: 'auto', halign: 'center' },
-      5: { cellWidth: 25, halign: 'center' }
+      0: { cellWidth: 20 }, 
+      1: { cellWidth: 35 }, 
+      2: { cellWidth: 35 }, 
+      3: { cellWidth: 25 }, 
+      4: { cellWidth: 'auto' },
+      5: { cellWidth: 25 }
     },
     margin: { left: 10, right: 10 },
     pageBreak: 'auto',
     styles: { halign: 'center' }
   });
 
-  // Agregar detalle de retiros
+  // Agregar detalle de Costos Operativos
   currentY = doc.lastAutoTable.finalY + 10;
   
-  // Agregar nueva página si es necesario
   if (currentY > 250) {
     doc.addPage();
     currentY = 20;
@@ -4408,43 +4513,38 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(220, 38, 38); // Rojo
   doc.setFontSize(12);
-  doc.text('Detalle de Retiros', 10, currentY);
+  doc.text('Costos Operativos (Pasivos Generados)', 10, currentY);
   currentY += 4;
 
-  const retirosFiltrados = withdrawalsData.data
-    .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
-    .map(r => [
-      formatDate(r.fecha),
-      r.nombre_usuario || '-',
-      r.descripcion?.replace(/\n/g, ' ') || 'Sin descripción',
-      r.estado,
-      formatCurrency(r.monto),
-    ]);
+  const costosFiltrados = operationalCosts.map(c => [
+      formatDate(c.fecha),
+      c.beneficiario,
+      c.descripcion,
+      formatCurrency(c.monto)
+  ]);
 
-  const hayRetiros = retirosFiltrados.length > 0;
+  const hayCostos = costosFiltrados.length > 0;
 
   doc.autoTable({
     startY: currentY,
-    head: [['Fecha', 'Usuario', 'Descripción', 'Estado', 'Monto']],
-    body: hayRetiros
+    head: [['Fecha', 'Beneficiario', 'Descripción', 'Monto']],
+    body: hayCostos
       ? [
-          ...retirosFiltrados,
+          ...costosFiltrados,
           [
-            { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: '', styles: { fontStyle: 'bold' } },
-            { content: formatCurrency(totalRetiros), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }
+            { content: 'TOTAL COSTOS OPERATIVOS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalCostosOperativos), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }
           ]
         ]
-      : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+      : [[{ content: 'No hay costos operativos del periodo', colSpan: 4, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
     theme: 'grid',
     headStyles: { fillColor: [220, 38, 38], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
     columnStyles: { 
-      0: { cellWidth: 25, halign: 'center' }, 
-      1: { cellWidth: 35, halign: 'center' }, 
-      2: { cellWidth: 'auto', halign: 'center' }, 
-      3: { cellWidth: 30, halign: 'center' }, 
-      4: { cellWidth: 25, halign: 'center' } 
+      0: { cellWidth: 25 }, 
+      1: { cellWidth: 45 }, 
+      2: { cellWidth: 'auto' }, 
+      3: { cellWidth: 35 } 
     },
     margin: { left: 10, right: 10 },
     pageBreak: 'auto',
@@ -4469,17 +4569,17 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     startY: currentY,
     head: [['Concepto', 'Monto (HNL)']],
     body: [
-      [{ content: 'Total Ingresos', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
-      [{ content: 'Total Retiros', styles: { fontStyle: 'bold', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetiros)}`, styles: { fontStyle: 'bold', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
-      [{ content: 'GANANCIA NETA', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
-       { content: formatCurrency(balanceNeto), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }]
+      [{ content: 'Total Ingresos Brutos', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
+      [{ content: '(-) Costos Operativos (Devengado)', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalCostosOperativos)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: 'GANANCIA NETA DE LA APP', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
+       { content: formatCurrency(balanceNetoFinal), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }]
     ],
     theme: 'grid',
     headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8, cellPadding: 2 },
     columnStyles: { 
-      0: { cellWidth: 120, halign: 'left' }, 
-      1: { cellWidth: 70, halign: 'right' } 
+      0: { cellWidth: 120 }, 
+      1: { cellWidth: 70 } 
     },
     margin: { left: 10, right: 10 },
     pageBreak: 'avoid',
@@ -4496,44 +4596,49 @@ const generarReporteRetiros = async (doc, withdrawalsData) => {
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(93, 92, 222);
   doc.setFontSize(14);
-  doc.text('REPORTE DE RETIROS DE TÉCNICOS', 10, currentY);
+  doc.text('REPORTE DETALLADO DE RETIROS', 10, currentY);
   currentY += 8;
-
-  const retirosFiltrados = withdrawalsData.data
-    .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
-    .map(r => [
-      formatDate(r.fecha),
-      r.nombre_usuario || '-',
-      r.descripcion?.replace(/\n/g, ' ') || 'Sin descripción',
-      formatCurrency(r.monto),
-      r.estado
-    ]);
 
   const totalRetirosReal = withdrawalsData.data
     .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
     .reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
+
+  const retirosFiltrados = withdrawalsData.data
+    .map(r => [
+      formatDate(r.fecha),
+      r.nombre_usuario || r.usuario?.nombre || 'N/A',
+      r.descripcion || 'Retiro de fondos',
+      r.estado?.toUpperCase() || 'PENDIENTE',
+      formatCurrency(r.monto)
+    ]);
     
   const hayRetiros = retirosFiltrados.length > 0;
 
   doc.autoTable({
     startY: currentY,
-    head: [['Fecha', 'Usuario', 'Descripción', 'Monto', 'Estado']],
+    head: [['Fecha', 'Beneficiario', 'Descripción', 'Estado', 'Monto']],
     body: hayRetiros
       ? [
           ...retirosFiltrados,
           [
-            { content: 'TOTAL RETIROS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: formatCurrency(totalRetirosReal), styles: { fontStyle: 'bold' } },
-            { content: '', styles: { fontStyle: 'bold' } }
+            { content: 'TOTAL L.', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: formatCurrency(totalRetirosReal), styles: { fontStyle: 'bold', halign: 'right' } }
           ]
         ]
-      : [[{ content: 'No hay retiros disponibles', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
+      : [[{ content: 'No se encontraron registros de retiros para este periodo', colSpan: 5, styles: { fontStyle: 'italic', halign: 'center', textColor: [100, 100, 100] } }]],
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
-    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 35 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 }, 4: { cellWidth: 25 } },
+    columnStyles: { 
+      0: { cellWidth: 25 }, 
+      1: { cellWidth: 40 }, 
+      2: { cellWidth: 'auto' }, 
+      3: { cellWidth: 25 },
+      4: { cellWidth: 30 } 
+    },
     margin: { left: 10, right: 10 },
-    pageBreak: 'auto'
+    pageBreak: 'auto',
+    styles: { halign: 'center' }
   });
 };
 
@@ -4596,11 +4701,12 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
       2: { cellWidth: 25 },
       3: { cellWidth: 30 },
       4: { cellWidth: 22 },
-      5: { cellWidth: 20, halign: 'right' },
-      6: { cellWidth: 23, halign: 'right' }
+      5: { cellWidth: 20 },
+      6: { cellWidth: 23 }
     },
     margin: { left: 10, right: 10 },
-    pageBreak: 'auto'
+    pageBreak: 'auto',
+    styles: { halign: 'center' }
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
@@ -4658,10 +4764,11 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
       2: { cellWidth: 30 },
       3: { cellWidth: 30 },
       4: { cellWidth: 22 },
-      5: { cellWidth: 18, halign: 'right' }
+      5: { cellWidth: 18 }
     },
     margin: { left: 10, right: 10 },
-    pageBreak: 'auto'
+    pageBreak: 'auto',
+    styles: { halign: 'center' }
   });
 
   currentY = doc.lastAutoTable.finalY + 10;
@@ -4705,7 +4812,8 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     bodyStyles: { fontSize: 8, cellPadding: 1.5 },
     margin: { left: 10 },
     tableWidth: 85,
-    columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 30, halign: 'right' } }
+    columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 30 } },
+    styles: { halign: 'center' }
   });
 
   // 🟩 Segunda columna (a la derecha)
@@ -4718,7 +4826,8 @@ const generarReporteUsuarios = async (doc, { usersData, mesNombre, year }) => {
     bodyStyles: { fontSize: 8, cellPadding: 1.5 },
     margin: { left: 110 },
     tableWidth: 85,
-    columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 30, halign: 'right' } }
+    columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 30 } },
+    styles: { halign: 'center' }
   });
 };
 
@@ -4791,7 +4900,8 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
       bodyStyles: { fontSize: 8 },
       margin: { left: 10, right: 10 },
-      pageBreak: 'auto'
+      pageBreak: 'auto',
+      styles: { halign: 'center' }
     });
 
     currentY = doc.lastAutoTable.finalY + 12;
@@ -4830,7 +4940,8 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
       bodyStyles: { fontSize: 8 },
       margin: { left: 10, right: 10 },
-      pageBreak: 'auto'
+      pageBreak: 'auto',
+      styles: { halign: 'center' }
     });
 
     currentY = doc.lastAutoTable.finalY + 12;
@@ -4875,7 +4986,8 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
       bodyStyles: { fontSize: 8 },
       margin: { left: 10, right: 10 },
-      pageBreak: 'auto'
+      pageBreak: 'auto',
+      styles: { halign: 'center' }
     });
 
     currentY = doc.lastAutoTable.finalY + 10;
@@ -4911,7 +5023,8 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
       bodyStyles: { fontSize: 9 },
       margin: { left: 10, right: 10 },
-      pageBreak: 'auto'
+      pageBreak: 'auto',
+      styles: { halign: 'center' }
     });
     
     currentY = doc.lastAutoTable.finalY + 12;
@@ -4954,7 +5067,8 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
       headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
       bodyStyles: { fontSize: 8 },
       margin: { left: 10, right: 10 },
-      pageBreak: 'auto'
+      pageBreak: 'auto',
+      styles: { halign: 'center' }
     });
   }
 };
@@ -5018,7 +5132,8 @@ const generarReporteTransacciones = async (doc, membershipData, visitData, withd
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8 },
-    margin: { left: 10, right: 10 }
+    margin: { left: 10, right: 10 },
+    styles: { halign: 'center' }
   });
 };
 
