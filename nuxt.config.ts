@@ -68,7 +68,7 @@ export default defineNuxtConfig({
         { property: 'og:description', content: 'Servicios técnicos profesionales a domicilio. Fontanería, electricidad, aires acondicionados y más.' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://miseguro.vercel.app/' },
-        { property: 'og:image', content: 'https://miseguro.vercel.app/pwa-192x192.png' },
+        { property: 'og:image', content: 'https://miseguro.vercel.app/favicon.ico' },
         { property: 'og:site_name', content: 'MiSeguro' },
       ],
 
