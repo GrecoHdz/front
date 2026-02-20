@@ -386,7 +386,7 @@
               </div>
             </div>
             <button 
-              @click="mostrarModalNuevaCuenta = true; cargarCuentas()"
+              @click="nuevaCuenta()"
               class="px-4 py-2 text-sm bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors">
               + Nueva
             </button>
@@ -514,7 +514,7 @@
               </div>
             </div>
             <button 
-              @click="mostrarModalNuevoBeneficio = true; cargarBeneficios()"
+              @click="nuevoBeneficio()"
               class="px-4 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors">
               + Nuevo
             </button>
@@ -638,7 +638,7 @@
               </div>
             </div>
             <button 
-              @click="mostrarModalNuevoServicio = true; cargarServicios()"
+              @click="nuevoServicio()"
               class="px-4 py-2 text-sm bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors">
               + Nuevo
             </button>
@@ -739,7 +739,7 @@
               
               <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
                 <button 
-                  @click="editarServicio(servicio)"
+                  @click.stop="editarServicio(servicio)"
                   class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
                   title="Editar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -749,7 +749,7 @@
                 
                 <button 
                   v-if="servicio.estado"
-                  @click="confirmarCambioEstado(servicio, false)"
+                  @click.stop="confirmarCambioEstado(servicio, false)"
                   class="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center justify-center"
                   title="Desactivar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -759,7 +759,7 @@
                 
                 <button 
                   v-else
-                  @click="confirmarCambioEstado(servicio, true)"
+                  @click.stop="confirmarCambioEstado(servicio, true)"
                   class="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-center"
                   title="Activar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -768,7 +768,7 @@
                 </button>
                 
                 <button 
-                  @click="confirmarEliminarServicio(servicio)"
+                  @click.stop="confirmarEliminarServicio(servicio)"
                   class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
                   title="Eliminar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -829,7 +829,7 @@
               </div>
             </div>
             <button 
-              @click="mostrarModalNuevaCiudad = true; cargarCiudades()"
+              @click="nuevaCiudad()"
               class="px-4 py-2 text-sm bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors">
               + Nueva
             </button>
@@ -1065,7 +1065,7 @@
               
               <div class="flex flex-row gap-1.5 sm:gap-2 ml-2">
                 <button 
-                  @click="editarPaquete(paquete)"
+                  @click.stop="editarPaquete(paquete)"
                   class="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
                   title="Editar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1075,7 +1075,7 @@
                 
                 <button 
                   v-if="paquete.estado === 1 || paquete.estado === true"
-                  @click="cambiarEstadoPaquete(paquete, false)"
+                  @click.stop="cambiarEstadoPaquete(paquete, false)"
                   class="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors flex items-center justify-center"
                   title="Desactivar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1085,7 +1085,7 @@
                 
                 <button 
                   v-else-if="paquete.estado === 0 || paquete.estado === false"
-                  @click="cambiarEstadoPaquete(paquete, true)"
+                  @click.stop="cambiarEstadoPaquete(paquete, true)"
                   class="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-center"
                   title="Activar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1094,7 +1094,7 @@
                 </button>
                 
                 <button 
-                  @click="confirmarEliminarPaquete(paquete)"
+                  @click.stop="confirmarEliminarPaquete(paquete)"
                   class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
                   title="Eliminar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3667,6 +3667,14 @@ const editarCiudad = (ciudad) => {
   });
 }
 
+const nuevaCiudad = () => {
+  ciudadEditando.value = null;
+  formCiudad.value = {
+    nombre: ''
+  };
+  mostrarModalNuevaCiudad.value = true;
+}
+
 const cerrarModalCiudad = () => {
   mostrarModalNuevaCiudad.value = false;
   // Usamos setTimeout para limpiar los datos después de que se cierre la animación del modal
@@ -3804,6 +3812,18 @@ const editarCuenta = (cuenta) => {
     };
     mostrarModalNuevaCuenta.value = true;
   });
+}
+
+const nuevaCuenta = () => {
+  cuentaEditando.value = null;
+  formCuenta.value = {
+    banco: '',
+    beneficiario: '',
+    num_cuenta: '',
+    tipo: '',
+    activo: true
+  };
+  mostrarModalNuevaCuenta.value = true;
 }
 
 const cerrarModalCuenta = () => {
@@ -4507,6 +4527,16 @@ const editarBeneficio = (beneficio) => {
   });
 }
 
+const nuevoBeneficio = () => {
+  beneficioEditando.value = null;
+  formBeneficio.value = {
+    mes_requerido: 1,
+    tipo_beneficio: '',
+    descripcion: ''
+  };
+  mostrarModalNuevoBeneficio.value = true;
+}
+
 const cerrarModalBeneficio = () => {
   mostrarModalNuevoBeneficio.value = false;
   // Usamos setTimeout para limpiar los datos después de que se cierre la animación del modal
@@ -5051,7 +5081,15 @@ function editarServicio(servicio) {
 // Cerrar modal de servicio
 function cerrarModalServicio() {
   mostrarModalNuevoServicio.value = false
-  servicioEditando.value = null
+  setTimeout(() => {
+    servicioEditando.value = null
+    formServicio.value = {
+      nombre: '',
+      descripcion: '',
+      estado: true,
+      ciudades_seleccionadas: []
+    }
+  }, 300)
 }
 
 // Guardar o actualizar servicio
