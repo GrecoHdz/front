@@ -5,7 +5,8 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
-    '@vite-pwa/nuxt'
+    '@vite-pwa/nuxt',
+    '@nuxtjs/sitemap'
   ],
   pwa: {
     manifest: {
@@ -41,7 +42,14 @@ export default defineNuxtConfig({
       type: 'module'
     }
   },
-
+  site: {
+    url: 'https://miseguro.vercel.app'
+  },
+  sitemap: {
+    urls: [
+      '/',
+    ]
+  },
   // Configuración de impresión
   app: {
     head: {
@@ -60,7 +68,8 @@ export default defineNuxtConfig({
         { property: 'og:description', content: 'Servicios técnicos profesionales a domicilio. Fontanería, electricidad, aires acondicionados y más.' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://miseguro.vercel.app/' },
-        { property: 'og:image', content: '/pwa-192x192.png' },
+        { property: 'og:image', content: 'https://miseguro.vercel.app/pwa-192x192.png' },
+        { property: 'og:site_name', content: 'MiSeguro' },
       ],
 
       link: [
@@ -69,6 +78,26 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap' }
+      ],
+      script: [
+        {
+          innerHTML: `!function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '1564351111444799');
+          fbq('track', 'PageView');`,
+          type: 'text/javascript'
+        }
+      ],
+      noscript: [
+        {
+          innerHTML: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1564351111444799&ev=PageView&noscript=1" />`
+        }
       ]
     }
   },
