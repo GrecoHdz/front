@@ -21,6 +21,10 @@
     <div class="max-w-4xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative pb-20 sm:pb-0">
       <div class="pb-24">
         <main class="pb-4">
+
+          <!-- Invitación a notificaciones push -->
+          <UiPushNotificationInvite /> 
+          
           <!-- Welcome Section -->
           <section class="px-4 sm:px-6 py-4 sm:py-6">
             <div class="bg-dark dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden">
@@ -48,10 +52,7 @@
                 </div>
               </div>
             </div>
-          </section>
-
-          <!-- Invitación a notificaciones push -->
-          <UiPushNotificationInvite />
+          </section> 
 
           <!-- Stats Cards -->
           <section class="px-3 sm:px-6 mb-6">

@@ -2411,4 +2411,220 @@ watch(darkMode, (newVal) => {
   localStorage.setItem('darkMode', newVal)
 })
  
-</script> 
+</script>
+
+<style scoped>
+/* Estilos personalizados para Multiselect */
+.multiselect-custom {
+  min-width: 140px !important;
+  font-size: 0.875rem !important;
+}
+
+.multiselect-custom :deep(.multiselect__tags) {
+  min-height: 46px !important;
+  background-color: rgb(249 250 251) !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.75rem !important;
+  padding: 10px 30px 10px 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__tags) {
+  background-color: rgb(55 65 81) !important;
+  border-color: rgb(75 85 99) !important;
+}
+
+.multiselect-custom :deep(.multiselect__tags:focus-within) {
+  border-color: rgb(59 130 246) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__tags:focus-within) {
+  border-color: rgb(59 130 246) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.multiselect-custom :deep(.multiselect__single) {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5rem !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__single) {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom :deep(.multiselect__input) {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
+  font-size: 0.875rem !important;
+  min-height: 24px !important;
+  line-height: 1.5rem !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__input) {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom :deep(.multiselect__input::placeholder) {
+  color: rgb(156 163 175) !important;
+}
+
+.multiselect-custom :deep(.multiselect__placeholder) {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: rgb(156 163 175) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5rem !important;
+}
+
+.multiselect-custom :deep(.multiselect__select) {
+  height: 100% !important;
+  width: 1.75rem !important;
+  right: 0 !important;
+  top: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.multiselect-custom :deep(.multiselect__select:before) {
+  border-color: rgb(156 163 175) transparent transparent !important;
+  border-style: solid !important;
+  border-width: 5px 5px 0 !important;
+  margin-top: 0 !important;
+  top: 55% !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__select:before) {
+  border-color: rgb(156 163 175) transparent transparent !important;
+}
+
+.multiselect-custom :deep(.multiselect__content-wrapper) {
+  background-color: white !important;
+  border: 1px solid rgb(229 231 235) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 0.25rem !important;
+  z-index: 50 !important;
+  min-width: 100% !important;
+  width: auto !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__content-wrapper) {
+  background-color: rgb(31 41 55) !important;
+  border-color: rgb(55 65 81) !important;
+}
+
+.multiselect-custom :deep(.multiselect__option) {
+  font-size: 0.875rem !important;
+  color: rgb(17 24 39) !important;
+  padding: 10px 14px !important;
+  line-height: 1.5rem !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__option) {
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom :deep(.multiselect__option--highlight) {
+  background-color: rgb(239 246 255) !important;
+  color: rgb(17 24 39) !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__option--highlight) {
+  background-color: rgb(55 65 81) !important;
+  color: rgb(243 244 246) !important;
+}
+
+.multiselect-custom :deep(.multiselect__option--selected) {
+  background-color: rgb(219 234 254) !important;
+  color: rgb(29 78 216) !important;
+  font-weight: 600 !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__option--selected) {
+  background-color: rgb(30 58 138) !important;
+  color: rgb(191 219 254) !important;
+}
+
+.multiselect-custom :deep(.multiselect__option--selected.multiselect__option--highlight) {
+  background-color: rgb(191 219 254) !important;
+  color: rgb(29 78 216) !important;
+}
+
+.dark .multiselect-custom :deep(.multiselect__option--selected.multiselect__option--highlight) {
+  background-color: rgb(30 58 138) !important;
+  color: rgb(191 219 254) !important;
+}
+
+/* Animación de pulso para icono */
+@keyframes pulse-icon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-icon {
+  animation: pulse-icon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animaciones del modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-content-enter-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-content-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.modal-content-enter-from,
+.modal-content-leave-to {
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+}
+
+.backdrop-enter-active {
+  transition: opacity 0.3s ease;
+}
+
+.backdrop-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+}
+
+/* Animación slide-down */
+.slide-down-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-down-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>
