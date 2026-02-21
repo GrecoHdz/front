@@ -1143,13 +1143,13 @@ const copyReferralLink = async () => {
 }
 
 const shareWhatsApp = () => {
-  const message = `¡Hola! Te invito a conocer la plataforma MiSeguro, el mejor servicio de reparaciones para tu hogar. 
+  const message = `¡Hola! 👋 Te invito a unirte a MiSeguro, la mejor plataforma en Honduras para servicios del hogar. 🏠
 
-- Servicios profesionales
-- Precios justos
-- Atención rápida
+✅ Técnicos profesionales y certificados
+✅ Precios justos y transparentes
+✅ Atención rápida y garantizada
 
-Regístrate aquí: ${referralLink.value}`
+Regístrate con mi enlace y obtén beneficios exclusivos: ${referralLink.value}`
 
   const encodedMessage = encodeURIComponent(message)
   window.open(`https://wa.me/?text=${encodedMessage}`, '_blank')

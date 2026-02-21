@@ -687,7 +687,7 @@ const verificarPerfilTecnico = async () => {
       let message = 'Por favor completa tu perfil para ofrecer servicios';
       
       if (!response.tiene_imagen && !response.tiene_servicios) {
-        message = 'Por favor completa tu perfil de lo contrario no se te asignarán trabajos';
+        message = 'Por favor sube una foto de perfil de lo contrario no se te asignarán trabajos';
       } else if (!response.tiene_imagen) {
         message = 'Por favor sube una foto de perfil de lo contrario no se te asignarán trabajos';
       } else if (!response.tiene_servicios) {

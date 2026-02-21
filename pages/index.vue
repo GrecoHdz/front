@@ -51,7 +51,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="relative -mt-4 pb-20">
+    <main class="relative -mt-4 pb-5">
       
       <!-- Problem Cards -->
       <section class="px-4 mb-5">
@@ -111,19 +111,106 @@
                      :class="getIconBg(index)">
                   <span class="text-base leading-none">{{ benefit.mes_requerido }}</span>
                   <span class="text-[9px] leading-none opacity-80">mes</span>
-                </div>
+              </div>
               </div>
               <div class="flex-1">
                 <h4 class="font-bold text-gray-900 dark:text-white text-base mb-1">
-                  {{ benefit.title }}
-                </h4>
+                    {{ benefit.title }}
+                  </h4>
                 <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-2">
                   {{ benefit.description }}
                 </p>
                 <div v-if="benefit.savings" class="inline-flex items-center px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">
                   💰 {{ benefit.savings }}
-                </div>
               </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Referral Program Section (v2 Compact) -->
+      <section class="px-4 mb-5">
+        <div class="bg-gradient-to-br from-indigo-700 via-indigo-800 to-purple-900 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden group">
+          <!-- Decorative Background Elements -->
+          <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-500"></div>
+          <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-indigo-500/20 rounded-full blur-2xl"></div>
+          
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center text-lg">
+                  💰
+                </div>
+                <span class="text-[16px] sm:text-xs md:text-base font-black uppercase text-indigo-200">Programa de Referidos</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-black leading-tight">
+                Gana dinero por cada<br>
+                <span class="text-yellow-300">usuario que invites</span>
+              </h3>
+              <div class="bg-yellow-400 text-indigo-900 px-3 py-1 rounded-xl font-black text-sm shadow-lg transform -rotate-2">
+                {{ referralPercentage }}% COMISIÓN
+              </div>
+            </div>
+            
+            <p class="text-xs text-indigo-100/90 mb-5 leading-relaxed">
+              Invita a tus contactos y recibe comisiones directas por cada servicio finalizado. Sin límites, dinero real.
+            </p>
+
+            <!-- Compact Steps 2x2 Grid with Numbers -->
+            <div class="grid grid-cols-2 gap-2 mb-5">
+              <div v-for="(step, index) in referralSteps" :key="index" 
+                   class="bg-black/20 backdrop-blur-sm border border-white/5 rounded-2xl p-3 flex flex-col items-start text-left relative overflow-hidden">
+                <div class="flex items-center justify-between w-full mb-1">
+                  <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-[10px] font-black">
+                    {{ index + 1 }}
+                  </div>
+                  <span class="text-lg opacity-80">{{ step.icon }}</span>
+                </div>
+                <h4 class="text-[10px] font-black uppercase tracking-tight leading-none mb-1">{{ step.title }}</h4>
+                <p class="text-[9px] text-indigo-100/60 leading-tight">{{ step.description }}</p>
+              </div>
+            </div>
+
+            <button 
+              @click="showLoginModal = true"
+              class="w-full py-4 bg-white text-indigo-800 font-black text-sm rounded-2xl transition-all shadow-lg active:scale-[0.98] hover:bg-indigo-50 flex items-center justify-center space-x-2"
+            >
+              <span>EMPEZAR A GANAR AHORA</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Services Section (Horizontal Scroll Compact) -->
+      <section class="mb-2">
+        <div class="px-4 flex items-end justify-between mb-3">
+          <div>
+            <h3 class="text-xl font-black text-gray-900 dark:text-white">Servicios cubiertos</h3>
+            <p class="text-xs text-gray-500">Explora nuestras soluciones</p>
+          </div>
+        </div>
+        
+        <div class="flex overflow-x-auto pb-4 px-4 space-x-3 snap-x snap-mandatory no-scrollbar">
+          <div v-for="service in services" :key="service.id"
+               @click="showLoginModal = true"
+               class="flex-shrink-0 w-[160px] snap-center">
+            <div class="bg-white dark:bg-gray-800 rounded-[2rem] p-4 shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center transition-all duration-300 active:scale-95 group relative overflow-hidden h-full min-h-[160px] justify-center">
+              <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-2xl mb-3 shadow-md shadow-emerald-100 dark:shadow-none transform group-hover:scale-110 transition-transform">
+                {{ service.icon }}
+              </div>
+              <h4 class="font-black text-gray-900 dark:text-white text-[13px] leading-tight mb-1">
+                {{ service.name }}
+              </h4>
+              <p class="text-[9px] text-gray-500 dark:text-gray-400 leading-tight line-clamp-2">
+                {{ service.description }}
+              </p>
             </div>
           </div>
         </div>
@@ -146,65 +233,8 @@
         </div>
       </section>
 
-      <!-- Services Section -->
-      <section class="px-4 mb-5">
-        <div class="text-center mb-4">
-          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
-            ¿Qué servicios cubrimos?
-          </h3> 
-        </div>
-        <div class="grid grid-cols-1 gap-3">
-          <div v-for="service in services" :key="service.id"
-               @click="showLoginModal = true"
-               class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-300">
-                {{ service.icon }}
-              </div>
-              <div class="flex-1">
-                <h4 class="font-bold text-gray-900 dark:text-white text-base mb-1">
-                  {{ service.name }}
-                </h4>
-                <p class="text-gray-600 dark:text-gray-300 text-sm">
-                  {{ service.description }}
-                </p>
-              </div>
-              <div class="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- No Emergencies Section -->
-      <section class="px-4 py-4 mb-5">
-        <div class="bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl p-4 text-white">
-          <div class="text-center mb-3">
-            <h3 class="text-lg font-bold mb-2">🧠 ¿Y si no tengo emergencias?</h3>
-            <p class="text-base font-semibold">¡Mucho mejor!</p>
-          </div>
-          <div class="space-y-2 text-sm">
-            <div class="flex items-start space-x-2">
-              <span>✨</span>
-              <span>Tu membresía no se pierde. Cada mes se acumula como crédito si no dejas de pagar.</span>
-            </div>
-            <div class="flex items-start space-x-2">
-              <span>💰</span>
-              <span>Si después de 3 meses quieres hacer una reparación de L. 750, puedes cubrirla con tus créditos acumulados.</span>
-            </div>
-            <div class="flex items-start space-x-2">
-              <span>🏦</span>
-              <span>Es como un seguro que se convierte en ahorro real.</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- How it Works -->
-      <section class="px-4 mb-5">
+      <section class="px-4 mb-2">
         <div class="text-center mb-4">
           <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
             ¿Cómo funciona?
@@ -233,6 +263,50 @@
         </div>
       </section>
 
+      <!-- No Emergencies Section -->
+      <section class="px-4 py-4 mb-2">
+        <div class="bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl p-4 text-white">
+          <div class="text-center mb-3">
+            <h3 class="text-lg font-bold mb-2">🧠 ¿Y si no tengo emergencias?</h3>
+            <p class="text-base font-semibold">¡Mucho mejor!</p>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-start space-x-2">
+              <span>✨</span>
+              <span>Tu membresía no se pierde. Cada mes se acumula como crédito si no dejas de pagar.</span>
+            </div>
+            <div class="flex items-start space-x-2">
+              <span>💰</span>
+              <span>Si después de 3 meses quieres hacer una reparación de L. 750, puedes cubrirla con tus créditos acumulados.</span>
+            </div>
+            <div class="flex items-start space-x-2">
+              <span>🏦</span>
+              <span>Es como un seguro que se convierte en ahorro real.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Trust Section -->
+      <section class="px-4 mb-5">
+        <div class="text-center mb-4">
+          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
+            ¿Por qué confiar en nosotros?
+          </h3> 
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700">
+          <div class="grid grid-cols-1 gap-3">
+            <div v-for="trust in trustFeatures" :key="trust.id" 
+                 class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+              <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center text-xl">
+                {{ trust.icon }}
+              </div>
+              <span class="font-semibold text-gray-900 dark:text-white text-base">{{ trust.title }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- No Membership Warning -->
       <section class="px-4 mb-5">
         <div class="bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl p-4 text-white relative overflow-hidden">
@@ -249,26 +323,6 @@
                 <span class="text-yellow-300 text-base">{{ limitation.icon }}</span>
                 <span class="text-sm">{{ limitation.text }}</span>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Trust Section -->
-      <section class="px-4 mb-5">
-        <div class="text-center mb-4">
-          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
-            ¿Por qué confiar en nosotros? 🛡️
-          </h3> 
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700">
-          <div class="grid grid-cols-1 gap-3">
-            <div v-for="trust in trustFeatures" :key="trust.id" 
-                 class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-              <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center text-xl">
-                {{ trust.icon }}
-              </div>
-              <span class="font-semibold text-gray-900 dark:text-white text-base">{{ trust.title }}</span>
             </div>
           </div>
         </div>
@@ -318,7 +372,8 @@
 />
 
     <!-- Modal de Login/Registro -->
-    <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <transition name="modal">
+      <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto overflow-x-hidden relative">
         <button 
           @click="showLoginModal = false" 
@@ -529,6 +584,7 @@
         </div>
       </div>
     </div>
+    </transition>
 
     <!-- Loading Spinner -->
     <LoadingSpinner 
@@ -869,6 +925,32 @@ html {
 #app {
   min-height: 100vh;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Animación del Modal */
+.modal-enter-active, .modal-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active > div, .modal-leave-active > div {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-enter-from > div, .modal-leave-to > div {
+  transform: scale(0.9) translateY(20px);
+  opacity: 0;
+}
 </style>
 
 <script setup>
@@ -1005,8 +1087,10 @@ const validateForm = () => {
 const membershipCost = ref(0)
 const visitCost = ref(0)
 const specialDiscountPercentage = ref('50') // Valor por defecto
+const referralPercentage = ref('10') // Valor por defecto
 const isLoadingMembershipCost = ref(false)
 const isLoadingVisitCost = ref(false)
+const isLoadingReferralPercentage = ref(false)
 
 // Estado para el número de teléfono
 const phoneNumber = ref('')
@@ -1126,18 +1210,46 @@ const fetchVisitCost = async () => {
   }
 };
 
+// Función para obtener el porcentaje de referido
+const fetchReferralPercentage = async () => {
+  isLoadingReferralPercentage.value = true;
+  try {
+    const data = await $api('/config/valor/porcentaje_referido', {
+      method: 'GET'
+    });
+
+    if (data && data.valor) {
+      referralPercentage.value = data.valor;
+    }
+  } catch (error) {
+    console.error('Error al obtener el porcentaje de referido:', error);
+  } finally {
+    isLoadingReferralPercentage.value = false;
+  }
+};
+
 onMounted(async () => {
-  await Promise.all([
-    cargarCiudades(),
-    fetchMembershipCost(),
-    loadServices(),
-    fetchVisitCost(),
-    checkAuthStatus()
-  ])
-  
-  // Código existente para el modo oscuro
+  // Configuración del modo oscuro
   if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.documentElement.classList.add('dark')
+  }
+
+  // Carga inicial de datos
+  try {
+    await Promise.all([
+      cargarCiudades(),
+      fetchMembershipCost(),
+      loadServices(),
+      fetchVisitCost(),
+      fetchReferralPercentage(),
+      fetchDiscountPercentage(),
+      checkAuthStatus()
+    ])
+    
+    // Cargar beneficios después de tener el costo de visita y porcentaje de descuento
+    await loadMembershipBenefits()
+  } catch (error) {
+    console.error('Error durante la inicialización:', error)
   }
 })
 
@@ -1182,11 +1294,6 @@ const fetchDiscountPercentage = async () => {
   }
 }
 
-// Cargar el porcentaje de descuento al montar el componente
-onMounted(() => {
-  fetchDiscountPercentage()
-  loadMembershipBenefits()
-})
 
 // Estado para los beneficios de membresía
 const membershipBenefitsList = ref([])
@@ -1216,35 +1323,35 @@ const loadMembershipBenefits = async () => {
     }
     
     // Obtener beneficios de la respuesta o usar valores por defecto
-    let beneficios = data.beneficios;
+    let beneficios = data.beneficios || [];
     
-    if (!beneficios || beneficios.length === 0) {
-      // Usar beneficios por defecto si no hay datos
-      const costoVisita = visitCost.value || 0;
-      const porcentaje = discountPercentage.value || '0'; 
+    if (beneficios.length === 0) {
+      console.warn('No se encontraron beneficios en la API');
+      // Podríamos insertar beneficios por defecto aquí si fuera necesario
     }
     
     // Ordenar por mes_requerido y mapear los datos
-    membershipBenefitsList.value = beneficios
-      .sort((a, b) => a.mes_requerido - b.mes_requerido)
+    membershipBenefitsList.value = [...beneficios]
+      .sort((a, b) => (a.mes_requerido || 0) - (b.mes_requerido || 0))
       .map((benefit, index) => {
         // Determinar el ahorro basado en el tipo de beneficio
         let savings = '';
+        const tipoBeneficio = benefit.tipo_beneficio || '';
+        
         if (benefit.id_beneficio === 4) {
-          // Usar el valor de specialDiscountPercentage para el beneficio con id_beneficio = 4
-          const porcentaje = specialDiscountPercentage.value || benefit.tipo_beneficio.split('%')[0];
+          const porcentaje = specialDiscountPercentage.value || tipoBeneficio.split('%')[0] || '0';
           savings = `Ahorro: ${porcentaje}% en cada servicio`;
-        } else if (benefit.tipo_beneficio.includes('Visita técnica')) {
+        } else if (tipoBeneficio.includes('Visita técnica')) {
           savings = `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita`;
-        } else if (benefit.tipo_beneficio.includes('Descuento en todos los servicios')) {
+        } else if (tipoBeneficio.includes('Descuento en todos los servicios')) {
           savings = `Ahorro: ${discountPercentage.value}% en cada servicio`;
         }
         
         return {
-          id: index + 1,
-          mes_requerido: benefit.mes_requerido,
-          title: benefit.tipo_beneficio,
-          description: benefit.descripcion,
+          id: benefit.id_beneficio || index + 1,
+          mes_requerido: benefit.mes_requerido || 0,
+          title: tipoBeneficio || 'Beneficio',
+          description: benefit.descripcion || '',
           savings: savings
         };
       })
@@ -1256,13 +1363,6 @@ const loadMembershipBenefits = async () => {
   }
 }
 
-// Cargar beneficios al montar el componente
-onMounted(async () => {
-  // Primero cargar el porcentaje de descuento
-  await fetchDiscountPercentage()
-  // Luego cargar los beneficios
-  await loadMembershipBenefits()
-})
 
 // Beneficios de membresía como propiedad computada
 const membershipBenefits = computed(() => membershipBenefitsList.value)
@@ -1310,9 +1410,14 @@ const getServiceIcon = (serviceName) => {
     'cerrajería': '🔑',
     'jardinería': '🌿',
     'limpieza': '🧹',
-    'mudanza': '🚚'
+    'mudanza': '🚚',
+    'taxi': '🚗',
+    'carpintería': '🚪',
+    'reparación de teléfonos/computadoras': '💻', 
+    'barbería/salón a domicilio': '✂️',
   }
   
+  if (!serviceName) return '🛠️'
   const lowerName = serviceName.toLowerCase()
   for (const [key, icon] of Object.entries(icons)) {
     if (lowerName.includes(key)) {
@@ -1332,18 +1437,42 @@ const howItWorks = [
   { id: 5, title: 'Acumula crédito mes a mes si no lo usás', description: 'Tu dinero se convierte en ahorro real' }
 ]
 
+// Referral steps data
+const referralSteps = [
+  {
+    title: 'Comparte tu enlace',
+    description: 'Envía tu enlace de invitación a amigos y familiares',
+    icon: '📱'
+  },
+  {
+    title: 'Ellos se registran',
+    description: 'Se registran usando tu enlace',
+    icon: '✍️'
+  },
+  {
+    title: 'Contratan un servicio',
+    description: 'Ganas por cada servicio contratado',
+    icon: '🏠'
+  },
+  {
+    title: 'Recibes recompensa',
+    description: 'Retira tu dinero inmediatamente',
+    icon: '💰'
+  }
+]
+
 // No membership limitations
 const noMembershipLimitations = [
   { id: 1, icon: '💢', text: 'No obtendrás descuentos a la hora de pagar' },
-  { id: 2, icon: '💢', text: 'Perderás la limpieza gratiuta de tu aire acondicionado' },
-  { id: 3, icon: '💢', text: 'Pagarás por cada visita técnica, incluso si no se hace el trabajo' }
+  { id: 2, icon: '💢', text: 'Perderás todos los beneficios de tener membresía' },
+  { id: 3, icon: '💢', text: 'Pagarás por la visita técnica al solicitar un servicio' }
 ]
 
 // Trust features data
 const trustFeatures = [
   { id: 1, title: 'Técnicos verificados y capacitados', icon: '✅' },
   { id: 2, title: 'Garantía de servicio en todos los trabajos', icon: '🛡️' },
-  { id: 3, title: 'Calificaciones de cada uno de los técnicos', icon: '⭐' },
+  { id: 3, title: 'Fotografía y calificaciones de cada uno de los técnicos', icon: '⭐' },
   { id: 4, title: 'Registro de todo tu historial de servicios', icon: '📋' },
   { id: 5, title: 'Soporte directo desde la app o WhatsApp', icon: '📞' }
 ]
