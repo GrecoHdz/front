@@ -413,6 +413,7 @@
                 @input="form.nombre = form.nombre.replace(/[0-9]/g, ''); formErrors.nombre = ''"
                 @keydown="preventNumberInput"
               />
+              <p v-if="formErrors.nombre" class="mt-1 text-sm text-red-500">{{ formErrors.nombre }}</p>
             </div>
 
             <div v-if="!isLogin">
@@ -422,11 +423,14 @@
               <input 
                 v-model="form.email"
                 type="email" 
-                class="w-full px-3 py-3 text-base border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                :class="formErrors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
                 placeholder="tu@email.com"
                 :required="!isLogin"
                 autocomplete="email"
+                @input="formErrors.email = ''"
               />
+              <p v-if="formErrors.email" class="mt-1 text-sm text-red-500">{{ formErrors.email }}</p>
             </div>
 
             <div v-if="!isLogin">
@@ -444,7 +448,9 @@
                 @input="handlePhoneInput"
                 @keydown="preventLetterInput"
                 @paste.prevent="handlePhonePaste"
+                maxlength="17"
               />
+              <p v-if="formErrors.telefono" class="mt-1 text-sm text-red-500">{{ formErrors.telefono }}</p>
             </div>
 
             <div v-if="!isLogin">
@@ -480,6 +486,7 @@
                   <span class="text-base truncate">{{ getCityLabel(option) }}</span>
                 </template>
               </multiselect>
+              <p v-if="formErrors.ciudad" class="mt-1 text-sm text-red-500">{{ formErrors.ciudad }}</p>
             </div>
 
             <div>
@@ -516,6 +523,7 @@
                   required
                   :autocomplete="isLogin ? 'current-password' : 'new-password'"
                   @input="formErrors.password = ''"
+                  maxlength="10"
                 />
                 <button
                   type="button"
@@ -1625,7 +1633,8 @@ const handleAuth = async () => {
         }
       } catch (loginError) {
         authStatus.value = 'error';
-        const errorMessage = loginError.response?._data?.message || loginError.message || 'Error de autenticación';
+        const loginErrorData = loginError.data || loginError.response?._data;
+        const errorMessage = loginErrorData?.message || loginError.message || 'Error de autenticación';
         loadingMessage.value = errorMessage;
         
         setTimeout(() => {
@@ -1770,14 +1779,15 @@ const handleAuth = async () => {
         }, 1500);
       } catch (error) {
         
-        // Si hay una respuesta del servidor, extraer el mensaje de error
-        if (error.response?.data) {
-          const responseData = error.response.data;
-          const errorMessage = responseData.message || 'Error en el registro. Por favor, inténtalo de nuevo.';
+        // Extraer los datos del error de forma compatible con Nuxt $fetch / ofetch
+        const errorData = error.data || error.response?._data || error.response?.data;
+        
+        if (errorData) {
+          const errorMessage = errorData.message || 'Error en el registro. Por favor, inténtalo de nuevo.';
           
           // Si hay un campo específico con error, resaltarlo
-          if (responseData.field) {
-            formErrors.value[responseData.field] = errorMessage;
+          if (errorData.field) {
+            formErrors.value[errorData.field] = errorMessage;
           }
           
           // Mostrar el mensaje de error al usuario
