@@ -2535,34 +2535,34 @@ watch(darkMode, (newVal) => {
 }
 
 .multiselect-custom :deep(.multiselect__option--highlight) {
-  background-color: rgb(239 246 255) !important;
+  background-color: transparent !important;
   color: rgb(17 24 39) !important;
 }
 
 .dark .multiselect-custom :deep(.multiselect__option--highlight) {
-  background-color: rgb(55 65 81) !important;
+  background-color: transparent !important;
   color: rgb(243 244 246) !important;
 }
 
 .multiselect-custom :deep(.multiselect__option--selected) {
-  background-color: rgb(219 234 254) !important;
-  color: rgb(29 78 216) !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
   font-weight: 600 !important;
 }
 
 .dark .multiselect-custom :deep(.multiselect__option--selected) {
-  background-color: rgb(30 58 138) !important;
-  color: rgb(191 219 254) !important;
+  background-color: transparent !important;
+  color: rgb(243 244 246) !important;
 }
 
 .multiselect-custom :deep(.multiselect__option--selected.multiselect__option--highlight) {
-  background-color: rgb(191 219 254) !important;
-  color: rgb(29 78 216) !important;
+  background-color: transparent !important;
+  color: rgb(17 24 39) !important;
 }
 
 .dark .multiselect-custom :deep(.multiselect__option--selected.multiselect__option--highlight) {
-  background-color: rgb(30 58 138) !important;
-  color: rgb(191 219 254) !important;
+  background-color: transparent !important;
+  color: rgb(243 244 246) !important;
 }
 
 /* Animación de pulso para icono */
