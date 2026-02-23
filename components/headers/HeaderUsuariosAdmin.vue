@@ -84,7 +84,9 @@ const onNotificationClick = async (notification) => {
   
     // Navegación por tipo de notificación 
   try {
-    if (notification.titulo === 'Pago de Paquete Aceptado') {
+    if (notification.titulo === 'CashBack Recibido') {
+      await navigateTo('/admin/Marketplace'); 
+    } else if (notification.titulo === 'Pago de Paquete Aceptado') {
       await navigateTo('/admin/Marketplace');
     } else if (notification.titulo === 'Pago de Paquete Rechazado') {
       await navigateTo('/admin/Marketplace');

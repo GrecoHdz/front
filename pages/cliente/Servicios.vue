@@ -697,496 +697,263 @@
       </div>
     </Transition>
  
-  <!-- Payment Modal with Transitions -->
-<Transition
-  name="modal"
-  enter-active-class="modal-enter-active"
-  leave-active-class="modal-leave-active"
-  enter-from-class="modal-enter-from"
-  leave-to-class="modal-leave-to">
-
-  <div 
-    v-if="showPaymentModal"
-    class="fixed inset-0 z-50 flex items-start justify-center 
-           p-2 sm:p-3 overflow-y-auto"
+  <!-- Standard Payment Modal -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to"
   >
-
-    <!-- Backdrop con animación -->
-    <Transition
-      name="backdrop"
-      enter-active-class="backdrop-enter-active"
-      leave-active-class="backdrop-leave-active"
-      enter-from-class="backdrop-enter-from"
-      leave-to-class="backdrop-leave-to">
-      <div 
-        v-if="showPaymentModal"
-        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        @click="closePaymentModal"
-      ></div>
-    </Transition>
-
-    <!-- Contenido del modal -->
-    <Transition
-      name="modal-content"
-      enter-active-class="modal-content-enter-active"
-      leave-active-class="modal-content-leave-active"
-      enter-from-class="modal-content-enter-from"
-      leave-to-class="modal-content-leave-to">
-
-      <div 
-        v-if="showPaymentModal"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full 
-               max-w-md max-h-[85vh] overflow-y-auto relative z-10"
-        @click.stop
-      >
-
-        <!-- Encabezado -->
-        <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 
-                    border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 
-                          rounded-lg flex items-center justify-center text-base">
-                💳
+    <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closePaymentModal"></div>
+      
+      <Transition name="modal-content" enter-active-class="modal-content-enter-active" leave-active-class="modal-content-leave-active" enter-from-class="modal-content-enter-from" leave-to-class="modal-content-leave-to">
+        <div v-if="showPaymentModal" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10" @click.stop>
+          
+          <!-- Encabezado del modal -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-base">
+                  💳
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Servicio</h3>
+                  <p class="text-[10px] text-gray-600 dark:text-gray-400 font-bold uppercase tracking-wider">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
+                </div>
               </div>
-              <div>
-                <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Servicio</h3>
-                <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
-              </div>
-            </div>
-            <button @click="closePaymentModal" 
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- CONTENIDO PRINCIPAL -->
-        <div class="p-3">
-
-          <!-- Resumen -->
-          <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
-            <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Resumen del Servicio</h4>
-            <div class="flex items-center space-x-2 mb-2">
-              <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-indigo-500
-                          rounded-lg flex items-center justify-center text-sm">
-                {{ selectedService.icon }}
-              </div>
-              <div>
-                <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ selectedService.title }}</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">{{ selectedService.date }}</p>
-              </div>
+              <button @click="closePaymentModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
             </div>
           </div>
 
-          <!-- Desglose -->
-          <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg mb-3">
-            <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
-
-            <div v-if="isLoadingQuotation" class="py-3 flex justify-center">
-              <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-
-            <div v-else class="space-y-1 text-sm">
-
-              <div class="flex justify-between items-center mb-1">
-                <span class="text-blue-700 dark:text-blue-300">Mano de obra:</span>
-                <span class="font-bold text-blue-800 dark:text-blue-200">
-                  L. {{ parseFloat(quotationData?.monto_manodeobra || 0).toFixed(2) }}
-                </span>
-              </div>
-
-              <!-- Mostrar descuento (regular o especial) -->
-              <template v-if="shouldShowDiscountBenefit">
-                <!-- Descuento especial si aplica -->
-                <div v-if="membresiaProgreso?.aplica_descuento_especial && membresiaProgreso?.porcentaje_descuento_especial" 
-                     class="flex justify-between items-center mb-1">
-                  <span class="text-amber-700 dark:text-amber-300">Descuento especial {{ membresiaProgreso.porcentaje_descuento_especial }}%:</span>
-                  <span class="font-bold text-amber-600 dark:text-amber-400">
-                    -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (parseFloat(membresiaProgreso.porcentaje_descuento_especial) / 100)).toFixed(2) }}
-                  </span>
-                </div>
-                <!-- Descuento regular si no hay descuento especial -->
-                <div v-else class="flex justify-between items-center mb-1">
-                  <span class="text-blue-700 dark:text-blue-300">Descuento por membresía ({{ membresiaProgreso.porcentaje_descuento }}%):</span>
-                  <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                    -L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (discountPercentage / 100)).toFixed(2) }}
-                  </span>
-                </div>
-              </template>
-
-              <!-- Mostrar crédito de membresía si aplica -->
-              <template v-if="shouldShowCreditBenefit && creditApplied > 0">
-                <div class="space-y-1">
-                  <div class="flex justify-between items-center">
-                    <span class="text-blue-700 dark:text-blue-300">Crédito de membresía:</span>
-                    <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                      -L. {{ parseFloat(creditApplied || 0).toFixed(2) }}
-                    </span>
+          <!-- Contenido -->
+          <div class="p-3 space-y-4">
+            <!-- Resumen del Servicio -->
+            <div class="space-y-2">
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">Desglose de Pago</h4>
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="text-gray-600 dark:text-gray-400 font-bold">Mano de Obra</span>
+                    <span class="font-black text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
                   </div>
-                </div>
-              </template>
-
-              <div class="flex justify-between items-center pt-2 mt-2 
-                          border-t border-blue-200 dark:border-blue-700">
-                <span class="font-bold text-blue-800 dark:text-blue-100">Total a pagar:</span>
-                <span class="font-bold text-lg text-blue-800 dark:text-blue-100">
-                  L. {{ (totalAPagar || 0).toFixed(2) }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Cuentas -->
-          <div class="space-y-2 mb-3">
-
-            <label for="bank-account" 
-                  class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Transferencia
-            </label>
-
-            <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
-              <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
-            </div>
-
-            <div v-else class="space-y-3">
-              <multiselect
-                id="bank-account"
-                v-model="selectedAccountObject"
-                :options="bankAccounts"
-                :searchable="false"
-                :close-on-select="true"
-                :show-labels="false"
-                placeholder="Selecciona una cuenta"
-                label="banco"
-                track-by="id_cuenta"
-                class="multiselect-custom"
-                :class="{ 'multiselect--active': selectedAccountObject }"
-                :select-label="''"
-                :deselect-label="''"
-                :selected-label="''"
-                :custom-label="getAccountLabel"
-                @search-change="$event && $event.stopPropagation()"
-                @search-focus="(e) => e && e.target && e.target.blur()"
-                @touchstart.native.stop
-                @click.native.stop
-                :options-limit="100"
-                :disabled="bankAccounts.length === 0"
-                :loading="isLoadingAccounts"
-              >
-                <template #singleLabel="{ option }">
-                  <span class="text-xs truncate text-gray-500 dark:text-gray-400 font-bold">{{ getAccountLabel(option) }}</span>
-                </template>
-              </multiselect>
-
-              <!-- Detalles -->
-              <div 
-                v-if="getSelectedAccount" 
-                class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
-              >
-                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Detalles de la cuenta:
-                </h4>
-                <div class="space-y-1">
-
-                  <div class="flex justify-between">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Nombre:</span>
-                    <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ getSelectedAccount.banco }}</span>
+                  
+                  <!-- Crédito Aplicado -->
+                  <div v-if="shouldShowCreditBenefit && creditApplied > 0" class="flex justify-between items-center text-xs text-blue-600 dark:text-blue-400">
+                    <span class="font-bold">💳 Crédito Aplicado</span>
+                    <span class="font-black">−L. {{ formatCurrency(creditApplied) }}</span>
                   </div>
 
-                  <div class="flex justify-between">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Titular:</span>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.titular }}</span>
+                  <div class="pt-2 border-t border-blue-200 dark:border-blue-800 flex justify-between items-center">
+                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">Total a Transferir</span>
+                    <span class="text-base font-black text-blue-600 dark:text-blue-400">L. {{ (totalAPagar || 0).toFixed(2) }}</span>
                   </div>
-
-                  <div class="flex justify-between">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
-                  </div>
-
-                  <div class="flex justify-between items-center">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Cuenta:</span>
-                    <div class="flex items-center space-x-2">
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
-                        {{ getSelectedAccount.numero_cuenta.length > 10 ? getSelectedAccount.numero_cuenta.slice(0, 10) + '...' : getSelectedAccount.numero_cuenta }}
-                      </span>
-                      <button 
-                        v-if="getSelectedAccount.numero_cuenta.length > 10"
-                        @click="copyToClipboard(getSelectedAccount.numero_cuenta)"
-                        class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-
                 </div>
               </div>
-
-              <!-- Comprobante -->
-              <div class="space-y-1">
-                <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Número de comprobante
-                </label>
-                <input
-                  id="comprobante"
-                  v-model="comprobante"
-                  type="text"
-                  class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200
-                         dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500
-                         text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200 text-base"
-                  placeholder="Ingresa el número de comprobante"
-                >
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Realiza la transferencia e ingresa el número de comprobante. Una vez enviado serás redirigido a WhatsApp para adjuntar la captura.
+              <!-- Cashback Info (Sección Estructurada) -->
+              <div v-if="shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">✨ Cashback</span>
+                  <span class="text-xs font-black text-emerald-700 dark:text-emerald-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
+                </div>
+                <p class="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-medium leading-tight">
+                  * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
                 </p>
               </div>
             </div>
 
-            <!-- Botón -->
-            <div class="mt-4">
-              <button 
-                @click="processPayment"
-                :disabled="!selectedAccount || !comprobante || isProcessingPayment"
-                class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg 
-                       hover:shadow-lg transition-all duration-300 transform hover:scale-105 
-                       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
-              >
-                <span v-if="!isProcessingPayment">
-                  Procesar Pago L. {{ (totalAPagar || 0).toFixed(2) }}
-                </span>
-                <span v-else class="flex items-center justify-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" 
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                  </svg>
-                  Procesando...
-                </span>
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </Transition>
-  </div>
-</Transition>
-
-<!-- Taxi VIP Payment Modal -->
-<Transition
-  name="modal"
-  enter-active-class="modal-enter-active"
-  leave-active-class="modal-leave-active"
-  enter-from-class="modal-enter-from"
-  leave-to-class="modal-leave-to">
-
-  <div 
-    v-if="showTaxiPaymentModal"
-    class="fixed inset-0 z-50 flex items-start justify-center p-2 sm:p-3 overflow-y-auto"
-  >
-    <!-- Backdrop -->
-    <Transition
-      name="backdrop"
-      enter-active-class="backdrop-enter-active"
-      leave-active-class="backdrop-leave-active"
-      enter-from-class="backdrop-enter-from"
-      leave-to-class="backdrop-leave-to">
-      <div 
-        v-if="showTaxiPaymentModal"
-        class="absolute inset-0 bg-black/70 backdrop-blur-md"
-        @click="closePaymentModal"
-      ></div>
-    </Transition>
-
-    <!-- Content -->
-    <Transition
-      name="modal-content"
-      enter-active-class="modal-content-enter-active"
-      leave-active-class="modal-content-leave-active"
-      enter-from-class="modal-content-enter-from"
-      leave-to-class="modal-content-leave-to">
-
-      <div 
-        v-if="showTaxiPaymentModal"
-        class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto relative z-10 border border-gray-100 dark:border-gray-700"
-        @click.stop
-      >
-        <!-- Header -->
-        <div class="sticky top-0 bg-yellow-400 dark:bg-yellow-500 p-4 border-b border-yellow-500 rounded-t-3xl z-20">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 bg-black rounded-2xl flex items-center justify-center shadow-lg transform rotate-3">
-                <span class="text-xl">🚕</span>
+            <!-- Información de Pago -->
+            <div class="space-y-3">
+              <h4 class="text-sm font-black text-gray-900 dark:text-white">Detalles de Transferencia</h4>
+              
+              <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
+                <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
-              <div>
-                <h3 class="text-lg font-black text-black leading-none">Pagar Mi Viaje</h3>
-                <p class="text-[10px] font-bold text-black/60 uppercase tracking-[0.2em] mt-1">Recibo #{{ selectedService.id }}</p>
-              </div>
-            </div>
-            <button @click="closePaymentModal" class="bg-black/10 hover:bg-black/20 p-2 rounded-full transition-colors">
-              <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-        </div>
+              
+              <div v-else class="space-y-3">
+                <multiselect
+                  v-model="selectedAccountObject"
+                  :options="bankAccounts"
+                  :searchable="false"
+                  :close-on-select="true"
+                  :show-labels="false"
+                  placeholder="Selecciona cuenta destino"
+                  label="banco"
+                  track-by="id_cuenta"
+                  class="multiselect-custom"
+                  :custom-label="getAccountLabel"
+                />
 
-        <div class="p-5 space-y-5">
-          <!-- Summary Card -->
-          <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
-             <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-2">
-                   <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                   <div class="w-8 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
-                   <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                </div>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-shadow-sm">{{ selectedService.date }}</span>
-             </div>
-             
-             <div class="space-y-2">
-                <div class="flex items-start space-x-3">
-                   <span class="text-xs">🟢</span>
-                   <p class="text-xs font-bold text-gray-700 dark:text-gray-300 truncate">{{ selectedService.fullLocation?.colonia || 'Punto de partida' }}</p>
-                </div>
-                <div class="flex items-start space-x-3">
-                   <span class="text-xs">🔴</span>
-                   <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ selectedService.fullLocation?.direccion || 'Destino final' }}</p>
-                </div>
-             </div>
-          </div>
-
-          <!-- Price Breakdown -->
-          <div class="bg-black dark:bg-gray-900 rounded-3xl p-6 shadow-xl space-y-4">
-            <h4 class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em] text-center">Detalle de la Tarifa</h4>
-            
-            <div v-if="isLoadingQuotation" class="flex justify-center py-4">
-               <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500"></div>
-            </div>
-            
-            <div v-else class="space-y-3">
-              <div class="flex justify-between items-center">
-                <span class="text-gray-400 text-sm font-medium">Tarifa del Viaje</span>
-                <span class="text-white font-bold">L. {{ parseFloat(quotationData?.monto_manodeobra || 0).toFixed(2) }}</span>
-              </div>
-
-              <!-- Discounts -->
-              <template v-if="shouldShowDiscountBenefit">
-                <div v-if="membresiaProgreso?.aplica_descuento_especial" class="flex justify-between items-center text-amber-400 text-xs">
-                  <span class="font-medium">Beneficio Especial ({{ membresiaProgreso.porcentaje_descuento_especial }}%)</span>
-                  <span class="font-black">-L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (parseFloat(membresiaProgreso.porcentaje_descuento_especial) / 100)).toFixed(2) }}</span>
-                </div>
-                <div v-else class="flex justify-between items-center text-yellow-400 text-xs text-shadow-sm">
-                  <span class="font-medium">Descuento Membresía ({{ membresiaProgreso.porcentaje_descuento }}%)</span>
-                  <span class="font-black">-L. {{ (parseFloat(quotationData?.monto_manodeobra || 0) * (discountPercentage / 100)).toFixed(2) }}</span>
-                </div>
-              </template>
-
-              <div v-if="shouldShowCreditBenefit && creditApplied > 0" class="flex justify-between items-center text-emerald-400 text-xs text-shadow-sm">
-                <span class="font-medium">Crédito Aplicado</span>
-                <span class="font-black">-L. {{ parseFloat(creditApplied || 0).toFixed(2) }}</span>
-              </div>
-
-              <div class="pt-4 border-t border-white/10 flex justify-between items-center">
-                <span class="text-white text-base font-black uppercase tracking-widest">A PAGAR</span>
-                <span class="text-2xl font-black text-yellow-400">L. {{ (totalAPagar || 0).toFixed(2) }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Payment Options -->
-          <div class="space-y-4">
-            <div class="flex items-center space-x-2 px-1">
-               <span class="text-sm">🏦</span>
-               <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cuenta de Transferencia</label>
-            </div>
-
-            <div v-if="isLoadingAccounts" class="p-6 bg-gray-50 dark:bg-gray-700/30 rounded-2xl flex flex-col items-center">
-              <div class="animate-spin rounded-full h-8 w-8 border-2 border-yellow-500 border-t-transparent"></div>
-            </div>
-
-            <div v-else class="space-y-3">
-              <multiselect
-                v-model="selectedAccountObject"
-                :options="bankAccounts"
-                :searchable="false"
-                :close-on-select="true"
-                :show-labels="false"
-                placeholder="Elige una cuenta bancaria"
-                label="banco"
-                track-by="id_cuenta"
-                class="multiselect-custom taxi-select"
-                :custom-label="getAccountLabel"
-              >
-                <template #singleLabel="{ option }">
-                  <span class="text-xs font-bold text-blue-600 dark:text-blue-400">{{ getAccountLabel(option) }}</span>
-                </template>
-              </multiselect>
-
-              <!-- Account Details -->
-              <div v-if="getSelectedAccount" class="p-4 bg-yellow-50 dark:bg-yellow-900/10 rounded-2xl border-2 border-yellow-100 dark:border-yellow-900/20">
-                <div class="grid grid-cols-2 gap-y-2 text-[10px]">
-                  <div>
-                    <p class="text-gray-500 uppercase font-black tracking-tighter">Banco</p>
-                    <p class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ getSelectedAccount.banco }}</p>
+                <div v-if="getSelectedAccount" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="text-sm font-bold text-gray-900 dark:text-white mb-3">{{ getSelectedAccount.banco }}</span>
+                    <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 italic">{{ getSelectedAccount.tipo_cuenta }}</span>
                   </div>
-                  <div>
-                    <p class="text-gray-500 uppercase font-black tracking-tighter">Titular</p>
-                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ getSelectedAccount.titular }}</p>
-                  </div>
-                  <div class="col-span-2 pt-2 border-t border-yellow-200 dark:border-yellow-900/30 flex justify-between items-center">
-                    <div>
-                      <p class="text-gray-500 uppercase font-black tracking-tighter">Número de Cuenta</p>
-                      <p class="text-sm font-mono font-black text-gray-900 dark:text-white">{{ getSelectedAccount.numero_cuenta }}</p>
-                    </div>
-                    <button @click="copyToClipboard(getSelectedAccount.numero_cuenta)" class="bg-yellow-400 p-2 rounded-xl hover:scale-110 transition-transform">
-                      <svg class="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                  
+                  <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-100 dark:border-gray-700">
+                    <span class="text-sm font-mono font-bold text-gray-900 dark:text-white">{{ getSelectedAccount.numero_cuenta }}</span>
+                    <button @click="copyToClipboard(getSelectedAccount.numero_cuenta)" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-indigo-500">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
                     </button>
                   </div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-2 font-bold uppercase tracking-widest">ID: <span class="text-gray-900 dark:text-white">{{ getSelectedAccount.titular }}</span></p>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Número de Referencia</label>
+                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ej: 123456789">
+                </div> 
+
+                <button @click="processPayment" :disabled="!selectedAccount || !comprobante || isProcessingPayment" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50">
+                  <span v-if="!isProcessingPayment">Confirmar Pago L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+                  <div v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+                </button> 
+                
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-100 dark:border-blue-800 flex items-start space-x-2">
+                  <span class="text-xs">ℹ️</span>
+                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">Al confirmar, serás redirigido automáticamente para adjuntar el comprobante de tu transferencia.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
+
+  <!-- Taxi VIP Payment Modal -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to"
+  >
+    <div v-if="showTaxiPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closePaymentModal"></div>
+      
+      <Transition name="modal-content" enter-active-class="modal-content-enter-active" leave-active-class="modal-content-leave-active" enter-from-class="modal-content-enter-from" leave-to-class="modal-content-leave-to">
+        <div v-if="showTaxiPaymentModal" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10" @click.stop>
+          
+          <!-- Encabezado -->
+          <div class="sticky top-0 bg-yellow-400 p-3 border-b border-yellow-500 rounded-t-xl z-20">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-base">
+                  🚕
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-black leading-none">Pagar Viaje</h3>
+                  <p class="text-[10px] font-bold text-black/60 uppercase tracking-widest mt-1">TAXI-{{ selectedService.id }}</p>
+                </div>
+              </div>
+              <button @click="closePaymentModal" class="bg-black/10 hover:bg-black/20 p-1.5 rounded-full transition-colors">
+                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido -->
+          <div class="p-3 space-y-4">
+            <!-- Resumen de Viaje -->
+            <div class="space-y-2">
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">Resumen de Viaje</h4>
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="text-gray-600 dark:text-gray-400 font-bold">Tarifa del Servicio</span>
+                    <span class="font-black text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
+                  </div>
+
+                  <div v-if="shouldShowCreditBenefit && creditApplied > 0" class="flex justify-between items-center text-xs text-blue-600 dark:text-blue-400">
+                    <span class="font-bold">💳 Crédito Aplicado</span>
+                    <span class="font-black">−L. {{ formatCurrency(creditApplied) }}</span>
+                  </div>
+
+                  <div class="pt-2 border-t border-blue-200 dark:border-blue-800 flex justify-between items-center">
+                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">Total a Pagar</span>
+                    <span class="text-base font-black text-blue-600 dark:text-blue-400">L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+                  </div>
                 </div>
               </div>
 
-              <!-- Comprobante Input -->
-              <div class="space-y-2">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Número de Referencia</label>
-                <input
-                  v-model="comprobante"
-                  type="text"
-                  class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-yellow-400 rounded-2xl text-sm font-black transition-all outline-none"
-                  placeholder="Ingresa el número de comprobante"
-                >
+              <!-- Cashback Taxi -->
+              <div v-if="shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">✨ Cashback</span>
+                  <span class="text-xs font-black text-emerald-700 dark:text-emerald-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
+                </div>
+                <p class="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-medium leading-tight">
+                  * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
+                </p>
               </div>
             </div>
 
-            <!-- Action Button -->
-            <button 
-              @click="processPayment"
-              :disabled="!selectedAccount || !comprobante || isProcessingPayment"
-              class="w-full py-5 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 transform hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:transform-none text-xs uppercase tracking-[0.2em] flex items-center justify-center space-x-2"
-            >
-              <span v-if="!isProcessingPayment">PAGAR MI VIAJE L. {{ (totalAPagar || 0).toFixed(2) }}</span>
-              <div v-else class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-            </button>
-            <p class="text-[10px] text-gray-400 text-center font-bold px-4 leading-tight italic">
-               Al pagar, serás redirigido para adjuntar tu comprobante y completar tu viaje.
-            </p>
+            <!-- Información de Pago -->
+            <div class="space-y-3">
+              <h4 class="text-sm font-black text-gray-900 dark:text-white">Datos de Transferencia</h4>
+              
+              <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
+                <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+              </div>
+              
+              <div v-else class="space-y-3">
+                <multiselect
+                  v-model="selectedAccountObject"
+                  :options="bankAccounts"
+                  :searchable="false"
+                  :close-on-select="true"
+                  :show-labels="false"
+                  placeholder="Elige cuenta destino"
+                  label="banco"
+                  track-by="id_cuenta"
+                  class="multiselect-custom taxi-select"
+                  :custom-label="getAccountLabel"
+                />
+
+                <div v-if="getSelectedAccount" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="text-sm font-bold text-gray-900 dark:text-white mb-3">{{ getSelectedAccount.banco }}</span>
+                    <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 italic">{{ getSelectedAccount.tipo_cuenta }}</span>
+                  </div>
+                  
+                  <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-100 dark:border-gray-700">
+                    <span class="text-sm font-mono font-bold text-gray-900 dark:text-white">{{ getSelectedAccount.numero_cuenta }}</span>
+                    <button @click="copyToClipboard(getSelectedAccount.numero_cuenta)" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-indigo-500">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                    </button>
+                  </div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-2 font-bold uppercase tracking-widest">ID: <span class="text-gray-900 dark:text-white">{{ getSelectedAccount.titular }}</span></p>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">N° de comprobante</label>
+                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ej: 987654321">
+                </div>
+
+                <button @click="processPayment" :disabled="!selectedAccount || !comprobante || isProcessingPayment" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50">
+                  <span v-if="!isProcessingPayment">Confirmar Pago L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+                  <div v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+                </button>
+
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-100 dark:border-blue-800 flex items-start space-x-2">
+                  <span class="text-xs">🚕</span>
+                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">Al confirmar, serás redirigido automáticamente para que puedas adjuntar tu comprobante de pago.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
-  </div>
-</Transition>
+      </Transition>
+    </div>
+  </Transition>
 
 <!-- Modal para ver imagen en grande -->
 <Transition
@@ -1249,7 +1016,7 @@
         enter-active-class="modal-content-enter-active"
         leave-active-class="modal-content-leave-active"
         enter-from-class="modal-content-enter-from"
-        leave-to-class="modal-content-leave-to">
+        leave-to-class="modal-leave-to">
         <div 
           v-if="showCancelModal"
           class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
@@ -1331,52 +1098,34 @@
   </Transition> 
 
   <!-- Modal de Cotización -->
+
+  <!-- Standard Quotation Modal -->
   <Transition
     name="modal"
     enter-active-class="modal-enter-active"
     leave-active-class="modal-leave-active"
     enter-from-class="modal-enter-from"
-    leave-to-class="modal-leave-to">
+    leave-to-class="modal-leave-to"
+  >
     <div v-if="showQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
-      <!-- Backdrop con animación -->
-      <Transition
-        name="backdrop"
-        enter-active-class="backdrop-enter-active"
-        leave-active-class="backdrop-leave-active"
-        enter-from-class="backdrop-enter-from"
-        leave-to-class="backdrop-leave-to">
-        <div 
-          v-if="showQuotationModal"
-          class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          @click="showQuotationModal = false"
-        ></div>
-      </Transition>
-
-      <!-- Contenido del modal con animación -->
-      <Transition
-        name="modal-content"
-        enter-active-class="modal-content-enter-active"
-        leave-active-class="modal-content-leave-active"
-        enter-from-class="modal-content-enter-from"
-        leave-to-class="modal-content-leave-to">
-        <div 
-          v-if="showQuotationModal"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10"
-          @click.stop
-        >
-          <!-- Encabezado del modal -->
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showQuotationModal = false"></div>
+      
+      <Transition name="modal-content" enter-active-class="modal-content-enter-active" leave-active-class="modal-content-leave-active" enter-from-class="modal-content-enter-from" leave-to-class="modal-content-leave-to">
+        <div v-if="showQuotationModal" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10" @click.stop>
+          
+          <!-- Encabezado -->
           <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-lg flex items-center justify-center text-base">
-                  📝
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-base">
+                  📜
                 </div>
                 <div>
-                  <h3 class="text-base font-black text-gray-900 dark:text-white">Cotización del Servicio</h3>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
+                  <h3 class="text-base font-black text-gray-900 dark:text-white">Propuesta Técnica</h3>
+                  <p class="text-[10px] text-gray-600 dark:text-gray-400 font-bold uppercase tracking-wider">Orden #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
               </div>
-              <button @click="showQuotationModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+              <button @click="showQuotationModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -1384,165 +1133,86 @@
             </div>
           </div>
 
-          <!-- Contenido principal del modal -->
-          <div class="p-3">
-            <!-- Cargando -->
-            <div v-if="isLoadingQuotation" class="flex justify-center items-center py-8">
-              <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <!-- Contenido -->
+          <div class="p-3 space-y-4">
+            <div v-if="isLoadingQuotation" class="p-12 flex justify-center">
+              <div class="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
             </div>
-            
-            <!-- Contenido de la cotización -->
+
             <template v-else>
-              <!-- Tarjeta de diagnóstico -->
-              <div class="bg-white dark:bg-gray-700/50 rounded-lg shadow-sm p-3 mb-3 border border-gray-100 dark:border-gray-700">
-                <div class="flex items-start space-x-2 mb-2">
-                  <div class="p-1 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Diagnóstico Técnico</h4> 
-                  </div>
+              <!-- Diagnóstico -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-sm font-black text-gray-900 dark:text-white">Diagnóstico</h4>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
-                  <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                    {{ quotationData?.comentario || 'No se proporcionó un diagnóstico detallado.' }}
+                <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <p class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-relaxed italic">
+                    "{{ quotationData?.comentario || 'Diagnóstico listo para ser ejecutado.' }}"
                   </p>
                 </div>
               </div>
-              
-              <!-- Tarjeta de costos -->
-              <div class="bg-white dark:bg-gray-700/50 rounded-lg shadow-sm p-3 mb-3 border border-gray-100 dark:border-gray-700">
-                <div class="flex items-start space-x-2 mb-2">
-                  <div class="p-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                    <svg class="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+
+              <!-- Estructura de Costos -->
+              <div class="space-y-2">
+                <h4 class="text-sm font-black text-gray-900 dark:text-white">Inversión</h4>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 space-y-3">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="text-blue-800 dark:text-blue-200 font-bold">Mano de Obra</span>
+                    <span class="font-black text-blue-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
                   </div>
-                  <div>
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Desglose de la cotización</h4> 
+
+                  <div v-if="shouldShowCreditBenefit && parseFloat(membresiaProgreso?.monto_credito || 0) > 0" class="flex justify-between items-center text-xs pt-2 border-t border-blue-200/50 dark:border-blue-800">
+                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">Crédito Membresía</span>
+                    <span class="font-black text-emerald-600">−L. {{ formatCurrency(Math.min((parseFloat(quotationData?.monto_manodeobra || 0)), parseFloat(membresiaProgreso?.monto_credito || 0))) }}</span>
+                  </div>
+
+                  <div class="flex justify-between items-center pt-2 border-t-2 border-blue-300 dark:border-blue-700">
+                    <span class="text-sm font-black text-blue-900 dark:text-white">TOTAL NETO</span>
+                    <span class="text-lg font-black text-blue-900 dark:text-white">L. {{ formatCurrency(getDiscountedPrice()) }}</span>
                   </div>
                 </div>
-                
-                <div class="space-y-2">
-                  <!-- Item de costo fijo -->
-                  <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <div>
-                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Mano de Obra</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">Servicio técnico especializado</p>
-                    </div>
-                    <span class="text-sm font-bold text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) || '0.00' }}</span>
-                  </div>
-                  
-                  <!-- Estimación de materiales -->
-                  <div v-if="Number(quotationData?.monto_materiales) > 0" class="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
-                    <div class="flex items-start space-x-1">
-                      <svg class="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 100 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                      </svg>
-                      <div>
-                        <p class="text-xs font-medium text-amber-800 dark:text-amber-200">Estimación de Materiales (puede variar)</p>
-                        <p class="text-xs text-amber-700/80 dark:text-amber-300/80 mt-1">
-                          El costo de materiales es solo una estimación y podrá variar según disponibilidad y necesidades reales del servicio.
-                        </p>
-                      </div>
-                    </div>
-                    <div class="mt-2 flex justify-between items-center pt-1 border-t border-amber-100 dark:border-amber-900/30">
-                      <span class="text-xs font-medium text-amber-800 dark:text-amber-200">Monto estimado:</span>
-                      <span class="text-xs font-bold text-amber-900 dark:text-amber-100">L. {{ formatCurrency(quotationData?.monto_materiales) || '0.00' }}</span>
-                    </div>
-                  </div>
-                  
-                  <!-- Descuento Membresía -->
-                  <div v-if="shouldShowDiscountBenefit && (parseFloat(membresiaProgreso?.porcentaje_descuento || 0) > 0 || parseFloat(membresiaProgreso?.porcentaje_descuento_especial || 0) > 0)" class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <div>
-                      <p class="text-xs font-medium text-green-600 dark:text-green-400">
-                        Descuento Membresía ({{ parseFloat(membresiaProgreso?.aplica_descuento_especial ? membresiaProgreso?.porcentaje_descuento_especial : membresiaProgreso?.porcentaje_descuento) }}%)
-                      </p>
-                    </div>
-                    <span class="text-xs font-bold text-green-600 dark:text-green-400">
-                      - L. {{ formatCurrency((parseFloat(quotationData?.monto_manodeobra || 0) * (parseFloat(membresiaProgreso?.aplica_descuento_especial ? membresiaProgreso?.porcentaje_descuento_especial : membresiaProgreso?.porcentaje_descuento) / 100))) }}
-                    </span>
-                  </div>
 
-                  <!-- Crédito Aplicado -->
-                  <div v-if="shouldShowCreditBenefit && parseFloat(membresiaProgreso?.monto_credito || 0) > 0" class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <div>
-                      <p class="text-xs font-medium text-green-600 dark:text-green-400">Crédito Aplicado</p>
-                      <p class="text-[10px] text-gray-400">Saldo: L. {{ formatCurrency(membresiaProgreso?.monto_credito || 0) }}</p>
-                    </div>
-                    <span class="text-xs font-bold text-green-600 dark:text-green-400">
-                      - L. {{ formatCurrency(Math.min((parseFloat(quotationData?.monto_manodeobra || 0) * (1 - (parseFloat(membresiaProgreso?.aplica_descuento_especial ? membresiaProgreso?.porcentaje_descuento_especial : membresiaProgreso?.porcentaje_descuento || 0) / 100))), parseFloat(membresiaProgreso?.monto_credito || 0))) }}
-                    </span>
+                <!-- Estimación de Materiales (Fuera del Desglose) -->
+                <div v-if="Number(quotationData?.monto_materiales) > 0" class="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Materiales</span>
+                    <span class="text-xs font-black text-gray-700 dark:text-white">L. {{ formatCurrency(quotationData?.monto_materiales) }}</span>
                   </div>
+                  <p class="text-[9px] text-gray-500 dark:text-gray-400 font-medium leading-tight">
+                    * Este valor es una estimación del técnico. Los materiales se adquieren de forma externa y el monto final puede variar.
+                  </p>
+                </div>
 
-                  <!-- Total -->
-                  <div class="flex justify-between items-center pt-2">
-                    <div>
-                      <span class="text-sm font-bold text-gray-900 dark:text-white">Total a pagar</span>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">Solo incluye mano de obra</p>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-base font-bold text-blue-600 dark:text-blue-400">
-                        L. {{ formatCurrency(getDiscountedPrice()) }}
-                      </p>
-                    </div>
+                <!-- Cashback Info -->
+                <div v-if="shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">✨ Cashback</span>
+                    <span class="text-xs font-black text-emerald-700 dark:text-emerald-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
                   </div>
+                  <p class="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-medium leading-tight">
+                    * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
+                  </p>
                 </div>
               </div>
-              
-              <!-- Información adicional -->
-              <div class="text-center mb-3">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                  <span class="inline-flex items-start">
-                    <svg
-                      class="w-3 h-3 mr-1 mt-0.5 text-blue-500 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span>
-                      Aceptar esta cotización autoriza el servicio. El pago se realiza desde la app al finalizar
-                    </span>
-                  </span>
-                </p>
+
+              <!-- Acciones -->
+              <div class="flex gap-2 pt-2">
+                <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
+                  Rechazar
+                </button>
+                <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
+                  <span v-if="!isProcessingQuotation">Confirmar Propuesta</span>
+                  <div v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </button>
               </div>
             </template>
-          </div>
-
-          <!-- Pie del modal -->
-          <div v-if="!isLoadingQuotation" class="sticky bottom-0 bg-gray-50 dark:bg-gray-800/80 px-3 py-2 border-t border-gray-200 dark:border-gray-700 rounded-b-xl backdrop-blur-sm">
-            <div class="flex space-x-2">
-              <button 
-                @click="confirmRejectQuotation"
-                :disabled="isProcessingQuotation"
-                class="flex-1 py-2 px-3 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg border border-gray-200 dark:border-gray-600 transition-colors flex items-center justify-center space-x-1 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <svg class="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-                <span>Rechazar</span>
-              </button>
-              <button 
-                @click="acceptQuotation"
-                :disabled="isProcessingQuotation"
-                class="flex-1 py-2 px-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg transition-all transform hover:shadow-lg flex items-center justify-center space-x-1 text-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-              >
-                <svg v-if="!isProcessingQuotation" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                <span>{{ isProcessingQuotation ? 'Procesando...' : 'Aceptar' }}</span>
-              </button>
-            </div>
           </div>
         </div>
       </Transition>
     </div>
   </Transition>
 
-  <!-- Modal de Cotización Taxi VIP -->
+  <!-- Taxi VIP Quotation Modal -->
   <Transition
     name="modal"
     enter-active-class="modal-enter-active"
@@ -1550,146 +1220,116 @@
     enter-from-class="modal-enter-from"
     leave-to-class="modal-leave-to">
     <div v-if="showTaxiQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
-      <!-- Backdrop con animación -->
-      <Transition
-        name="backdrop"
-        enter-active-class="backdrop-enter-active"
-        leave-active-class="backdrop-leave-active"
-        enter-from-class="backdrop-enter-from"
-        leave-to-class="backdrop-leave-to">
-        <div 
-          v-if="showTaxiQuotationModal"
-          class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          @click="showTaxiQuotationModal = false"
-        ></div>
-      </Transition>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showTaxiQuotationModal = false"></div>
 
-      <!-- Contenido del modal con animación -->
-      <Transition
-        name="modal-content"
-        enter-active-class="modal-content-enter-active"
-        leave-active-class="modal-content-leave-active"
-        enter-from-class="modal-content-enter-from"
-        leave-to-class="modal-content-leave-to">
-        <div 
-          v-if="showTaxiQuotationModal"
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto relative z-10 border border-gray-100 dark:border-gray-700"
-          @click.stop
-        >
-          <!-- Encabezado con Icono de Taxi -->
-          <div class="sticky top-0 bg-yellow-400 dark:bg-yellow-500 p-4 border-b border-yellow-500 rounded-t-2xl z-20 overflow-hidden">
-            <!-- Patrón de taxi de fondo -->
-            <div class="absolute inset-0 opacity-10 pointer-events-none flex flex-wrap">
-               <div v-for="i in 100" :key="i" class="w-4 h-4 border border-black"></div>
-            </div>
-            
-            <div class="relative flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center shadow-lg transform -rotate-3">
-                  <span class="text-2xl">🚕</span>
+      <!-- Contenido -->
+      <Transition name="modal-content" enter-active-class="modal-content-enter-active" leave-active-class="modal-content-leave-active" enter-from-class="modal-content-enter-from" leave-to-class="modal-content-leave-to">
+        <div v-if="showTaxiQuotationModal" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10" @click.stop>
+          
+          <!-- Encabezado -->
+          <div class="sticky top-0 bg-yellow-400 p-3 border-b border-yellow-500 rounded-t-xl z-20">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-base">
+                  🚕
                 </div>
                 <div>
-                  <h3 class="text-lg font-black text-black">Tarifa de Viaje</h3>
-                  <p class="text-[9px] font-bold text-black/60 uppercase tracking-[0.2em]">Taxi VIP #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
+                  <h3 class="text-base font-black text-black leading-none">Tarifa de Viaje</h3>
+                  <p class="text-[10px] font-bold text-black/60 uppercase tracking-widest mt-1">TAXI-{{ selectedService.id }}</p>
                 </div>
               </div>
-              <button @click="showTaxiQuotationModal = false" class="bg-black/10 hover:bg-black/20 p-2 rounded-full transition-colors">
-                <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button @click="showTaxiQuotationModal = false" class="bg-black/10 hover:bg-black/20 p-1.5 rounded-full transition-colors">
+                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
             </div>
           </div>
 
-          <!-- Contenido principal -->
-          <div class="p-5 space-y-6">
-            <!-- Cargando -->
-            <div v-if="isLoadingQuotation" class="flex justify-center items-center py-12">
-              <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-yellow-500"></div>
+          <!-- Contenido -->
+          <div class="p-3 space-y-4">
+            <div v-if="isLoadingQuotation" class="py-12 flex justify-center">
+              <div class="w-8 h-8 border-4 border-yellow-600/20 border-t-yellow-600 rounded-full animate-spin"></div>
             </div>
             
             <template v-else>
-              <!-- Info del Conductor -->
-              <div v-if="selectedService.tecnico" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-700">
+              <!-- Conductor -->
+              <div v-if="selectedService.tecnico" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                 <img 
                   :src="getOptimizedImage(selectedService.tecnico.imagen_url, 60, 60)" 
-                  class="w-12 h-12 rounded-xl object-cover shadow-sm"
+                  class="w-10 h-10 rounded-lg object-cover shadow-sm"
                   @error="handleImageError"
                 >
                 <div>
-                  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tu Conductor</p>
+                  <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Conductor</p>
                   <p class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedService.tecnico.nombre }}</p>
                 </div>
               </div>
 
-              <!-- Visualización de Ruta -->
-              <div class="relative space-y-4">
-                <div class="flex items-start space-x-3">
-                  <div class="mt-1 flex flex-col items-center">
-                    <div class="w-3 h-3 rounded-full border-2 border-green-500 bg-white shadow-sm"></div>
-                    <div class="w-0.5 h-10 border-l-2 border-dotted border-gray-300 dark:border-gray-600"></div>
+              <!-- Ruta -->
+              <div class="space-y-2">
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Itinerario</h4>
+                <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600 space-y-3 relative">
+                  <!-- Línea conectora -->
+                  <div class="absolute left-[21px] top-7 bottom-7 w-0.5 border-l-2 border-dotted border-gray-300 dark:border-gray-500"></div>
+                  
+                  <div class="flex items-start space-x-3 relative z-10">
+                    <div class="mt-1 w-4 h-4 rounded-full border-2 border-emerald-500 bg-white dark:bg-gray-800 flex items-center justify-center">
+                      <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Recogida</p>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ selectedService.fullLocation?.colonia || 'Punto de partida' }}</p>
+                    </div>
                   </div>
-                  <div class="flex-1 bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl">
-                    <p class="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">Origen</p>
-                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ selectedService.fullLocation?.colonia || 'Punto de partida' }}</p>
-                  </div>
-                </div>
-                <div class="flex items-start space-x-3">
-                  <div class="mt-1">
-                    <div class="w-3 h-3 bg-red-500 rounded-sm shadow-sm transform rotate-45"></div>
-                  </div>
-                  <div class="flex-1 bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl">
-                    <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Destino</p>
-                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ selectedService.fullLocation?.direccion || 'Destino final' }}</p>
+
+                  <div class="flex items-start space-x-3 relative z-10">
+                    <div class="mt-1 w-4 h-4 rounded-full border-2 border-red-500 bg-white dark:bg-gray-800 flex items-center justify-center">
+                      <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-[9px] font-black text-red-600 uppercase tracking-widest">Destino</p>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ selectedService.fullLocation?.direccion || 'Destino final' }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Tarifa Principal -->
-              <div class="bg-black dark:bg-gray-900 rounded-3xl p-6 shadow-2xl transform hover:scale-[1.02] transition-transform">
-                <div class="flex flex-col items-center text-center">
-                  <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em] mb-2 text-shadow">Coste Total del Viaje</p>
-                  <div class="flex items-baseline space-x-1">
-                    <span class="text-2xl font-black text-white">L.</span>
-                    <span class="text-5xl font-black text-white tracking-tighter">{{ formatCurrency(quotationData?.monto_manodeobra || '0.00').split('.')[0] }}</span>
-                    <span class="text-2xl font-black text-white/50">.{{ formatCurrency(quotationData?.monto_manodeobra || '0.00').split('.')[1] }}</span>
+              <!-- Tarifa -->
+              <div class="bg-black p-4 rounded-lg shadow-xl shadow-black/10">
+                <div class="flex flex-col items-center">
+                  <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">Costo Estimado</p>
+                  <div class="text-3xl font-black text-white tabular-nums">
+                    L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
                   </div>
-                  <div v-if="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-4 flex items-center space-x-2 bg-white/10 px-3 py-1 rounded-full">
-                    <span class="text-[10px] font-bold text-yellow-400">PAGO VÍA APP: L. {{ getDiscountedPrice() }}</span>
+                  <div v-if="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-yellow-400/80 uppercase">
+                    Pago con App: L. {{ getDiscountedPrice() }}
                   </div>
                 </div>
               </div>
 
-              <!-- Notas del Conductor -->
-              <div v-if="quotationData?.comentario" class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border-l-4 border-blue-500">
-                <div class="flex space-x-3">
-                   <span class="text-xl">💬</span>
-                   <div>
-                     <p class="text-[10px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-widest mb-1">Mensaje del conductor</p>
-                     <p class="text-sm font-medium text-blue-900 dark:text-blue-100 italic">"{{ quotationData.comentario }}"</p>
-                   </div>
+              <!-- Cashback Taxi Info -->
+              <div v-if="shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-yellow-400/10 dark:bg-yellow-400/5 border border-yellow-400/20 rounded-lg">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-[10px] font-black text-yellow-700 dark:text-yellow-500 uppercase tracking-widest">✨ Cashback</span>
+                  <span class="text-xs font-black text-yellow-800 dark:text-yellow-400">+L. {{ formatCurrency(cashbackAmount) }}</span>
                 </div>
+                <p class="text-[9px] text-yellow-700/70 dark:text-yellow-500/70 font-medium leading-tight">
+                  * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
+                </p>
+              </div>
+
+              <!-- Acciones -->
+              <div class="flex gap-2 pt-2">
+                <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
+                  CANCELA
+                </button>
+                <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
+                  <span v-if="!isProcessingQuotation">ACEPTAR VIAJE</span>
+                  <div v-else class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                </button>
               </div>
             </template>
-          </div>
-
-          <!-- Acciones -->
-          <div v-if="!isLoadingQuotation" class="p-5 pt-0 grid grid-cols-2 gap-3 pb-8">
-            <button 
-              @click="confirmRejectQuotation"
-              :disabled="isProcessingQuotation"
-              class="py-4 px-4 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-xs uppercase tracking-widest disabled:opacity-50"
-            >
-              CANCELA VIAJE
-            </button>
-            <button 
-              @click="acceptQuotation"
-              :disabled="isProcessingQuotation"
-              class="py-4 px-4 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-2xl transition-all transform hover:shadow-xl active:scale-95 text-xs uppercase tracking-widest flex items-center justify-center space-x-2 disabled:opacity-50 shadow-lg shadow-yellow-500/20"
-            >
-              <span v-if="!isProcessingQuotation">ACEPTAR VIAJE</span>
-              <div v-else class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-            </button>
           </div>
         </div>
       </Transition>
@@ -2337,6 +1977,64 @@ body {
   border-color: #3b82f6 transparent transparent;
 }
 
+
+.multiselect-custom-v2 .multiselect__tags {
+  min-height: 42px;
+  padding: 8px 40px 0 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+}
+
+.dark .multiselect-custom-v2 .multiselect__tags {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: white;
+}
+
+.multiselect-custom-v2 .multiselect__placeholder {
+  color: #9ca3af;
+  margin-bottom: 8px;
+  padding-top: 2px;
+}
+
+.multiselect-custom-v2 .multiselect__single {
+  background: transparent;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.dark .multiselect-custom-v2 .multiselect__single {
+  color: #f9fafb;
+}
+
+.multiselect-custom-v2 .multiselect__content-wrapper {
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.dark .multiselect-custom-v2 .multiselect__content-wrapper {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.multiselect-custom-v2 .multiselect__option--highlight {
+  background: #3b82f6;
+}
+
+.multiselect-custom-v2 .multiselect__option--selected {
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 700;
+}
+
+.dark .multiselect-custom-v2 .multiselect__option--selected {
+  background: #374151;
+  color: white;
+}
 </style>
 
 <script setup>
@@ -2665,6 +2363,15 @@ const shouldShowCreditBenefit = computed(() => {
   const cumpleRequisito = membresiaProgreso.value.mesesProgreso >= creditBenefit.mes_requerido;
    
   return cumpleRequisito;
+}); 
+
+const cashbackAmount = computed(() => {
+  const netTotal = parseFloat(getDiscountedPrice());
+  if (!netTotal) return 0;
+  
+  // Usar el porcentaje de membresía si está disponible, de lo contrario el regular
+  const percentage = (membresiaProgreso.value?.porcentaje_descuento || discountPercentage.value || 0) / 100;
+  return netTotal * percentage;
 }); 
 
 // =========================
@@ -3238,18 +2945,7 @@ const getDiscountedPrice = () => {
   const amount = parseFloat(quotationData.value?.monto_manodeobra || 0)
   if (!amount) return '0.00'
   
-  let discountPercent = 0
-  
-  if (shouldShowDiscountBenefit.value) {
-    if (membresiaProgreso.value?.aplica_descuento_especial) {
-      discountPercent = parseFloat(membresiaProgreso.value.porcentaje_descuento_especial || 0)
-    } else if (membresiaProgreso.value?.porcentaje_descuento) {
-      discountPercent = parseFloat(membresiaProgreso.value.porcentaje_descuento || 0)
-    }
-  }
-  
-  const discount = amount * (discountPercent / 100)
-  let currentTotal = amount - discount
+  let currentTotal = amount
   
   if (shouldShowCreditBenefit.value) {
     const availableCredit = parseFloat(membresiaProgreso.value?.monto_credito || 0)
@@ -3931,21 +3627,9 @@ const processPayment = async () => {
     nombre: auth.user.nombre
   };
   
-  // Agregar el descuento correspondiente (especial o regular)
-  const porcentajeDescuento = parseFloat(membresiaProgreso.value?.porcentaje_descuento || 0) || 0;
-  if (porcentajeDescuento > 0) {
-    payload.descuento_membresia = Math.round(
-      parseFloat(quotationData.value?.monto_manodeobra || 0) * 
-      (porcentajeDescuento / 100) * 
-      100
-    ) / 100;
-  } else if (shouldShowDiscountBenefit.value) {
-    // Si no hay descuento especial, usamos el descuento regular
-    payload.descuento_membresia = Math.round(
-      parseFloat(quotationData.value?.monto_manodeobra || 0) * 
-      (discountPercentage.value / 100) * 
-      100
-    ) / 100;
+  // Agregar el beneficio de cashback (calculado sobre el total neto)
+  if (shouldShowDiscountBenefit.value && cashbackAmount.value > 0) {
+    payload.descuento_membresia = Math.round(cashbackAmount.value * 100) / 100;
   }
 
   try {
@@ -4124,21 +3808,9 @@ const calcularTotal = () => {
     const montoManodeObra = parseFloat(quotationData.value?.monto_manodeobra || 0) || 0;
     let currentTotal = montoManodeObra;
 
-    // 1. Determinar el porcentaje de descuento a aplicar
-    let pct = 0;
-    if (shouldShowDiscountBenefit.value) {
-      if (membresiaProgreso.value?.aplica_descuento_especial && membresiaProgreso.value?.porcentaje_descuento_especial) {
-        pct = parseFloat(membresiaProgreso.value.porcentaje_descuento_especial);
-      } else {
-        pct = parseFloat(membresiaProgreso.value?.porcentaje_descuento || 0);
-      }
-    }
-
-    // 2. Calcular y restar el descuento
-    if (pct > 0) {
-      const montoDescuento = montoManodeObra * (pct / 100);
-      currentTotal -= montoDescuento;
-    }
+    // 1. El descuento de membresía es un cashback: NO reduce el total a pagar.
+    //    Se acredita al usuario cuando el admin acepta el pago.
+    //    (No se modifica currentTotal por el descuento de membresía)
 
     // 3. Aplicar crédito, pero solo hasta que el total sea 0
     let actualCreditUsed = 0;
@@ -4292,12 +3964,44 @@ const formattedDate = [
 };
 
 const copyToClipboard = (text) => {
-  navigator.clipboard.writeText(text).then(() => {
-    showSuccess('Número de cuenta copiado')
-  }).catch(err => {
-    console.error('Error al copiar al portapapeles:', err)
-    showError('No se pudo copiar al portapapeles')
-  })
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showSuccess('Copiado al portapapeles')
+    }).catch(err => {
+      console.error('Error al copiar:', err)
+      fallbackCopyToClipboard(text)
+    })
+  } else {
+    fallbackCopyToClipboard(text)
+  }
+}
+
+const fallbackCopyToClipboard = (text) => {
+  const textArea = document.createElement("textarea")
+  textArea.value = text
+  
+  // Asegurar que el textarea no sea visible pero esté en el DOM
+  textArea.style.position = "fixed"
+  textArea.style.left = "-9999px"
+  textArea.style.top = "0"
+  document.body.appendChild(textArea)
+  
+  textArea.focus()
+  textArea.select()
+
+  try {
+    const successful = document.execCommand('copy')
+    if (successful) {
+      showSuccess('Copiado al portapapeles')
+    } else {
+      showError('No se pudo copiar el texto')
+    }
+  } catch (err) {
+    console.error('Error en fallback de copia:', err)
+    showError('Error al intentar copiar')
+  }
+
+  document.body.removeChild(textArea)
 }
 
 // =========================

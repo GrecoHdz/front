@@ -174,7 +174,7 @@
                         <div class="min-w-0 flex-1">
                           <div class="flex flex-col space-y-1">
                             <div class="flex items-center space-x-2">
-                              <p class="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate">
+                              <p class="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate capitalize">
                                 {{ ticket.subject }}
                               </p>
                             </div>
@@ -345,7 +345,7 @@
                   <span class="text-base">🎫</span>
                 </div>
                 <div class="flex flex-col">
-                  <h3 class="text-[12px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  <h3 class="text-[12px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight capitalize">
                     {{ selectedTicket?.subject }}
                   </h3>
                   <span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 leading-none mt-0.5">
@@ -539,9 +539,14 @@ onMounted(async () => {
       return
     }
 
-    // Inicializar fechas vacías
-    startDate.value = ''
-    endDate.value = ''
+    // Inicializar fechas (Primer día del mes hasta hoy)
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    
+    startDate.value = `${year}-${month}-01`
+    endDate.value = `${year}-${month}-${day}`
 
     // Usar initializeDashboard que respeta la caché
     await initializeDashboard()

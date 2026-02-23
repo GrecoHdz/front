@@ -1040,7 +1040,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
         movementsHistory.value = loadMore 
           ? [...movementsHistory.value, ...(response.data || [])] 
           : (response.data || [])
-      } else if (tipo === 'retiro') {
+      } else if (tipo === 'retiro' || tipo === 'retiro_referido') {
         withdrawalsHistory.value = loadMore 
           ? [...withdrawalsHistory.value, ...(response.data || [])] 
           : (response.data || [])
@@ -1088,7 +1088,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
 
 const setActiveTab = async (tab) => {
   activeTab.value = tab
-  const tipo = tab === 'ingresos' ? 'ingreso_referido' : 'retiro'
+  const tipo = tab === 'ingresos' ? 'ingreso_referido' : 'retiro_referido'
   await loadMovements(tipo)
 }
 
@@ -1100,7 +1100,7 @@ const handleMonthChange = async (event, tab) => {
     await loadMovements('ingreso_referido', newMonth)
   } else {
     selectedWithdrawMonth.value = newMonth
-    await loadMovements('retiro', newMonth)
+    await loadMovements('retiro_referido', newMonth)
   }
 }
 
@@ -1113,7 +1113,7 @@ const loadMoreEarnings = async () => {
 
 const loadMoreWithdrawals = async () => {
   if (hasMoreMovements.value) {
-    await loadMovements('retiro', selectedWithdrawMonth.value, true)
+    await loadMovements('retiro_referido', selectedWithdrawMonth.value, true)
   }
 }
 
@@ -1143,13 +1143,13 @@ const copyReferralLink = async () => {
 }
 
 const shareWhatsApp = () => {
-  const message = `¡Hola! Te invito a conocer la plataforma MiSeguro, el mejor servicio de reparaciones para tu hogar. 
+  const message = `¡Hola! 👋 Te invito a unirte a MiSeguro, la mejor plataforma en Honduras para servicios del hogar. 🏠
 
-- Servicios profesionales
-- Precios justos
-- Atención rápida
+✅ Técnicos profesionales y certificados
+✅ Precios justos y transparentes
+✅ Atención rápida y garantizada
 
-Regístrate aquí: ${referralLink.value}`
+Regístrate con mi enlace y obtén beneficios exclusivos: ${referralLink.value}`
 
   const encodedMessage = encodeURIComponent(message)
   window.open(`https://wa.me/?text=${encodedMessage}`, '_blank')
@@ -1234,7 +1234,7 @@ const processWithdraw = async () => {
     
     const requestBody = {
       id_usuario: userCookie.value.id_usuario,
-      tipo: 'retiro',
+      tipo: 'retiro_referido',
       monto: montoMaximoRetiro,
       total_retirado: montoRetiro,
       descripcion: `Retiro por comisión de referidos a: ${withdrawForm.value.bankDetails}`
@@ -1375,7 +1375,7 @@ watch([selectedMonth, selectedWithdrawMonth], async ([newMonth, newWithdrawMonth
   if (newMonth !== oldMonth && activeTab.value === 'ingresos') {
     await loadMovements('ingreso_referido', newMonth)
   } else if (newWithdrawMonth !== oldWithdrawMonth && activeTab.value === 'retiros') {
-    await loadMovements('retiro', newWithdrawMonth)
+    await loadMovements('retiro_referido', newWithdrawMonth)
   }
 })
 

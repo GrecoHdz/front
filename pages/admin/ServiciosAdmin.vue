@@ -3527,7 +3527,8 @@ const getServiceTypeIcon = (serviceName) => {
     'Pintura': '🎨',
     'Carpintería': '🪚',
     'Carpintería - Puerta': '🪚',
-    'Limpieza de Hogar': '🧹'
+    'Limpieza de Hogar': '🧹',
+    'Taxi VIP':'🚕'
   }
   
   // Buscar por coincidencia exacta primero

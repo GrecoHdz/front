@@ -535,9 +535,9 @@
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-2">FORMA DE PAGO</span>
                 <div class="space-y-1 text-xs text-gray-700">
                     <p class="flex justify-between">
-                        <span>Efectivo recibido:</span>
-                        <span class="font-medium">{{ formatCurrency(Math.max(0, (parseFloat(selectedFacturaPayment.monto_manodeobra) || 0) - (parseFloat(selectedFacturaPayment.descuento_membresia) || 0) - (parseFloat(selectedFacturaPayment.credito_usado) || 0))) }}</span>
-                    </p>
+                         <span>Efectivo recibido:</span>
+                         <span class="font-medium">{{ formatCurrency(Math.max(0, (parseFloat(selectedFacturaPayment.monto_manodeobra) || 0) - (parseFloat(selectedFacturaPayment.credito_usado) || 0))) }}</span>
+                     </p>
                     <p class="flex justify-between" v-if="selectedFacturaPayment.credito_usado > 0">
                         <span>Crédito de membresía aplicado:</span>
                         <span class="font-medium">{{ formatCurrency(selectedFacturaPayment.credito_usado || 0) }}</span>
@@ -673,7 +673,7 @@
                 </button>
               </div>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ formatCurrency(selectedService.cotizacion?.total || 0) }}</p>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ formatCurrency(parseFloat(selectedService.cotizacion?.monto_manodeobra || 0) - parseFloat(selectedService.cotizacion?.credito_usado || 0)) }}</p>
               </div>
             </div>
             
@@ -702,7 +702,7 @@
       </div>
     </Transition>
 
-    <!-- Modal de Detalles del Monto (Copiado de ServiciosAdmin) -->
+    <!-- Modal de Detalles del Monto -->
     <Transition
       name="modal"
       enter-active-class="modal-enter-active"
@@ -726,7 +726,7 @@
           </div>
 
           <!-- Content -->
-          <div class="p-3">
+          <div class="p-3 space-y-3">
             <div v-if="paymentType === 'visit'" class="space-y-2">
               <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                 <h4 class="font-medium text-blue-800 dark:text-blue-200 text-xs sm:text-sm mb-2">Pago de Visita</h4>
@@ -734,7 +734,7 @@
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Monto:</span>
                     <span class="font-medium text-gray-900 dark:text-white">
-                      {{ serviceToPayment?.pagoVisita?.monto ? `${serviceToPayment.pagoVisita.monto}` : 'L. 150.00' }}
+                      {{ serviceToPayment?.pagoVisita?.monto ? formatCurrency(serviceToPayment.pagoVisita.monto) : 'L. 150.00' }}
                     </span>
                   </div>
                 </div>
@@ -742,26 +742,30 @@
             </div>
 
             <div v-else-if="paymentType === 'service' && serviceToPayment?.cotizacion" class="space-y-3">
-              <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-                <h4 class="font-medium text-green-800 dark:text-green-200 text-xs sm:text-sm mb-2">Detalles de la Cotización</h4>
+              <div class="bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                <h4 class="font-medium text-blue-800 dark:text-blue-200 text-xs sm:text-sm mb-2">Desglose de Cotización</h4>
                 <div class="text-xs sm:text-sm space-y-2">
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
-                    <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(serviceToPayment.cotizacion.monto_manodeobra || 0) }}</span>
                   </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
-                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.descuento_membresia || 0 }}</span>
-                  </div>
-                  <div class="flex justify-between">
+                  <div v-if="Number(serviceToPayment.cotizacion.credito_usado) > 0" class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Crédito usado:</span>
-                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.credito_usado || 0 }}</span>
+                    <span class="font-medium text-blue-600 dark:text-blue-400">-{{ formatCurrency(serviceToPayment.cotizacion.credito_usado) }}</span>
                   </div>
                   <hr class="border-gray-200 dark:border-gray-600">
-                  <div class="flex justify-between font-bold">
-                    <span class="text-gray-900 dark:text-white">Total a pagar:</span>
-                    <span class="text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.total || 0 }}</span>
-                  </div>
+                   <div class="flex justify-between font-bold">
+                     <span class="text-gray-900 dark:text-white">Total recibido:</span>
+                     <span class="text-gray-900 dark:text-white">{{ formatCurrency((parseFloat(serviceToPayment.cotizacion.monto_manodeobra || 0) - parseFloat(serviceToPayment.cotizacion.credito_usado || 0))) }}</span>
+                   </div>
+                </div>
+              </div>
+
+              <!-- Beneficio Cashback -->
+              <div v-if="Number(serviceToPayment.cotizacion.descuento_membresia) > 0" class="p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                <div class="flex justify-between items-center">
+                  <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">✨ Cashback Generado</span>
+                  <span class="font-bold text-emerald-700 dark:text-emerald-300">+{{ formatCurrency(serviceToPayment.cotizacion.descuento_membresia) }}</span>
                 </div>
               </div>
             </div>
@@ -1390,7 +1394,7 @@ import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import { Chart, registerables } from 'chart.js';
 import { useHead, useCookie, useRuntimeConfig } from '#imports';
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '~/middleware/auth.store'; 
 import DataLabelsPlugin from 'chartjs-plugin-datalabels'; 
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
@@ -2078,9 +2082,9 @@ const loadServicePayments = async (page = 1) => {
         return {
           ...item,
           id: item.id_cotizacion,
-          billingType: 'services',
-          status: mapApiStatusToFrontend(item.estado),
-          amount: item.monto_total || 0,
+           billingType: 'services',
+           status: mapApiStatusToFrontend(item.estado),
+           amount: (parseFloat(item.monto_manodeobra) || 0) - (parseFloat(item.credito_usado) || 0),
           date: item.fecha,
           service: serviceName,
           client: item.solicitud?.cliente?.nombre || 'Cliente desconocido',
@@ -2725,7 +2729,7 @@ const searchById = async () => {
               id: item.id_cotizacion,
               billingType: 'services',
               status: mapApiStatusToFrontend(item.estado),
-              amount: item.monto_total || 0,
+              amount: (parseFloat(item.monto_manodeobra) || 0) - (parseFloat(item.credito_usado) || 0),
               date: item.fecha,
               service: serviceName,
               client: item.solicitud?.cliente?.nombre || 'Cliente desconocido',
@@ -3613,14 +3617,13 @@ const updatePlatformStats = async () => {
     if (response?.success && response.data) {
       const data = response.data.resumen;
       
-      platformStats.totalRevenue = data.ingresosTotales || 0;
+      platformStats.totalRevenue = data.gananciaNeta || 0;
       platformStats.membershipRevenue = data.ingresosMembresias || 0;
       platformStats.visitRevenue = data.ingresosVisitas || 0;
       platformStats.serviceRevenue = data.ingresosServicios || 0;
       platformStats.packageRevenue = data.ingresosPaquetes || 0;
-      platformStats.totalWithdrawals = data.retiros || 0;
       platformStats.totalCommissions = data.comisiones || 0;
-      platformStats.totalRevenue = data.gananciaNeta || 0;
+      platformStats.totalWithdrawals = data.retiros || 0;
       
       if (response.data.grafico) {
         updateChart(response.data.grafico);
@@ -4304,20 +4307,19 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     .filter(v => v.estado?.toLowerCase() === 'aprobado')
     .reduce((sum, v) => sum + (parseFloat(v.monto) || 0), 0);
     
-  // Calcular efectivo real recibido de servicios (lo que pagó el cliente)
   const totalServicios = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
     .reduce((sum, s) => {
-      const manoObra = parseFloat(s.monto_manodeobra) || 0;
-      const descuento = parseFloat(s.descuento_membresia) || 0;
-      const credito = parseFloat(s.credito_usado) || 0;
-      const efectivoReal = Math.max(0, manoObra - descuento - credito);
-      return sum + efectivoReal;
+       const manoObra = parseFloat(s.monto_manodeobra) || 0;
+       const credito = parseFloat(s.credito_usado) || 0;
+       const cashback = parseFloat(s.descuento_membresia) || 0;
+       const efectivoReal = Math.max(0, manoObra - credito - cashback);
+       return sum + efectivoReal;
     }, 0);
     
   const totalPaquetes = packagePaymentsData.data
     .filter(p => p.estado?.toLowerCase() !== 'rechazado')
-    .reduce((sum, p) => sum + (parseFloat(p.monto_comision) || 0), 0);
+    .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
     
   // Cálculo de Ingresos Totales (consistente con lo que se muestra abajo)
   const totalIngresos = totalMembresias + totalVisitas + totalServicios + totalPaquetes;
@@ -4403,18 +4405,18 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const serviciosFiltrados = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
     .map(s => {
-        const manoObra = parseFloat(s.monto_manodeobra) || 0;
-        const descuento = parseFloat(s.descuento_membresia) || 0;
-        const credito = parseFloat(s.credito_usado) || 0;
-        const efectivoReal = Math.max(0, manoObra - descuento - credito);
-        return [
-          formatDate(s.fecha), 
-          'Efectivo por Servicio', 
-          s.solicitud?.cliente?.nombre || '-', 
-          s.facturaRelacion?.factura?.estado || 'PENDIENTE',
-          s.facturaRelacion?.factura?.numero_factura_correlativo || '-',
-          formatCurrency(efectivoReal)
-        ];
+         const manoObra = parseFloat(s.monto_manodeobra) || 0;
+         const credito = parseFloat(s.credito_usado) || 0;
+         const cashback = parseFloat(s.descuento_membresia) || 0;
+         const efectivoReal = Math.max(0, manoObra - credito - cashback);
+         return [
+           formatDate(s.fecha), 
+           'Servicio '+ s.solicitud?.servicio?.nombre,
+           s.solicitud?.cliente?.nombre || '-', 
+           s.facturaRelacion?.factura?.estado || 'PENDIENTE',
+           s.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+           formatCurrency(efectivoReal)
+         ];
     });
 
   const paquetesFiltrados = packagePaymentsData.data
@@ -4425,7 +4427,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       p.usuario?.nombre || '-',
       p.facturaRelacion?.factura?.estado || 'PENDIENTE',
       p.facturaRelacion?.factura?.numero_factura_correlativo || '-',
-      formatCurrency(p.monto_comision)
+      formatCurrency(p.monto)
     ]);
 
   const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0 || paquetesFiltrados.length > 0;
@@ -4451,7 +4453,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       fecha: r.fecha,
       beneficiario: r.nombre_usuario || r.usuario?.nombre || 'Referidor',
       tipo: 'Comisión',
-      descripcion: r.servicio ? `Comisión por ${r.servicio} (Comisión)` : (r.descripcion ? `${r.descripcion} (Comisión)` : 'Comisión por referido (Comisión)'),
+      descripcion: r.servicio ? `Comisión por ${r.servicio}` : (r.descripcion ? `${r.descripcion}` : 'Comisión por referido'),
       estado: 'Pendiente', // Es una deuda generada
       fechaRetiro: '-',
       monto: parseFloat(r.monto) || 0,
@@ -5387,6 +5389,21 @@ const approvePayment = async (id) => {
           }
         }
         
+        // Notificar al cliente sobre el CashBack Recibido
+        if (response?.success && response.detalles?.cashback > 0) {
+          try {
+            await $api('/notificaciones/enviar', {
+              method: 'POST',
+              body: {
+                titulo: 'CashBack Recibido',
+                id_usuario: idUsuario
+              }
+            });
+          } catch (notificationError) {
+            console.error('❌ Error al enviar notificación de CashBack:', notificationError);
+          }
+        }
+        
         break;
 
       case 'withdrawals':
@@ -5397,7 +5414,8 @@ const approvePayment = async (id) => {
         });
 
         // si se acepta el retiro haz que el monto se sume al credito
-        if (idUsuario && payment.monto) {
+        // solo si es tipo 'retiro_referido'
+        if (idUsuario && payment.monto && payment.tipo === 'retiro_referido') {
           try {
             await $api('/credito', {
               method: 'POST',
@@ -5469,6 +5487,9 @@ const approvePayment = async (id) => {
     const currentPage = currentPaymentsPage.value;
     const cacheKey = `${activeTab.value}-${selectedMonthPayments.value || 'all'}-${statusFilter.value || 'all'}-${currentPage}-${paymentsPerPage}`;
     if (paymentsCache.value[cacheKey]) delete paymentsCache.value[cacheKey];
+
+    // Limpiar caché de transacciones para forzar recarga
+    transactionsCache.value = {};
 
     await loadTabData(currentPage);
     await updatePlatformStats();
@@ -5618,7 +5639,13 @@ const rejectPayment = async (id) => {
     const cacheKey = `${activeTab.value}-${selectedMonthPayments.value || 'all'}-${statusFilter.value || 'all'}-${currentPage}-${paymentsPerPage}`;
     if (paymentsCache.value[cacheKey]) delete paymentsCache.value[cacheKey];
 
+    // Limpiar caché de transacciones para forzar recarga
+    transactionsCache.value = {};
+
     await loadTabData(currentPage);
+    await updatePlatformStats();
+    await loadTransactions(); // Actualizar sección de transacciones
+    await loadPendingBilling(); // Actualizar Centro de Facturación
 
   } catch (error) {
     console.error('❌ Error rechazando pago:', error);

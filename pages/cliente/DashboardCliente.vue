@@ -294,7 +294,7 @@
               <div>
                 <div class="multiselect-service-wrapper">
                 <multiselect v-model="selectedServiceObject" 
-                        :options="servicesList"
+                        :options="filteredServicesList"
                         :searchable="false"
                         :close-on-select="true"
                         :show-labels="false"
@@ -1383,6 +1383,20 @@ const isFormValid = computed(() => {
   )
 })
 
+// Solo mostrar 'Taxi VIP' a usuarios con membresía activa
+const filteredServicesList = computed(() => {
+  if (isMembershipActive.value) return servicesList.value
+  return servicesList.value.filter(s => s.name !== 'Taxi VIP')
+})
+
+// Si el usuario pierde la membresía y tenía 'Taxi VIP' seleccionado, limpiar la selección
+watch(isMembershipActive, (isActive) => {
+  if (!isActive && selectedServiceObject.value?.name === 'Taxi VIP') {
+    selectedServiceObject.value = null
+    serviceFormData.value.type = ''
+  }
+})
+
 // =========================
 // FUNCIONES UTILITARIAS
 // =========================
@@ -1390,13 +1404,14 @@ const isFormValid = computed(() => {
 // Get appropriate icon based on service name
 const getServiceIcon = (serviceName) => {
   const name = serviceName.toLowerCase()
-  if (name.includes('plom')) return '🚰'
-  if (name.includes('electric') || name.includes('eléctric')) return '💡'
-  if (name.includes('pintur')) return '🎨'
-  if (name.includes('carpinter')) return '🔨'
-  if (name.includes('jardín') || name.includes('jardin')) return '🌱'
-  if (name.includes('limpiez')) return '🧹'
+  if (name.includes('fontanería')) return '🚰'
+  if (name.includes('electricidad')) return '💡'
+  if (name.includes('pintura')) return '🎨'
+  if (name.includes('carpintería')) return '🔨'
+  if (name.includes('jardinería')) return '🌱'
+  if (name.includes('limpieza')) return '🧹'
   if (name.includes('aire') || name.includes('clima')) return '❄️'
+  if (name.includes('taxi')) return '🚕'
   return '🔧'
 }
 
