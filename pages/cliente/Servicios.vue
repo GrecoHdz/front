@@ -326,11 +326,7 @@
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="bg-white dark:bg-emerald-900/30 p-2 rounded-lg">
-              <p class="text-emerald-800 dark:text-emerald-200 text-xs font-bold mb-1">Servicio a realizar:</p>
-              <p class="text-emerald-700 dark:text-emerald-300 text-xs">{{ selectedService.serviceDescription || selectedService.description }}</p>
-            </div>
+            </div> 
           </div>
         </div>
 
@@ -790,9 +786,9 @@
                 />
 
                 <div v-if="getSelectedAccount" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                  <div class="flex justify-between items-center mb-1">
-                    <span class="text-sm font-bold text-gray-900 dark:text-white mb-3">{{ getSelectedAccount.banco }}</span>
-                    <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 italic">{{ getSelectedAccount.tipo_cuenta }}</span>
+                  <div class="flex justify-between items-center gap-2 mb-1">
+                    <span class="text-sm font-bold text-gray-900 dark:text-white truncate flex-1">{{ getSelectedAccount.banco }}</span>
+                    <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 italic whitespace-nowrap">{{ getSelectedAccount.tipo_cuenta }}</span>
                   </div>
                   
                   <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-100 dark:border-gray-700">
@@ -919,9 +915,9 @@
                 />
 
                 <div v-if="getSelectedAccount" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                  <div class="flex justify-between items-center mb-1">
-                    <span class="text-sm font-bold text-gray-900 dark:text-white mb-3">{{ getSelectedAccount.banco }}</span>
-                    <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 italic">{{ getSelectedAccount.tipo_cuenta }}</span>
+                  <div class="flex justify-between items-center gap-2 mb-1">
+                    <span class="text-sm font-bold text-gray-900 dark:text-white truncate flex-1">{{ getSelectedAccount.banco }}</span>
+                    <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 italic whitespace-nowrap">{{ getSelectedAccount.tipo_cuenta }}</span>
                   </div>
                   
                   <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-100 dark:border-gray-700">
