@@ -825,7 +825,7 @@
                   {{ formatCurrency(platformStats.totalRevenue || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
-                  Ingresos Netos Totales
+                  Ganancia Total
                 </p>
               </div>
             </div>
@@ -899,18 +899,52 @@
             </div>
           </div>
 
+          <!-- retiros -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                <span class="text-red-600 dark:text-red-400 text-sm sm:text-lg">💸</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
+                  {{ formatCurrency(platformStats.totalWithdrawals || 0) }}
+                </p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
+                  Pasivos en Retiros
+                </p>
+              </div>
+            </div>
+          </div>
+
           <!-- comisiones -->
           <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
             <div class="flex items-center space-x-2 sm:space-x-3">
               <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
-                <span class="text-indigo-600 dark:text-indigo-400 text-sm sm:text-lg">₹</span>
+                <span class="text-indigo-600 dark:text-indigo-400 text-sm sm:text-lg">💰</span>
               </div>
               <div class="min-w-0">
                 <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
                   {{ formatCurrency(platformStats.totalCommissions || 0) }}
                 </p>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
-                  Comisiones
+                  Comisiones (Referidos)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- cashback -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+              <div class="flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center">
+                <span class="text-pink-600 dark:text-pink-400 text-sm sm:text-lg">✨</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm sm:text-xl font-black text-gray-900 dark:text-white truncate">
+                  {{ formatCurrency(platformStats.totalCashback || 0) }}
+                </p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">
+                  Cashback (Créditos)
                 </p>
               </div>
             </div>
@@ -1002,7 +1036,7 @@
                 </div>
                 <div class="text-right">
                   <p :class="getTransactionAmountClass(transaction.tipo, transaction.estado)" class="font-bold text-[12px] sm:text-base">
-                    {{ transaction.tipo === 'ingreso' ? '+' : (transaction.tipo === 'ingreso_referido' ? '' : '-') }}{{ formatCurrency(transaction.monto || 0) }}
+                    {{ transaction.tipo === 'ingreso' ? '+' : (['ingreso_referido', 'cashback'].includes(transaction.tipo) ? '' : '-') }}{{ formatCurrency(transaction.monto || 0) }}
                   </p>
                   <p class="text-[10px]" :class="getStatusColor(transaction.estado, transaction.tipo)">
                     {{ transaction.estado || 'Sin estado' }}
@@ -1077,7 +1111,7 @@
 
                 <!-- Balance Neto -->
                 <div class="text-right">
-                  <p class="text-xs text-gray-600 dark:text-gray-300">Balance en Banco</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-300">Utilidad Real</p>
                   <p class="text-sm font-bold" :class="getBalanceClass()">
                     {{ getNetBalance() }}
                   </p>
@@ -1537,7 +1571,8 @@ const platformStats = reactive({
   serviceRevenue: 0,
   packageRevenue: 0,
   totalWithdrawals: 0,
-  totalCommissions: 0
+  totalCommissions: 0,
+  totalCashback: 0
 });
 
 const transactionsSummary = ref({
@@ -2916,9 +2951,9 @@ const getStatusColor = (status, tipo) => {
   try {
     const statusLower = (status || '').toLowerCase();
     
-    if (tipo === 'ingreso_referido' && statusLower === 'completado') {
+    if ((tipo === 'ingreso_referido' || tipo === 'cashback') && statusLower === 'completado') {
       return 'text-blue-400';
-    } else if (tipo === 'ingreso_referido' && statusLower === 'pendiente') {
+    } else if ((tipo === 'ingreso_referido' || tipo === 'cashback') && statusLower === 'pendiente') {
       return 'text-yellow-400';
     }
     
@@ -3182,7 +3217,8 @@ const getTransactionIcon = (type) => {
   try {
     switch (type) {
       case 'ingreso': 
-      case 'ingreso_referido': return '💰';
+      case 'ingreso_referido': 
+      case 'cashback': return '💰';
       case 'retiro':
       case 'retiro_referido': return '💳';
       case 'commission': return '💰';
@@ -3200,7 +3236,8 @@ const getTransactionIconClass = (type) => {
   try {
     switch (type) {
       case 'ingreso':
-      case 'ingreso_referido': return 'bg-green-500';
+      case 'ingreso_referido': 
+      case 'cashback': return 'bg-green-500';
       case 'retiro':
       case 'retiro_referido': return 'bg-red-500';
       case 'commission': return 'bg-green-500';
@@ -3224,7 +3261,7 @@ const getTransactionAmountClass = (type, estado) => {
     
     if (type === 'ingreso' || type === 'commission') {
       return 'text-green-600 dark:text-green-400';
-    } else if (type === 'ingreso_referido') {
+    } else if (type === 'ingreso_referido' || type === 'cashback') {
       return 'text-blue-600 dark:text-blue-400';
     } else {
       return 'text-red-600 dark:text-red-400';
@@ -3244,6 +3281,8 @@ const getTransactionTitle = (transaction) => {
         return transaction.servicio || transaction.descripcion || 'Ingreso por servicio';
       case 'ingreso_referido':
         return transaction.descripcion || 'Ingreso por referido';
+      case 'cashback':
+        return transaction.descripcion || 'Cashback por servicio';
       case 'retiro':
       case 'retiro_referido':
         return 'Retiro de fondos'; // Siempre muestra este texto para retiros
@@ -3267,7 +3306,8 @@ const getTransactionSubtitle = (transaction) => {
         if (transaction.colonia) parts.push(transaction.colonia);
         break;
       case 'ingreso_referido':
-        const nombreReferido = transaction.id_usuario || transaction.nombre_usuario || 'Usuario referido';
+      case 'cashback':
+        const nombreReferido = transaction.id_usuario || transaction.nombre_usuario || 'Usuario';
         return nombreReferido.length > 17 ? nombreReferido.substring(0, 15) + '...' : nombreReferido;
     }
     
@@ -3592,7 +3632,7 @@ const updatePlatformStats = async () => {
     if (platformDateFrom.value || platformDateTo.value) {
       const mesActual = platformDateFrom.value ? 
         `${platformDateFrom.value.substring(0, 7)}` : 
-        `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+        `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}` ;
       params.append('mesActual', mesActual);
       
       if (platformDateFrom.value) {
@@ -3623,6 +3663,7 @@ const updatePlatformStats = async () => {
       platformStats.serviceRevenue = data.ingresosServicios || 0;
       platformStats.packageRevenue = data.ingresosPaquetes || 0;
       platformStats.totalCommissions = data.comisiones || 0;
+      platformStats.totalCashback = data.cashback || 0;
       platformStats.totalWithdrawals = data.retiros || 0;
       
       if (response.data.grafico) {
@@ -4000,7 +4041,7 @@ const generateReport = async (report) => {
 
     // 📊 2️⃣ Definir qué datos necesita cada reporte para optimizar las peticiones
     const reportNeeds = {
-      1: ['membresia', 'visit', 'withdrawals', 'quotation', 'users', 'techIncome', 'pkgPayments', 'referralIncome'],
+      1: ['membresia', 'visit', 'withdrawals', 'quotation', 'users', 'techIncome', 'pkgPayments', 'referralIncome', 'cashbackIncome'],
       2: [], // Este reporte hace sus propias peticiones internas
       3: ['users'],
       4: ['membresia', 'visit', 'withdrawals'],
@@ -4018,7 +4059,8 @@ const generateReport = async (report) => {
       users: `/usuarios${monthParam}`,
       techIncome: `/movimientos/ingresos/tecnicos${monthParam}`,
       pkgPayments: `/paquetes/usuarios/pagos${monthParam}`,
-      referralIncome: `/movimientos${monthParam}&tipo=ingreso_referido&estado=completado`
+      referralIncome: `/movimientos${monthParam}&tipo=ingreso_referido&estado=completado`,
+      cashbackIncome: `/movimientos${monthParam}&tipo=cashback&estado=completado`
     };
 
     const urlsToConsult = needs.map(key => urlMap[key]).filter(Boolean);
@@ -4032,10 +4074,11 @@ const generateReport = async (report) => {
       usersRes: needs.includes('users') ? $api(urlMap.users).catch(err => { console.error('❌ Error en /usuarios:', err); throw err; }) : Promise.resolve(null),
       technicianIncomeRes: needs.includes('techIncome') ? $api(urlMap.techIncome).catch(err => { console.error('❌ Error en /movimientos (ingresos):', err); return { movimientos: [], data: [] }; }) : Promise.resolve({ movimientos: [], data: [] }),
       packagePaymentsRes: needs.includes('pkgPayments') ? $api(urlMap.pkgPayments).catch(err => { console.error('❌ Error en /paquetes/usuarios/pagos:', err); return { data: [], estadisticas: { total: 0 } }; }) : Promise.resolve({ data: [], estadisticas: { total: 0 } }),
-      referralIncomeRes: needs.includes('referralIncome') ? $api(urlMap.referralIncome).catch(err => { console.error('❌ Error en /movimientos (referidos):', err); return { movimientos: [], data: [] }; }) : Promise.resolve({ movimientos: [], data: [] })
+      referralIncomeRes: needs.includes('referralIncome') ? $api(urlMap.referralIncome).catch(err => { console.error('❌ Error en /movimientos (referidos):', err); return { movimientos: [], data: [] }; }) : Promise.resolve({ movimientos: [], data: [] }),
+      cashbackIncomeRes: needs.includes('cashbackIncome') ? $api(urlMap.cashbackIncome).catch(err => { console.error('❌ Error en /movimientos (cashback):', err); return { movimientos: [], data: [] }; }) : Promise.resolve({ movimientos: [], data: [] })
     };
 
-    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes, packagePaymentsRes, referralIncomeRes] = await Promise.all([
+    const [membershipRes, visitRes, withdrawalsRes, quotationRes, usersRes, technicianIncomeRes, packagePaymentsRes, referralIncomeRes, cashbackIncomeRes] = await Promise.all([
       promises.membershipRes,
       promises.visitRes,
       promises.withdrawalsRes,
@@ -4043,7 +4086,8 @@ const generateReport = async (report) => {
       promises.usersRes,
       promises.technicianIncomeRes,
       promises.packagePaymentsRes,
-      promises.referralIncomeRes
+      promises.referralIncomeRes,
+      promises.cashbackIncomeRes
     ]); 
 
     const usersData = {
@@ -4094,6 +4138,9 @@ const generateReport = async (report) => {
     const rawReferralData = referralIncomeRes?.movimientos || referralIncomeRes?.data?.movimientos || referralIncomeRes?.data || [];
     const referralIncomeData = Array.isArray(rawReferralData) ? rawReferralData : [];
 
+    const rawCashbackData = cashbackIncomeRes?.movimientos || cashbackIncomeRes?.data?.movimientos || cashbackIncomeRes?.data || [];
+    const cashbackData = Array.isArray(rawCashbackData) ? rawCashbackData : [];
+
     const serviceData = {
       label: 'Servicios',
       total: quotationRes?.estadisticas?.total || 0,
@@ -4125,19 +4172,20 @@ const generateReport = async (report) => {
           // 'retiros' en el resumen ahora = ingresos de técnicos (deudas)
           const deudasTecnicos = parseFloat(resumen.retiros || 0);
           const comisionesReferidos = parseFloat(resumen.comisiones || 0);
+          const totalCashback = parseFloat(resumen.cashback || 0);
           const balanceNeto = parseFloat(resumen.gananciaNeta || 0);
-          ingredientesReporte = { balanceNeto, deudasTecnicos, comisionesReferidos };
+          ingredientesReporte = { balanceNeto, deudasTecnicos, comisionesReferidos, totalCashback };
         } else {
           // Fallback: calcular básico sin deudas
           const ingresosTotales = (membershipRes?.estadisticas?.total || 0) +
             (visitRes?.estadisticas?.total || 0) +
             (quotationRes?.estadisticas?.total || 0) +
             (packagePaymentsRes?.estadisticas?.total || 0);
-          ingredientesReporte = { balanceNeto: ingresosTotales, deudasTecnicos: 0, comisionesReferidos: 0 };
+          ingredientesReporte = { balanceNeto: ingresosTotales, deudasTecnicos: 0, comisionesReferidos: 0, totalCashback: 0 };
         }
       } catch (e) {
         console.error('❌ Error en cálculo de balance PDF:', e);
-        ingredientesReporte = { balanceNeto: 0, deudasTecnicos: 0, comisionesReferidos: 0 };
+        ingredientesReporte = { balanceNeto: 0, deudasTecnicos: 0, comisionesReferidos: 0, totalCashback: 0 };
       }
     }
     const { balanceNeto } = ingredientesReporte;
@@ -4181,12 +4229,14 @@ const generateReport = async (report) => {
           withdrawalsData,
           technicianIncomeData,
           referralIncomeData,
+          cashbackData,
           packagePaymentsData,
           mesNombre: monthName,
           year,
           balanceNeto,
           deudasTecnicos: ingredientesReporte.deudasTecnicos || 0,
-          comisionesReferidos: ingredientesReporte.comisionesReferidos || 0
+          comisionesReferidos: ingredientesReporte.comisionesReferidos || 0,
+          totalCashback: ingredientesReporte.totalCashback || 0
         });
         break;
 
@@ -4297,7 +4347,7 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], referralIncomeData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto: balanceNetoParam, deudasTecnicos = 0, comisionesReferidos = 0 }) => {
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], referralIncomeData = [], cashbackData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto: balanceNetoParam, deudasTecnicos = 0, comisionesReferidos = 0, totalCashback: totalCashbackParam = 0 }) => {
   // 1️⃣ Recalcular TODOS los totales basados en los datos filtrados que se mostrarán en las tablas
   const totalMembresias = membershipData.data
     .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
@@ -4309,17 +4359,16 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     
   const totalServicios = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
-    .reduce((sum, s) => {
-       const manoObra = parseFloat(s.monto_manodeobra) || 0;
-       const credito = parseFloat(s.credito_usado) || 0;
-       const cashback = parseFloat(s.descuento_membresia) || 0;
-       const efectivoReal = Math.max(0, manoObra - credito - cashback);
-       return sum + efectivoReal;
-    }, 0);
+    .reduce((sum, s) => sum + (parseFloat(s.monto_comision_app) || 0), 0);
     
-  const totalPaquetes = packagePaymentsData.data
+  // Obtener porcentaje de comisión para paquetes (puedes intentar obtenerlo de la config o usar el 10% por defecto)
+  const totalPaquetesBruto = packagePaymentsData.data
     .filter(p => p.estado?.toLowerCase() !== 'rechazado')
     .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
+  
+  // Usamos el 10% por defecto o el calculado si viniera en la data
+  const totalPaquetes = (totalPaquetesBruto * 0.10); 
+
     
   // Cálculo de Ingresos Totales (consistente con lo que se muestra abajo)
   const totalIngresos = totalMembresias + totalVisitas + totalServicios + totalPaquetes;
@@ -4329,9 +4378,10 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     .filter(r => ['completado', 'aprobado'].includes(r.estado?.toLowerCase()))
     .reduce((sum, r) => sum + (parseFloat(r.monto) || 0), 0);
 
-  // Ganancia Neta REAL (Contabilidad de Devengado):
-  // Ingresos Brutos - Lo que se le debe a técnicos - Comisiones de referidores
-  const balanceNeto = balanceNetoParam ?? (totalIngresos - deudasTecnicos - comisionesReferidos);
+  // Ganancia Neta REAL (Utilidad App):
+  // Ingresos App (Suma de comisiones y cobros directos) - Cashback - Comisiones Referidos
+  const totalCashbackDebt = totalCashbackParam;
+  const balanceNeto = balanceNetoParam ?? (totalIngresos - totalCashbackDebt - comisionesReferidos);
 
   // Usar autoTable del documento
   let currentY = 40;
@@ -4351,11 +4401,11 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     startY: currentY,
     head: [['Concepto', 'Total (HNL)', 'Porcentaje (%)']],
     body: [
-      ['Membresías', formatCurrency(totalMembresias), calcPorcentaje(totalMembresias)],
-      ['Visitas Técnicas', formatCurrency(totalVisitas), calcPorcentaje(totalVisitas)],
-      ['Venta de Paquetes', formatCurrency(totalPaquetes), calcPorcentaje(totalPaquetes)],
-      ['Efectivo por Servicios', formatCurrency(totalServicios), calcPorcentaje(totalServicios)],
-      ['Total Ingresos', formatCurrency(totalIngresos), '-']
+      ['Membresías (Total)', formatCurrency(totalMembresias), calcPorcentaje(totalMembresias)],
+      ['Visitas Técnicas (Total)', formatCurrency(totalVisitas), calcPorcentaje(totalVisitas)],
+      ['Comisión por Paquetes (App)', formatCurrency(totalPaquetes), calcPorcentaje(totalPaquetes)],
+      ['Comisión por Servicios (App)', formatCurrency(totalServicios), calcPorcentaje(totalServicios)],
+      ['Total Utilidad Bruta App', formatCurrency(totalIngresos), '-']
     ],
     theme: 'grid',
     headStyles: { fillColor: [93, 92, 222], textColor: 255, fontSize: 9 },
@@ -4405,17 +4455,14 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const serviciosFiltrados = serviceData.data
     .filter(s => s.estado?.toLowerCase() === 'confirmado')
     .map(s => {
-         const manoObra = parseFloat(s.monto_manodeobra) || 0;
-         const credito = parseFloat(s.credito_usado) || 0;
-         const cashback = parseFloat(s.descuento_membresia) || 0;
-         const efectivoReal = Math.max(0, manoObra - credito - cashback);
+         const comisionApp = parseFloat(s.monto_comision_app) || 0;
          return [
            formatDate(s.fecha), 
-           'Servicio '+ s.solicitud?.servicio?.nombre,
+           'Comisión '+ (s.solicitud?.servicio?.nombre || 'Servicio'),
            s.solicitud?.cliente?.nombre || '-', 
            s.facturaRelacion?.factura?.estado || 'PENDIENTE',
            s.facturaRelacion?.factura?.numero_factura_correlativo || '-',
-           formatCurrency(efectivoReal)
+           formatCurrency(comisionApp)
          ];
     });
 
@@ -4423,11 +4470,11 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     .filter(p => p.estado?.toLowerCase() !== 'rechazado')
     .map(p => [
       formatDate(p.fecha),
-      'Venta de Paquete',
+      'Comisión Paquete',
       p.usuario?.nombre || '-',
       p.facturaRelacion?.factura?.estado || 'PENDIENTE',
       p.facturaRelacion?.factura?.numero_factura_correlativo || '-',
-      formatCurrency(p.monto)
+      formatCurrency(parseFloat(p.monto) * 0.10)
     ]);
 
   const hayDatos = membresiasFiltradas.length > 0 || visitasFiltradas.length > 0 || serviciosFiltrados.length > 0 || paquetesFiltrados.length > 0;
@@ -4442,7 +4489,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       fecha: t.fecha,
       beneficiario: t.nombre_usuario || t.usuario?.nombre || 'Técnico',
       tipo: 'Servicio',
-      descripcion: t.nombre_servicio ? `Ingreso por ${t.nombre_servicio}` : (t.descripcion || 'Ingreso por servicio completado'),
+      descripcion: t.nombre_servicio ? `Ingreso por servicio ${t.nombre_servicio}` : (t.descripcion || 'Ingreso por servicio completado'),
       estado: 'Pendiente', // Mostramos como pendiente de pago por defecto para reflejar pasivo
       fechaRetiro: '-',
       monto: parseFloat(t.monto) || 0,
@@ -4459,16 +4506,32 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       monto: parseFloat(r.monto) || 0,
     }));
 
+  // C. Cashback (Movimientos reales de tipo cashback)
+  const totalCashbackLocal = totalCashbackDebt || 0;
+
+  const cashbackOps = cashbackData.map(c => ({
+    fecha: c.fecha,
+    beneficiario: c.nombre_usuario || c.usuario?.nombre || 'Cliente',
+    tipo: 'Cashback',
+    descripcion: c.descripcion || 'Cashback acreditado',
+    monto: parseFloat(c.monto) || 0,
+  }));
+
   const operationalCosts = [
     ...tecnicosOps,
-    ...referidosOps
+    ...referidosOps,
+    ...cashbackOps
   ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
+  // Total = suma real de todas las filas de la tabla
   const totalCostosOperativos = operationalCosts.reduce((sum, c) => sum + c.monto, 0);
 
-  // Recalcular Balance Neto
-  // Aquí usamos el total de costos devengados (400.00) para calcular la utilidad real.
-  const balanceNetoFinal = totalIngresos - totalCostosOperativos;
+  // Total de retiros a técnicos (viene del resumen del API como deudasTecnicos)
+  const totalRetirosTecnicos = deudasTecnicos || 0;
+
+  // Recalcular Balance Neto Final: misma fórmula que el API
+  // gananciaNeta = ingresos - cashback - retirosTecnicos
+  const balanceNetoFinal = balanceNetoParam ?? (totalIngresos - totalCashbackLocal - totalRetirosTecnicos);
 
 
   // ... (código existente de Detalle de Ingresos) ...
@@ -4534,7 +4597,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       ? [
           ...costosFiltrados,
           [
-            { content: 'TOTAL COSTOS OPERATIVOS', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: 'TOTAL DEUDAS GENERADAS (Cashback + Referidos)', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
             { content: formatCurrency(totalCostosOperativos), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }
           ]
         ]
@@ -4571,9 +4634,10 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     startY: currentY,
     head: [['Concepto', 'Monto (HNL)']],
     body: [
-      [{ content: 'Total Ingresos Brutos', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
-      [{ content: '(-) Costos Operativos (Devengado)', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalCostosOperativos)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
-      [{ content: 'GANANCIA NETA DE LA APP', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
+      [{ content: 'Total Ingresos App (Bruto)', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
+      [{ content: '(-) Saldo Cashback Acreditado', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalCashbackLocal)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: '(-) Retiros a Técnicos', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetirosTecnicos)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: 'UTILIDAD NETA FINAL (MI DINERO)', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
        { content: formatCurrency(balanceNetoFinal), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }]
     ],
     theme: 'grid',

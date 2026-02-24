@@ -197,10 +197,18 @@
           </div>
         </div>
         
-        <div class="flex overflow-x-auto pb-4 px-4 space-x-3 snap-x snap-mandatory no-scrollbar">
-          <div v-for="service in services" :key="service.id"
+        <div 
+          ref="carruselRef"
+          class="flex overflow-x-auto pb-4 px-4 space-x-3 no-scrollbar cursor-grab active:cursor-grabbing select-none"
+          @mouseenter="isHovering = true"
+          @mouseleave="isHovering = false"
+          @touchstart="handleInteraction"
+          @mousedown="handleInteraction"
+          @scroll="onManualScroll"
+        >
+          <div v-for="(service, index) in carouselItems" :key="index"
                @click="showLoginModal = true"
-               class="flex-shrink-0 w-[160px] snap-center">
+               class="flex-shrink-0 w-[160px]">
             <div class="bg-white dark:bg-gray-800 rounded-[2rem] p-4 shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center transition-all duration-300 active:scale-95 group relative overflow-hidden h-full min-h-[160px] justify-center">
               <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-2xl mb-3 shadow-md shadow-emerald-100 dark:shadow-none transform group-hover:scale-110 transition-transform">
                 {{ service.icon }}
@@ -942,6 +950,9 @@ html {
   scrollbar-width: none;
 }
 
+.cursor-grab { cursor: grab; }
+.cursor-grabbing { cursor: grabbing; }
+
 /* Animación del Modal */
 .modal-enter-active, .modal-leave-active {
   transition: opacity 0.4s ease;
@@ -962,7 +973,7 @@ html {
 </style>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { navigateTo } from '#imports'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
@@ -1099,6 +1110,104 @@ const referralPercentage = ref('10') // Valor por defecto
 const isLoadingMembershipCost = ref(false)
 const isLoadingVisitCost = ref(false)
 const isLoadingReferralPercentage = ref(false)
+
+// Servicios cargados dinámicamente
+const services = ref([])
+const isLoadingServices = ref(false)
+
+// Carrusel Auto-scroll Logic
+const carruselRef = ref(null);
+const isHovering = ref(false);
+const isInteracting = ref(false);
+let animationFrame = null;
+let currentScroll = 0;
+let resumeTimeout = null;
+let isAutoScrolling = false;
+
+const handleInteraction = () => {
+  isInteracting.value = true;
+  if (resumeTimeout) clearTimeout(resumeTimeout);
+  
+  resumeTimeout = setTimeout(() => {
+    isInteracting.value = false;
+    // Sincronizar posición final
+    if (carruselRef.value) currentScroll = carruselRef.value.scrollLeft;
+  }, 2000);
+};
+
+const onManualScroll = () => {
+  if (!isAutoScrolling) {
+    handleInteraction();
+  }
+};
+
+const startAutoScroll = () => {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  
+  const scroll = () => {
+    // Si el modal de login está abierto, detener scroll
+    if (showLoginModal.value) {
+      animationFrame = null;
+      return;
+    }
+
+    if (carruselRef.value) {
+      if (!isHovering.value && !isInteracting.value) {
+        // En index.vue el scroll es horizontal también
+        currentScroll += 0.6; // Velocidad ajustada
+        
+        const halfWidth = carruselRef.value.scrollWidth / 2;
+        
+        if (currentScroll >= halfWidth) {
+          currentScroll = 0;
+        }
+        
+        isAutoScrolling = true;
+        carruselRef.value.scrollLeft = currentScroll;
+        // Pequeño delay para que el evento scroll no detecte esto como manual inmediatamente
+        requestAnimationFrame(() => { isAutoScrolling = false; });
+      } else {
+        // Sincronizar currentScroll con la posición real mientras el usuario interactúa
+        currentScroll = carruselRef.value.scrollLeft;
+      }
+    }
+    animationFrame = requestAnimationFrame(scroll);
+  };
+  
+  animationFrame = requestAnimationFrame(scroll);
+};
+
+const stopAutoScroll = () => {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+};
+
+// Computed property para duplicar elementos (infinite scroll effect)
+const carouselItems = computed(() => {
+  if (!services.value.length) return []
+  return [...services.value, ...services.value]
+})
+
+// Reiniciar scroll si cambian los servicios
+watch(services, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    nextTick(() => {
+      startAutoScroll();
+    });
+  }
+});
+
+// Watch para pausar/reanudar cuando se abre el modal
+watch(showLoginModal, (isOpen) => {
+  if (!isOpen) {
+    startAutoScroll();
+  } else {
+    stopAutoScroll();
+  }
+});
+
+onUnmounted(() => {
+  stopAutoScroll();
+});
 
 // Estado para el número de teléfono
 const phoneNumber = ref('')
@@ -1375,10 +1484,6 @@ const loadMembershipBenefits = async () => {
 // Beneficios de membresía como propiedad computada
 const membershipBenefits = computed(() => membershipBenefitsList.value)
 
-// Servicios cargados dinámicamente
-const services = ref([])
-const isLoadingServices = ref(false)
-
 // Función para cargar los servicios desde la API
 const loadServices = async () => {
   try {
@@ -1392,14 +1497,14 @@ const loadServices = async () => {
       throw new Error('Formato de respuesta inesperado: se esperaba un array de servicios')
     }
     
-    // Mapear los datos de la API al formato esperado por el componente
+    // Mapear los datos de la API al formato esperado por el componente y barajar aleatoriamente
     services.value = data.map(service => ({
       id: service.id_servicio,
       name: service.nombre,
       description: service.descripcion,
       estado: service.estado,
       icon: getServiceIcon(service.nombre)
-    }))
+    })).sort(() => Math.random() - 0.5)
   } catch (error) {
     console.error('Error al cargar los servicios:', error) 
   } finally {

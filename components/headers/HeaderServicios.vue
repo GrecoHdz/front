@@ -207,7 +207,9 @@ const onNotificationClick = async (notification) => {
 
   // Navegación por tipo de notificación
   try {
-    if (notification.titulo === 'CashBack Recibido') {
+    if (notification.titulo === 'Comisión por referido recibida') {
+      await navigateTo('/cliente/Referir');
+    } else if (notification.titulo === 'CashBack Recibido') {
       await navigateTo('/cliente/Marketplace');
     } else if (notification.titulo === 'Pago de Paquete Aceptado') {
       await navigateTo('/cliente/Marketplace');

@@ -950,7 +950,7 @@
       </div>
     </Transition>
 
-    <!-- Top Referrals Modal -->
+    <!-- Unified Top Referrals Modal -->
     <Transition
       enter-active-class="backdrop-enter-active"
       leave-active-class="backdrop-leave-active"
@@ -959,27 +959,63 @@
     >
       <div v-if="showTopReferralsModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showTopReferralsModal = false"></div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-md max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
           <div class="p-3">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-black text-gray-900 dark:text-white">👥 Top 5 Usuarios con más Referidos</h3>
-              <button @click="showTopReferralsModal = false" class="text-gray-400 hover:text-gray-600">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4 border-b dark:border-gray-700 pb-2">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">🏆 Ranking de Referidos</h3>
+              <button @click="showTopReferralsModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
             </div>
-            <div class="space-y-2">
-              <div v-for="(user, index) in topReferrals" :key="index" class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center space-x-2">
-                    <span class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{{ index + 1 }}</span>
-                    <div>
-                      <p class="font-medium text-gray-900 dark:text-white text-xs">{{ user.name }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ user.city }}</p>
+
+            <!-- Dashboard Style Sections -->
+            <div class="space-y-5">
+              <!-- Section 1: Quantity -->
+              <div>
+                <div class="flex items-center space-x-2 mb-2">
+                  <span class="text-lg">👥</span>
+                  <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Top 3 por Cantidad</p>
+                </div>
+                <div class="space-y-1.5">
+                  <div v-for="(user, index) in topReferrals" :key="'q-'+index" class="p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30 flex items-center justify-between">
+                    <div class="flex items-center space-x-2 min-w-0">
+                      <span class="w-5 h-5 flex-shrink-0 bg-blue-500 text-white rounded-md flex items-center justify-center text-[10px] font-black">{{ index + 1 }}</span>
+                      <div class="min-w-0">
+                        <p class="font-bold text-gray-900 dark:text-white text-[11px] truncate">{{ user.name }}</p>
+                        <p class="text-[9px] text-gray-500 dark:text-gray-400 truncate">{{ user.city }}</p>
+                      </div>
+                    </div>
+                    <div class="text-right ml-2">
+                      <p class="text-[12px] font-black text-blue-600 dark:text-blue-400 leading-none">{{ user.total }}</p>
+                      <p class="text-[8px] text-blue-400 font-bold uppercase">Refs</p>
                     </div>
                   </div>
-                  <p class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ user.total }}</p>
+                </div>
+              </div>
+
+              <!-- Section 2: Earnings -->
+              <div>
+                <div class="flex items-center space-x-2 mb-2">
+                  <span class="text-lg">💰</span>
+                  <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Top 3 por Ganancia</p>
+                </div>
+                <div class="space-y-1.5">
+                  <div v-for="(user, index) in topEarnings" :key="'e-'+index" class="p-2 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-100 dark:border-amber-900/30 flex items-center justify-between">
+                    <div class="flex items-center space-x-2 min-w-0">
+                      <span class="w-5 h-5 flex-shrink-0 bg-amber-500 text-white rounded-md flex items-center justify-center text-[10px] font-black">{{ index + 1 }}</span>
+                      <div class="min-w-0">
+                        <p class="font-bold text-gray-900 dark:text-white text-[11px] truncate">{{ user.name }}</p>
+                        <p class="text-[9px] text-gray-500 dark:text-gray-400 truncate">{{ user.city }}</p>
+                      </div>
+                    </div>
+                    <div class="text-right ml-2">
+                      <p class="text-[12px] font-black text-amber-600 dark:text-amber-400 leading-none">L. {{ formatCurrency(user.total) }}</p>
+                      <p class="text-[8px] text-amber-400 font-bold uppercase">Total</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1157,8 +1193,15 @@
                       <p class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(transaction.date) }}</p> 
                     </div>
                     <div class="text-right">
-                      <p :class="transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'" class="font-bold text-sm">
-                        {{ transaction.type === 'credit' ? '+' : '-' }}L. {{ formatCurrency(transaction.amount) }}
+                      <p 
+                        :class="{
+                          'text-green-600': transaction.type === 'credit',
+                          'text-red-600': transaction.type === 'debit',
+                          'text-blue-500': transaction.type === 'info'
+                        }" 
+                        class="font-bold text-sm"
+                      >
+                        {{ transaction.type === 'credit' ? '+' : (transaction.type === 'debit' ? '-' : '') }}L. {{ formatCurrency(transaction.amount) }}
                       </p>
                       <span :class="{
                         'bg-green-100 text-green-800': transaction.status === 'Completado',
@@ -1176,8 +1219,7 @@
             <!-- Paginación créditos -->
             <div v-if="creditsTotalPages > 1" class="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Mostrando {{ userCreditHistory.length }} de {{ totalCreditsCount || 'varias' }}
+                <div class="text-xs text-gray-500 dark:text-gray-400"> 
                 </div>
                 <div class="flex items-center space-x-2">
                   <button 
@@ -1702,17 +1744,17 @@
                     <span class="font-medium text-gray-900 dark:text-white">L. {{ currentQuote.monto_manodeobra || 0 }}</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
-                    <span class="font-medium text-green-600 dark:text-green-400">-L. {{ currentQuote.descuento_membresia || 0 }}</span>
-                  </div>
-                  <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Crédito usado:</span>
                     <span class="font-medium text-green-600 dark:text-green-400">-L. {{ currentQuote.credito_usado || 0 }}</span>
                   </div>
                   <hr class="border-gray-200 dark:border-gray-600">
                   <div class="flex justify-between font-bold">
-                    <span class="text-gray-900 dark:text-white">Total a pagar:</span>
-                    <span class="text-gray-900 dark:text-white">L. {{ (currentQuote.monto_manodeobra - (currentQuote.descuento_membresia || 0) - (currentQuote.credito_usado || 0)).toFixed(2) }}</span>
+                    <span class="text-gray-900 dark:text-white">Total pagado:</span>
+                    <span class="text-gray-900 dark:text-white">L. {{ (currentQuote.monto_manodeobra - (currentQuote.credito_usado || 0)).toFixed(2) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Cashback:</span>
+                    <span class="font-medium text-blue-600 dark:text-blue-400">L. {{ currentQuote.descuento_membresia || 0 }}</span>
                   </div>
                 </div>
               </div>
@@ -2231,6 +2273,7 @@ const showTopCreditsModal = ref(false)
 const showTopReferralsModal = ref(false)
 const showTopBalancesModal = ref(false)
 const showTopRatingsModal = ref(false)
+const showTopEarningsModal = ref(false)
 
 // Estados para el cambio de contraseña
 const newPassword = ref('')
@@ -2322,9 +2365,11 @@ const userServiceHistory = ref([])
 const topBalances = ref([])
 const topReferrals = ref([])
 const topRatings = ref([])
+const topEarnings = ref([])
 const isLoadingTopBalances = ref(false)
 const isLoadingTopReferrals = ref(false)
 const isLoadingTopRatings = ref(false)
+const isLoadingTopEarnings = ref(false)
 
 // Variables para el formulario de usuario
 const userForm = ref({
@@ -2984,8 +3029,9 @@ const filterCredits = async () => {
           userCreditHistory.value = response.data.map(tx => ({
             id: tx.id_movimiento,
             description: tx.descripcion,
-            amount: parseFloat(tx.monto),
-            type: tx.tipo === 'ingreso' || tx.tipo === 'ingreso_referido' ? 'credit' : 'debit',
+            amount: Math.abs(parseFloat(tx.monto)),
+            type: tx.tipo === 'ingreso_referido' ? 'info' : 
+                  (['ingreso', 'cashback', 'retiro_referido'].includes(tx.tipo) ? 'credit' : 'debit'),
             status: tx.estado === 'completado' ? 'Completado' : 
                     tx.estado === 'pendiente' ? 'Pendiente' : 'Rechazado',
             reference: 'SIN-REF',
@@ -3106,12 +3152,7 @@ const showCredits = async (user, page = 1, dateRange = null) => {
     
     // Make the API request
     const response = await $api(url, {
-      baseURL: config.public.apiBase,
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      }
+      method: 'GET'
     })
     
     if (response && response.success) {
@@ -3147,8 +3188,9 @@ const showCredits = async (user, page = 1, dateRange = null) => {
           id: tx.id_movimiento,
           description: description,
           originalDescription: tx.descripcion, // Guardar la descripción original
-          amount: parseFloat(tx.monto),
-          type: tx.tipo === 'ingreso' || tx.tipo === 'ingreso_referido' ? 'credit' : 'debit',
+          amount: Math.abs(parseFloat(tx.monto)),
+          type: tx.tipo === 'ingreso_referido' ? 'info' : 
+                (['ingreso', 'cashback', 'retiro_referido'].includes(tx.tipo) ? 'credit' : 'debit'),
           status: tx.estado === 'completado' ? 'Completado' : 
                   tx.estado === 'pendiente' ? 'Pendiente' : 'Rechazado',
           reference: showQuoteButton ? `COT-${tx.id_movimiento}` : 'SIN-REF',
@@ -3408,23 +3450,29 @@ const showTopReferrals = async () => {
     isLoadingTopReferrals.value = true
     showTopReferralsModal.value = true
     
-    const response = await $api('/referidos/top/usuarios', {
-      method: 'GET'
-    })
+    const [referralsResponse, earningsResponse] = await Promise.all([
+      $api('/referidos/top/usuarios', { method: 'GET' }),
+      $api('/movimientos/referidos/top/ingresos', { method: 'GET' })
+    ])
 
-    if (response && response.success) {
-      topReferrals.value = response.data.map(item => ({
+    if (referralsResponse && referralsResponse.success) {
+      topReferrals.value = referralsResponse.data.map(item => ({
         name: item.nombre,
         city: item.ciudad,
-        total: item.cantidad_referidos,
-        date: new Date(item.fecha).toLocaleDateString()
+        total: item.cantidad_referidos
       }))
-    } else {
-      showError(response?.error || 'No se pudieron cargar los usuarios con más referidos')
+    }
+
+    if (earningsResponse && earningsResponse.success) {
+      topEarnings.value = earningsResponse.data.map(item => ({
+        name: item.name,
+        city: item.city,
+        total: item.total
+      }))
     }
   } catch (error) {
-    console.error('Error al cargar los usuarios con más referidos:', error)
-    showError(`Error: ${error.message || 'No se pudieron cargar los usuarios con más referidos'}`)
+    console.error('Error al cargar rankings de referidos:', error)
+    showError(`Error: ${error.message || 'No se pudieron cargar los rankings'}`)
   } finally {
     isLoadingTopReferrals.value = false
   }
