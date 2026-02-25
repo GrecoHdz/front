@@ -285,7 +285,7 @@
             <!-- Descuento -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Descuento por Membresía
+                Cashback por Membresía
               </label>
               <div class="relative">
                 <input
@@ -302,7 +302,7 @@
             <!-- Descuento Especial -->
             <div>
               <label class="block text-[12px] sm:text-xs md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Descuento por Membresía Especial
+                Cashback por Membresía Especial
               </label>
               <div class="relative">
                 <input

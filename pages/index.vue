@@ -30,7 +30,7 @@
             </div>
           </div>
           <button 
-            @click="showLoginModal = true"
+            @click="isLogin = true; showLoginModal = true"
             class="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-300 text-sm"
           >
             Ingresar
@@ -71,7 +71,7 @@
         <div class="text-center"> 
           <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed px-2">
             <strong class="text-emerald-600 dark:text-emerald-400">MiSeguro</strong> es la primera plataforma en Honduras que te da 
-            <span class="font-bold text-gray-900 dark:text-white">mantenimiento, descuentos y asistencia técnica</span> 
+            <span class="font-bold text-gray-900 dark:text-white">mantenimiento, cashback y asistencia técnica</span> 
             en un solo lugar, a cambio de una membresía mensual accesible.
           </p>
         </div>
@@ -176,7 +176,7 @@
             </div>
 
             <button 
-              @click="showLoginModal = true"
+              @click="isLogin = false; showLoginModal = true"
               class="w-full py-4 bg-white text-indigo-800 font-black text-sm rounded-2xl transition-all shadow-lg active:scale-[0.98] hover:bg-indigo-50 flex items-center justify-center space-x-2"
             >
               <span>EMPEZAR A GANAR AHORA</span>
@@ -207,7 +207,7 @@
           @scroll="onManualScroll"
         >
           <div v-for="(service, index) in carouselItems" :key="index"
-               @click="showLoginModal = true"
+               @click="isLogin = false; showLoginModal = true"
                class="flex-shrink-0 w-[160px]">
             <div class="bg-white dark:bg-gray-800 rounded-[2rem] p-4 shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center transition-all duration-300 active:scale-95 group relative overflow-hidden h-full min-h-[160px] justify-center">
               <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-2xl mb-3 shadow-md shadow-emerald-100 dark:shadow-none transform group-hover:scale-110 transition-transform">
@@ -361,7 +361,7 @@
         </div>
       </div>
       <button 
-        @click="showLoginModal = true"
+        @click="isLogin = false; showLoginModal = true"
         class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
       >
         🌟 Quiero ser parte de MiSeguro
@@ -393,9 +393,34 @@
         </button>
         <div class="p-6">
           <div class="text-center mb-6 pt-4">
-            <div class="w-14 h-14 bg-emerald-50 rounded-xl mx-auto mb-3 flex items-center justify-center border border-emerald-100 shadow-sm">
+            <div class="w-14 h-14 bg-emerald-50 rounded-xl mx-auto mb-4 flex items-center justify-center border border-emerald-100 shadow-sm">
               <img src="/favicon.ico" alt="Logo" class="w-8 h-8 object-contain" />
             </div>
+
+            <!-- Tabs de navegación -->
+            <div class="flex p-1 bg-gray-100 dark:bg-gray-800/50 rounded-xl mb-6 border border-gray-200/50 dark:border-gray-700/50">
+              <button 
+                type="button"
+                @click="isLogin = false"
+                class="flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-300"
+                :class="!isLogin 
+                  ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-md ring-1 ring-black/5' 
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+              >
+                Crear cuenta
+              </button>
+              <button 
+                type="button"
+                @click="isLogin = true"
+                class="flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-300"
+                :class="isLogin 
+                  ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-md ring-1 ring-black/5' 
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+              >
+                Ya tengo cuenta
+              </button>
+            </div>
+
             <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">
               {{ isLogin ? 'Bienvenido' : 'Únete a MiSeguro' }}
             </h3>
@@ -579,18 +604,11 @@
             </button>
           </form>
 
-          <div class="flex items-center justify-center gap-3 text-center text-xs mt-1">
+          <div v-if="isLogin" class="text-center mt-6">
             <button 
-              @click="isLogin = !isLogin"
-              class="text-emerald-600 dark:text-emerald-400 hover:underline focus:outline-none"
-            >
-              {{ isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión' }}
-            </button>
-            <span v-if="isLogin" class="text-gray-300 dark:text-gray-600">|</span>
-            <button 
-              v-if="isLogin"
+              type="button"
               @click="showForgotPassword = true"
-              class="text-gray-600 dark:text-gray-400 hover:underline focus:outline-none"
+              class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors focus:outline-none"
             >
               ¿Olvidaste tu contraseña?
             </button>
