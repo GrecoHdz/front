@@ -92,9 +92,13 @@ export const useAuthStore = defineStore('auth', () => {
 
       return { success: false, error: response.message || 'Error en la autenticación' };
 
-    } catch (error: any) { 
+    } catch (error: any) {
       clearAuthState();
-      return { success: false, error: error.data?.message || error.message || 'Error en la autenticación' };
+      return {
+        success: false,
+        error: error.data?.message || error.message || 'Error en la autenticación',
+        status: error.response?.status || error.statusCode || error.status
+      };
     }
   };
 
@@ -167,7 +171,7 @@ export const useAuthStore = defineStore('auth', () => {
       let tokenPayload: any;
       try {
         tokenPayload = JSON.parse(atob(token.value.split('.')[1]));
-      } catch { 
+      } catch {
         return await refreshToken();
       }
 
@@ -185,13 +189,13 @@ export const useAuthStore = defineStore('auth', () => {
       // Obtener usuario actualizado
       const fetchedUser = await fetchUser();
 
-      if (!fetchedUser) { 
+      if (!fetchedUser) {
         clearAuthState();
         return false;
       }
 
       return true;
-    } catch (err) { 
+    } catch (err) {
       clearAuthState();
       return false;
     }
@@ -237,7 +241,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
 
         return false;
-      } catch (err) { 
+      } catch (err) {
         clearAuthState();
         return false;
       } finally {

@@ -37,6 +37,29 @@
           </button>
         </div>
 
+        <!-- Rate Limit Modal (Posicionado aquí para máxima visibilidad) -->
+        <transition name="modal">
+          <div v-if="showRateLimitModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden relative border border-red-100 dark:border-red-900/30">
+              <div class="p-8 text-center">
+                <div class="w-20 h-20 bg-red-50 dark:bg-red-900/20 rounded-full mx-auto mb-6 flex items-center justify-center border-4 border-white dark:border-gray-700 shadow-lg">
+                  <span class="text-4xl">🛑</span>
+                </div>
+                
+                <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
+                  Demasiados intentos
+                </h3>
+                
+                <p class="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                  Has superado el límite de intentos fallidos. Por seguridad, tu cuenta ha sido bloqueada temporalmente.
+                  <br><br>
+                  <span class="font-bold text-red-600 dark:text-red-400">Por favor, intenta de nuevo en una hora.</span>
+                </p> 
+              </div>
+            </div>
+          </div>
+        </transition>
+
         <!-- Hero Content -->
         <div class="text-center text-white">
           <h2 class="text-2xl font-black mb-3 leading-tight">
@@ -1018,6 +1041,7 @@ useHead({
 
 // Reactive data
 const showLoginModal = ref(false)
+const showRateLimitModal = ref(false)
 const showSuccess = ref(false)
 const isLogin = ref(true)
 const isLoading = ref(true) // Iniciar en true para mostrar el spinner mientras se verifica la autenticación
@@ -1671,9 +1695,20 @@ const handlePasswordReset = async () => {
     showForgotPassword.value = false
     emailForPasswordReset.value = ''
   } catch (error) {
+    const statusCode = error.statusCode || error.status || error.response?.status;
+    const errorMessage = error?.data?.message || '';
+    
+    if (statusCode == 429 || errorMessage.includes('Demasiados intentos')) {
+      showForgotPassword.value = false;
+      setTimeout(() => {
+        showRateLimitModal.value = true;
+      }, 100);
+      return;
+    }
+
     console.error('Error al solicitar recuperación de contraseña:', error)
-    const errorMessage = error?.data?.message || 'Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo.'
-    showToast(errorMessage, 'error')
+    const finalErrorMessage = error?.data?.message || 'Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo.'
+    showToast(finalErrorMessage, 'error')
   } finally {
     isResettingPassword.value = false
   }
@@ -1716,21 +1751,15 @@ const handleAuth = async () => {
         const loginResult = await authStore.login(loginData); 
         
         if (loginResult?.success) {
-          // Mostrar estado de éxito en el spinner
           authStatus.value = 'success';
           
-          // Esperar para mostrar el estado de éxito
           await new Promise(resolve => setTimeout(resolve, 800));
           
-          // Obtener el rol del usuario autenticado
           const userRole = authStore.user?.role?.toLowerCase() || '';
           
-          // Cerrar modal
           showLoginModal.value = false;
           showSuccess.value = true;
           
-          // MANTENER isLoading.value = true hasta la redirección
-          // Redirigir según el rol
           setTimeout(() => {
             switch(userRole) {
               case 'admin':
@@ -1749,16 +1778,38 @@ const handleAuth = async () => {
                 window.location.href = '/';
                 break;
             }
-            // NO desactivar isLoading aquí porque window.location.href cambiará la página
           }, 300);
         } else {
+          // Verificar si el error es por Rate Limit (429)
+          const errorMessage = loginResult?.error || '';
+          if (loginResult?.status == 429 || errorMessage.includes('Demasiados intentos')) {
+            showLoginModal.value = false;
+            isLoading.value = false;
+            authStatus.value = '';
+            setTimeout(() => {
+              showRateLimitModal.value = true;
+            }, 100);
+            return;
+          }
           throw new Error(loginResult?.error || 'Error en las credenciales');
         }
       } catch (loginError) {
-        authStatus.value = 'error';
         const loginErrorData = loginError.data || loginError.response?._data;
-        const errorMessage = loginErrorData?.message || loginError.message || 'Error de autenticación';
-        loadingMessage.value = errorMessage;
+        const statusCode = loginError.statusCode || loginError.status || loginError.response?.status;
+        const errorMessage = loginErrorData?.message || loginError.message || '';
+        
+        if (statusCode == 429 || errorMessage.includes('Demasiados intentos')) {
+          showLoginModal.value = false;
+          isLoading.value = false;
+          authStatus.value = '';
+          setTimeout(() => {
+            showRateLimitModal.value = true;
+          }, 100);
+          return;
+        }
+
+        authStatus.value = 'error';
+        loadingMessage.value = errorMessage || 'Error de autenticación';
         
         setTimeout(() => {
           isLoading.value = false;
@@ -1901,20 +1952,30 @@ const handleAuth = async () => {
           authStatus.value = '';
         }, 1500);
       } catch (error) {
-        
-        // Extraer los datos del error de forma compatible con Nuxt $fetch / ofetch
         const errorData = error.data || error.response?._data || error.response?.data;
+        const statusCode = error.statusCode || error.status || error.response?.status;
+        const errorMessage = errorData?.message || error?.message || '';
+
+        if (statusCode == 429 || errorMessage.includes('Demasiados intentos')) {
+          showLoginModal.value = false;
+          isLoading.value = false;
+          authStatus.value = '';
+          setTimeout(() => {
+            showRateLimitModal.value = true;
+          }, 100);
+          return;
+        }
         
         if (errorData) {
-          const errorMessage = errorData.message || 'Error en el registro. Por favor, inténtalo de nuevo.';
+          const registerErrorMessage = errorData.message || 'Error en el registro. Por favor, inténtalo de nuevo.';
           
           // Si hay un campo específico con error, resaltarlo
           if (errorData.field) {
-            formErrors.value[errorData.field] = errorMessage;
+            formErrors.value[errorData.field] = registerErrorMessage;
           }
           
           // Mostrar el mensaje de error al usuario
-          showToast(errorMessage, 'error');
+          showToast(registerErrorMessage, 'error');
         } else if (error.message) {
           // Si no hay respuesta del servidor pero hay un mensaje de error
           showToast(error.message, 'error');

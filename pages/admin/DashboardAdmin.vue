@@ -588,7 +588,7 @@ const fetchStatistics = async () => {
         totalUsers: response.data.totalUsuarios,
         pendingServices: response.data.totalServicios,
         activeMemberships: response.data.totalMembresiasActivas,
-        monthlyRevenue: parseFloat(response.data.ingresosTotales) || 0,
+        monthlyRevenue: parseFloat(response.data.ingresosGross) || 0,
         serviciosPendiente: response.data.serviciosPendiente || 'no',
         membresiasPendiente: response.data.membresiasPendiente || 'no',
         incomeBreakdown: response.data.desgloseIngresos || {
