@@ -395,7 +395,7 @@
       enter-from-class="modal-enter-from"
       leave-to-class="modal-leave-to"
     >
-      <div v-if="showRenewalModal" class="fixed inset-0 z-50 p-3">
+      <div v-if="showRenewalModal" class="fixed inset-0 z-50 p-3 flex items-center justify-center">
         <!-- Backdrop con animación separada -->
         <Transition
           name="backdrop"
@@ -412,179 +412,177 @@
         </Transition>
 
         <!-- Modal Content con animación separada -->
-        <div class="flex items-center justify-center min-h-full">
-          <Transition
-            name="modal-content"
-            enter-active-class="modal-content-enter-active"
-            leave-active-class="modal-content-leave-active"
-            enter-from-class="modal-content-enter-from"
-            leave-to-class="modal-content-leave-to"
+        <Transition
+          name="modal-content"
+          enter-active-class="modal-content-enter-active"
+          leave-active-class="modal-content-leave-active"
+          enter-from-class="modal-content-enter-from"
+          leave-to-class="modal-content-leave-to"
+        >
+          <div 
+            v-if="showRenewalModal"
+            class="bg-white dark:bg-gray-800 rounded-2xl p-5 w-full max-w-sm max-h-[90vh] flex flex-col relative shadow-2xl border border-gray-200 dark:border-gray-700"
+            @click.stop
           >
-            <div 
-              v-if="showRenewalModal"
-              class="bg-white dark:bg-gray-800 rounded-2xl p-5 w-full max-w-sm relative shadow-2xl border border-gray-200 dark:border-gray-700"
-              @click.stop
+            <!-- Botón de cerrar mejorado -->
+            <button 
+              @click="showRenewalModal = false"
+              type="button"
+              class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+              aria-label="Cerrar modal"
             >
-              <!-- Botón de cerrar mejorado -->
-              <button 
-                @click="showRenewalModal = false"
-                type="button"
-                class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-                aria-label="Cerrar modal"
-              >
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
 
-              <!-- Header del modal mejorado -->
-              <div class="text-center mb-4">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mb-3 shadow-lg">
-                  <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
+            <!-- Header del modal mejorado -->
+            <div class="text-center mb-4 flex-shrink-0">
+              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mb-3 shadow-lg">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white mb-1">Renovar Membresía</h3>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">Selecciona una cuenta para realizar el pago</p>
+            </div>
+
+            <div class="overflow-y-auto flex-1 pr-1 space-y-4 mb-2">
+              <!-- Costo de la membresía mejorado -->
+              <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">Costo de la membresía:</span>
+                  <span v-if="isLoadingMembershipCost" class="h-5 w-20 bg-blue-200 dark:bg-blue-700 rounded animate-pulse"></span>
+                  <span v-else class="text-lg font-black text-blue-600 dark:text-blue-400">L. {{ Number(membershipCost).toFixed(2) }}</span>
                 </div>
-                <h3 class="text-lg font-black text-gray-900 dark:text-white mb-1">Renovar Membresía</h3>
-                <p class="text-gray-600 dark:text-gray-300 text-sm">Selecciona una cuenta para realizar el pago</p>
+                <p class="text-xs text-blue-600 dark:text-blue-300 mt-1 font-medium"> Válido por 30 días a partir de hoy</p>
               </div>
 
-              <div class="space-y-4 mb-2">
-                <!-- Costo de la membresía mejorado -->
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800">
-                  <div class="flex justify-between items-center">
-                    <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">Costo de la membresía:</span>
-                    <span v-if="isLoadingMembershipCost" class="h-5 w-20 bg-blue-200 dark:bg-blue-700 rounded animate-pulse"></span>
-                    <span v-else class="text-lg font-black text-blue-600 dark:text-blue-400">L. {{ Number(membershipCost).toFixed(2) }}</span>
-                  </div>
-                  <p class="text-xs text-blue-600 dark:text-blue-300 mt-1 font-medium"> Válido por 30 días a partir de hoy</p>
+              <!-- Selector de cuenta bancaria mejorado -->
+              <div class="space-y-2 text-left">
+                <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Cuenta bancaria
+                </label>
+                <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
+                  <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
                 </div>
-
-                <!-- Selector de cuenta bancaria mejorado -->
-                <div class="space-y-2">
-                  <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Cuenta bancaria
-                  </label>
-                  <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
-                  </div>
-                  <div v-else class="space-y-3">
-                    <multiselect
-                      id="bank-account"
-                      v-model="selectedAccountObject"
-                      :options="bankAccounts"
-                      :searchable="false"
-                      placeholder="Selecciona una cuenta"
-                      label="banco"
-                      track-by="id_cuenta"
-                      class="multiselect-custom"
-                      :custom-label="getAccountLabel"
-                      :disabled="bankAccounts.length === 0"
-                    >
-                      <template #singleLabel="{ option }">
-                        <span>{{ getAccountLabel(option) }}</span>
-                      </template>
-                    </multiselect>
-                    
-                    <!-- Detalles de la cuenta seleccionada con animación -->
-                    <Transition
-                      name="slide-down"
-                      enter-active-class="slide-down-enter-active"
-                      leave-active-class="slide-down-leave-active"
-                      enter-from-class="slide-down-enter-from"
-                      leave-to-class="slide-down-leave-to"
-                    >
-                      <div v-if="selectedAccount" class="space-y-3">
-                        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
-                          <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de la cuenta:</h4>
-                          <div class="space-y-1">
-                            <div class="flex justify-between items-center py-1">
-                              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Banco:</span>
-                              <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.banco || 'N/A' }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-1">
-                              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Cuenta:</span>
-                              <span class="text-xs font-mono font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.num_cuenta || 'N/A' }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-1">
-                              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Beneficiario:</span>
-                              <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.beneficiario || 'N/A' }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-1">
-                              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Tipo:</span>
-                              <span class="text-xs font-semibold text-gray-800 dark:text-gray-100 capitalize">{{ getSelectedAccount?.tipo || 'N/A' }}</span>
-                            </div>
+                <div v-else class="space-y-3">
+                  <multiselect
+                    id="bank-account"
+                    v-model="selectedAccountObject"
+                    :options="bankAccounts"
+                    :searchable="false"
+                    placeholder="Selecciona una cuenta"
+                    label="banco"
+                    track-by="id_cuenta"
+                    class="multiselect-custom"
+                    :custom-label="getAccountLabel"
+                    :disabled="bankAccounts.length === 0"
+                  >
+                    <template #singleLabel="{ option }">
+                      <span>{{ getAccountLabel(option) }}</span>
+                    </template>
+                  </multiselect>
+                  
+                  <!-- Detalles de la cuenta seleccionada con animación -->
+                  <Transition
+                    name="slide-down"
+                    enter-active-class="slide-down-enter-active"
+                    leave-active-class="slide-down-leave-active"
+                    enter-from-class="slide-down-enter-from"
+                    leave-to-class="slide-down-leave-to"
+                  >
+                    <div v-if="selectedAccount" class="space-y-3">
+                      <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de la cuenta:</h4>
+                        <div class="space-y-1">
+                          <div class="flex justify-between items-center py-1">
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Banco:</span>
+                            <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.banco || 'N/A' }}</span>
+                          </div>
+                          <div class="flex justify-between items-center py-1">
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Cuenta:</span>
+                            <span class="text-xs font-mono font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.num_cuenta || 'N/A' }}</span>
+                          </div>
+                          <div class="flex justify-between items-center py-1">
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Beneficiario:</span>
+                            <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.beneficiario || 'N/A' }}</span>
+                          </div>
+                          <div class="flex justify-between items-center py-1">
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Tipo:</span>
+                            <span class="text-xs font-semibold text-gray-800 dark:text-gray-100 capitalize">{{ getSelectedAccount?.tipo || 'N/A' }}</span>
                           </div>
                         </div>
-
-                        <!-- Input para el número de comprobante mejorado -->
-                        <div class="space-y-1">
-                          <label for="comprobante" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                            Número de comprobante
-                          </label>
-                          <input
-                            id="comprobante"
-                            v-model="comprobante"
-                            type="text"
-                            class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
-                            placeholder="Ej: 123456789"
-                            required
-                          />
-                          <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Ingresa el número de comprobante de tu transferencia o depósito
-                          </p>
-                        </div>
                       </div>
-                    </Transition>
-                    
-                    <div v-if="bankAccounts.length === 0" class="text-center py-3">
-                      <p class="text-sm text-amber-600 dark:text-amber-400 font-medium">⚠️ No se encontraron cuentas bancarias</p>
-                    </div>
-                  </div>
-                </div>
 
-                <!-- Botones de acción mejorados -->
-                <div class="flex flex-col space-y-2 pt-3">
-                  <button
-                    @click="confirmRenewal"
-                    :disabled="isRenewing || !selectedAccount || !comprobante || bankAccounts.length === 0"
-                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] text-sm"
-                    :class="{'opacity-50 cursor-not-allowed': !selectedAccount || !comprobante}"
-                  >
-                    <span v-if="isRenewing" class="flex items-center justify-center">
-                      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Procesando...
-                    </span>
-                    <span v-else class="flex items-center justify-center">
-                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      Confirmar Pago
-                    </span>
-                  </button>
-                  <button
-                    @click="showRenewalModal = false"
-                    class="w-full py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] text-sm"
-                  >
-                    Cancelar
-                  </button>
+                      <!-- Input para el número de comprobante mejorado -->
+                      <div class="space-y-1">
+                        <label for="comprobante" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          Número de comprobante
+                        </label>
+                        <input
+                          id="comprobante"
+                          v-model="comprobante"
+                          type="text"
+                          class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
+                          placeholder="Ej: 123456789"
+                          required
+                        />
+                        <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          Ingresa el número de comprobante de tu transferencia o depósito
+                        </p>
+                      </div>
+                    </div>
+                  </Transition>
+                  
+                  <div v-if="bankAccounts.length === 0" class="text-center py-3">
+                    <p class="text-sm text-amber-600 dark:text-amber-400 font-medium">⚠️ No se encontraron cuentas bancarias</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </Transition>
-        </div>
+
+            <!-- Botones de acción mejorados -->
+            <div class="flex flex-col space-y-2 pt-3 flex-shrink-0">
+              <button
+                @click="confirmRenewal"
+                :disabled="isRenewing || !selectedAccount || !comprobante || bankAccounts.length === 0"
+                class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+                :class="{'opacity-50 cursor-not-allowed': !selectedAccount || !comprobante}"
+              >
+                <span v-if="isRenewing" class="flex items-center justify-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Procesando...
+                </span>
+                <span v-else class="flex items-center justify-center">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Confirmar Pago
+                </span>
+              </button>
+              <button
+                @click="showRenewalModal = false"
+                class="w-full py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] text-sm"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </Transition>
       </div>
     </Transition>
 
 <!-- Modal de Términos y Condiciones (PARA CLIENTES Y TÉCNICOS) -->
 <div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
-  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] flex flex-col relative shadow-2xl border border-gray-200 dark:border-gray-700">
     
     <button 
       @click="isTerminosModalOpen = false"
@@ -597,11 +595,11 @@
       </svg>
     </button>
 
-    <div class="mb-4">
+    <div class="mb-4 flex-shrink-0 text-left">
       <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
     </div>
 
-    <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+    <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
 
       <section>
         <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
@@ -706,9 +704,18 @@
         </p>
       </section>
 
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Garantía de los Servicios</h4>
+        <p>
+          Los servicios técnicos contratados a través de MiSeguro cuentan con una garantía de <strong>un (1) mes</strong>. 
+          En caso de que un trabajo no se haya realizado con los mejores estándares posibles y requiera una nueva 
+          intervención para hacer efectiva la garantía, no se le cobrará mano de obra de nuevo al cliente.
+        </p>
+      </section>
+
     </div>
 
-    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
       <button 
         @click="isTerminosModalOpen = false"
         class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
@@ -722,7 +729,7 @@
 
     <!-- Modal de Política de Privacidad -->
     <div v-if="isPrivacidadModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] flex flex-col relative shadow-2xl border border-gray-200 dark:border-gray-700">
         <button 
           @click="isPrivacidadModalOpen = false"
           type="button"
@@ -734,11 +741,11 @@
           </svg>
         </button>
 
-        <div class="mb-4">
+        <div class="mb-4 flex-shrink-0 text-left">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Política de Privacidad</h3> 
         </div>
 
-        <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+        <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Información que Recopilamos</h4>
             <p>Recopilamos información personal que usted nos proporciona voluntariamente al registrarse y utilizar nuestros servicios. Esta información incluye:</p>
@@ -829,7 +836,7 @@
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Cambios a esta Política</h4>
-            <p>Podemos actualizar esta política de privacidad periódicamente para reflejar cambios en nuestras prácticas o por requisitos legales. Le notificaremos cualquier cambio significativo mediante:</p>
+            <p>Pueden actualizar esta política de privacidad periódicamente para reflejar cambios en nuestras prácticas o por requisitos legales. Le notificaremos cualquier cambio significativo mediante:</p>
             <ul class="list-disc pl-5 space-y-1 mt-2">
               <li>Notificaciones en nuestra plataforma</li>
               <li>Comunicación por correo electrónico</li>
@@ -838,7 +845,7 @@
           </section> 
         </div>
 
-        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
           <button 
             @click="isPrivacidadModalOpen = false"
             class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
@@ -851,7 +858,7 @@
 
     <!-- Modal de Acerca de MiSeguro -->
     <div v-if="isAcercaModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] flex flex-col relative shadow-2xl border border-gray-200 dark:border-gray-700">
         <button 
           @click="isAcercaModalOpen = false"
           type="button"
@@ -863,12 +870,12 @@
           </svg>
         </button>
 
-        <div class="mb-4">
+        <div class="mb-4 flex-shrink-0 text-left">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acerca de MiSeguro</h3>
           <p class="text-sm text-gray-600 dark:text-gray-400">Tu plataforma de confianza para servicios del hogar</p>
         </div>
 
-        <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+        <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
           <section class="text-center">
             <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-3xl text-white mb-4 shadow-lg mx-auto">
               🏠
@@ -955,7 +962,7 @@
           </section> 
         </div>
 
-        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
           <button 
             @click="isAcercaModalOpen = false"
             class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
@@ -1384,6 +1391,25 @@ const selectedCiudadObject = ref(null)
 const isTerminosModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
+
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return isPasswordModalOpen.value || 
+         isTerminosModalOpen.value || 
+         isPrivacidadModalOpen.value || 
+         isAcercaModalOpen.value || 
+         showUnsubscribeModal.value || 
+         showSubscribeModal.value ||
+         showRenewalModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 
 // Información de contacto de la empresa
 const contactInfo = ref([

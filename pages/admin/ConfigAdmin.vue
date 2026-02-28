@@ -2726,13 +2726,37 @@ const isSaving = ref(false)
 const referidorPredeterminado = ref(null)
 
 // Variables para el envío de notificaciones
+const nombreRolDestinoObject = ref(null)
 const mostrarModalEnvio = ref(false)
 const notificacionAEnviar = ref(null)
 const tipoEnvio = ref('')
 const tipoEnvioObject = ref(null)
 const idUsuarioDestino = ref(null)
 const nombreRolDestino = ref('')
-const nombreRolDestinoObject = ref(null)
+
+const anyModalOpen = computed(() => {
+  return mostrarModalEnvio.value || 
+         mostrarModalBuscarUsuario.value || 
+         mostrarModalConfirmacionEliminar.value || 
+         mostrarModalConfirmacionEliminarLeidas.value || 
+         mostrarModalConfirmacion.value || 
+         mostrarModalNuevoServicio.value || 
+         mostrarModalNuevoPaquete.value || 
+         mostrarModalConfirmacionEliminarPaquete.value || 
+         mostrarModalNuevoBeneficio.value || 
+         mostrarModalNuevaCuenta.value || 
+         mostrarModalDetallesCuenta.value || 
+         mostrarModalNuevaCiudad.value || 
+         mostrarModalCorrelativo.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 
 // Variables para selección de ciudad
 const ciudadSeleccionada = ref(null)

@@ -727,6 +727,19 @@ const userReferralCode = ref('')
 
 // Estados de modales
 const showWithdrawModal = ref(false)
+
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return showWithdrawModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 const isProcessingWithdraw = ref(false)
 
 // Estado para el formulario de retiro

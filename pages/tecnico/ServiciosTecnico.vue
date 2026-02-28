@@ -863,6 +863,24 @@ const isCompleting = ref(false)
 const isSubmittingQuotation = ref(false)
 const isUpdatingQuotation = ref(false)
 
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return showServiceModal.value || 
+         showQuotationModal.value || 
+         showTaxiQuotationModal.value || 
+         showViewQuotationModal.value || 
+         showCancelConfirmation.value || 
+         showCompleteConfirmation.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
+
 // Paginación
 const currentPage = ref(1)
 const hasMore = ref(false)

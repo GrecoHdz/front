@@ -2347,6 +2347,7 @@ const loadingHistory = ref(false)
 const loadingPackages = ref(false)
 const isProcessingPayment = ref(false)
 const isVerifying = ref(false)
+const showPaymentConfirmationModal = ref(false)
 const showDetailModal = ref(false)
 const showLiquidacionModal = ref(false)
 const techSearchQuery = ref('')
@@ -2355,10 +2356,34 @@ const showPaymentModal = ref(false)
 const showAmountDetailsModal = ref(false)
 const showAssignmentModal = ref(false)
 const showBankDetailsModal = ref(false)
-const showPaymentConfirmationModal = ref(false)
+const showPackageConfirmModal = ref(false)
+const showConfirmModal = ref(false)
+const showPackagePaymentDetailsModal = ref(false)
+const showFacturaModal = ref(false)
+
+const anyModalOpen = computed(() => {
+  return showDetailModal.value || 
+         showLiquidacionModal.value || 
+         showPaymentModal.value || 
+         showAmountDetailsModal.value || 
+         showAssignmentModal.value || 
+         showBankDetailsModal.value || 
+         showPaymentConfirmationModal.value || 
+         showPackageConfirmModal.value || 
+         showConfirmModal.value || 
+         showPackagePaymentDetailsModal.value || 
+         showFacturaModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 
 // Package Assignment Modal
-const showPackageConfirmModal = ref(false) 
 const selectedPackageTechnician = ref(null)
 const isAssigningPackage = ref(false)
 const packageCities = ref([])
@@ -2720,10 +2745,8 @@ const toast = ref({
 })
 
 // ===== VARIABLES PARA MODALES DE PAGOS y CONFIG EMPRESA =====
-const showPackagePaymentDetailsModal = ref(false)
 const selectedPackagePayment = ref(null)
-const showFacturaModal = ref(false)
-const selectedFacturaPayment = ref(null)
+const selectedFacturaPayment = ref(null);
 
 // Variables de datos de empresa
 const empresaNombre = ref('MiSeguro');
@@ -3737,7 +3760,6 @@ const confirmPaymentService = (service) => {
 }
 
 // Estado para el modal de confirmación
-const showConfirmModal = ref(false)
 const selectedTechnician = ref(null)
 
 // Función para manejar la selección inicial del técnico

@@ -639,6 +639,23 @@ const selectedAccountObject = ref(null)
 const isProcessingPayment = ref(false)
 const numeroComprobante = ref('')
 
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return !!selectedDetailPackage.value || 
+         showPaquetePagoModal.value || 
+         showAccountDetailModal.value || 
+         showConfirmarUsoModal.value || 
+         showConfirmarCanjeoModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
+
 // --- Computed ---
 
 const displayPackages = computed(() => {
@@ -760,12 +777,10 @@ const handleImageError = (id) => {}
 
 const openPackageDetail = (p) => {
   selectedDetailPackage.value = p
-  document.body.style.overflow = 'hidden'
 }
 
 const closeDetail = () => {
   selectedDetailPackage.value = null
-  document.body.style.overflow = ''
 }
 
 const verDatosCuenta = (acc) => {

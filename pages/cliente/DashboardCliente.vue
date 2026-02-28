@@ -1927,14 +1927,12 @@ const selectedDetailPackage = ref(null)
 
 const openPackageDetail = (p) => {
   selectedDetailPackage.value = p
-  document.body.style.overflow = 'hidden'
   isHovering.value = true;
   stopAutoScroll(); // Apagar el loop completamente
 }
 
 const closeDetail = () => {
   selectedDetailPackage.value = null
-  document.body.style.overflow = ''
   isHovering.value = false;
   startAutoScroll(); // Reiniciar el loop
 }
@@ -1967,6 +1965,23 @@ const bankAccounts = ref([]);
 const selectedAccountObject = ref(null);
 const isProcessingPayment = ref(false);
 const numeroComprobante = ref('');
+
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return !!selectedDetailPackage.value || 
+         showPaquetePagoModal.value || 
+         showAccountDetailModal.value || 
+         showConfirmarUsoModal.value || 
+         showConfirmarCanjeoModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 
 
 const verDatosCuenta = (acc) => {

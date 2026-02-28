@@ -631,6 +631,7 @@ const selectedDetailPackage = ref(null)
 const showPaquetePagoModal = ref(false)
 const showAccountDetailModal = ref(false)
 const viewingAccount = ref(null)
+const numeroComprobante = ref('')
 const showConfirmarUsoModal = ref(false)
 const showConfirmarCanjeoModal = ref(false)
 const selectedPaquete = ref(null)
@@ -638,7 +639,22 @@ const isLoadingAccounts = ref(false)
 const bankAccounts = ref([])
 const selectedAccountObject = ref(null)
 const isProcessingPayment = ref(false)
-const numeroComprobante = ref('')
+
+const anyModalOpen = computed(() => {
+  return !!selectedDetailPackage.value || 
+         showPaquetePagoModal.value || 
+         showAccountDetailModal.value || 
+         showConfirmarUsoModal.value || 
+         showConfirmarCanjeoModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 
 // --- Computed ---
 
@@ -761,12 +777,10 @@ const handleImageError = (id) => {}
 
 const openPackageDetail = (p) => {
   selectedDetailPackage.value = p
-  document.body.style.overflow = 'hidden'
 }
 
 const closeDetail = () => {
   selectedDetailPackage.value = null
-  document.body.style.overflow = ''
 }
 
 const verDatosCuenta = (acc) => {

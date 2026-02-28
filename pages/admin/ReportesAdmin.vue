@@ -1483,14 +1483,34 @@ const selectedMonthTransactions = ref('');
 const selectedMonthPayments = ref('');
 const selectedMonthReports = ref(new Date().toISOString().slice(0, 7));
 const statusFilter = ref('all');
+const showServiceDetailModal = ref(false);
 const showDetailsModal = ref(false);
 const showWithdrawalModal = ref(false);
 const showFacturaModal = ref(false);
 const selectedPayment = ref(null);
 const selectedWithdrawal = ref(null);
 const selectedFacturaPayment = ref(null);
-const showServiceDetailModal = ref(false);
 const selectedService = ref(null);
+const showBankDetailsModal = ref(false);
+const showAmountDetailsModal = ref(false);
+
+const anyModalOpen = computed(() => {
+  return showDetailsModal.value || 
+         showWithdrawalModal.value || 
+         showFacturaModal.value || 
+         showServiceDetailModal.value || 
+         showAmountDetailsModal.value || 
+         isBillingModalOpen.value ||
+         showBankDetailsModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 const initialStats = ref({
   aprobados: 0,
   rechazados: 0,
@@ -2604,7 +2624,6 @@ const updateSelectedMonth = async (type = 'payments') => {
 };
 
 // ===== FUNCIONES DE DETALLES DE MONTO (COPIADO DE SERVICIOSADMIN) =====
-const showAmountDetailsModal = ref(false);
 const paymentType = ref('');
 const serviceToPayment = ref(null);
 
@@ -3358,7 +3377,6 @@ const showItemDetails = (item) => {
       selectedPayment.value = item;
       showDetailsModal.value = true;
     }
-    document.body.style.overflow = 'hidden';
   } catch (error) {
     console.error('Error al mostrar detalles del ítem:', error);
     showToast('Error al cargar los detalles', 'error');
@@ -3500,7 +3518,6 @@ const closeWithdrawalModal = () => {
   try {
     showWithdrawalModal.value = false;
     selectedWithdrawal.value = null;
-    document.body.style.overflow = 'auto';
   } catch (error) {
     console.error('Error cerrando modal de retiro:', error);
   }

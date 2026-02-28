@@ -2263,6 +2263,7 @@ const hasMoreUsers = ref(false)
 const totalAdmins = ref(0)
 
 // Modales
+const showTopEarningsModal = ref(false)
 const showEditModal = ref(false)
 const showPasswordModal = ref(false)
 const showReferralsModal = ref(false) 
@@ -2273,7 +2274,36 @@ const showTopCreditsModal = ref(false)
 const showTopReferralsModal = ref(false)
 const showTopBalancesModal = ref(false)
 const showTopRatingsModal = ref(false)
-const showTopEarningsModal = ref(false)
+const showCreditsModal = ref(false)
+const showQuoteModal = ref(false)
+const showAmountDetailsModal = ref(false)
+const showWithdrawalModal = ref(false)
+
+const anyModalOpen = computed(() => {
+  return showEditModal.value || 
+         showPasswordModal.value || 
+         showReferralsModal.value || 
+         showServiceHistoryModal.value || 
+         showCommentModal.value || 
+         showTopCreditsModal.value || 
+         showTopReferralsModal.value || 
+         showTopBalancesModal.value || 
+         showTopRatingsModal.value || 
+         showTopEarningsModal.value ||
+         showCreditsModal.value ||
+         showQuoteModal.value ||
+         showAmountDetailsModal.value ||
+         showWithdrawalModal.value ||
+         imagePreview.value.show
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 
 // Estados para el cambio de contraseña
 const newPassword = ref('')
@@ -2402,12 +2432,10 @@ const currentRating = ref('')
 const currentClient = ref('') 
 
 // Variables para el modal de créditos 
-const showCreditsModal = ref(false)
 const creditsLoading = ref(false)  
 const totalCreditsCount = ref(0)
 
 // Variables para el modal de cotización
-const showQuoteModal = ref(false)
 const currentQuote = ref(null)
 
 // Variables para el progreso de membresía
@@ -2457,7 +2485,6 @@ const openQuoteModal = (transaction) => {
 const creditsCache = ref({})
 
 // Variables para el modal de retiro
-const showWithdrawalModal = ref(false)
 const currentWithdrawal = ref(null)
 
 // Abrir modal de retiro
@@ -2483,8 +2510,6 @@ const openWithdrawalModal = (transaction) => {
 const creditsResponse = ref(null)
 
 // Variables para el modal de detalles de monto
-const showAmountDetailsModal = ref(false) 
-
 // Generar clave única para el cache
 const getCacheKey = (userId, page, month) => {
   return `${userId}-${page}-${month || 'all'}`

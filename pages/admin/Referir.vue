@@ -1052,6 +1052,18 @@ useHead({
 // VARIABLES ESTÁTICAS
 // =========================
 
+const anyModalOpen = computed(() => {
+  return showWithdrawModal.value || showTechnicianWithdrawModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
+
 // Pasos de cómo funciona
 const howItWorksSteps = [
   {

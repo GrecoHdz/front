@@ -453,6 +453,19 @@ let resumeTimeout = null
 let isAutoScrolling = false
 const selectedDetailPackage = ref(null)
 
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return !!selectedDetailPackage.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
+
 // ===== FUNCIONES DE UTILIDAD =====
 const formatRelativeDate = (dateString) => {
   if (!dateString) return 'Sin fecha'
@@ -638,14 +651,12 @@ const getEstadoPaquete = (paqueteId) => {
 
 const openPackageDetail = (p) => {
   selectedDetailPackage.value = p;
-  document.body.style.overflow = 'hidden';
   isHovering.value = true;
   stopAutoScroll();
 };
 
 const closeDetail = () => {
   selectedDetailPackage.value = null;
-  document.body.style.overflow = '';
   isHovering.value = false;
   startAutoScroll();
 };

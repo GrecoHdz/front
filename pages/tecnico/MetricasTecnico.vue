@@ -612,6 +612,19 @@ const isLoadingMovements = ref(false)
 const isProcessingWithdraw = ref(false)
 const showWithdrawModal = ref(false)
 
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return showWithdrawModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
+
 // Fechas
 const currentMonth = new Date().toISOString().slice(0, 7)
 const selectedMonth = ref(currentMonth)

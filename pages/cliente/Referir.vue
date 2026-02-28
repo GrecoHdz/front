@@ -729,6 +729,19 @@ const userReferralCode = ref('')
 const showWithdrawModal = ref(false)
 const isProcessingWithdraw = ref(false)
 
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return showWithdrawModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
+
 // Estado para el formulario de retiro
 const withdrawForm = ref({
   amount: 0,

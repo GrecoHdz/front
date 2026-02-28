@@ -2184,7 +2184,28 @@ const showQuotationModal = ref(false)
 const showTaxiQuotationModal = ref(false)
 const showRatingModal = ref(false) 
 const showImageModal = ref(false)
-const selectedImage = ref('') 
+const selectedImage = ref('')
+
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return showServiceModal.value || 
+         showPaymentModal.value || 
+         showTaxiPaymentModal.value || 
+         showVisitPaymentModal.value || 
+         showCancelModal.value || 
+         showQuotationModal.value || 
+         showTaxiQuotationModal.value || 
+         showRatingModal.value || 
+         showImageModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+}) 
 
 // Estados para calificación
 const rating = ref(0)

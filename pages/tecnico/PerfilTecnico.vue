@@ -476,7 +476,7 @@
 
 <!-- Modal de Términos y Condiciones (PARA CLIENTES Y TÉCNICOS) -->
 <div v-if="isTerminosModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
-  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] flex flex-col relative shadow-2xl border border-gray-200 dark:border-gray-700">
     
     <button 
       @click="isTerminosModalOpen = false"
@@ -489,11 +489,11 @@
       </svg>
     </button>
 
-    <div class="mb-4">
+    <div class="mb-4 flex-shrink-0">
       <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Términos y Condiciones</h3> 
     </div>
 
-    <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+    <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
 
       <section>
         <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
@@ -598,9 +598,18 @@
         </p>
       </section>
 
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Garantía de los Servicios</h4>
+        <p>
+          Los servicios técnicos contratados a través de MiSeguro cuentan con una garantía de <strong>un (1) mes</strong>. 
+          En caso de que un trabajo no se haya realizado con los mejores estándares posibles y requiera una nueva 
+          intervención para hacer efectiva la garantía, no se le cobrará mano de obra de nuevo al cliente.
+        </p>
+      </section>
+
     </div>
 
-    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
       <button 
         @click="isTerminosModalOpen = false"
         class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
@@ -614,7 +623,7 @@
 
 <!-- Modal de Contrato del Técnico (SOLO PARA TÉCNICOS) -->
 <div v-if="isContratoTecnicoModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
-  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[80vh] overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-700">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-5 w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] flex flex-col relative shadow-2xl border border-gray-200 dark:border-gray-700">
     
     <button 
       @click="isContratoTecnicoModalOpen = false"
@@ -627,7 +636,7 @@
       </svg>
     </button>
 
-    <div class="mb-4">
+    <div class="mb-4 flex-shrink-0">
       <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
         Contrato de Prestación de Servicios del Técnico
       </h3> 
@@ -636,7 +645,7 @@
       </p>
     </div>
 
-    <div class="overflow-y-auto max-h-[60vh] pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+    <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
 
       <section>
         <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Objeto del Contrato</h4>
@@ -771,7 +780,21 @@
       </section>
 
       <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Aceptación del Contrato</h4>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Garantía de Servicio</h4>
+        <p>
+          Todos los trabajos realizados a través de la plataforma cuentan con una garantía de <strong>un (1) mes</strong>. 
+          En caso de que un trabajo no se haya realizado siguiendo los mejores estándares posibles y requiera una 
+          nueva intervención para hacer efectiva la garantía, el Técnico deberá correr íntegramente con los <strong>gastos de mano de obra</strong> 
+          derivados de dicha intervención.
+        </p>
+        <p class="mt-2 text-red-600 dark:text-red-400 font-medium">
+          El incumplimiento de esta obligación resultará en el <strong>veto inmediato y permanente</strong> del Técnico 
+          de la aplicación.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Aceptación del Contrato</h4>
         <p>
           El uso, acceso y permanencia en la Plataforma implica la aceptación expresa,
           automática e incondicional del presente contrato.
@@ -785,7 +808,7 @@
 
     </div>
 
-    <div class="mt-4 pt-4 pb-2 border-t border-gray-200 dark:border-gray-700">
+    <div class="mt-4 pt-4 pb-2 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
       <button 
         @click="isContratoTecnicoModalOpen = false"
         class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
@@ -1234,11 +1257,34 @@ const showUnsubscribeModal = ref(false)
 const showSubscribeModal = ref(false)
 
 
+
+
 // Variables para gestión de servicios
 const availableServices = ref([])
 const technicianServices = ref([])
 const loadingServices = ref(false)
 const showServiceModal = ref(false)
+
+// Bloquear scroll cuando un modal está abierto
+const anyModalOpen = computed(() => {
+  return isPasswordModalOpen.value || 
+         isPhotoModalOpen.value || 
+         isTerminosModalOpen.value || 
+         isContratoTecnicoModalOpen.value || 
+         isPrivacidadModalOpen.value || 
+         isAcercaModalOpen.value || 
+         showUnsubscribeModal.value || 
+         showSubscribeModal.value ||
+         showServiceModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
 
 // Campos de contraseña
 const currentPassword = ref('')

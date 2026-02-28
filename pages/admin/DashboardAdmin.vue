@@ -647,6 +647,18 @@ const verificationData = ref({
   verified: false
 })
 
+const anyModalOpen = computed(() => {
+  return showTicketModal.value || showAssignmentModal.value || showVerificationModal.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
+
 // Para el modal de asignación de técnico
 const selectedTechCity = ref('')
 const currentTechPage = ref(1)
