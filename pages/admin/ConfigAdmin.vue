@@ -2727,12 +2727,25 @@ const referidorPredeterminado = ref(null)
 
 // Variables para el envío de notificaciones
 const nombreRolDestinoObject = ref(null)
-const mostrarModalEnvio = ref(false)
 const notificacionAEnviar = ref(null)
 const tipoEnvio = ref('')
 const tipoEnvioObject = ref(null)
 const idUsuarioDestino = ref(null)
 const nombreRolDestino = ref('')
+
+const mostrarModalEnvio = ref(false)
+const mostrarModalBuscarUsuario = ref(false)
+const mostrarModalConfirmacionEliminar = ref(false)
+const mostrarModalConfirmacionEliminarLeidas = ref(false)
+const mostrarModalConfirmacion = ref(false)
+const mostrarModalNuevoServicio = ref(false)
+const mostrarModalNuevoPaquete = ref(false)
+const mostrarModalConfirmacionEliminarPaquete = ref(false)
+const mostrarModalNuevoBeneficio = ref(false)
+const mostrarModalNuevaCuenta = ref(false)
+const mostrarModalDetallesCuenta = ref(false)
+const mostrarModalNuevaCiudad = ref(false)
+const mostrarModalCorrelativo = ref(false)
 
 const anyModalOpen = computed(() => {
   return mostrarModalEnvio.value || 
@@ -2764,7 +2777,6 @@ const rolCiudadSeleccionado = ref(null)
 const cargandoCiudades = ref(false)
 
 // Variables para búsqueda de usuarios
-const mostrarModalBuscarUsuario = ref(false)
 const terminoBusquedaUsuario = ref('')
 const buscandoUsuarios = ref(false)
 const usuariosEncontrados = ref([])
@@ -2900,10 +2912,7 @@ const getRolLabel = (option) => {
 const isSendingNotification = ref(false)
 
 // Estados para los modales de confirmación
-const mostrarModalConfirmacionEliminar = ref(false)
 const notificacionAEliminar = ref(null)
-const mostrarModalConfirmacionEliminarLeidas = ref(false)
-const mostrarModalConfirmacion = ref(false)
 const accionConfirmar = ref(null)
 const servicioSeleccionado = ref(null)
 const mensajeConfirmacion = ref('')
@@ -2913,18 +2922,15 @@ const tituloConfirmacion = ref('')
 const servicios = ref([]);
 const serviciosCargando = ref(false);
 const servicioEditando = ref(null);
-const mostrarModalNuevoServicio = ref(false);
 
 // Estados para gestión de paquetes
 const paquetes = ref([]);
 const paquetesCargando = ref(false);
 const paqueteEditando = ref(null);
-const mostrarModalNuevoPaquete = ref(false);
 const filtroBusquedaPaquetes = ref('');
 const filtroEstadoPaquetesObject = ref(null);
 const filtroCiudadPaquete = ref(null);
 const paqueteAEliminar = ref(null);
-const mostrarModalConfirmacionEliminarPaquete = ref(false);
 
 // Formulario de paquete
 // Estado para controlar la carga al guardar
@@ -2976,7 +2982,6 @@ const getEstadoLabel = (option) => {
 const beneficios = ref([]);
 const beneficiosCargando = ref(false);
 const beneficioEditando = ref(null);
-const mostrarModalNuevoBeneficio = ref(false);
 const guardandoBeneficio = ref(false);
 const formBeneficio = ref({
   mes_requerido: 1,
@@ -2989,8 +2994,6 @@ const filtroBusquedaBeneficios = ref('')
 const cuentas = ref([]);
 const cuentasCargando = ref(false);
 const cuentaEditando = ref(null);
-const mostrarModalNuevaCuenta = ref(false);
-const mostrarModalDetallesCuenta = ref(false);
 const guardandoCuenta = ref(false);
 const cuentaSeleccionada = ref(null);
 const formCuenta = ref({
@@ -3006,7 +3009,6 @@ const filtroBusquedaCuentas = ref('')
 const ciudades = ref([]);
 const ciudadesCargando = ref(false);
 const ciudadEditando = ref(null);
-const mostrarModalNuevaCiudad = ref(false);
 const guardandoCiudad = ref(false);
 const formCiudad = ref({
   nombre: ''
@@ -3017,7 +3019,6 @@ const filtroBusquedaCiudades = ref('')
 const correlativos = ref([]);
 const correlativosCargando = ref(false);
 const correlativoEditando = ref(null);
-const mostrarModalCorrelativo = ref(false);
 const guardandoCorrelativo = ref(false);
 const correlativoForm = ref({
   cai: '',

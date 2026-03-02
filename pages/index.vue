@@ -1714,6 +1714,14 @@ const handlePasswordReset = async () => {
   }
 }
 
+const trackCompleteRegistration = () => {
+  if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+    window.fbq('track', 'CompleteRegistration', {
+      content_name: 'Registro MiSeguro'
+    });
+  }
+};
+
 const handleAuth = async () => {
   // Validar identidad antes de continuar
   if (!validateIdentity()) {
@@ -1860,6 +1868,9 @@ const handleAuth = async () => {
         // Mostrar mensaje de éxito
         if (registerAsTechnician.value) {
           showToast('¡Solicitud de técnico enviada! Tu perfil está en revisión. Te notificaremos cuando sea aprobado.', 'success');
+
+          trackCompleteRegistration();
+
           // Guardar los datos del formulario antes de limpiarlos
           const formData = { ...form.value };
           
@@ -1888,6 +1899,7 @@ const handleAuth = async () => {
         } else {
           // Mostrar mensaje de éxito para usuarios normales
           showToast('¡Registro exitoso! Ahora puedes iniciar sesión.', 'success');
+          trackCompleteRegistration();
         }
         
         // Manejar referido después del registro exitoso

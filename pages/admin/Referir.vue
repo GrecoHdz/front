@@ -1052,6 +1052,9 @@ useHead({
 // VARIABLES ESTÁTICAS
 // =========================
 
+const showWithdrawModal = ref(false)
+const showTechnicianWithdrawModal = ref(false)
+
 const anyModalOpen = computed(() => {
   return showWithdrawModal.value || showTechnicianWithdrawModal.value
 })
@@ -1123,7 +1126,6 @@ const stats = ref({
 const userReferralCode = ref('')
 
 // Estados de modales
-const showWithdrawModal = ref(false)
 const isProcessingWithdraw = ref(false)
 
 // Estado para el formulario de retiro
@@ -1174,7 +1176,6 @@ const technicianBalance = ref({
 
 // Estados de carga para movimientos de técnico
 const isLoadingTechnicianMovements = ref(false)
-const showTechnicianWithdrawModal = ref(false)
 const isProcessingTechnicianWithdraw = ref(false)
 
 // Datos de movimientos de técnico

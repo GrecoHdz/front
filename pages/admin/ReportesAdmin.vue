@@ -1493,6 +1493,7 @@ const selectedFacturaPayment = ref(null);
 const selectedService = ref(null);
 const showBankDetailsModal = ref(false);
 const showAmountDetailsModal = ref(false);
+const isBillingModalOpen = ref(false);
 
 const anyModalOpen = computed(() => {
   return showDetailsModal.value || 
@@ -1530,7 +1531,6 @@ const isApproving = ref(false);
 const isRejecting = ref(false);
 const billingMonth = ref(new Date().toISOString().slice(0, 7));
 const pendingBillingItems = ref([]);
-const isBillingModalOpen = ref(false);
 const currentBillingItem = ref(null);
 const billingForm = reactive({
   tipo_factura: 'CONSUMIDOR_FINAL',
@@ -5373,6 +5373,16 @@ const approvePayment = async (id) => {
 
         // Crear factura para pago de membresía
         billingStatus = await crearFacturaParaPago(idUsuario, payment, 'membership', payment.id_membresia || payment.id);
+        
+        if (response?.success && typeof window !== 'undefined' && typeof window.fbq === 'function') {
+          window.fbq('track', 'Purchase', {
+            value: Number(payment.monto),
+            currency: 'HNL',
+            content_name: 'Membresía MiSeguro',
+            content_type: 'membership',
+            transaction_id: payment.id_membresia || payment.id
+          });
+        }     
         break;
 
       case 'visits':
@@ -5414,6 +5424,16 @@ const approvePayment = async (id) => {
             console.error('❌ Error al enviar notificación al técnico:', notificationError);
             // No interrumpir el flujo si falla la notificación
           }
+        }
+
+        if (response?.success && typeof window !== 'undefined' && typeof window.fbq === 'function') {
+          window.fbq('track', 'Purchase', {
+            value: Number(payment.monto),
+            currency: 'HNL',
+            content_name: 'Visita Técnica MiSeguro',
+            content_type: 'visit',
+            transaction_id: payment.id_pagovisita
+          });
         }
         break;
 
@@ -5485,6 +5505,15 @@ const approvePayment = async (id) => {
           }
         }
         
+        if (response?.success && typeof window !== 'undefined' && typeof window.fbq === 'function') {
+          window.fbq('track', 'Purchase', {
+            value: Number(payment.monto),
+            currency: 'HNL',
+            content_name: 'Servicio Técnico MiSeguro',
+            content_type: 'service',
+            transaction_id: payment.id
+          });
+        }
         break;
 
       case 'withdrawals':
