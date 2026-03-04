@@ -8,6 +8,7 @@
     <NuxtLayout>
       <NuxtPage/>
     </NuxtLayout>
+    <Analytics />
   </div>
 </template>
 
@@ -41,6 +42,7 @@ html, body, #__nuxt {
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { Analytics } from '@vercel/analytics/nuxt';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 
 const isLoading = ref(true);
