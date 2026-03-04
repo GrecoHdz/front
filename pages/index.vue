@@ -547,7 +547,7 @@
 
             <div>
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Número de Identidad
+                Número de Identidad (sin guiones)
               </label>
               <input 
                 v-model="form.identidad"
@@ -1042,6 +1042,20 @@ useHead({
 // Reactive data
 const showLoginModal = ref(false)
 const showRateLimitModal = ref(false)
+const showForgotPassword = ref(false)
+
+const anyModalOpen = computed(() => {
+  return showLoginModal.value || showRateLimitModal.value || showForgotPassword.value
+})
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : ''
+    document.body.style.overflow = overflowValue
+    document.documentElement.style.overflow = overflowValue
+  }
+})
+
 const showSuccess = ref(false)
 const isLogin = ref(true)
 const isLoading = ref(true) // Iniciar en true para mostrar el spinner mientras se verifica la autenticación
@@ -1499,11 +1513,11 @@ const loadMembershipBenefits = async () => {
         
         if (benefit.id_beneficio === 4) {
           const porcentaje = specialDiscountPercentage.value || tipoBeneficio.split('%')[0] || '0';
-          savings = `Ahorro: ${porcentaje}% en cada servicio`;
+          savings = `${porcentaje}% Cashback en cada servicio`;
         } else if (tipoBeneficio.includes('Visita técnica')) {
           savings = `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita`;
-        } else if (tipoBeneficio.includes('Cashback')) {
-          savings = `Ahorro: ${discountPercentage.value}% en cada servicio`;
+        } else if (tipoBeneficio.includes('CashBack')) {
+          savings = `${discountPercentage.value}% Cashback en cada servicio`;
         }
         
         return {
@@ -2008,8 +2022,6 @@ const handleAuth = async () => {
   }
 }
 
-// Estado para el modal de recuperación de contraseña
-const showForgotPassword = ref(false)
 const emailForPasswordReset = ref('')
 const isResettingPassword = ref(false)
 
