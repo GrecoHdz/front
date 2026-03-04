@@ -1502,7 +1502,7 @@ const loadMembershipBenefits = async () => {
           savings = `Ahorro: ${porcentaje}% en cada servicio`;
         } else if (tipoBeneficio.includes('Visita técnica')) {
           savings = `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita`;
-        } else if (tipoBeneficio.includes('Descuento en todos los servicios')) {
+        } else if (tipoBeneficio.includes('Cashback')) {
           savings = `Ahorro: ${discountPercentage.value}% en cada servicio`;
         }
         
