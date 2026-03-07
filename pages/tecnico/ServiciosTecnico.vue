@@ -93,9 +93,12 @@
                       <p class="text-[9px] text-gray-500 dark:text-gray-400 font-medium">#{{ service.serviceNumber }}</p>
                     </div>
                   </div>
-                  <div class="flex flex-col items-end">
+                  <div class="flex flex-col items-end space-y-1">
                     <span class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm" :class="getStatusColor(service.rawStatus)">
                       {{ service.status }}
+                    </span>
+                    <span v-if="service.isFirstTrip" class="text-[8px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter flex items-center shadow-sm border border-amber-200/50 dark:border-amber-700/50 animate-pulse">
+                      ✨ Primer Viaje
                     </span>
                   </div>
                 </div>
@@ -216,7 +219,12 @@
                     {{ selectedService.icon }}
                   </div>
                   <div>
-                    <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">{{ selectedService.title }}</h3>
+                    <div class="flex items-center space-x-2">
+                      <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">{{ selectedService.title }}</h3>
+                      <span v-if="selectedService?.isFirstTrip" class="text-[8px] sm:text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter animate-pulse border border-amber-200/50">
+                        ✨ Primer Viaje
+                      </span>
+                    </div>
                     <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService.serviceNumber }}</p>
                   </div>
                 </div>
@@ -278,7 +286,7 @@
               </div>
 
               <!-- Calificación del Servicio -->
-              <div v-if="selectedService.rawStatus === 'finalizado'" class="mb-4 sm:mb-6">
+              <div v-if="['finalizado', 'calificado'].includes(selectedService.rawStatus)" class="mb-4 sm:mb-6">
                 <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">Valoración del Cliente</h4>
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-3 sm:p-4 rounded-lg">
                   <template v-if="selectedService.calificacion">
@@ -512,7 +520,12 @@
                     🚕
                   </div>
                   <div>
-                    <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">Precio de Viaje</h3>
+                    <div class="flex items-center space-x-2">
+                      <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">Precio de Viaje</h3>
+                      <span v-if="selectedService?.isFirstTrip" class="text-[8px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter animate-pulse border border-amber-200/50">
+                        ✨ Primer
+                      </span>
+                    </div>
                     <p class="text-[10px] text-gray-400 font-bold">Taxi VIP • REF: #{{ selectedService?.serviceNumber }}</p>
                   </div>
                 </div>
@@ -583,7 +596,7 @@
 
                 <!-- Submit Button -->
                 <button type="submit" 
-                        :disabled="isSubmittingQuotation || !quotationForm.monto_manodeobra"
+                        :disabled="isSubmittingQuotation || (quotationForm.monto_manodeobra === null || quotationForm.monto_manodeobra === undefined || quotationForm.monto_manodeobra === '')"
                         class="group relative w-full py-4 bg-gray-900 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50">
                   <div v-if="!isSubmittingQuotation" class="relative z-10 flex items-center justify-center space-x-2">
                     <span class="uppercase tracking-[0.2em] text-xs">Confirmar Precio</span>
@@ -712,7 +725,7 @@
                   </button>
                   <button 
                     type="submit" 
-                    :disabled="isUpdatingQuotation || !currentQuotation.comentario || !currentQuotation.monto_manodeobra"
+                    :disabled="isUpdatingQuotation || !currentQuotation.comentario || (currentQuotation.monto_manodeobra === null || currentQuotation.monto_manodeobra === undefined || currentQuotation.monto_manodeobra === '')"
                     class="w-1/2 py-2.5 sm:py-3 bg-blue-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm">
                     <span v-if="!isUpdatingQuotation">Guardar Cambios</span>
                     <span v-else class="flex items-center justify-center">
@@ -1105,6 +1118,7 @@ const mapSolicitudToService = (solicitud) => {
       formattedAddress: `${solicitud.direccion_precisa || ''}${solicitud.colonia ? ', ' + solicitud.colonia : ''}`.trim() || 'Sin dirección especificada'
     },
     // Datos adicionales de la API
+    isFirstTrip: solicitud.es_primer_viaje,
     cityId: solicitud.id_ciudad,
     technicianId: solicitud.id_tecnico,
     payForVisit: solicitud.pagar_visita,
@@ -1354,7 +1368,7 @@ const openServiceModal = async (service) => {
   
   const servicioId = service.id || service.id_solicitud 
   
-  if (service.rawStatus === 'finalizado') {
+  if (service.rawStatus === 'finalizado' || service.rawStatus === 'calificado') {
     if (servicioId) { 
       await loadCalificacion(servicioId)
     } else {
@@ -1407,6 +1421,13 @@ const closeViewQuotationModal = () => {
 const openCompleteConfirmation = (service, event) => {
   event.stopPropagation()
   currentServiceToComplete.value = service
+  
+  // Si es primer viaje de Taxi VIP, completar directamente sin modal
+  if (service.title === 'Taxi VIP' && service.isFirstTrip) {
+    confirmCompleteService()
+    return
+  }
+  
   completeServiceComment.value = ''
   showCompleteConfirmation.value = true
 }
@@ -1517,7 +1538,7 @@ const updateQuotation = async () => {
     return
   }
 
-  if (!currentQuotation.value.monto_manodeobra || !currentQuotation.value.comentario) {
+  if ((currentQuotation.value.monto_manodeobra === null || currentQuotation.value.monto_manodeobra === undefined || currentQuotation.value.monto_manodeobra === '') || !currentQuotation.value.comentario) {
     showToast({
       message: 'Por favor completa todos los campos requeridos',
       type: 'error'
@@ -1604,14 +1625,40 @@ const confirmCompleteService = async () => {
   isCompleting.value = true
   
   try {
-    const response = await $api(`/solicitudservicio/${selectedService.value.id}`, {
+    const isTaxiFirstTrip = currentServiceToComplete.value?.title === 'Taxi VIP' && currentServiceToComplete.value?.isFirstTrip;
+    
+    const response = await $api(`/solicitudservicio/${currentServiceToComplete.value.id}`, {
       method: 'PUT',
       body: {
-        estado: 'pendiente_pagoservicio',
-        comentario: completeServiceComment.value || 'Completado'
+        estado: isTaxiFirstTrip ? 'finalizado' : 'pendiente_pagoservicio',
+        comentario: completeServiceComment.value || (isTaxiFirstTrip ? 'Primer viaje Taxi VIP completado' : 'Completado')
       }
     })
     
+    // Si es primer viaje de Taxi VIP, también confirmar la cotización asociada
+    if (isTaxiFirstTrip) {
+      try {
+        const quotationRes = await $api(`cotizacion/solicitud/${currentServiceToComplete.value.id}`, {
+          method: 'GET'
+        });
+        
+        if (quotationRes && (quotationRes.data || quotationRes)) {
+          const cotizacion = quotationRes.data || quotationRes;
+          const cotId = cotizacion.id_cotizacion || cotizacion.id;
+          
+          if (cotId) {
+            await $api(`/cotizacion/${cotId}`, {
+              method: 'PUT',
+              body: { estado: 'confirmado' }
+            });
+            console.log(`Cotización ${cotId} confirmada automáticamente para primer viaje`);
+          }
+        }
+      } catch (quotationError) {
+        console.error('Error al confirmar cotización para primer viaje:', quotationError);
+      }
+    }
+
     // Notificar al usuario que solicitó el servicio sobre la finalización
     try {
       const userId = selectedService.value.rawData.cliente?.id_usuario;
@@ -1620,7 +1667,7 @@ const confirmCompleteService = async () => {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: 'Pago de Servicio Pendiente',
+            titulo: isTaxiFirstTrip ? 'Viaje Finalizado' : 'Pago de Servicio Pendiente',
             id_usuario: userId
           }
         });

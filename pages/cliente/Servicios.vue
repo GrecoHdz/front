@@ -1263,31 +1263,41 @@
               </div>
 
               <!-- Ruta -->
-              <div class="space-y-2">
+              <div class="space-y-1">
                 <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Itinerario</h4>
-                <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600 space-y-3 relative">
+                <div class="bg-gray-50 dark:bg-gray-700/50 pt-1.5 pb-3 px-3 rounded-lg border border-gray-200 dark:border-gray-600 space-y-2 relative">
                   <!-- Línea conectora -->
-                  <div class="absolute left-[21px] top-7 bottom-7 w-0.5 border-l-2 border-dotted border-gray-300 dark:border-gray-500"></div>
+                  <div class="absolute left-[19px] top-6 bottom-7 w-0.5 border-l-2 border-dotted border-gray-300 dark:border-gray-500"></div>
                   
                   <div class="flex items-start space-x-3 relative z-10">
-                    <div class="mt-1 w-4 h-4 rounded-full border-2 border-emerald-500 bg-white dark:bg-gray-800 flex items-center justify-center">
+                    <div class="mt-0.5 w-4 h-4 rounded-full border-2 border-emerald-500 bg-white dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                       <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
                     </div>
                     <div class="flex-1">
-                      <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Recogida</p>
-                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ selectedService.fullLocation?.colonia || 'Punto de partida' }}</p>
+                      <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">Recogida</p>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight">{{ selectedService.fullLocation?.colonia || 'Punto de partida' }}</p>
                     </div>
                   </div>
 
                   <div class="flex items-start space-x-3 relative z-10">
-                    <div class="mt-1 w-4 h-4 rounded-full border-2 border-red-500 bg-white dark:bg-gray-800 flex items-center justify-center">
+                    <div class="mt-0.5 w-4 h-4 rounded-full border-2 border-red-500 bg-white dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                       <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
                     </div>
                     <div class="flex-1">
-                      <p class="text-[9px] font-black text-red-600 uppercase tracking-widest">Destino</p>
-                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ selectedService.fullLocation?.direccion || 'Destino final' }}</p>
+                      <p class="text-[9px] font-black text-red-600 uppercase tracking-widest leading-none mb-0.5">Destino</p>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight">{{ selectedService.fullLocation?.direccion || 'Destino final' }}</p>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <!-- Notas del Conductor -->
+              <div v-if="quotationData?.comentario" class="space-y-2">
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Notas del Conductor</h4>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-relaxed italic text-center">
+                    "{{ quotationData.comentario }}"
+                  </p>
                 </div>
               </div>
 
@@ -2265,8 +2275,8 @@ const getAccountLabel = (option) => {
 // =========================
 
 const totalServices = computed(() => servicesData.value.total || allServices.value.length)
-const completedServices = computed(() => servicesData.value.finalizadas || allServices.value.filter(s => s.status === 'Servicio Completado').length)
-const pendingServices = computed(() => servicesData.value.pendientes || allServices.value.filter(s => !['Servicio Completado', 'Cancelado'].includes(s.status)).length)
+const completedServices = computed(() => servicesData.value.finalizadas || allServices.value.filter(s => ['calificado', 'cancelado'].includes(s.rawStatus)).length)
+const pendingServices = computed(() => servicesData.value.pendientes || allServices.value.filter(s => !['calificado', 'cancelado'].includes(s.rawStatus)).length)
 
 // Referencia reactiva para almacenar el servicio seleccionado
 const selectedServiceRef = ref({})
@@ -2286,11 +2296,11 @@ const filteredServices = computed(() => {
   
   if (currentFilter.value !== 'all') {
     if (currentFilter.value === 'pending') {
-      filtered = filtered.filter(s => !['Servicio Completado', 'Cancelado'].includes(s.status))
+      filtered = filtered.filter(s => !['calificado', 'cancelado'].includes(s.rawStatus))
     } else if (currentFilter.value === 'completed') {
-      filtered = filtered.filter(s => s.status === 'Servicio Completado')
+      filtered = filtered.filter(s => s.rawStatus === 'calificado')
     } else if (currentFilter.value === 'cancelled') {
-      filtered = filtered.filter(s => s.status === 'Cancelado')
+      filtered = filtered.filter(s => s.rawStatus === 'cancelado')
     }
   }
   
@@ -2469,7 +2479,8 @@ const getCurrentStepNumber = (status) => {
 const isActionRequired = (service) => {
   return (service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita) || 
          service.rawStatus === 'pendiente_pagoservicio' || 
-         service.rawStatus === 'pendiente_cotizacion';
+         service.rawStatus === 'pendiente_cotizacion' ||
+         service.rawStatus === 'finalizado';
 }
 
 const getStepStatus = (stepId, rawStatus) => {
@@ -2552,7 +2563,7 @@ const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
     'en_proceso': servicio.title === 'Taxi VIP' ? 'Viaje Programado' : 'Servicio en Curso',
     'pendiente_pagoservicio': 'Pago del Servicio',
     'verificando_pagoservicio': 'Verificando Pago del Servicio',
-    'finalizado': 'Servicio Completado',
+    'finalizado': 'Servicio sin calificar',
     'calificado': 'Servicio Completado',
     'cancelado': 'Cancelado'
   }
