@@ -304,10 +304,22 @@
                         class="multiselect-transparent"
                         :custom-label="getServiceLabel"
                         :options-limit="100"
+                        :option-disabled="'isDisabled'"
                         :disabled="isLoadingServices || servicesList.length === 0"
                         :loading="isLoadingServices">
                   <template #singleLabel="{ option }">
                     <span class="truncate">{{ getServiceLabel(option) }}</span>
+                  </template>
+                  <template #option="{ option }">
+                    <div class="flex items-center gap-2" :class="{'opacity-40 grayscale pointer-events-none': option.isDisabled}">
+                      <span class="flex items-center gap-2">
+                        <span>{{ option.icon }}</span>
+                        <span>{{ option.name }}</span>
+                      </span>
+                      <span v-if="option.isDisabled" class="text-[7px] font-black uppercase tracking-tighter bg-red-50 text-red-500 px-1.5 py-0.5 rounded-md border border-red-100">
+                        Membresía Requerida
+                      </span>
+                    </div>
                   </template>
                 </multiselect>
               </div>
@@ -928,6 +940,18 @@ html .multiselect-custom .multiselect__tags {
   color: white;
 }
 
+/* Estilos profundos para asegurar que se apliquen a las opciones deshabilitadas */
+:deep(.multiselect-transparent .multiselect__option--disabled) {
+  background: #f9fafb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+:deep(.multiselect-transparent .multiselect__option--disabled *) {
+  color: #9ca3af !important;
+}
+
 .multiselect-custom .multiselect__tags:hover {
   border-color: rgba(255, 255, 255, 0.5);
 }
@@ -1015,6 +1039,13 @@ html .multiselect-custom .multiselect__tags {
 
 .multiselect-custom .multiselect__option--highlight::after {
   content: '';
+}
+
+.multiselect-custom .multiselect__option--disabled {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
 }
 
 .multiselect-custom .multiselect__spinner {
@@ -1203,7 +1234,11 @@ const selectedServiceObject = ref(null)
 // Función para obtener la etiqueta del servicio
 const getServiceLabel = (option) => {
   if (!option) return ''
-  return `${option.icon} ${option.name}`
+  let label = `${option.icon} ${option.name}`
+  if (option.name === 'Taxi VIP' && !isMembershipActive.value) {
+    label += ' (Membresía Necesaria)'
+  }
+  return label
 }
 
 // Estados de notificaciones
@@ -1383,10 +1418,12 @@ const isFormValid = computed(() => {
   )
 })
 
-// Solo mostrar 'Taxi VIP' a usuarios con membresía activa
+// Mostrar todos los servicios, pero marcar Taxi VIP como deshabilitado si no hay membresía activa
 const filteredServicesList = computed(() => {
-  if (isMembershipActive.value) return servicesList.value
-  return servicesList.value.filter(s => s.name !== 'Taxi VIP')
+  return servicesList.value.map(s => ({
+    ...s,
+    isDisabled: s.name === 'Taxi VIP' && !isMembershipActive.value
+  }))
 })
 
 // Si el usuario pierde la membresía y tenía 'Taxi VIP' seleccionado, limpiar la selección
@@ -2706,6 +2743,12 @@ watch(() => serviceFormData.value.type, (newType) => {
 // Watch para sincronizar selectedServiceObject con serviceFormData.type
 watch(() => selectedServiceObject.value, (newService) => {
   if (newService) {
+    // Protección adicional: Si por alguna razón se intenta seleccionar Taxi VIP sin membresía
+    if (newService.name === 'Taxi VIP' && !isMembershipActive.value) {
+      showToast('Membresía Necesaria', 'Este servicio es exclusivo para usuarios con membresía activa.', 'warning');
+      selectedServiceObject.value = null;
+      return;
+    }
     serviceFormData.value.type = newService.name;
   } else {
     serviceFormData.value.type = '';
