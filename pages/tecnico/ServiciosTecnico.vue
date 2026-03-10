@@ -144,7 +144,7 @@
                         : 'text-blue-600 dark:text-blue-400',
                       'text-[10px] font-black uppercase tracking-widest'
                     ]">
-                      {{ service.rawStatus === 'asignado' ? 'Cotizar' : (service.rawStatus === 'en_proceso' ? 'Finalizar' : 'Ver detalles') }}
+                      {{ service.rawStatus === 'asignado' ? (isBarberíaService(service.title) ? 'Detalles' : 'Cotizar') : (service.rawStatus === 'en_proceso' ? 'Finalizar' : 'Ver detalles') }}
                     </span>
                     <svg class="w-3 h-3 text-blue-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -258,7 +258,9 @@
 
               <!-- Location Details -->
               <div class="mb-4 sm:mb-6">
-                <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">Ubicación del Servicio</h4>
+                <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">
+                  {{ isBarberíaService(selectedService.title) ? 'Ubicación del Corte' : 'Ubicación del Servicio' }}
+                </h4>
                 
                 <div v-if="selectedService.title === 'Taxi VIP'" class="grid grid-cols-2 gap-3">
                   <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border-l-4 border-blue-500">
@@ -279,7 +281,9 @@
 
               <!-- Service Description -->
               <div v-if="selectedService.title !== 'Taxi VIP'" class="mb-4 sm:mb-6">
-                <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">Descripción del Problema</h4>
+                <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">
+                  {{ isBarberíaService(selectedService.title) ? 'Detalles del Corte' : 'Descripción del Problema' }}
+                </h4>
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 sm:p-3 rounded-lg">
                   <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm">{{ selectedService.description }}</p>
                 </div>
@@ -325,7 +329,7 @@
                   <button 
                     @click="openQuotationModal" 
                     class="w-full py-2.5 sm:py-3 bg-blue-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors text-sm">
-                    📋 Crear Cotización
+                    {{ isBarberíaService(selectedService.title) ? '💇 Poner Precio' : '📋 Crear Cotización' }}
                   </button>
                   
                   <button 
@@ -353,7 +357,7 @@
                   <button 
                     @click="openQuotationModal" 
                     class="w-full py-2.5 sm:py-3 bg-blue-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors text-sm">
-                    ✏️ Editar Cotización
+                    {{ isBarberíaService(selectedService.title) ? '✏️ Editar Detalles' : '✏️ Editar Cotización' }}
                   </button>
                 </template>
               </div>
@@ -412,12 +416,14 @@
               <form @submit.prevent="submitQuotation" class="space-y-3 sm:space-y-4">
                 <!-- Comentario/Diagnóstico -->
                 <div>
-                  <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Diagnóstico</label>
+                  <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    {{ isBarberíaService(selectedService.title) ? 'Notas del Barbero' : 'Diagnóstico' }}
+                  </label>
                   <textarea v-model="quotationForm.comentario" 
                             rows="4" 
                             required
                             class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                            placeholder="Escriba su Diagnóstico"></textarea>
+                            :placeholder="isBarberíaService(selectedService.title) ? 'Escriba los detalles del servicio realizado' : 'Escriba su Diagnóstico'"></textarea>
                 </div>
 
                 <!-- Monto Mano de Obra -->
@@ -614,6 +620,119 @@
       </div>
     </Transition>
 
+    <!-- Barbería Quotation Modal -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showBarberiaQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <Transition
+          name="backdrop"
+          enter-active-class="backdrop-enter-active"
+          leave-active-class="backdrop-leave-active"
+          enter-from-class="backdrop-enter-from"
+          leave-to-class="backdrop-leave-to">
+          <div 
+            v-if="showBarberiaQuotationModal"
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            @click="showBarberiaQuotationModal = false"
+          ></div>
+        </Transition>
+
+        <Transition
+          name="modal-content"
+          enter-active-class="modal-content-enter-active"
+          leave-active-class="modal-content-leave-active"
+          enter-from-class="modal-content-enter-from"
+          leave-to-class="modal-content-leave-to">
+          <div 
+            v-if="showBarberiaQuotationModal"
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto relative z-10"
+            @click.stop>
+            
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-amber-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-amber-500/30">
+                    💇♂️
+                  </div>
+                  <div>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">Detalles del Corte</h3>
+                    <p class="text-[10px] text-gray-400 font-bold">Barbería • REF: #{{ selectedService?.serviceNumber }}</p>
+                  </div>
+                </div>
+                <button @click="showBarberiaQuotationModal = false" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quotation Form -->
+            <div class="p-4">
+              <form @submit.prevent="submitQuotation" class="space-y-4">
+
+                <!-- Price Field -->
+                <div class="relative">
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Precio del Corte (L.)</label>
+                  <div class="relative group">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400 group-focus-within:text-amber-500 transition-colors">L.</div>
+                    <input v-model.number="quotationForm.monto_manodeobra" 
+                           type="number" 
+                           step="1" 
+                           min="0" 
+                           required
+                           class="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-amber-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-2xl font-black text-gray-900 dark:text-white transition-all outline-none" 
+                           placeholder="0">
+                  </div>
+                </div>
+
+                <!-- Comment Field -->
+                <div>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Notas del Barbero</label>
+                  <textarea v-model="quotationForm.comentario" 
+                            rows="3" 
+                            required
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-amber-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-sm font-medium text-gray-900 dark:text-white transition-all outline-none resize-none" 
+                            placeholder="Ej: Corte desvanecido, barba y cejas..."></textarea>
+                </div>
+
+                <!-- Earning Preview -->
+                <div class="bg-amber-600 rounded-2xl p-4 shadow-xl shadow-amber-500/30 text-white">
+                  <div class="flex justify-between items-center mb-1 opacity-80">
+                    <span class="text-[10px] font-black uppercase tracking-widest">Tu Ganancia</span>
+                    <span class="text-[10px] font-bold">({{ 100 - commissionPercentage }}%)</span>
+                  </div>
+                  <div class="flex justify-between items-end">
+                    <div class="text-3xl font-black">L. {{ (Number(quotationForm.monto_manodeobra || 0) * ((100 - commissionPercentage) / 100)).toFixed(0) }}</div>
+                    <div class="text-[10px] font-bold bg-white/20 px-2 py-1 rounded-lg backdrop-blur-sm">PROCESADO VÍA APP</div>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" 
+                        :disabled="isSubmittingQuotation || (quotationForm.monto_manodeobra === null || quotationForm.monto_manodeobra === undefined || quotationForm.monto_manodeobra === '')"
+                        class="group relative w-full py-4 bg-gray-900 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50">
+                  <div v-if="!isSubmittingQuotation" class="relative z-10 flex items-center justify-center space-x-2">
+                    <span class="uppercase tracking-[0.2em] text-xs">Enviar Detalles</span>
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                  </div>
+                  <div v-else class="flex items-center justify-center">
+                    <svg class="animate-spin h-5 w-5 text-amber-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-r from-amber-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity translate-y-full group-hover:translate-y-0 duration-300"></div>
+                </button>
+              </form>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
     <!-- View/Edit Quotation Modal -->
     <Transition
       name="modal"
@@ -647,9 +766,21 @@
             @click.stop>
             
             <!-- Modal Header -->
-            <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl">
+            <div :class="[
+              'sticky top-0 p-3 sm:p-4 border-b rounded-t-xl sm:rounded-t-2xl',
+              selectedService.title === 'Taxi VIP' ? 'bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-blue-100 dark:border-blue-800/30' : 
+              isBarberíaService(selectedService.title) ? 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-100 dark:border-amber-800/30' : 
+              'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+            ]">
               <div class="flex items-center justify-between">
-                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Editar Cotización</h3>
+                <div class="flex items-center space-x-3">
+                  <div v-if="selectedService.title === 'Taxi VIP'" class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-blue-500/30">🚕</div>
+                  <div v-else-if="isBarberíaService(selectedService.title)" class="w-8 h-8 sm:w-10 sm:h-10 bg-amber-600 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-amber-500/30">💇</div>
+                  
+                  <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
+                    {{ selectedService.title === 'Taxi VIP' ? 'Editar Precio de Viaje' : (isBarberíaService(selectedService.title) ? 'Editar Detalles del Corte' : 'Editar Cotización') }}
+                  </h3>
+                </div>
                 <button @click="closeViewQuotationModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -663,19 +794,23 @@
               <form @submit.prevent="updateQuotation" class="space-y-3 sm:space-y-4">
                 <!-- Comentario/Diagnóstico -->
                 <div>
-                  <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Diagnóstico</label>
+                  <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    {{ selectedService.title === 'Taxi VIP' ? 'Notas del Viaje' : (isBarberíaService(selectedService.title) ? 'Notas del Barbero' : 'Diagnóstico') }}
+                  </label>
                   <textarea 
                     v-model="currentQuotation.comentario" 
                     rows="4" 
                     required
                     class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                    placeholder="Escriba su Diagnóstico">
+                    :placeholder="selectedService.title === 'Taxi VIP' ? 'Ej: Ford Escape Gris, llego en 5 min...' : (isBarberíaService(selectedService.title) ? 'Escriba los detalles del servicio realizado' : 'Escriba su Diagnóstico')">
                   </textarea>
                 </div>
 
                 <!-- Monto Mano de Obra -->
                 <div>
-                  <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Monto Mano de Obra (L.)</label>
+                  <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    {{ selectedService.title === 'Taxi VIP' ? 'Monto del Viaje (L.)' : (isBarberíaService(selectedService.title) ? 'Precio del Corte (L.)' : 'Monto Mano de Obra (L.)') }}
+                  </label>
                   <input 
                     v-model.number="currentQuotation.monto_manodeobra" 
                     type="number" 
@@ -687,7 +822,7 @@
                 </div>
 
                 <!-- Monto Materiales -->
-                <div>
+                <div v-if="selectedService.title !== 'Taxi VIP' && !isBarberíaService(selectedService.title)">
                   <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Monto Materiales (L.) - Estimado</label>
                   <input 
                     v-model.number="currentQuotation.monto_materiales" 
@@ -875,12 +1010,14 @@ const showCompleteConfirmation = ref(false)
 const isCompleting = ref(false)
 const isSubmittingQuotation = ref(false)
 const isUpdatingQuotation = ref(false)
+const showBarberiaQuotationModal = ref(false)
 
 // Bloquear scroll cuando un modal está abierto
 const anyModalOpen = computed(() => {
   return showServiceModal.value || 
          showQuotationModal.value || 
          showTaxiQuotationModal.value || 
+         showBarberiaQuotationModal.value || 
          showViewQuotationModal.value || 
          showCancelConfirmation.value || 
          showCompleteConfirmation.value
@@ -1065,7 +1202,13 @@ const getTimeAgo = (dateString) => {
   return `Hace ${Math.floor(diffInHours / 24)} días`
 }
 
-const getServiceIcon = (estado) => {
+// Helper: detects barberia service regardless of accent/case
+const isBarberíaService = (title = '') => {
+  return title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'barberia'
+}
+
+const getServiceIcon = (estado, serviceTitle = '') => {
+  if (isBarberíaService(serviceTitle)) return '💇'
   const iconMap = {
     'verificando_pagovisita': '💰',
     'asignado': '👨‍🔧',
@@ -1080,11 +1223,12 @@ const getServiceIcon = (estado) => {
 
 const mapApiStatusToLocal = (apiStatus, title = '') => {
   const isTaxi = title === 'Taxi VIP';
+  const isBarberia = isBarberíaService(title);
   const statusMap = {
     'pendiente_asignacion': 'Cotización Rechazada',
     'asignado': 'Asignado',
-    'pendiente_cotizacion': isTaxi ? 'Tarifa Recibida' : 'Cotización Enviada',
-    'en_proceso': isTaxi ? 'Viaje Programado' : 'En Progreso',
+    'pendiente_cotizacion': isTaxi ? 'Tarifa Recibida' : (isBarberia ? 'Detalles Enviados' : 'Cotización Enviada'),
+    'en_proceso': isTaxi ? 'Viaje Programado' : (isBarberia ? 'Corte en Curso' : 'En Progreso'),
     'pendiente_pagoservicio': 'Finalizado',
     'verificando_pagoservicio': 'Finalizado',
     'finalizado': 'Finalizado',
@@ -1103,7 +1247,7 @@ const mapSolicitudToService = (solicitud) => {
     status: mapApiStatusToLocal(solicitud.estado || 'pendiente', solicitud.servicio?.nombre),
     rawStatus: solicitud.estado || 'pendiente',
     serviceNumber: `${formatDateDDMMYY(solicitud.fecha_solicitud)}-${solicitud.id_solicitud}`,
-    icon: getServiceIcon(solicitud.estado),
+    icon: getServiceIcon(solicitud.estado, solicitud.servicio?.nombre),
     rawDate: solicitud.fecha_solicitud,
     date: formatDate(solicitud.fecha_solicitud),
     assignedDate: solicitud.fecha_solicitud,
@@ -1396,6 +1540,8 @@ const openQuotationModal = async () => {
     
     if (selectedService.value.title === 'Taxi VIP') {
       showTaxiQuotationModal.value = true
+    } else if (isBarberíaService(selectedService.value.title)) {
+      showBarberiaQuotationModal.value = true
     } else {
       showQuotationModal.value = true
     }
@@ -1490,10 +1636,11 @@ const submitQuotation = async () => {
     } catch (error) {
     }
     
-    showToast('Cotización enviada correctamente', 'success')
+    showToast(`${selectedService.value?.title === 'Barbería' ? 'Detalles enviados' : 'Cotización enviada'} correctamente`, 'success')
     
     closeQuotationModal()
     showTaxiQuotationModal.value = false // Cerrar también el de taxi si se usó
+    showBarberiaQuotationModal.value = false // Cerrar también el de barbería if used
     closeServiceModal()
     await loadServices()
     return true
@@ -1679,7 +1826,7 @@ const confirmCompleteService = async () => {
       // No mostrar error al usuario para no afectar su experiencia
     }
     
-    showToast('Servicio marcado como completado exitosamente', 'success')
+    showToast(`${currentServiceToComplete.value?.title === 'Barbería' ? 'Servicio de barbería' : 'Servicio'} marcado como completado exitosamente`, 'success')
     
     showCompleteConfirmation.value = false
     completeServiceComment.value = ''

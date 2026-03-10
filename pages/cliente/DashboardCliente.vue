@@ -291,59 +291,139 @@
             </h3>
             
             <form @submit.prevent="handleRequestService" class="space-y-3">
-              <div>
+              <div class="grid" :class="selectedServiceObject?.name === 'Barbería' ? 'grid-cols-2 gap-2' : 'grid-cols-1'">
+                <!-- Select Principal de Servicio -->
                 <div class="multiselect-service-wrapper">
-                <multiselect v-model="selectedServiceObject" 
-                        :options="filteredServicesList"
-                        :searchable="false"
-                        :close-on-select="true"
-                        :show-labels="false"
-                        placeholder="Selecciona un servicio"
-                        label="name"
-                        track-by="id"
-                        class="multiselect-transparent"
-                        :custom-label="getServiceLabel"
-                        :options-limit="100"
-                        :option-disabled="'isDisabled'"
-                        :disabled="isLoadingServices || servicesList.length === 0"
-                        :loading="isLoadingServices">
-                  <template #singleLabel="{ option }">
-                    <span class="truncate">{{ getServiceLabel(option) }}</span>
-                  </template>
-                  <template #option="{ option }">
-                    <div class="flex items-center gap-2" :class="{'opacity-40 grayscale pointer-events-none': option.isDisabled}">
+                  <multiselect v-model="selectedServiceObject" 
+                          :options="filteredServicesList"
+                          :searchable="false"
+                          :close-on-select="true"
+                          :show-labels="false"
+                          placeholder="Selecciona un servicio"
+                          label="name"
+                          track-by="id"
+                          class="multiselect-transparent"
+                          :custom-label="getServiceLabel"
+                          :options-limit="100"
+                          :option-disabled="'isDisabled'"
+                          :disabled="isLoadingServices || servicesList.length === 0"
+                          :loading="isLoadingServices">
+                    <template #singleLabel="{ option }">
+                      <span class="truncate">{{ getServiceLabel(option) }}</span>
+                    </template>
+                    <template #option="{ option }">
+                      <div class="flex items-center gap-2" :class="{'opacity-40 grayscale pointer-events-none': option.isDisabled}">
+                        <span class="flex items-center gap-2">
+                          <span>{{ option.icon }}</span>
+                          <span>{{ option.name }}</span>
+                        </span>
+                        <span v-if="option.isDisabled" class="text-[7px] font-black uppercase tracking-tighter bg-red-50 text-red-500 px-1.5 py-0.5 rounded-md border border-red-100">
+                          Membresía Requerida
+                        </span>
+                      </div>
+                    </template>
+                  </multiselect>
+                </div>
+
+                <!-- Select Tipo de Barbería (Solo si es Barbería) -->
+                <div v-if="selectedServiceObject?.name === 'Barbería'" class="multiselect-service-wrapper animate-fade-in">
+                  <multiselect
+                    v-model="barberiaTypeSelected"
+                    :options="barberiaTypeOptions"
+                    :searchable="false"
+                    :allow-empty="true"
+                    :show-labels="false"
+                    placeholder="Selecciona tipo"
+                    label="name"
+                    track-by="id"
+                    class="multiselect-transparent"
+                  >
+                    <template #singleLabel="{ option }">
                       <span class="flex items-center gap-2">
-                        <span>{{ option.icon }}</span>
+                        <span>{{ option.icon || '📍' }}</span>
                         <span>{{ option.name }}</span>
                       </span>
-                      <span v-if="option.isDisabled" class="text-[7px] font-black uppercase tracking-tighter bg-red-50 text-red-500 px-1.5 py-0.5 rounded-md border border-red-100">
-                        Membresía Requerida
-                      </span>
-                    </div>
-                  </template>
-                </multiselect>
-              </div>
+                    </template>
+                    <template #option="{ option }">
+                      <div class="flex items-center gap-2">
+                        <span>{{ option.icon || '📍' }}</span>
+                        <span>{{ option.name }}</span>
+                      </div>
+                    </template>
+                  </multiselect>
+                </div>
               </div>
               
-              <div>
+              <!-- Selección de Barbería Específica (En local) -->
+              <div v-if="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'" class="space-y-3">
+                <div class="multiselect-service-wrapper animate-fade-in">
+                  <multiselect
+                    v-model="serviceFormData.selectedBarberia"
+                    :options="barberiasList"
+                    :searchable="false"
+                    :show-labels="false"
+                    placeholder="Elige barbería"
+                    track-by="id_barberia"
+                    class="multiselect-transparent"
+                  >
+                    <template #singleLabel="{ option }">
+                      <span class="truncate text-sm font-medium">{{ option.nombre }}</span>
+                    </template>
+                    <template #option="{ option }">
+                      <div class="flex items-center gap-1.5 py-0.5">
+                        <span class="font-bold text-sm text-white">{{ option.nombre }}</span>
+                        <span class="text-[10px] text-white/60 font-medium">({{ option.colonia }})</span>
+                      </div>
+                    </template>
+                  </multiselect>
+                </div>
+              </div>
+
+                <!-- Image Placeholders for 'En local' -->
+                <div v-if="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local' && serviceFormData.selectedBarberia" class="grid grid-cols-2 gap-3 animate-fade-in">
+                  <div class="aspect-video rounded-xl bg-white/10 border-2 border-dashed border-white/30 flex flex-col items-center justify-center text-white/50 overflow-hidden relative group">
+                    <img v-if="serviceFormData.selectedBarberia.foto1" :src="serviceFormData.selectedBarberia.foto1" class="absolute inset-0 w-full h-full object-cover">
+                    <div v-else class="flex flex-col items-center">
+                      <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span class="text-[10px] font-bold uppercase tracking-wider">Imagen Local 1</span>
+                    </div>
+                  </div>
+                  <div class="aspect-video rounded-xl bg-white/10 border-2 border-dashed border-white/30 flex flex-col items-center justify-center text-white/50 overflow-hidden relative group">
+                    <img v-if="serviceFormData.selectedBarberia.foto2" :src="serviceFormData.selectedBarberia.foto2" class="absolute inset-0 w-full h-full object-cover">
+                    <div v-else class="flex flex-col items-center">
+                      <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span class="text-[10px] font-bold uppercase tracking-wider">Imagen Local 2</span>
+                    </div>
+                  </div>
+                </div>
+              
+              <div v-if="shouldShowFormFields" class="animate-fade-in">
                 <textarea v-model="serviceFormData.description" 
-                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? '¿Cuántas personas van y en cuánto tiempo lo necesitan?' : 'Describe el problema o servicio que necesitas...'"
+                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? '¿Cuántas personas van y en cuánto tiempo lo necesitan?' : (selectedServiceObject?.name === 'Barbería' ? '¿Qué tipo de corte desea? Ejemplo: Fade medio con barba' : 'Describe el problema o servicio que necesitas...')"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
               </div>
               
-              <div class="grid grid-cols-2 gap-2">
+              <div v-if="shouldShowFormFields" class="grid grid-cols-2 gap-2 animate-fade-in">
                 <div>
                   <input v-model="serviceFormData.colonia" 
                          type="text"
+                         :readonly="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
                          :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? 'Lugar de recogida' : 'Colonia'"
-                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
+                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
+                         :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
                 </div>
                 <div>
                   <input v-model="serviceFormData.direccion" 
                          type="text"
+                         :readonly="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
                          :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? 'Lugar de destino' : 'Dirección precisa'"
-                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50">
+                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
+                         :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
                 </div>
               </div>
 
@@ -884,7 +964,7 @@ html .multiselect-custom .multiselect__tags {
   box-shadow: none !important;
 }
 
-.multiselect-transparent .multiselect__placeholder {
+:deep(.multiselect-transparent .multiselect__placeholder) {
   color: rgba(255, 255, 255, 0.7) !important;
   font-size: 16px;
 }
@@ -907,10 +987,11 @@ html .multiselect-custom .multiselect__tags {
 }
 
 .multiselect-transparent .multiselect__content-wrapper {
-  background-color: white;
-  border: 1px solid #e5e7eb;
+  background-color: rgba(30, 41, 59, 0.98) !important; /* Slate muy oscuro (casi negro) */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.75rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   margin-top: 4px;
   z-index: 50;
 }
@@ -920,24 +1001,28 @@ html .multiselect-custom .multiselect__tags {
   min-height: 44px;
   font-size: 16px;
   cursor: pointer;
-  color: #374151;
+  color: white !important; /* Nombre en blanco */
   transition: all 0.2s ease;
 }
 
 .multiselect-transparent .multiselect__option:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white !important;
 }
 
 .multiselect-transparent .multiselect__option--selected {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: rgba(59, 130, 246, 0.2);
+  color: white !important;
   font-weight: 600;
 }
 
 .multiselect-transparent .multiselect__option--highlight {
-  background-color: #3b82f6;
-  color: white;
+  background-color: rgba(59, 130, 246, 0.5) !important;
+  color: white !important;
+}
+
+.multiselect-transparent .multiselect__option--highlight::after {
+  content: '';
 }
 
 /* Estilos profundos para asegurar que se apliquen a las opciones deshabilitadas */
@@ -961,14 +1046,14 @@ html .multiselect-custom .multiselect__tags {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
-.multiselect-custom .multiselect__placeholder {
+:deep(.multiselect-custom .multiselect__placeholder) {
   margin-bottom: 0;
   padding: 0;
   color: rgba(255, 255, 255, 0.7) !important;
   font-size: 16px;
 }
 
-.dark .multiselect-custom .multiselect__placeholder {
+:deep(.dark .multiselect-custom .multiselect__placeholder) {
   color: rgba(255, 255, 255, 0.7) !important;
 }
 
@@ -1226,8 +1311,13 @@ const serviceFormData = ref({
   type: '',
   description: '',
   colonia: '',
-  direccion: ''
+  direccion: '',
+  barberiaOption: null,
+  selectedBarberia: null
 })
+
+const barberiasList = ref([])
+
 
 const selectedServiceObject = ref(null)
 
@@ -1240,6 +1330,20 @@ const getServiceLabel = (option) => {
   }
   return label
 }
+
+// Opciones para tipo de barbería
+const barberiaTypeOptions = [
+  { id: 'a domicilio', name: 'A domicilio', icon: '🏠' },
+  { id: 'en local', name: 'En local', icon: '💈' }
+]
+
+const barberiaTypeSelected = computed({
+  get: () => barberiaTypeOptions.find(o => o.id === serviceFormData.value.barberiaOption) || null,
+  set: (val) => {
+    if (val) serviceFormData.value.barberiaOption = val.id
+    else serviceFormData.value.barberiaOption = null
+  }
+})
 
 // Estados de notificaciones
 const recentServicesData = ref([]);
@@ -1409,13 +1513,43 @@ const recentServicesDisplay = computed(() => {
   return recentServicesData.value.slice(0, 3)
 })
 
+const shouldShowFormFields = computed(() => {
+  // Solo aplicar lógica de ocultar para el servicio de Barbería
+  if (selectedServiceObject.value?.name === 'Barbería') {
+    if (serviceFormData.value.barberiaOption === 'a domicilio') return true;
+    if (serviceFormData.value.barberiaOption === 'en local' && serviceFormData.value.selectedBarberia) return true;
+    return false; // Ocultos mientras selecciona modalidad/local
+  }
+  
+  // Para el resto de servicios (o si no hay selección aún), se muestran siempre
+  return true;
+})
+
 const isFormValid = computed(() => {
-  return (
-    serviceFormData.value.type &&
-    serviceFormData.value.description.trim() !== '' &&
+  const isBarberia = selectedServiceObject.value?.name === 'Barbería';
+  const isEnLocal = serviceFormData.value.barberiaOption === 'en local';
+  const isDomicilio = serviceFormData.value.barberiaOption === 'a domicilio';
+  
+  const basicFields = serviceFormData.value.type &&
+    serviceFormData.value.description.trim() !== '';
+
+  if (isBarberia) {
+    if (!serviceFormData.value.barberiaOption) return false;
+    
+    if (isEnLocal) {
+      return basicFields && serviceFormData.value.selectedBarberia;
+    }
+    
+    if (isDomicilio) {
+      return basicFields && 
+        serviceFormData.value.colonia.trim() !== '' &&
+        serviceFormData.value.direccion.trim() !== '';
+    }
+  }
+  
+  return basicFields &&
     serviceFormData.value.colonia.trim() !== '' &&
     serviceFormData.value.direccion.trim() !== ''
-  )
 })
 
 // Mostrar todos los servicios, pero marcar Taxi VIP como deshabilitado si no hay membresía activa
@@ -1434,6 +1568,34 @@ watch(isMembershipActive, (isActive) => {
   }
 })
 
+// Si el usuario cambia la opción de barbería, limpiar la selección y los campos relacionados
+watch(() => serviceFormData.value.barberiaOption, (newVal) => {
+  if (newVal === 'a domicilio') {
+    serviceFormData.value.selectedBarberia = null
+    serviceFormData.value.colonia = ''
+    serviceFormData.value.direccion = ''
+  }
+})
+
+// Si se selecciona una barbería, rellenar colonia y dirección automáticamente
+watch(() => serviceFormData.value.selectedBarberia, (newVal) => {
+  if (newVal && serviceFormData.value.barberiaOption === 'en local') {
+    serviceFormData.value.colonia = newVal.colonia || ''
+    serviceFormData.value.direccion = newVal.direccion_precisa || ''
+  }
+})
+
+// Limpiar datos de barbería y campos de dirección si se cambia de servicio
+watch(selectedServiceObject, (newVal) => {
+  if (newVal) {
+    serviceFormData.value.barberiaOption = null
+    serviceFormData.value.selectedBarberia = null
+    serviceFormData.value.colonia = ''
+    serviceFormData.value.direccion = ''
+    serviceFormData.value.description = ''
+  }
+})
+
 // =========================
 // FUNCIONES UTILITARIAS
 // =========================
@@ -1449,6 +1611,7 @@ const getServiceIcon = (serviceName) => {
   if (name.includes('limpieza')) return '🧹'
   if (name.includes('aire') || name.includes('clima')) return '❄️'
   if (name.includes('taxi')) return '🚕'
+  if (name.includes('barbería')) return '💈'
   return '🔧'
 }
 
@@ -1708,6 +1871,19 @@ const fetchServices = async () => {
     showToast('No se pudieron cargar los servicios. Intente nuevamente.', 'error')
   } finally {
     isLoadingServices.value = false
+  }
+}
+
+const fetchBarberias = async () => {
+  try {
+    const data = await $api('/barberias', {
+      method: 'GET'
+    })
+    if (Array.isArray(data)) {
+      barberiasList.value = data
+    }
+  } catch (error) {
+    console.error('Error al cargar barberías:', error)
   }
 }
 
@@ -2558,13 +2734,32 @@ const handleRequestService = async () => {
     const estadoInicial = tieneMembresiaActiva ? 'pendiente_asignacion' : 'pendiente_pagovisita'
     const visitaPagada = tieneMembresiaActiva ? 0 : 1 
 
+    const isBarberia = selectedService.name === 'Barbería'
+    const isEnLocal = serviceFormData.value.barberiaOption === 'en local'
+
+    const colonia = (isBarberia && isEnLocal) 
+      ? serviceFormData.value.selectedBarberia.colonia 
+      : serviceFormData.value.colonia
+
+    const direccion = (isBarberia && isEnLocal)
+      ? serviceFormData.value.selectedBarberia.direccion_precisa
+      : serviceFormData.value.direccion
+
+    let descripcionFinal = serviceFormData.value.description
+
+    if (isBarberia) {
+      const tecnicoNombre = serviceFormData.value.selectedBarberia?.tecnico?.nombre ? ` - ${serviceFormData.value.selectedBarberia.tecnico.nombre}` : ''
+      const infoLocal = isEnLocal ? `en local: ${serviceFormData.value.selectedBarberia.nombre}${tecnicoNombre}` : 'a domicilio'
+      descripcionFinal = `${serviceFormData.value.description} (${infoLocal})`
+    }
+
     const requestData = {
       id_usuario: Number(userData.id_usuario),
       id_servicio: Number(selectedService.id),
       id_ciudad: Number(userData.id_ciudad),
-      colonia: serviceFormData.value.colonia,
-      direccion_precisa: serviceFormData.value.direccion,
-      descripcion: serviceFormData.value.description,
+      colonia: colonia,
+      direccion_precisa: direccion,
+      descripcion: descripcionFinal,
       pagar_visita: visitaPagada,
       estado: estadoInicial
     }
@@ -2615,13 +2810,15 @@ const handleRequestService = async () => {
       type: '', 
       description: '', 
       colonia: '', 
-      direccion: '' 
+      direccion: '' ,
+      barberiaOption: null,
+      selectedBarberia: null
     }
     
     showToast(
       '¡Solicitud enviada!', 
       tieneMembresiaActiva 
-        ? 'Pronto se le asignará un técnico.' 
+        ? `Pronto se le asignará un ${isBarberia ? 'barbero' : 'técnico'}.` 
         : 'Ya puedes pagar la visita.',
       'success'
     )
@@ -2775,7 +2972,8 @@ onMounted(async () => {
       fetchServices(),
       fetchBeneficios(),
       fetchTotalSolicitudes(),
-      fetchUserCredit()
+      fetchUserCredit(),
+      fetchBarberias()
     ])
   } catch (error) {
     window.location.reload()

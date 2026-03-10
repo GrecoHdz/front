@@ -413,7 +413,7 @@
                 <div class="flex items-center space-x-2">
                   <span class="text-base">📝</span>
                   <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">
-                    {{ selectedService.title === 'Taxi VIP' ? 'Ver Detalles del Viaje' : 'Ver Cotización y Diagnóstico' }}
+                    {{ selectedService.title === 'Taxi VIP' ? 'Ver Detalles del Viaje' : selectedService.title === 'Barbería' ? 'Ver Detalles del Corte' : 'Ver Cotización y Diagnóstico' }}
                   </span>
                 </div>
                 <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1305,11 +1305,11 @@
               <div class="bg-black p-4 rounded-lg shadow-xl shadow-black/10">
                 <div class="flex flex-col items-center">
                   <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">Costo Estimado</p>
-                  <div class="text-3xl font-black text-white tabular-nums">
+                  <div class="text-3xl font-black tabular-nums transition-colors" :class="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0) ? 'line-through text-white/50' : 'text-white'">
                     L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
                   </div>
                   <div v-if="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-yellow-400/80 uppercase">
-                    Pago con App: L. {{ getDiscountedPrice() }}
+                    Pago con App: <span class="text-xs text-yellow-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
                   </div>
                 </div>
               </div>
@@ -1333,6 +1333,128 @@
                 <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
                   <span v-if="!isProcessingQuotation">ACEPTAR VIAJE</span>
                   <div v-else class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                </button>
+              </div>
+            </template>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
+
+  <!-- Barbería Quotation Modal -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to">
+    <div v-if="showBarberiaQuotationModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showBarberiaQuotationModal = false"></div>
+
+      <!-- Contenido -->
+      <Transition name="modal-content" enter-active-class="modal-content-enter-active" leave-active-class="modal-content-leave-active" enter-from-class="modal-content-enter-from" leave-to-class="modal-content-leave-to">
+        <div v-if="showBarberiaQuotationModal" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10" @click.stop>
+          
+          <!-- Encabezado -->
+          <div class="sticky top-0 bg-gradient-to-r from-red-600 via-rose-500 to-blue-600 p-3 border-b border-blue-700/50 rounded-t-xl z-20 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center text-base shadow-inner border border-white/20">
+                  💈
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-white leading-none">Costo de Servicio</h3>
+                  <p class="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-1">BARBER-{{ selectedService.id }}</p>
+                </div>
+              </div>
+              <button @click="showBarberiaQuotationModal = false" class="bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-colors">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido -->
+          <div class="p-3 space-y-4">
+            <div v-if="isLoadingQuotation" class="py-12 flex justify-center">
+              <div class="w-8 h-8 border-4 border-slate-600/20 border-t-slate-600 rounded-full animate-spin"></div>
+            </div>
+            
+            <template v-else>
+              <!-- Barbero -->
+              <div v-if="selectedService.tecnico" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                <img 
+                  :src="getOptimizedImage(selectedService.tecnico.imagen_url, 60, 60)" 
+                  class="w-10 h-10 rounded-lg object-cover shadow-sm"
+                  @error="handleImageError"
+                >
+                <div>
+                  <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Barbero</p>
+                  <p class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedService.tecnico.nombre }}</p>
+                </div>
+              </div>
+
+              <!-- Localidad -->
+              <div class="space-y-1">
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Lugar</h4>
+                <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600 space-y-2 shadow-sm">
+                  <div class="flex items-start space-x-3">
+                    <div class="mt-0.5 w-4 h-4 rounded-full border-2 border-red-500 bg-white dark:bg-gray-800 flex items-center justify-center flex-shrink-0 shadow-sm shadow-red-500/20">
+                      <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-[9px] font-black text-red-600 uppercase tracking-widest leading-none">Domicilio</p>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight mt-1">{{ selectedService.fullLocation?.direccion || selectedService.fullLocation?.colonia || 'Dirección no especificada' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notas del Barbero -->
+              <div v-if="quotationData?.comentario" class="space-y-2">
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Notas del Barbero</h4>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 shadow-sm">
+                  <p class="text-xs font-medium text-blue-800 dark:text-blue-200 leading-relaxed italic text-center">
+                    "{{ quotationData.comentario }}"
+                  </p>
+                </div>
+              </div>
+
+              <!-- Tarifa -->
+              <div class="bg-gradient-to-br from-gray-900 to-black p-4 rounded-lg shadow-xl shadow-blue-900/10 border border-gray-800 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-blue-500"></div>
+                <div class="flex flex-col items-center mt-1">
+                  <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Costo Estimado</p>
+                  <div class="text-3xl font-black tabular-nums transition-colors" :class="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0) ? 'line-through text-white/50' : 'text-white'">
+                    L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
+                  </div>
+                  <div v-if="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-white/80 uppercase">
+                    Pago con App: <span class="text-xs text-blue-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cashback -->
+              <div v-if="shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-lg">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest">✨ Cashback</span>
+                  <span class="text-xs font-black text-red-700 dark:text-red-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
+                </div>
+                <p class="text-[9px] text-red-600/80 dark:text-red-400/80 font-medium leading-tight">
+                  * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
+                </p>
+              </div>
+
+              <!-- Acciones -->
+              <div class="flex gap-2 pt-2">
+                <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50 border border-gray-200 dark:border-gray-600 shadow-sm">
+                  RECHAZAR
+                </button>
+                <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
+                  <span v-if="!isProcessingQuotation">ACEPTAR COSTO</span>
+                  <div v-else class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
                 </button>
               </div>
             </template>
@@ -2192,6 +2314,7 @@ const showVisitPaymentModal = ref(false)
 const showCancelModal = ref(false)
 const showQuotationModal = ref(false)
 const showTaxiQuotationModal = ref(false)
+const showBarberiaQuotationModal = ref(false)
 const showRatingModal = ref(false) 
 const showImageModal = ref(false)
 const selectedImage = ref('')
@@ -2205,6 +2328,7 @@ const anyModalOpen = computed(() => {
          showCancelModal.value || 
          showQuotationModal.value || 
          showTaxiQuotationModal.value || 
+         showBarberiaQuotationModal.value || 
          showRatingModal.value || 
          showImageModal.value
 })
@@ -2428,7 +2552,11 @@ const formatDateDDMMYY = (dateString) => {
   return `${day}${month}${year}`
 }
 
-const getServiceIcon = () => {
+const getServiceIcon = (serviceName) => {
+  if (!serviceName) return '🛠️'
+  const name = serviceName.toLowerCase()
+  if (name.includes('taxi')) return '🚕'
+  if (name.includes('barber')) return '💈'
   return '🛠️'
 }
 
@@ -2557,10 +2685,10 @@ const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
   const statusMap = {
     'pendiente_pagovisita': 'Pago de la Visita',
     'verificando_pagovisita': 'Verificando Pago de la Visita',
-    'pendiente_asignacion': servicio.title === 'Taxi VIP' ? 'Esperando Conductor' : 'Esperando Asignación de Técnico',
-    'asignado': servicio.title === 'Taxi VIP' ? 'Conductor Asignado' : 'Técnico Asignado',
-    'pendiente_cotizacion': servicio.title === 'Taxi VIP' ? 'Tarifa Recibida' : 'Diagnóstico Realizado',
-    'en_proceso': servicio.title === 'Taxi VIP' ? 'Viaje Programado' : 'Servicio en Curso',
+    'pendiente_asignacion': servicio.title === 'Taxi VIP' ? 'Esperando Conductor' : (servicio.title === 'Barbería' ? 'Esperando Asignación de Barbero' : 'Esperando Asignación de Técnico'),
+    'asignado': servicio.title === 'Taxi VIP' ? 'Conductor Asignado' : (servicio.title === 'Barbería' ? 'Barbero Asignado' : 'Técnico Asignado'),
+    'pendiente_cotizacion': servicio.title === 'Taxi VIP' ? 'Tarifa Recibida' : (servicio.title === 'Barbería' ? 'Detalles Enviados' : 'Diagnóstico Realizado'),
+    'en_proceso': servicio.title === 'Taxi VIP' ? 'Viaje Programado' : (servicio.title === 'Barbería' ? 'Corte en Curso' : 'Servicio en Curso'),
     'pendiente_pagoservicio': 'Pago del Servicio',
     'verificando_pagoservicio': 'Verificando Pago del Servicio',
     'finalizado': 'Servicio sin calificar',
@@ -2583,7 +2711,7 @@ const mapApiServiceToLocal = (apiService) => {
     pagovisitaRechazado: pagovisitaRechazado,
     cotizacion_estado: apiService.cotizacion_estado || 'pendiente',
     title: apiService.servicio?.nombre || 'Servicio General',
-    icon: getServiceIcon(apiService.id_servicio),
+    icon: getServiceIcon(apiService.servicio?.nombre),
     status: mapApiStatusToLocal(apiService.estado, { 
       pagovisitaRechazado,
       cotizacion_estado: apiService.cotizacion_estado,
@@ -3007,6 +3135,8 @@ const openQuotationModal = async (service) => {
     // Mostrar el modal según el tipo de servicio
     if (service.title === 'Taxi VIP') {
       showTaxiQuotationModal.value = true;
+    } else if (service.title === 'Barbería') {
+      showBarberiaQuotationModal.value = true;
     } else {
       showQuotationModal.value = true;
     }
@@ -3040,6 +3170,7 @@ const closeAllModals = () => {
   showCancelModal.value = false
   showQuotationModal.value = false
   showTaxiQuotationModal.value = false
+  showBarberiaQuotationModal.value = false
   showRejectConfirmation.value = false
   showTaxiRejectConfirmation.value = false
   showRatingModal.value = false
@@ -3368,6 +3499,7 @@ const acceptQuotation = async () => {
     // Cerrar modal y recargar datos
     showQuotationModal.value = false;
     showTaxiQuotationModal.value = false;
+    showBarberiaQuotationModal.value = false;
     
     await new Promise(resolve => setTimeout(resolve, 300)); // esperar animación
     await loadServices();
@@ -3478,6 +3610,7 @@ const rejectQuotation = async () => {
     // Cerrar el modal de cotización
     showQuotationModal.value = false
     showTaxiQuotationModal.value = false
+    showBarberiaQuotationModal.value = false
     
     // Esperar a que la animación del modal termine
     await new Promise(resolve => setTimeout(resolve, 300));

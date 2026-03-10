@@ -394,6 +394,97 @@
           </div>
         </div>
       </Transition>
+      
+      <!-- Mi Local (Solo si es Barbero) -->
+      <div v-if="isBarber" class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700/50 mb-6 transition-all duration-300 animate-fade-in">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+            💈
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">Mi Barbería</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Registra tu local físico</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre del Local</label>
+            <input v-model="barberia.nombre" type="text" placeholder="Ej: Barbería El Elegante" 
+                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white text-sm">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Colonia</label>
+              <input v-model="barberia.colonia" type="text" placeholder="Colonia" 
+                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white text-sm">
+            </div>
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Dirección Precisa</label>
+              <input v-model="barberia.direccion_precisa" type="text" placeholder="Calle, Bloque, Casa" 
+                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white text-sm">
+            </div>
+          </div>
+
+          <!-- Fotos de Barbería con Cloudinary -->
+          <div class="grid grid-cols-2 gap-4">
+             <!-- Foto 1 -->
+             <div class="space-y-2">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Foto Fachada</label>
+                <div @click="fileInputBarberia1.click()" 
+                     class="group relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-400 transition-all">
+                   <img v-if="barberia.foto1" :src="barberia.foto1" class="absolute inset-0 w-full h-full object-cover group-hover:opacity-75 transition-opacity">
+                   <div v-else class="text-center p-3">
+                      <div class="text-2xl mb-1">📸</div>
+                      <p class="text-[10px] text-gray-400 font-bold">Subir Fachada</p>
+                   </div>
+                   
+                   <!-- Overlay de carga/edición -->
+                   <div v-if="isUploading" class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <div class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                   </div>
+                   <div v-if="barberia.foto1 && !isUploading" class="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
+                      <button @click.stop="deleteBarberiaImage('foto1')" class="p-2 bg-red-500/20 hover:bg-red-500/40 text-white rounded-full backdrop-blur-md transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                   </div>
+                </div>
+                <input type="file" ref="fileInputBarberia1" class="hidden" accept="image/*" @change="onBarberiaFileChange($event, 'foto1')">
+             </div>
+
+             <!-- Foto 2 -->
+             <div class="space-y-2">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Foto Interior</label>
+                <div @click="fileInputBarberia2.click()" 
+                     class="group relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-400 transition-all">
+                   <img v-if="barberia.foto2" :src="barberia.foto2" class="absolute inset-0 w-full h-full object-cover group-hover:opacity-75 transition-opacity">
+                   <div v-else class="text-center p-3">
+                      <div class="text-2xl mb-1">🛋️</div>
+                      <p class="text-[10px] text-gray-400 font-bold">Subir Interior</p>
+                   </div>
+
+                   <!-- Overlay de carga/edición -->
+                   <div v-if="isUploading" class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <div class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                   </div>
+                   <div v-if="barberia.foto2 && !isUploading" class="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
+                      <button @click.stop="deleteBarberiaImage('foto2')" class="p-2 bg-red-500/20 hover:bg-red-500/40 text-white rounded-full backdrop-blur-md transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                   </div>
+                </div>
+                <input type="file" ref="fileInputBarberia2" class="hidden" accept="image/*" @change="onBarberiaFileChange($event, 'foto2')">
+             </div>
+          </div>
+
+          <button @click="saveBarberia" :disabled="isSavingBarberia || !hasBarberiaChanges"
+                  class="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black rounded-2xl transition-all shadow-lg hover:shadow-indigo-200/50 disabled:opacity-50">
+            <span v-if="isSavingBarberia">Guardando...</span>
+            <span v-else>{{ barberia.id_barberia ? 'Actualizar Local' : 'Registrar Mi Local' }}</span>
+          </button>
+        </div>
+      </div>
 
       <!-- Push Notifications Settings -->
       <div v-if="isSupported" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4 transition-all duration-300">
@@ -1259,11 +1350,22 @@ const showSubscribeModal = ref(false)
 
 
 
-// Variables para gestión de servicios
 const availableServices = ref([])
 const technicianServices = ref([])
 const loadingServices = ref(false)
 const showServiceModal = ref(false)
+
+// Variables para gestión de barbería
+const barberia = ref({
+  id_barberia: null,
+  nombre: '',
+  colonia: '',
+  direccion_precisa: '',
+  foto1: '',
+  foto2: ''
+})
+const loadingBarberia = ref(false)
+const isSavingBarberia = ref(false)
 
 // Bloquear scroll cuando un modal está abierto
 const anyModalOpen = computed(() => {
@@ -1295,6 +1397,7 @@ const confirmPassword = ref('')
 const ciudades = ref([])
 const loadingCiudades = ref(false)
 const originalUserData = ref(null)
+const originalBarberiaData = ref(null)
 
 // Datos del usuario con valores por defecto seguros
 const user = ref({
@@ -1381,6 +1484,20 @@ const hasChanges = computed(() => {
 const passwordMismatch = computed(() => {
   return newPassword.value && confirmPassword.value && 
          newPassword.value !== confirmPassword.value;
+})
+
+const isBarber = computed(() => {
+  return technicianServices.value.some(s => s.nombre.toLowerCase().includes('barbería'));
+})
+
+const hasBarberiaChanges = computed(() => {
+  if (!originalBarberiaData.value) return !!barberia.value.nombre;
+  
+  return (
+    barberia.value.nombre !== originalBarberiaData.value.nombre ||
+    barberia.value.colonia !== originalBarberiaData.value.colonia ||
+    barberia.value.direccion_precisa !== originalBarberiaData.value.direccion_precisa
+  );
 })
 
 // ===== FUNCIONES DE UTILIDAD =====
@@ -1488,6 +1605,72 @@ const fetchTechnicianServices = async () => {
   } catch (error) {
     console.error('Error al cargar servicios del técnico:', error)
     showError('Error', 'No se pudieron cargar tus servicios asignados.')
+  }
+}
+
+const fetchTechnicianBarberia = async () => {
+  try {
+    const userId = auth.user?.id_usuario || userCookie.value?.id_usuario
+    if (!userId) return
+    
+    loadingBarberia.value = true
+    const data = await $api(`/barberias/tecnico/${userId}`)
+    if (data) {
+      barberia.value = data
+      originalBarberiaData.value = { ...data }
+    } else {
+      barberia.value = {
+        id_barberia: null,
+        id_tecnico: userId,
+        nombre: '',
+        colonia: '',
+        direccion_precisa: '',
+        foto1: '',
+        foto2: ''
+      }
+      originalBarberiaData.value = null
+    }
+  } catch (error) {
+    console.error('Error al cargar barbería del técnico:', error)
+  } finally {
+    loadingBarberia.value = false
+  }
+}
+
+const saveBarberia = async () => {
+  try {
+    const userId = auth.user?.id_usuario || userCookie.value?.id_usuario
+    if (!userId) return
+
+    isSavingBarberia.value = true
+    const method = barberia.value.id_barberia ? 'PUT' : 'POST'
+    const url = barberia.value.id_barberia ? `/barberias/${barberia.value.id_barberia}` : '/barberias'
+    
+    const payload = {
+      ...barberia.value,
+      id_tecnico: userId
+    }
+
+    const response = await $api(url, {
+      method,
+      body: payload
+    })
+
+    if (response.success) {
+      showSuccess('¡Éxito!', 'Información de barbería guardada.')
+      const barberData = response.data || barberia.value;
+      if (!barberia.value.id_barberia) {
+         barberia.value = barberData
+      }
+      originalBarberiaData.value = { ...barberia.value }
+    } else {
+      showError('Error', response.error || 'No se pudo guardar la información.')
+    }
+  } catch (error) {
+    console.error('Error al guardar barbería:', error)
+    showError('Error', 'Ocurrió un error inesperado.')
+  } finally {
+    isSavingBarberia.value = false
   }
 }
 
@@ -1627,7 +1810,8 @@ const cargarDatosPerfil = async () => {
       cargarCiudades(),
       fetchUserData(),
       fetchAvailableServices(),
-      fetchTechnicianServices()
+      fetchTechnicianServices(),
+      fetchTechnicianBarberia()
     ])
     
     return true
@@ -1766,8 +1950,82 @@ const deleteProfileImage = async () => {
   }
 }
 
+const onBarberiaFileChange = (event, campo) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!validTypes.includes(file.type)) {
+    showError('Error', 'Formato no válido. Use JPG, PNG o WebP.')
+    return
+  }
+
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    showError('Error', 'La imagen supera los 5MB.')
+    return
+  }
+
+  uploadBarberiaImage(file, campo)
+}
+
+const uploadBarberiaImage = async (file, campo) => {
+  if (!barberia.value.id_barberia) {
+    showError('Aviso', 'Primero guarda la información básica del local antes de subir fotos.')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('imagen', file)
+  
+  try {
+    isUploading.value = true
+    const response = await $api(`/barberias/foto/${barberia.value.id_barberia}/${campo}`, {
+      method: 'POST',
+      body: formData
+    })
+    
+    if (response.success) {
+      barberia.value[campo] = response.data.url
+      showSuccess('¡Éxito!', 'Imagen actualizada.')
+    } else {
+      showError('Error', response.error || 'No se pudo subir la imagen.')
+    }
+  } catch (error) {
+    console.error('Error al subir imagen de barbería:', error)
+    showError('Error', 'Error al procesar la subida.')
+  } finally {
+    isUploading.value = false
+    if (campo === 'foto1' && fileInputBarberia1.value) fileInputBarberia1.value.value = ''
+    if (campo === 'foto2' && fileInputBarberia2.value) fileInputBarberia2.value.value = ''
+  }
+}
+
+const deleteBarberiaImage = async (campo) => {
+  if (!barberia.value.id_barberia || !barberia.value[campo]) return
+
+  try {
+    isUploading.value = true
+    const response = await $api(`/barberias/foto/${barberia.value.id_barberia}/${campo}`, {
+      method: 'DELETE'
+    })
+
+    if (response.success) {
+      barberia.value[campo] = null
+      showSuccess('¡Éxito!', 'Imagen eliminada.')
+    }
+  } catch (error) {
+    console.error('Error al eliminar imagen:', error)
+    showError('Error', 'No se pudo eliminar la imagen.')
+  } finally {
+    isUploading.value = false
+  }
+}
+
 // Referencia al input de archivo
 const fileInput = ref(null)
+const fileInputBarberia1 = ref(null)
+const fileInputBarberia2 = ref(null)
 
 // ===== FUNCIONES DE ACCIONES =====
 const saveProfile = async () => {
