@@ -117,7 +117,9 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex items-start space-x-2 sm:space-x-3">
                       <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-md sm:rounded-lg bg-blue-50 dark:bg-blue-900/20 flex-shrink-0 flex items-center justify-center mt-0.5">
-                        <span class="text-blue-500 text-base sm:text-lg">🔧</span>
+                        <span class="text-blue-500 text-base sm:text-lg">
+                          {{ service.title === 'Taxi VIP' ? '🚕' : (service.title?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'barberia' ? '💈' : '🔧') }}
+                        </span>
                       </div>
                       <div class="min-w-0">
                         <h4 class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ service.title }}</h4>

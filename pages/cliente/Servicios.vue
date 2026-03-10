@@ -951,6 +951,135 @@
     </div>
   </Transition>
 
+  <!-- Barbería Payment Modal -->
+  <Transition
+    name="modal"
+    enter-active-class="modal-enter-active"
+    leave-active-class="modal-leave-active"
+    enter-from-class="modal-enter-from"
+    leave-to-class="modal-leave-to"
+  >
+    <div v-if="showBarberiaPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closePaymentModal"></div>
+      
+      <Transition name="modal-content" enter-active-class="modal-content-enter-active" leave-active-class="modal-content-leave-active" enter-from-class="modal-content-enter-from" leave-to-class="modal-content-leave-to">
+        <div v-if="showBarberiaPaymentModal" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs max-h-[90vh] overflow-y-auto relative z-10" @click.stop>
+          
+          <!-- Encabezado -->
+          <div class="sticky top-0 bg-gradient-to-r from-red-600 via-rose-500 to-blue-600 p-3 border-b border-blue-700/50 rounded-t-xl z-20 shadow-lg">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center text-base shadow-inner border border-white/20">
+                  💈
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-white leading-none">Pagar Servicio</h3>
+                  <p class="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-1">BARBER-{{ selectedService.id }}</p>
+                </div>
+              </div>
+              <button @click="closePaymentModal" class="bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-colors">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido -->
+          <div class="p-3 space-y-4">
+            <!-- Resumen de Costo -->
+            <div class="space-y-2">
+              <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">Resumen de Costo</h4>
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="text-gray-600 dark:text-gray-400 font-bold">Costo del Servicio</span>
+                    <span class="font-black text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
+                  </div>
+
+                  <div v-if="shouldShowCreditBenefit && creditApplied > 0" class="flex justify-between items-center text-xs text-blue-600 dark:text-blue-400">
+                    <span class="font-bold">💳 Crédito Aplicado</span>
+                    <span class="font-black">−L. {{ formatCurrency(creditApplied) }}</span>
+                  </div>
+
+                  <div class="pt-2 border-t border-blue-200 dark:border-blue-800 flex justify-between items-center">
+                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">Total a Pagar</span>
+                    <span class="text-base font-black text-blue-600 dark:text-blue-400">L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cashback -->
+              <div v-if="shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-lg">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest">✨ Cashback</span>
+                  <span class="text-xs font-black text-red-700 dark:text-red-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
+                </div>
+                <p class="text-[9px] text-red-600/80 dark:text-red-400/80 font-medium leading-tight">
+                  * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
+                </p>
+              </div>
+            </div>
+
+            <!-- Información de Pago -->
+            <div class="space-y-3">
+              <h4 class="text-sm font-black text-gray-900 dark:text-white">Datos de Transferencia</h4>
+              
+              <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
+                <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+              </div>
+              
+              <div v-else class="space-y-3">
+                <multiselect
+                  v-model="selectedAccountObject"
+                  :options="bankAccounts"
+                  :searchable="false"
+                  :close-on-select="true"
+                  :show-labels="false"
+                  placeholder="Elige cuenta destino"
+                  label="banco"
+                  track-by="id_cuenta"
+                  class="multiselect-custom taxi-select"
+                  :custom-label="getAccountLabel"
+                />
+
+                <div v-if="getSelectedAccount" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div class="flex justify-between items-center gap-2 mb-1">
+                    <span class="text-sm font-bold text-gray-900 dark:text-white truncate flex-1">{{ getSelectedAccount.banco }}</span>
+                    <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 italic whitespace-nowrap">{{ getSelectedAccount.tipo_cuenta }}</span>
+                  </div>
+                  
+                  <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-100 dark:border-gray-700">
+                    <span class="text-sm font-mono font-bold text-gray-900 dark:text-white">{{ getSelectedAccount.numero_cuenta }}</span>
+                    <button @click="copyToClipboard(getSelectedAccount.numero_cuenta)" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-indigo-500">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                    </button>
+                  </div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-2 font-bold uppercase tracking-widest">ID: <span class="text-gray-900 dark:text-white">{{ getSelectedAccount.titular }}</span></p>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">N° de comprobante</label>
+                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ej: 987654321">
+                </div>
+
+                <button @click="processPayment" :disabled="!selectedAccount || !comprobante || isProcessingPayment" class="w-full py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50">
+                  <span v-if="!isProcessingPayment">Confirmar Pago L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+                  <div v-else class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin mx-auto"></div>
+                </button>
+
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-100 dark:border-blue-800 flex items-start space-x-2">
+                  <span class="text-xs">💈</span>
+                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">Al confirmar, serás redirigido automáticamente para que puedas adjuntar tu comprobante de pago.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
+
 <!-- Modal para ver imagen en grande -->
 <Transition
   enter-active-class="transition-opacity duration-300"
@@ -2238,6 +2367,14 @@ const serviceSteps = computed(() => {
       { id: 4, title: 'Viaje en Curso', description: 'Vas en camino a tu destino' },
       { id: 5, title: 'Viaje Completado', description: 'Has llegado a tu destino' }
     ]
+  } else if (selectedService.value?.title === 'Barbería') {
+    return [
+      { id: 1, title: 'Solicitud recibida', description: 'Tu solicitud de corte ha sido registrada' },
+      { id: 2, title: 'Barbero asignado', description: 'Se asignó al mejor barbero' },
+      { id: 3, title: 'Costo del Servicio', description: 'El barbero ha enviado el costo de su servicio' },
+      { id: 4, title: 'Corte en Progreso', description: 'Tu estilo está siendo perfeccionado' },
+      { id: 5, title: 'Servicio Completado', description: 'Disfruta de tu nuevo look' }
+    ]
   }
   return [
     { id: 1, title: 'Solicitud recibida', description: 'Tu solicitud ha sido registrada' },
@@ -2310,6 +2447,7 @@ const isLoadingMore = ref(false)
 const showServiceModal = ref(false)
 const showPaymentModal = ref(false) 
 const showTaxiPaymentModal = ref(false)
+const showBarberiaPaymentModal = ref(false)
 const showVisitPaymentModal = ref(false)
 const showCancelModal = ref(false)
 const showQuotationModal = ref(false)
@@ -2324,6 +2462,7 @@ const anyModalOpen = computed(() => {
   return showServiceModal.value || 
          showPaymentModal.value || 
          showTaxiPaymentModal.value || 
+         showBarberiaPaymentModal.value || 
          showVisitPaymentModal.value || 
          showCancelModal.value || 
          showQuotationModal.value || 
@@ -3062,6 +3201,8 @@ const openPaymentModal = async (service) => {
     // Mostrar el modal según el tipo de servicio
     if (service?.title === 'Taxi VIP') {
       showTaxiPaymentModal.value = true
+    } else if (service?.title === 'Barbería') {
+      showBarberiaPaymentModal.value = true
     } else {
       showPaymentModal.value = true
     }
@@ -3092,6 +3233,7 @@ const openPaymentModal = async (service) => {
 const closePaymentModal = () => {
   showPaymentModal.value = false
   showTaxiPaymentModal.value = false
+  showBarberiaPaymentModal.value = false
   selectedAccount.value = ''
   comprobante.value = ''
   isProcessingPayment.value = false
@@ -3166,6 +3308,7 @@ const closeAllModals = () => {
   showServiceModal.value = false
   showPaymentModal.value = false
   showTaxiPaymentModal.value = false
+  showBarberiaPaymentModal.value = false
   showVisitPaymentModal.value = false
   showCancelModal.value = false
   showQuotationModal.value = false

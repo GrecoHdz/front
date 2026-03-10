@@ -1208,6 +1208,7 @@ const isBarberíaService = (title = '') => {
 }
 
 const getServiceIcon = (estado, serviceTitle = '') => {
+  if (serviceTitle === 'Taxi VIP') return '🚕'
   if (isBarberíaService(serviceTitle)) return '💇'
   const iconMap = {
     'verificando_pagovisita': '💰',
