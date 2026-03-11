@@ -109,6 +109,8 @@ const onNotificationClick = async (notification) => {
   try {
     if (notification.titulo === 'Nuevo referido') {
       await navigateTo('/tecnico/Referir');
+    } else if (notification.titulo === 'Paquete Consumido') {
+      await navigateTo('/tecnico/Marketplace');
     } else if (notification.titulo === 'Comisión por referido recibida') {
       await navigateTo('/tecnico/Referir');
     } else if (notification.titulo === 'CashBack Recibido') {

@@ -29,10 +29,10 @@
             </svg>
           </div>
           <input 
-            v-model="searchQuery"
+            v-model="tempSearchQuery"
+            @input="debouncedSearch(tempSearchQuery)"
             type="text" 
-            class="block w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-xl tex
-            t-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
+            class="block w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
             placeholder="¿Qué necesitas hoy?"
           >
         </div>
@@ -78,7 +78,7 @@
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
                   v-for="paquete in ownedPackages" 
-                  :key="'owned-'+paquete.id"
+                  :key="'owned-'+paquete.id_paquete_usuario"
                   @click="openPackageDetail(paquete)"
                   class="snap-center shrink-0 w-72 text-white rounded-2xl p-4 relative overflow-hidden shadow-lg group active:scale-95 transition-all duration-300"
                   :class="getEstadoPaquete(paquete.id) === 'En uso' 
@@ -105,9 +105,15 @@
                      </div>
                   </div>
                   
-                  <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center">
-                     <span class="text-[10px] text-gray-300">Toca para gestionar</span>
-                     <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                  <div class="mt-4 pt-3 border-t border-white/10 flex flex-col gap-1">
+                     <div class="flex justify-between items-center">
+                        <span class="text-[10px] text-gray-300">Toca para gestionar</span>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                     </div>
+                     <div v-if="paquete.fecha_compra" class="text-[9px] text-white/50 flex items-center gap-1.5 mt-1">
+                        <span class="font-bold uppercase tracking-tighter">Adquirido:</span>
+                        <span>{{ formatDate(paquete.fecha_compra) }}</span>
+                     </div>
                   </div>
                </div>
             </div>
@@ -232,7 +238,7 @@
             <div class="grid grid-cols-2 gap-3">
                <div 
                   v-for="paquete in gridPackages" 
-                  :key="paquete.id"
+                  :key="paquete.id_paquete_usuario || paquete.id"
                   @click="openPackageDetail(paquete)"
                   class="flex bg-white dark:bg-gray-800 rounded-xl p-2 shadow-sm border border-gray-100 dark:border-gray-700 active:bg-gray-50 transition-colors"
                >
@@ -273,14 +279,25 @@
                      <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate mt-0.5 leading-tight opacity-80">
                         {{ paquete.descripcion }}
                      </p>
+
+                     <!-- Fechas de historial -->
+                     <div v-if="paquete.fecha_compra || paquete.fecha_uso" class="mt-2 pt-1 border-t border-gray-100 dark:border-gray-700/50 space-y-0.5">
+                        <div v-if="paquete.fecha_compra" class="flex items-center gap-1.5 text-[8px] text-gray-400">
+                           <span class="font-bold uppercase tracking-tighter">Compra:</span>
+                           <span class="font-medium">{{ formatDate(paquete.fecha_compra) }}</span>
+                        </div>
+                        <div v-if="paquete.fecha_uso" class="flex items-center gap-1.5 text-[8px] text-blue-500">
+                           <span class="font-black uppercase tracking-tighter">Uso:</span>
+                           <span class="font-bold">{{ formatDate(paquete.fecha_uso) }}</span>
+                        </div>
+                     </div>
                   </div>
                </div>
             </div>
             
             <!-- Empty Search -->
             <div v-if="gridPackages.length === 0" class="text-center py-10">
-               <p class="text-gray-400 text-sm">No encontramos resultados para "{{ searchQuery }}"</p>
-               <button @click="searchQuery = ''" class="text-blue-600 text-xs font-bold mt-2">Limpiar búsqueda</button>
+               <p class="text-gray-400 text-sm">No hay resultados</p>
             </div>
          </section>
       </div>
@@ -586,6 +603,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
@@ -610,7 +628,12 @@ const isLoading = ref(true)
 const toast = ref({ show: false })
 const userCredit = ref(0)
 const searchQuery = ref('')
+const tempSearchQuery = ref('')
 const activeFilter = ref('todos')
+
+const debouncedSearch = useDebounceFn((val) => {
+   searchQuery.value = val
+}, 350)
 
 const filtersList = [
    { id: 'todos', label: 'Todos' },
@@ -670,7 +693,21 @@ const displayPackages = computed(() => {
 const showLanes = computed(() => !searchQuery.value && activeFilter.value === 'todos')
 
 const ownedPackages = computed(() => {
-   const owned = paquetesMantenimiento.value.filter(p => tienePaquete(p.id))
+   const owned = paquetesUsuario.value
+      .filter(pu => pu.estado === 'activo' || pu.estado === 'utilizando' || pu.estado === 'verificando_pago')
+      .map(pu => {
+         const base = paquetesMantenimiento.value.find(p => p.id === pu.id_paquete) || {}
+         return {
+            ...base,
+            nombre: pu.paquete?.nombre || base.nombre,
+            descripcion: pu.paquete?.descripcion || base.descripcion,
+            id: pu.id_paquete,
+            id_paquete_usuario: pu.id_paquete_usuario,
+            fecha_compra: pu.fecha_compra,
+            fecha_uso: (pu.estado === 'utilizando' || pu.estado === 'utilizado') ? pu.fecha_uso : null,
+            status_usuario: pu.estado
+         }
+      })
    
    // Ordenar: primero "En uso", luego "Adquirido", finalmente "Verificando"
    return owned.sort((a, b) => {
@@ -692,9 +729,27 @@ const filteredPackages = computed(() => {
    const f = activeFilter.value
    
    if (f === 'utilizados') {
-      // Filtrar paquetes que tengan registro 'utilizado' en historial
-      const usedIds = new Set(paquetesUsuario.value.filter(pu => pu.estado === 'utilizado').map(pu => pu.id_paquete))
-      list = list.filter(p => usedIds.has(p.id))
+      // Mostrar historial de paquetes utilizados con sus fechas
+      let used = paquetesUsuario.value.filter(pu => pu.estado === 'utilizado')
+      if (searchQuery.value) {
+         const q = searchQuery.value.toLowerCase()
+         used = used.filter(pu => 
+            pu.paquete?.nombre?.toLowerCase().includes(q) || 
+            pu.paquete?.descripcion?.toLowerCase().includes(q)
+         )
+      }
+      return used.map(pu => {
+         const base = paquetesMantenimiento.value.find(p => p.id === pu.id_paquete) || {}
+         return {
+            ...base,
+            id_paquete_usuario: pu.id_paquete_usuario,
+            nombre: pu.paquete?.nombre || base.nombre,
+            descripcion: pu.paquete?.descripcion || base.descripcion,
+            costo: pu.paquete?.costo || base.costo,
+            fecha_compra: pu.fecha_compra,
+            fecha_uso: pu.fecha_uso
+         }
+      })
    } else if (f === 'canjeables') {
       list = list.filter(p => userCredit.value >= p.costo)
    } else if (f === 'auto') {
@@ -804,6 +859,19 @@ const handleCopyAndSelect = async () => {
 } 
 
 const formatNumber = (val) => new Intl.NumberFormat('es-HN', { minimumFractionDigits: 2 }).format(val || 0)
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  })
+}
 
 // Transaction Triggers
 const initiatePurchase = async (p) => {

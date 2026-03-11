@@ -392,13 +392,13 @@
                               <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
-                              <span class="truncate">{{ pkg.Usuario.nombre }}</span>
+                              <span class="truncate">{{ pkg.usuario?.nombre || 'Sin nombre' }}</span>
                             </div>
                             <div class="flex items-center space-x-1.5 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
                               <svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                               </svg>
-                              <span>{{ pkg.Usuario.telefono }}</span>
+                              <span>{{ pkg.usuario?.telefono || 'N/A' }}</span>
                             </div>
                           </div>
 
@@ -486,7 +486,7 @@
                               <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
-                              <span class="truncate">{{ pkg.Usuario.nombre }}</span>
+                              <span class="truncate">{{ pkg.usuario?.nombre || 'Sin nombre' }}</span>
                             </div>
                             <div v-if="pkg.pagos?.length > 0" class="mt-1 p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-0.5">
                               <p class="text-[8px] font-medium text-gray-600 dark:text-gray-400">Monto: <span class="text-gray-900 dark:text-white">L. {{ parseFloat(pkg.pagos[0].monto).toFixed(2) }}</span></p>
@@ -579,7 +579,7 @@
                               <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
-                              <span class="truncate">{{ pkg.Usuario.nombre }}</span>
+                              <span class="truncate">{{ pkg.usuario?.nombre || 'Sin nombre' }}</span>
                             </div>
                             <p class="text-[8px] text-gray-400 mt-1">Uso: {{ formatDate(pkg.fecha_actualizacion) }}</p>
                           </div>
@@ -1502,7 +1502,7 @@
               </div>
               <div>
                 <p class="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm">{{ selectedPackage?.paquete?.nombre }}</p>
-                <p class="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400">{{ selectedPackage?.Usuario?.nombre }}</p>
+                <p class="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400">{{ selectedPackage?.usuario?.nombre }}</p>
               </div>
             </div>
           </div>
@@ -1522,7 +1522,7 @@
                 <div>
                   <p class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">Monto</p>
                   <p class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
-                    L. {{ selectedPackage?.pagos?.[0]?.monto ? parseFloat(selectedPackage.pagos[0].monto).toFixed(2) : '0.00' }}
+                    L. {{ (selectedPackage?.pagos?.find(p => p.estado === 'pendiente')?.monto || selectedPackage?.pagos?.[0]?.monto) ? parseFloat(selectedPackage?.pagos?.find(p => p.estado === 'pendiente')?.monto || selectedPackage.pagos[0].monto).toFixed(2) : '0.00' }}
                   </p>
                 </div>
               </div> 
@@ -1532,12 +1532,12 @@
                 <div>
                    <p class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">Banco</p>
                    <p class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
-                     {{ selectedPackage?.pagos?.[0]?.cuenta?.banco || 'No especificado' }}
+                     {{ (selectedPackage?.pagos?.find(p => p.estado === 'pendiente') || selectedPackage?.pagos?.[0])?.cuenta?.banco || 'No especificado' }}
                    </p>
                 </div>
                 <!-- Mini detalle bancario desplegable o info extra si se requiere, similar al diseño original -->
                 <button 
-                  v-if="selectedPackage?.pagos?.[0]?.cuenta"
+                  v-if="(selectedPackage?.pagos?.find(p => p.estado === 'pendiente') || selectedPackage?.pagos?.[0])?.cuenta"
                   @click="showBankDetailsModal = true"
                   class="p-1.5 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
                   title="Ver detalles del banco"
@@ -2566,10 +2566,13 @@ const confirmPaymentAction = async () => {
   if (!selectedPackage.value || !pendingPaymentAction.value) return;
   
   isVerifying.value = true;
-  const pagoId = selectedPackage.value.pagos?.[0]?.id_pago_paquete;
+  
+  // Buscar el pago que está en estado pendiente
+  const pendingPayment = selectedPackage.value.pagos?.find(p => p.estado === 'pendiente') || selectedPackage.value.pagos?.[0];
+  const pagoId = pendingPayment?.id_pago_paquete;
   
   if (!pagoId) {
-    showError('No se encontró el ID del pago');
+    showError('No se encontró el ID del pago pendiente');
     isVerifying.value = false;
     return;
   }
@@ -2614,10 +2617,9 @@ const confirmPaymentAction = async () => {
           console.error('Error notificando Usuario (Aprobación):', e);
         }
 
-        // Generar factura automática para el paquete
-        const pago = selectedPackage.value?.pagos?.[0];
-        if (pago) {
-           await crearFacturaParaPago(selectedPackage.value.id_usuario, pago, 'package', pago.id_pago_paquete);
+        // Generar factura automática para el paquete usando el pago que aprobamos
+        if (pendingPayment) {
+           await crearFacturaParaPago(selectedPackage.value.id_usuario, pendingPayment, 'package', pendingPayment.id_pago_paquete);
         }
       }
 
@@ -3499,8 +3501,8 @@ const changeTechPage = async (page) => {
     const offset = (page - 1) * techsPerPage;
     
     // Obtener el ID de la ciudad del paquete seleccionado o del selector de ciudad
-    const cityId = selectedPackage.value?.Usuario?.ciudad?.id_ciudad || 
-                  selectedPackage.value?.Usuario?.id_ciudad || 
+    const cityId = selectedPackage.value?.usuario?.ciudad?.id_ciudad || 
+                  selectedPackage.value?.usuario?.id_ciudad || 
                   selectedTechCityObject.value?.id_ciudad;
     
     const result = showLiquidacionModal.value 
@@ -4045,7 +4047,7 @@ const openPackageAssignment = async (pkg) => {
     techSearchQuery.value = '' // Resetear búsqueda al abrir
     
     // Obtener el ID de la ciudad del usuario que tiene el paquete
-    const cityId = pkg.Usuario?.ciudad?.id_ciudad || pkg.Usuario?.id_ciudad;
+    const cityId = pkg.usuario?.ciudad?.id_ciudad || pkg.usuario?.id_ciudad;
     
     // Actualizar el selectedTechCityObject si se encontró una ciudad
     if (cityId) {
@@ -4379,8 +4381,8 @@ const handleTechSearch = async () => {
   isSearchingTech.value = true
   currentTechPage.value = 1
   try {
-    const cityId = selectedPackage.value?.Usuario?.ciudad?.id_ciudad || 
-                  selectedPackage.value?.Usuario?.id_ciudad || 
+    const cityId = selectedPackage.value?.usuario?.ciudad?.id_ciudad || 
+                  selectedPackage.value?.usuario?.id_ciudad || 
                   selectedTechCityObject.value?.id_ciudad;
     
     const result = await fetchTechniciansAndAdmins(cityId, techsPerPage, 0, serviceToAssign.value?.id_servicio, techSearchQuery.value);

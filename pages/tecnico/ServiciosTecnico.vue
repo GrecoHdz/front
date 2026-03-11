@@ -574,9 +574,18 @@
                            step="1" 
                            min="0" 
                            required
-                           class="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-2xl font-black text-gray-900 dark:text-white transition-all outline-none" 
+                           :readonly="selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip"
+                           :class="[
+                             'w-full pl-12 pr-4 py-4 border-2 border-transparent focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-2xl font-black transition-all outline-none',
+                             selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip 
+                               ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 cursor-not-allowed' 
+                               : 'bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500'
+                           ]"
                            placeholder="0">
                   </div>
+                  <p v-if="selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip" class="text-[9px] font-bold text-amber-600 dark:text-amber-400 mt-2 px-1 uppercase tracking-wider">
+                    ✨ ¡Primer viaje gratis! El monto está fijado en 0 por sistema.
+                  </p>
                 </div>
 
                 <!-- Comment Field -->
@@ -603,15 +612,22 @@
                 <!-- Submit Button -->
                 <button type="submit" 
                         :disabled="isSubmittingQuotation || (quotationForm.monto_manodeobra === null || quotationForm.monto_manodeobra === undefined || quotationForm.monto_manodeobra === '')"
-                        class="group relative w-full py-4 bg-gray-900 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50">
+                        :class="[
+                          'group relative w-full py-4 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50',
+                          selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip 
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg shadow-amber-500/30' 
+                            : 'bg-gray-900'
+                        ]">
                   <div v-if="!isSubmittingQuotation" class="relative z-10 flex items-center justify-center space-x-2">
-                    <span class="uppercase tracking-[0.2em] text-xs">Confirmar Precio</span>
+                    <span class="uppercase tracking-[0.2em] text-xs">
+                      {{ selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip ? 'Confirmar Viaje Gratuito' : 'Confirmar Precio' }}
+                    </span>
                     <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                   </div>
                   <div v-else class="flex items-center justify-center">
-                    <svg class="animate-spin h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                   </div>
-                  <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity translate-y-full group-hover:translate-y-0 duration-300"></div>
+                  <div v-if="!(selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip)" class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity translate-y-full group-hover:translate-y-0 duration-300"></div>
                 </button>
               </form>
             </div>
@@ -657,7 +673,7 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                   <div class="w-10 h-10 bg-amber-600 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-amber-500/30">
-                    💇♂️
+                    💇
                   </div>
                   <div>
                     <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">Detalles del Corte</h3>
@@ -698,7 +714,7 @@
                             rows="3" 
                             required
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-amber-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-sm font-medium text-gray-900 dark:text-white transition-all outline-none resize-none" 
-                            placeholder="Ej: Corte desvanecido, barba y cejas..."></textarea>
+                            placeholder="Ej: Lo esperamos pregunte por..."></textarea>
                 </div>
 
                 <!-- Earning Preview -->
@@ -1540,6 +1556,7 @@ const openQuotationModal = async () => {
     }
     
     if (selectedService.value.title === 'Taxi VIP') {
+      quotationForm.value.monto_manodeobra = selectedService.value.isFirstTrip ? 0 : 0;
       showTaxiQuotationModal.value = true
     } else if (isBarberíaService(selectedService.value.title)) {
       showBarberiaQuotationModal.value = true

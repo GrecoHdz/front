@@ -4280,7 +4280,7 @@ const generateReport = async (report) => {
             throw err;
           }),
           // Obtener paquetes utilizados
-          $api('/paquetes/usuarios/utilizados', {
+          $api(`/paquetes/usuarios/utilizados${hasSelectedMonth ? '?month=' + selectedMonth : ''}`, {
             baseURL: config.public.apiBase,
             headers: { 
               Authorization: `Bearer ${auth.token}`,
@@ -5127,10 +5127,11 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
     doc.text('PAQUETES UTILIZADOS', 10, currentY);
     currentY += 4;
 
-    const headers = ['Fecha de Compra', 'Usuario', 'Paquete', 'Estado'];
+    const headers = ['Fecha Compra', 'Fecha Uso', 'Usuario', 'Paquete', 'Estado'];
     const rows = paquetesData.data.map(p => ([
-      formatDate(p.fecha_actualizacion),
-      p.Usuario?.nombre?.trim() || 'Usuario no disponible',
+      formatDate(p.fecha_compra),
+      formatDate(p.fecha_uso),
+      p.usuario?.nombre?.trim() || 'Usuario no disponible',
       p.paquete?.nombre || 'Paquete no disponible',
       p.estado.charAt(0).toUpperCase() + p.estado.slice(1) // Capitalizar primera letra
     ]));

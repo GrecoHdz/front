@@ -148,8 +148,8 @@
                   <span class="text-gray-400 text-[9px] font-medium">{{ service.date }}</span>
                 </div>
                 <div class="flex items-center space-x-1">
-                  <span class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
-                    {{ service.rawStatus === 'finalizado' ? (service.title === 'Taxi VIP' ? 'Calificar Viaje' : 'Calificar Servicio') : 'Ver detalles' }}
+                  <span class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest inline-block" :class="{ 'animate-bounce': service.rawStatus === 'finalizado' }">
+                    {{ service.rawStatus === 'finalizado' ? (service.title === 'Taxi VIP' ? '⭐ Calificar Viaje' : '⭐ Calificar Servicio') : 'Ver detalles' }}
                   </span>
                   <svg class="w-3 h-3 text-blue-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -1534,8 +1534,14 @@
                       <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
                     </div>
                     <div class="flex-1">
-                      <p class="text-[9px] font-black text-red-600 uppercase tracking-widest leading-none">Domicilio</p>
-                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight mt-1">{{ selectedService.fullLocation?.direccion || selectedService.fullLocation?.colonia || 'Dirección no especificada' }}</p>
+                      <p class="text-[9px] font-black text-red-600 uppercase tracking-widest leading-none">
+                        {{ selectedService.description?.includes('(en local:') ? 'En Local' : 'A Domicilio' }}
+                      </p>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight mt-1">
+                        {{ selectedService.description?.includes('(en local:') 
+                           ? (selectedService.description.match(/\(en local:\s*(.*?)\)/)?.[1]?.split(' - ')?.[0] || selectedService.fullLocation?.direccion) 
+                           : (selectedService.fullLocation?.direccion || selectedService.fullLocation?.colonia || 'Dirección no especificada') }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -2624,15 +2630,7 @@ const getCancelButtonText = computed(() => {
 
 // Computed properties para determinar si mostrar los beneficios
 const shouldShowDiscountBenefit = computed(() => {
-  if (!membresiaBeneficios.value.length || !membresiaProgreso.value) return false;
-  
-  const discountBenefit = membresiaBeneficios.value.find(
-    beneficio => beneficio.tipo_beneficio === 'Descuento en todos los servicios'
-  );
-  
-  if (!discountBenefit) return false;
-  
-  return membresiaProgreso.value.mesesProgreso >= discountBenefit.mes_requerido;
+  return membresiaProgreso.value?.tiene_membresia && (membresiaProgreso.value?.porcentaje_descuento > 0);
 });
 
 const shouldShowCreditBenefit = computed(() => {  
@@ -2656,11 +2654,11 @@ const shouldShowCreditBenefit = computed(() => {
 }); 
 
 const cashbackAmount = computed(() => {
-  const netTotal = parseFloat(getDiscountedPrice());
+  const basePrice = getDiscountedPrice();
+  const netTotal = parseFloat(basePrice);
   if (!netTotal) return 0;
   
-  // Usar el porcentaje de membresía si está disponible, de lo contrario el regular
-  const percentage = (membresiaProgreso.value?.porcentaje_descuento || discountPercentage.value || 0) / 100;
+  const percentage = (membresiaProgreso.value?.porcentaje_descuento || 0) / 100;
   return netTotal * percentage;
 }); 
 
@@ -4064,6 +4062,7 @@ const cancelarSolicitud = async () => {
     }
 
     closeCancelModal()
+    closeServiceModal()
     
     showSuccess('Solicitud cancelada', 'El servicio ha sido cancelado correctamente')
     
@@ -4371,8 +4370,8 @@ onMounted(async () => {
     ]);
     
     // Si hay un usuario autenticado, cargar su progreso de membresía
-    if (auth.user?.id) {
-      await fetchMembresiaProgreso(auth.user.id);
+    if (auth.user?.id_usuario || auth.user?.id) {
+      await fetchMembresiaProgreso(auth.user.id_usuario || auth.user.id);
     }
   } catch (error) {
     window.location.reload()

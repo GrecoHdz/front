@@ -2818,7 +2818,7 @@ const handleRequestService = async () => {
     showToast(
       '¡Solicitud enviada!', 
       tieneMembresiaActiva 
-        ? `Pronto se le asignará un ${isBarberia ? 'barbero' : 'técnico'}.` 
+        ? `Pronto se le asignará un ${selectedService.name === 'Taxi VIP' ? 'conductor' : (isBarberia ? 'barbero' : 'técnico')}.` 
         : 'Ya puedes pagar la visita.',
       'success'
     )

@@ -29,10 +29,10 @@
             </svg>
           </div>
           <input 
-            v-model="searchQuery"
+            v-model="tempSearchQuery"
+            @input="debouncedSearch(tempSearchQuery)"
             type="text" 
-            class="block w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-xl tex
-            t-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
+            class="block w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
             placeholder="¿Qué necesitas hoy?"
           >
         </div>
@@ -78,7 +78,7 @@
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
                   v-for="paquete in ownedPackages" 
-                  :key="'owned-'+paquete.id"
+                  :key="'owned-'+paquete.id_paquete_usuario"
                   @click="openPackageDetail(paquete)"
                   class="snap-center shrink-0 w-72 text-white rounded-2xl p-4 relative overflow-hidden shadow-lg group active:scale-95 transition-all duration-300"
                   :class="getEstadoPaquete(paquete.id) === 'En uso' 
@@ -105,9 +105,15 @@
                      </div>
                   </div>
                   
-                  <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center">
-                     <span class="text-[10px] text-gray-300">Toca para gestionar</span>
-                     <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                  <div class="mt-4 pt-3 border-t border-white/10 flex flex-col gap-1">
+                     <div class="flex justify-between items-center">
+                        <span class="text-[10px] text-gray-300">Toca para gestionar</span>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                     </div>
+                     <div v-if="paquete.fecha_compra" class="text-[9px] text-white/50 flex items-center gap-1.5 mt-1">
+                        <span class="font-bold uppercase tracking-tighter">Adquirido:</span>
+                        <span>{{ formatDate(paquete.fecha_compra) }}</span>
+                     </div>
                   </div>
                </div>
             </div>
@@ -232,7 +238,7 @@
             <div class="grid grid-cols-2 gap-3">
                <div 
                   v-for="paquete in gridPackages" 
-                  :key="paquete.id"
+                  :key="paquete.id_paquete_usuario || paquete.id"
                   @click="openPackageDetail(paquete)"
                   class="flex bg-white dark:bg-gray-800 rounded-xl p-2 shadow-sm border border-gray-100 dark:border-gray-700 active:bg-gray-50 transition-colors"
                >
@@ -273,14 +279,25 @@
                      <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate mt-0.5 leading-tight opacity-80">
                         {{ paquete.descripcion }}
                      </p>
+
+                     <!-- Fechas de historial -->
+                     <div v-if="paquete.fecha_compra || paquete.fecha_uso" class="mt-2 pt-1 border-t border-gray-100 dark:border-gray-700/50 space-y-0.5">
+                        <div v-if="paquete.fecha_compra" class="flex items-center gap-1.5 text-[8px] text-gray-400">
+                           <span class="font-bold uppercase tracking-tighter">Compra:</span>
+                           <span class="font-medium">{{ formatDate(paquete.fecha_compra) }}</span>
+                        </div>
+                        <div v-if="paquete.fecha_uso" class="flex items-center gap-1.5 text-[8px] text-blue-500">
+                           <span class="font-black uppercase tracking-tighter">Uso:</span>
+                           <span class="font-bold">{{ formatDate(paquete.fecha_uso) }}</span>
+                        </div>
+                     </div>
                   </div>
                </div>
             </div>
             
             <!-- Empty Search -->
             <div v-if="gridPackages.length === 0" class="text-center py-10">
-               <p class="text-gray-400 text-sm">No encontramos resultados para "{{ searchQuery }}"</p>
-               <button @click="searchQuery = ''" class="text-blue-600 text-xs font-bold mt-2">Limpiar búsqueda</button>
+               <p class="text-gray-400 text-sm">No hay resultados</p>
             </div>
          </section>
       </div>
@@ -546,7 +563,8 @@
                                  {{ viewingAccount?.num_cuenta }}
                               </p>
                               <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                 </svg>
                               </div>
                            </div>
                         </div>
@@ -586,6 +604,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
@@ -610,7 +629,12 @@ const isLoading = ref(true)
 const toast = ref({ show: false })
 const userCredit = ref(0)
 const searchQuery = ref('')
+const tempSearchQuery = ref('')
 const activeFilter = ref('todos')
+
+const debouncedSearch = useDebounceFn((val) => {
+   searchQuery.value = val
+}, 350)
 
 const filtersList = [
    { id: 'todos', label: 'Todos' },
@@ -631,6 +655,7 @@ const selectedDetailPackage = ref(null)
 const showPaquetePagoModal = ref(false)
 const showAccountDetailModal = ref(false)
 const viewingAccount = ref(null)
+const numeroComprobante = ref('')
 const showConfirmarUsoModal = ref(false)
 const showConfirmarCanjeoModal = ref(false)
 const selectedPaquete = ref(null)
@@ -638,9 +663,7 @@ const isLoadingAccounts = ref(false)
 const bankAccounts = ref([])
 const selectedAccountObject = ref(null)
 const isProcessingPayment = ref(false)
-const numeroComprobante = ref('')
 
-// Bloquear scroll cuando un modal está abierto
 const anyModalOpen = computed(() => {
   return !!selectedDetailPackage.value || 
          showPaquetePagoModal.value || 
@@ -671,7 +694,21 @@ const displayPackages = computed(() => {
 const showLanes = computed(() => !searchQuery.value && activeFilter.value === 'todos')
 
 const ownedPackages = computed(() => {
-   const owned = paquetesMantenimiento.value.filter(p => tienePaquete(p.id))
+   const owned = paquetesUsuario.value
+      .filter(pu => pu.estado === 'activo' || pu.estado === 'utilizando' || pu.estado === 'verificando_pago')
+      .map(pu => {
+         const base = paquetesMantenimiento.value.find(p => p.id === pu.id_paquete) || {}
+         return {
+            ...base,
+            nombre: pu.paquete?.nombre || base.nombre,
+            descripcion: pu.paquete?.descripcion || base.descripcion,
+            id: pu.id_paquete,
+            id_paquete_usuario: pu.id_paquete_usuario,
+            fecha_compra: pu.fecha_compra,
+            fecha_uso: (pu.estado === 'utilizando' || pu.estado === 'utilizado') ? pu.fecha_uso : null,
+            status_usuario: pu.estado
+         }
+      })
    
    // Ordenar: primero "En uso", luego "Adquirido", finalmente "Verificando"
    return owned.sort((a, b) => {
@@ -693,9 +730,27 @@ const filteredPackages = computed(() => {
    const f = activeFilter.value
    
    if (f === 'utilizados') {
-      // Filtrar paquetes que tengan registro 'utilizado' en historial
-      const usedIds = new Set(paquetesUsuario.value.filter(pu => pu.estado === 'utilizado').map(pu => pu.id_paquete))
-      list = list.filter(p => usedIds.has(p.id))
+      // Mostrar historial de paquetes utilizados con sus fechas
+      let used = paquetesUsuario.value.filter(pu => pu.estado === 'utilizado')
+      if (searchQuery.value) {
+         const q = searchQuery.value.toLowerCase()
+         used = used.filter(pu => 
+            pu.paquete?.nombre?.toLowerCase().includes(q) || 
+            pu.paquete?.descripcion?.toLowerCase().includes(q)
+         )
+      }
+      return used.map(pu => {
+         const base = paquetesMantenimiento.value.find(p => p.id === pu.id_paquete) || {}
+          return {
+             ...base,
+             id_paquete_usuario: pu.id_paquete_usuario,
+             nombre: pu.paquete?.nombre || base.nombre,
+             descripcion: pu.paquete?.descripcion || base.descripcion,
+             costo: pu.paquete?.costo || base.costo,
+             fecha_compra: pu.fecha_compra,
+             fecha_uso: pu.fecha_uso
+          }
+      })
    } else if (f === 'canjeables') {
       list = list.filter(p => userCredit.value >= p.costo)
    } else if (f === 'auto') {
@@ -806,6 +861,19 @@ const handleCopyAndSelect = async () => {
 
 const formatNumber = (val) => new Intl.NumberFormat('es-HN', { minimumFractionDigits: 2 }).format(val || 0)
 
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  })
+}
+
 // Transaction Triggers
 const initiatePurchase = async (p) => {
    if (userCredit.value < p.costo) {
@@ -831,7 +899,9 @@ const fetchUserCredit = async () => {
   try {
     const user = userCookie.value
     if (!user) return
-    const res = await $api(`/credito/usuario/${user.id_usuario}`)
+    const res = await $api(`/credito/usuario/${user.id_usuario}`, {
+      method: 'GET'
+    })
     if (res?.success) userCredit.value = res.data.monto_credito
   } catch(e) {}
 }
@@ -839,7 +909,13 @@ const fetchUserCredit = async () => {
 const cargarPaquetes = async () => {
   cargandoPaquetes.value = true
   try {
-    const res = await $api('/paquetes/activos', { params: { id_ciudad: userCookie.value?.id_ciudad, id_usuario: userCookie.value?.id_usuario } })
+    const res = await $api('/paquetes/activos', {
+      method: 'GET',
+      params: { 
+        id_ciudad: userCookie.value?.id_ciudad, 
+        id_usuario: userCookie.value?.id_usuario 
+      } 
+    })
     paquetesMantenimiento.value = res.map(p => ({
       id: p.id_paquete,
       nombre: p.nombre,
@@ -854,7 +930,9 @@ const cargarPaquetes = async () => {
 
 const cargarPaquetesUsuario = async () => {
    try {
-      const res = await $api(`/paquetes/usuarios/${userCookie.value.id_usuario}`)
+      const res = await $api(`/paquetes/usuarios/${userCookie.value.id_usuario}`, {
+        method: 'GET'
+      })
       if(res.success) paquetesUsuario.value = res.data
    } catch(e) {}
 }
@@ -862,7 +940,9 @@ const cargarPaquetesUsuario = async () => {
 const cargarCuentas = async () => {
    isLoadingAccounts.value = true
    try {
-      const res = await $api('/cuentas')
+      const res = await $api('/cuentas', {
+        method: 'GET'
+      })
       if(Array.isArray(res)) bankAccounts.value = res
    } finally { isLoadingAccounts.value = false }
 }
@@ -886,11 +966,17 @@ const confirmarCanjeo = async () => {
       const p = selectedPaquete.value
       await $api('/credito', { 
          method: 'POST', 
-         body: { id_usuario: userCookie.value.id_usuario, monto_credito: -Math.abs(p.costo) } 
+         body: { 
+            id_usuario: userCookie.value.id_usuario, 
+            monto_credito: -Math.abs(p.costo) 
+         } 
       })
       const res = await $api('/paquetes/usuarios/canjear', { 
          method: 'POST', 
-         body: { id_paquete: p.id, id_usuario: userCookie.value.id_usuario } 
+         body: { 
+            id_paquete: p.id, 
+            id_usuario: userCookie.value.id_usuario 
+         } 
       })
       
       if(res.success) {
@@ -900,6 +986,7 @@ const confirmarCanjeo = async () => {
          
          // Notificar a los administradores
          try {
+            await Promise.all([
             await Promise.all([
                $api('/notificaciones/enviar', {
                   method: 'POST',
@@ -915,6 +1002,7 @@ const confirmarCanjeo = async () => {
                      nombre_rol: 'sa'
                   }
                })
+            ])
             ])
          } catch (error) {
             console.error('Error al enviar notificaciones:', error)
@@ -994,7 +1082,9 @@ const usarPaquete = async (p) => {
       const pu = paquetesUsuario.value.find(pup => pup.id_paquete === p.id && pup.estado === 'activo')
       if(!pu) throw new Error('Error')
       
-      const res = await $api(`/paquetes/usuarios/${pu.id_paquete_usuario}/activar`, { method: 'PUT' })
+      const res = await $api(`/paquetes/usuarios/${pu.id_paquete_usuario}/activar`, { 
+        method: 'PUT'
+      })
       
       if(res.success) {
          showToast('Paquete Activado', 'success')
@@ -1028,7 +1118,9 @@ const usarPaquete = async (p) => {
 
 const sendWA = async (p, ref, type, extraId = null) => {
    try {
-      const res = await $api('/config/valor/numero_empresa')
+      const res = await $api('/config/valor/numero_empresa', {
+        method: 'GET'
+      })
       const phone = res?.valor || '12345678'
       
       const today = new Date();

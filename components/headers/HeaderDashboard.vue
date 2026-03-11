@@ -130,7 +130,7 @@ const onNotificationClick = async (notification) => {
     } else if (notification.tipo === 'financieros') { 
       await navigateTo('/cliente/Servicios');
     } else if (notification.tipo === 'paquetes') { 
-      await navigateTo('/cliente/DashboardCliente');
+      await navigateTo('/cliente/Marketplace');
     }
   } finally {
     // Asegurarse de que el loading siempre se desactive
