@@ -1511,14 +1511,16 @@ const loadMembershipBenefits = async () => {
         let savings = '';
         const tipoBeneficio = benefit.tipo_beneficio || '';
         
-        if (benefit.id_beneficio === 4) {
+        const tipoLower = tipoBeneficio.toLowerCase().trim();
+        
+        if (tipoLower === 'cashback en todos los servicios') {
           const porcentaje = specialDiscountPercentage.value || tipoBeneficio.split('%')[0] || '0';
           savings = `${porcentaje}% Cashback en cada servicio`;
-        } else if (tipoBeneficio.includes('Visita técnica')) {
-          savings = `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita`;
-        } else if (tipoBeneficio.includes('CashBack')) {
+        } else if (tipoLower === 'cashback especial en todos los servicios') {
           savings = `${discountPercentage.value}% Cashback en cada servicio`;
-        }
+        } else if (tipoLower.includes('visita técnica')) {
+          savings = `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita`;
+        } 
         
         return {
           id: benefit.id_beneficio || index + 1,
@@ -1632,7 +1634,7 @@ const referralSteps = [
 
 // No membership limitations
 const noMembershipLimitations = [
-  { id: 1, icon: '💢', text: 'No obtendrás descuentos a la hora de pagar' },
+  { id: 1, icon: '💢', text: 'No obtendrás descuentos ni cashback a la hora de pagar' },
   { id: 2, icon: '💢', text: 'Perderás todos los beneficios de tener membresía' },
   { id: 3, icon: '💢', text: 'Pagarás por la visita técnica al solicitar un servicio' }
 ]
