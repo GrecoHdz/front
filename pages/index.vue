@@ -1514,10 +1514,10 @@ const loadMembershipBenefits = async () => {
         const tipoLower = tipoBeneficio.toLowerCase().trim();
         
         if (tipoLower === 'cashback en todos los servicios') {
+          savings = `${discountPercentage.value}% Cashback en cada servicio`;
+        } else if (tipoLower === 'cashback especial en todos los servicios') {
           const porcentaje = specialDiscountPercentage.value || tipoBeneficio.split('%')[0] || '0';
           savings = `${porcentaje}% Cashback en cada servicio`;
-        } else if (tipoLower === 'cashback especial en todos los servicios') {
-          savings = `${discountPercentage.value}% Cashback en cada servicio`;
         } else if (tipoLower.includes('visita técnica')) {
           savings = `Ahorro: L. ${(visitCost.value || 0).toLocaleString('es-HN')} por visita`;
         } 
