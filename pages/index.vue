@@ -2296,7 +2296,7 @@ const sendTechnicianRegistrationMessage = async (nombre, formData = {}) => {
     // Mantener el formato original del mensaje
     const message = `Hola, mi nombre es ${nombreUsuario}\n` +
       `*Identidad:* ${identidadUsuario}\n\n` +  
-      `Me registré como técnico en la plataforma y quiero continuar con mi validación.\n\n` +
+      `Como técnico en la ciudad ${formData?.ciudad?.nombre || ''} y quiero continuar con mi validación.\n\n` +
       `Me dedico a:\n` +
       `(escribir aquí qué servicios u oficios ofrece)\n\n` +
       `Tengo experiencia en:\n` +

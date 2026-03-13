@@ -769,13 +769,26 @@
                   </div>
                 </div>
 
-                <!-- Ciudad -->
-                <div>
-                  <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">
-                    Ciudad
-                  </label>
-                  <div class="text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 py-2 rounded border border-gray-200 dark:border-gray-600">
-                    {{ userForm.ciudad?.nombre_ciudad || 'No especificada' }}
+                <!-- Ciudad y Fecha en la misma línea -->
+                <div class="grid grid-cols-2 gap-3">
+                  <!-- Ciudad -->
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">
+                      Ciudad
+                    </label>
+                    <div class="text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 py-2 rounded border border-gray-200 dark:border-gray-600 truncate">
+                      {{ userForm.ciudad?.nombre_ciudad || 'No especificada' }}
+                    </div>
+                  </div>
+
+                  <!-- Fecha de Registro -->
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">
+                      Fecha de registro
+                    </label>
+                    <div class="text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 py-2 rounded border border-gray-200 dark:border-gray-600 truncate">
+                      {{ userForm.fecha_registro ? formatDate(userForm.fecha_registro) : 'No disponible' }}
+                    </div>
                   </div>
                 </div>
               </div> 
@@ -2412,7 +2425,8 @@ const userForm = ref({
   email: '',
   telefono: '',
   estado: 'activo',
-  ciudad: null
+  ciudad: null,
+  fecha_registro: null
 }) 
 
 // Variables para filtros de modales
@@ -3651,7 +3665,8 @@ const editUser = (user) => {
     email: user.email || '',
     telefono: user.telefono || user.phone || '',
     estado: user.estado || user.status || 'activo',
-    ciudad: user.ciudad || null
+    ciudad: user.ciudad || null,
+    fecha_registro: user.fecha_registro || null
   }
 
   showEditModal.value = true
