@@ -444,6 +444,19 @@
                         </div>
                         <div class="flex items-center space-x-1">
                           <button 
+                            @click.stop="showOfferedServices(technician)"
+                            class="p-1 text-gray-400 hover:text-green-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            :class="{
+                              'text-red-400 hover:text-red-500': technician.estado === 'inactivo',
+                              'text-gray-400 hover:text-green-500': technician.estado === 'activo' || !technician.estado
+                            }"
+                            title="Servicios"
+                          >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                          </button>
+                          <button 
                             @click.stop="editUser(technician)"
                             class="p-1 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :class="{
@@ -1480,6 +1493,82 @@
       </div>
     </Transition>
 
+    <!-- Offered Services Modal -->
+    <Transition
+      enter-active-class="backdrop-enter-active"
+      leave-active-class="backdrop-leave-active"
+      enter-from-class="backdrop-enter-from"
+      leave-to-class="backdrop-leave-to"
+    >
+      <div v-if="showOfferedServicesModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showOfferedServicesModal = false"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+          <div class="p-3">
+            <div class="flex items-center justify-between mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                <span class="p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-lg">🛠️</span>
+                Servicios que Ofrece
+              </h3>
+              <button @click="showOfferedServicesModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Técnico Info -->
+            <div class="mb-4 flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+              <div class="w-10 h-10 rounded-full bg-blue-500 flex-shrink-0 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                {{ getUserInitial(selectedUser?.nombre) }}
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ selectedUser?.nombre }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate">{{ selectedUser?.email }}</p>
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div v-if="loadingOfferedServices" class="text-center py-8">
+              <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p class="text-gray-600 dark:text-gray-400 text-xs font-medium">Cargando servicios ofrecidos...</p>
+            </div>
+
+            <!-- Services List -->
+            <div v-else>
+              <div v-if="offeredServices.length === 0" class="text-center py-10 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-600">
+                <div class="text-3xl mb-2">📋</div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium px-4">Este técnico no tiene servicios asignados en su perfil todavía.</p>
+              </div>
+              <div v-else class="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+                <div v-for="service in offeredServices" :key="service.id_tecnico_servicio" class="group p-3 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-200 flex items-center gap-3">
+                  <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition-transform">
+                    🔧
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="font-bold text-gray-900 dark:text-white text-[11px] leading-tight mb-0.5">{{ service.nombre }}</p>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-[9px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">ID: {{ service.id_servicio }}</span>
+                      <span class="text-[9px] font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded">Activo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+              <button 
+                @click="showOfferedServicesModal = false"
+                class="w-full py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-xl text-xs hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Modal de Cambio de Contraseña -->
     <Transition
       enter-active-class="backdrop-enter-active"
@@ -2291,6 +2380,9 @@ const showCreditsModal = ref(false)
 const showQuoteModal = ref(false)
 const showAmountDetailsModal = ref(false)
 const showWithdrawalModal = ref(false)
+const showOfferedServicesModal = ref(false)
+const offeredServices = ref([])
+const loadingOfferedServices = ref(false)
 
 const anyModalOpen = computed(() => {
   return showEditModal.value || 
@@ -2306,7 +2398,8 @@ const anyModalOpen = computed(() => {
          showCreditsModal.value ||
          showQuoteModal.value ||
          showAmountDetailsModal.value ||
-         showWithdrawalModal.value ||
+          showWithdrawalModal.value ||
+          showOfferedServicesModal.value ||
          imagePreview.value.show
 })
 
@@ -3128,6 +3221,8 @@ const closeModal = () => {
   showEditModal.value = false
   showPasswordModal.value = false
   showCreditsModal.value = false
+  showOfferedServicesModal.value = false
+  offeredServices.value = []
   resetUserForm()
   selectedUser.value = null
   creditsResponse.value = null
@@ -3406,6 +3501,29 @@ const showTechnicianServices = async (technician) => {
     console.error('Error al cargar los servicios del técnico:', error)
     showError('No se pudieron cargar los servicios del técnico. Intente de nuevo.')
   } 
+}
+
+const showOfferedServices = async (technician) => {
+  try {
+    selectedUser.value = technician
+    loadingOfferedServices.value = true
+    showOfferedServicesModal.value = true
+    
+    const response = await $api(`/tecnicoServicio/${technician.id_usuario}`, {
+      method: 'GET'
+    })
+    
+    if (response && response.success) {
+      offeredServices.value = response.data
+    } else {
+      showError(response?.error || 'No se pudieron cargar los servicios ofrecidos')
+    }
+  } catch (error) {
+    console.error('Error al cargar servicios ofrecidos:', error)
+    showError('Error al cargar los servicios ofrecidos. Por favor, intente nuevamente.')
+  } finally {
+    loadingOfferedServices.value = false
+  }
 }
 
 const showComment = (comment, rating, client) => {
