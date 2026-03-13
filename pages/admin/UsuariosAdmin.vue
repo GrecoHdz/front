@@ -429,9 +429,9 @@
                             </div>
                           </div>
                           <div class="min-w-0">
-                            <h3 class="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[120px]">
-                              {{ technician.nombre || 'Técnico sin nombre' }}
-                            </h3>
+                            <h3 class="text-[10px] sm:text-xs font-bold text-gray-900 dark:text-white truncate max-w-[80px] sm:max-w-[120px]" :title="technician.nombre">
+                  {{ technician.nombre?.length > 12 ? technician.nombre.substring(0, 12) + '...' : (technician.nombre || 'Técnico sin nombre') }}
+                </h3>
                             <div class="flex items-center space-x-1">
                               <span 
                                 class="px-1.5 py-0.5 rounded-full text-[10px] font-medium"
@@ -1545,11 +1545,7 @@
                     🔧
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="font-bold text-gray-900 dark:text-white text-[11px] leading-tight mb-0.5">{{ service.nombre }}</p>
-                    <div class="flex items-center gap-1.5">
-                      <span class="text-[9px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">ID: {{ service.id_servicio }}</span>
-                      <span class="text-[9px] font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded">Activo</span>
-                    </div>
+                    <p class="font-bold text-gray-900 dark:text-white text-[11px] leading-tight">{{ service.nombre }}</p>
                   </div>
                 </div>
               </div>
