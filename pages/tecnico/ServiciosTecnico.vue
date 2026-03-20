@@ -93,11 +93,14 @@
                       <p class="text-[9px] text-gray-500 dark:text-gray-400 font-medium">#{{ service.serviceNumber }}</p>
                     </div>
                   </div>
-                  <div class="flex flex-col items-end space-y-1">
+                  <div class="flex flex-wrap items-center justify-end gap-1.5 max-w-[50%]">
+                    <span v-if="isCashService(service.description)" class="text-[8px] whitespace-nowrap bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter flex items-center shadow-sm border border-green-200/50 dark:border-green-700/50">
+                      💰 Pago Efectivo
+                    </span>
                     <span class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm" :class="getStatusColor(service.rawStatus)">
                       {{ service.status }}
                     </span>
-                    <span v-if="service.isFirstTrip" class="text-[8px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter flex items-center shadow-sm border border-amber-200/50 dark:border-amber-700/50 animate-pulse">
+                    <span v-if="service.isFirstTrip" class="text-[8px] whitespace-nowrap bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter flex items-center shadow-sm border border-amber-200/50 dark:border-amber-700/50 animate-pulse">
                       ✨ Primer Viaje
                     </span>
                   </div>
@@ -224,6 +227,9 @@
                       <span v-if="selectedService?.isFirstTrip" class="text-[8px] sm:text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter animate-pulse border border-amber-200/50">
                         ✨ Primer Viaje
                       </span>
+                      <span v-if="isCashService(selectedService.description)" class="text-[8px] sm:text-[9px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter border border-green-200/50">
+                        💰 Pago Efectivo
+                      </span>
                     </div>
                     <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService.serviceNumber }}</p>
                   </div>
@@ -243,9 +249,24 @@
                 <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">Información del Cliente</h4>
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-2.5 sm:p-3 rounded-lg sm:rounded-xl">
                   <div class="flex items-center justify-between mb-2">
-                    <div>
-                      <p class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ selectedService.customer?.name }}</p>
-                      <p class="text-blue-600 dark:text-blue-400 text-xs sm:text-sm">{{ selectedService.customer?.phone }}</p>
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <!-- Client Profile Photo (visible from 'asignado') -->
+                      <div v-if="selectedService.customer?.photo && ['asignado', 'en_proceso', 'pendiente_cotizacion', 'pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(selectedService.rawStatus)" 
+                           @click="openImageModal(selectedService.customer.photo)"
+                           class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-blue-200 dark:border-blue-800 shadow-sm flex-shrink-0 cursor-pointer transition-transform hover:scale-110 active:scale-95">
+                        <img :src="selectedService.customer.photo" 
+                             :alt="selectedService.customer?.name"
+                             class="w-full h-full object-cover">
+                      </div>
+                      <div v-else-if="['asignado', 'en_proceso', 'pendiente_cotizacion', 'pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(selectedService.rawStatus)" 
+                           class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 font-black text-sm sm:text-base flex-shrink-0">
+                        {{ (selectedService.customer?.name || 'C')[0].toUpperCase() }}
+                      </div>
+
+                      <div class="min-w-0">
+                        <p class="font-bold text-blue-800 dark:text-blue-200 text-sm sm:text-base truncate">{{ selectedService.customer?.name }}</p>
+                        <p class="text-blue-600 dark:text-blue-400 text-xs sm:text-sm">{{ selectedService.customer?.phone }}</p>
+                      </div>
                     </div>
                     <button @click="openWhatsApp(selectedService.customer?.phone)" class="p-1.5 sm:p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
                       <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -981,6 +1002,39 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Modal para ver imagen en grande -->
+    <Transition
+      enter-active-class="transition-opacity duration-300"
+      leave-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      leave-to-class="opacity-0"
+    >
+      <div 
+        v-if="showImageModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        @click.self="showImageModal = false"
+      >
+        <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center animate-modal-enter">
+          <button 
+            @click="showImageModal = false"
+            class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-all p-2 hover:scale-110"
+            aria-label="Cerrar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <div class="bg-transparent rounded-2xl overflow-hidden shadow-2xl transition-all">
+            <img 
+              :src="selectedImage" 
+              class="max-w-full max-h-[80vh] object-contain rounded-xl"
+              alt="Vista previa de imagen"
+            />
+          </div>
+        </div>
+      </div>
+    </Transition>
 </template>
 
 <script setup>
@@ -1027,6 +1081,8 @@ const isCompleting = ref(false)
 const isSubmittingQuotation = ref(false)
 const isUpdatingQuotation = ref(false)
 const showBarberiaQuotationModal = ref(false)
+const showImageModal = ref(false)
+const selectedImage = ref('')
 
 // Bloquear scroll cuando un modal está abierto
 const anyModalOpen = computed(() => {
@@ -1036,7 +1092,8 @@ const anyModalOpen = computed(() => {
          showBarberiaQuotationModal.value || 
          showViewQuotationModal.value || 
          showCancelConfirmation.value || 
-         showCompleteConfirmation.value
+         showCompleteConfirmation.value ||
+         showImageModal.value
 })
 
 watch(anyModalOpen, (newValue) => {
@@ -1223,6 +1280,11 @@ const isBarberíaService = (title = '') => {
   return title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'barberia'
 }
 
+// Helper: detects cash payment based on description
+const isCashService = (description = '') => {
+  return (description || '').toLowerCase().includes('pago efectivo')
+}
+
 const getServiceIcon = (estado, serviceTitle = '') => {
   if (serviceTitle === 'Taxi VIP') return '🚕'
   if (isBarberíaService(serviceTitle)) return '💇'
@@ -1271,7 +1333,8 @@ const mapSolicitudToService = (solicitud) => {
     customer: {
       id: solicitud.cliente?.id_usuario,
       name: solicitud.cliente?.nombre || 'Desconocido',
-      phone: solicitud.cliente?.telefono || 'N/A'
+      phone: solicitud.cliente?.telefono || 'N/A',
+      photo: solicitud.cliente?.imagen_url
     },
     location: {
       neighborhood: solicitud.colonia || 'Sin especificar',
@@ -1791,17 +1854,19 @@ const confirmCompleteService = async () => {
   
   try {
     const isTaxiFirstTrip = currentServiceToComplete.value?.title === 'Taxi VIP' && currentServiceToComplete.value?.isFirstTrip;
+    const isCashPayment = isCashService(currentServiceToComplete.value?.description);
+    const setAsFinalized = isTaxiFirstTrip || isCashPayment;
     
     const response = await $api(`/solicitudservicio/${currentServiceToComplete.value.id}`, {
       method: 'PUT',
       body: {
-        estado: isTaxiFirstTrip ? 'finalizado' : 'pendiente_pagoservicio',
-        comentario: completeServiceComment.value || (isTaxiFirstTrip ? 'Primer viaje Taxi VIP completado' : 'Completado')
+        estado: setAsFinalized ? 'finalizado' : 'pendiente_pagoservicio',
+        comentario: completeServiceComment.value || (isTaxiFirstTrip ? 'Primer viaje Taxi VIP completado' : (isCashPayment ? 'Servicio cobrado en efectivo' : 'Completado'))
       }
     })
     
-    // Si es primer viaje de Taxi VIP, también confirmar la cotización asociada
-    if (isTaxiFirstTrip) {
+    // Si se fue directo a finalizado (Primer viaje o Pago efectivo), confirmar la cotización asociada directamente
+    if (setAsFinalized) {
       try {
         const quotationRes = await $api(`cotizacion/solicitud/${currentServiceToComplete.value.id}`, {
           method: 'GET'
@@ -1816,11 +1881,11 @@ const confirmCompleteService = async () => {
               method: 'PUT',
               body: { estado: 'confirmado' }
             });
-            console.log(`Cotización ${cotId} confirmada automáticamente para primer viaje`);
+            console.log(`Cotización ${cotId} confirmada automáticamente para servicio finalizado directamente`);
           }
         }
       } catch (quotationError) {
-        console.error('Error al confirmar cotización para primer viaje:', quotationError);
+        console.error('Error al confirmar cotización para servicio directo:', quotationError);
       }
     }
 
@@ -1832,7 +1897,7 @@ const confirmCompleteService = async () => {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: isTaxiFirstTrip ? 'Viaje Finalizado' : 'Pago de Servicio Pendiente',
+            titulo: setAsFinalized ? 'Servicio Finalizado' : 'Pago de Servicio Pendiente',
             id_usuario: userId
           }
         });
@@ -1985,6 +2050,13 @@ const checkAuthAndLoad = async () => {
 onMounted(() => {
   checkAuthAndLoad()
 })
+
+const openImageModal = (url) => {
+  if (!url) return
+  selectedImage.value = url
+  showImageModal.value = true
+}
+
 
 </script>
 

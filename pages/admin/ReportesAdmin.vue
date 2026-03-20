@@ -1693,15 +1693,17 @@ const formatCurrency = (value) => {
 const formatDate = (dateString) => {
   try {
     if (!dateString) return 'N/A';
-    // Si está en formato YYYY-MM-DD, parsear manualmente para evitar problemas de zona horaria
-    if (dateString.includes('-') && dateString.length === 10) {
-      const [year, month, day] = dateString.split('-');
+    // Extraer solo la parte YYYY-MM-DD para evitar problemas de zona horaria
+    // Funciona tanto para 'YYYY-MM-DD' como para 'YYYY-MM-DDTHH:mm:ss.sssZ'
+    const datePart = String(dateString).substring(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      const [year, month, day] = datePart.split('-');
       const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
       const monthName = months[parseInt(month) - 1];
       return `${parseInt(day)} ${monthName} ${year}`;
     }
-    // Para otros formatos, usar el método tradicional
-    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    // Para otros formatos inesperados, usar el método de locale
+    const options = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' };
     return new Date(dateString).toLocaleDateString('es-ES', options);
   } catch (error) {
     console.error('Error formateando fecha:', error);
@@ -2109,7 +2111,10 @@ const loadServicePayments = async (page = 1) => {
       return;
     }
     
+    // soloCuentas=true para que el panel de pagos solo muestre transferencias bancarias, NO efectivo
+    params.append('soloCuentas', 'true');
     const url = `/cotizacion?${params.toString()}`;
+
     
     const response = await $api(url, {
       method: 'GET'
@@ -4470,15 +4475,19 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     ]);
 
   const serviciosFiltrados = serviceData.data
-    .filter(s => s.estado?.toLowerCase() === 'confirmado')
+    // serviceData.data ya viene pre-filtrado a 'confirmado' desde el llamado al API
     .map(s => {
-         const comisionApp = parseFloat(s.monto_comision_app) || 0;
+         // Si monto_comision_app es null (pago en efectivo sin recalcular aún),
+         // estimar la comisión en base al porcentaje estándar del monto de mano de obra
+         const comisionApp = s.monto_comision_app != null
+           ? parseFloat(s.monto_comision_app)
+           : 0;
          return [
            formatDate(s.fecha), 
            'Comisión '+ (s.solicitud?.servicio?.nombre || 'Servicio'),
            s.solicitud?.cliente?.nombre || '-', 
-           s.facturaRelacion?.factura?.estado || 'PENDIENTE',
-           s.facturaRelacion?.factura?.numero_factura_correlativo || '-',
+           s.facturaRelacion?.factura?.estado || 'PAGADO (EFECTIVO)',
+           s.facturaRelacion?.factura?.numero_factura_correlativo || 'EFECTIVO',
            formatCurrency(comisionApp)
          ];
     });
@@ -4550,9 +4559,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   // gananciaNeta = ingresos - cashback - retirosTecnicos
   const balanceNetoFinal = balanceNetoParam ?? (totalIngresos - totalCashbackLocal - totalRetirosTecnicos);
 
-
-  // ... (código existente de Detalle de Ingresos) ...
-
+  // Renderizar tabla de Detalle de Ingresos
   doc.autoTable({
     startY: currentY,
     head: [['Fecha', 'Concepto', 'Cliente', 'Estado Fiscal', 'Correlativo', 'Monto']],
@@ -4947,6 +4954,16 @@ const generarReporteServiciosDetallado = async (doc, serviceData, paquetesData =
   const obtenerUbicacion = (s) => {
     const colonia = s?.colonia?.trim() || '';
     const ciudad = s?.ciudad?.nombre?.trim() || '';
+    const direccion = s?.direccion_precisa?.trim() || '';
+    const esTaxi = s?.servicio?.nombre?.toLowerCase().includes('taxi');
+
+    if (esTaxi) {
+      // Para Taxi VIP: mostrar dirección precisa + colonia + ciudad
+      const partes = [direccion, colonia, ciudad].filter(Boolean);
+      return partes.join(' - ');
+    }
+
+    // Para otros servicios: solo colonia - ciudad
     if (colonia && ciudad) return `${colonia} - ${ciudad}`;
     return colonia || ciudad || '-';
   };

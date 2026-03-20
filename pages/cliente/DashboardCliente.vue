@@ -318,7 +318,7 @@
                           <span>{{ option.name }}</span>
                         </span>
                         <span v-if="option.isDisabled" class="text-[7px] font-black uppercase tracking-tighter bg-red-50 text-red-500 px-1.5 py-0.5 rounded-md border border-red-100">
-                          Membresía Requerida
+                          Verifica tu Perfil
                         </span>
                       </div>
                     </template>
@@ -1325,8 +1325,8 @@ const selectedServiceObject = ref(null)
 const getServiceLabel = (option) => {
   if (!option) return ''
   let label = `${option.icon} ${option.name}`
-  if (option.name === 'Taxi VIP' && !isMembershipActive.value) {
-    label += ' (Membresía Necesaria)'
+  if (option.name === 'Taxi VIP' && !isUserVerified.value) {
+    label += ' (Verificación Requerida)'
   }
   return label
 }
@@ -1383,6 +1383,10 @@ const isMembershipPending = computed(() => {
 const isMembershipExpired = computed(() => {
   return membershipData.value.status === 'vencida' || 
          (membershipData.value.status === 'activa' && membershipData.value.progress >= 100)
+})
+
+const isUserVerified = computed(() => {
+  return !!userData.value.identidad_url || !!userCookie.value?.identidad_url
 })
 
 const isMembershipInactive = computed(() => {
@@ -1552,17 +1556,17 @@ const isFormValid = computed(() => {
     serviceFormData.value.direccion.trim() !== ''
 })
 
-// Mostrar todos los servicios, pero marcar Taxi VIP como deshabilitado si no hay membresía activa
+// Mostrar todos los servicios, pero marcar Taxi VIP como deshabilitado si no está verificado
 const filteredServicesList = computed(() => {
   return servicesList.value.map(s => ({
     ...s,
-    isDisabled: s.name === 'Taxi VIP' && !isMembershipActive.value
+    isDisabled: s.name === 'Taxi VIP' && !isUserVerified.value
   }))
 })
 
-// Si el usuario pierde la membresía y tenía 'Taxi VIP' seleccionado, limpiar la selección
-watch(isMembershipActive, (isActive) => {
-  if (!isActive && selectedServiceObject.value?.name === 'Taxi VIP') {
+// Si el usuario pierde la verificación y tenía 'Taxi VIP' seleccionado, limpiar la selección
+watch(isUserVerified, (isVerified) => {
+  if (!isVerified && selectedServiceObject.value?.name === 'Taxi VIP') {
     selectedServiceObject.value = null
     serviceFormData.value.type = ''
   }
@@ -2940,9 +2944,9 @@ watch(() => serviceFormData.value.type, (newType) => {
 // Watch para sincronizar selectedServiceObject con serviceFormData.type
 watch(() => selectedServiceObject.value, (newService) => {
   if (newService) {
-    // Protección adicional: Si por alguna razón se intenta seleccionar Taxi VIP sin membresía
-    if (newService.name === 'Taxi VIP' && !isMembershipActive.value) {
-      showToast('Membresía Necesaria', 'Este servicio es exclusivo para usuarios con membresía activa.', 'warning');
+    // Protección adicional: Si por alguna razón se intenta seleccionar Taxi VIP sin estar verificado
+    if (newService.name === 'Taxi VIP' && !isUserVerified.value) {
+      showToast('Verificación Necesaria', 'Este servicio es exclusivo para usuarios con perfil verificado.', 'warning');
       selectedServiceObject.value = null;
       return;
     }
@@ -2963,8 +2967,22 @@ onMounted(async () => {
       return
     }
 
-    // Primero cargar los datos de la membresía
-    await fetchMembershipData()
+    // Primero cargar los datos de la membresía y actualizar info de usuario
+    await Promise.all([
+      fetchMembershipData(),
+      (async () => {
+        try {
+          const u = useCookie('user').value
+          if (u?.id_usuario) {
+            const data = await $api(`/usuarios/id/${u.id_usuario}`)
+            if (data) {
+              userData.value = { ...userData.value, ...data }
+              useCookie('user').value = { ...u, ...data }
+            }
+          }
+        } catch (e) {}
+      })()
+    ])
     
     // Luego cargar el resto de datos en paralelo
     await Promise.all([
@@ -2976,7 +2994,7 @@ onMounted(async () => {
       fetchBarberias()
     ])
   } catch (error) {
-    window.location.reload()
+    console.error('Error initialization:', error)
   } finally {
     isLoading.value = false
   }

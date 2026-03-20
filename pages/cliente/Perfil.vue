@@ -24,13 +24,54 @@
     <!-- Main Content -->
     <div class="max-w-2xl mx-auto px-4 pb-4">
       <!-- Profile Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4">
+      <div class="relative bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4 overflow-hidden">
+        <!-- Badge de Verificado en la esquina -->
+        <div v-if="user.identidad_url" class="absolute top-0 right-0 pt-2 pr-2">
+          <span class="flex items-center gap-1.5 text-[10px] bg-emerald-500 text-white px-3 py-1.5 rounded-bl-2xl rounded-tr-xl font-black uppercase tracking-widest shadow-lg animate-fade-in">
+            <i class="fas fa-check-circle"></i> Verificado
+          </span>
+        </div>
+
         <div class="flex flex-col items-center text-center mb-6">
-          <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-3xl text-white mb-3 shadow-lg">
-            {{ userInitials }}
+          <div class="relative group">
+            <div 
+              @click="isPhotoModalOpen = true"
+              class="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl text-white mb-3 shadow-xl overflow-hidden bg-gradient-to-br from-emerald-400 to-teal-500 border-4 border-white dark:border-gray-800 transition-transform duration-300 group-hover:scale-105 cursor-pointer"
+            >
+              <img 
+                v-if="user.imagen_url" 
+                :src="user.imagen_url" 
+                alt="Avatar" 
+                class="w-full h-full object-cover"
+              />
+              <div v-else class="flex flex-col items-center justify-center w-full h-full text-white/90 group-hover:scale-110 transition-transform duration-500">
+                <div class="relative mb-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 drop-shadow-sm">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                  <div class="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md animate-bounce-subtle">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-emerald-600">
+                      <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                  </div>
+                </div> 
+              </div>
+            </div>
+            <button 
+              @click="isPhotoModalOpen = true"
+              class="absolute -bottom-1 -right-1 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-all border border-gray-100 dark:border-gray-700"
+              title="Cambiar Foto"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a48.324 48.324 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+              </svg>
+            </button>
           </div>
-          <h2 class="text-lg font-black text-gray-900 dark:text-white">{{ user.nombre }}</h2>
-          <p class="text-emerald-600 dark:text-emerald-400 font-medium text-sm">{{ user.email }}</p>
+          <h2 class="text-xl font-black text-gray-900 dark:text-white mt-2">{{ user.nombre }}</h2>
+          <div class="flex items-center justify-center">
+            <p class="text-emerald-600 dark:text-emerald-400 font-medium text-sm">{{ user.email }}</p>
+          </div>
         </div>
 
         <!-- Membership Status -->
@@ -293,23 +334,35 @@
             </div>
           </div>
           
-          <div class="flex flex-col space-y-2 pt-2">
+          <div class="flex flex-col space-y-3 pt-4">
             <button 
               @click="saveProfile"
               :disabled="!hasChanges || isSaving"
-              class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-blue-400 disabled:to-indigo-400 text-sm"
+              class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
-              <span v-if="isSaving">Guardando...</span>
-              <span v-else>Actualizar Perfil</span>
+              <i v-if="isSaving" class="fas fa-circle-notch fa-spin"></i>
+              <span>{{ isSaving ? 'Guardando...' : 'Actualizar Información' }}</span>
             </button>
             
-            <button 
-              @click="isPasswordModalOpen = true"
-              type="button"
-              class="w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
-            >
-              Cambiar Contraseña
-            </button>
+            <div class="grid grid-cols-2 gap-3">
+              <button 
+                @click="isPasswordModalOpen = true"
+                type="button"
+                class="py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
+              >
+                <i class="fas fa-key text-amber-500"></i>
+                Cambiar Contraseña
+              </button>
+              
+              <button 
+                @click="isIdentityModalOpen = true"
+                type="button"
+                class="py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
+              >
+                <i class="fas fa-id-card text-blue-500"></i>
+                {{ user.identidad_url ? 'Ver Identidad' : 'Verificar ID' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -574,6 +627,171 @@
               >
                 Cancelar
               </button>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Modal para Gestionar Foto de Perfil -->
+    <Transition name="fade">
+      <div v-if="isPhotoModalOpen" @click.self="isPhotoModalOpen = false" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <Transition name="modal">
+          <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-gray-900 dark:text-white">Foto de Perfil</h3>
+                <button @click="isPhotoModalOpen = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+
+              <div class="flex flex-col items-center gap-6">
+                <div class="w-32 h-32 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-4 border-emerald-500/20">
+                  <img v-if="user.imagen_url" :src="user.imagen_url" class="w-full h-full object-cover" />
+                  <div v-else class="w-full h-full flex items-center justify-center text-4xl text-gray-400">
+                    {{ userInitials }}
+                  </div>
+                </div>
+
+                <div class="w-full space-y-3">
+                  <input 
+                    type="file" 
+                    ref="fileInput" 
+                    class="hidden" 
+                    accept="image/*"
+                    @change="onFileChange"
+                  />
+                  <button 
+                    @click="$refs.fileInput.click()"
+                    :disabled="isUploading"
+                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <i v-if="isUploading" class="fas fa-circle-notch fa-spin"></i>
+                    <i v-else class="fas fa-upload"></i>
+                    {{ isUploading ? 'Subiendo...' : 'Subir Nueva Foto' }}
+                  </button>
+                  
+                  <button 
+                    v-if="user.imagen_url"
+                    @click="deleteProfileImage"
+                    :disabled="isDeleting"
+                    class="w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center justify-center gap-2"
+                  >
+                    <i v-if="isDeleting" class="fas fa-circle-notch fa-spin"></i>
+                    <i v-else class="fas fa-trash"></i>
+                    Eliminar Foto
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Modal para Verificación de Identidad -->
+    <Transition name="fade">
+      <div v-if="isIdentityModalOpen" @click.self="isIdentityModalOpen = false" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <Transition name="modal">
+          <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800">
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400 text-xl"></i>
+                  <h3 class="text-xl font-black text-gray-900 dark:text-white">Verificación de ID</h3>
+                  <svg v-if="user.identidad_url" class="w-6 h-6 text-emerald-500 animate-bounce-subtle" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                  </svg>
+                </div> 
+              </div>
+
+              <div class="space-y-6">
+                <p class="text-gray-600 dark:text-gray-400 text-sm">
+                  Para garantizar la seguridad de nuestra comunidad, solicitamos una foto clara de tu identificación nacional (DNI).
+                </p>
+
+                <div v-if="user.identidad_url" class="aspect-[1.6/1] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-emerald-500/20 shadow-inner">
+                  <img :src="user.identidad_url" class="w-full h-full object-cover pointer-events-none" />
+                </div>
+                <div v-else class="aspect-[1.6/1] rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/50">
+                  <i class="fas fa-cloud-upload-alt text-4xl text-gray-300 mb-2"></i>
+                  <span class="text-sm text-gray-500">Sin archivo seleccionado</span>
+                </div>
+
+                <div :class="user.identidad_url ? 'grid grid-cols-2 gap-3' : 'space-y-3'">
+                  <input 
+                    type="file" 
+                    ref="identityFileInput" 
+                    class="hidden" 
+                    accept="image/*,application/pdf"
+                    @change="onIdentityFileChange"
+                  />
+                  <button 
+                    @click="$refs.identityFileInput.click()"
+                    :disabled="isUploading"
+                    class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs"
+                  >
+                    <i v-if="isUploading" class="fas fa-circle-notch fa-spin"></i>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a48.324 48.324 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                    </svg>
+                    {{ user.identidad_url ? 'Actualizar' : 'Subir Identificación' }}
+                  </button>
+
+                  <button 
+                    v-if="user.identidad_url"
+                    @click="deleteIdentityImage"
+                    :disabled="isDeleting"
+                    class="w-full py-3 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-all flex items-center justify-center gap-2 text-xs border border-red-100 dark:border-red-900/30"
+                  >
+                    <i v-if="isDeleting" class="fas fa-circle-notch fa-spin"></i>
+                    <i v-else class="fas fa-trash-alt"></i>
+                    Eliminar
+                  </button>
+                </div>
+                
+                <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/30">
+                  <i class="fas fa-shield-alt text-amber-600 mt-1"></i>
+                  <p class="text-[11px] text-amber-700 dark:text-amber-500 leading-tight">
+                    Tus datos están protegidos. Esta información solo se utiliza para validar tu identidad y no será compartida.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Modal de Confirmación de Eliminación de Identidad -->
+    <Transition name="fade">
+      <div v-if="showDeleteIdentityConfirm" @click.self="showDeleteIdentityConfirm = false" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <Transition name="modal">
+          <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800">
+            <div class="p-6 text-center">
+              <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="fas fa-trash-alt"></i>
+              </div>
+              <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">¿Eliminar documento?</h3>
+              <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Esta acción no se puede deshacer y perderás tu estado de verificado.</p>
+              
+              <div class="flex flex-col gap-2">
+                <button 
+                  @click="confirmDeleteIdentity" 
+                  :disabled="isDeleting"
+                  class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-600/20 disabled:opacity-50"
+                >
+                  {{ isDeleting ? 'Eliminando...' : 'Sí, eliminar documento' }}
+                </button>
+                <button 
+                  @click="showDeleteIdentityConfirm = false" 
+                  class="w-full py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all font-sans"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
         </Transition>
@@ -1391,6 +1609,9 @@ const selectedCiudadObject = ref(null)
 const isTerminosModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
+const isPhotoModalOpen = ref(false);
+const isIdentityModalOpen = ref(false);
+const showDeleteIdentityConfirm = ref(false);
 
 // Bloquear scroll cuando un modal está abierto
 const anyModalOpen = computed(() => {
@@ -1400,7 +1621,10 @@ const anyModalOpen = computed(() => {
          isAcercaModalOpen.value || 
          showUnsubscribeModal.value || 
          showSubscribeModal.value ||
-         showRenewalModal.value
+         showRenewalModal.value ||
+         isPhotoModalOpen.value || 
+         isIdentityModalOpen.value || 
+         showDeleteIdentityConfirm.value;
 })
 
 watch(anyModalOpen, (newValue) => {
@@ -1504,6 +1728,21 @@ const originalUserData = ref(null);
 
 // Estado para controlar la carga
 const isSaving = ref(false);
+const isUploading = ref(false);
+const isDeleting = ref(false);
+ 
+ 
+
+watch(anyModalOpen, (newValue) => {
+  if (process.client) {
+    const overflowValue = newValue ? 'hidden' : '';
+    document.body.style.overflow = overflowValue;
+    document.documentElement.style.overflow = overflowValue;
+  }
+});
+
+const fileInput = ref(null);
+const identityFileInput = ref(null);
 
 // Datos del usuario con valores por defecto seguros
 const user = ref({
@@ -1520,7 +1759,9 @@ const user = ref({
   membership: {
     status: 'inactiva',
     endDate: new Date().toISOString()
-  }
+  },
+  identidad_url: null,
+  imagen_url: null
 })
 
 const userData = computed(() => auth.user || {})
@@ -1553,8 +1794,10 @@ const fetchUserData = async () => {
         status: 'inactiva',
         endDate: new Date().toISOString()
       },
-      role: data.role || 'usuario'
-    }
+  role: data.role || 'usuario',
+  identidad_url: data.identidad_url || null,
+  imagen_url: data.imagen_url || null
+}
     
     
     
@@ -1841,6 +2084,133 @@ const showInfo = (message) => {
     duration: 5000
   });
 };
+
+// ===== FUNCIONES PARA IMAGEN DE PERFIL =====
+const onFileChange = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  // Validar tamaño (máximo 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showError('Error', 'La imagen no debe superar los 5MB')
+    return
+  }
+  
+  await uploadProfileImage(file)
+}
+
+const uploadProfileImage = async (file) => {
+  isUploading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('imagen', file)
+    
+    const response = await $api(`/usuarios/imagen-perfil/${user.value.id_usuario}`, {
+      method: 'POST',
+      body: formData
+    })
+    
+    if (response.success) {
+      user.value.imagen_url = response.data.imagen_url
+      // Actualizar el store y la cookie
+      const userCookie = useCookie('user')
+      userCookie.value = { ...userCookie.value, imagen_url: response.data.imagen_url }
+      showSuccess('¡Éxito!', 'Imagen de perfil actualizada')
+      isPhotoModalOpen.value = false
+    }
+  } catch (error) {
+    console.error('Error al subir imagen:', error)
+    showError('Error', 'No se pudo subir la imagen')
+  } finally {
+    isUploading.value = false
+  }
+}
+
+const deleteProfileImage = async () => {
+  if (!confirm('¿Estás seguro de que quieres eliminar tu foto de perfil?')) return
+  
+  isDeleting.value = true
+  try {
+    const response = await $api(`/usuarios/imagen-perfil/${user.value.id_usuario}`, {
+      method: 'DELETE'
+    })
+    
+    if (response.success) {
+      user.value.imagen_url = null
+      const userCookie = useCookie('user')
+      userCookie.value = { ...userCookie.value, imagen_url: null }
+      showSuccess('¡Éxito!', 'Imagen de perfil eliminada')
+      isPhotoModalOpen.value = false
+    }
+  } catch (error) {
+    console.error('Error al eliminar imagen:', error)
+    showError('Error', 'No se pudo eliminar la imagen')
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+// ===== FUNCIONES PARA FOTO DE IDENTIDAD =====
+const onIdentityFileChange = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  if (file.size > 10 * 1024 * 1024) {
+    showError('Error', 'El archivo no debe superar los 10MB')
+    return
+  }
+  
+  await uploadIdentityImage(file)
+}
+
+const uploadIdentityImage = async (file) => {
+  isUploading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('imagen', file)
+    
+    const response = await $api(`/usuarios/identidad-foto/${user.value.id_usuario}`, {
+      method: 'POST',
+      body: formData
+    })
+    
+    if (response.success) {
+      user.value.identidad_url = response.data.identidad_url
+      showSuccess('¡Éxito!', 'Foto de identidad subida correctamente')
+      isIdentityModalOpen.value = false
+    }
+  } catch (error) {
+    console.error('Error al subir foto de identidad:', error)
+    showError('Error', 'No se pudo subir la foto de identidad')
+  } finally {
+    isUploading.value = false
+  }
+}
+
+const deleteIdentityImage = () => {
+  showDeleteIdentityConfirm.value = true
+}
+
+const confirmDeleteIdentity = async () => {
+  showDeleteIdentityConfirm.value = false
+  isDeleting.value = true
+  try {
+    const response = await $api(`/usuarios/identidad-foto/${user.value.id_usuario}`, {
+      method: 'DELETE'
+    })
+    
+    if (response.success) {
+      user.value.identidad_url = null
+      showSuccess('¡Éxito!', 'Foto de identidad eliminada')
+      isIdentityModalOpen.value = false
+    }
+  } catch (error) {
+    console.error('Error al eliminar foto de identidad:', error)
+    showError('Error', 'No se pudo eliminar la foto de identidad')
+  } finally {
+    isDeleting.value = false
+  }
+}
 
 const saveProfile = async () => {
   try {
@@ -2599,6 +2969,16 @@ watch(darkMode, (newVal) => {
 
 .animate-pulse-icon {
   animation: pulse-icon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animación sutil para el check de verificación */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
 }
 
 /* Animaciones del modal */

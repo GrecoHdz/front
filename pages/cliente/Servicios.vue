@@ -1390,7 +1390,15 @@
                   <p class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedService.tecnico.nombre }}</p>
                 </div>
               </div>
-
+              <!-- Notas del Conductor -->
+              <div v-if="quotationData?.comentario" class="space-y-2">
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Notas del Conductor</h4>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-relaxed italic text-center">
+                    "{{ quotationData.comentario }}"
+                  </p>
+                </div>
+              </div>
               <!-- Ruta -->
               <div class="space-y-1">
                 <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Itinerario</h4>
@@ -1419,32 +1427,71 @@
                   </div>
                 </div>
               </div>
+ 
 
-              <!-- Notas del Conductor -->
-              <div v-if="quotationData?.comentario" class="space-y-2">
-                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Notas del Conductor</h4>
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-relaxed italic text-center">
-                    "{{ quotationData.comentario }}"
-                  </p>
+              <!-- Selector de Pago -->
+              <div class="space-y-2">
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1 text-center">Forma de Pago</h4>
+                <div class="grid grid-cols-2 gap-2">
+                  <button 
+                    @click="taxiPaymentMethod = 'transferencia'"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
+                    :class="taxiPaymentMethod === 'transferencia' 
+                      ? 'border-yellow-400 bg-yellow-400/10 dark:bg-yellow-400/5' 
+                      : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
+                  >
+                    <span class="text-xl">💳</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'transferencia' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">App / Transf.</span>
+                  </button>
+                  <button 
+                    @click="taxiPaymentMethod = 'efectivo'"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
+                    :class="taxiPaymentMethod === 'efectivo' 
+                      ? 'border-yellow-400 bg-yellow-400/10 dark:bg-yellow-400/5' 
+                      : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
+                  >
+                    <span class="text-xl">💵</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'efectivo' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">Efectivo</span>
+                  </button>
                 </div>
               </div>
 
+              <!-- Input Billete (Solo si es efectivo) -->
+              <Transition name="slide-down">
+                <div v-if="taxiPaymentMethod === 'efectivo'" class="space-y-2">
+                  <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">¿Con cuánto pagarás?</h4>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">L.</span>
+                    <input 
+                      v-model="taxiCashBillAmount"
+                      type="number"
+                      inputmode="numeric"
+                      placeholder="Ej: 500"
+                      class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none font-bold text-sm transition-all"
+                    >
+                  </div>
+                  <p class="text-[9px] text-gray-500 italic ml-1">* El conductor llevará cambio basándose en este monto.</p>
+                </div>
+              </Transition>
+
               <!-- Tarifa -->
               <div class="bg-black p-4 rounded-lg shadow-xl shadow-black/10">
-                <div class="flex flex-col items-center">
-                  <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">Costo Estimado</p>
-                  <div class="text-3xl font-black tabular-nums transition-colors" :class="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0) ? 'line-through text-white/50' : 'text-white'">
+                <div class="flex flex-col items-center text-center">
+                  <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">Total a Pagar</p>
+                  <div class="text-3xl font-black tabular-nums transition-colors" :class="taxiPaymentMethod === 'transferencia' && Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0) ? 'line-through text-white/50' : 'text-white'">
                     L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
                   </div>
-                  <div v-if="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-yellow-400/80 uppercase">
+                  <div v-if="taxiPaymentMethod === 'transferencia' && Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-yellow-400/80 uppercase">
                     Pago con App: <span class="text-xs text-yellow-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
+                  </div>
+                  <div v-else-if="taxiPaymentMethod === 'efectivo'" class="mt-2 text-[9px] font-bold text-gray-400 uppercase tracking-tight">
+                    * Beneficios de membresía no aplican con pago en efectivo
                   </div>
                 </div>
               </div>
 
               <!-- Cashback Taxi Info -->
-              <div v-if="shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-yellow-400/10 dark:bg-yellow-400/5 border border-yellow-400/20 rounded-lg">
+              <div v-if="taxiPaymentMethod === 'transferencia' && shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-yellow-400/10 dark:bg-yellow-400/5 border border-yellow-400/20 rounded-lg">
                 <div class="flex justify-between items-center mb-1">
                   <span class="text-[10px] font-black text-yellow-700 dark:text-yellow-500 uppercase tracking-widest">✨ Cashback</span>
                   <span class="text-xs font-black text-yellow-800 dark:text-yellow-400">+L. {{ formatCurrency(cashbackAmount) }}</span>
@@ -2502,6 +2549,10 @@ const showRejectConfirmation = ref(false)
 const showTaxiRejectConfirmation = ref(false)
 const rejectReason = ref('') 
 
+// Estados de pago Taxi VIP
+const taxiPaymentMethod = ref('transferencia') // 'transferencia' o 'efectivo'
+const taxiCashBillAmount = ref('')
+
 // Estados de filtros
 const showFilters = ref(false)
 const currentFilter = ref('all')
@@ -3241,6 +3292,11 @@ const getDiscountedPrice = () => {
   const amount = parseFloat(quotationData.value?.monto_manodeobra || 0)
   if (!amount) return '0.00'
   
+  // Si es Taxi VIP y el método de pago es efectivo, no hay beneficio de descuento de membresía/crédito
+  if (selectedService.value?.title === 'Taxi VIP' && taxiPaymentMethod.value === 'efectivo') {
+    return amount.toFixed(2)
+  }
+  
   let currentTotal = amount
   
   if (shouldShowCreditBenefit.value) {
@@ -3271,6 +3327,10 @@ const openQuotationModal = async (service) => {
     }
     
     await Promise.all(promises);
+    
+    // Reset variables de pago Taxi VIP
+    taxiPaymentMethod.value = 'transferencia';
+    taxiCashBillAmount.value = '';
     
     // Mostrar el modal según el tipo de servicio
     if (service.title === 'Taxi VIP') {
@@ -3562,6 +3622,14 @@ const acceptQuotation = async () => {
     // 1. Aceptar la cotización 
     const cotizacionUpdate = { estado: 'aceptado' }; 
     
+    // Si es Taxi VIP y pago en efectivo, resetear campos de transferencia y beneficios
+    if (selectedService.value?.title === 'Taxi VIP' && taxiPaymentMethod.value === 'efectivo') {
+      cotizacionUpdate.id_cuenta = null;
+      cotizacionUpdate.num_comprobante = null;
+      cotizacionUpdate.descuento_membresia = 0;
+      cotizacionUpdate.credito_usado = 0;
+    }
+    
     const cotizacionResponse = await $api(`/cotizacion/${cotizacionId}`, {
       method: 'PUT',
       body: cotizacionUpdate
@@ -3570,7 +3638,15 @@ const acceptQuotation = async () => {
     // 2. Actualizar el estado de la solicitud 
     if (!selectedServiceId.value) throw new Error('No se encontró el ID de la solicitud de servicio');
     
-    const solicitudUpdate = { estado: 'en_proceso' }; 
+    const solicitudUpdate = { estado: 'en_proceso' };
+    
+    // Agregar información de pago en la descripción si es Taxi VIP y efectivo
+    if (selectedService.value?.title === 'Taxi VIP' && taxiPaymentMethod.value === 'efectivo') {
+      const amount = taxiCashBillAmount.value || '0';
+      // Actualizar la descripción agregando el detalle del efectivo
+      const currentDesc = selectedService.value.description || '';
+      solicitudUpdate.descripcion = `${currentDesc} Pago efectivo (L. ${amount})`.trim();
+    }
     
     const solicitudResponse = await $api(`/solicitudservicio/${selectedServiceId.value}`, {
       method: 'PUT',
