@@ -179,6 +179,16 @@
                             </svg>
                           </button>
                           <button 
+                            v-if="service.estado === 'asignado'"
+                            @click.stop="assignTechnician(service)"
+                            class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
+                            title="Cambiar técnico"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                          </button>
+                          <button 
                             @click.stop="viewService(service)"
                             class="p-0.5 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 transform hover:scale-110"
                             title="Ver detalles"
@@ -829,6 +839,16 @@
                         </span>
                         
                         <div class="flex space-x-0.5">
+                          <button 
+                            v-if="service.estado === 'asignado'"
+                            @click.stop="assignTechnician(service)"
+                            class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
+                            title="Cambiar técnico"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                          </button>
                           <button 
                             @click.stop="viewService(service)"
                             class="p-0.5 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 transform hover:scale-110"
@@ -3841,6 +3861,21 @@ const confirmTechnicianAssignment = async () => {
       
       showSuccess(`${selectedTechnician.value.nombre} asignado al servicio exitosamente`) 
       await loadPendingServices(1, true) 
+    } else {
+      // Buscar en el historial
+      const historyIndex = historyServices.value.findIndex(s => s.id_solicitud === serviceToAssign.value.id_solicitud)
+      if (historyIndex > -1) {
+        showSuccess(`Técnico cambiando exitosamente a ${selectedTechnician.value.nombre}`)
+        // Actualizar el servicio en el historial localmente
+        const currentService = historyServices.value[historyIndex]
+        if (currentService) {
+           currentService.id_tecnico = idTecnico
+           currentService.tecnico = { ...currentService.tecnico, id_usuario: idTecnico, nombre: selectedTechnician.value.nombre }
+        }
+        await loadHistoryServices(currentHistoryPage.value, true)
+      } else {
+        showSuccess(`${selectedTechnician.value.nombre} asignado al servicio exitosamente`)
+      }
     }
     
     // Notificar al técnico vía WhatsApp
