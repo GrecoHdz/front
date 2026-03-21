@@ -179,6 +179,16 @@
                             </svg>
                           </button>
                           <button 
+                            v-if="service.estado === 'pendiente_pagovisita' || service.estado === 'asignado'"
+                            @click.stop="confirmDeleteService(service)"
+                            class="p-0.5 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-all duration-300 transform hover:scale-110"
+                            title="Eliminar solicitud"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                          <button 
                             v-if="service.estado === 'asignado'"
                             @click.stop="assignTechnician(service)"
                             class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
@@ -840,6 +850,16 @@
                         
                         <div class="flex space-x-0.5">
                           <button 
+                            v-if="service.estado === 'pendiente_pagovisita' || service.estado === 'asignado'"
+                            @click.stop="confirmDeleteService(service)"
+                            class="p-0.5 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-all duration-300 transform hover:scale-110"
+                            title="Eliminar solicitud"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                          <button 
                             v-if="service.estado === 'asignado'"
                             @click.stop="assignTechnician(service)"
                             class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
@@ -1224,6 +1244,74 @@
                 class="inline-flex justify-center w-1/2 rounded-lg border border-transparent px-3 sm:px-4 py-2 bg-green-600 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
               >
                 Sí, liquidar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Delete Confirmation Modal -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="showDeleteConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDeleteConfirmModal = false"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-xs sm:max-w-sm max-h-[90vh] overflow-y-auto relative z-10">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-2xl z-10">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                Eliminar Solicitud
+              </h3>
+              <button 
+                @click="showDeleteConfirmModal = false"
+                class="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 p-1 -mr-1"
+              >
+                <span class="sr-only">Cerrar</span>
+                <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4 sm:p-5">
+            <div class="text-center">
+              <div class="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-red-100 dark:bg-red-900/50 mb-3 sm:mb-4">
+                <svg class="h-5 w-5 sm:h-6 sm:w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">
+                ¿Eliminar solicitud?
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-6">
+                Esta acción borrará la solicitud permanentemente y no se puede deshacer.
+                ¿Deseas continuar?
+              </p>
+            </div>
+
+            <div class="mt-4 sm:mt-5 flex flex-row gap-2 sm:gap-3">
+              <button
+                type="button"
+                @click="showDeleteConfirmModal = false"
+                class="inline-flex justify-center w-1/2 rounded-lg border border-gray-300 dark:border-gray-600 px-3 sm:px-4 py-2 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+               >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                @click="deleteService"
+                class="inline-flex justify-center w-1/2 rounded-lg border border-transparent px-3 sm:px-4 py-2 bg-red-600 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+               >
+                Sí, eliminar
               </button>
             </div>
           </div>
@@ -2380,6 +2468,8 @@ const showPackageConfirmModal = ref(false)
 const showConfirmModal = ref(false)
 const showPackagePaymentDetailsModal = ref(false)
 const showFacturaModal = ref(false)
+const showDeleteConfirmModal = ref(false)
+const serviceToDelete = ref(null)
 
 const anyModalOpen = computed(() => {
   return showDetailModal.value || 
@@ -2392,7 +2482,8 @@ const anyModalOpen = computed(() => {
          showPackageConfirmModal.value || 
          showConfirmModal.value || 
          showPackagePaymentDetailsModal.value || 
-         showFacturaModal.value
+         showFacturaModal.value ||
+         showDeleteConfirmModal.value
 })
 
 watch(anyModalOpen, (newValue) => {
@@ -3888,6 +3979,44 @@ const confirmTechnicianAssignment = async () => {
   } catch (error) {
     console.error('Error en asignación de técnico:', error)
     showError('Error al asignar técnico')
+  }
+}
+
+const confirmDeleteService = (service) => {
+  serviceToDelete.value = service
+  showDeleteConfirmModal.value = true
+}
+
+const deleteService = async () => {
+  try {
+    const id = serviceToDelete.value.id_solicitud;
+    await $api(`/solicitudservicio/${id}`, {
+      method: 'DELETE'
+    })
+    
+    // Remove from UI lists
+    // pendingServices
+    const pendingIndex = pendingServices.value.findIndex(s => s.id_solicitud === id)
+    if (pendingIndex > -1) {
+      pendingServices.value.splice(pendingIndex, 1)
+      await loadPendingServices(currentPendingPage.value, true) 
+    }
+    
+    // historyServices
+    const historyIndex = historyServices.value.findIndex(s => s.id_solicitud === id)
+    if (historyIndex > -1) {
+      historyServices.value.splice(historyIndex, 1)
+      await loadHistoryServices(currentHistoryPage.value, true)
+    }
+
+    showSuccess('Solicitud eliminada exitosamente')
+    
+    showDeleteConfirmModal.value = false
+    serviceToDelete.value = null
+    
+  } catch (error) {
+    console.error('Error al eliminar solicitud:', error)
+    showError('Error al eliminar la solicitud')
   }
 }
 
