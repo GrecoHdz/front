@@ -237,9 +237,17 @@
                       <!-- User Header -->
                       <div class="flex items-start justify-between w-full">
                         <div class="flex items-center space-x-2">
-                          <div class="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-sm"
-                               :class="user.estado === 'deshabilitado' || user.estado === 'inactivo' ? 'bg-red-500' : 'bg-green-500'">
-                            {{ getUserInitial(user.nombre) }}
+                          <div class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-100 dark:border-gray-700">
+                            <img 
+                              v-if="user.imagen_url" 
+                              :src="user.imagen_url" 
+                              class="w-full h-full object-cover"
+                              :alt="user.nombre"
+                            />
+                            <div v-else class="w-full h-full flex items-center justify-center text-white text-[10px] font-bold shadow-sm"
+                                 :class="user.estado === 'deshabilitado' || user.estado === 'inactivo' ? 'bg-red-500' : 'bg-green-500'">
+                              {{ getUserInitial(user.nombre) }}
+                            </div>
                           </div>
                           <div class="min-w-0">
                             <h3 class="text-[10px] sm:text-xs font-bold text-gray-900 dark:text-white truncate max-w-[90px] sm:max-w-[120px] mb-0.5">
@@ -738,9 +746,25 @@
             <form @submit.prevent="saveUser" class="space-y-3">
               <!-- Información del Usuario (solo lectura) -->
               <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded-lg space-y-3">
-                <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 pb-1">
-                  Información del Usuario
-                </h4>
+                <div class="flex items-center space-x-3 border-b border-gray-200 dark:border-gray-600 pb-2 mb-3">
+                  <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-500/20 flex-shrink-0">
+                    <img 
+                      v-if="userForm.imagen_url" 
+                      :src="userForm.imagen_url" 
+                      class="w-full h-full object-cover"
+                      :alt="userForm.nombre"
+                    />
+                    <div v-else class="w-full h-full bg-blue-500 flex items-center justify-center text-white font-black text-xl">
+                      {{ getUserInitial(userForm.nombre) }}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                      Información del Usuario
+                    </h4>
+                    <p class="text-[10px] text-gray-500">ID: {{ userForm.id_usuario }}</p>
+                  </div>
+                </div>
                 
                 <!-- Nombre -->
                 <div>
@@ -767,8 +791,20 @@
                   <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">
                     Número de Identidad
                   </label>
-                  <div class="text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 py-2 rounded border border-gray-200 dark:border-gray-600">
-                    {{ userForm.identidad || 'No especificado' }}
+                  <div class="flex gap-2 h-[38px]">
+                    <div class="w-[75%] flex items-center justify-between text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 rounded border border-gray-200 dark:border-gray-600 h-full">
+                      <span class="truncate">{{ userForm.identidad || 'No especificado' }}</span>
+                      <span v-if="userForm.verificado" class="text-green-500 flex-shrink-0" title="Verificado">
+                        <svg class="w-4 h-4 text-green-500 font-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      </span>
+                    </div>
+                    <button 
+                      type="button"
+                      @click="showVerifyIdentityModal = true"
+                      class="w-[25%] bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-bold rounded hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors text-xs h-full flex justify-center items-center"
+                    >
+                      Verificar
+                    </button>
                   </div>
                 </div>
 
@@ -1558,6 +1594,74 @@
                 class="w-full py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-xl text-xs hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
               >
                 Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Modal para Verificar Identidad -->
+    <Transition
+      enter-active-class="backdrop-enter-active"
+      leave-active-class="backdrop-leave-active"
+      enter-from-class="backdrop-enter-from"
+      leave-to-class="backdrop-leave-to"
+    >
+      <div v-if="showVerifyIdentityModal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showVerifyIdentityModal = false"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-[85%] sm:max-w-md max-h-[90vh] overflow-y-auto relative z-10 mx-auto">
+          <!-- Header -->
+          <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-black text-gray-900 dark:text-white">Verificar Identidad</h3>
+              <button @click="showVerifyIdentityModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="p-4 space-y-4">
+            <!-- Identity number -->
+             <div class="text-center">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Número de Identidad</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white">{{ userForm.identidad || 'No especificado' }}</p>
+            </div>
+
+            <!-- Identity Photo -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900/50">
+              <span class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 text-center">Fotografía del documento</span>
+              <div v-if="userForm.identidad_url" class="relative w-full aspect-video rounded-lg overflow-hidden bg-black/5 flex items-center justify-center cursor-pointer" @click="showImagePreview(userForm.identidad_url)">
+                <img :src="userForm.identidad_url" alt="Identidad" class="w-full h-full object-contain hover:scale-105 transition-transform" />
+              </div>
+              <div v-else class="w-full aspect-video rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <span class="text-gray-400 text-sm">No hay fotografía subida</span>
+              </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex space-x-2 pt-2">
+              <button 
+                type="button"
+                @click="rejectIdentity"
+                :disabled="isVerifyingIdentity"
+                class="flex-1 py-2 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 font-bold rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors text-xs disabled:opacity-50"
+              >
+                {{ isVerifyingIdentity ? 'Borrando...' : 'Borrar Imagen' }}
+              </button>
+              <button 
+                type="button"
+                @click="verifyIdentity"
+                :disabled="isVerifyingIdentity || !userForm.identidad_url || userForm.verificado"
+                class="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg transition-colors text-xs disabled:opacity-50 disabled:bg-green-300 dark:disabled:bg-green-800"
+              >
+                <div class="flex items-center justify-center gap-1">
+                  <svg v-if="userForm.verificado" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <span>{{ userForm.verificado ? 'Verificado' : 'Verificar Identidad' }}</span>
+                </div>
               </button>
             </div>
           </div>
@@ -2364,6 +2468,8 @@ const totalAdmins = ref(0)
 const showTopEarningsModal = ref(false)
 const showEditModal = ref(false)
 const showPasswordModal = ref(false)
+const showVerifyIdentityModal = ref(false)
+const isVerifyingIdentity = ref(false)
 const showReferralsModal = ref(false) 
 const showServiceHistoryModal = ref(false)
 const selectedUserType = ref('') // 'user' o 'technician'
@@ -2383,6 +2489,7 @@ const loadingOfferedServices = ref(false)
 const anyModalOpen = computed(() => {
   return showEditModal.value || 
          showPasswordModal.value || 
+         showVerifyIdentityModal.value || 
          showReferralsModal.value || 
          showServiceHistoryModal.value || 
          showCommentModal.value || 
@@ -2515,7 +2622,10 @@ const userForm = ref({
   telefono: '',
   estado: 'activo',
   ciudad: null,
-  fecha_registro: null
+  fecha_registro: null,
+  imagen_url: null,
+  identidad_url: null,
+  verificado: false
 }) 
 
 // Variables para filtros de modales
@@ -3045,7 +3155,10 @@ const resetUserForm = () => {
     email: '',
     telefono: '',
     estado: 'activo',
-    ciudad: null
+    ciudad: null,
+    imagen_url: null,
+    identidad_url: null,
+    verificado: false
   }
   
   // Resetear campos de contraseña
@@ -3218,6 +3331,7 @@ const closeModal = () => {
   showPasswordModal.value = false
   showCreditsModal.value = false
   showOfferedServicesModal.value = false
+  showVerifyIdentityModal.value = false
   offeredServices.value = []
   resetUserForm()
   selectedUser.value = null
@@ -3780,7 +3894,10 @@ const editUser = (user) => {
     telefono: user.telefono || user.phone || '',
     estado: user.estado || user.status || 'activo',
     ciudad: user.ciudad || null,
-    fecha_registro: user.fecha_registro || null
+    fecha_registro: user.fecha_registro || null,
+    imagen_url: user.imagen_url || null,
+    identidad_url: user.identidad_url || null,
+    verificado: user.verificado || false
   }
 
   showEditModal.value = true
@@ -3890,6 +4007,72 @@ const saveUser = async () => {
   } finally {
     isSaving.value = false;
   }
+};
+
+// Verificar identidad del usuario
+const verifyIdentity = async () => {
+  try {
+    isVerifyingIdentity.value = true;
+    
+    await $api(`usuarios/${userForm.value.id_usuario}`, {
+      method: 'PUT',
+      body: {
+        verificado: true
+      }
+    });
+    
+    userForm.value.verificado = true;
+    showSuccess('Identidad verificada exitosamente');
+    
+    // Actualizar al usuario en las listas
+    updateUserVerificationInLists(userForm.value.id_usuario, true, userForm.value.identidad_url);
+    
+    showVerifyIdentityModal.value = false;
+  } catch (error) {
+    console.error('Error al verificar identidad:', error);
+    showError(error.data?.message || 'Error al verificar la identidad');
+  } finally {
+    isVerifyingIdentity.value = false;
+  }
+};
+
+const rejectIdentity = async () => {
+  try {
+    isVerifyingIdentity.value = true;
+    
+    await $api(`usuarios/identidad-foto/${userForm.value.id_usuario}`, {
+      method: 'DELETE'
+    });
+    
+    userForm.value.verificado = false;
+    userForm.value.identidad_url = null;
+    showSuccess('Fotografía de identidad borrada y validación revocada');
+    
+    // Actualizar al usuario en las listas
+    updateUserVerificationInLists(userForm.value.id_usuario, false, null);
+    
+    showVerifyIdentityModal.value = false;
+  } catch (error) {
+    console.error('Error al rechazar identidad:', error);
+    showError(error.data?.message || 'Error al borrar identidad');
+  } finally {
+    isVerifyingIdentity.value = false;
+  }
+};
+
+const updateUserVerificationInLists = (userId, verificado, identidad_url) => {
+  const updateFn = (list) => {
+    return list.map(user => {
+      if (user.id_usuario === userId || user.id === userId) {
+        return { ...user, verificado, identidad_url };
+      }
+      return user;
+    });
+  };
+
+  users.value = updateFn(users.value);
+  technicians.value = updateFn(technicians.value);
+  administrators.value = updateFn(administrators.value);
 };
 
 // Actualizar la contraseña del usuario
