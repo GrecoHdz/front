@@ -74,6 +74,44 @@
               </div>
             </section>
 
+            <!-- SECCIÓN: Centro de Verificación Rápida -->
+            <section class="px-3 sm:px-6 mb-3 sm:mb-6">
+              <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-3">
+                <!-- Header con título -->
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center space-x-2">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-lg">
+                      <span class="text-blue-600 dark:text-blue-400 text-sm">🆔</span>
+                    </div>
+                    <h2 class="text-sm font-black text-gray-900 dark:text-white">Centro de Verificación Rápida</h2>
+                  </div>
+                </div>
+
+                <!-- Resumen de Contadores -->
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5 mb-3 border border-gray-100 dark:border-gray-600/50">
+                  <div class="flex justify-center text-center">
+                    <div>
+                      <div class="text-sm font-black text-gray-900 dark:text-white">{{ pendingVerificationUsers.length }}</div>
+                      <div class="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-medium">Usuarios Pendientes</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Botón de acción -->
+                <button 
+                  v-if="pendingVerificationUsers.length > 0"
+                  @click="openNextPendingVerification"
+                  class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold text-xs shadow-sm transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+                >
+                  <span>🚀 Comenzar Verificación Rápida</span>
+                  <span class="bg-blue-500 text-white px-2 py-0.5 rounded-full text-[10px]">{{ pendingVerificationUsers.length }}</span>
+                </button>
+                <div v-else class="text-center py-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-dashed border-gray-200 dark:border-gray-600">
+                  <p class="text-xs text-gray-500 dark:text-gray-400">No hay usuarios pendientes de verificar identidad.</p>
+                </div>
+              </div>
+            </section>
+
             <!-- Filters and Search -->
             <section class="px-3 sm:px-6 mb-3 sm:mb-6">
               <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
@@ -2463,6 +2501,8 @@ const availableCities = ref([])
 const cities = ref([])
 const hasMoreUsers = ref(false)
 const totalAdmins = ref(0)
+const pendingVerificationUsers = ref([])
+const loadingPendingVerification = ref(false)
 
 // Modales
 const showTopEarningsModal = ref(false)
@@ -4009,6 +4049,43 @@ const saveUser = async () => {
   }
 };
 
+// Función para cargar usuarios pendientes de verificación
+const loadPendingVerificationUsers = async () => {
+  try {
+    loadingPendingVerification.value = true
+    const response = await $api('/usuarios/pendientes-verificar', {
+      method: 'GET'
+    })
+    
+    if (response.success) {
+      pendingVerificationUsers.value = response.data || []
+    }
+  } catch (error) {
+    console.error('Error al cargar usuarios pendientes de verificación:', error)
+  } finally {
+    loadingPendingVerification.value = false
+  }
+}
+
+// Abrir el modal de verificación para el siguiente usuario
+const openNextPendingVerification = () => {
+  if (pendingVerificationUsers.value.length > 0) {
+    const userToVerify = pendingVerificationUsers.value[0]
+    
+    userForm.value = {
+      ...userForm.value,
+      id_usuario: userToVerify.id_usuario,
+      nombre: userToVerify.nombre,
+      identidad: userToVerify.identidad,
+      email: userToVerify.email,
+      identidad_url: userToVerify.identidad_url,
+      verificado: false
+    }
+    
+    showVerifyIdentityModal.value = true
+  }
+}
+
 // Verificar identidad del usuario
 const verifyIdentity = async () => {
   try {
@@ -4027,7 +4104,22 @@ const verifyIdentity = async () => {
     // Actualizar al usuario en las listas
     updateUserVerificationInLists(userForm.value.id_usuario, true, userForm.value.identidad_url);
     
+    // Enviar notificación de éxito
+    try {
+      await $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: {
+          titulo: 'Identidad Verificada',
+          id_usuario: userForm.value.id_usuario,
+          tipo: 'verificacion'
+        }
+      });
+    } catch (notifError) {
+      console.error('Error al enviar notificación:', notifError);
+    }
+    
     showVerifyIdentityModal.value = false;
+    loadPendingVerificationUsers();
   } catch (error) {
     console.error('Error al verificar identidad:', error);
     showError(error.data?.message || 'Error al verificar la identidad');
@@ -4051,7 +4143,22 @@ const rejectIdentity = async () => {
     // Actualizar al usuario en las listas
     updateUserVerificationInLists(userForm.value.id_usuario, false, null);
     
+    // Enviar notificación de rechazo
+    try {
+      await $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: {
+          titulo: 'Verificación Fallida',
+          id_usuario: userForm.value.id_usuario,
+          tipo: 'verificacion'
+        }
+      });
+    } catch (notifError) {
+      console.error('Error al enviar notificación:', notifError);
+    }
+    
     showVerifyIdentityModal.value = false;
+    loadPendingVerificationUsers();
   } catch (error) {
     console.error('Error al rechazar identidad:', error);
     showError(error.data?.message || 'Error al borrar identidad');
@@ -4445,7 +4552,8 @@ onMounted(async () => {
       loadTechnicians(),
       loadAdministrators(),
       loadCities(),
-      fetchStatistics()
+      fetchStatistics(),
+      loadPendingVerificationUsers()
     ])
   } catch (error) {
     window.location.reload()

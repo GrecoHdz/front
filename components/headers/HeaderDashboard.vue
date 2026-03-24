@@ -131,6 +131,8 @@ const onNotificationClick = async (notification) => {
       await navigateTo('/cliente/Servicios');
     } else if (notification.tipo === 'paquetes') { 
       await navigateTo('/cliente/Marketplace');
+    } else if (notification.tipo === 'verificacion') { 
+      await navigateTo('/cliente/Perfil');
     }
   } finally {
     // Asegurarse de que el loading siempre se desactive

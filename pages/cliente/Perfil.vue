@@ -360,7 +360,7 @@
                 class="py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
               >
                 <i class="fas fa-id-card text-blue-500"></i>
-                {{ user.identidad_url ? 'Ver Identidad' : 'Verificar ID' }}
+                {{ user.identidad_url ? 'Ver Identidad' : 'Verificar ID ✅' }}
               </button>
             </div>
           </div>
@@ -2178,6 +2178,26 @@ const uploadIdentityImage = async (file) => {
       user.value.identidad_url = response.data.identidad_url
       showSuccess('¡Éxito!', 'Foto de identidad subida correctamente')
       isIdentityModalOpen.value = false
+      
+      // Notificar a administradores y súper administradores
+      try {
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          body: {
+            titulo: 'Solicitud de Verificación',
+            nombre_rol: 'admin'
+          }
+        });
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          body: {
+            titulo: 'Solicitud de Verificación',
+            nombre_rol: 'sa'
+          }
+        });
+      } catch (notifError) {
+        console.error('Error al enviar notificaciones:', notifError);
+      }
     }
   } catch (error) {
     console.error('Error al subir foto de identidad:', error)
