@@ -2734,11 +2734,14 @@ const handleRequestService = async () => {
       throw new Error('No se pudo encontrar el servicio seleccionado')
     }
 
+    const isTaxiVIP = selectedService.name === 'Taxi VIP'
     const membershipStatus = await fetchMembershipData()
     const tieneMembresiaActiva = membershipStatus?.estado === 'activa'
     
-    const estadoInicial = tieneMembresiaActiva ? 'pendiente_asignacion' : 'pendiente_pagovisita'
-    const visitaPagada = tieneMembresiaActiva ? 0 : 1 
+    // Taxi VIP no requiere pago de visita y va directo a asignacion
+    const noRequierePagoVisita = tieneMembresiaActiva || isTaxiVIP
+    const estadoInicial = noRequierePagoVisita ? 'pendiente_asignacion' : 'pendiente_pagovisita'
+    const visitaPagada = noRequierePagoVisita ? 0 : 1 
 
     const isBarberia = selectedService.name === 'Barbería'
     const isEnLocal = serviceFormData.value.barberiaOption === 'en local'
@@ -2777,7 +2780,7 @@ const handleRequestService = async () => {
 
     // Enviar notificación según el tipo de membresía
     try {
-      const notificationData = tieneMembresiaActiva
+      const notificationData = noRequierePagoVisita
         ? { titulo: 'Asignación Pendiente', nombre_rol: 'admin' }
         : { titulo: 'Pago de visita pendiente', id_usuario: Number(userData.id_usuario) }
 
@@ -2786,7 +2789,7 @@ const handleRequestService = async () => {
         body: notificationData
       })
 
-      if (tieneMembresiaActiva) {
+      if (noRequierePagoVisita) {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
@@ -2823,7 +2826,7 @@ const handleRequestService = async () => {
     
     showToast(
       '¡Solicitud enviada!', 
-      tieneMembresiaActiva 
+      noRequierePagoVisita 
         ? `Pronto se le asignará un ${selectedService.name === 'Taxi VIP' ? 'conductor' : (isBarberia ? 'barbero' : 'técnico')}.` 
         : 'Ya puedes pagar la visita.',
       'success'
