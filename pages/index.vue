@@ -95,21 +95,27 @@
           <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed px-2">
             <strong class="text-emerald-600 dark:text-emerald-400">MiSeguro</strong> es la primera plataforma en Honduras que te da 
             <span class="font-bold text-gray-900 dark:text-white">mantenimiento, cashback y asistencia técnica</span> 
-            en un solo lugar, a cambio de una membresía mensual accesible.
+            en un solo lugar. <span class="text-emerald-600 dark:text-emerald-400 font-bold">Úsala gratis</span> o potencia tu ahorro con nuestra membresía opcional.
           </p>
         </div>
       </section>
 
       <!-- Pricing Hero -->
       <section class="px-4 mb-5">
-        <div class="relative bg-gradient-to-br from-purple-600 via-pink-600 to-red-500 rounded-2xl p-5 text-white overflow-hidden shadow-xl">
+        <div class="relative bg-gradient-to-br from-purple-600 via-pink-600 to-red-500 rounded-2xl p-5 text-white overflow-hidden shadow-xl border border-white/10">
+          <!-- Optional Badge -->
+          <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30 shadow-sm z-10">
+            <span class="text-[10px] font-black tracking-widest uppercase">Opcional</span>
+          </div>
+
           <!-- Background decoration -->
           <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
           <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           
           <div class="relative text-center">
             <div class="text-4xl mb-3">🎁</div>
-            <h3 class="text-xl font-black mb-2">¿Qué recibes como miembro?</h3>
+            <h3 class="text-xl font-black mb-1">¿Qué recibes como miembro?</h3>
+            <p class="text-xs font-bold text-white/80 mb-3 uppercase tracking-wider">(No es obligatoria para usar la app)</p>
             <div class="flex items-center justify-center space-x-2 mb-4">
               <span class="text-base opacity-90">Por solo</span>
               <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/30">

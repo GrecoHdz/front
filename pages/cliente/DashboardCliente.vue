@@ -1857,7 +1857,7 @@ const fetchServices = async () => {
     const user = useCookie('user').value
     const id_ciudad = user?.id_ciudad
     
-    const data = await $api('/servicios', {
+    const data = await $api('/servicios/activos', {
       method: 'GET',
       params: id_ciudad ? { id_ciudad } : {}
     })
@@ -2213,12 +2213,14 @@ const handleCopyAndSelect = async () => {
    if (!accountNumber) return
    
    selectedAccountObject.value = viewingAccount.value
-   await copyToClipboard(accountNumber)
+   const copied = await copyToClipboard(accountNumber)
    
-   // Feedback visual antes de cerrar
-   setTimeout(() => {
+   if (copied) {
       showAccountDetailModal.value = false
-   }, 1000)
+      showToast('¡Copiado!', 'Número de cuenta copiado', 'success')
+   } else {
+      showToast('Error', 'No se pudo copiar el número de cuenta', 'error')
+   }
 }
 
 const isValidPaymentForm = computed(() => {
@@ -2895,6 +2897,32 @@ const updateMembershipToExpired = async (membresiaId) => {
 // =========================
 // FUNCIONES DE NOTIFICACIONES
 // =========================
+
+const copyToClipboard = async (text) => {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } else {
+      // Fallback for older browsers or non-secure contexts
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return true;
+      } catch (err) {
+        document.body.removeChild(textArea);
+        return false;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+    return false;
+  }
+}
 
 const showToast = (param1, param2, param3 = 'success') => { 
   let message, type;
