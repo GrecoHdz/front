@@ -279,8 +279,9 @@
                             <img 
                               v-if="user.imagen_url" 
                               :src="user.imagen_url" 
-                              class="w-full h-full object-cover"
+                              class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                               :alt="user.nombre"
+                              @click.stop="showImagePreview(user.imagen_url)"
                             />
                             <div v-else class="w-full h-full flex items-center justify-center text-white text-[10px] font-bold shadow-sm"
                                  :class="user.estado === 'deshabilitado' || user.estado === 'inactivo' ? 'bg-red-500' : 'bg-green-500'">
@@ -789,8 +790,9 @@
                     <img 
                       v-if="userForm.imagen_url" 
                       :src="userForm.imagen_url" 
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                       :alt="userForm.nombre"
+                      @click="showImagePreview(userForm.imagen_url)"
                     />
                     <div v-else class="w-full h-full bg-blue-500 flex items-center justify-center text-white font-black text-xl">
                       {{ getUserInitial(userForm.nombre) }}
@@ -830,19 +832,12 @@
                     Número de Identidad
                   </label>
                   <div class="flex gap-2 h-[38px]">
-                    <div class="w-[75%] flex items-center justify-between text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 rounded border border-gray-200 dark:border-gray-600 h-full">
+                    <div class="w-full flex items-center justify-between text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 rounded border border-gray-200 dark:border-gray-600 h-full">
                       <span class="truncate">{{ userForm.identidad || 'No especificado' }}</span>
                       <span v-if="userForm.verificado" class="text-green-500 flex-shrink-0" title="Verificado">
                         <svg class="w-4 h-4 text-green-500 font-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                       </span>
                     </div>
-                    <button 
-                      type="button"
-                      @click="showVerifyIdentityModal = true"
-                      class="w-[25%] bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-bold rounded hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors text-xs h-full flex justify-center items-center"
-                    >
-                      Verificar
-                    </button>
                   </div>
                 </div>
 
@@ -2210,7 +2205,7 @@
   >
     <div 
       v-if="imagePreview.show" 
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
       @click.self="closeImagePreview"
     >
       <div class="relative max-w-4xl w-full max-h-[90vh]">
