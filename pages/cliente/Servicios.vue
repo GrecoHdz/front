@@ -1080,38 +1080,7 @@
     </div>
   </Transition>
 
-<!-- Modal para ver imagen en grande -->
-<Transition
-  enter-active-class="transition-opacity duration-300"
-  leave-active-class="transition-opacity duration-200"
-  enter-from-class="opacity-0"
-  leave-to-class="opacity-0"
->
-  <div 
-    v-if="showImageModal"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-    @click.self="showImageModal = false"
-  >
-    <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col">
-      <button 
-        @click="showImageModal = false"
-        class="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
-        aria-label="Cerrar"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex-1 flex items-center justify-center">
-        <img 
-          :src="selectedImage" 
-          class="max-w-full max-h-[80vh] object-contain"
-          :alt="'Imagen de ' + (selectedService?.technicianName || 'técnico')"
-        />
-      </div>
-    </div>
-  </div>
-</Transition>
+
 
   <!-- Modal de Cancelación con Transiciones -->
   <Transition
@@ -1382,8 +1351,12 @@
               <div v-if="selectedService.tecnico" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                 <img 
                   :src="getOptimizedImage(selectedService.tecnico.imagen_url, 60, 60)" 
-                  class="w-10 h-10 rounded-lg object-cover shadow-sm"
+                  class="w-10 h-10 rounded-lg object-cover shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
                   @error="handleImageError"
+                  @click="() => {
+                    selectedImage = getOptimizedImage(selectedService.tecnico.imagen_url, 800, 800, 'fit')
+                    showImageModal = true
+                  }"
                 >
                 <div>
                   <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Conductor</p>
@@ -1562,9 +1535,13 @@
               <!-- Barbero -->
               <div v-if="selectedService.tecnico" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                 <img 
-                  :src="getOptimizedImage(selectedService.tecnico.imagen_url, 60, 60)" 
-                  class="w-10 h-10 rounded-lg object-cover shadow-sm"
+                  :src="getOptimizedImage(selectedService.tecnico.imagen_url, 100, 100)" 
+                  class="w-10 h-10 rounded-lg object-cover shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
                   @error="handleImageError"
+                  @click="() => {
+                    selectedImage = getOptimizedImage(selectedService.tecnico.imagen_url, 800, 800, 'fit')
+                    showImageModal = true
+                  }"
                 >
                 <div>
                   <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Barbero</p>
@@ -1930,6 +1907,39 @@
           </div>
         </div>
       </Transition>
+    </div>
+  </Transition>
+
+  <!-- Modal para ver imagen en grande -->
+  <Transition
+    enter-active-class="transition-opacity duration-300"
+    leave-active-class="transition-opacity duration-200"
+    enter-from-class="opacity-0"
+    leave-to-class="opacity-0"
+  >
+    <div 
+      v-if="showImageModal"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+      @click.self="showImageModal = false"
+    >
+      <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col">
+        <button 
+          @click="showImageModal = false"
+          class="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+          aria-label="Cerrar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex-1 flex items-center justify-center">
+          <img 
+            :src="selectedImage" 
+            class="max-w-full max-h-[80vh] object-contain"
+            :alt="'Imagen de ' + (selectedService?.technicianName || 'técnico')"
+          />
+        </div>
+      </div>
     </div>
   </Transition>
 </template>
