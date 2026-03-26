@@ -16,7 +16,7 @@
         <div class="flex items-center justify-between mb-5">
           <div class="flex items-center space-x-2">
             <div class="relative">
-              <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+              <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20">
                 <div class="w-6 h-6 rounded-md flex items-center justify-center">
                   <img src="/pwa-192x192.png" alt="MiSeguro" class="w-full h-full object-contain" />
                 </div>
@@ -26,7 +26,7 @@
               <h1 class="text-xl font-black text-white tracking-tight">
                 MiSeguro
               </h1>
-              <p class="text-emerald-100 text-xs font-medium">Tu casa es tu refugio</p>
+              <p class="text-emerald-100 text-xs font-medium">Soluciones profesionales</p>
             </div>
           </div>
           <button 
@@ -61,174 +61,74 @@
         </transition>
 
         <!-- Hero Content -->
-        <div class="text-center text-white">
-          <h2 class="text-2xl font-black mb-3 leading-tight">
-            Tu casa es tu<br>
-            <span class="text-yellow-300">refugio</span>
+        <div class="text-center text-white py-10">
+          <h2 class="text-4xl font-black mb-4 tracking-tight leading-[1.1]">
+            Servicios<br>
+            <span class="text-yellow-300">Profesionales.</span>
           </h2>
-          <p class="text-lg text-emerald-100 font-medium mb-4">
-            Pero cuando algo se arruina<br>el estrés comienza...
+          <p class="text-lg text-emerald-50/80 font-medium px-4">
+            Nosotros nos encargamos de todo.
           </p>
         </div>
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class="relative -mt-4 pb-5">
+    <main class="relative -mt-6 pb-1">
       
-      <!-- Problem Cards -->
-      <section class="px-4 mb-5">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 border border-gray-100 dark:border-gray-700">
-          <div class="grid grid-cols-2 gap-3">
-            <div v-for="problem in problems" :key="problem.id" 
-                 class="flex flex-col items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-100 dark:border-red-800">
-              <div class="text-2xl mb-1">{{ problem.icon }}</div>
-              <p class="text-red-700 dark:text-red-300 text-xs font-semibold text-center">{{ problem.text }}</p>
+      <!-- Value Proposition Hero -->
+      <section class="px-4 py-6 text-center bg-white dark:bg-gray-800 rounded-t-[2.5rem] shadow-2xl relative z-10 border-t border-gray-100 dark:border-gray-700">
+        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4 leading-tight">
+          La solución para<br>
+          <span class="gradient-text">tus problemas</span>
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-sm mx-auto">
+          Mantenimiento, cashback y asistencia profesional en la palma de tu mano.
+        </p>
+
+        <!-- Simple How it Works -->
+        <div class="grid grid-cols-3 gap-2 mb-8 max-w-md mx-auto px-2">
+          <div class="flex flex-col items-center group">
+            <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-emerald-100 dark:border-emerald-800 transition-transform group-hover:scale-110">
+              📱
             </div>
+            <span class="text-[10px] text-gray-500 font-bold leading-tight">Solicítalo desde<br>tu teléfono</span>
           </div>
+          <div class="flex flex-col items-center group">
+            <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-blue-100 dark:border-blue-800 transition-transform group-hover:scale-110">
+              👷
+            </div>
+            <span class="text-[10px] text-gray-500 font-bold leading-tight">Asignación de<br>profesional</span>
+          </div>
+          <div class="flex flex-col items-center group">
+            <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-amber-100 dark:border-amber-800 transition-transform group-hover:scale-110">
+              ✅
+            </div>
+            <span class="text-[10px] text-gray-500 font-bold leading-tight">Solución<br>garantizada</span>
+          </div>
+        </div>
+
+        <div class="px-4">
+          <button 
+            @click="isLogin = false; showLoginModal = true"
+            class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95 mb-4"
+          >
+            ¡Empezar ahora! ✨
+          </button>
+          <p class="text-xs text-gray-400">Registro Gratis • en menos de 1 minuto</p>
         </div>
       </section>
 
-      <!-- Solution Statement -->
-      <section class="px-4 mb-5">
-        <div class="text-center"> 
-          <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed px-2">
-            <strong class="text-emerald-600 dark:text-emerald-400">MiSeguro</strong> es la primera plataforma en Honduras que te da 
-            <span class="font-bold text-gray-900 dark:text-white">mantenimiento, cashback y asistencia técnica</span> 
-            en un solo lugar. <span class="text-emerald-600 dark:text-emerald-400 font-bold">Úsala gratis</span> o potencia tu ahorro con nuestra membresía opcional.
-          </p>
-        </div>
-      </section>
-
-      <!-- Pricing Hero -->
-      <section class="px-4 mb-5">
-        <div class="relative bg-gradient-to-br from-purple-600 via-pink-600 to-red-500 rounded-2xl p-5 text-white overflow-hidden shadow-xl border border-white/10">
-          <!-- Optional Badge -->
-          <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30 shadow-sm z-10">
-            <span class="text-[10px] font-black tracking-widest uppercase">Opcional</span>
-          </div>
-
-          <!-- Background decoration -->
-          <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-          <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-          
-          <div class="relative text-center">
-            <div class="text-4xl mb-3">🎁</div>
-            <h3 class="text-xl font-black mb-1">¿Qué recibes como miembro?</h3>
-            <p class="text-xs font-bold text-white/80 mb-3 uppercase tracking-wider">(No es obligatoria para usar la app)</p>
-            <div class="flex items-center justify-center space-x-2 mb-4">
-              <span class="text-base opacity-90">Por solo</span>
-              <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/30">
-                <span class="text-3xl font-black text-yellow-300">L. {{ membershipCost.toLocaleString('es-HN') }}</span>
-                <span class="text-base opacity-90 ml-1">/mes</span>
-              </div>
-            </div>
-            <p class="text-base opacity-90 font-medium">obtendrás increíbles beneficios:</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Benefits Grid -->
-      <section class="px-4 mb-5">
-        <div class="space-y-3">
-          <div v-for="(benefit, index) in membershipBenefits" :key="benefit.id" 
-               class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300"
-               :class="getCardColor(index)">
-            <div class="flex items-start space-x-3">
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center text-white font-bold" 
-                     :class="getIconBg(index)">
-                  <span class="text-base leading-none">{{ benefit.mes_requerido }}</span>
-                  <span class="text-[9px] leading-none opacity-80">mes</span>
-              </div>
-              </div>
-              <div class="flex-1">
-                <h4 class="font-bold text-gray-900 dark:text-white text-base mb-1">
-                    {{ benefit.title }}
-                  </h4>
-                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-2">
-                  {{ benefit.description }}
-                </p>
-                <div v-if="benefit.savings" class="inline-flex items-center px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">
-                  💰 {{ benefit.savings }}
-              </div>
-            </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Referral Program Section (v2 Compact) -->
-      <section class="px-4 mb-5">
-        <div class="bg-gradient-to-br from-indigo-700 via-indigo-800 to-purple-900 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden group">
-          <!-- Decorative Background Elements -->
-          <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-500"></div>
-          <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-indigo-500/20 rounded-full blur-2xl"></div>
-          
-          <div class="relative z-10">
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center text-lg">
-                  💰
-                </div>
-                <span class="text-[16px] sm:text-xs md:text-base font-black uppercase text-indigo-200">Programa de Referidos</span>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-xl font-black leading-tight">
-                Gana dinero por cada<br>
-                <span class="text-yellow-300">usuario que invites</span>
-              </h3>
-              <div class="bg-yellow-400 text-indigo-900 px-3 py-1 rounded-xl font-black text-sm shadow-lg transform -rotate-2">
-                {{ referralPercentage }}% COMISIÓN
-              </div>
-            </div>
-            
-            <p class="text-xs text-indigo-100/90 mb-5 leading-relaxed">
-              Invita a tus contactos y recibe comisiones directas por cada servicio finalizado. Sin límites, dinero real.
-            </p>
-
-            <!-- Compact Steps 2x2 Grid with Numbers -->
-            <div class="grid grid-cols-2 gap-2 mb-5">
-              <div v-for="(step, index) in referralSteps" :key="index" 
-                   class="bg-black/20 backdrop-blur-sm border border-white/5 rounded-2xl p-3 flex flex-col items-start text-left relative overflow-hidden">
-                <div class="flex items-center justify-between w-full mb-1">
-                  <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-[10px] font-black">
-                    {{ index + 1 }}
-                  </div>
-                  <span class="text-lg opacity-80">{{ step.icon }}</span>
-                </div>
-                <h4 class="text-[10px] font-black uppercase tracking-tight leading-none mb-1">{{ step.title }}</h4>
-                <p class="text-[9px] text-indigo-100/60 leading-tight">{{ step.description }}</p>
-              </div>
-            </div>
-
-            <button 
-              @click="isLogin = false; showLoginModal = true"
-              class="w-full py-4 bg-white text-indigo-800 font-black text-sm rounded-2xl transition-all shadow-lg active:scale-[0.98] hover:bg-indigo-50 flex items-center justify-center space-x-2"
-            >
-              <span>EMPEZAR A GANAR AHORA</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Services Section (Horizontal Scroll Compact) -->
-      <section class="mb-2">
-        <div class="px-4 flex items-end justify-between mb-3">
-          <div>
-            <h3 class="text-xl font-black text-gray-900 dark:text-white">Servicios cubiertos</h3>
-            <p class="text-xs text-gray-500">Explora nuestras soluciones</p>
-          </div>
+      <!-- Services Carousel -->
+      <section class="py-6 bg-gray-50 dark:bg-gray-900/50">
+        <div class="px-6 mb-4 flex items-center justify-between">
+          <h4 class="font-black text-gray-900 dark:text-white">Servicios Cubiertos</h4>
+          <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Garantizados</span>
         </div>
         
         <div 
           ref="carruselRef"
-          class="flex overflow-x-auto pb-4 px-4 space-x-3 no-scrollbar cursor-grab active:cursor-grabbing select-none"
+          class="flex overflow-x-auto pb-4 px-6 space-x-4 no-scrollbar cursor-grab active:cursor-grabbing select-none"
           @mouseenter="isHovering = true"
           @mouseleave="isHovering = false"
           @touchstart="handleInteraction"
@@ -237,167 +137,103 @@
         >
           <div v-for="(service, index) in carouselItems" :key="index"
                @click="isLogin = false; showLoginModal = true"
-               class="flex-shrink-0 w-[160px]">
-            <div class="bg-white dark:bg-gray-800 rounded-[2rem] p-4 shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center transition-all duration-300 active:scale-95 group relative overflow-hidden h-full min-h-[160px] justify-center">
-              <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-2xl mb-3 shadow-md shadow-emerald-100 dark:shadow-none transform group-hover:scale-110 transition-transform">
-                {{ service.icon }}
-              </div>
-              <h4 class="font-black text-gray-900 dark:text-white text-[13px] leading-tight mb-1">
+               class="flex-shrink-0 w-[140px]">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center h-full min-h-[140px] justify-center transition-transform hover:scale-105 active:scale-95">
+              <div class="text-3xl mb-3">{{ service.icon }}</div>
+              <h4 class="font-bold text-gray-900 dark:text-white text-xs leading-tight">
                 {{ service.name }}
               </h4>
-              <p class="text-[9px] text-gray-500 dark:text-gray-400 leading-tight line-clamp-2">
-                {{ service.description }}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Membership & Savings -->
+      <section class="px-2">
+        <div class="bg-gradient-to-br from-gray-900 to-emerald-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+          <div class="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl"></div>
+          
+          <div class="relative z-10">
+            <div class="text-center mb-8">
+              <div class="inline-flex flex-col items-center">
+                <span class="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30 mb-3">Membresía Premium</span>
+                <div class="flex items-center justify-center space-x-3">
+                  <span v-if="isLoadingMembershipCost" class="text-2xl font-black text-white animate-pulse">Cargando...</span>
+                  <span v-else class="text-5xl font-black text-white">L. {{ membershipCost.toLocaleString('es-HN') }}</span>
+                  <span class="px-2 py-0.5 bg-white/10 rounded text-[10px] text-emerald-300 font-bold uppercase tracking-tighter self-start mt-1 border border-white/10">Opcional</span>
+                </div>
+                <p class="text-[10px] text-emerald-100/50 mt-2 font-medium uppercase tracking-widest">Inversión mensual de ahorro</p>
+              </div>
+            </div>
+
+            <!-- Value Proposition: Money is not lost -->
+            <div class="mb-4 p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 text-center">
+              <h4 class="text-xl font-black text-emerald-400 mb-2">¡Lo que pagas no se pierde! 💰</h4>
+              <p class="text-sm text-emerald-100/80 leading-relaxed">
+                Tus mensualidades se acumulan cada mes como <span class="font-bold text-white">Crédito Real</span>. El crédito puede ser usado para <span class="font-bold text-white">pagar cualquier servicio.</span>
               </p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- Mobile App Feature -->
-      <section class="px-4 mb-5">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-5 text-white relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"></div>
-          <div class="relative">
-            <div class="flex items-center space-x-2 mb-3">
-              <div class="text-3xl">📱</div>
-              <h4 class="font-black text-lg">Todo desde tu celular</h4>
-            </div>
-            <p class="text-blue-100 leading-relaxed text-sm">
-              Solicita cualquier servicio con solo <span class="font-bold text-yellow-300">un par de clics</span>. 
-              Recibes confirmación, técnico asignado y seguimiento en tiempo real.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- How it Works -->
-      <section class="px-4 mb-2">
-        <div class="text-center mb-4">
-          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
-            ¿Cómo funciona?
-          </h3> 
-        </div>
-        <div class="space-y-3">
-          <div v-for="(step, index) in howItWorks" :key="step.id"
-               class="relative bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-            <div class="flex items-start space-x-3">
-              <div class="flex-shrink-0 relative">
-                <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white font-black text-base shadow-lg">
-                  {{ index + 1 }}
+            <!-- Key Benefits Checklist -->
+            <div class="grid grid-cols-1 gap-2 mb-8">
+              <div v-for="(benefit, index) in membershipBenefits.slice(0, 3)" :key="benefit.id" class="flex items-center space-x-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                <div class="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center text-xl">
+                  {{ index === 0 ? '✨' : index === 1 ? '💸' : '🛠️' }}
                 </div>
-                <div v-if="index < howItWorks.length - 1" class="absolute top-10 left-1/2 transform -translate-x-1/2 w-px h-6 bg-gradient-to-b from-emerald-500 to-transparent"></div>
-              </div>
-              <div class="flex-1 pt-1">
-                <h4 class="font-bold text-gray-900 dark:text-white mb-1 text-base">
-                  {{ step.title }}
-                </h4>
-                <p class="text-gray-600 dark:text-gray-300 text-sm">
-                  {{ step.description }}
-                </p>
+                <div class="flex-1">
+                  <h5 class="text-sm font-black text-white">{{ benefit.title }}</h5>
+                  <p class="text-xs text-emerald-100/60 mt-0.5">{{ benefit.description }}</p>
+                </div>
               </div>
             </div>
+
+            <button 
+              @click="isLogin = false; showLoginModal = true"
+              class="w-full py-4 bg-white text-emerald-900 font-black text-sm rounded-2xl shadow-xl hover:bg-emerald-50 transition-all active:scale-[0.98] uppercase tracking-wider"
+            >
+              Convertir mi pago en ahorro
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- No Emergencies Section -->
-      <section class="px-4 py-4 mb-2">
-        <div class="bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl p-4 text-white">
-          <div class="text-center mb-3">
-            <h3 class="text-lg font-bold mb-2">🧠 ¿Y si no tengo emergencias?</h3>
-            <p class="text-base font-semibold">¡Mucho mejor!</p>
-          </div>
-          <div class="space-y-2 text-sm">
-            <div class="flex items-start space-x-2">
-              <span>✨</span>
-              <span>Tu membresía no se pierde. Cada mes se acumula como crédito si no dejas de pagar.</span>
+      <!-- Referral Program - Modern Glassmorphism Design -->
+      <section class="px-4 py-6">
+        <div class="relative overflow-hidden bg-gradient-to-br from-indigo-600/10 to-purple-600/10 dark:from-indigo-500/5 dark:to-purple-500/5 rounded-[2.5rem] p-8 border border-white/10 backdrop-blur-sm">
+          <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
+          <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
+          
+          <div class="relative z-10 text-center max-w-xs mx-auto">
+            <div class="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl shadow-xl flex items-center justify-center text-3xl mx-auto mb-6 transform -rotate-6">
+              🤝
             </div>
-            <div class="flex items-start space-x-2">
-              <span>💰</span>
-              <span>Si después de 3 meses quieres hacer una reparación de L. 750, puedes cubrirla con tus créditos acumulados.</span>
-            </div>
-            <div class="flex items-start space-x-2">
-              <span>🏦</span>
-              <span>Es como un seguro que se convierte en ahorro real.</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Trust Section -->
-      <section class="px-4 mb-5">
-        <div class="text-center mb-4">
-          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
-            ¿Por qué confiar en nosotros?
-          </h3> 
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700">
-          <div class="grid grid-cols-1 gap-3">
-            <div v-for="trust in trustFeatures" :key="trust.id" 
-                 class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-              <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center text-xl">
-                {{ trust.icon }}
-              </div>
-              <span class="font-semibold text-gray-900 dark:text-white text-base">{{ trust.title }}</span>
-            </div>
+            <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-3">Programa de Referidos</h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-8 leading-relaxed">
+              Invita a tus amigos y gana comisiones del <span class="text-indigo-600 dark:text-indigo-400 font-black">{{ referralPercentage }}%</span> por cada servicio contratado.
+            </p>
+            <button 
+              @click="isLogin = false; showLoginModal = true"
+              class="px-8 py-3 bg-indigo-600 text-white text-sm font-black rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:bg-indigo-700 active:scale-95"
+            >
+              ¡Saber más y Ganar!
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- No Membership Warning -->
-      <section class="px-4 mb-5">
-        <div class="bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl p-4 text-white relative overflow-hidden">
-          <div class="absolute -top-4 -right-4 w-16 h-16 bg-white/10 rounded-full"></div>
-          <div class="relative">
-            <h3 class="text-lg font-black mb-3 flex items-center space-x-2">
-              <span>💬</span>
-              <span>¿Y si opto por no pagar membresía?</span>
-            </h3>
-            <p class="text-pink-100 mb-3 text-sm">Siempre podrás usar la app sin membresía, pero:</p>
-            <div class="space-y-2">
-              <div v-for="limitation in noMembershipLimitations" :key="limitation.id" 
-                   class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-lg p-2 border border-white/30">
-                <span class="text-yellow-300 text-base">{{ limitation.icon }}</span>
-                <span class="text-sm">{{ limitation.text }}</span>
-              </div>
-            </div>
-          </div>
+      <!-- Simple Final CTA -->
+      <section class="px-4 pb-10 text-center">
+        <div class="max-w-xs mx-auto">
+          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-4">¿Listo para empezar?</h3> 
+          <button 
+            @click="isLogin = false; showLoginModal = true"
+            class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95"
+          >
+            Crear mi cuenta gratis ✨
+          </button>
+          <p class="mt-4 text-[10px] text-gray-400 font-medium tracking-wide uppercase">Registro en menos de 1 minuto</p>
         </div>
       </section>
-
-      <!-- Final CTA (versión más amigable) -->
-<section class="px-4 mb-5">
-  <div class="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 rounded-2xl p-6 text-white relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
-    <div class="relative text-center">
-      <div class="text-4xl mb-3">🔐</div>
-      <h3 class="text-xl font-black mb-3">En pocas palabras...</h3>
-      <div class="text-lg font-bold mb-4 text-yellow-300">
-        MiSeguro = Más tranquilidad, más ahorro y cero estrés ✨
-      </div>
-      <div class="space-y-2 mb-5 text-sm">
-        <div class="flex items-center space-x-2 justify-center">
-          <span class="text-green-400 text-base">✔️</span>
-          <span>Olvidate de buscar técnicos al azar en Facebook</span>
-        </div>
-        <div class="flex items-center space-x-2 justify-center">
-          <span class="text-green-400 text-base">✔️</span>
-          <span>Recibe atención rápida, sin esperas ni complicaciones</span>
-        </div>
-        <div class="flex items-center space-x-2 justify-center">
-          <span class="text-green-400 text-base">✔️</span>
-          <span>Mantén tu hogar protegido y funcionando al 100%</span>
-        </div>
-      </div>
-      <button 
-        @click="isLogin = false; showLoginModal = true"
-        class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-base rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-      >
-        🌟 Quiero ser parte de MiSeguro
-      </button>
-    </div>
-  </div>
-</section>
 
     </main>
    <!-- Login/Register Modal -->
