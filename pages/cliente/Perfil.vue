@@ -25,7 +25,7 @@
     <div class="max-w-2xl mx-auto px-4 pb-4">
       <!-- Profile Card -->
       <div class="relative bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4 overflow-hidden">
-        <!-- Badge de Verificado en la esquina -->
+        <!-- Badge de Verificado en la esquina (Keep it simple) -->
         <div v-if="user.identidad_url" class="absolute top-0 right-0 pt-2 pr-2">
           <span class="flex items-center gap-1.5 text-[10px] bg-emerald-500 text-white px-3 py-1.5 rounded-bl-2xl rounded-tr-xl font-black uppercase tracking-widest shadow-lg animate-fade-in">
             <i class="fas fa-check-circle"></i> Verificado
@@ -71,6 +71,49 @@
           <h2 class="text-xl font-black text-gray-900 dark:text-white mt-2">{{ user.nombre }}</h2>
           <div class="flex items-center justify-center">
             <p class="text-emerald-600 dark:text-emerald-400 font-medium text-sm">{{ user.email }}</p>
+          </div>
+          
+          <!-- New Verification Status under Email -->
+          <div class="mt-3 flex justify-center">
+            <button 
+              v-if="!user.identidad_url"
+              @click="isIdentityModalOpen = true"
+              class="flex items-center gap-2.5 px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-full shadow-lg hover:shadow-blue-200 dark:hover:shadow-none transition-all duration-300 active:scale-95 group relative overflow-hidden"
+            >
+              <div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_white]"></div>
+              <span class="text-[10px] font-black uppercase tracking-[0.1em]">Verificar Identidad</span>
+              <i class="fas fa-chevron-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
+            </button>
+            <div 
+              v-else
+              class="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-800/30 shadow-sm"
+            >
+              <div class="flex items-center justify-center w-4 h-4 bg-emerald-500 rounded-full">
+                <i class="fas fa-check text-white text-[8px]"></i>
+              </div>
+              <span class="text-[10px] font-black uppercase tracking-widest">Cuenta Verificada</span>
+            </div>
+          </div>
+        </div>
+        
+
+
+        <!-- User Stats -->
+        <div class="grid grid-cols-2 gap-2 mb-4 pt-2">
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <span class="text-blue-600 dark:text-blue-400 text-sm">📅</span>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Registrado el</p>
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ formatShortDate(user.fecha_registro) }}</p>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+            <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <span class="text-purple-600 dark:text-purple-400 text-sm">🏙️</span>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Ciudad</p>
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || 'No especificada' }}</p>
           </div>
         </div>
 
@@ -165,30 +208,14 @@
             <p>Estado: {{ membershipData.status }}</p>
             <p>Progreso: {{ membershipProgress }}%</p>
           </div>
-        </div>
+        </div> 
 
-        <!-- User Stats -->
-        <div class="grid grid-cols-2 gap-2 mb-4 pt-2">
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
-            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <span class="text-blue-600 dark:text-blue-400 text-sm">📅</span>
-            </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Registrado el</p>
-            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ formatShortDate(user.fecha_registro) }}</p>
-          </div>
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
-            <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <span class="text-purple-600 dark:text-purple-400 text-sm">🏙️</span>
-            </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Ciudad</p>
-            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || 'No especificada' }}</p>
-          </div>
-        </div>
-      </div>
+      </div> 
 
       <!-- User Information -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4">
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3">Información Personal</h3>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4">Información Personal</h3>
+        
         
         <div class="space-y-3">
           <div class="space-y-1">
@@ -344,25 +371,14 @@
               <span>{{ isSaving ? 'Guardando...' : 'Actualizar Información' }}</span>
             </button>
             
-            <div class="grid grid-cols-2 gap-3">
               <button 
                 @click="isPasswordModalOpen = true"
                 type="button"
-                class="py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
+                class="w-full py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
               >
                 <i class="fas fa-key text-amber-500"></i>
                 Cambiar Contraseña
               </button>
-              
-              <button 
-                @click="isIdentityModalOpen = true"
-                type="button"
-                class="py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
-              >
-                <i class="fas fa-id-card text-blue-500"></i>
-                {{ user.identidad_url ? 'Ver Identidad' : 'Verificar ID ✅' }}
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -1260,7 +1276,17 @@
   </div> 
 </template>
 <style scoped>
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.98); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s infinite ease-in-out;
+}
+
 @keyframes pulse {
+
   0% {
     transform: scale(1);
     opacity: 1;

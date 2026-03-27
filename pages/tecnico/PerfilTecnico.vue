@@ -105,8 +105,7 @@
                 :options="ciudades"
                 :searchable="false"
                 :close-on-select="true"
-                :show-labels="false"
-                placeholder="Seleccionar ciudad"
+                :show-labels="true"
                 label="nombre"
                 track-by="id_ciudad"
                 class="multiselect-custom"
@@ -114,19 +113,12 @@
                 :select-label="''"
                 :deselect-label="''"
                 :selected-label="''"
-                :no-options="loadingCiudades ? 'Cargando ciudades...' : 'No hay ciudades disponibles'"
-                :no-result="'No se encontraron resultados'"
-                :loading="loadingCiudades"
-                :disabled="loadingCiudades || !ciudades.length"
-                :custom-label="getCityLabel"
-                @search-change="$event && $event.stopPropagation()"
-                @search-focus="(e) => e && e.target && e.target.blur()"
-                @touchstart.native.stop
-                @click.native.stop
+                :custom-label="getCiudadLabel"
                 :options-limit="100"
+                :disabled="ciudades.length === 0"
               >
                 <template #singleLabel="{ option }">
-                  <span class="text-[16px] sm:text-xs md:text-base truncate">{{ getCityLabel(option) }}</span>
+                  <span class="text-sm truncate">{{ getCiudadLabel(option) }}</span>
                 </template>
               </multiselect>
             </div>
@@ -1736,7 +1728,7 @@ const isServiceAssigned = (serviceId) => {
 }
 
 // Función para obtener la etiqueta de la ciudad
-const getCityLabel = (option) => {
+const getCiudadLabel = (option) => {
   if (!option) return ''
   return option.nombre || ''
 }
