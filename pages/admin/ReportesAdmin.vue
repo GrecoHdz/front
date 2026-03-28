@@ -4672,13 +4672,11 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     startY: currentY,
     head: [['Concepto', 'Monto (HNL)']],
     body: [
-      [{ content: 'Total Ingresos App (Bruto)', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
-      [{ content: '(-) Saldo Cashback Acreditado', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalCashbackLocal)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
-      [{ content: '(-) Retiros Reales Pagados', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetirosEfectuados)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
-      [{ content: 'UTILIDAD NETA FINAL (MI DINERO)', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
-       { content: formatCurrency(balanceNetoFinal), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }],
-      [{ content: 'Pasivos Pendientes (Deuda con técnicos)', styles: { fontStyle: 'italic', textColor: [100, 100, 100], fontSize: 8 } }, { content: `(${formatCurrency(totalDeudasGeneradas)})`, styles: { fontStyle: 'italic', textColor: [100, 100, 100], halign: 'right', fontSize: 8 } }]
-    ],
+      [{ content: '(-) Pasivos por Cashback', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalCashbackLocal)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: '(-) Pasivos por Retiros', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetirosEfectuados)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: 'Total Ingresos App', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
+       { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }],
+     ],
     theme: 'grid',
     headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 8 },
     bodyStyles: { fontSize: 8, cellPadding: 2 },
