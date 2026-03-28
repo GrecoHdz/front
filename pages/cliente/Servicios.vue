@@ -2769,6 +2769,8 @@ const getStatusColor = (status) => {
     'Cotización Pendiente': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
     'Técnico Asignado': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
     'Solicitud Recibida': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'Esperando Conductor': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'Servicio sin calificar': 'bg-orange-200 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     'Cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
   }
   return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'

@@ -49,7 +49,7 @@
             
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-3 rounded-xl">
               <p class="text-emerald-800 dark:text-emerald-200 font-medium text-center text-sm">
-                🏠 Tu hogar está protegido con MiSeguro
+                 Servicios en la palma de tu mano ✅
               </p>
             </div>
           </div>
@@ -66,7 +66,7 @@
               </div>
               <div>
                 <p class="text-gray-600 dark:text-gray-400 text-xs">Servicios Totales</p>
-                <p class="text-xl font-black text-gray-900 dark:text-white">{{ statsData.totalServices }}</p>
+                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">{{ statsData.totalServices }}</p>
               </div>
             </div>
           </div>
@@ -77,202 +77,31 @@
               </div>
               <div>
                 <p class="text-gray-600 dark:text-gray-400 text-xs">Crédito</p>
-                <p class="text-xl font-black text-gray-900 dark:text-white">L. {{ (userCredit || 0).toLocaleString('es-HN') }}</p>
+                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">L. {{ (userCredit || 0).toLocaleString('es-HN') }}</p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- Progress Section - New Design -->
-      <section class="px-4 mb-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
-          <!-- Header with gradient -->
-          <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 p-4 text-white relative">
-            <div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
-            <div class="relative">
-              <div class="flex items-center justify-between mb-3">
-                <h3 class="text-xl font-black">Tu Progreso</h3>
-                <div class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
-                  <span v-if="isLoadingProgress" class="text-xs font-bold">Cargando...</span>
-                  <span v-else class="text-xs font-bold">Mes {{ statsData.membershipMonths }}</span>
-                </div>
+          <!-- Referidos Card -->
+          <div @click="navigateTo('/cliente/Referir')" class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-95 transition-all">
+            <div class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-lg">🫂</span>
               </div>
-              
-              <!-- Progress Circle -->
-              <div class="flex items-center justify-center mb-3">
-                <div class="relative w-24 h-24">
-                  <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
-                    <path class="text-white/20" stroke="currentColor" stroke-width="3" fill="none"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                    <path class="text-yellow-300" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"
-                          :stroke-dasharray="progressCircle"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  </svg>
-                  <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="text-center">
-                      <div v-if="isLoadingProgress" class="text-lg font-black text-white">--</div>
-                      <div v-else class="text-lg font-black text-white">{{ statsData.membershipMonths }}</div>
-                      <div class="text-xs text-white/80">Mes</div>
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">Referidos</p>
+                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">Invita y Gana</p>
               </div>
-              
-              <p class="text-center text-white/90 font-medium text-sm">
-                {{ progressMessage }}
-              </p>
             </div>
           </div>
-
-          <!-- Benefits Cards -->
-          <div class="p-4">
-            <div v-if="loadingBenefits" class="grid grid-cols-2 gap-2">
-              <div v-for="i in 4" :key="`skeleton-${i}`" 
-                   class="h-20 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"></div>
-            </div>
-            
-            <div v-else-if="benefitsError" class="text-center py-3 text-red-500 text-sm">
-              {{ benefitsError }}
-              <button @click="fetchBeneficios" class="mt-2 text-xs text-blue-600 hover:underline">
-                Reintentar
-              </button>
-            </div>
-            
-            <div v-else-if="benefitsToShow.length === 0" class="text-center py-3 text-gray-500 text-sm">
-              No hay beneficios disponibles en este momento.
-            </div>
-            
-            <div v-else class="grid grid-cols-2 gap-2">
-              <div v-for="(benefit, index) in benefitsToShow" :key="`benefit-${benefit.mes_requerido}`"
-                   class="p-3 rounded-xl border-2 transition-all duration-300"
-                   :class="getBenefitStyle(benefit.mes_requerido)">
-                <div class="flex items-center space-x-2 mb-1">
-                  <div class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
-                       :class="getBenefitIconStyle(benefit.mes_requerido)">
-                    {{ getBenefitIcon(benefit.mes_requerido) }}
-                  </div>
-                  <span class="text-xs font-bold"
-                        :class="getBenefitTextStyle(benefit.mes_requerido)">
-                    Mes {{ benefit.mes_requerido }}
-                  </span>
-                </div>
-                <p class="text-xs font-semibold leading-tight mb-1"
-                   :class="getBenefitTitleStyle(benefit.mes_requerido)">
-                  {{ benefit.tipo_beneficio }}
-                </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                  <template v-if="benefit.tipo_beneficio === 'Descuento Especial en todos los Servicios'">
-                    Descuento Especial del {{ specialDiscount }}% en todos los servicios
-                  </template>
-                  <template v-else-if="benefit.tipo_beneficio === 'Descuento en todos los servicios'">
-                    Descuento del {{ regularDiscount }}% en todos los servicios
-                  </template>
-                  <template v-else>
-                    {{ benefit.descripcion }}
-                  </template>
-                </p>
+          <!-- Marketplace Card -->
+          <div @click="navigateTo('/cliente/Marketplace')" class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-95 transition-all">
+            <div class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
+                <span class="text-white text-lg">🛍️</span>
               </div>
-            </div>
-            
-            <!-- Membresía -->
-            <div class="mt-3 p-3 rounded-xl border transition-colors duration-300"
-              :class="{
-                'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': isMembershipActive,
-                'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800': isMembershipPending,
-                'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800': isMembershipExpired,
-                'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700': isMembershipInactive
-              }">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex-1">
-                  <div class="flex items-center space-x-2 mb-2">
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                      :class="{
-                        'bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-400': isMembershipActive,
-                        'bg-amber-100 dark:bg-amber-800/30 text-amber-600 dark:text-amber-400': isMembershipPending,
-                        'bg-red-100 dark:bg-red-800/30 text-red-600 dark:text-red-400': isMembershipExpired,
-                        'bg-gray-100 dark:bg-gray-700/30 text-gray-600 dark:text-gray-400': isMembershipInactive
-                      }">
-                      <span v-if="isMembershipActive">🏆</span>
-                      <span v-else-if="isMembershipPending">⏳</span>
-                      <span v-else-if="isMembershipExpired">⚠️</span>
-                      <span v-else>🔒</span>
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-xs font-medium"
-                        :class="{
-                          'text-blue-800 dark:text-blue-200': isMembershipActive,
-                          'text-amber-800 dark:text-amber-200': isMembershipPending,
-                          'text-red-800 dark:text-red-200': isMembershipExpired,
-                          'text-gray-800 dark:text-gray-200': isMembershipInactive
-                        }">
-                        {{ isMembershipActive ? 'Membresía activa hasta' : 
-                           isMembershipPending ? 'Membresía pendiente' :
-                           isMembershipExpired ? 'Membresía vencida' : 'Estado de la membresía' }}
-                      </p>
-                      <p class="text-xs font-bold truncate"
-                        :class="{
-                          'text-blue-900 dark:text-white': isMembershipActive,
-                          'text-amber-900 dark:text-amber-100': isMembershipPending,
-                          'text-red-900 dark:text-red-100': isMembershipExpired,
-                          'text-gray-900 dark:text-gray-100': isMembershipInactive
-                        }">
-                        {{ isMembershipActive ? membershipEndDate : membershipStatus }}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <!-- Barra de progreso -->
-                  <div v-if="!isMembershipInactive" class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mb-1">
-                    <div 
-                      class="h-1.5 rounded-full transition-all duration-500 ease-in-out"
-                      :class="{
-                        'bg-gradient-to-r from-green-500 to-emerald-600': membershipProgress < 80,
-                        'bg-gradient-to-r from-amber-400 to-orange-500': membershipProgress >= 80 && membershipProgress < 95,
-                        'bg-gradient-to-r from-red-500 to-pink-600': membershipProgress >= 95
-                      }"
-                      :style="`width: ${membershipProgress}%`"
-                    ></div>
-                  </div>
-                  
-                  <div v-if="!isMembershipInactive" class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span>Inicio: {{ membershipStartDate }}</span>
-                    <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% completado</span>
-                    <span v-else-if="membershipProgress >= 100 && !diasRestantesCredito">Expirada</span>
-                  </div>
-                  
-                  <!-- Mensaje de días restantes para crédito -->
-                  <div v-if="diasRestantesCredito > 0" class="mt-2 text-xs font-medium px-2 py-1 rounded-md text-center bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                    <template v-if="diasRestantesCredito > 0">
-                      <span v-if="diasRestantesCredito === 1">⚠️ Tienes 1 día antes de perder tu crédito</span>
-                      <span v-else>⏳ Tienes {{ diasRestantesCredito }} días antes de perder tu crédito</span>
-                    </template>
-                  </div>
-                </div>
-                
-                <button 
-                  @click="renovarMembresia"
-                  class="w-full sm:w-auto px-3 py-2 text-white text-xs font-bold rounded-lg transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
-                  :class="{
-                    'bg-gradient-to-r from-green-400 to-green-500 cursor-not-allowed': isMembershipActive,
-                    'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5': isMembershipExpired || isMembershipInactive,
-                    'bg-gradient-to-r from-gray-500 to-gray-600 cursor-not-allowed': isMembershipPending,
-                    'opacity-80': !isMembershipExpired && !isMembershipInactive
-                  }"
-                  :disabled="!isMembershipExpired && !isMembershipInactive"
-                >
-                  <svg v-if="isMembershipExpired || isMembershipInactive" class="w-3 h-3 mr-1 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                  </svg>
-                  {{ isMembershipActive ? 'Membresía Activa' : isMembershipPending ? 'Pendiente' : isMembershipInactive ? 'Activar ahora' : 'Renovar Ahora' }}
-                </button>
-              </div>
-              
-              <!-- Información adicional para debug -->
-              <div v-if="false" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500">
-                <p>ID: {{ membershipData.id }}</p>
-                <p>Estado: {{ membershipData.status }}</p>
-                <p>Progreso: {{ membershipProgress }}%</p>
+              <div>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">Marketplace</p>
+                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">Ver Ofertas</p>
               </div>
             </div>
           </div>
@@ -286,7 +115,6 @@
           <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           <div class="relative">
             <h3 class="text-xl font-black mb-3 flex items-center space-x-2">
-              <span>🚀</span>
               <span>Solicitar Servicio</span>
             </h3>
             
@@ -522,7 +350,10 @@
         <!-- Acciones Minimalistas -->
         <div class="px-3 py-3 bg-white dark:bg-gray-800">
            <button 
-             class="w-full py-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm"
+             class="w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-sm"
+             :class="tienePaquete(paquete.id) 
+               ? 'bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 group-hover:bg-blue-600 group-hover:text-white' 
+               : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'"
            >
              {{ tienePaquete(paquete.id) ? 'Ver Detalles' : 'Adquirir' }}
            </button>
@@ -774,6 +605,201 @@
     </div>
   </Transition>
 </section>
+
+      <!-- Progress Section - New Design -->
+      <section class="px-4 mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <!-- Header with gradient -->
+          <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 p-4 text-white relative">
+            <div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xl font-black">Tu Progreso</h3>
+                <div class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
+                  <span v-if="isLoadingProgress" class="text-xs font-bold">Cargando...</span>
+                  <span v-else class="text-xs font-bold">Mes {{ statsData.membershipMonths }}</span>
+                </div>
+              </div>
+              
+              <!-- Progress Circle -->
+              <div class="flex items-center justify-center mb-3">
+                <div class="relative w-24 h-24">
+                  <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
+                    <path class="text-white/20" stroke="currentColor" stroke-width="3" fill="none"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="text-yellow-300" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"
+                          :stroke-dasharray="progressCircle"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                      <div v-if="isLoadingProgress" class="text-lg font-black text-white">--</div>
+                      <div v-else class="text-lg font-black text-white">{{ statsData.membershipMonths }}</div>
+                      <div class="text-xs text-white/80">Mes</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <p class="text-center text-white/90 font-medium text-sm">
+                {{ progressMessage }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Benefits Cards -->
+          <div class="p-4">
+            <div v-if="loadingBenefits" class="grid grid-cols-2 gap-2">
+              <div v-for="i in 4" :key="`skeleton-${i}`" 
+                   class="h-20 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            </div>
+            
+            <div v-else-if="benefitsError" class="text-center py-3 text-red-500 text-sm">
+              {{ benefitsError }}
+              <button @click="fetchBeneficios" class="mt-2 text-xs text-blue-600 hover:underline">
+                Reintentar
+              </button>
+            </div>
+            
+            <div v-else-if="benefitsToShow.length === 0" class="text-center py-3 text-gray-500 text-sm">
+              No hay beneficios disponibles en este momento.
+            </div>
+            
+            <div v-else class="grid grid-cols-2 gap-2">
+              <div v-for="(benefit, index) in benefitsToShow" :key="`benefit-${benefit.mes_requerido}`"
+                   class="p-3 rounded-xl border-2 transition-all duration-300"
+                   :class="getBenefitStyle(benefit.mes_requerido)">
+                <div class="flex items-center space-x-2 mb-1">
+                  <div class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                       :class="getBenefitIconStyle(benefit.mes_requerido)">
+                    {{ getBenefitIcon(benefit.mes_requerido) }}
+                  </div>
+                  <span class="text-xs font-bold"
+                        :class="getBenefitTextStyle(benefit.mes_requerido)">
+                    Mes {{ benefit.mes_requerido }}
+                  </span>
+                </div>
+                <p class="text-xs font-semibold leading-tight mb-1"
+                   :class="getBenefitTitleStyle(benefit.mes_requerido)">
+                  {{ benefit.tipo_beneficio }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  <template v-if="benefit.tipo_beneficio === 'Descuento Especial en todos los Servicios'">
+                    Descuento Especial del {{ specialDiscount }}% en todos los servicios
+                  </template>
+                  <template v-else-if="benefit.tipo_beneficio === 'Descuento en todos los servicios'">
+                    Descuento del {{ regularDiscount }}% en todos los servicios
+                  </template>
+                  <template v-else>
+                    {{ benefit.descripcion }}
+                  </template>
+                </p>
+              </div>
+            </div>
+            
+            <!-- Membresía -->
+            <div class="mt-3 p-3 rounded-xl border transition-colors duration-300"
+              :class="{
+                'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': isMembershipActive,
+                'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800': isMembershipPending,
+                'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800': isMembershipExpired,
+                'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700': isMembershipInactive
+              }">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex-1">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                      :class="{
+                        'bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-400': isMembershipActive,
+                        'bg-amber-100 dark:bg-amber-800/30 text-amber-600 dark:text-amber-400': isMembershipPending,
+                        'bg-red-100 dark:bg-red-800/30 text-red-600 dark:text-red-400': isMembershipExpired,
+                        'bg-gray-100 dark:bg-gray-700/30 text-gray-600 dark:text-gray-400': isMembershipInactive
+                      }">
+                      <span v-if="isMembershipActive">🏆</span>
+                      <span v-else-if="isMembershipPending">⏳</span>
+                      <span v-else-if="isMembershipExpired">⚠️</span>
+                      <span v-else>🔒</span>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-xs font-medium"
+                        :class="{
+                          'text-blue-800 dark:text-blue-200': isMembershipActive,
+                          'text-amber-800 dark:text-amber-200': isMembershipPending,
+                          'text-red-800 dark:text-red-200': isMembershipExpired,
+                          'text-gray-800 dark:text-gray-200': isMembershipInactive
+                        }">
+                        {{ isMembershipActive ? 'Membresía activa hasta' : 
+                           isMembershipPending ? 'Membresía pendiente' :
+                           isMembershipExpired ? 'Membresía vencida' : 'Estado de la membresía' }}
+                      </p>
+                      <p class="text-xs font-bold truncate"
+                        :class="{
+                          'text-blue-900 dark:text-white': isMembershipActive,
+                          'text-amber-900 dark:text-amber-100': isMembershipPending,
+                          'text-red-900 dark:text-red-100': isMembershipExpired,
+                          'text-gray-900 dark:text-gray-100': isMembershipInactive
+                        }">
+                        {{ isMembershipActive ? membershipEndDate : membershipStatus }}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <!-- Barra de progreso -->
+                  <div v-if="!isMembershipInactive" class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mb-1">
+                    <div 
+                      class="h-1.5 rounded-full transition-all duration-500 ease-in-out"
+                      :class="{
+                        'bg-gradient-to-r from-green-500 to-emerald-600': membershipProgress < 80,
+                        'bg-gradient-to-r from-amber-400 to-orange-500': membershipProgress >= 80 && membershipProgress < 95,
+                        'bg-gradient-to-r from-red-500 to-pink-600': membershipProgress >= 95
+                      }"
+                      :style="`width: ${membershipProgress}%`"
+                    ></div>
+                  </div>
+                  
+                  <div v-if="!isMembershipInactive" class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Inicio: {{ membershipStartDate }}</span>
+                    <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% completado</span>
+                    <span v-else-if="membershipProgress >= 100 && !diasRestantesCredito">Expirada</span>
+                  </div>
+                  
+                  <!-- Mensaje de días restantes para crédito -->
+                  <div v-if="diasRestantesCredito > 0" class="mt-2 text-xs font-medium px-2 py-1 rounded-md text-center bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    <template v-if="diasRestantesCredito > 0">
+                      <span v-if="diasRestantesCredito === 1">⚠️ Tienes 1 día antes de perder tu crédito</span>
+                      <span v-else>⏳ Tienes {{ diasRestantesCredito }} días antes de perder tu crédito</span>
+                    </template>
+                  </div>
+                </div>
+                
+                <button 
+                  @click="renovarMembresia"
+                  class="w-full sm:w-auto px-3 py-2 text-white text-xs font-bold rounded-lg transition-all duration-300 shadow-md whitespace-nowrap self-center sm:self-auto flex items-center justify-center"
+                  :class="{
+                    'bg-gradient-to-r from-green-400 to-green-500 cursor-not-allowed': isMembershipActive,
+                    'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5': isMembershipExpired || isMembershipInactive,
+                    'bg-gradient-to-r from-gray-500 to-gray-600 cursor-not-allowed': isMembershipPending,
+                    'opacity-80': !isMembershipExpired && !isMembershipInactive
+                  }"
+                  :disabled="!isMembershipExpired && !isMembershipInactive"
+                >
+                  <svg v-if="isMembershipExpired || isMembershipInactive" class="w-3 h-3 mr-1 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  {{ isMembershipActive ? 'Membresía Activa' : isMembershipPending ? 'Pendiente' : isMembershipInactive ? 'Activar ahora' : 'Renovar Ahora' }}
+                </button>
+              </div>
+              
+              <!-- Información adicional para debug -->
+              <div v-if="false" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500">
+                <p>ID: {{ membershipData.id }}</p>
+                <p>Estado: {{ membershipData.status }}</p>
+                <p>Progreso: {{ membershipProgress }}%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- Quick Actions -->
       <section class="px-4 mb-4">
@@ -1556,12 +1582,18 @@ const isFormValid = computed(() => {
     serviceFormData.value.direccion.trim() !== ''
 })
 
-// Mostrar todos los servicios, pero marcar Taxi VIP como deshabilitado si no está verificado
+// Mostrar todos los servicios, pero marcar Taxi VIP como deshabilitado si no está verificado y ponerlo de primero
 const filteredServicesList = computed(() => {
-  return servicesList.value.map(s => ({
-    ...s,
-    isDisabled: s.name === 'Taxi VIP' && !isUserVerified.value
-  }))
+  return [...servicesList.value]
+    .map(s => ({
+      ...s,
+      isDisabled: s.name === 'Taxi VIP' && !isUserVerified.value
+    }))
+    .sort((a, b) => {
+      if (a.name === 'Taxi VIP') return -1;
+      if (b.name === 'Taxi VIP') return 1;
+      return 0;
+    });
 })
 
 // Si el usuario pierde la verificación y tenía 'Taxi VIP' seleccionado, limpiar la selección
