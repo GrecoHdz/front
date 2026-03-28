@@ -4258,6 +4258,7 @@ const generateReport = async (report) => {
           mesNombre: monthName,
           year,
           balanceNeto,
+          retirosPagados: retirosPagados || 0,
           deudasTecnicos: ingredientesReporte.deudasTecnicos || 0,
           comisionesReferidos: ingredientesReporte.comisionesReferidos || 0,
           totalCashback: ingredientesReporte.totalCashback || 0
@@ -4371,7 +4372,7 @@ const generateReport = async (report) => {
 };
 
 // ===== REPORTE FINANCIERO =====
-const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], referralIncomeData = [], cashbackData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto: balanceNetoParam, deudasTecnicos = 0, comisionesReferidos = 0, totalCashback: totalCashbackParam = 0 }) => {
+const generarReporteFinanciero = async (doc, { membershipData, visitData, serviceData, withdrawalsData, technicianIncomeData = [], referralIncomeData = [], cashbackData = [], packagePaymentsData = { data: [], total: 0 }, mesNombre, year, balanceNeto: balanceNetoParam, retirosPagados = 0, deudasTecnicos = 0, comisionesReferidos = 0, totalCashback: totalCashbackParam = 0 }) => {
   // 1️⃣ Recalcular TODOS los totales basados en los datos filtrados que se mostrarán en las tablas
   const totalMembresias = membershipData.data
     .filter(m => ['activa', 'vencida'].includes(m.estado?.toLowerCase()))
