@@ -1,47 +1,62 @@
 <template>
   <transition
-    enter-active-class="transition ease-out duration-300 transform"
-    enter-from-class="opacity-0 -translate-y-4"
-    enter-to-class="opacity-100 translate-y-0"
-    leave-active-class="transition ease-in duration-200 transform"
-    leave-from-class="opacity-100 translate-y-0"
-    leave-to-class="opacity-0 -translate-y-4"
+    enter-active-class="transition ease-out duration-500"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-active-class="transition ease-in duration-300"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
   >
     <div 
       v-if="isVisible" 
-      class="mx-4 mt-4 mb-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 shadow-lg border border-emerald-400/20 relative overflow-hidden group"
+      class="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl"
     >
-      <!-- Decoración de fondo -->
-      <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-      
-      <div class="flex items-center gap-4 relative z-10">
-        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl backdrop-blur-md border border-white/30 shadow-inner">
-          🔔
+      <!-- Animación de fondo -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-emerald-500/20 rounded-full blur-[120px] animate-pulse"></div>
+        <div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-teal-500/20 rounded-full blur-[120px] animate-pulse" style="animation-delay: 1s;"></div>
+      </div>
+
+      <div 
+        class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden flex flex-col items-center text-center gap-6"
+      >
+        <!-- Icono Principal -->
+        <div class="relative">
+          <div class="absolute inset-0 bg-emerald-500 blur-2xl opacity-20 scale-150"></div>
+          <div class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-3xl flex items-center justify-center text-5xl shadow-lg border border-white/20 relative z-10 animate-bounce-slow">
+            🔔
+          </div>
         </div>
         
-        <div class="flex-1 min-w-0">
-          <h4 class="text-white font-bold text-sm sm:text-base leading-tight">¡Mantente al día!</h4>
-          <p class="text-emerald-50 text-xs sm:text-sm line-clamp-1 opacity-90">Activa las notificaciones para no perderte nada.</p>
+        <div class="space-y-3 relative z-10">
+          <h2 class="text-2xl font-black text-slate-800 dark:text-white leading-tight">
+            ¡Mantente siempre <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">conectado!</span>
+          </h2>
+          <p class="text-slate-500 dark:text-slate-400 text-base px-2">
+            Necesitas activar las notificaciones para recibir actualizaciones en tiempo real sobre tus servicios y reportes.
+          </p>
         </div>
         
-        <div class="flex items-center gap-2">
+        <div class="w-full space-y-4 pt-2 relative z-10">
           <button 
             @click="handleSubscribe"
-            class="bg-white text-emerald-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+            class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-5 rounded-3xl text-lg font-extrabold hover:translate-y-[-2px] hover:shadow-xl hover:shadow-emerald-500/20 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-3 group"
           >
-            Activar
-          </button>
-          
-          <button 
-            @click="dismiss"
-            class="text-emerald-100 hover:text-white p-1 transition-colors"
-            title="Cerrar"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <span>Activar Notificaciones</span>
+            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </button>
+          
+          <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">
+            Es obligatorio para continuar usando el sistema
+          </p>
         </div>
+
+        <!-- Decoración interior -->
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-32 h-32 bg-teal-500/5 rounded-full blur-3xl"></div>
       </div>
     </div>
   </transition>
@@ -52,40 +67,46 @@ import { ref, onMounted, computed } from 'vue';
 import { usePushNotifications } from '~/composables/usePushNotifications';
 
 const { isSupported, isSubscribed, permission, isChecking, subscribe, checkSubscription } = usePushNotifications();
-const isDismissed = ref(false);
 
 const isVisible = computed(() => {
+  // Solo mostramos si:
+  // 1. No está cargando/revisando
+  // 2. El navegador soporta notificaciones
+  // 3. NO está suscrito
+  // 4. El permiso NO ha sido denegado manualmente en el navegador
   return !isChecking.value &&
          isSupported.value && 
          !isSubscribed.value && 
-         permission.value !== 'denied' && 
-         !isDismissed.value;
+         permission.value !== 'denied';
 });
 
 const handleSubscribe = async () => {
-  await subscribe();
-};
-
-const dismiss = () => {
-  isDismissed.value = true;
-  // Opcional: Guardar en localStorage para que no aparezca en X días
-  if (process.client) {
-    localStorage.setItem('push_invite_dismissed', Date.now().toString());
+  try {
+    await subscribe();
+  } catch (error) {
+    console.error('Error al suscribirse:', error);
   }
 };
 
 onMounted(async () => {
   await checkSubscription();
-  
-  // Verificar si fue descartado hace poco (ej: 3 días)
-  /*if (process.client) {
-    const lastDismissed = localStorage.getItem('push_invite_dismissed');
-    if (lastDismissed) {
-      const threeDays = 3 * 24 * 60 * 60 * 1000;
-      if (Date.now() - parseInt(lastDismissed) < threeDays) {
-        isDismissed.value = true;
-      }
-    }
-  }*/
 });
 </script>
+
+<style scoped>
+.animate-bounce-slow {
+  animation: bounce-slow 3s infinite;
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(-10%);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+</style>
+

@@ -3686,7 +3686,8 @@ const updatePlatformStats = async () => {
       platformStats.packageRevenue = data.ingresosPaquetes || 0;
       platformStats.totalCommissions = data.comisiones || 0;
       platformStats.totalCashback = data.cashback || 0;
-      platformStats.totalWithdrawals = data.retiros || 0;
+      platformStats.totalWithdrawals = data.deudasTecnicos || 0; // Se muestra lo que se DEBE a los técnicos (Pasivos)
+      platformStats.totalPaidOut = data.retiros || 0; // Monto real que ya salió de caja (Retiros completados)
       
       if (response.data.grafico) {
         updateChart(response.data.grafico);
@@ -4191,12 +4192,13 @@ const generateReport = async (report) => {
 
         if (reporteRes?.success && reporteRes?.data?.resumen) {
           const resumen = reporteRes.data.resumen;
-          // 'retiros' en el resumen ahora = ingresos de técnicos (deudas)
-          const deudasTecnicos = parseFloat(resumen.retiros || 0);
+          // deudasTecnicos = ingresos de técnicos pendientes de retirar en este periodo
+          const deudasTecnicos = parseFloat(resumen.deudasTecnicos || 0);
+          const retirosPagados = parseFloat(resumen.retiros || 0);
           const comisionesReferidos = parseFloat(resumen.comisiones || 0);
           const totalCashback = parseFloat(resumen.cashback || 0);
           const balanceNeto = parseFloat(resumen.gananciaNeta || 0);
-          ingredientesReporte = { balanceNeto, deudasTecnicos, comisionesReferidos, totalCashback };
+          ingredientesReporte = { balanceNeto, deudasTecnicos, retirosPagados, comisionesReferidos, totalCashback };
         } else {
           // Fallback: calcular básico sin deudas
           const ingresosTotales = (membershipRes?.estadisticas?.total || 0) +
@@ -4210,7 +4212,7 @@ const generateReport = async (report) => {
         ingredientesReporte = { balanceNeto: 0, deudasTecnicos: 0, comisionesReferidos: 0, totalCashback: 0 };
       }
     }
-    const { balanceNeto } = ingredientesReporte;
+    const { balanceNeto, retirosPagados, deudasTecnicos: deudasResumen } = ingredientesReporte;
 
     // 🧾 5️⃣ Crear documento PDF usando el plugin $pdf
     const { $pdf } = useNuxtApp();
@@ -4533,7 +4535,19 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     }));
 
   // C. Cashback (Movimientos reales de tipo cashback)
-  const totalCashbackLocal = totalCashbackDebt || 0;
+  const totalCashbackLocal = totalCashbackParam || 0;
+  
+  // Total de deudas generadas a técnicos en el periodo (lo que la plataforma les asignó)
+  const totalDeudasGeneradas = deudasTecnicos || deudasResumen || 0;
+  
+  // Total de retiros PAGADOS (dinero que salió realmente del banco)
+  const totalRetirosEfectuados = retirosPagados || 0;
+
+  // UTILIDAD NETA (Ganancia de la plataforma)
+  // Nota: Ya no restamos deudasTecnicos de totalIngresos porque totalIngresos es el 20% (Cut) 
+  // y deudasTecnicos es el 80% (Vendor share). Restarlo resultaría en saldo negativo incorrecto.
+  // La ganancia neta real de la plataforma es la suma de comisiones menos cashback y retiros por comisiones de referidos pagados.
+  const balanceNetoFinal = balanceNetoParam ?? balanceNeto;
 
   const cashbackOps = cashbackData.map(c => ({
     fecha: c.fecha,
@@ -4556,8 +4570,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const totalRetirosTecnicos = deudasTecnicos || 0;
 
   // Recalcular Balance Neto Final: misma fórmula que el API
-  // gananciaNeta = ingresos - cashback - retirosTecnicos
-  const balanceNetoFinal = balanceNetoParam ?? (totalIngresos - totalCashbackLocal - totalRetirosTecnicos);
+  // gananciaNeta = ingresos - cashback - retirosTecnicos 
 
   // Renderizar tabla de Detalle de Ingresos
   doc.autoTable({
@@ -4660,9 +4673,10 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     body: [
       [{ content: 'Total Ingresos App (Bruto)', styles: { fontStyle: 'bold', textColor: [22, 163, 74], fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', textColor: [22, 163, 74], halign: 'right', fontSize: 9 } }],
       [{ content: '(-) Saldo Cashback Acreditado', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalCashbackLocal)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
-      [{ content: '(-) Retiros a Técnicos', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetirosTecnicos)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: '(-) Retiros Reales Pagados', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetirosEfectuados)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
       [{ content: 'UTILIDAD NETA FINAL (MI DINERO)', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
-       { content: formatCurrency(balanceNetoFinal), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }]
+       { content: formatCurrency(balanceNetoFinal), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }],
+      [{ content: 'Pasivos Pendientes (Deuda con técnicos)', styles: { fontStyle: 'italic', textColor: [100, 100, 100], fontSize: 8 } }, { content: `(${formatCurrency(totalDeudasGeneradas)})`, styles: { fontStyle: 'italic', textColor: [100, 100, 100], halign: 'right', fontSize: 8 } }]
     ],
     theme: 'grid',
     headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 8 },
