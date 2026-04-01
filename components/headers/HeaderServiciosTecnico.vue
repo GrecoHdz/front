@@ -29,7 +29,7 @@
                 <p class="text-emerald-100 text-xs">{{ totalServices }} servicios</p>
                 <span class="w-1 h-1 bg-emerald-200 rounded-full"></span>
                 <div class="flex items-center space-x-1"> 
-                  <span class="text-emerald-100 text-xs">{{ auth.user?.nombre || 'Técnico' }}</span>
+                  <span class="text-emerald-100 text-xs">{{ (auth.user?.nombre || 'Técnico').split(' ').slice(0, 2).join(' ') }}</span>
                 </div>
               </div>
             </div>

@@ -23,12 +23,12 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
   const tokenCookie = useCookie('token', {
     maxAge: 60 * 15, // 15 minutos
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
   const userCookie = useCookie<string | null>('user', {
     maxAge: 60 * 60 * 24 * 7, // 7 días
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
 
