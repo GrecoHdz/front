@@ -681,6 +681,9 @@ const navigateToProfile = () => {
 
 // ===== VERIFICACIÓN DE PERFIL DE TÉCNICO =====
 const verificarPerfilTecnico = async () => {
+  // 🛡️ Seguridad: Solo ejecutar en el cliente (no en SSR)
+  if (!process.client || typeof $api !== 'function') return;
+
   try {
     // Verificar si estamos en una ruta de técnico
     const route = useRoute();

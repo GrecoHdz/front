@@ -689,13 +689,24 @@ const carouselItems = computed(() => {
 
 // ===== VERIFICACIÓN DE PERFIL =====
 const verificarPerfilTecnico = async () => {
+  // 🛡️ Seguridad: No ejecutar esto en el servidor (SSR)
+  if (!process.client || typeof $api !== 'function') return;
+
   try {
-    const userId = auth.user?.id_usuario;
-    if (!userId) return; 
+    // Verificar si estamos en una ruta de técnico
+    const route = useRoute();
+    const isTecnicoRoute = route.path.startsWith('/tecnico/');
     
+    if (!isTecnicoRoute) return;
+    
+    // Obtener el ID del usuario autenticado
+    const userId = auth.user?.id_usuario;
+    if (!userId) return;
+
+    // Realizar la petición para verificar el perfil del técnico
     const response = await $api(`/usuarios/verificar-perfil-tecnico/${userId}`, {
       method: 'GET'
-    }); 
+    });
 
     if (response && response.perfil_completo === false) {
       let message = 'Por favor completa tu perfil para ofrecer servicios';
