@@ -2373,77 +2373,76 @@ button:hover {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Estilos personalizados para Multiselect - Exact match to index.vue */
+/* Estilos personalizados para Multiselect - Sincronizado con Perfil.vue */
 .multiselect-custom {
   min-width: 140px !important;
-  font-size: 0.75rem !important;
+  font-size: 0.875rem !important;
 }
 
-.multiselect-custom .multiselect__tags {
-  min-height: 36px !important;
+.multiselect-custom :deep(.multiselect__tags) {
+  min-height: 46px !important;
   background-color: rgb(249 250 251) !important;
   border: 1px solid rgb(229 231 235) !important;
-  border-radius: 0.5rem !important;
-  padding: 6px 30px 6px 10px !important;
+  border-radius: 0.75rem !important;
+  padding: 10px 30px 10px 12px !important;
   transition: all 0.2s ease !important;
 }
 
-.dark .multiselect-custom .multiselect__tags {
+.dark .multiselect-custom :deep(.multiselect__tags) {
   background-color: rgb(55 65 81) !important;
   border-color: rgb(75 85 99) !important;
 }
 
-.multiselect-custom .multiselect__tags:focus-within {
-  border-color: rgb(16 185 129) !important;
-  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+.multiselect-custom :deep(.multiselect__tags:focus-within) {
+  border-color: rgb(59 130 246) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
 }
 
-.dark .multiselect-custom .multiselect__tags:focus-within {
-  border-color: rgb(16 185 129) !important;
-  box-shadow: 0 0 0 2px rgb(16 185 129) !important;
+.dark .multiselect-custom :deep(.multiselect__tags:focus-within) {
+  border-color: rgb(59 130 246) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
 }
 
-.multiselect-custom .multiselect__single {
+.multiselect-custom :deep(.multiselect__single) {
   margin: 0 !important;
   padding: 0 !important;
   background-color: transparent !important;
   color: rgb(17 24 39) !important;
-  font-size: 0.75rem !important;
-  line-height: 1.25rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5rem !important;
 }
 
-.dark .multiselect-custom .multiselect__single {
+.dark .multiselect-custom :deep(.multiselect__single) {
   color: rgb(243 244 246) !important;
 }
 
-.multiselect-custom .multiselect__input {
+.multiselect-custom :deep(.multiselect__input) {
   margin: 0 !important;
   padding: 0 !important;
   background-color: transparent !important;
   color: rgb(17 24 39) !important;
-  font-size: 0.75rem !important;
-  min-height: 20px !important;
-  line-height: 1.25rem !important;
+  font-size: 0.875rem !important;
+  min-height: 24px !important;
+  line-height: 1.5rem !important;
 }
 
-.dark .multiselect-custom .multiselect__input {
+.dark .multiselect-custom :deep(.multiselect__input) {
   color: rgb(243 244 246) !important;
 }
 
-.multiselect-custom .multiselect__input::placeholder {
+.multiselect-custom :deep(.multiselect__input::placeholder) {
   color: rgb(156 163 175) !important;
 }
 
-.multiselect-custom .multiselect__placeholder {
+.multiselect-custom :deep(.multiselect__placeholder) {
   margin: 0 !important;
   padding: 0 !important;
   color: rgb(156 163 175) !important;
-  font-size: 0.75rem !important;
-  line-height: 1.25rem !important;
-  margin-top: 1px !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5rem !important;
 }
 
-.multiselect-custom .multiselect__select {
+.multiselect-custom :deep(.multiselect__select) {
   height: 100% !important;
   width: 1.5rem !important;
   right: 0 !important;
@@ -2455,7 +2454,7 @@ button:hover {
   padding: 0 !important;
 }
 
-.multiselect-custom .multiselect__select:before {
+.multiselect-custom :deep(.multiselect__select:before) {
   border-color: rgb(156 163 175) transparent transparent !important;
   border-style: solid !important;
   border-width: 5px 5px 0 !important;
@@ -2463,14 +2462,14 @@ button:hover {
   top: 55% !important;
 }
 
-.dark .multiselect-custom .multiselect__select:before {
+.dark .multiselect-custom :deep(.multiselect__select:before) {
   border-color: rgb(156 163 175) transparent transparent !important;
 }
 
-.multiselect-custom .multiselect__content-wrapper {
+.multiselect-custom :deep(.multiselect__content-wrapper) {
   background-color: white !important;
   border: 1px solid rgb(229 231 235) !important;
-  border-radius: 0.5rem !important;
+  border-radius: 0.75rem !important;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
   margin-top: 0.25rem !important;
   z-index: 50 !important;
@@ -2478,49 +2477,50 @@ button:hover {
   width: auto !important;
 }
 
-.dark .multiselect-custom .multiselect__content-wrapper {
+.dark .multiselect-custom :deep(.multiselect__content-wrapper) {
   background-color: rgb(31 41 55) !important;
   border-color: rgb(55 65 81) !important;
 }
 
-.multiselect-custom .multiselect__option {
-  font-size: 0.75rem !important;
+.multiselect-custom :deep(.multiselect__option) {
+  font-size: 0.875rem !important;
   color: rgb(17 24 39) !important;
-  padding: 8px 12px !important;
-  line-height: 1.25rem !important;
+  padding: 10px 14px !important;
+  line-height: 1.5rem !important;
 }
 
-.dark .multiselect-custom .multiselect__option {
+.dark .multiselect-custom :deep(.multiselect__option) {
   color: rgb(243 244 246) !important;
 }
 
-.multiselect-custom .multiselect__option--highlight {
+.multiselect-custom :deep(.multiselect__option--highlight) {
   background-color: transparent !important;
   color: rgb(17 24 39) !important;
 }
 
-.dark .multiselect-custom .multiselect__option--highlight {
+.dark .multiselect-custom :deep(.multiselect__option--highlight) {
+  background-color: transparent !important;
   color: rgb(243 244 246) !important;
 }
 
-.multiselect-custom .multiselect__option--selected {
-    background-color: #4b5563;
-    color: #f9fafb;
+.multiselect-custom :deep(.multiselect__option--selected) {
+    background-color: #4b5563 !important;
+    color: #f9fafb !important;
 }
 
-.dark .multiselect-custom .multiselect__option--selected {
-    background-color: #4b5563;
-    color: #f9fafb;
+.dark .multiselect-custom :deep(.multiselect__option--selected) {
+    background-color: #4b5563 !important;
+    color: #f9fafb !important;
 }
 
-.multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
-    background-color: #4b5563;
-    color: #f9fafb;
+.multiselect-custom :deep(.multiselect__option--selected.multiselect__option--highlight) {
+    background-color: #4b5563 !important;
+    color: #f9fafb !important;
 }
 
-.dark .multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
-    background-color: #4b5563;
-    color: #f9fafb;
+.dark .multiselect-custom :deep(.multiselect__option--selected.multiselect__option--highlight) {
+    background-color: #4b5563 !important;
+    color: #f9fafb !important;
 }
 .fade-enter-active,
 .fade-leave-active {
