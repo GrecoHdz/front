@@ -1441,11 +1441,6 @@ const fetchContactInfo = async () => {
   }
 }
 
-// Cargar información al montar el componente
-onMounted(() => {
-  fetchContactInfo()
-})
-
 // ===== COMPUTED PROPERTIES =====
 const userInitials = computed(() => {
   if (!user.value?.nombre) return '?'
@@ -1735,12 +1730,13 @@ const getCiudadLabel = (option) => {
 
 const fetchUserData = async () => {
   try {
-    if (!userCookie.value?.id_usuario) {
-      console.error('No se pudo obtener el ID del usuario')
+    const userData = userCookie.value
+    if (!userData || !userData.id_usuario) {
+      console.warn('No hay datos de usuario válidos en las cookies');
       return false
     }
     
-    const data = await $api(`/usuarios/id/${userCookie.value.id_usuario}`)
+    const data = await $api(`/usuarios/id/${userData.id_usuario}`)
     
     if (!data) {
       throw new Error('No se recibieron datos del usuario')
@@ -1778,8 +1774,6 @@ const fetchUserData = async () => {
     console.error('Error al obtener los datos del usuario:', error)
     showError('Error', 'No se pudieron cargar los datos del perfil')
     return false
-  } finally {
-    isLoading.value = false
   }
 }
 
@@ -1811,8 +1805,6 @@ const cargarDatosPerfil = async () => {
     console.error('Error al cargar el perfil:', error)
     showError('Error', 'No se pudo cargar la información del perfil')
     return false
-  } finally {
-    isLoading.value = false
   }
 }
 
@@ -2224,19 +2216,27 @@ watch(() => user.value.ciudadSeleccionada, (newCiudad) => {
 });
 
 // ===== INICIALIZACIÓN =====
-const checkAuthAndLoad = async () => {
+// ===== INICIALIZACIÓN UNIFICADA =====
+onMounted(async () => {
   try {
     const token = useCookie('token')
     const userCookieValue = useCookie('user')
     
+    // Si no hay token o cookie, redirigir al inicio en lugar de recargar infinitamente
     if (!token.value || !userCookieValue.value) { 
-      window.location.reload()
+      console.warn('Sesión no encontrada o expirada en Perfil Técnico. Redirigiendo...');
+      navigateTo('/')
       return
     }
     
-    await cargarDatosPerfil()
+    // Cargar todos los datos necesarios en paralelo
+    await Promise.all([
+      cargarDatosPerfil(),
+      fetchContactInfo(),
+      checkSubscription()
+    ])
     
-    // Inicializar originalUserData con los datos cargados del usuario
+    // Inicializar originalUserData tras la carga exitosa
     if (user.value) {
       originalUserData.value = {
         nombre: user.value.nombre,
@@ -2246,13 +2246,14 @@ const checkAuthAndLoad = async () => {
       }
     }
   } catch (error) { 
-    window.location.reload() 
+    console.error('Error fatal durante la carga del perfil técnico:', error);
+    if (error.statusCode === 401) {
+      navigateTo('/') 
+    }
+  } finally {
+    // Asegurar que el estado de carga termine pase lo que pase
+    isLoading.value = false
   }
-}
-
-onMounted(() => {
-  checkAuthAndLoad()
-  checkSubscription()
 })
 
 </script>
