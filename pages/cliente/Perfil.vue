@@ -2517,13 +2517,17 @@ const fetchMembershipCost = async () => {
 
 // Cargar datos al montar el componente de forma unificada
 onMounted(async () => {
+  console.log('🚀 [Perfil] Iniciando inicialización...');
   try {
     const token = useCookie('token')
     const userCookie = useCookie('user')
     
+    console.log('🔑 [Perfil] Token:', !!token.value ? 'Presente' : 'Ausente');
+    console.log('👤 [Perfil] Cookie User:', !!userCookie.value ? 'Presente' : 'Ausente');
+    
     // Si no hay token o cookie, redirigir al inicio en lugar de recargar infinitamente
     if (!token.value || !userCookie.value) {
-      console.warn('Sesión no encontrada o expirada. Redirigiendo...');
+      console.warn('⚠️ [Perfil] Sesión no encontrada. Redirigiendo al Home...');
       navigateTo('/');
       return;
     }
@@ -2560,6 +2564,7 @@ onMounted(async () => {
       navigateTo('/');
     }
   } finally {
+    console.log('🏁 [Perfil] Finalizando carga. isLoading = false');
     // Asegurar que isLoading se detenga incluso si hay errores
     isLoading.value = false;
   }

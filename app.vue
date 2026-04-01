@@ -70,7 +70,7 @@ useHead({
 
 onMounted(() => {
   if (process.client) {
-    // Asegurar que el modo oscuro esté aplicado
+    // Aplicar modo oscuro inmediatamente para evitar parpadeos
     const applyDarkMode = () => {
       const html = document.documentElement;
       html.classList.add('dark');
@@ -78,24 +78,20 @@ onMounted(() => {
       document.body.style.backgroundColor = '#111827';
     };
 
-    // Ocultar el spinner después de que todo esté cargado
+    // Ocultar el spinner de forma proactiva
     const hideSpinner = () => {
+      // Un pequeño retraso para asegurar que la transición sea suave
       setTimeout(() => {
         isLoading.value = false;
       }, 300);
     };
 
-    // Aplicar modo oscuro inmediatamente
     applyDarkMode();
-
-    if (document.readyState === 'complete') {
-      hideSpinner();
-    } else {
-      window.addEventListener('load', () => {
-        applyDarkMode();
-        hideSpinner();
-      }, { once: true });
-    }
+    
+    // En Nuxt/Vue, onMounted ya garantiza que el componente está listo.
+    // No necesitamos esperar a que todos los recursos externos (window.load) carguen,
+    // ya que eso puede fallar o tardar demasiado en navegadores embebidos como el de Facebook.
+    hideSpinner();
   }
 });
 </script>

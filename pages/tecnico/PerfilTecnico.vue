@@ -2218,13 +2218,17 @@ watch(() => user.value.ciudadSeleccionada, (newCiudad) => {
 // ===== INICIALIZACIÓN =====
 // ===== INICIALIZACIÓN UNIFICADA =====
 onMounted(async () => {
+  console.log('🚀 [PerfilTecnico] Iniciando inicialización...');
   try {
     const token = useCookie('token')
     const userCookieValue = useCookie('user')
     
+    console.log('🔑 [PerfilTecnico] Token:', !!token.value ? 'Presente' : 'Ausente');
+    console.log('👤 [PerfilTecnico] Cookie User:', !!userCookieValue.value ? 'Presente' : 'Ausente');
+    
     // Si no hay token o cookie, redirigir al inicio en lugar de recargar infinitamente
     if (!token.value || !userCookieValue.value) { 
-      console.warn('Sesión no encontrada o expirada en Perfil Técnico. Redirigiendo...');
+      console.warn('⚠️ [PerfilTecnico] Sesión no encontrada. Redirigiendo al Home...');
       navigateTo('/')
       return
     }
@@ -2251,6 +2255,7 @@ onMounted(async () => {
       navigateTo('/') 
     }
   } finally {
+    console.log('🏁 [PerfilTecnico] Finalizando carga. isLoading = false');
     // Asegurar que el estado de carga termine pase lo que pase
     isLoading.value = false
   }
