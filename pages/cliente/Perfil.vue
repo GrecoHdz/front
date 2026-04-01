@@ -1580,7 +1580,7 @@ button:hover {
 </style>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
@@ -1651,14 +1651,6 @@ const anyModalOpen = computed(() => {
          isPhotoModalOpen.value || 
          isIdentityModalOpen.value || 
          showDeleteIdentityConfirm.value;
-})
-
-watch(anyModalOpen, (newValue) => {
-  if (process.client) {
-    const overflowValue = newValue ? 'hidden' : ''
-    document.body.style.overflow = overflowValue
-    document.documentElement.style.overflow = overflowValue
-  }
 })
 
 // Información de contacto de la empresa
@@ -1796,8 +1788,11 @@ const userCookie = useCookie('user')
 // Obtener datos del usuario desde la API
 const fetchUserData = async () => {
   try {
-    const userCookie = useCookie('user')
     const userData = userCookie.value
+    if (!userData || !userData.id_usuario) {
+      console.warn('No hay datos de usuario válidos en las cookies');
+      return false;
+    }
     
     const data = await $api(`/usuarios/id/${userData.id_usuario}`, {
       method: 'GET'
@@ -1846,8 +1841,6 @@ const fetchUserData = async () => {
   } catch (error) {
     console.error('Error al obtener los datos del usuario:', error)
     showError('Error', 'No se pudieron cargar los datos del perfil')
-  } finally {
-    isLoading.value = false
   }
 }
 
@@ -1865,8 +1858,6 @@ const cargarDatosPerfil = async () => {
     console.error('Error al cargar el perfil:', error)
     showError('Error', 'No se pudo cargar la información del perfil')
     return false
-  } finally {
-    isLoading.value = false
   }
 }
 
@@ -1927,34 +1918,6 @@ watch(() => selectedAccountObject.value, (newAccount) => {
     selectedAccount.value = '';
   }
 });
-
-// Cargar datos al montar el componente
-onMounted(async () => {
-  try {
-    const token = useCookie('token')
-    const userCookie = useCookie('user')
-    
-    if (!token.value || !userCookie.value) {
-      window.location.reload()
-      return
-    }
-
-    await Promise.all([
-      cargarDatosPerfil(),
-      fetchContactInfo(), 
-      fetchMembershipData(),
-      checkSubscription()
-
-    ])
-    
-    // Guardar una copia de los datos originales
-    if (user.value) {
-      originalUserData.value = { ...user.value }
-    }
-  } catch (error) {
-    window.location.reload()
-  }
-})
 
 // Función para manejar el cierre de sesión
 const handleLogout = async () => {
@@ -2552,46 +2515,73 @@ const fetchMembershipCost = async () => {
   }
 };
 
-// Cargar el costo de la membresía al montar el componente
-onMounted(() => {
-  // Primero cargar el costo
-  fetchMembershipCost().then(() => {
-    // Luego cargar las cuentas bancarias
-    fetchBankAccounts().finally(() => {
-      // Finalmente, cargar los datos del perfil
-      cargarDatosPerfil().finally(() => {
-        // Cargar datos de la membresía
-        fetchMembershipData().finally(() => {
-          // Verificar el hash de la URL después de cargar todo
-          if (process.client && window.location.hash === '#membresia' && (isMembershipExpired.value || isMembershipInactive.value)) {
-            // Usar nextTick para asegurar que el DOM esté listo
-            nextTick(() => {
-              renovarMembresia();
-              // Limpiar el hash sin recargar la página
-              window.history.replaceState({}, document.title, window.location.pathname);
-            });
-          }
-        });
+// Cargar datos al montar el componente de forma unificada
+onMounted(async () => {
+  try {
+    const token = useCookie('token')
+    const userCookie = useCookie('user')
+    
+    // Si no hay token o cookie, redirigir al inicio en lugar de recargar infinitamente
+    if (!token.value || !userCookie.value) {
+      console.warn('Sesión no encontrada o expirada. Redirigiendo...');
+      navigateTo('/');
+      return;
+    }
+
+    // Iniciar carga de datos esenciales en paralelo
+    await Promise.all([
+      fetchMembershipCost(),
+      fetchBankAccounts(),
+      cargarDatosPerfil(), // Este ya llama a fetchUserData() y cargarCiudades()
+      fetchContactInfo(),
+      checkSubscription()
+    ]);
+    
+    // Cargar datos de la membresía después de tener el ID del usuario
+    await fetchMembershipData();
+    
+    // Guardar una copia de los datos originales para detectar cambios
+    if (user.value) {
+      originalUserData.value = { ...user.value };
+    }
+
+    // Verificar el hash de la URL después de cargar todo
+    if (process.client && window.location.hash === '#membresia' && (isMembershipExpired.value || isMembershipInactive.value)) {
+      nextTick(() => {
+        renovarMembresia();
+        // Limpiar el hash sin recargar la página
+        window.history.replaceState({}, document.title, window.location.pathname);
       });
-    });
-  });
+    }
+  } catch (error) {
+    console.error('Error durante la inicialización del Perfil:', error);
+    // Si es un error de autenticación (401), redirigir
+    if (error.statusCode === 401) {
+      navigateTo('/');
+    }
+  } finally {
+    // Asegurar que isLoading se detenga incluso si hay errores
+    isLoading.value = false;
+  }
 
   // Escuchar cambios en el hash
   const handleHashChange = () => {
     if (process.client && window.location.hash === '#membresia' && (isMembershipExpired.value || isMembershipInactive.value)) {
       renovarMembresia();
-      // Limpiar el hash sin recargar la página
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   };
 
-  // Agregar el event listener
-  window.addEventListener('hashchange', handleHashChange);
+  if (process.client) {
+    window.addEventListener('hashchange', handleHashChange);
+  }
 
-  // Limpiar event listener al desmontar el componente
-  return () => {
-    window.removeEventListener('hashchange', handleHashChange);
-  };
+  // Limpiar event listener en onUnmounted (usando Lifecycle hook correcto)
+  onUnmounted(() => {
+    if (process.client) {
+      window.removeEventListener('hashchange', handleHashChange);
+    }
+  });
 });
 
 // Obtener cuentas bancarias
