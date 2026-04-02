@@ -834,7 +834,12 @@
                   <div class="flex gap-2 h-[38px]">
                     <div class="w-full flex items-center justify-between text-sm text-gray-900 dark:text-white bg-white/50 dark:bg-gray-700/50 px-3 rounded border border-gray-200 dark:border-gray-600 h-full">
                       <span class="truncate">{{ userForm.identidad || 'No especificado' }}</span>
-                      <span v-if="userForm.verificado" class="text-green-500 flex-shrink-0" title="Verificado">
+                      <span 
+                        v-if="userForm.verificado" 
+                        @click="showIdentityViewModal = true"
+                        class="text-green-500 flex-shrink-0 cursor-pointer hover:scale-110 transition-transform p-1" 
+                        title="Ver Identidad"
+                      >
                         <svg class="w-4 h-4 text-green-500 font-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                       </span>
                     </div>
@@ -2225,6 +2230,70 @@
       </div>
     </div>
   </Transition>
+
+  <!-- Modal para ver Identificación -->
+  <Transition
+    enter-active-class="backdrop-enter-active"
+    leave-active-class="backdrop-leave-active"
+    enter-from-class="backdrop-enter-from"
+    leave-to-class="backdrop-leave-to"
+  >
+    <div v-if="showIdentityViewModal" class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showIdentityViewModal = false"></div>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-[90%] sm:max-w-md overflow-hidden relative z-10 mx-auto border border-gray-200 dark:border-gray-700">
+        <!-- Header -->
+        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">🪪</span>
+            <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">Documento de Identidad</h3>
+          </div>
+          <button @click="showIdentityViewModal = false" class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-4 space-y-4">
+          <!-- Info Badge -->
+          <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800/30">
+            <p class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase mb-1">Número de Identidad</p>
+            <p class="text-base font-black text-gray-900 dark:text-white tracking-wider">{{ userForm.identidad || 'No especificado' }}</p>
+          </div>
+
+          <!-- Image Container -->
+          <div class="space-y-2">
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase">Fotografía del Documento</p>
+            <div class="relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-900 aspect-[4/3] border border-gray-200 dark:border-gray-700 group">
+              <img 
+                v-if="userForm.identidad_url" 
+                :src="userForm.identidad_url" 
+                class="w-full h-full object-contain cursor-zoom-in transition-transform duration-300 group-hover:scale-105"
+                @click="showImagePreview(userForm.identidad_url)"
+              />
+              <div v-else class="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                <svg class="w-12 h-12 mb-2 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <p class="text-xs font-bold">Sin imagen disponible</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 bg-gray-50 dark:bg-gray-800/50 flex justify-end">
+          <button 
+            @click="showIdentityViewModal = false"
+            class="px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-bold text-xs hover:opacity-90 transition-opacity"
+          >
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <style scoped>
@@ -2518,6 +2587,7 @@ const showQuoteModal = ref(false)
 const showAmountDetailsModal = ref(false)
 const showWithdrawalModal = ref(false)
 const showOfferedServicesModal = ref(false)
+const showIdentityViewModal = ref(false)
 const offeredServices = ref([])
 const loadingOfferedServices = ref(false)
 
@@ -2538,6 +2608,7 @@ const anyModalOpen = computed(() => {
          showAmountDetailsModal.value ||
           showWithdrawalModal.value ||
           showOfferedServicesModal.value ||
+          showIdentityViewModal.value ||
          imagePreview.value.show
 })
 
@@ -3367,6 +3438,7 @@ const closeModal = () => {
   showCreditsModal.value = false
   showOfferedServicesModal.value = false
   showVerifyIdentityModal.value = false
+  showIdentityViewModal.value = false
   offeredServices.value = []
   resetUserForm()
   selectedUser.value = null
