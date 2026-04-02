@@ -89,7 +89,13 @@ const handleSubscribe = async () => {
 };
 
 onMounted(async () => {
-  await checkSubscription();
+  // Timeout de seguridad de 5 segundos para que no bloquee en iOS
+  const timeout = new Promise((resolve) => setTimeout(resolve, 5000));
+  try {
+    await Promise.race([checkSubscription(), timeout]);
+  } catch (error) {
+    console.warn('⚠️ [PushNotificationInvite] checkSubscription tardó demasiado o falló:', error);
+  }
 });
 </script>
 

@@ -11,8 +11,10 @@ export const usePushNotifications = () => {
     const auth = useAuthStore();
 
     if (process.client) {
-        isSupported.value = 'serviceWorker' in navigator && 'PushManager' in window;
-        permission.value = Notification.permission;
+        // En iOS Safari (WKWebView / in-app browsers) la API Notification puede no existir
+        const hasNotificationAPI = typeof Notification !== 'undefined';
+        isSupported.value = 'serviceWorker' in navigator && 'PushManager' in window && hasNotificationAPI;
+        permission.value = hasNotificationAPI ? Notification.permission : 'denied';
 
         // Optimistic check from localStorage to avoid flashes
         const savedStatus = localStorage.getItem('push_subscribed_status');
@@ -45,7 +47,12 @@ export const usePushNotifications = () => {
 
         try {
             isChecking.value = true;
-            const registration = await navigator.serviceWorker.ready;
+            // Usar un timeout de seguridad para que no bloquee en iOS
+            const readyPromise = navigator.serviceWorker.ready;
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('serviceWorker.ready timeout')), 5000)
+            );
+            const registration = await Promise.race([readyPromise, timeoutPromise]);
             const subscription = await registration.pushManager.getSubscription();
             const status = !!subscription;
             isSubscribed.value = status;
@@ -54,7 +61,7 @@ export const usePushNotifications = () => {
             localStorage.setItem('push_subscribed_status', status.toString());
 
             // Si ya tiene permiso y no está suscrito, preguntar automáticamente? No, mejor manual.
-            if (Notification.permission === 'granted' && !subscription) {
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && !subscription) {
                 // Podríamos intentar resuscribir, pero mejor dejar al usuario
             }
         } catch (error) {

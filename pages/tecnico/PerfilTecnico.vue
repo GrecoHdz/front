@@ -17,6 +17,7 @@
 
     <!-- Contenido principal -->
     <div v-if="!isLoading">
+    <UiPushNotificationInvite />
     <HeadersHeaderPerfil/>
 
     <!-- Main Content -->
@@ -478,43 +479,7 @@
         </div>
       </div>
 
-      <!-- Push Notifications Settings -->
-      <div v-if="isSupported" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4 transition-all duration-300">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-xl">
-              🔔
-            </div>
-            <div>
-              <h3 class="text-base font-bold text-gray-900 dark:text-white">Notificaciones Push</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Recibe alertas en tiempo real</p>
-            </div>
-          </div>
-          
-          <!-- Toggle Switch -->
-          <button 
-            @click="handleToggleNotifications"
-            :disabled="permission === 'denied'"
-            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-            :class="isSubscribed ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'"
-          >
-            <span
-              class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm"
-              :class="isSubscribed ? 'translate-x-6' : 'translate-x-1'"
-            />
-          </button>
-        </div>
 
-        <div class="mt-4">
-          <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-            Activa las notificaciones para recibir actualizaciones sobre tus pedidos y mensajes incluso si no tienes la aplicación abierta.
-          </p>
-          
-          <p v-if="permission === 'denied'" class="mt-2 text-[10px] text-red-500 dark:text-red-400">
-            ⚠️ Permisos bloqueados en el navegador. Por favor, habilítalos en los ajustes del sitio.
-          </p>
-        </div>
-      </div>
 
       <!-- Legal & About -->
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow border border-gray-200 dark:border-gray-700">
@@ -1225,73 +1190,7 @@
     </div>
   </div>
 </Transition>
-    <!-- Modal de Confirmación Desactivar Notificaciones -->
-    <Transition name="fade">
-      <div v-if="showUnsubscribeModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showUnsubscribeModal = false"></div>
-        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl w-full max-w-sm relative z-10 border border-gray-100 dark:border-gray-700">
-          <div class="text-center mb-6">
-            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-              🔕
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¿Desactivar notificaciones?</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed px-2">
-              Dejarás de recibir avisos importantes sobre tus servicios y membresías en tiempo real.
-            </p>
-          </div>
-          
-          <div class="flex flex-col gap-3">
-            <button 
-              @click="confirmUnsubscribe"
-              class="w-full py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-red-200 dark:shadow-none"
-            >
-              Sí, desactivar
-            </button>
-            <button 
-              @click="showUnsubscribeModal = false"
-              class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
-            >
-              Mantener activas
-            </button>
-          </div>
-        </div>
-      </div>
-    </Transition>
 
-    <!-- Modal de Confirmación Activar Notificaciones -->
-    <Transition name="fade">
-      <div v-if="showSubscribeModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSubscribeModal = false"></div>
-        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl w-full max-w-sm relative z-10 border border-gray-100 dark:border-gray-700 overflow-hidden">
-          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-blue-500"></div>
-          
-          <div class="text-center mb-6 pt-2">
-            <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-              🔔
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¡Mantente informado!</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed px-2">
-              Activando las notificaciones te avisaremos sobre el estado de tus servicios y promociones exclusivas.
-            </p>
-          </div>
-          
-          <div class="flex flex-col gap-3">
-            <button 
-              @click="confirmSubscribe"
-              class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200 dark:shadow-none"
-            >
-              Sí, activar alertas
-            </button>
-            <button 
-              @click="showSubscribeModal = false"
-              class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
-            >
-              Ahora no
-            </button>
-          </div>
-        </div>
-      </div>
-    </Transition>
   </div>
   
 </template>
@@ -1303,7 +1202,7 @@ import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Multiselect from 'vue-multiselect'
-import { usePushNotifications } from '~/composables/usePushNotifications'
+
 
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
@@ -1335,9 +1234,6 @@ const isTerminosModalOpen = ref(false)
 const isContratoTecnicoModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
-const { subscribe, unsubscribe, isSubscribed, checkSubscription, isSupported, permission } = usePushNotifications()
-const showUnsubscribeModal = ref(false)
-const showSubscribeModal = ref(false)
 
 
 
@@ -1367,8 +1263,6 @@ const anyModalOpen = computed(() => {
          isContratoTecnicoModalOpen.value || 
          isPrivacidadModalOpen.value || 
          isAcercaModalOpen.value || 
-         showUnsubscribeModal.value || 
-         showSubscribeModal.value ||
          showServiceModal.value
 })
 
@@ -2148,45 +2042,7 @@ const handleLogout = async () => {
   }
 }
 
-const handleToggleNotifications = async () => {
-    if (isSubscribed.value) {
-        showUnsubscribeModal.value = true
-    } else {
-        showSubscribeModal.value = true
-    }
-}
 
-const confirmSubscribe = async () => {
-    try {
-        showSubscribeModal.value = false
-        const result = await subscribe()
-        
-        if (result.success) {
-            showSuccess('¡Éxito!', 'Notificaciones activadas correctamente')
-        } else if (result.error === 'denied') {
-            showError('Permiso denegado', 'Debes permitir las notificaciones en tu navegador')
-        } else if (result.error === 'supported') {
-            showError('No soportado', 'Tu navegador no soporta notificaciones push')
-        } else {
-            showError('Error', result.error || 'No se pudieron activar las notificaciones')
-        }
-    } catch (error) {
-        console.error('Error al suscribir:', error)
-        showError('Error', 'Ocurrió un error inesperado al activar las notificaciones')
-    }
-}
-
-const confirmUnsubscribe = async () => {
-  try {
-    await unsubscribe()
-    showUnsubscribeModal.value = false
-    toast.value.show = true
-    toast.value.message = 'Notificaciones desactivadas'
-    toast.value.type = 'info'
-  } catch (error) {
-    console.error('Error al desactivar:', error)
-  }
-}
 
 
 // ===== WATCHERS =====
@@ -2233,11 +2089,10 @@ onMounted(async () => {
       return
     }
     
-    // Cargar todos los datos necesarios en paralelo
+    // Cargar datos principales sin bloquear por checkSubscription (que puede colgar en iOS Safari)
     await Promise.all([
       cargarDatosPerfil(),
-      fetchContactInfo(),
-      checkSubscription()
+      fetchContactInfo()
     ])
     
     // Inicializar originalUserData tras la carga exitosa
@@ -2249,6 +2104,8 @@ onMounted(async () => {
         id_ciudad: user.value.id_ciudad
       }
     }
+
+
   } catch (error) { 
     console.error('Error fatal durante la carga del perfil técnico:', error);
     if (error.statusCode === 401) {
@@ -2358,8 +2215,9 @@ onMounted(async () => {
   border-width: 3px;
 }
 
-/* Efecto de glassmorphism sutil */
+/* Efecto de glassmorphism sutil - con prefijo webkit para iOS Safari */
 .backdrop-blur-sm {
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 

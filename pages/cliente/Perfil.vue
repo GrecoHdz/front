@@ -17,8 +17,12 @@
         :message="isLoggingOut ? 'Cerrando sesión...' : 'Cargando Perfil...'"
       />
 
-    <!-- Contenido principal (oculto hasta completar autenticación) -->
+    <!-- Contenido principal -->
     <div v-if="!isLoading">
+      
+    <!-- Invitación a notificaciones push -->
+    <UiPushNotificationInvite />
+
     <HeadersHeaderPerfil/>
 
     <!-- Main Content -->
@@ -2537,8 +2541,7 @@ onMounted(async () => {
       fetchMembershipCost(),
       fetchBankAccounts(),
       cargarDatosPerfil(), // Este ya llama a fetchUserData() y cargarCiudades()
-      fetchContactInfo(),
-      checkSubscription()
+      fetchContactInfo()
     ]);
     
     // Cargar datos de la membresía después de tener el ID del usuario
