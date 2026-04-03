@@ -86,7 +86,7 @@
             >
               <div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></div>
               <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_white]"></div>
-              <span class="text-[10px] font-black uppercase tracking-[0.1em]">Verificar Identidad</span>
+              <span class="text-[10px] font-black uppercase tracking-[0.1em]">Verifica tu Identidad aquí</span>
               <i class="fas fa-chevron-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
             </button>
             <div 
@@ -691,17 +691,6 @@
                     <i v-else class="fas fa-upload"></i>
                     {{ isUploading ? 'Subiendo...' : 'Subir Nueva Foto' }}
                   </button>
-                  
-                  <button 
-                    v-if="user.imagen_url"
-                    @click="deleteProfileImage"
-                    :disabled="isDeleting"
-                    class="w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center justify-center gap-2"
-                  >
-                    <i v-if="isDeleting" class="fas fa-circle-notch fa-spin"></i>
-                    <i v-else class="fas fa-trash"></i>
-                    Eliminar Foto
-                  </button>
                 </div>
               </div>
             </div>
@@ -854,7 +843,7 @@
           para la prestación de servicios de mantenimiento y reparación a domicilio.
         </p>
         <p class="mt-2">
-          <strong>Importante:</strong> MiSeguro no presta directamente los servicios técnicos, no emplea a los técnicos
+          <strong>Importante:</strong> MiSeguro no presta directamente los servicios, no emplea a los técnicos
           y no asume una relación laboral con ellos. Los técnicos actúan de manera independiente y bajo su propia responsabilidad.
         </p>
       </section>
@@ -945,7 +934,7 @@
       <section>
         <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Garantía de los Servicios</h4>
         <p>
-          Los servicios técnicos contratados a través de MiSeguro cuentan con una garantía de <strong>un (1) mes</strong>. 
+          Los servicios contratados a través de MiSeguro cuentan con una garantía de <strong>un (1) mes</strong>. 
           En caso de que un trabajo no se haya realizado con los mejores estándares posibles y requiera una nueva 
           intervención para hacer efectiva la garantía, no se le cobrará mano de obra de nuevo al cliente.
         </p>
@@ -1124,7 +1113,7 @@
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestra Misión</h4>
-            <p>En MiSeguro, nos dedicamos a facilitar el acceso a servicios técnicos de alta calidad para el hogar, conectando a clientes con profesionales verificados y confiables. Buscamos convertir cada experiencia de servicio en una solución satisfactoria y segura.</p>
+            <p>En MiSeguro, nos dedicamos a facilitar el acceso a servicios de alta calidad para el hogar, conectando a clientes con profesionales verificados y confiables. Buscamos convertir cada experiencia de servicio en una solución satisfactoria y segura.</p>
           </section>
 
           <section>
@@ -1181,7 +1170,7 @@
 
           <section>
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestro Equipo</h4>
-            <p>Somos un equipo apasionado de profesionales comprometidos con transformar la forma en que los hogares acceden a servicios técnicos. Contamos con expertos en tecnología, atención al cliente y desarrollo de negocios trabajando juntos para ofrecer la mejor experiencia posible.</p>
+            <p>Somos un equipo apasionado de profesionales comprometidos con transformar la forma en que los hogares acceden a servicios. Contamos con expertos en tecnología, atención al cliente y desarrollo de negocios trabajando juntos para ofrecer la mejor experiencia posible.</p>
           </section>
 
           <section>

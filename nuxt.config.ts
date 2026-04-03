@@ -53,19 +53,19 @@ export default defineNuxtConfig({
   // Configuración de impresión
   app: {
     head: {
-      title: 'MiSeguro - Servicios Técnicos a Domicilio',
+      title: 'MiSeguro - Servicios Profesionales a Domicilio',
       meta: [
         { name: 'google-site-verification', content: 'GEPuBsyW3v_JTl_akiNBfF4DILNI3EVLggqEsYawrNM' },
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Servicios técnicos profesionales a domicilio. Fontanería, electricidad, aires acondicionados y más.' },
+        { name: 'description', content: 'Servicios Profesionales a Domicilio.' },
         { name: 'theme-color', content: '#2563eb' },
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
         // Open Graph
-        { property: 'og:title', content: 'MiSeguro - Servicios Técnicos a Domicilio' },
-        { property: 'og:description', content: 'Servicios técnicos profesionales a domicilio. Fontanería, electricidad, aires acondicionados y más.' },
+        { property: 'og:title', content: 'MiSeguro - Servicios Profesionales a Domicilio' },
+        { property: 'og:description', content: 'Servicios Profesionales a Domicilio.' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://miseguro.vercel.app/' },
         { property: 'og:image', content: 'https://miseguro.vercel.app/favicon.ico' },

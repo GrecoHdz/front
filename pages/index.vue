@@ -873,11 +873,11 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'MiSeguro - Servicios Técnicos a Domicilio',
+  title: 'MiSeguro - Servicios Profesionales a Domicilio',
   meta: [
-    { name: 'description', content: 'MiSeguro - Servicios Técnicos a Domicilio' }, 
-    { name: 'keywords', content: 'MiSeguro, Servicios Técnicos a Domicilio' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
+    { name: 'description', content: 'MiSeguro - Servicios Profesionales a Domicilio' }, 
+    { name: 'keywords', content: 'MiSeguro, Servicios Profesionales a Domicilio' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
 
@@ -1726,18 +1726,49 @@ const handleAuth = async () => {
         // Mostrar mensaje de éxito
         if (registerAsTechnician.value) {
           showToast('¡Solicitud de técnico enviada! Tu perfil está en revisión. Te notificaremos cuando sea aprobado.', 'success');
+        } else {
+          showToast('¡Registro exitoso! Iniciando sesión...', 'success');
+        }
+        trackCompleteRegistration();
+        
+        // Manejar referido después del registro exitoso
+        try {
+          await handleReferral(userId);
+        } catch (error) {
+          // No interrumpir el flujo por errores en el referido
+        }
+        
+        // Enviar notificaciones a administradores en segundo plano
+        const sendAdminNotifications = async () => {
+          try {
+            await $api('/notificaciones/enviar', {
+              method: 'POST',
+              body: {
+                titulo: 'Nuevo registro',
+                nombre_rol: 'admin'
+              }
+            });
+            await $api('/notificaciones/enviar', {
+              method: 'POST',
+              body: {
+                titulo: 'Nuevo registro',
+                nombre_rol: 'sa'
+              }
+            });
+          } catch (error) {
+            // No interrumpir el flujo por errores en las notificaciones
+          }
+        };
+        sendAdminNotifications();
 
-          trackCompleteRegistration();
-
-          // Guardar los datos del formulario antes de limpiarlos
+        if (registerAsTechnician.value) {
+          // Flujo específico para técnicos
           const formData = { ...form.value };
           
-          // Enviar mensaje de WhatsApp con los datos del formulario
           setTimeout(() => {
             const nombreTecnico = formData.nombre || 'Nuevo Técnico';
             sendTechnicianRegistrationMessage(nombreTecnico, formData);
             
-            // Cerrar el modal después de 2 segundos
             setTimeout(() => {
               // Limpiar el formulario
               form.value = {
@@ -1751,76 +1782,67 @@ const handleAuth = async () => {
               registerAsTechnician.value = false;
               isLoading.value = false;
               showLoginModal.value = false;
+              authStatus.value = '';
             }, 2000);
-          }, 0); // Tiempo 0 para ejecutar de forma asíncrona
+          }, 0);
           
         } else {
-          // Mostrar mensaje de éxito para usuarios normales
-          showToast('¡Registro exitoso! Ahora puedes iniciar sesión.', 'success');
-          trackCompleteRegistration();
-        }
-        
-        // Manejar referido después del registro exitoso
-        try {
-          await handleReferral(userId);
-        } catch (error) {
-          // No interrumpir el flujo por errores en el referido
-        }
-        
-        // Enviar notificaciones a administradores en segundo plano
-        const sendAdminNotifications = async () => {
+          // Flujo para usuarios normales: Login automático
           try {
-            // Notificación para administradores
-            await $api('/notificaciones/enviar', {
-              method: 'POST',
-              body: {
-                titulo: 'Nuevo registro',
-                nombre_rol: 'admin'
-              }
+            const loginResult = await authStore.login({
+              identidad: form.value.identidad,
+              password: form.value.password
             });
-            
-            // Notificación para super administradores
-            await $api('/notificaciones/enviar', {
-              method: 'POST',
-              body: {
-                titulo: 'Nuevo registro',
-                nombre_rol: 'sa'
-              }
-            });
-          } catch (error) {
-            // No interrumpir el flujo por errores en las notificaciones
+
+            if (loginResult?.success) {
+              const userRole = authStore.user?.role?.toLowerCase() || '';
+              showLoginModal.value = false;
+              showSuccess.value = true;
+              
+              const redirectPath = {
+                'admin': '/admin/DashboardAdmin',
+                'sa': '/admin/DashboardAdmin',
+                'tecnico': '/tecnico/DashboardTecnico',
+                'usuario': '/cliente/DashboardCliente'
+              }[userRole] || '/';
+
+              setTimeout(() => {
+                window.location.href = redirectPath;
+              }, 500);
+              return; // Salir de handleAuth con éxito
+            }
+          } catch (loginError) {
+            console.error('Error en login automático:', loginError);
           }
-        };
-        
-        // Ejecutar notificaciones en segundo plano
-        sendAdminNotifications();
-        
-        // Cambiar a pestaña de login
-        isLogin.value = true;
-        
-        // Limpiar errores
-        formErrors.value = {};
-        
-        // Limpiar el formulario
-        form.value = {
-          nombre: '',
-          email: '',
-          telefono: '',
-          identidad: '',
-          password: '',
-          ciudad: null
-        };
-        
-        // Limpiar la imagen de perfil
-        profileImage.value = null;
-        profileImagePreview.value = '';
-        registerAsTechnician.value = false;
-        
-        // Desactivar loading solo para registro exitoso
-        setTimeout(() => {
-          isLoading.value = false;
-          authStatus.value = '';
-        }, 1500);
+
+          // Si el login automático falla, cambiar a pestaña de login con datos preservados
+          isLogin.value = true;
+          
+          // Preservar credenciales para que el modal ya las tenga listas
+          const savedIdentidad = form.value.identidad;
+          const savedPassword = form.value.password;
+          
+          // Limpiar el resto del formulario
+          form.value = {
+            nombre: '',
+            email: '',
+            telefono: '',
+            identidad: savedIdentidad,
+            password: savedPassword,
+            ciudad: null
+          };
+          
+          formErrors.value = {};
+          profileImage.value = null;
+          profileImagePreview.value = '';
+          registerAsTechnician.value = false;
+          
+          // Desactivar loading
+          setTimeout(() => {
+            isLoading.value = false;
+            authStatus.value = '';
+          }, 1000);
+        }
       } catch (error) {
         const errorData = error.data || error.response?._data || error.response?.data;
         const statusCode = error.statusCode || error.status || error.response?.status;
