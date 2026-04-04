@@ -2033,6 +2033,14 @@ const sendWhatsAppMessage = async (data, type) => {
         `*ID:* ${formattedDate}-${data.id_paquete_usuario}\n` +
         `*Paquete:* ${data.nombre_paquete}\n` +
         `Quedo atento(a) a la coordinación correspondiente.`;
+    } else if (type === 'taxi_vip') {
+      // Mensaje para solicitud de taxi VIP
+      message = `*Solicitud de Taxi VIP 🚕*\n\n` +
+        `*Usuario:* ${data.nombre_usuario}\n` +
+        `*Recoger en:* ${data.colonia}\n` +
+        `*Destino:* ${data.direccion}\n` +
+        `*Detalles:* ${data.description}\n\n` +
+        `Solicitado a través de la plataforma MiSeguro.`;
     }
     
     if (!message) return;
@@ -2846,6 +2854,16 @@ const handleRequestService = async () => {
     }
     
     recentServicesData.value.unshift(newService)
+    
+    // Si es Taxi VIP, enviar WhatsApp con los detalles ANTES de limpiar el formulario
+    if (isTaxiVIP) {
+      sendWhatsAppMessage({
+        nombre_usuario: userData.value.nombre,
+        colonia: serviceFormData.value.colonia,
+        direccion: serviceFormData.value.direccion,
+        description: serviceFormData.value.description
+      }, 'taxi_vip');
+    }
     
     serviceFormData.value = { 
       type: '', 
