@@ -2858,7 +2858,7 @@ const handleRequestService = async () => {
     // Si es Taxi VIP, enviar WhatsApp con los detalles ANTES de limpiar el formulario
     if (isTaxiVIP) {
       sendWhatsAppMessage({
-        nombre_usuario: userData.value.nombre,
+        nombre_usuario: userData.nombre,
         colonia: serviceFormData.value.colonia,
         direccion: serviceFormData.value.direccion,
         description: serviceFormData.value.description
