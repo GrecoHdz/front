@@ -4535,14 +4535,9 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       monto: parseFloat(r.monto) || 0,
     }));
 
-  // C. Cashback (Movimientos reales de tipo cashback)
-  const totalCashbackLocal = totalCashbackParam || 0;
-  
-  // Total de deudas generadas a técnicos en el periodo (lo que la plataforma les asignó)
-  const totalDeudasGeneradas = deudasTecnicos || 0;
-  
-  // Total de retiros PAGADOS (dinero que salió realmente del banco)
-  const totalRetirosEfectuados = retirosPagados || 0;
+  // Las variables se inicializarán después de procesar los datos detallados
+  let totalCashbackLocal = 0;
+  let totalRetirosEfectuados = 0;
 
   // UTILIDAD NETA (Ganancia de la plataforma)
   // Nota: Ya no restamos deudasTecnicos de totalIngresos porque totalIngresos es el 20% (Cut) 
@@ -4567,8 +4562,10 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   // Total = suma real de todas las filas de la tabla
   const totalCostosOperativos = operationalCosts.reduce((sum, c) => sum + c.monto, 0);
 
-  // Total de retiros a técnicos (viene del resumen del API como deudasTecnicos)
-  const totalRetirosTecnicos = deudasTecnicos || 0;
+  // Recalcular pasivos para el Balance General basados en los datos detallados
+  totalCashbackLocal = cashbackOps.reduce((sum, c) => sum + c.monto, 0);
+  // Los pasivos por "retiros" en este contexto corresponden a lo adeudado a técnicos y referidos
+  totalRetirosEfectuados = tecnicosOps.reduce((sum, t) => sum + t.monto, 0) + referidosOps.reduce((sum, r) => sum + r.monto, 0);
 
   // Recalcular Balance Neto Final: misma fórmula que el API
   // gananciaNeta = ingresos - cashback - retirosTecnicos 
@@ -4635,7 +4632,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       ? [
           ...costosFiltrados,
           [
-            { content: 'TOTAL DEUDAS GENERADAS (Cashback + Referidos)', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+            { content: 'TOTAL DEUDAS GENERADAS (Técnicos + Referidos + Cashback)', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
             { content: formatCurrency(totalCostosOperativos), styles: { fontStyle: 'bold', textColor: [220, 38, 38] } }
           ]
         ]
@@ -4672,10 +4669,11 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
     startY: currentY,
     head: [['Concepto', 'Monto (HNL)']],
     body: [
+      [{ content: 'Utilidad Bruta App (Ingresos)', styles: { fontStyle: 'bold', fontSize: 9 } }, { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', halign: 'right', fontSize: 9 } }],
       [{ content: '(-) Pasivos por Cashback', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalCashbackLocal)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
-      [{ content: '(-) Pasivos por Retiros', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetirosEfectuados)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
-      [{ content: 'Total Ingresos App', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
-       { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }],
+      [{ content: '(-) Pasivos por Retiros (Técnicos/Referidos)', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetirosEfectuados)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
+      [{ content: 'UTILIDAD NETA FINAL', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
+       { content: formatCurrency(totalIngresos - totalCashbackLocal - totalRetirosEfectuados), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }],
      ],
     theme: 'grid',
     headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 8 },
