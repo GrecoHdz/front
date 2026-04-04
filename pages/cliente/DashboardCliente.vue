@@ -2035,7 +2035,7 @@ const sendWhatsAppMessage = async (data, type) => {
         `Quedo atento(a) a la coordinación correspondiente.`;
     } else if (type === 'taxi_vip') {
       // Mensaje para solicitud de taxi VIP
-      message = `*Solicitud de Taxi VIP 🚕*\n\n` +
+      message = `*Solicitud de Taxi VIP*🚖\n\n` +
         `*Usuario:* ${data.nombre_usuario}\n` +
         `*Recoger en:* ${data.colonia}\n` +
         `*Destino:* ${data.direccion}\n` +

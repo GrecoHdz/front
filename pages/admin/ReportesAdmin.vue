@@ -4212,7 +4212,7 @@ const generateReport = async (report) => {
         ingredientesReporte = { balanceNeto: 0, deudasTecnicos: 0, comisionesReferidos: 0, totalCashback: 0 };
       }
     }
-    const { balanceNeto, retirosPagados, deudasTecnicos: deudasResumen } = ingredientesReporte;
+    const { balanceNeto, retirosPagados, deudasTecnicos } = ingredientesReporte;
 
     // 🧾 5️⃣ Crear documento PDF usando el plugin $pdf
     const { $pdf } = useNuxtApp();
@@ -4539,7 +4539,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
   const totalCashbackLocal = totalCashbackParam || 0;
   
   // Total de deudas generadas a técnicos en el periodo (lo que la plataforma les asignó)
-  const totalDeudasGeneradas = deudasTecnicos || deudasResumen || 0;
+  const totalDeudasGeneradas = deudasTecnicos || 0;
   
   // Total de retiros PAGADOS (dinero que salió realmente del banco)
   const totalRetirosEfectuados = retirosPagados || 0;
