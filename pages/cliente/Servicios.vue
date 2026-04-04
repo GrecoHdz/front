@@ -782,8 +782,16 @@
                   label="banco"
                   track-by="id_cuenta"
                   class="multiselect-custom"
+                  :class="{ 'multiselect--active': selectedAccountObject }"
+                  :select-label="''"
+                  :deselect-label="''"
+                  :selected-label="''"
                   :custom-label="getAccountLabel"
-                />
+                >
+                  <template #singleLabel="{ option }">
+                    <span class="text-xs truncate font-bold">{{ getAccountLabel(option) }}</span>
+                  </template>
+                </multiselect>
 
                 <div v-if="getSelectedAccount" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
                   <div class="flex justify-between items-center gap-2 mb-1">
@@ -911,8 +919,16 @@
                   label="banco"
                   track-by="id_cuenta"
                   class="multiselect-custom taxi-select"
+                  :class="{ 'multiselect--active': selectedAccountObject }"
+                  :select-label="''"
+                  :deselect-label="''"
+                  :selected-label="''"
                   :custom-label="getAccountLabel"
-                />
+                >
+                  <template #singleLabel="{ option }">
+                    <span class="text-xs truncate font-bold text-blue-900 dark:text-blue-100">{{ getAccountLabel(option) }}</span>
+                  </template>
+                </multiselect>
 
                 <div v-if="getSelectedAccount" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
                   <div class="flex justify-between items-center gap-2 mb-1">
@@ -1040,8 +1056,16 @@
                   label="banco"
                   track-by="id_cuenta"
                   class="multiselect-custom taxi-select"
+                  :class="{ 'multiselect--active': selectedAccountObject }"
+                  :select-label="''"
+                  :deselect-label="''"
+                  :selected-label="''"
                   :custom-label="getAccountLabel"
-                />
+                >
+                  <template #singleLabel="{ option }">
+                    <span class="text-xs truncate font-bold text-blue-900 dark:text-blue-100">{{ getAccountLabel(option) }}</span>
+                  </template>
+                </multiselect>
 
                 <div v-if="getSelectedAccount" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
                   <div class="flex justify-between items-center gap-2 mb-1">
@@ -2155,84 +2179,85 @@ body {
   z-index: 10;
 }
 
-.multiselect-custom .multiselect__tags {
-  min-height: 44px;
-  padding: 8px 40px 8px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background-color: #f9fafb;
-  font-size: 16px;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+.multiselect-custom :deep(.multiselect__tags) {
+  min-height: 46px !important;
+  padding: 10px 40px 10px 12px !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem !important;
+  background-color: rgb(249 250 251) !important;
+  font-size: 16px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
 }
 
-.dark .multiselect-custom .multiselect__tags {
-  background-color: #374151;
-  border-color: #4b5563;
-  color: white;
+.dark .multiselect-custom :deep(.multiselect__tags) {
+  background-color: rgb(55 65 81) !important;
+  border-color: rgb(75 85 99) !important;
+  color: white !important;
 }
 
-.multiselect-custom .multiselect__tags:hover {
-  border-color: #d1d5db;
+.multiselect-custom :deep(.multiselect__tags:hover) {
+  border-color: #d1d5db !important;
 }
 
-.dark .multiselect-custom .multiselect__tags:hover {
-  border-color: #6b7280;
+.dark .multiselect-custom :deep(.multiselect__tags:hover) {
+  border-color: #6b7280 !important;
 }
 
-.multiselect-custom.multiselect--active .multiselect__tags {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.multiselect-custom.multiselect--active :deep(.multiselect__tags) {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
 }
 
-.multiselect-custom .multiselect__placeholder {
-  margin-bottom: 0;
-  padding: 0;
-  color: #9ca3af;
-  font-size: 16px;
+.multiselect-custom :deep(.multiselect__placeholder) {
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  color: #9ca3af !important;
+  font-size: 16px !important;
 }
 
-.dark .multiselect-custom .multiselect__placeholder {
-  color: #6b7280;
+.dark .multiselect-custom :deep(.multiselect__placeholder) {
+  color: #6b7280 !important;
 }
 
-.multiselect-custom .multiselect__single {
-  margin-bottom: 0;
-  padding: 0;
-  color: #111827;
-  font-size: 16px;
-  font-weight: 500;
+.multiselect-custom :deep(.multiselect__single) {
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  color: #111827 !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  background: transparent !important;
 }
 
-.dark .multiselect-custom .multiselect__single {
-  color: white;
+.dark .multiselect-custom :deep(.multiselect__single) {
+  color: white !important;
 }
 
-.multiselect-custom .multiselect__select {
-  padding: 8px 12px;
+.multiselect-custom :deep(.multiselect__select) {
+  padding: 8px 12px !important;
 }
 
-.multiselect-custom .multiselect__select::before {
-  border-color: #6b7280 transparent transparent;
-  top: 65%;
+.multiselect-custom :deep(.multiselect__select:before) {
+  border-color: #6b7280 transparent transparent !important;
+  top: 65% !important;
 }
 
-.dark .multiselect-custom .multiselect__select::before {
-  border-color: #9ca3af transparent transparent;
+.dark .multiselect-custom :deep(.multiselect__select:before) {
+  border-color: #9ca3af transparent transparent !important;
 }
 
-.multiselect-custom .multiselect__content-wrapper {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  margin-top: 4px;
-  z-index: 50;
+.multiselect-custom :deep(.multiselect__content-wrapper) {
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 4px !important;
+  z-index: 50 !important;
 }
 
-.dark .multiselect-custom .multiselect__content-wrapper {
-  background-color: #1f2937;
-  border-color: #374151;
+.dark .multiselect-custom :deep(.multiselect__content-wrapper) {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
 }
 
 .multiselect-custom .multiselect__content {
@@ -2245,43 +2270,43 @@ body {
   padding: 0;
 }
 
-.multiselect-custom .multiselect__option {
-  padding: 12px 16px;
-  min-height: 44px;
-  font-size: 16px;
-  cursor: pointer;
-  color: #374151;
-  transition: all 0.2s ease;
+.multiselect-custom :deep(.multiselect__option) {
+  padding: 12px 16px !important;
+  min-height: 44px !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  color: #374151 !important;
+  transition: all 0.2s ease !important;
 }
 
-.dark .multiselect-custom .multiselect__option {
-  color: #e5e7eb;
+.dark .multiselect-custom :deep(.multiselect__option) {
+  color: #e5e7eb !important;
 }
 
-.multiselect-custom .multiselect__option:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+.multiselect-custom :deep(.multiselect__option:hover) {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
 }
 
-.dark .multiselect-custom .multiselect__option:hover {
-  background-color: #374151;
-  color: white;
+.dark .multiselect-custom :deep(.multiselect__option:hover) {
+  background-color: #374151 !important;
+  color: white !important;
 }
 
-.multiselect-custom .multiselect__option--selected {
-  background-color: #dbeafe;
-  color: #1e40af;
-  font-weight: 600;
+.multiselect-custom :deep(.multiselect__option--selected) {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+  font-weight: 600 !important;
 }
 
-.dark .multiselect-custom .multiselect__option--selected {
-    background-color: #4b5563;
-    color: #f9fafb;
+.dark .multiselect-custom :deep(.multiselect__option--selected) {
+    background-color: #4b5563 !important;
+    color: #f9fafb !important;
 }
 
-.multiselect-custom .multiselect__option--highlight {
-  background-color: #3b82f6;
-  color: white;
+.multiselect-custom :deep(.multiselect__option--highlight) {
+  background-color: #3b82f6 !important;
+  color: white !important;
 }
 
 .multiselect-custom .multiselect__option--highlight::after {
