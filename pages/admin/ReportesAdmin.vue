@@ -4672,7 +4672,7 @@ const generarReporteFinanciero = async (doc, { membershipData, visitData, servic
       [{ content: '(-) Pasivos por Cashback', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalCashbackLocal)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
       [{ content: '(-) Pasivos por Retiros', styles: { fontStyle: 'normal', textColor: [220, 38, 38], fontSize: 9 } }, { content: `-${formatCurrency(totalRetirosEfectuados)}`, styles: { fontStyle: 'normal', textColor: [220, 38, 38], halign: 'right', fontSize: 9 } }],
       [{ content: 'Total Ingresos App', styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], fontSize: 9 } }, 
-       { content: formatCurrency(totalIngresos - totalCashbackLocal - totalRetirosEfectuados), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }],
+       { content: formatCurrency(totalIngresos), styles: { fontStyle: 'bold', fillColor: [220, 252, 231], textColor: [0, 0, 0], halign: 'right', fontSize: 9 } }],
      ],
     theme: 'grid',
     headStyles: { fillColor: [75, 85, 99], textColor: 255, fontSize: 8 },
