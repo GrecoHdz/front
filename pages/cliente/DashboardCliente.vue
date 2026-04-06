@@ -256,14 +256,15 @@
               </div>
 
               <button type="submit" 
-                      :disabled="!isFormValid"
+                      :disabled="!isFormValid || isSubmittingService"
                       :class="[
                         'w-full py-3 backdrop-blur-sm border font-black text-base rounded-xl transition-all duration-300',
-                        isFormValid 
+                        (isFormValid && !isSubmittingService) 
                           ? 'bg-white/20 border-white/30 text-white hover:bg-white/30 hover:scale-105 cursor-pointer' 
                           : 'bg-white/10 border-white/10 text-white/50 cursor-not-allowed'
                       ]">
-                Solicitar Ahora
+                <span v-if="isSubmittingService">Solicitando...</span>
+                <span v-else>Solicitar Ahora</span>
               </button>
             </form>
           </div>
@@ -1292,6 +1293,7 @@ useHead({
 const isLoading = ref(true)
 const isLoadingProgress = ref(false)
 const isLoadingServices = ref(false)
+const isSubmittingService = ref(false)
 
 // Datos del usuario
 const userData = ref({
@@ -2752,7 +2754,11 @@ const resetCredito = async () => {
 
 // Event handlers
 const handleRequestService = async () => {
+  if (isSubmittingService.value) return;
+  
   try {
+    isSubmittingService.value = true;
+    
     if (!serviceFormData.value.type || !serviceFormData.value.description || 
         !serviceFormData.value.colonia || !serviceFormData.value.direccion) {
       throw new Error('Por favor completa todos los campos requeridos')
@@ -2890,6 +2896,8 @@ const handleRequestService = async () => {
   } catch (error) {
     console.error('Error al enviar la solicitud de servicio:', error)
     showToast('Error', 'No se pudo enviar la solicitud. Por favor, inténtalo mas tarde.', 'error')
+  } finally {
+    isSubmittingService.value = false;
   }
 }
 
