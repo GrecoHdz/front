@@ -2539,6 +2539,13 @@ onMounted(async () => {
     // Guardar una copia de los datos originales para detectar cambios
     if (user.value) {
       originalUserData.value = { ...user.value };
+      
+      // Mostrar toast si no tiene foto de perfil
+      if (!user.value.imagen_url) {
+        setTimeout(() => {
+          showInfo('¡Completa tu perfil! Sube una foto para que sea más fácil identificarte👤');
+        }, 1000);
+      }
     }
 
     // Verificar el hash de la URL después de cargar todo
