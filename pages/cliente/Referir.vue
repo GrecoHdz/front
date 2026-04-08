@@ -816,7 +816,6 @@ const formatDate = (dateString, monthOnly = false) => {
     year: 'numeric'
   })
 }
- Broadway 
 
 const formatCurrency = (amount) => {
   return parseFloat(amount).toLocaleString('es-HN', {
@@ -867,7 +866,6 @@ const getNoWithdrawalsMessage = () => {
     return t('referral.no_withdrawals')
   }
 }
- Broadway 
 
 // =========================
 // FUNCIONES DE CARGA DE DATOS
@@ -937,7 +935,8 @@ const loadReferralData = async () => {
 
     // Generar código de referido
     userReferralCode.value = `HR${user.id_usuario.toString().padStart(6, '0')}`
-    
+  } catch (error) {
+    console.error('Error al cargar datos de referidos:', error)
     showError(t('referral.messages.load_error'))
   }
 }

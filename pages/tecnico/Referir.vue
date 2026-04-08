@@ -1137,6 +1137,8 @@ const loadMoreReferrals = async () => {
 // =========================
 
 const copyReferralLink = async () => {
+  try {
+    await navigator.clipboard.writeText(referralLink.value)
     showSuccess(t('technician.referral.messages.copy_success'))
   } catch (error) {
     const textArea = document.createElement('textarea')

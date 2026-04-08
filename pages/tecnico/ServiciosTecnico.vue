@@ -619,12 +619,7 @@
                 <!-- Submit Button -->
                 <button type="submit" 
                         :disabled="isSubmittingQuotation || (quotationForm.monto_manodeobra === null || quotationForm.monto_manodeobra === undefined || quotationForm.monto_manodeobra === '')"
-                        :class="[
-                          'group relative w-full py-4 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50',
-                          selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip 
-                            ? 'bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg shadow-amber-500/30' 
-                            : 'bg-gray-900'
-                        ]">
+                        class="group relative w-full py-4 bg-gray-900 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50">
                   <div v-if="!isSubmittingQuotation" class="relative z-10 flex items-center justify-center space-x-2">
                     <span class="uppercase tracking-[0.2em] text-xs">
                       {{ $t('technician.services.modal.confirm_price') }}
@@ -1333,7 +1328,6 @@ const mapSolicitudToService = (solicitud) => {
       formattedAddress: `${solicitud.direccion_precisa || ''}${solicitud.colonia ? ', ' + solicitud.colonia : ''}`.trim() || 'Sin dirección especificada'
     },
     // Datos adicionales de la API
-    isFirstTrip: solicitud.es_primer_viaje,
     cityId: solicitud.id_ciudad,
     technicianId: solicitud.id_tecnico,
     payForVisit: solicitud.pagar_visita,

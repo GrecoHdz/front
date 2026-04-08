@@ -169,7 +169,7 @@
             <!-- Value Proposition: Money is not lost -->
             <div class="mb-4 p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 text-center">
               <h4 class="text-xl font-black text-emerald-400 mb-2">{{ $t('money_not_lost') }}</h4>
-              <p class="text-sm text-emerald-100/80 leading-relaxed" v-html="$t('money_not_lost_desc').replace('Crédito Real', '<span class=\"font-bold text-white\">Crédito Real</span>').replace('pagar cualquier servicio.', '<span class=\"font-bold text-white\">pagar cualquier servicio.</span>')">
+              <p class="text-sm text-emerald-100/80 leading-relaxed" v-html="$t('money_not_lost_desc').replace('Crédito Real', '<span class=\'font-bold text-white\'>Crédito Real</span>').replace('pagar cualquier servicio.', '<span class=\'font-bold text-white\'>pagar cualquier servicio.</span>')">
               </p>
             </div>
 

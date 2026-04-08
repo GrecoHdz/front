@@ -1477,6 +1477,7 @@
                   <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">{{ $t('services_page.payment.total_pay') }}</p>
                   <div class="text-3xl font-black tabular-nums transition-colors" :class="taxiPaymentMethod === 'transferencia' && Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0) ? 'line-through text-white/50' : 'text-white'">
                     L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
+                  </div>
                   <div v-if="taxiPaymentMethod === 'transferencia' && Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-yellow-400/80 uppercase">
                     {{ $t('services_page.modals.app_payment') }}: <span class="text-xs text-yellow-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
                   </div>
@@ -1493,10 +1494,14 @@
                   <span class="text-xs font-black text-yellow-800 dark:text-yellow-400">+L. {{ formatCurrency(cashbackAmount) }}</span>
                 </div>
                 <p class="text-[9px] text-yellow-700/70 dark:text-yellow-500/70 font-medium leading-tight">
+                  * {{ $t('services_page.payment.cashback_desc') }}
+                </p>
+              </div>
+
               <!-- Acciones -->
               <div class="flex gap-2 pt-2">
                 <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
-                  CANCELA
+                  {{ $t('common.cancel') }}
                 </button>
                 <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
                   <span v-if="!isProcessingQuotation">ACEPTAR VIAJE</span>
