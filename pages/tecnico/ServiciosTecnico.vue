@@ -48,7 +48,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden">
                   <div v-if="currentTab === 'active'" class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
                   <div class="text-xl font-black text-blue-600 dark:text-blue-400 mb-0.5">{{ apiResponse.activas }}</div>
-                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">{{ $t('technician.services.tabs.active') }}</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Activos</p>
                 </div>
               </div>
               <div @click="currentTab = 'finished'" 
@@ -57,7 +57,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden">
                   <div v-if="currentTab === 'finished'" class="absolute bottom-0 left-0 right-0 h-1 bg-green-500"></div>
                   <div class="text-xl font-black text-green-600 dark:text-green-400 mb-0.5">{{ apiResponse.finalizadas }}</div>
-                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">{{ $t('technician.services.tabs.finished') }}</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Finalizados</p>
                 </div>
               </div>
             </div>
@@ -95,12 +95,14 @@
                   </div>
                   <div class="flex flex-wrap items-center justify-end gap-1.5 max-w-[50%]">
                     <span v-if="isCashService(service.description)" class="text-[8px] whitespace-nowrap bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter flex items-center shadow-sm border border-green-200/50 dark:border-green-700/50">
-                      💰 {{ $t('technician.services.badges.cash_payment') }}
+                      💰 Pago Efectivo
                     </span>
                     <span class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm" :class="getStatusColor(service.rawStatus)">
                       {{ service.status }}
                     </span>
-
+                    <span v-if="service.isFirstTrip" class="text-[8px] whitespace-nowrap bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter flex items-center shadow-sm border border-amber-200/50 dark:border-amber-700/50 animate-pulse">
+                      ✨ Primer Viaje
+                    </span>
                   </div>
                 </div>
 
@@ -108,21 +110,21 @@
                 <div class="grid grid-cols-2 gap-2 mb-3">
                   <div v-if="service.title === 'Taxi VIP'" class="grid grid-cols-2 gap-2 col-span-2">
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
-                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">📍 {{ $t('technician.services.labels.pickup') }}</p>
+                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">📍 Recogida</p>
                       <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.location?.neighborhood }}</p>
                     </div>
                     <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
-                      <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-0.5">🏁 {{ $t('technician.services.labels.destination') }}</p>
+                      <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-0.5">🏁 Destino</p>
                       <p class="font-bold text-emerald-900 dark:text-emerald-200 text-[10px] truncate">{{ service.location?.address }}</p>
                     </div>
                   </div>
                   <div v-else class="grid grid-cols-2 gap-2 col-span-2">
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
-                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">👤 {{ $t('technician.services.labels.customer') }}</p>
+                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">👤 Cliente</p>
                       <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.customer.name }}</p>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg border border-gray-100 dark:border-gray-600/50">
-                      <p class="text-gray-600 dark:text-gray-400 text-[10px] font-black uppercase mb-0.5">📍 {{ $t('technician.services.labels.location') }}</p>
+                      <p class="text-gray-600 dark:text-gray-400 text-[10px] font-black uppercase mb-0.5">📍 Ubicación</p>
                       <p class="font-bold text-gray-900 dark:text-white text-[10px] truncate">{{ service.location?.neighborhood }}</p>
                     </div>
                   </div>
@@ -145,7 +147,7 @@
                         : 'text-blue-600 dark:text-blue-400',
                       'text-[10px] font-black uppercase tracking-widest'
                     ]">
-                      {{ service.rawStatus === 'asignado' ? (isBarberíaService(service.title) ? $t('technician.services.labels.details') : $t('technician.services.labels.quote')) : (service.rawStatus === 'en_proceso' ? $t('technician.services.labels.finish') : $t('technician.services.labels.view_details')) }}
+                      {{ service.rawStatus === 'asignado' ? (isBarberíaService(service.title) ? 'Detalles' : 'Cotizar') : (service.rawStatus === 'en_proceso' ? 'Finalizar' : 'Ver detalles') }}
                     </span>
                     <svg class="w-3 h-3 text-blue-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -160,14 +162,14 @@
               <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-2xl mx-auto mb-3 flex items-center justify-center opacity-50">
                 <span class="text-2xl">�</span>
               </div>
-              <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">{{ $t('technician.services.no_services') }}</h3>
+              <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">No hay servicios</h3>
             </div>
 
             <!-- Load More -->
             <div v-if="hasMore && !isLoading" class="mt-6">
               <button @click="loadServices(true)" :disabled="isLoadingMore"
                 class="w-full py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 shadow-sm transition-all flex items-center justify-center space-x-2">
-                <span>{{ isLoadingMore ? $t('common.loading') : $t('common.load_more') }}</span>
+                <span>{{ isLoadingMore ? 'Cargando...' : 'Cargar más' }}</span>
                 <svg v-if="!isLoadingMore" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
               </button>
             </div>
@@ -222,9 +224,11 @@
                   <div>
                     <div class="flex items-center space-x-2">
                       <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">{{ selectedService.title }}</h3>
-
+                      <span v-if="selectedService?.isFirstTrip" class="text-[8px] sm:text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter animate-pulse border border-amber-200/50">
+                        ✨ Primer Viaje
+                      </span>
                       <span v-if="isCashService(selectedService.description)" class="text-[8px] sm:text-[9px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter border border-green-200/50">
-                        💰 {{ $t('technician.services.badges.cash_payment') }}
+                        💰 Pago Efectivo
                       </span>
                     </div>
                     <p class="text-xs text-gray-600 dark:text-gray-400">#{{ selectedService.serviceNumber }}</p>
@@ -242,7 +246,7 @@
             <div class="p-3 sm:p-4">
               <!-- Customer Details -->
               <div class="mb-4 sm:mb-6">
-                <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">{{ $t('technician.services.modal.customer_info') }}</h4>
+                <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">Información del Cliente</h4>
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-2.5 sm:p-3 rounded-lg sm:rounded-xl">
                   <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2 sm:gap-3">
@@ -276,16 +280,16 @@
               <!-- Location Details -->
               <div class="mb-4 sm:mb-6">
                 <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">
-                  {{ isBarberíaService(selectedService.title) ? $t('technician.services.modal.location_cut') : $t('technician.services.modal.location_service') }}
+                  {{ isBarberíaService(selectedService.title) ? 'Ubicación del Corte' : 'Ubicación del Servicio' }}
                 </h4>
                 
                 <div v-if="selectedService.title === 'Taxi VIP'" class="grid grid-cols-2 gap-3">
                   <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border-l-4 border-blue-500">
-                    <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-1">📍 {{ $t('technician.services.labels.pickup') }}</p>
+                    <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-1">📍 Recogida</p>
                     <p class="font-bold text-gray-900 dark:text-white text-[12px] sm:text-xs md:text-base">{{ selectedService.location?.neighborhood }}</p>
                   </div>
                   <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border-l-4 border-emerald-500">
-                    <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-1">🏁 {{ $t('technician.services.labels.destination') }}</p>
+                    <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-1">🏁 Destino</p>
                     <p class="font-bold text-gray-900 dark:text-white text-[12px] sm:text-xs md:text-base">{{ selectedService.location?.address }}</p>
                   </div>
                 </div>
@@ -299,7 +303,7 @@
               <!-- Service Description -->
               <div v-if="selectedService.title !== 'Taxi VIP'" class="mb-4 sm:mb-6">
                 <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">
-                  {{ isBarberíaService(selectedService.title) ? $t('technician.services.modal.details_cut') : $t('technician.services.modal.problem_description') }}
+                  {{ isBarberíaService(selectedService.title) ? 'Detalles del Corte' : 'Descripción del Problema' }}
                 </h4>
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 sm:p-3 rounded-lg">
                   <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm">{{ selectedService.description }}</p>
@@ -308,7 +312,7 @@
 
               <!-- Calificación del Servicio -->
               <div v-if="['finalizado', 'calificado'].includes(selectedService.rawStatus)" class="mb-4 sm:mb-6">
-                <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">{{ $t('technician.services.modal.customer_rating') }}</h4>
+                <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">Valoración del Cliente</h4>
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-3 sm:p-4 rounded-lg">
                   <template v-if="selectedService.calificacion">
                     <div class="flex items-center mb-2">
@@ -334,7 +338,7 @@
                     </p>
                   </template>
                   <p v-else class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
-                    {{ $t('technician.services.modal.no_rating') }}
+                    El cliente no ha dejado ninguna valoración.
                   </p>
                 </div>
               </div>
@@ -346,7 +350,7 @@
                   <button 
                     @click="openQuotationModal" 
                     class="w-full py-2.5 sm:py-3 bg-blue-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors text-sm">
-                    {{ isBarberíaService(selectedService.title) ? $t('technician.services.modal.set_price') : $t('technician.services.modal.create_quotation') }}
+                    {{ isBarberíaService(selectedService.title) ? '💇 Poner Precio' : '📋 Crear Cotización' }}
                   </button>
                   
                   <button 
@@ -360,7 +364,7 @@
                   <button 
                     @click="openCompleteConfirmation(selectedService, $event)" 
                     class="w-full py-2.5 sm:py-3 bg-green-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-green-700 transition-colors text-sm">
-                    {{ $t('technician.services.modal.complete_service') }}
+                    ✅ Completar Servicio
                   </button>
                   
                   <button 
@@ -374,7 +378,7 @@
                   <button 
                     @click="openQuotationModal" 
                     class="w-full py-2.5 sm:py-3 bg-blue-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors text-sm">
-                    {{ isBarberíaService(selectedService.title) ? $t('technician.services.modal.edit_details') : $t('technician.services.modal.edit_quotation') }}
+                    {{ isBarberíaService(selectedService.title) ? '✏️ Editar Detalles' : '✏️ Editar Cotización' }}
                   </button>
                 </template>
               </div>
@@ -419,7 +423,7 @@
             <!-- Modal Header -->
             <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 rounded-t-xl sm:rounded-t-2xl">
               <div class="flex items-center justify-between">
-                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">{{ $t('technician.services.modal.create_quotation_title') }}</h3>
+                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Crear Cotización</h3>
                 <button @click="closeQuotationModal" class="text-gray-400 hover:text-gray-600">
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -434,18 +438,18 @@
                 <!-- Comentario/Diagnóstico -->
                 <div>
                   <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                    {{ isBarberíaService(selectedService.title) ? $t('technician.services.modal.barber_notes') : $t('technician.services.modal.diagnosis') }}
+                    {{ isBarberíaService(selectedService.title) ? 'Notas del Barbero' : 'Diagnóstico' }}
                   </label>
                   <textarea v-model="quotationForm.comentario" 
                             rows="4" 
                             required
                             class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                            :placeholder="isBarberíaService(selectedService.title) ? $t('technician.services.modal.barber_notes') : $t('technician.services.modal.diagnosis')"></textarea>
+                            :placeholder="isBarberíaService(selectedService.title) ? 'Escriba los detalles del servicio realizado' : 'Escriba su Diagnóstico'"></textarea>
                 </div>
 
                 <!-- Monto Mano de Obra -->
                 <div>
-                  <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{{ $t('technician.services.modal.labor_cost') }}</label>
+                  <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Monto Mano de Obra (L.)</label>
                   <input v-model.number="quotationForm.monto_manodeobra" 
                          type="number" 
                          step="1" 
@@ -464,7 +468,7 @@
                          min="0"
                          class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
                          placeholder="0">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('technician.services.modal.materials_note') }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Si aplica, este monto es solo para referencia del cliente y no suma al total a pagar por el cliente</p>
                 </div>
 
                 <!-- Total -->
@@ -487,13 +491,13 @@
                 <button type="submit" 
                         :disabled="isSubmittingQuotation"
                         class="w-full py-2.5 sm:py-3 bg-blue-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm">
-                  <span v-if="!isSubmittingQuotation">{{ $t('technician.services.modal.send_quotation') }}</span>
+                  <span v-if="!isSubmittingQuotation">Enviar Cotización</span>
                   <span v-else class="flex items-center justify-center">
                     <svg class="animate-spin -ml-1 mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {{ $t('common.sending') }}
+                    Enviando...
                   </span>
                 </button>
               </form>
@@ -544,8 +548,10 @@
                   </div>
                   <div>
                     <div class="flex items-center space-x-2">
-                      <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('technician.services.modal.taxi_price_title') }}</h3>
-
+                      <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">Precio de Viaje</h3>
+                      <span v-if="selectedService?.isFirstTrip" class="text-[8px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter animate-pulse border border-amber-200/50">
+                        ✨ Primer
+                      </span>
                     </div>
                     <p class="text-[10px] text-gray-400 font-bold">Taxi VIP • REF: #{{ selectedService?.serviceNumber }}</p>
                   </div>
@@ -566,14 +572,14 @@
                    <div class="flex items-start space-x-3">
                       <div class="mt-1 w-2 h-2 rounded-full bg-blue-500 ring-4 ring-blue-500/20"></div>
                       <div class="min-w-0">
-                         <p class="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">{{ $t('technician.services.labels.pickup') }}</p>
+                         <p class="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Recogida</p>
                          <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ selectedService?.location?.neighborhood }}</p>
                       </div>
                    </div>
                    <div class="flex items-start space-x-3 mt-2 border-t border-blue-100/30 dark:border-blue-800/30 pt-2">
                       <div class="mt-1 w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></div>
                       <div class="min-w-0">
-                         <p class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">{{ $t('technician.services.labels.destination') }}</p>
+                         <p class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Destino</p>
                          <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ selectedService?.location?.address }}</p>
                       </div>
                    </div>
@@ -581,7 +587,7 @@
 
                 <!-- Price Field -->
                 <div class="relative">
-                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">{{ $t('technician.services.modal.labor_cost') }}</label>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Monto del Viaje (L.)</label>
                   <div class="relative group">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400 group-focus-within:text-blue-500 transition-colors">L.</div>
                     <input v-model.number="quotationForm.monto_manodeobra" 
@@ -589,25 +595,33 @@
                            step="1" 
                            min="0" 
                            required
-                           class="w-full pl-12 pr-4 py-4 border-2 border-transparent focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-2xl font-black transition-all outline-none bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500"
+                           :readonly="selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip"
+                           :class="[
+                             'w-full pl-12 pr-4 py-4 border-2 border-transparent focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-2xl font-black transition-all outline-none',
+                             selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip 
+                               ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 cursor-not-allowed' 
+                               : 'bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500'
+                           ]"
                            placeholder="0">
                   </div>
-
+                  <p v-if="selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip" class="text-[9px] font-bold text-amber-600 dark:text-amber-400 mt-2 px-1 uppercase tracking-wider">
+                    ✨ ¡Primer viaje gratis! El monto está fijado en 0 por sistema.
+                  </p>
                 </div>
 
                 <!-- Comment Field -->
                 <div>
-                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">{{ $t('technician.services.modal.trip_notes') }}</label>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Notas del Viaje</label>
                   <textarea v-model="quotationForm.comentario" 
                             rows="2" 
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-sm font-medium text-gray-900 dark:text-white transition-all outline-none resize-none" 
-                            :placeholder="$t('technician.services.modal.trip_notes_placeholder')"></textarea>
+                            placeholder="Ej: Ford Escape Gris, llego en 5 min..."></textarea>
                 </div>
 
                 <!-- Earning Preview -->
                 <div class="bg-blue-600 rounded-2xl p-4 shadow-xl shadow-blue-500/30 text-white">
                   <div class="flex justify-between items-center mb-1 opacity-80">
-                    <span class="text-[10px] font-black uppercase tracking-widest">{{ $t('technician.services.modal.estimated_earning') }}</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Tu Ganancia Estimada</span>
                     <span class="text-[10px] font-bold">({{ 100 - commissionPercentage }}%)</span>
                   </div>
                   <div class="flex justify-between items-end">
@@ -619,17 +633,22 @@
                 <!-- Submit Button -->
                 <button type="submit" 
                         :disabled="isSubmittingQuotation || (quotationForm.monto_manodeobra === null || quotationForm.monto_manodeobra === undefined || quotationForm.monto_manodeobra === '')"
-                        class="group relative w-full py-4 bg-gray-900 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50">
+                        :class="[
+                          'group relative w-full py-4 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50',
+                          selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip 
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg shadow-amber-500/30' 
+                            : 'bg-gray-900'
+                        ]">
                   <div v-if="!isSubmittingQuotation" class="relative z-10 flex items-center justify-center space-x-2">
                     <span class="uppercase tracking-[0.2em] text-xs">
-                      {{ $t('technician.services.modal.confirm_price') }}
+                      {{ selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip ? 'Confirmar Viaje Gratuito' : 'Confirmar Precio' }}
                     </span>
                     <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                   </div>
                   <div v-else class="flex items-center justify-center">
                     <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                   </div>
-                  <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity translate-y-full group-hover:translate-y-0 duration-300"></div>
+                  <div v-if="!(selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip)" class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity translate-y-full group-hover:translate-y-0 duration-300"></div>
                 </button>
               </form>
             </div>
@@ -678,7 +697,7 @@
                     💇
                   </div>
                   <div>
-                    <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('technician.services.modal.details_cut') }}</h3>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">Detalles del Corte</h3>
                     <p class="text-[10px] text-gray-400 font-bold">Barbería • REF: #{{ selectedService?.serviceNumber }}</p>
                   </div>
                 </div>
@@ -696,7 +715,7 @@
 
                 <!-- Price Field -->
                 <div class="relative">
-                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">{{ $t('technician.services.modal.labor_cost') }}</label>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Precio del Corte (L.)</label>
                   <div class="relative group">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400 group-focus-within:text-amber-500 transition-colors">L.</div>
                     <input v-model.number="quotationForm.monto_manodeobra" 
@@ -711,7 +730,7 @@
 
                 <!-- Comment Field -->
                 <div>
-                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">{{ $t('technician.services.modal.barber_notes') }}</label>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Notas del Barbero</label>
                   <textarea v-model="quotationForm.comentario" 
                             rows="3" 
                             required
@@ -722,7 +741,7 @@
                 <!-- Earning Preview -->
                 <div class="bg-amber-600 rounded-2xl p-4 shadow-xl shadow-amber-500/30 text-white">
                   <div class="flex justify-between items-center mb-1 opacity-80">
-                    <span class="text-[10px] font-black uppercase tracking-widest">{{ $t('technician.services.modal.estimated_earning') }}</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Tu Ganancia</span>
                     <span class="text-[10px] font-bold">({{ 100 - commissionPercentage }}%)</span>
                   </div>
                   <div class="flex justify-between items-end">
@@ -849,7 +868,7 @@
                     min="0"
                     class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
                     placeholder="0.00">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('technician.services.modal.materials_note') }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Este monto es solo para referencia del cliente y no suma al total a pagar por el cliente</p>
                 </div>
 
                 <!-- Total -->
@@ -912,9 +931,9 @@
             <div class="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-3 sm:mb-4">
               <span class="text-green-600 dark:text-green-400 text-lg sm:text-xl">✅</span>
             </div>
-            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">{{ $t('technician.services.modal.complete_service') }}</h3>
+            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">¿Completar servicio?</h3>
             <p class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">
-              {{ $t('technician.services.modal.complete_confirmation_desc') || '¿Deseas marcar este servicio como completado? Puedes agregar un comentario opcional.' }}
+              ¿Deseas marcar este servicio como completado? Puedes agregar un comentario opcional.
             </p>
             
             <!-- Comentario opcional -->
@@ -935,7 +954,7 @@
               <button 
                 @click="confirmCompleteService"
                 class="flex-1 px-3 sm:px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center text-sm">
-                <span v-if="!isCompleting">{{ $t('technician.services.modal.yes_complete') || 'Sí, completar' }}</span>
+                <span v-if="!isCompleting">Sí, completar</span>
                 <svg v-else class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -971,12 +990,12 @@
               <button 
                 @click="showCancelConfirmation = false"
                 class="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm">
-                {{ $t('common.cancel') }}
+                No, mantener
               </button>
               <button 
                 @click="cancelService"
                 class="flex-1 px-3 sm:px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors text-sm">
-                {{ $t('common.confirm_cancel') || 'Sí, cancelar' }}
+                Sí, cancelar
               </button>
             </div>
           </div>
@@ -1019,7 +1038,6 @@
 </template>
 
 <script setup>
-import { useI18n } from 'vue-i18n'
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useHead, useCookie } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
@@ -1030,7 +1048,6 @@ import Toast from '~/components/ui/Toast.vue'
 const emit = defineEmits(['filterChange', 'dateFilterChange'])
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
-const { locale, t } = useI18n()
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
@@ -1038,9 +1055,9 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: t('technician.dashboard.seo.title') + ' - Servicios',
+  title: 'MiSeguro - Dashboard Técnico',
   meta: [
-    { name: 'description', content: t('technician.dashboard.seo.description') }, 
+    { name: 'description', content: 'Panel de Técnico - Gestiona tus servicios asignados' }, 
     { name: 'keywords', content: 'MiSeguro, Técnico, Servicios, Asignados' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
@@ -1220,7 +1237,7 @@ const filteredServices = computed(() => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const options = { year: 'numeric', month: 'short', day: 'numeric' }
-  return new Date(dateString).toLocaleDateString(locale.value === 'es' ? 'es-HN' : 'en-US', options)
+  return new Date(dateString).toLocaleDateString('es-HN', options)
 }
 
 const formatDateDDMMYY = (dateString) => {
@@ -1253,9 +1270,9 @@ const getTimeAgo = (dateString) => {
   const date = new Date(dateString)
   const diffInHours = Math.floor((now - date) / (1000 * 60 * 60))
   
-  if (diffInHours < 1) return t('time.just_now')
-  if (diffInHours < 24) return t('time.hours_ago', { n: diffInHours })
-  return t('time.days_ago', { n: Math.floor(diffInHours / 24) })
+  if (diffInHours < 1) return 'Hace unos minutos'
+  if (diffInHours < 24) return `Hace ${diffInHours} horas`
+  return `Hace ${Math.floor(diffInHours / 24)} días`
 }
 
 // Helper: detects barberia service regardless of accent/case
@@ -1283,25 +1300,22 @@ const getServiceIcon = (estado, serviceTitle = '') => {
   return iconMap[estado] || '🔧'
 }
 
-const getStatusLabel = (apiStatus, title = '') => {
+const mapApiStatusToLocal = (apiStatus, title = '') => {
   const isTaxi = title === 'Taxi VIP';
   const isBarberia = isBarberíaService(title);
-  
-  // Specific technician labels for certain statuses
-  if (apiStatus === 'pendiente_asignacion') return t('services.status.quotation_rejected')
-  if (apiStatus === 'pendiente_cotizacion') {
-    if (isTaxi) return t('services.status.fare_sent')
-    if (isBarberia) return t('services.status.details_sent')
-    return t('services.status.quotation_sent')
-  }
-  if (apiStatus === 'en_proceso') {
-    if (isTaxi) return t('services.status.trip_scheduled')
-    if (isBarberia) return t('services.status.haircut_in_progress')
-    return t('services.status.in_progress')
+  const statusMap = {
+    'pendiente_asignacion': 'Cotización Rechazada',
+    'asignado': 'Asignado',
+    'pendiente_cotizacion': isTaxi ? 'Tarifa Recibida' : (isBarberia ? 'Detalles Enviados' : 'Cotización Enviada'),
+    'en_proceso': isTaxi ? 'Viaje Programado' : (isBarberia ? 'Corte en Curso' : 'En Progreso'),
+    'pendiente_pagoservicio': 'Finalizado',
+    'verificando_pagoservicio': 'Finalizado',
+    'finalizado': 'Finalizado',
+    'calificado': 'Calificado',
+    'cancelado': 'Cancelado'
   }
   
-  // Default status labels
-  return t(`services.status.${apiStatus}`) || apiStatus
+  return statusMap[apiStatus] || 'Estado Desconocido'
 }
 
 const mapSolicitudToService = (solicitud) => {
@@ -1309,7 +1323,7 @@ const mapSolicitudToService = (solicitud) => {
     id: solicitud.id_solicitud,
     title: solicitud.servicio?.nombre || 'Servicio General',
     description: solicitud.descripcion || 'Sin descripción',
-    status: getStatusLabel(solicitud.estado || 'pendiente', solicitud.servicio?.nombre),
+    status: mapApiStatusToLocal(solicitud.estado || 'pendiente', solicitud.servicio?.nombre),
     rawStatus: solicitud.estado || 'pendiente',
     serviceNumber: `${formatDateDDMMYY(solicitud.fecha_solicitud)}-${solicitud.id_solicitud}`,
     icon: getServiceIcon(solicitud.estado, solicitud.servicio?.nombre),
@@ -1328,6 +1342,7 @@ const mapSolicitudToService = (solicitud) => {
       formattedAddress: `${solicitud.direccion_precisa || ''}${solicitud.colonia ? ', ' + solicitud.colonia : ''}`.trim() || 'Sin dirección especificada'
     },
     // Datos adicionales de la API
+    isFirstTrip: solicitud.es_primer_viaje,
     cityId: solicitud.id_ciudad,
     technicianId: solicitud.id_tecnico,
     payForVisit: solicitud.pagar_visita,
@@ -1410,7 +1425,7 @@ const loadServices = async (loadMore = false) => {
     if (!userCookieValue?.id_usuario) {
       console.error('No se encontró ID de usuario')
       showToast({
-        message: t('technician.services.messages.no_user_id'),
+        message: 'Error: No se encontró información del usuario',
         type: 'error'
       })
       return
@@ -1448,7 +1463,7 @@ const loadServices = async (loadMore = false) => {
   } catch (error) {
     console.error('Error al cargar servicios:', error)
     showToast({
-      message: t('technician.services.messages.load_error'),
+      message: 'Error al cargar los servicios. Intente de nuevo más tarde.',
       type: 'error'
     })
     
@@ -1486,7 +1501,7 @@ const loadServiceTypes = async () => {
   } catch (error) {
     console.error('Error al cargar tipos de servicio:', error)
     showToast({
-      message: t('technician.services.messages.type_load_error'),
+      message: 'No se pudieron cargar los tipos de servicio',
       type: 'error'
     })
   } finally {
@@ -1537,7 +1552,7 @@ const loadQuotationDetails = async () => {
       
       if (!cotizacionId) {
         console.error('La cotización no tiene un ID válido:', cotizacion)
-        showToast(t('technician.services.messages.quotation_load_error'), 'error')
+        showToast('Error: La cotización no tiene un ID válido', 'error')
         return
       }
       
@@ -1555,14 +1570,14 @@ const loadQuotationDetails = async () => {
       await nextTick()
     } else {
       showToast({
-        message: t('technician.services.messages.quotation_not_found'),
+        message: 'No se encontró la cotización para este servicio',
         type: 'warning'
       })
     }
   } catch (error) {
     console.error('Error al cargar la cotización:', error)
     showToast({
-      message: t('technician.services.messages.quotation_load_error'),
+      message: 'Error al cargar los detalles de la cotización',
       type: 'error'
     })
   } finally {
@@ -1604,7 +1619,7 @@ const openQuotationModal = async () => {
     }
     
     if (selectedService.value.title === 'Taxi VIP') {
-      quotationForm.value.monto_manodeobra = 0;
+      quotationForm.value.monto_manodeobra = selectedService.value.isFirstTrip ? 0 : 0;
       showTaxiQuotationModal.value = true
     } else if (isBarberíaService(selectedService.value.title)) {
       showBarberiaQuotationModal.value = true
@@ -1634,7 +1649,11 @@ const openCompleteConfirmation = (service, event) => {
   event.stopPropagation()
   currentServiceToComplete.value = service
   
-
+  // Si es primer viaje de Taxi VIP, completar directamente sin modal
+  if (service.title === 'Taxi VIP' && service.isFirstTrip) {
+    confirmCompleteService()
+    return
+  }
   
   completeServiceComment.value = ''
   showCompleteConfirmation.value = true
@@ -1652,7 +1671,7 @@ const submitQuotation = async () => {
   const isAmountInvalid = quotationForm.value.monto_manodeobra === null || quotationForm.value.monto_manodeobra === undefined || quotationForm.value.monto_manodeobra < 0
 
   if ((!isTaxi && isCommentEmpty) || isAmountInvalid) {
-    showToast(t('technician.services.messages.complete_all_fields'), 'error')
+    showToast('Por favor completa todos los campos requeridos', 'error')
     return
   }
 
@@ -1698,7 +1717,7 @@ const submitQuotation = async () => {
     } catch (error) {
     }
     
-    showToast(isBarberíaService(selectedService.value?.title) ? t('technician.services.messages.details_sent_success') : t('technician.services.messages.quotation_sent_success'), 'success')
+    showToast(`${selectedService.value?.title === 'Barbería' ? 'Detalles enviados' : 'Cotización enviada'} correctamente`, 'success')
     
     closeQuotationModal()
     showTaxiQuotationModal.value = false // Cerrar también el de taxi si se usó
@@ -1728,7 +1747,7 @@ const submitQuotation = async () => {
       }
     }
     
-    const errorMessage = error.response?._data?.message || t('technician.services.messages.quotation_process_error');
+    const errorMessage = error.response?._data?.message || 'Error al procesar la cotización. Por favor, intente de nuevo.';
     showToast(errorMessage, 'error');
     return false;
   } finally {
@@ -1834,14 +1853,15 @@ const confirmCompleteService = async () => {
   isCompleting.value = true
   
   try {
+    const isTaxiFirstTrip = currentServiceToComplete.value?.title === 'Taxi VIP' && currentServiceToComplete.value?.isFirstTrip;
     const isCashPayment = isCashService(currentServiceToComplete.value?.description);
-    const setAsFinalized = isCashPayment;
+    const setAsFinalized = isTaxiFirstTrip || isCashPayment;
     
     const response = await $api(`/solicitudservicio/${currentServiceToComplete.value.id}`, {
       method: 'PUT',
       body: {
         estado: setAsFinalized ? 'finalizado' : 'pendiente_pagoservicio',
-        comentario: completeServiceComment.value || (isCashPayment ? 'Servicio cobrado en efectivo' : 'Completado')
+        comentario: completeServiceComment.value || (isTaxiFirstTrip ? 'Primer viaje Taxi VIP completado' : (isCashPayment ? 'Servicio cobrado en efectivo' : 'Completado'))
       }
     })
     

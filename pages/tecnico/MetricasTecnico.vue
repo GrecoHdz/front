@@ -26,21 +26,21 @@
         <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white mb-3 sm:mb-4">
           <div class="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <p class="text-green-100 text-xs sm:text-sm font-medium">{{ $t('technician.metrics.available_balance') }}</p>
+              <p class="text-green-100 text-xs sm:text-sm font-medium">Balance Disponible</p>
               <p class="text-2xl sm:text-3xl font-black">L. {{ formatCurrency(balance.balanceDisponible) }}</p>
             </div>
             <button @click="openWithdrawModal" 
                     class="bg-white/20 hover:bg-white/30 px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-colors">
-              {{ $t('technician.metrics.withdraw_btn') }}
+              💳 Retirar
             </button>
           </div>
           <div class="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <p class="text-green-100 text-xs">{{ $t('technician.metrics.last_withdrawal') }}</p>
+              <p class="text-green-100 text-xs">Último Retiro</p>
               <p class="text-lg sm:text-xl font-bold">{{ balance.ultimoRetiro !== null ? `L. ${formatCurrency(parseFloat(balance.ultimoRetiro))}` : 'N/A' }}</p>
             </div>
             <div>
-              <p class="text-green-100 text-xs">{{ $t('technician.metrics.last_income') }}</p>
+              <p class="text-green-100 text-xs">Último Ingreso</p>
               <p class="text-lg sm:text-xl font-bold">{{ balance.ultimoIngreso !== null ? `L. ${formatCurrency(parseFloat(balance.ultimoIngreso))}` : 'N/A' }}</p>
             </div>
           </div>
@@ -49,7 +49,7 @@
 
       <!-- Estadísticas Generales -->
       <section class="px-3 sm:px-4 mb-4 sm:mb-6">
-        <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-3 sm:mb-4">{{ $t('technician.metrics.general_stats') }}</h2>
+        <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-3 sm:mb-4">Estadísticas Generales</h2>
         <div class="grid grid-cols-2 gap-2 sm:gap-3">
           <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100 dark:border-gray-700">
             <div class="flex items-center space-x-2 sm:space-x-3">
@@ -58,7 +58,7 @@
               </div>
               <div>
                 <p class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white">{{ stats.totalServices }}</p>
-                <p class="text-xs font-bold text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.total_services') }}</p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400">Servicios Totales</p>
               </div>
             </div>
           </div>
@@ -70,7 +70,7 @@
               </div>
               <div>
                 <p class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white">{{ averageRating }}</p>
-                <p class="text-xs font-bold text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.rating') }}</p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400">Calificación</p>
               </div>
             </div>
           </div>
@@ -82,7 +82,7 @@
               </div>
               <div>
                 <p class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white">{{ stats.last3Months }}</p>
-                <p class="text-xs font-bold text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.last_3_months') }}</p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400">Últimos 3 Meses</p>
               </div>
             </div>
           </div>
@@ -94,7 +94,7 @@
               </div>
               <div>
                 <p class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white">{{ stats.thisMonth }}</p>
-                <p class="text-xs font-bold text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.this_month') }}</p>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400">Este Mes</p>
               </div>
             </div>
           </div>
@@ -104,14 +104,14 @@
       <!-- Selector de Gráficos -->
       <section class="px-3 sm:px-4 mb-3 sm:mb-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">{{ $t('technician.metrics.data_analysis') }}</h2>
+          <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">Análisis de Datos</h2>
           <multiselect
             v-model="selectedChartObject"
             :options="availableCharts"
             :searchable="false"
             :close-on-select="true"
             :show-labels="false"
-            :placeholder="$t('technician.metrics.select_chart')"
+            placeholder="Seleccionar gráfico"
             label="name"
             track-by="id"
             class="multiselect-custom"
@@ -153,11 +153,11 @@
                   </svg>
                 </div>
                 <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">
-                  {{ serviceTypesData.labels[0] === 'Sin servicios' ? $t('technician.metrics.no_services_desc') : 
-                     serviceTypesData.labels[0] === 'Error al cargar' ? $t('technician.metrics.error_loading') : $t('technician.metrics.no_data') }}
+                  {{ serviceTypesData.labels[0] === 'Sin servicios' ? 'No tienes servicios registrados' : 
+                     serviceTypesData.labels[0] === 'Error al cargar' ? 'Error al cargar datos' : 'No hay datos disponibles' }}
                 </p>
                 <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">
-                  {{ serviceTypesData.labels[0] === 'Sin servicios' ? $t('technician.metrics.no_services_footer') : '' }}
+                  {{ serviceTypesData.labels[0] === 'Sin servicios' ? 'Los servicios que realices aparecerán aquí' : '' }}
                 </p>
               </div>
             </div>
@@ -184,7 +184,7 @@
               }"
               class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-l-lg font-medium text-xs sm:text-sm transition-colors"
             >
-              {{ $t('technician.metrics.incomes_tab') }}
+              Ingresos
             </button>
             <button 
               @click="setActiveTab('retiros')"
@@ -194,7 +194,7 @@
               }"
               class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-r-lg font-medium text-xs sm:text-sm transition-colors"
             >
-              {{ $t('technician.metrics.withdrawals_tab') }}
+              Retiros
             </button>
           </div>
 
@@ -214,11 +214,11 @@
           <template v-if="activeTab === 'ingresos'">
             <div v-if="isLoadingMovements" class="text-center py-6 sm:py-8">
               <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.loading_incomes') }}</p>
+              <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Cargando ingresos...</p>
             </div>
 
             <div v-else-if="earnings.length === 0" class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">{{ $t('technician.metrics.no_incomes') }}</h3>
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">Sin ingresos registrados</h3>
               <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ getNoEarningsMessage() }}</p>
             </div>
 
@@ -235,16 +235,16 @@
                         </svg>
                       </div>
                       <div>
-                        <p class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{{ earning.servicio || $t('technician.metrics.service_unspecified') }}</p>
+                        <p class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{{ earning.servicio || 'Servicio no especificado' }}</p>
                         <p class="text-xs text-gray-600 dark:text-gray-400">
-                          {{ formatDate(earning.fecha) }} • {{ earning.colonia || $t('technician.metrics.no_location') }}
+                          {{ formatDate(earning.fecha) }} • {{ earning.colonia || 'Sin ubicación' }}
                         </p>
                       </div>
                     </div>
                     <div class="text-right">
                       <p class="font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">+L. {{ formatCurrency(earning.monto) }}</p>
                       <p class="text-xs" :class="getStatusColor(earning.estado)">
-                        {{ getStatusLabel(earning.estado) }}
+                        {{ earning.estado }}
                       </p>
                     </div>
                   </div>
@@ -255,7 +255,7 @@
               <div v-if="earnings.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
                 <div class="flex items-center justify-between">
                   <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ $t('technician.dashboard.pagination_info', { current: earningsPagination.currentPage, total: earningsPagination.totalPages }) }}
+                    Página {{ earningsPagination.currentPage }} de {{ earningsPagination.totalPages }}
                   </div>
                   <div class="flex items-center space-x-1">
                     <button 
@@ -289,7 +289,7 @@
               <div v-if="movementSummary" class="mt-3 sm:mt-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/10 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-green-100 dark:border-green-800/30">
                 <div class="flex items-center justify-between">
                   <span class="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">
-                    {{ $t('technician.metrics.total_month', { month: movementSummary.mes }) }}
+                    Total {{ movementSummary.mes.toLowerCase() }}
                   </span>
                   <span class="text-base sm:text-lg font-bold text-green-800 dark:text-green-200">
                     L. {{ formatCurrency(movementSummary.totalIngresos) }}
@@ -303,11 +303,11 @@
           <template v-else>
             <div v-if="isLoadingMovements" class="text-center py-6 sm:py-8">
               <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.loading_withdrawals') }}</p>
+              <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Cargando retiros...</p>
             </div>
 
             <div v-else-if="withdrawals.length === 0" class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">{{ $t('technician.metrics.no_withdrawals') }}</h3>
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">Sin retiros registrados</h3>
               <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ getNoWithdrawalsMessage() }}</p>
             </div>
 
@@ -325,7 +325,7 @@
                       </div>
                       <div>
                         <p class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
-                          {{ $t('technician.metrics.funds_withdrawal') }}
+                          Retiro de Fondos
                         </p>
                         <p class="text-xs text-gray-600 dark:text-gray-400">
                           {{ formatDate(withdrawal.fecha) }}
@@ -335,7 +335,7 @@
                     <div class="text-right">
                       <p class="font-bold text-yellow-600 dark:text-yellow-400 text-sm sm:text-base">L. {{ formatCurrency(withdrawal.monto) }}</p>
                       <p class="text-xs" :class="getStatusWithDrawalColor(withdrawal.estado)">
-                        {{ getStatusLabel(withdrawal.estado) }}
+                        {{ withdrawal.estado }}
                       </p>
                     </div>
                   </div>
@@ -346,7 +346,7 @@
               <div v-if="withdrawals.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
                 <div class="flex items-center justify-between">
                   <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ $t('technician.dashboard.pagination_info', { current: withdrawalsPagination.currentPage, total: withdrawalsPagination.totalPages }) }}
+                    Página {{ withdrawalsPagination.currentPage }} de {{ withdrawalsPagination.totalPages }}
                   </div>
                   <div class="flex items-center space-x-1">
                     <button 
@@ -380,7 +380,7 @@
               <div v-if="movementSummary" class="mt-3 sm:mt-4 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg sm:rounded-xl">
                 <div class="flex items-center justify-between">
                   <span class="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">
-                    {{ $t('technician.metrics.total_month', { month: movementSummary.mes }) }}
+                    Total {{ movementSummary.mes }}
                   </span>
                   <span class="text-base sm:text-lg font-bold text-red-800 dark:text-red-200">
                     L. {{ formatCurrency(movementSummary.totalRetiros) }}
@@ -395,8 +395,8 @@
       <!-- Calificaciones Recientes -->
       <section class="px-3 sm:px-4 mb-4 sm:mb-6">
         <div class="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">{{ $t('technician.metrics.recent_reviews') }}</h2>
-          <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.reviews_count', { n: reviews.length }) }}</span>
+          <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Calificaciones Recientes</h2>
+          <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ reviews.length }} calificaciones</span>
         </div>
         
         <!-- Mensaje cuando no hay calificaciones -->
@@ -406,9 +406,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
             </svg>
           </div>
-          <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">{{ $t('technician.metrics.no_reviews') }}</h3>
+          <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">Sin calificaciones aún</h3>
           <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-            {{ $t('technician.metrics.no_reviews_desc') }}
+            Completa más servicios para recibir valoraciones de tus clientes
           </p>
         </div>
 
@@ -416,7 +416,7 @@
         <template v-else>
           <div v-if="isLoadingReviews" class="text-center py-6 sm:py-8">
             <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-            <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.loading_reviews') }}</p>
+            <p class="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Cargando calificaciones...</p>
           </div>
           
           <template v-else>
@@ -465,7 +465,7 @@
             <div v-if="reviews.length > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
               <div class="flex items-center justify-between">
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ $t('technician.dashboard.pagination_info', { current: reviewsPagination.currentPage, total: reviewsPagination.totalPages }) }}
+                  Página {{ reviewsPagination.currentPage }} de {{ reviewsPagination.totalPages }}
                 </div>
                 <div class="flex items-center space-x-1">
                   <button 
@@ -515,8 +515,8 @@
                 💳
               </div>
               <div>
-                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">{{ $t('technician.metrics.withdraw_modal.title') }}</h3>
-                <p class="text-xs text-gray-600 dark:text-gray-400">{{ $t('technician.metrics.withdraw_modal.balance', { bal: formatCurrency(balance.balanceDisponible) }) }}</p>
+                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Retirar Dinero</h3>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Balance: L. {{ formatCurrency(balance.balanceDisponible) }}</p>
               </div>
             </div>
             <button @click="closeWithdrawModal" class="text-gray-400 hover:text-gray-600">
@@ -531,7 +531,7 @@
         <div class="p-3 sm:p-4">
           <!-- Monto a retirar -->
           <div class="mb-4 sm:mb-6">
-            <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{{ $t('technician.metrics.withdraw_modal.amount_label') }}</label>
+            <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Monto a retirar</label>
             <div class="relative">
               <span class="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm sm:text-base">L.</span>
               <input v-model.number="withdrawForm.amount" 
@@ -542,16 +542,16 @@
                      class="w-full pl-6 sm:pl-8 pr-3 sm:pr-4 py-2 sm:py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white" 
                      placeholder="0.00">
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('technician.metrics.withdraw_modal.min_amount') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Mínimo: L. 100.00</p>
           </div>
 
           <!-- Datos Bancarios -->
           <div class="mb-4 sm:mb-6">
-            <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{{ $t('technician.metrics.withdraw_modal.bank_details_label') }}</label>
+            <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Datos Bancarios</label>
             <textarea v-model="withdrawForm.bankDetails" 
                       rows="4" 
                       class="w-full px-2 sm:px-3 py-2 sm:py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white" 
-                      :placeholder="$t('technician.metrics.withdraw_modal.bank_details_placeholder')"></textarea>
+                      placeholder="Ingresa donde deseas recibir tu retiro: Banco, Número de Cuenta, Identidad, Titular, Tipo de cuenta"></textarea>
           </div>
 
           <!-- Botón de confirmar -->
@@ -559,19 +559,19 @@
                   :disabled="!canProcessWithdraw || isProcessingWithdraw"
                   class="w-full py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg sm:rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm sm:text-base">
             <span v-if="!isProcessingWithdraw">
-              {{ $t('technician.metrics.withdraw_modal.submit_btn') }}
+              Solicitar Retiro
             </span>
             <span v-else class="flex items-center justify-center">
               <svg class="animate-spin -ml-1 mr-2 h-3 w-3 sm:h-4 sm:w-4 text-white" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              {{ $t('technician.metrics.withdraw_modal.processing') }}
+              Procesando...
             </span>
           </button>
 
           <p class="text-xs text-gray-500 dark:text-gray-400 text-center mt-2 sm:mt-3">
-            {{ $t('technician.metrics.withdraw_modal.footer_note') }}
+            Los retiros se procesan en 1-3 días hábiles
           </p>
         </div>
       </div>
@@ -591,16 +591,15 @@ import Multiselect from 'vue-multiselect'
 
 // SEO and Meta
 useHead({
-  title: t('technician.metrics.title'),
+  title: 'MiSeguro - Metricas Técnico',
   meta: [
-    { name: 'description', content: t('technician.metrics.subtitle') },
+    { name: 'description', content: 'Panel de Metricas Técnico - Gestiona tus metricas' },
     { name: 'keywords', content: 'MiSeguro, Panel Metricas Técnico, Técnico, Metricas' }, 
     { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
-const { locale, t } = useI18n()
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
@@ -719,12 +718,13 @@ const withdrawForm = reactive({
   bankDetails: ''
 })
 
+// ===== CONSTANTES =====
 // Gráficos disponibles
-const availableCharts = computed(() => [
-  { id: 'earnings', name: t('technician.metrics.charts.earnings') },
-  { id: 'serviceTypes', name: t('technician.metrics.charts.service_types') },
-  { id: 'services', name: t('technician.metrics.charts.services') }
-])
+const availableCharts = [
+  { id: 'earnings', name: '📈 Ingresos Mensuales' },
+  { id: 'serviceTypes', name: '🛠️ Servicios por Tipo' },
+  { id: 'services', name: '📊 Servicios por Mes' }
+]
 
 // Datos para gráficos
 const monthlyIncomes = ref([])
@@ -732,7 +732,7 @@ const monthlyServices = ref([])
 const earningsData = reactive({
   labels: [],
   datasets: [{
-    label: t('technician.metrics.charts.earnings'),
+    label: 'Ingresos Mensuales',
     data: [],
     borderColor: '#10B981',
     backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -753,7 +753,7 @@ const serviceTypesData = reactive({
 const servicesData = reactive({
   labels: [],
   datasets: [{
-    label: t('technician.metrics.charts.services'),
+    label: 'Servicios Realizados',
     data: [],
     backgroundColor: 'rgba(139, 92, 246, 0.2)',
     borderColor: '#8B5CF6',
@@ -801,18 +801,13 @@ const currentMonthValue = computed({
 // ===== FUNCIONES DE UTILIDAD =====
 const formatCurrency = (value) => {
   if (value === undefined || value === null) return '0.00'
-  const { locale } = useI18n()
-  return parseFloat(value).toLocaleString(locale.value === 'en' ? 'en-US' : 'es-HN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })
+  return parseFloat(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
-  const { locale } = useI18n()
   const options = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }
-  return new Date(dateString).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-ES', options)
+  return new Date(dateString).toLocaleDateString('es-ES', options)
 }
 
 const getStatusColor = (status) => {
@@ -834,11 +829,10 @@ const getInitials = (name) => {
 }
 
 const compactNumber = (num) => {
-  const isMobile = window.innerWidth < 640;
-  const { locale } = useI18n()
+  const isMobile = window.innerWidth < 640; // Breakpoint de Tailwind sm
   
   if (!isMobile) {
-    return num.toLocaleString(locale.value === 'en' ? 'en-US' : 'es-HN');
+    return num.toLocaleString('es-HN');
   }
   
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
@@ -847,30 +841,36 @@ const compactNumber = (num) => {
   return num.toString();
 }
 
-const getStatusLabel = (status) => {
-  if (!status) return ''
-  const statusLower = status.toLowerCase()
-  return t(`services.status.${statusLower}`) || status
-}
-
 const getNoEarningsMessage = () => {
-  if (!selectedMonth.value) return t('technician.metrics.messages.no_earnings_generic')
+  if (!selectedMonth.value) return 'Selecciona un mes para ver los ingresos.'
+  
+  const [year, month] = selectedMonth.value.split('-').map(Number)
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ]
   
   if (isLoadingMovements.value) {
-    return t('technician.metrics.loading_incomes')
+    return 'Cargando ingresos...'
   }
   
-  return t('technician.metrics.messages.no_earnings_month')
+  return `No se encontraron ingresos para ${monthNames[month - 1]} de ${year}.`
 }
 
 const getNoWithdrawalsMessage = () => {
-  if (!selectedWithdrawMonth.value) return t('technician.metrics.messages.no_withdrawals_generic')
+  if (!selectedWithdrawMonth.value) return 'Selecciona un mes para ver los retiros.'
+  
+  const [year, month] = selectedWithdrawMonth.value.split('-').map(Number)
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ]
   
   if (isLoadingMovements.value) {
-    return t('technician.metrics.loading_withdrawals')
+    return 'Cargando retiros...'
   }
   
-  return t('technician.metrics.messages.no_withdrawals_month')
+  return `No se encontraron retiros para ${monthNames[month - 1]} de ${year}.`
 }
 
 const getWithdrawalNumber = (withdrawal) => {
@@ -1119,7 +1119,7 @@ const loadMovements = async (page = 1, forceRefresh = false) => {
     }
   } catch (error) {
     console.error('Error al cargar movimientos:', error);
-    showError(t('technician.metrics.error_loading_movements'));
+    showError('No se pudieron cargar los movimientos. Por favor, inténtalo de nuevo.');
   } finally {
     isLoadingMovements.value = false;
   }
@@ -1134,7 +1134,7 @@ const refreshMovements = async () => {
     await loadMovements(1, true);
   } catch (error) {
     console.error('Error al refrescar movimientos:', error);
-    showError(t('technician.metrics.error_refresh_movements'));
+    showError('Error al actualizar los movimientos. Por favor, intente de nuevo.');
   }
 };
 
@@ -1337,7 +1337,7 @@ const loadEstadisticasGenerales = async () => {
     
   } catch (error) {
     console.error('Error al cargar estadísticas generales:', error);
-    showError(t('technician.metrics.error_loading_stats'));
+    showError('No se pudieron cargar las estadísticas generales');
   }
 };
 
@@ -1415,7 +1415,7 @@ const loadMonthlyIncomes = async () => {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
-      const monthName = date.toLocaleString(locale.value === 'en' ? 'en-US' : 'es-ES', { month: 'short' });
+      const monthName = date.toLocaleString('es-ES', { month: 'short' });
       const yearShort = String(year).slice(-2);
       
       months.push(`${monthName} '${yearShort}`);
@@ -1424,7 +1424,6 @@ const loadMonthlyIncomes = async () => {
     
     earningsData.labels = months;
     earningsData.datasets[0].data = monthlyData;
-    earningsData.datasets[0].label = t('technician.metrics.charts.earnings');
     
     if (selectedChart.value === 'earnings') {
       createChart();
@@ -1464,7 +1463,7 @@ const loadMonthlyServices = async () => {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
-      const monthName = date.toLocaleString(locale.value === 'en' ? 'en-US' : 'es-ES', { month: 'short' });
+      const monthName = date.toLocaleString('es-ES', { month: 'short' });
       const yearShort = String(year).slice(-2);
       const count = servicesMap.get(`${year}-${month}`) || 0;
       
@@ -1478,7 +1477,6 @@ const loadMonthlyServices = async () => {
     
     servicesData.labels = months;
     servicesData.datasets[0].data = monthlyData;
-    servicesData.datasets[0].label = t('technician.metrics.charts.services');
     
     // Actualizar estadísticas
     stats.thisMonth = thisMonthCount;

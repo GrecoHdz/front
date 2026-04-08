@@ -11,12 +11,12 @@
           </button>
           
           <div class="flex-1 text-center">
-            <h1 class="text-base font-black text-gray-900 dark:text-white tracking-tight">{{ $t('marketplace.title') }}</h1>
+            <h1 class="text-base font-black text-gray-900 dark:text-white tracking-tight">Marketplace</h1>
           </div>
 
           <!-- Saldo Pill Compacto -->
           <div class="bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full flex items-center space-x-1.5 border border-gray-200 dark:border-gray-700">
-            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">{{ $t('marketplace.balance') }}</span>
+            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Saldo</span>
             <span class="text-xs font-black text-blue-600 dark:text-blue-400">L. {{ formatNumber(userCredit) }}</span>
           </div>
         </div>
@@ -33,7 +33,7 @@
             @input="debouncedSearch(tempSearchQuery)"
             type="text" 
             class="block w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
-            :placeholder="$t('marketplace.search_placeholder')"
+            placeholder="¿Qué necesitas hoy?"
           >
         </div>
       </div>
@@ -72,7 +72,7 @@
          <!-- 1. Mis Paquetes (Carril Horizontal) -->
          <section v-if="showLanes && ownedPackages.length > 0" class="pl-4">
             <div class="flex items-center justify-between pr-4 mb-3">
-               <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">{{ $t('marketplace.my_packages') }}</h2>
+               <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Mis Paquetes</h2>
             </div>
             
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
@@ -122,7 +122,7 @@
          <!-- 2. Carril 1: Destacados (4 items) -->
          <!-- 2. Carril 1: Destacados (4 items) -->
          <section v-if="showLanes && lane1.length > 0" class="pl-4">
-            <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">{{ $t('marketplace.featured') }}</h2>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">Destacados</h2>
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
                   v-for="paquete in lane1" 
@@ -141,7 +141,7 @@
                         CANJEABLE
                      </div>
                      <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute bottom-0 left-0 right-0 bg-orange-500/90 text-white text-[8px] font-bold text-center py-0.5">
-                        🔥 {{ $t('marketplace.low_stock', { n: paquete.cantidad }) }}
+                        🔥 ¡QUEDAN {{ paquete.cantidad }}!
                      </div>
                   </div>
 
@@ -165,7 +165,7 @@
          <!-- 3. Carril 2: Recomendados (4 items) -->
          <!-- 3. Carril 2: Recomendados (4 items) -->
          <section v-if="showLanes && lane2.length > 0" class="pl-4">
-            <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">{{ $t('marketplace.might_interest_you') }}</h2>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">Te podría interesar</h2>
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
                   v-for="paquete in lane2" 
@@ -184,7 +184,7 @@
                         CANJEABLE
                      </div>
                      <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute bottom-0 left-0 right-0 bg-orange-500/90 text-white text-[7px] font-bold text-center py-0.5 uppercase tracking-tighter">
-                        {{ $t('marketplace.low_stock_short', { n: paquete.cantidad }) }}
+                        Quedan {{ paquete.cantidad }}
                      </div>
                   </div>
                   <div class="p-2">
@@ -198,7 +198,7 @@
          <!-- 3.5. Carril Especial "Hogar" (Filtro 'casa') -->
          <!-- 3.5. Carril Especial "Hogar" (Filtro 'casa') -->
          <section v-if="showLanes && laneHome.length > 0" class="pl-4">
-            <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">{{ $t('marketplace.home_special') }}</h2>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">Especial Hogar 🏠</h2>
             <div class="flex overflow-x-auto gap-4 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
                   v-for="paquete in laneHome" 
@@ -218,8 +218,8 @@
                      <h3 class="text-white font-bold text-lg leading-tight mb-1">{{ paquete.nombre }}</h3>
                      <div class="flex items-center space-x-2">
                         <span class="text-white font-black text-sm">L. {{ formatNumber(paquete.costo) }}</span>
-                        <span v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="text-[9px] bg-emerald-500/90 text-white px-1.5 py-0.5 rounded font-bold">{{ $t('marketplace.redeemable_badge') }}</span>
-                        <span v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="text-[9px] bg-orange-500 text-white px-1.5 py-0.5 rounded font-bold italic animate-pulse">🔥 {{ $t('marketplace.low_stock_short', { n: paquete.cantidad }) }}</span>
+                        <span v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="text-[9px] bg-emerald-500/90 text-white px-1.5 py-0.5 rounded font-bold">Canjeable</span>
+                        <span v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="text-[9px] bg-orange-500 text-white px-1.5 py-0.5 rounded font-bold italic animate-pulse">¡Corre! Solo quedan {{ paquete.cantidad }}</span>
                      </div>
                   </div>
                </div>
@@ -257,13 +257,13 @@
                         
                         <!-- Etiqueta Canjeable -->
                         <div v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="absolute top-2 left-2 bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm z-10">
-                           {{ $t('marketplace.redeemable_badge') }}
+                           CANJEABLE
                         </div>
 
                         <!-- Etiqueta Stock Bajo -->
                         <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute top-2 left-2 bg-orange-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm z-10 flex items-center gap-1">
                            <span class="w-1 h-1 bg-white rounded-full animate-ping"></span>
-                           {{ $t('marketplace.low_stock_short', { n: paquete.cantidad }) }}
+                           {{ paquete.cantidad }} DISPONIBLES
                         </div>
 
                         <!-- Mini Badge de Precio -->
@@ -297,7 +297,7 @@
             
             <!-- Empty Search -->
             <div v-if="gridPackages.length === 0" class="text-center py-10">
-               <p class="text-gray-400 text-sm">{{ $t('marketplace.no_results') }}</p>
+               <p class="text-gray-400 text-sm">No hay resultados</p>
             </div>
          </section>
       </div>
@@ -350,7 +350,7 @@
                      class="absolute top-0 left-0 w-32 h-32 overflow-hidden pointer-events-none z-10"
                   >
                      <div class="absolute top-[32px] left-[-48px] w-[170px] h-7 bg-red-600 dark:bg-red-500 shadow-lg transform -rotate-45 border-y border-white/20 flex items-center justify-center">
-                        <span class="text-[10px] font-black text-white uppercase tracking-tighter">🔥 {{ $t('marketplace.low_stock_short', { n: selectedDetailPackage.cantidad }) }}</span>
+                        <span class="text-[10px] font-black text-white uppercase tracking-tighter">🔥 Quedan {{ selectedDetailPackage.cantidad }}</span>
                      </div>
                   </div>
                </div>
@@ -366,8 +366,8 @@
                   </div>
 
                   <div class="prose prose-sm dark:prose-invert text-gray-500 dark:text-gray-400">
-                     <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">{{ $t('marketplace.description_label') }}</h3>
-                     <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">{{ selectedDetailPackage.descripcion || $t('marketplace.no_description') }}</p>
+                     <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Descripción</h3>
+                     <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">{{ selectedDetailPackage.descripcion || 'Sin descripción detallada.' }}</p>
                   </div>
                </div>
             </div>
@@ -409,12 +409,12 @@
        <div v-if="showConfirmarUsoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
           <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center modal-content-pop">
              <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🚀</div>
-             <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">{{ $t('marketplace.confirm_use_title') }}</h3>
+             <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">Usar Paquete</h3>
              <p class="text-xs text-gray-500 mb-6">{{ selectedPaquete?.nombre }}</p>
              <button @click="usarPaquete(selectedPaquete)" :disabled="isProcessingPayment" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-sm mb-2">
-                {{ isProcessingPayment ? $t('marketplace.activating') : $t('marketplace.confirm') }}
+                {{ isProcessingPayment ? 'Activando...' : 'Confirmar' }}
              </button>
-             <button @click="showConfirmarUsoModal = false" class="text-xs text-gray-500 font-bold py-2">{{ $t('marketplace.cancel') }}</button>
+             <button @click="showConfirmarUsoModal = false" class="text-xs text-gray-500 font-bold py-2">Cancelar</button>
           </div>
        </div>
     </Transition>
@@ -424,11 +424,11 @@
        <div v-if="showConfirmarCanjeoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
           <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center modal-content-pop">
              <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">💎</div>
-             <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-4">{{ $t('marketplace.confirm_redeem_title') }}</h3>
+             <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-4">Confirmar Canje</h3>
              <button @click="confirmarCanjeo" :disabled="isProcessingPayment" class="w-full py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm mb-2">
-                {{ isProcessingPayment ? $t('marketplace.processing') : $t('marketplace.redeem') }}
+                {{ isProcessingPayment ? 'Procesando...' : 'Canjear' }}
              </button>
-             <button @click="showConfirmarCanjeoModal = false" class="text-xs text-gray-500 font-bold py-2">{{ $t('marketplace.cancel') }}</button>
+             <button @click="showConfirmarCanjeoModal = false" class="text-xs text-gray-500 font-bold py-2">Cancelar</button>
           </div>
        </div>
     </Transition>
@@ -437,17 +437,17 @@
      <Transition name="slide-up">
       <div v-if="showPaquetePagoModal" class="fixed inset-0 z-[70] bg-white dark:bg-gray-900 flex flex-col">
          <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-            <h2 class="font-bold text-base">{{ $t('marketplace.transfer') }}</h2>
+            <h2 class="font-bold text-base">Transferencia</h2>
             <button @click="closePaquetePagoModal" class="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full">✕</button>
          </div>
          <div class="flex-1 overflow-y-auto p-6">
             <div class="text-center mb-6">
                <h1 class="text-3xl font-black text-blue-600">L. {{ formatNumber(selectedPaquete?.costo) }}</h1>
-               <p class="text-xs font-bold text-gray-400 mt-1">{{ $t('marketplace.total_to_transfer') }}</p>
+               <p class="text-xs font-bold text-gray-400 mt-1">Total a transferir</p>
             </div>
 
             <!-- Grid de Bancos - Estilo Compacto 3 Columnas -->
-<label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-1">{{ $t('marketplace.available_accounts') }}</label>
+<label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-1">Cuentas Disponibles</label>
 <div class="grid grid-cols-3 gap-2 mb-8">
    <div 
       v-for="acc in bankAccounts" 
@@ -494,12 +494,12 @@
 </div>
 
             <!-- Input Comprobante -->
-            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ $t('marketplace.payment_reference') }}</label>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Referencia de Pago</label>
             <input 
                v-model="numeroComprobante"
                type="text" 
                inputmode="numeric" 
-               :placeholder="$t('marketplace.receipt_placeholder')"
+               placeholder="# Comprobante"
                class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 font-bold focus:border-blue-500 focus:ring-0 mb-8 bg-transparent text-sm"
             >
 
@@ -508,7 +508,7 @@
                :disabled="!isValidPaymentForm || isProcessingPayment"
                class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black text-base rounded-xl shadow-lg disabled:opacity-50 transition-all"
             >
-               {{ isProcessingPayment ? $t('marketplace.sending') : $t('marketplace.send_receipt') }}
+               {{ isProcessingPayment ? 'Enviando...' : 'Enviar Comprobante' }}
             </button>
          </div>
       </div>
@@ -557,7 +557,7 @@
                         </div>
                         
                         <div class="pt-4 border-t border-gray-50 dark:border-gray-700/50">
-                           <p class="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">{{ $t('marketplace.account_number') }}</p>
+                           <p class="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Número de Cuenta</p>
                            <div class="flex items-center justify-between cursor-pointer active:opacity-60 transition-opacity" @click="handleCopyAndSelect">
                               <p class="font-mono font-black text-sm text-gray-900 dark:text-white tracking-tight">
                                  {{ viewingAccount?.num_cuenta }}
@@ -606,11 +606,9 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useHead, useCookie, useRouter } from '#imports'
-import { useI18n } from 'vue-i18n'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 
-const { locale, t } = useI18n()
 const { $api } = useNuxtApp()
 const config = useRuntimeConfig()
 const auth = useAuthStore()
@@ -619,9 +617,9 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: t('marketplace.title'),
+  title: 'MiSeguro - Marketplace',
   meta: [
-    { name: 'description', content: t('marketplace.description_meta') },
+    { name: 'description', content: 'Marketplace de MiSeguro - Compra paquetes de servicios' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })

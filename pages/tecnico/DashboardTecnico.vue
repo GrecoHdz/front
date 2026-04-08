@@ -39,15 +39,15 @@
                   </div>
                   <div class="min-w-0">
                     <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
-                      {{ $t('technician.dashboard.hello_name', { name: currentUser?.nombre || $t('profile.technician.technician') }) }}
+                      ¡Hola, {{ currentUser?.nombre || 'Técnico' }}!
                     </h2>
-                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">{{ $t('technician.dashboard.welcome_panel') }}</p>
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Bienvenido al panel</p>
                   </div>
                 </div>
                 
                 <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-2 sm:p-3 rounded-xl">
                   <p class="text-blue-800 dark:text-blue-200 font-medium text-sm sm:text-base text-center">
-                    {{ $t('technician.dashboard.manage_services') }}
+                    🛠️ Gestiona tus servicios asignados
                   </p>
                 </div>
               </div>
@@ -65,7 +65,7 @@
                     <span class="text-white text-sm sm:text-lg">📋</span>
                   </div>
                   <div class="min-w-0">
-                    <p class="text-[10px] xs:text-xs text-gray-600 dark:text-gray-400 truncate">{{ $t('technician.dashboard.active_services') }}</p>
+                    <p class="text-[10px] xs:text-xs text-gray-600 dark:text-gray-400 truncate">Servicios Activos</p>
                     <p class="text-base sm:text-xl font-black text-gray-900 dark:text-white">{{ stats.activeServices }}</p>
                   </div>
                 </div>
@@ -78,7 +78,7 @@
                     <span class="text-yellow-600 dark:text-yellow-400 text-sm sm:text-base">⭐</span>
                   </div>
                   <div class="min-w-0">
-                  <p class="text-[10px] xs:text-xs text-gray-600 dark:text-gray-400 truncate">{{ $t('technician.dashboard.rating') }}</p>
+                  <p class="text-[10px] xs:text-xs text-gray-600 dark:text-gray-400 truncate">Calificación</p>
                     <p class="text-base sm:text-xl font-black text-gray-900 dark:text-white">{{ averageRating }}</p> 
                   </div>
                 </div>
@@ -89,9 +89,9 @@
           <!-- Servicios Recientes -->
           <section class="px-4 sm:px-6 mb-6">
             <div class="flex justify-between items-center mb-3 sm:mb-4">
-              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{{ $t('technician.dashboard.recent_services') }}</h3>
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Servicios Recientes</h3>
               <NuxtLink to="/tecnico/ServiciosTecnico" class="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors whitespace-nowrap ml-2">
-                {{ $t('technician.dashboard.view_all') }}
+                Ver todos
               </NuxtLink>
             </div>
             
@@ -105,8 +105,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h4 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-1">{{ $t('technician.dashboard.no_services') }}</h4>
-              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ $t('technician.dashboard.no_services_desc') }}</p>
+              <h4 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-1">Sin servicios</h4>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">No hay servicios asignados</p>
             </div>
             
             <div class="space-y-2 sm:space-y-3">
@@ -147,7 +147,7 @@
               <div v-if="totalServices > 0" class="mt-3 bg-white dark:bg-gray-800 p-2 rounded-lg">
                 <div class="flex items-center justify-between">
                   <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ $t('technician.dashboard.pagination_info', { current: currentPage, total: totalPages }) }}
+                    Página {{ currentPage }} de {{ totalPages }}
                   </div>
                   <div class="flex items-center space-x-1">
                     <button 
@@ -181,7 +181,7 @@
 
           <!-- Quick Actions -->
           <section class="px-4 sm:px-6 mb-6">
-            <h3 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-3 sm:mb-4">{{ $t('technician.dashboard.quick_actions') }}</h3>
+            <h3 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-3 sm:mb-4">Acciones Rápidas</h3>
             <div class="grid grid-cols-2 gap-2 sm:gap-4">
               <button @click="updateAvailability" :disabled="loadingAvailability" class="bg-dark dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed h-full">
                 <div class="flex items-center space-x-2 sm:space-x-3">
@@ -213,11 +213,11 @@
                   </div>
                   <div class="w-full min-w-0">
                     <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">
-                      {{ isAvailable ? $t('technician.dashboard.available') : $t('technician.dashboard.unavailable') }}
+                      {{ isAvailable ? 'Disponible' : 'No disponible' }}
                     </p>
                     <div class="flex items-center justify-between mt-1 sm:mt-2">
                       <span class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate pr-1">
-                        {{ isAvailable ? $t('technician.dashboard.active_for_jobs') : $t('technician.dashboard.unavailable') }}
+                        {{ isAvailable ? 'Activo para trabajos' : 'No disponible' }}
                       </span>
                       <label class="relative inline-flex items-center cursor-pointer">
                         <input 
@@ -247,8 +247,8 @@
                     </svg>
                   </div>
                   <div class="min-w-0">
-                    <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">{{ $t('technician.dashboard.view_reports') }}</p>
-                    <p class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate">{{ $t('technician.dashboard.statistics') }}</p>
+                    <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">Ver Reportes</p>
+                    <p class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate">Estadísticas</p>
                   </div>
                 </div>
               </button>
@@ -262,8 +262,8 @@
                     </svg>
                   </div>
                   <div class="min-w-0">
-                    <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">{{ $t('technician.dashboard.refer') }}</p>
-                    <p class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate">{{ $t('technician.dashboard.share_link') }}</p>
+                    <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">Referir</p>
+                    <p class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate">Compartir enlace</p>
                   </div>
                 </div>
               </button>
@@ -275,8 +275,8 @@
                     </svg>
                   </div>
                   <div class="min-w-0">
-                    <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">{{ $t('technician.dashboard.marketplace') }}</p>
-                    <p class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate">{{ $t('technician.dashboard.buy_package') }}</p>
+                    <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">Marketplace</p>
+                    <p class="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 truncate">Comprar paquete</p>
                   </div>
                 </div>
               </button>
@@ -289,10 +289,10 @@
             <div class="flex items-end justify-between mb-6">
               <div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                  {{ $t('technician.dashboard.package_market') }}
+                  Mercado de Paquetes 💎
                 </h3>
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                  {{ $t('technician.dashboard.package_market_desc') }}
+                  Compra paquetes o canjéalos con tu crédito
                 </p>
               </div>
               <button 
@@ -300,7 +300,7 @@
                 @click="navigateTo('/tecnico/Marketplace')" 
                 class="text-xs font-black text-blue-600 dark:text-blue-400 px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full"
               >
-                {{ $t('technician.dashboard.view_all') }}
+                Ver todos
               </button>
             </div>
 
@@ -339,12 +339,12 @@
 
                     <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent">
                       <h4 class="font-bold text-white text-sm line-clamp-1 truncate">{{ paquete.nombre }}</h4>
-                      <p class="text-xs font-black text-blue-400">{{ formatCurrency(paquete.costo) }}</p>
+                      <p class="text-xs font-black text-blue-400">L. {{ formatNumber(paquete.costo) }}</p>
                     </div>
                   </div>
                   <div class="px-3 py-3 bg-white dark:bg-gray-800">
                     <button class="w-full py-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                      {{ $t('technician.dashboard.view_details') }}
+                      Ver Detalles
                     </button>
                   </div>
                 </div>
@@ -371,16 +371,16 @@
             </div>
             <div class="px-6 pb-32 pt-6">
               <h2 class="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-1">{{ selectedDetailPackage.nombre }}</h2>
-              <p class="text-base font-black text-blue-600 mb-4">{{ formatCurrency(selectedDetailPackage.costo) }}</p>
+              <p class="text-base font-black text-blue-600 mb-4">L. {{ formatNumber(selectedDetailPackage.costo) }}</p>
               <div class="prose prose-sm dark:prose-invert text-gray-500 dark:text-gray-400">
-                <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">{{ $t('marketplace.description_label') }}</h3>
-                <p class="text-base leading-relaxed">{{ selectedDetailPackage.descripcion || $t('marketplace.no_description') }}</p>
+                <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Descripción</h3>
+                <p class="text-base leading-relaxed">{{ selectedDetailPackage.descripcion || 'Sin descripción.' }}</p>
               </div>
             </div>
           </div>
           <div class="absolute bottom-0 left-0 right-0 p-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
             <button @click="navigateTo('/tecnico/Marketplace')" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-base shadow-xl">
-              {{ $t('marketplace.go_to_marketplace') }}
+              Ir al Marketplace
             </button>
           </div>
         </div>
@@ -398,20 +398,18 @@ import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
-
-// ===== CONFIGURACIÓN Y AUTENTICACIÓN =====
-const { $api } = useNuxtApp();
-const { locale, t } = useI18n()
-
 // SEO and Meta
 useHead({
-  title: t('technician.dashboard.seo.title'),
+  title: 'MiSeguro - Panel Técnico',
   meta: [
-    { name: 'description', content: t('technician.dashboard.seo.description') },
-    { name: 'keywords', content: t('technician.dashboard.seo.keywords') },  
+    { name: 'description', content: 'Panel de Técnico - Gestiona tus servicios y asignaciones' },
+    { name: 'keywords', content: 'MiSeguro, Panel Técnico, Técnico, Servicios, Asignaciones' },  
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
+
+// ===== CONFIGURACIÓN Y AUTENTICACIÓN =====
+const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const router = useRouter()
@@ -472,10 +470,10 @@ watch(anyModalOpen, (newValue) => {
 
 // ===== FUNCIONES DE UTILIDAD =====
 const formatRelativeDate = (dateString) => {
-  if (!dateString) return t('common.no_date')
+  if (!dateString) return 'Sin fecha'
   
   const date = new Date(dateString)
-  if (isNaN(date.getTime())) return t('common.invalid_date')
+  if (isNaN(date.getTime())) return 'Fecha inválida'
   
   const now = new Date()
   const diffInMs = now - date
@@ -483,38 +481,38 @@ const formatRelativeDate = (dateString) => {
   // Calcular horas
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
   if (diffInHours < 1) {
-    return t('common.now')
+    return 'Ahora'
   } else if (diffInHours < 24) {
-    return t('time.hours_ago', { n: diffInHours })
+    return `Hace ${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'}`
   }
   
   // Calcular días
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
   if (diffInDays < 7) {
-    return t('time.days_ago', { n: diffInDays })
+    return `Hace ${diffInDays} ${diffInDays === 1 ? 'día' : 'días'}`
   } else if (diffInDays < 30) {
     const weeks = Math.floor(diffInDays / 7)
-    return t('time.weeks_ago', { n: weeks })
+    return `Hace ${weeks} ${weeks === 1 ? 'semana' : 'semanas'}`
   } else if (diffInDays < 365) {
     const months = Math.floor(diffInDays / 30)
-    return t('time.months_ago', { n: months })
+    return `Hace ${months} ${months === 1 ? 'mes' : 'meses'}`
   } else {
     const years = Math.floor(diffInDays / 365)
-    return t('time.years_ago', { n: years })
+    return `Hace ${years} ${years === 1 ? 'año' : 'años'}`
   }
 }
 
-const formatCurrency = (value) => {
-  if (value === undefined || value === null) return '0.00'
-  return parseFloat(value).toLocaleString(locale.value === 'en' ? 'en-US' : 'es-HN', {
-    style: 'currency',
-    currency: locale.value === 'en' ? 'USD' : 'HNL',
-    minimumFractionDigits: 2
-  })
-}
-
 const formatStatus = (status) => {
-  return t(`services.status.${status}`) || status
+  const statusMap = {
+    'pendiente_pago': 'Pendiente de Pago',
+    'pendiente_asignacion': 'Pendiente de Asignación',
+    'asignado': 'Asignado',
+    'pendiente_pagocotizacion': 'Pendiente de Pago de Cotización',
+    'en_proceso': 'En Proceso',
+    'finalizado': 'Finalizado',
+    'cancelado': 'Cancelado'
+  }
+  return statusMap[status] || status
 }
 
 const getStatusBadgeClass = (status) => {
@@ -647,9 +645,9 @@ const tienePaquete = (paqueteId) => {
 const getEstadoPaquete = (paqueteId) => {
   const paquetes = paquetesUsuario.value.filter(p => p.id_paquete === paqueteId);
   if (paquetes.length === 0) return '';
-  if (paquetes.some(p => p.estado === 'verificando_pago')) return t('marketplace.verifying_short');
-  if (paquetes.some(p => p.estado === 'activo')) return t('marketplace.acquired_short');
-  if (paquetes.some(p => p.estado === 'utilizando')) return t('marketplace.in_use');
+  if (paquetes.some(p => p.estado === 'verificando_pago')) return 'Verificando';
+  if (paquetes.some(p => p.estado === 'activo')) return 'Adquirido';
+  if (paquetes.some(p => p.estado === 'utilizando')) return 'En uso';
   return '';
 };
 
@@ -665,7 +663,7 @@ const closeDetail = () => {
   startAutoScroll();
 };
 
-const formatNumber = (val) => new Intl.NumberFormat(locale.value === 'es' ? 'es-HN' : 'en-US', { minimumFractionDigits: 2 }).format(val || 0);
+const formatNumber = (val) => new Intl.NumberFormat('es-HN', { minimumFractionDigits: 2 }).format(val || 0);
 
 // Watchers and Computed for Carousel
 watch(paquetesMantenimiento, (newVal) => {
@@ -711,14 +709,14 @@ const verificarPerfilTecnico = async () => {
     });
 
     if (response && response.perfil_completo === false) {
-      let message = t('profile.messages.complete_perfil_generic');
+      let message = 'Por favor completa tu perfil para ofrecer servicios';
       
       if (!response.tiene_imagen && !response.tiene_servicios) {
-        message = t('profile.messages.complete_photo_and_services');
+        message = 'Por favor sube una foto de perfil de lo contrario no se te asignarán trabajos';
       } else if (!response.tiene_imagen) {
-        message = t('profile.messages.complete_photo');
+        message = 'Por favor sube una foto de perfil de lo contrario no se te asignarán trabajos';
       } else if (!response.tiene_servicios) {
-        message = t('profile.messages.complete_services');
+        message = 'Por favor selecciona los servicios que ofreces en tu Perfil';
       }
 
       showToast({
@@ -790,7 +788,7 @@ const fetchServices = async (page = 1) => {
     
   } catch (error) {
     console.error('Error al cargar servicios:', error)
-    showError(t('technician.dashboard.messages.load_error'))
+    showError('Error al cargar los servicios. Intente de nuevo más tarde.')
   } finally {
     loading.value = false
   }
