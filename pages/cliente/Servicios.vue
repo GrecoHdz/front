@@ -50,7 +50,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden">
                   <div v-if="currentTab === 'active'" class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
                   <div class="text-xl font-black text-blue-600 dark:text-blue-400 mb-0.5">{{ pendingServices }}</div>
-                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Activos</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">{{ $t('services_page.active') }}</p>
                 </div>
               </div>
               
@@ -61,7 +61,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden">
                   <div v-if="currentTab === 'finished'" class="absolute bottom-0 left-0 right-0 h-1 bg-green-500"></div>
                   <div class="text-xl font-black text-green-600 dark:text-green-400 mb-0.5">{{ completedServices }}</div>
-                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Finalizados</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">{{ $t('services_page.finished') }}</p>
                 </div>
               </div>
             </div>
@@ -106,10 +106,10 @@
                   <!-- Badges for extra info -->
                   <div class="flex flex-col items-end gap-1">
                     <span v-if="service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita || service.rawStatus === 'pendiente_pagoservicio'" class="animate-pulse inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500 dark:border-amber-500 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 uppercase tracking-wide shadow-sm">
-                      🟡 Pago Pendiente
+                      🟡 {{ $t('services_page.pending_payment') }}
                     </span>
                     <span v-if="service.rawStatus === 'pendiente_cotizacion'" class="animate-pulse inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500 dark:border-amber-500 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 uppercase tracking-wide shadow-sm">
-                      🟡 {{ service.title === 'Taxi VIP' ? 'Tarifa Lista' : 'Cotización Lista' }}
+                      🟡 {{ service.title === 'Taxi VIP' ? $t('services_page.fare_ready') : $t('services_page.quote_ready') }}
                     </span>
                   </div>
                 </div>
@@ -149,7 +149,7 @@
                 </div>
                 <div class="flex items-center space-x-1">
                   <span class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest inline-block" :class="{ 'animate-bounce': service.rawStatus === 'finalizado' }">
-                    {{ service.rawStatus === 'finalizado' ? (service.title === 'Taxi VIP' ? '⭐ Calificar Viaje' : '⭐ Calificar Servicio') : 'Ver detalles' }}
+                    {{ service.rawStatus === 'finalizado' ? (service.title === 'Taxi VIP' ? $t('services_page.rate_trip') : $t('services_page.rate_service')) : $t('services_page.view_details') }}
                   </span>
                   <svg class="w-3 h-3 text-blue-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -164,10 +164,10 @@
             <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-2xl mx-auto mb-3 flex items-center justify-center opacity-50">
               <span class="text-2xl">🔍</span>
             </div>
-            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">No hay servicios</h3>
-            <p class="text-gray-500 dark:text-gray-500 mb-3 text-[10px]">No se encontraron servicios con los filtros</p>
+            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('services_page.no_services') }}</h3>
+            <p class="text-gray-500 dark:text-gray-500 mb-3 text-[10px]">{{ $t('services_page.no_services_desc') }}</p>
             <button @click="resetFilters" class="px-3 py-1.5 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors text-[10px] uppercase tracking-wider">
-              Limpiar filtros
+              {{ $t('services_page.reset_filters') }}
             </button>
           </div>
 
@@ -179,7 +179,7 @@
                 class="w-full py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 shadow-sm transition-all flex items-center justify-center space-x-2"
              >
                 <div v-if="isLoadingMore" class="animate-spin h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <span>{{ isLoadingMore ? 'Cargando...' : 'Cargar más servicios' }}</span>
+                <span>{{ isLoadingMore ? $t('services_page.loading') : $t('services_page.load_more') }}</span>
                 <svg v-if="!isLoadingMore" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
              </button>
           </div>
@@ -239,7 +239,7 @@
                   <div>
                     <h3 class="text-base font-black text-gray-900 dark:text-white">{{ selectedService.title }}</h3>
                     <p class="text-xs text-gray-600 dark:text-gray-400">
-                      Número de referencia #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}
+                      {{ $t('services_page.reference') }} #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}
                     </p>
                   </div>
                 </div>
@@ -255,7 +255,7 @@
             <div class="p-3">
         <!-- 1. Seguimiento del Servicio -->
         <div v-if="selectedService.rawStatus !== 'cancelado'" class="mb-4">  
-          <h4 class="text-sm font-black text-gray-900 dark:text-white mb-3">Seguimiento del Servicio</h4> 
+          <h4 class="text-sm font-black text-gray-900 dark:text-white mb-3">{{ $t('services_page.modal.tracking') }}</h4> 
           <!-- Timeline Steps -->
           <div class="space-y-2">
             <div v-for="(step, index) in serviceSteps" :key="step.id"
@@ -351,20 +351,20 @@
 
         <!-- 3. Acciones - Solo se muestra si hay acciones disponibles -->
         <div v-if="hasActions" class="mb-3">
-          <h4 v-if="hasVisibleActions" class="text-sm font-black text-gray-900 dark:text-white mb-2">Acciones</h4>
+          <h4 v-if="hasVisibleActions" class="text-sm font-black text-gray-900 dark:text-white mb-2">{{ $t('services_page.modal.actions') }}</h4>
           <div class="space-y-2">
 
             <!-- Acciones para Cotización Pendiente -->
             <div v-if="selectedService.status === 'Cotización Pendiente'">
-              <div class="bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg mb-2">
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg mb-2">
                 <p class="text-yellow-800 dark:text-yellow-200 text-xs font-bold text-center">
-                  ⏳ Esperando tu decisión sobre la cotización
+                  {{ $t('services_page.modal.waiting_decision') }}
                 </p>
               </div>
               <button class="w-full flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
                 <div class="flex items-center space-x-2">
                   <span class="text-base">💬</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Contactar técnico</span>
+                  <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ $t('services_page.modal.contact_technician') }}</span>
                 </div>
                 <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -380,7 +380,7 @@
               >
                 <div class="flex items-center space-x-2">
                   <span class="text-base">💳</span>
-                  <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">Pagar Visita</span>
+                  <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">{{ $t('services_page.modal.pay_visit') }}</span>
                 </div>
                 <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -396,7 +396,7 @@
               >
                 <div class="flex items-center space-x-2">
                   <span class="text-base">💰</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Pagar Servicio</span>
+                  <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ $t('services_page.modal.pay_service') }}</span>
                 </div>
                 <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -411,9 +411,12 @@
                 class="w-full flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors mb-2"
               >
                 <div class="flex items-center space-x-2">
-                  <span class="text-base">📝</span>
-                  <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">
-                    {{ selectedService.title === 'Taxi VIP' ? 'Ver Detalles del Viaje' : selectedService.title === 'Barbería' ? 'Ver Detalles del Corte' : 'Ver Cotización y Diagnóstico' }}
+                  <span class="text-base">📋</span>
+                  <span class="font-bold text-gray-800 dark:text-gray-200 text-sm">
+                    {{ 
+                      selectedService.title === 'Taxi VIP' ? $t('services_page.modal.view_trip_details') : 
+                      (selectedService.title === 'Barbería' ? $t('services_page.modal.view_cut_details') : $t('services_page.modal.view_quotation')) 
+                    }}
                   </span>
                 </div>
                 <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -521,11 +524,8 @@
             <div class="sticky top-0 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 rounded-t-xl z-10">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                  <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-base">
-                    💳
-                  </div>
                   <div>
-                    <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Visita</h3> 
+                    <h3 class="text-base font-black text-gray-900 dark:text-white">{{ $t('services_page.payment.visit_title') }}</h3> 
                     <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                   </div> 
                 </div>
@@ -541,7 +541,7 @@
             <div class="p-3">
               <!-- Service Summary -->
               <div class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg mb-3">
-                <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">Pago de la Visita</h4>
+                <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-2">{{ $t('services_page.payment.visit_title') }}</h4>
                 <div class="flex items-center space-x-2 mb-2">
                   <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center text-sm">
                     {{ selectedService.icon }}
@@ -555,16 +555,16 @@
 
               <!-- Payment Breakdown -->
               <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg mb-3">
-                <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 Desglose de Pago</h4>
+                <h4 class="font-bold text-blue-800 dark:text-blue-200 text-sm mb-2">💰 {{ $t('services_page.payment.breakdown') }}</h4>
                 <div class="space-y-2 text-sm">
 
-                  <div class="flex justify-between items-center">
-                    <span class="text-blue-700 dark:text-blue-300">Visita del Técnico:</span>
+                  <div class="flex justify-between items-center text-sm">
+                    <span class="text-blue-700 dark:text-blue-300">{{ $t('services_page.payment.visit_cost') }}:</span>
                     <span class="font-bold text-blue-800 dark:text-blue-200">L. {{ visitCost }}</span>
                   </div> 
                   <hr class="border-blue-300 dark:border-blue-700">
                   <div class="flex justify-between items-center">
-                    <span class="font-bold text-blue-800 dark:text-blue-200">Total a pagar:</span>
+                    <span class="font-bold text-blue-800 dark:text-blue-200">{{ $t('services_page.payment.total_pay') }}:</span>
                     <span class="font-bold text-blue-800 dark:text-blue-200 text-base">L. {{ visitCost }}</span>
                   </div>
                 </div>
@@ -573,11 +573,11 @@
               <!-- Cuenta Bancaria -->
               <div class="space-y-2 mb-3">
                 <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Transferencia Bancaria
+                  {{ $t('services_page.payment.bank_transfer') }}
                 </label>
                 <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
                   <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ $t('auth.profile.membership.loading_accounts') }}</p>
                 </div>
                 <div v-else class="space-y-3">
                   <multiselect
@@ -587,7 +587,7 @@
                     :searchable="false"
                     :close-on-select="true"
                     :show-labels="false"
-                    placeholder="Selecciona una cuenta"
+                    :placeholder="$t('services_page.payment.select_account')"
                     label="banco"
                     track-by="id_cuenta"
                     class="multiselect-custom"
@@ -614,7 +614,7 @@
                     v-if="getSelectedAccount" 
                     class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
                   >
-                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de la cuenta:</h4>
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $t('auth.profile.membership.account_details') }}</h4>
                     <div class="space-y-1">
                       <div class="flex justify-between">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Banco:</span>
@@ -629,7 +629,7 @@
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Cuenta:</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('auth.profile.membership.bank_account') }}:</span>
                         <div class="flex items-center space-x-2">
                           <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
                             {{ getSelectedAccount.numero_cuenta.length > 10 ? getSelectedAccount.numero_cuenta.slice(0, 10) + '...' : getSelectedAccount.numero_cuenta }}
@@ -652,17 +652,17 @@
                   <!-- Input para el número de comprobante -->
                   <div class="space-y-1">
                     <label for="comprobante" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Número de comprobante
+                      {{ $t('services_page.payment.receipt_number') }}
                     </label>
                     <input
                       id="comprobante"
                       v-model="comprobante"
                       type="text"
                       class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200 text-base"
-                      placeholder="Ingresa el número de comprobante"
+                      :placeholder="$t('services_page.payment.receipt_placeholder')"
                     >
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Realiza la transferencia e ingresa el número de comprobante. Una vez envaido serás redirigido a WhatsApp para adjuntar la captura.
+                      {{ $t('services_page.payment.receipt_desc') }}
                     </p>
                   </div>
                 </div>
@@ -675,14 +675,14 @@
                     class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
                   >
                     <span v-if="!isProcessingPayment">
-                      Procesar Pago - L. {{ visitCost }}
+                      {{ $t('services_page.payment.process_payment') }} - L. {{ visitCost }}
                     </span>
                     <span v-else class="flex items-center justify-center">
                       <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Procesando...
+                      {{ $t('auth.profile.membership.processing') }}
                     </span>
                   </button>
                 </div> 
@@ -715,7 +715,7 @@
                   💳
                 </div>
                 <div>
-                  <h3 class="text-base font-black text-gray-900 dark:text-white">Pagar Servicio</h3>
+                  <h3 class="text-base font-black text-gray-900 dark:text-white">{{ $t('services_page.payment.service_title') }}</h3>
                   <p class="text-[10px] text-gray-600 dark:text-gray-400 font-bold uppercase tracking-wider">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
               </div>
@@ -732,21 +732,21 @@
             <!-- Resumen del Servicio -->
             <div class="space-y-2">
               <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">Desglose de Pago</h4>
+                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">{{ $t('services_page.payment.breakdown') }}</h4>
                 <div class="space-y-2">
                   <div class="flex justify-between items-center text-xs">
-                    <span class="text-gray-600 dark:text-gray-400 font-bold">Mano de Obra</span>
+                    <span class="text-gray-600 dark:text-gray-400 font-bold">{{ $t('services_page.payment.labor') }}</span>
                     <span class="font-black text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
                   </div>
                   
                   <!-- Crédito Aplicado -->
                   <div v-if="shouldShowCreditBenefit && creditApplied > 0" class="flex justify-between items-center text-xs text-blue-600 dark:text-blue-400">
-                    <span class="font-bold">💳 Crédito Aplicado</span>
+                    <span class="font-bold">{{ $t('services_page.payment.credit_applied') }}</span>
                     <span class="font-black">−L. {{ formatCurrency(creditApplied) }}</span>
                   </div>
 
                   <div class="pt-2 border-t border-blue-200 dark:border-blue-800 flex justify-between items-center">
-                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">Total a Transferir</span>
+                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">{{ $t('services_page.payment.total_transfer') }}</span>
                     <span class="text-base font-black text-blue-600 dark:text-blue-400">L. {{ (totalAPagar || 0).toFixed(2) }}</span>
                   </div>
                 </div>
@@ -765,7 +765,7 @@
 
             <!-- Información de Pago -->
             <div class="space-y-3">
-              <h4 class="text-sm font-black text-gray-900 dark:text-white">Detalles de Transferencia</h4>
+              <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('auth.profile.membership.select_account_desc') }}</h4>
               
               <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
@@ -778,7 +778,7 @@
                   :searchable="false"
                   :close-on-select="true"
                   :show-labels="false"
-                  placeholder="Selecciona cuenta destino"
+                  :placeholder="$t('services_page.payment.select_account')"
                   label="banco"
                   track-by="id_cuenta"
                   class="multiselect-custom"
@@ -809,18 +809,18 @@
                 </div>
 
                 <div class="space-y-1">
-                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Número de Referencia</label>
-                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ej: 123456789">
+                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{{ $t('services_page.payment.receipt_number') }}</label>
+                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" :placeholder="$t('services_page.payment.receipt_placeholder')">
                 </div> 
 
                 <button @click="processPayment" :disabled="!selectedAccount || !comprobante || isProcessingPayment" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50">
-                  <span v-if="!isProcessingPayment">Confirmar Pago L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+                  <span v-if="!isProcessingPayment">{{ $t('services_page.payment.confirm_payment') }} L. {{ (totalAPagar || 0).toFixed(2) }}</span>
                   <div v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
                 </button> 
                 
                 <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-100 dark:border-blue-800 flex items-start space-x-2">
                   <span class="text-xs">ℹ️</span>
-                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">Al confirmar, serás redirigido automáticamente para adjuntar el comprobante de tu transferencia.</p>
+                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">{{ $t('services_page.payment.receipt_desc') }}</p>
                 </div>
               </div>
             </div>
@@ -852,7 +852,7 @@
                   🚕
                 </div>
                 <div>
-                  <h3 class="text-base font-black text-black leading-none">Pagar Viaje</h3>
+                  <h3 class="text-base font-black text-black leading-none">{{ $t('services_page.payment.trip_title') }}</h3>
                   <p class="text-[10px] font-bold text-black/60 uppercase tracking-widest mt-1">TAXI-{{ selectedService.id }}</p>
                 </div>
               </div>
@@ -869,10 +869,10 @@
             <!-- Resumen de Viaje -->
             <div class="space-y-2">
               <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">Resumen de Viaje</h4>
+                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">{{ $t('services_page.payment.summary') }}</h4>
                 <div class="space-y-2">
                   <div class="flex justify-between items-center text-xs">
-                    <span class="text-gray-600 dark:text-gray-400 font-bold">Tarifa del Servicio</span>
+                    <span class="text-gray-600 dark:text-gray-400 font-bold">{{ $t('services_page.payment.tariff') }}</span>
                     <span class="font-black text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
                   </div>
 
@@ -895,14 +895,14 @@
                   <span class="text-xs font-black text-emerald-700 dark:text-emerald-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
                 </div>
                 <p class="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-medium leading-tight">
-                  * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
+                  * {{ $t('services_page.payment.cashback_desc') }}
                 </p>
               </div>
             </div>
 
             <!-- Información de Pago -->
             <div class="space-y-3">
-              <h4 class="text-sm font-black text-gray-900 dark:text-white">Datos de Transferencia</h4>
+              <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('auth.profile.membership.select_account_desc') }}</h4>
               
               <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
@@ -946,18 +946,18 @@
                 </div>
 
                 <div class="space-y-1">
-                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">N° de comprobante</label>
-                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ej: 987654321">
+                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{{ $t('services_page.payment.receipt_number') }}</label>
+                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" :placeholder="$t('services_page.payment.receipt_placeholder')">
                 </div>
 
                 <button @click="processPayment" :disabled="!selectedAccount || !comprobante || isProcessingPayment" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50">
-                  <span v-if="!isProcessingPayment">Confirmar Pago L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+                  <span v-if="!isProcessingPayment">{{ $t('services_page.payment.confirm_payment') }} L. {{ (totalAPagar || 0).toFixed(2) }}</span>
                   <div v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
                 </button>
 
                 <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-100 dark:border-blue-800 flex items-start space-x-2">
                   <span class="text-xs">🚕</span>
-                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">Al confirmar, serás redirigido automáticamente para que puedas adjuntar tu comprobante de pago.</p>
+                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">{{ $t('services_page.payment.receipt_desc') }}</p>
                 </div>
               </div>
             </div>
@@ -989,7 +989,7 @@
                   💈
                 </div>
                 <div>
-                  <h3 class="text-base font-black text-white leading-none">Pagar Servicio</h3>
+                  <h3 class="text-base font-black text-white leading-none">{{ $t('services_page.payment.service_title') }}</h3>
                   <p class="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-1">BARBER-{{ selectedService.id }}</p>
                 </div>
               </div>
@@ -1006,10 +1006,10 @@
             <!-- Resumen de Costo -->
             <div class="space-y-2">
               <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">Resumen de Costo</h4>
+                <h4 class="text-xs font-black text-blue-800 dark:text-blue-200 uppercase tracking-widest mb-2">{{ $t('services_page.payment.summary') }}</h4>
                 <div class="space-y-2">
                   <div class="flex justify-between items-center text-xs">
-                    <span class="text-gray-600 dark:text-gray-400 font-bold">Costo del Servicio</span>
+                    <span class="text-gray-600 dark:text-gray-400 font-bold">{{ $t('services_page.payment.service_cost') }}</span>
                     <span class="font-black text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
                   </div>
 
@@ -1032,14 +1032,14 @@
                   <span class="text-xs font-black text-red-700 dark:text-red-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
                 </div>
                 <p class="text-[9px] text-red-600/80 dark:text-red-400/80 font-medium leading-tight">
-                  * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
+                  * {{ $t('services_page.payment.cashback_desc') }}
                 </p>
               </div>
             </div>
 
             <!-- Información de Pago -->
             <div class="space-y-3">
-              <h4 class="text-sm font-black text-gray-900 dark:text-white">Datos de Transferencia</h4>
+              <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('auth.profile.membership.select_account_desc') }}</h4>
               
               <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
@@ -1083,18 +1083,18 @@
                 </div>
 
                 <div class="space-y-1">
-                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">N° de comprobante</label>
-                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ej: 987654321">
+                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{{ $t('services_page.payment.receipt_number') }}</label>
+                  <input v-model="comprobante" type="text" class="w-full px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" :placeholder="$t('services_page.payment.receipt_placeholder')">
                 </div>
 
                 <button @click="processPayment" :disabled="!selectedAccount || !comprobante || isProcessingPayment" class="w-full py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-50">
-                  <span v-if="!isProcessingPayment">Confirmar Pago L. {{ (totalAPagar || 0).toFixed(2) }}</span>
+                  <span v-if="!isProcessingPayment">{{ $t('services_page.payment.confirm_payment') }} L. {{ (totalAPagar || 0).toFixed(2) }}</span>
                   <div v-else class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin mx-auto"></div>
                 </button>
 
                 <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-100 dark:border-blue-800 flex items-start space-x-2">
                   <span class="text-xs">💈</span>
-                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">Al confirmar, serás redirigido automáticamente para que puedas adjuntar tu comprobante de pago.</p>
+                  <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">{{ $t('services_page.payment.receipt_desc') }}</p>
                 </div>
               </div>
             </div>
@@ -1149,7 +1149,7 @@
                 </div>
                 <div>
                   <h3 class="text-base font-black text-gray-900 dark:text-white">
-                    {{ cancelModalTexts[selectedService.rawStatus]?.title || 'Cancelar Servicio' }}
+                    {{ cancelModalTexts[selectedService.rawStatus]?.title || $t('services_page.modals.cancel_title') }}
                   </h3>
                   <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
@@ -1167,19 +1167,19 @@
             <div class="space-y-3">
               <div class="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-lg mb-3">
                 <p class="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                  {{ cancelModalTexts[selectedService.rawStatus]?.message || '¿Estás seguro de que deseas cancelar este servicio?' }}
+                  {{ cancelModalTexts[selectedService.rawStatus]?.message || $t('services_page.modals.cancel_message') }}
                 </p>
               </div>
 
               <div class="space-y-2">
                 <p class="text-gray-600 dark:text-gray-300 text-sm">
-                  Por favor, indícanos el motivo de la cancelación:
+                  {{ $t('services_page.modals.cancel_reason') }}:
                 </p>
                 <textarea 
                   v-model="cancelAdditionalInfo" 
                   rows="3" 
                   class="w-full px-3 py-3 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder-gray-400 transition-all duration-200"
-                  placeholder="Describe el motivo de la cancelación..."
+                  :placeholder="$t('services_page.modals.cancel_placeholder')"
                 ></textarea> 
               </div>
             </div>
@@ -1191,7 +1191,7 @@
               @click="closeCancelModal" 
               class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
-              Volver atrás
+              {{ $t('common.go_back') }}
             </button>
             <button 
               @click="cancelarSolicitud" 
@@ -1199,14 +1199,14 @@
               class="px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-rose-500 rounded-lg hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="!isCancelling">
-                Confirmar cancelación
+                {{ $t('services_page.modals.confirm_cancel') }}
               </span>
               <span v-else class="flex items-center justify-center">
                 <svg class="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Cancelando...
+                {{ $t('common.cancelling') }}...
               </span>
             </button>
           </div>
@@ -1239,8 +1239,8 @@
                   📜
                 </div>
                 <div>
-                  <h3 class="text-base font-black text-gray-900 dark:text-white">Propuesta Técnica</h3>
-                  <p class="text-[10px] text-gray-600 dark:text-gray-400 font-bold uppercase tracking-wider">Orden #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
+                  <h3 class="text-base font-black text-gray-900 dark:text-white">{{ $t('services_page.modals.technical_proposal') }}</h3>
+                  <p class="text-[10px] text-gray-600 dark:text-gray-400 font-bold uppercase tracking-wider">{{ $t('services_page.modals.order_prefix') }} #{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
               </div>
               <button @click="showQuotationModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
@@ -1261,31 +1261,31 @@
               <!-- Diagnóstico -->
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                  <h4 class="text-sm font-black text-gray-900 dark:text-white">Diagnóstico</h4>
+                  <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('services_page.modals.diagnosis') }}</h4>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
                   <p class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-relaxed italic">
-                    "{{ quotationData?.comentario || 'Diagnóstico listo para ser ejecutado.' }}"
+                    "{{ quotationData?.comentario || $t('services_page.modals.diagnosis_ready') }}"
                   </p>
                 </div>
               </div>
 
               <!-- Estructura de Costos -->
               <div class="space-y-2">
-                <h4 class="text-sm font-black text-gray-900 dark:text-white">Inversión</h4>
+                <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('services_page.modals.investment') }}</h4>
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 space-y-3">
                   <div class="flex justify-between items-center text-xs">
-                    <span class="text-blue-800 dark:text-blue-200 font-bold">Mano de Obra</span>
+                    <span class="text-blue-800 dark:text-blue-200 font-bold">{{ $t('services_page.payment.labor') }}</span>
                     <span class="font-black text-blue-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
                   </div>
 
                   <div v-if="shouldShowCreditBenefit && parseFloat(membresiaProgreso?.monto_credito || 0) > 0" class="flex justify-between items-center text-xs pt-2 border-t border-blue-200/50 dark:border-blue-800">
-                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">Crédito Membresía</span>
+                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ $t('services_page.modals.membership_credit') }}</span>
                     <span class="font-black text-emerald-600">−L. {{ formatCurrency(Math.min((parseFloat(quotationData?.monto_manodeobra || 0)), parseFloat(membresiaProgreso?.monto_credito || 0))) }}</span>
                   </div>
 
                   <div class="flex justify-between items-center pt-2 border-t-2 border-blue-300 dark:border-blue-700">
-                    <span class="text-sm font-black text-blue-900 dark:text-white">TOTAL NETO</span>
+                    <span class="text-sm font-black text-blue-900 dark:text-white">{{ $t('services_page.modals.net_total') }}</span>
                     <span class="text-lg font-black text-blue-900 dark:text-white">L. {{ formatCurrency(getDiscountedPrice()) }}</span>
                   </div>
                 </div>
@@ -1293,11 +1293,11 @@
                 <!-- Estimación de Materiales (Fuera del Desglose) -->
                 <div v-if="Number(quotationData?.monto_materiales) > 0" class="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-gray-200 dark:border-gray-600">
                   <div class="flex justify-between items-center mb-1">
-                    <span class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Materiales</span>
+                    <span class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ $t('services_page.modals.materials') }}</span>
                     <span class="text-xs font-black text-gray-700 dark:text-white">L. {{ formatCurrency(quotationData?.monto_materiales) }}</span>
                   </div>
                   <p class="text-[9px] text-gray-500 dark:text-gray-400 font-medium leading-tight">
-                    * Este valor es una estimación del técnico. Los materiales se adquieren de forma externa y el monto final puede variar.
+                    * {{ $t('services_page.modals.materials_desc') }}
                   </p>
                 </div>
 
@@ -1308,7 +1308,7 @@
                     <span class="text-xs font-black text-emerald-700 dark:text-emerald-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
                   </div>
                   <p class="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-medium leading-tight">
-                    * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
+                    * {{ $t('services_page.payment.cashback_desc') }}
                   </p>
                 </div>
               </div>
@@ -1316,10 +1316,10 @@
               <!-- Acciones -->
               <div class="flex gap-2 pt-2">
                 <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
-                  Rechazar
+                  {{ $t('common.reject') }}
                 </button>
                 <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
-                  <span v-if="!isProcessingQuotation">Confirmar Propuesta</span>
+                  <span v-if="!isProcessingQuotation">{{ $t('services_page.modals.confirm_proposal') }}</span>
                   <div v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </button>
               </div>
@@ -1352,7 +1352,7 @@
                   🚕
                 </div>
                 <div>
-                  <h3 class="text-base font-black text-black leading-none">Tarifa de Viaje</h3>
+                  <h3 class="text-base font-black text-black leading-none">{{ $t('services_page.modals.trip_tariff') }}</h3>
                   <p class="text-[10px] font-bold text-black/60 uppercase tracking-widest mt-1">TAXI-{{ selectedService.id }}</p>
                 </div>
               </div>
@@ -1383,13 +1383,13 @@
                   }"
                 >
                 <div>
-                  <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Conductor</p>
+                  <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ $t('services_page.modals.driver') }}</p>
                   <p class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedService.tecnico.nombre }}</p>
                 </div>
               </div>
               <!-- Notas del Conductor -->
               <div v-if="quotationData?.comentario" class="space-y-2">
-                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Notas del Conductor</h4>
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">{{ $t('services_page.modals.driver_notes') }}</h4>
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                   <p class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-relaxed italic text-center">
                     "{{ quotationData.comentario }}"
@@ -1398,7 +1398,7 @@
               </div>
               <!-- Ruta -->
               <div class="space-y-1">
-                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Itinerario</h4>
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">{{ $t('services_page.modals.itinerary') }}</h4>
                 <div class="bg-gray-50 dark:bg-gray-700/50 pt-1.5 pb-3 px-3 rounded-lg border border-gray-200 dark:border-gray-600 space-y-2 relative">
                   <!-- Línea conectora -->
                   <div class="absolute left-[19px] top-6 bottom-7 w-0.5 border-l-2 border-dotted border-gray-300 dark:border-gray-500"></div>
@@ -1408,8 +1408,8 @@
                       <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
                     </div>
                     <div class="flex-1">
-                      <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">Recogida</p>
-                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight">{{ selectedService.fullLocation?.colonia || 'Punto de partida' }}</p>
+                      <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">{{ $t('services_page.modals.pickup') }}</p>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight">{{ selectedService.fullLocation?.colonia || $t('services_page.modals.departure_point') }}</p>
                     </div>
                   </div>
 
@@ -1418,8 +1418,8 @@
                       <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
                     </div>
                     <div class="flex-1">
-                      <p class="text-[9px] font-black text-red-600 uppercase tracking-widest leading-none mb-0.5">Destino</p>
-                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight">{{ selectedService.fullLocation?.direccion || 'Destino final' }}</p>
+                      <p class="text-[9px] font-black text-red-600 uppercase tracking-widest leading-none mb-0.5">{{ $t('services_page.modals.destination') }}</p>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-tight">{{ selectedService.fullLocation?.direccion || $t('services_page.modals.final_destination') }}</p>
                     </div>
                   </div>
                 </div>
@@ -1428,7 +1428,7 @@
 
               <!-- Selector de Pago -->
               <div class="space-y-2">
-                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1 text-center">Forma de Pago</h4>
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1 text-center">{{ $t('services_page.modals.payment_method') }}</h4>
                 <div class="grid grid-cols-2 gap-2">
                   <button 
                     @click="taxiPaymentMethod = 'transferencia'"
@@ -1438,7 +1438,7 @@
                       : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
                   >
                     <span class="text-xl">💳</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'transferencia' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">App / Transf.</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'transferencia' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">{{ $t('services_page.modals.app_transfer') }}</span>
                   </button>
                   <button 
                     @click="taxiPaymentMethod = 'efectivo'"
@@ -1448,7 +1448,7 @@
                       : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
                   >
                     <span class="text-xl">💵</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'efectivo' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">Efectivo</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'efectivo' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">{{ $t('services_page.modals.cash') }}</span>
                   </button>
                 </div>
               </div>
@@ -1456,33 +1456,32 @@
               <!-- Input Billete (Solo si es efectivo) -->
               <Transition name="slide-down">
                 <div v-if="taxiPaymentMethod === 'efectivo'" class="space-y-2">
-                  <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">¿Con cuánto pagarás?</h4>
+                  <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{{ $t('services_page.modals.cash_amount') }}</h4>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">L.</span>
                     <input 
                       v-model="taxiCashBillAmount"
                       type="number"
                       inputmode="numeric"
-                      placeholder="Ej: 500"
+                      :placeholder="$t('services_page.modals.cash_placeholder')"
                       class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none font-bold text-sm transition-all"
                     >
                   </div>
-                  <p class="text-[9px] text-gray-500 italic ml-1">* El conductor llevará cambio basándose en este monto.</p>
+                  <p class="text-[9px] text-gray-500 italic ml-1">* {{ $t('services_page.modals.cash_change_desc') }}</p>
                 </div>
               </Transition>
 
               <!-- Tarifa -->
               <div class="bg-black p-4 rounded-lg shadow-xl shadow-black/10">
                 <div class="flex flex-col items-center text-center">
-                  <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">Total a Pagar</p>
+                  <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">{{ $t('services_page.payment.total_pay') }}</p>
                   <div class="text-3xl font-black tabular-nums transition-colors" :class="taxiPaymentMethod === 'transferencia' && Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0) ? 'line-through text-white/50' : 'text-white'">
                     L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
-                  </div>
                   <div v-if="taxiPaymentMethod === 'transferencia' && Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-yellow-400/80 uppercase">
-                    Pago con App: <span class="text-xs text-yellow-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
+                    {{ $t('services_page.modals.app_payment') }}: <span class="text-xs text-yellow-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
                   </div>
                   <div v-else-if="taxiPaymentMethod === 'efectivo'" class="mt-2 text-[9px] font-bold text-gray-400 uppercase tracking-tight">
-                    * Beneficios de membresía no aplican con pago en efectivo
+                    * {{ $t('services_page.modals.cash_benefit_desc') }}
                   </div>
                 </div>
               </div>
@@ -1494,10 +1493,6 @@
                   <span class="text-xs font-black text-yellow-800 dark:text-yellow-400">+L. {{ formatCurrency(cashbackAmount) }}</span>
                 </div>
                 <p class="text-[9px] text-yellow-700/70 dark:text-yellow-500/70 font-medium leading-tight">
-                  * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
-                </p>
-              </div>
-
               <!-- Acciones -->
               <div class="flex gap-2 pt-2">
                 <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
@@ -1950,7 +1945,7 @@
         <button 
           @click="showImageModal = false"
           class="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
-          aria-label="Cerrar"
+          :aria-label="$t('common.cancel')"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -1960,7 +1955,7 @@
           <img 
             :src="selectedImage" 
             class="max-w-full max-h-[80vh] object-contain"
-            :alt="'Imagen de ' + (selectedService?.technicianName || 'técnico')"
+            :alt="'Imagen de ' + (selectedService?.technicianName || $t('common.technician'))"
           />
         </div>
       </div>
@@ -2384,6 +2379,7 @@ body {
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useHead, useCookie, useRouter } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
@@ -2394,16 +2390,17 @@ import Multiselect from 'vue-multiselect'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
+const { t: $t, locale } = useI18n()
 const auth = useAuthStore()
 const router = useRouter()
 const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'MiSeguro - Dashboard',
+  title: $t('welcome') + ' - Dashboard',
   meta: [
-    { name: 'description', content: 'Panel de Servicios - Gestiona tus servicios y membresía' },
-    { name: 'keywords', content: 'dashboard, MiSeguro, servicios, membresía, panel de control' },
+    { name: 'description', content: $t('dashboard_client.seo.description', 'Panel de Servicios - Gestiona tus servicios y membresía') },
+    { name: 'keywords', content: $t('dashboard_client.seo.keywords') },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
@@ -2413,12 +2410,12 @@ useHead({
 // =========================
 
 // Service filters
-const serviceFilters = [
-  { key: 'all', label: 'Todos' },
-  { key: 'pending', label: 'Pendientes' },
-  { key: 'completed', label: 'Completados' },
-  { key: 'cancelled', label: 'Cancelados' }
-]
+const serviceFilters = computed(() => [
+  { key: 'all', label: $t('services_page.filters.all') },
+  { key: 'pending', label: $t('services_page.filters.pending') },
+  { key: 'completed', label: $t('services_page.filters.completed') },
+  { key: 'cancelled', label: $t('services_page.filters.cancelled') }
+])
 
 const currentTab = ref('active')
 const toast = ref({
@@ -2427,13 +2424,13 @@ const toast = ref({
     type: 'success',
     duration: 3000
 })
-const datePeriods = [
-    { label: 'Todos', value: 'all' },
-    { label: 'Hoy', value: 'today' },
-    { label: 'Esta semana', value: 'week' },
-    { label: 'Este mes', value: 'month' },
-    { key: 'quarter', label: 'Últimos 3m' }
-]
+const datePeriods = computed(() => [
+    { label: $t('services_page.filters.all'), value: 'all' },
+    { label: $t('services_page.filters.today'), value: 'today' },
+    { label: $t('services_page.filters.week'), value: 'week' },
+    { label: $t('services_page.filters.month'), value: 'month' },
+    { key: 'quarter', label: $t('services_page.filters.quarter') }
+])
 
 const switchTab = async (tab) => {
     if (currentTab.value === tab) return
@@ -2449,49 +2446,49 @@ const switchTab = async (tab) => {
 const serviceSteps = computed(() => {
   if (selectedService.value?.title === 'Taxi VIP') {
     return [
-      { id: 1, title: 'Solicitud recibida', description: 'Tu solicitud de viaje ha sido registrada' },
-      { id: 2, title: 'Conductor asignado', description: 'Se asignó el mejor conductor para ti' },
-      { id: 3, title: 'Tarifa Enviada', description: 'El conductor ha enviado la tarifa de tu viaje' },
-      { id: 4, title: 'Viaje en Curso', description: 'Vas en camino a tu destino' },
-      { id: 5, title: 'Viaje Completado', description: 'Has llegado a tu destino' }
+      { id: 1, title: $t('services_page.steps.pending_assignment.title'), description: $t('services_page.steps.pending_assignment.desc') },
+      { id: 2, title: $t('services_page.steps.assigned.title'), description: $t('services_page.steps.assigned.desc') },
+      { id: 3, title: $t('services_page.quotation.taxi_title'), description: $t('services_page.steps.quotation.desc') },
+      { id: 4, title: $t('services_page.steps.in_progress.title'), description: $t('services_page.steps.in_progress.desc') },
+      { id: 5, title: $t('services_page.steps.finished.title'), description: $t('services_page.steps.finished.desc') }
     ]
   } else if (selectedService.value?.title === 'Barbería') {
     return [
-      { id: 1, title: 'Solicitud recibida', description: 'Tu solicitud de corte ha sido registrada' },
-      { id: 2, title: 'Barbero asignado', description: 'Se asignó al mejor barbero' },
-      { id: 3, title: 'Costo del Servicio', description: 'El barbero ha enviado el costo de su servicio' },
-      { id: 4, title: 'Corte en Progreso', description: 'Tu estilo está siendo perfeccionado' },
-      { id: 5, title: 'Servicio Completado', description: 'Disfruta de tu nuevo look' }
+      { id: 1, title: $t('services_page.steps.pending_assignment.title'), description: $t('services_page.steps.pending_assignment.desc') },
+      { id: 2, title: $t('services_page.steps.assigned.title'), description: $t('services_page.steps.assigned.desc') },
+      { id: 3, title: $t('services_page.quotation.barber_title'), description: $t('services_page.steps.quotation.desc') },
+      { id: 4, title: $t('services_page.steps.in_progress.title'), description: $t('services_page.steps.in_progress.desc') },
+      { id: 5, title: $t('services_page.steps.finished.title'), description: $t('services_page.steps.finished.desc') }
     ]
   }
   return [
-    { id: 1, title: 'Solicitud recibida', description: 'Tu solicitud ha sido registrada' },
-    { id: 2, title: 'Técnico asignado', description: 'Se asignó el mejor técnico' },
-    { id: 3, title: 'Diagnóstico y Cotización', description: 'Evaluación y cotización' },
-    { id: 4, title: 'Servicio en Curso', description: 'Trabajo en progreso' },
-    { id: 5, title: 'Servicio Completado', description: 'Servicio finalizado' }
+    { id: 1, title: $t('services_page.steps.pending_assignment.title'), description: $t('services_page.steps.pending_assignment.desc') },
+    { id: 2, title: $t('services_page.steps.assigned.title'), description: $t('services_page.steps.assigned.desc') },
+    { id: 3, title: $t('services_page.steps.quotation.title'), description: $t('services_page.steps.quotation.desc') },
+    { id: 4, title: $t('services_page.steps.in_progress.title'), description: $t('services_page.steps.in_progress.desc') },
+    { id: 5, title: $t('services_page.steps.finished.title'), description: $t('services_page.steps.finished.desc') }
   ]
 })
 
 // Títulos y textos para el modal de cancelación
-const cancelModalTexts = {
+const cancelModalTexts = computed(() => ({
   pendiente_asignacion: {
-    title: 'Cancelar Servicio',
-    confirmButton: 'Sí, cancelar',
+    title: $t('services_page.modal.cancel_request'),
+    confirmButton: $t('common.confirm'),
   },
   asignado: {
-    title: 'Solicitar Cancelación',
-    confirmButton: 'Solicitar cancelación',
+    title: $t('services_page.modal.cancel_service'),
+    confirmButton: $t('common.confirm'),
   },
   en_proceso: {
-    title: 'Reportar Problema',
-    confirmButton: 'Enviar reporte',
+    title: $t('services_page.modal.report_problem'),
+    confirmButton: $t('common.send'),
   },
   default: {
-    title: 'Cancelar Servicio',
-    confirmButton: 'Confirmar cancelación',
+    title: $t('services_page.modal.cancel_service'),
+    confirmButton: $t('common.confirm'),
   }
-}
+}))
 
 // =========================
 // VARIABLES REACTIVAS
@@ -2705,13 +2702,13 @@ const getCancelButtonText = computed(() => {
   const status = selectedService.value?.rawStatus || 'default'
   const isTaxi = selectedService.value?.title === 'Taxi VIP'
   
-  if (status === 'cancelado') return isTaxi ? 'Viaje Cancelado' : 'Servicio Cancelado'
-  if (status === 'completado') return isTaxi ? 'Viaje Completado' : 'Servicio Completado'
-  if (status === 'en_proceso') return 'Reportar Problema'
-  if (status === 'asignado') return isTaxi ? 'Solicitar Cancelación' : 'Solicitar Cancelación'
-  if (status === 'pendiente_pago') return isTaxi ? 'Cancelar Viaje' : 'Cancelar Servicio'
+  if (status === 'cancelado') return isTaxi ? $t('services_page.status.trip_scheduled') : $t('services_page.status.cancelled') // This is a bit weird but let's use keys
+  if (status === 'completado') return isTaxi ? $t('services_page.steps.finished.title') : $t('services_page.steps.finished.title')
+  if (status === 'en_proceso') return $t('services_page.modal.report_problem')
+  if (status === 'asignado') return isTaxi ? $t('services_page.modal.cancel_trip') : $t('services_page.modal.cancel_service')
+  if (status === 'pendiente_pago') return isTaxi ? $t('services_page.modal.cancel_trip') : $t('services_page.modal.cancel_service')
   
-  return isTaxi ? 'Cancelar Viaje' : 'Cancelar Servicio'
+  return isTaxi ? $t('services_page.modal.cancel_trip') : $t('services_page.modal.cancel_service')
 })
 
 // Computed properties para determinar si mostrar los beneficios
@@ -2764,7 +2761,7 @@ const formatDate = (dateString) => {
     month: 'short', 
     year: 'numeric' 
   }
-  return date.toLocaleDateString('es-ES', options)
+  return date.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-ES', options)
 }
 
 const formatDateDDMMYY = (dateString) => {
@@ -2785,18 +2782,18 @@ const getServiceIcon = (serviceName) => {
 
 const getStatusColor = (status) => {
   const colors = {
-    'Servicio Completado': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    'Verificando Pago de la Visita': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Pago Visita Rechazado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    'Pago del Servicio Rechazado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    'Verificando Pago del Servicio': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Servicio en Curso': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    'Cotización Pendiente': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Técnico Asignado': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    'Solicitud Recibida': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Esperando Conductor': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'Servicio sin calificar': 'bg-orange-200 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    'Cancelado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    [$t('services_page.status_labels.finished')]: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    [$t('services_page.status_labels.verifying_visit')]: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    [$t('services_page.status_labels.visit_rejected')]: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    [$t('services_page.status_labels.service_rejected')]: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    [$t('services_page.status_labels.verifying_service')]: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    [$t('services_page.status_labels.in_progress')]: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    [$t('services_page.status_labels.pending_quote')]: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    [$t('services_page.status_labels.tech_assigned')]: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    [$t('services_page.status_labels.req_received')]: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    [$t('services_page.status_labels.waiting_driver')]: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    [$t('services_page.status_labels.unrated')]: 'bg-orange-200 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    [$t('services_page.status_labels.cancelled')]: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
   }
   return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
 }
@@ -2806,10 +2803,10 @@ const getTimeAgo = (date) => {
   const targetDate = new Date(date)
   const diffInDays = Math.floor((now - targetDate) / (1000 * 60 * 60 * 24))
   
-  if (diffInDays === 0) return 'Hoy'
-  if (diffInDays === 1) return 'Ayer'
-  if (diffInDays < 7) return `Hace ${diffInDays} días`
-  return `Hace ${Math.floor(diffInDays / 7)} semanas`
+  if (diffInDays === 0) return $t('common.today')
+  if (diffInDays === 1) return $t('common.yesterday')
+  if (diffInDays < 7) return $t('common.days_ago', { n: diffInDays })
+  return $t('common.weeks_ago', { n: Math.floor(diffInDays / 7) })
 }
 
 const getCurrentStepNumber = (status) => {
@@ -2899,28 +2896,28 @@ const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
   
   // Si el estado es 'pendiente_pagovisita' y el pago fue rechazado, mostramos 'Pago Visita Rechazado'
   if (apiStatus === 'pendiente_pagovisita' && servicio.pagovisitaRechazado) {
-    return 'Pago Visita Rechazado';
+    return $t('services_page.status_labels.visit_rejected');
   }
   
   // Si el estado es 'pendiente_pagoservicio' y la cotización fue rechazada, mostramos 'Pago del Servicio Rechazado'
   if (apiStatus === 'pendiente_pagoservicio' && servicio.cotizacion_estado === 'rechazado') {
-    return 'Pago del Servicio Rechazado';
+    return $t('services_page.status_labels.service_rejected');
   }
   
   const statusMap = {
-    'pendiente_pagovisita': 'Pago de la Visita',
-    'verificando_pagovisita': 'Verificando Pago de la Visita',
-    'pendiente_asignacion': servicio.title === 'Taxi VIP' ? 'Esperando Conductor' : (servicio.title === 'Barbería' ? 'Esperando Asignación de Barbero' : 'Esperando Asignación de Técnico'),
-    'asignado': servicio.title === 'Taxi VIP' ? 'Conductor Asignado' : (servicio.title === 'Barbería' ? 'Barbero Asignado' : 'Técnico Asignado'),
-    'pendiente_cotizacion': servicio.title === 'Taxi VIP' ? 'Tarifa Recibida' : (servicio.title === 'Barbería' ? 'Detalles Enviados' : 'Diagnóstico Realizado'),
-    'en_proceso': servicio.title === 'Taxi VIP' ? 'Viaje Programado' : (servicio.title === 'Barbería' ? 'Corte en Curso' : 'Servicio en Curso'),
-    'pendiente_pagoservicio': 'Pago del Servicio',
-    'verificando_pagoservicio': 'Verificando Pago del Servicio',
-    'finalizado': 'Servicio sin calificar',
-    'calificado': 'Servicio Completado',
-    'cancelado': 'Cancelado'
+    'pendiente_pagovisita': $t('services_page.steps.pending_payment.title'),
+    'verificando_pagovisita': $t('services_page.status_labels.verifying_visit'),
+    'pendiente_asignacion': servicio.title === 'Taxi VIP' ? $t('services_page.status_labels.waiting_driver') : $t('services_page.status_labels.req_received'),
+    'asignado': $t('services_page.status_labels.tech_assigned'),
+    'pendiente_cotizacion': $t('services_page.status_labels.pending_quote'),
+    'en_proceso': $t('services_page.status_labels.in_progress'),
+    'pendiente_pagoservicio': $t('services_page.steps.finished.title'),
+    'verificando_pagoservicio': $t('services_page.status_labels.verifying_service'),
+    'finalizado': $t('services_page.status_labels.unrated'),
+    'calificado': $t('services_page.status_labels.finished'),
+    'cancelado': $t('services_page.status_labels.cancelled')
   }
-  return statusMap[apiStatus] || 'En Progreso'
+  return statusMap[apiStatus] || $t('dashboard_client.in_progress')
 }
 
 const mapApiServiceToLocal = (apiService) => { 

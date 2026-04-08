@@ -14,7 +14,7 @@
       <!-- Loading Spinner -->
       <LoadingSpinner 
         :loading="isLoading || isLoggingOut" 
-        :message="isLoggingOut ? 'Cerrando sesión...' : 'Cargando Perfil...'"
+        :message="isLoggingOut ? $t('profile.logging_out') : $t('profile.loading_profile')"
       />
 
     <!-- Contenido principal -->
@@ -32,7 +32,7 @@
         <!-- Badge de Verificado en la esquina (Keep it simple) -->
         <div v-if="user.identidad_url" class="absolute top-0 right-0 pt-2 pr-2">
           <span class="flex items-center gap-1.5 text-[10px] bg-emerald-500 text-white px-3 py-1.5 rounded-bl-2xl rounded-tr-xl font-black uppercase tracking-widest shadow-lg animate-fade-in">
-            <i class="fas fa-check-circle"></i> Verificado
+            <i class="fas fa-check-circle"></i> {{ $t('profile.verified') }}
           </span>
         </div>
 
@@ -64,7 +64,7 @@
             <button 
               @click="isPhotoModalOpen = true"
               class="absolute -bottom-1 -right-1 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-all border border-gray-100 dark:border-gray-700"
-              title="Cambiar Foto"
+              :title="$t('profile.change_photo')"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a48.324 48.324 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -86,7 +86,7 @@
             >
               <div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></div>
               <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_white]"></div>
-              <span class="text-[10px] font-black uppercase tracking-[0.1em]">Verifica tu Identidad aquí</span>
+              <span class="text-[10px] font-black uppercase tracking-[0.1em]">{{ $t('profile.verify_identity') }}</span>
               <i class="fas fa-chevron-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
             </button>
             <div 
@@ -96,7 +96,7 @@
               <div class="flex items-center justify-center w-4 h-4 bg-emerald-500 rounded-full">
                 <i class="fas fa-check text-white text-[8px]"></i>
               </div>
-              <span class="text-[10px] font-black uppercase tracking-widest">Cuenta Verificada</span>
+              <span class="text-[10px] font-black uppercase tracking-widest">{{ $t('profile.verified_account') }}</span>
             </div>
           </div>
         </div>
@@ -109,15 +109,15 @@
             <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
               <span class="text-blue-600 dark:text-blue-400 text-sm">📅</span>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Registrado el</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.registered_on') }}</p>
             <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ formatShortDate(user.fecha_registro) }}</p>
           </div>
           <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
             <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
               <span class="text-purple-600 dark:text-purple-400 text-sm">🏙️</span>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Ciudad</p>
-            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || 'No especificada' }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.city') }}</p>
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || $t('profile.not_specified') }}</p>
           </div>
         </div>
 
@@ -152,9 +152,9 @@
                       'text-red-800 dark:text-red-200': isMembershipExpired,
                       'text-gray-800 dark:text-gray-200': isMembershipInactive
                     }">
-                    {{ isMembershipActive ? 'Membresía activa hasta' : 
-                       isMembershipPending ? 'Membresía pendiente' :
-                       isMembershipExpired ? 'Membresía vencida' : 'Estado de la membresía' }}
+                    {{ isMembershipActive ? $t('profile.membership.active_until') : 
+                       isMembershipPending ? $t('profile.membership.pending') :
+                       isMembershipExpired ? $t('profile.membership.expired') : $t('profile.membership.status') }}
                   </p>
                   <p class="text-xs font-bold truncate"
                     :class="{
@@ -182,9 +182,9 @@
               </div>
               
               <div v-if="!isMembershipInactive" class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                <span>Inicio: {{ membershipStartDate }}</span>
-                <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% completado</span>
-                <span v-else-if="membershipProgress >= 100">Expirada</span>
+                <span>{{ $t('profile.membership.start') }}: {{ membershipStartDate }}</span>
+                <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% {{ $t('profile.membership.completed') }}</span>
+                <span v-else-if="membershipProgress >= 100">{{ $t('profile.membership.expired') }}</span>
               </div>
             </div>
             
@@ -202,7 +202,7 @@
               <svg v-if="isMembershipExpired || isMembershipInactive" class="w-3 h-3 mr-1 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
-              {{ isMembershipActive ? 'Membresía Activa' : isMembershipPending ? 'Pendiente' : isMembershipInactive ? 'Activar ahora' : 'Renovar Ahora' }}
+              {{ isMembershipActive ? $t('profile.membership.active') : isMembershipPending ? $t('profile.membership.pending') : isMembershipInactive ? $t('profile.membership.activate_now') : $t('profile.membership.renew_now') }}
             </button>
           </div>
           
@@ -218,42 +218,42 @@
 
       <!-- User Information -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4">
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4">Información Personal</h3>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4">{{ $t('profile.personal_info') }}</h3>
         
         
         <div class="space-y-3">
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.full_name') }}</label>
             <input 
               v-model="user.nombre"
               type="text" 
               class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
-              placeholder="Tu nombre completo"
+              :placeholder="$t('profile.name_placeholder')"
             >
           </div>
           
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.email') }}</label>
             <input 
               v-model="user.email"
               type="email" 
               class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
-              placeholder="tu@email.com"
+              :placeholder="$t('profile.email_placeholder')"
             >
           </div>
           
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.phone') }}</label>
             <input 
               v-model="user.telefono"
               type="tel" 
               class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
-              placeholder="+504 9999-9999"
+              :placeholder="$t('profile.phone_placeholder')"
             >
           </div>
           
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ciudad</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.city') }}</label>
             <div class="relative">
               <multiselect
                 v-model="selectedCiudadObject"
@@ -287,19 +287,19 @@
                 @click="isPasswordModalOpen = false"
                 type="button"
                 class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200"
-                aria-label="Cerrar modal"
+                :aria-label="$t('profile.close_modal')"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
               
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Cambiar Contraseña</h3>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ $t('profile.change_password') }}</h3>
               
               <form @submit.prevent="updatePassword" class="space-y-3">
               <!-- Campo de usuario oculto para accesibilidad -->
               <div class="sr-only">
-                <label for="username">Nombre de usuario</label>
+                <label for="username">{{ $t('profile.username') }}</label>
                 <input 
                   id="username"
                   type="text" 
@@ -311,13 +311,13 @@
                 >
               </div>
                 <div class="space-y-1">
-                  <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña Actual</label>
+                  <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.current_password') }}</label>
                   <input 
                     id="currentPassword"
                     v-model="currentPassword"
                     type="password" 
                     class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
-                    placeholder="Ingresa tu contraseña actual"
+                    :placeholder="$t('profile.current_password_placeholder')"
                     autocomplete="current-password"
                     required
                     minlength="6"
@@ -325,13 +325,13 @@
                 </div>
                 
                 <div class="space-y-1">
-                  <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
+                  <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.new_password') }}</label>
                   <input 
                     id="newPassword"
                     v-model="newPassword"
                     type="password" 
                     class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
-                    placeholder="Ingresa tu nueva contraseña"
+                    :placeholder="$t('profile.new_password_placeholder')"
                     autocomplete="new-password"
                     required
                     minlength="6"
@@ -339,18 +339,18 @@
                 </div>
                 
                 <div class="space-y-1">
-                  <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nueva Contraseña</label>
+                  <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.confirm_password') }}</label>
                   <input 
                     id="confirmPassword"
                     v-model="confirmPassword"
                     type="password" 
                     class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
-                    placeholder="Confirma tu nueva contraseña"
+                    :placeholder="$t('profile.confirm_password_placeholder')"
                     autocomplete="new-password"
                     required
                     :class="{'border-red-500 dark:border-red-400': passwordMismatch}"
                   >
-                  <p v-if="passwordMismatch" class="text-sm text-red-600 dark:text-red-400">Las contraseñas no coinciden</p>
+                  <p v-if="passwordMismatch" class="text-sm text-red-600 dark:text-red-400">{{ $t('profile.passwords_mismatch') }}</p>
                 </div>
                 
                 <button 
@@ -358,8 +358,8 @@
                   :disabled="isUpdatingPassword || passwordMismatch"
                   class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
-                  <span v-if="isUpdatingPassword">Actualizando...</span>
-                  <span v-else>Actualizar Contraseña</span>
+                  <span v-if="isUpdatingPassword">{{ $t('profile.updating') }}</span>
+                  <span v-else>{{ $t('profile.update_password') }}</span>
                 </button>
               </form>
             </div>
@@ -372,7 +372,7 @@
               class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
               <i v-if="isSaving" class="fas fa-circle-notch fa-spin"></i>
-              <span>{{ isSaving ? 'Guardando...' : 'Actualizar Información' }}</span>
+              <span>{{ isSaving ? $t('profile.saving') : $t('profile.update_info') }}</span>
             </button>
             
               <button 
@@ -381,7 +381,7 @@
                 class="w-full py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
               >
                 <i class="fas fa-key text-amber-500"></i>
-                Cambiar Contraseña
+                {{ $t('profile.change_password') }}
               </button>
           </div>
         </div>
@@ -395,8 +395,8 @@
               🔔
             </div>
             <div>
-              <h3 class="text-base font-bold text-gray-900 dark:text-white">Notificaciones Push</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Recibe alertas en tiempo real</p>
+              <h3 class="text-base font-bold text-gray-900 dark:text-white">{{ $t('profile.push_notifications') }}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.real_time_alerts') }}</p>
             </div>
           </div>
           
@@ -416,34 +416,66 @@
 
         <div class="mt-4">
           <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-            Activa las notificaciones para recibir actualizaciones sobre tus pedidos y mensajes incluso si no tienes la aplicación abierta.
+            {{ $t('profile.notifications_description') }}
           </p>
           
           <p v-if="permission === 'denied'" class="mt-2 text-[10px] text-red-500 dark:text-red-400">
-            ⚠️ Permisos bloqueados en el navegador. Por favor, habilítalos en los ajustes del sitio.
+            ⚠️ {{ $t('profile.notifications_blocked') }}
           </p>
+        </div>
+      </div>
+
+      <!-- Language Settings -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4 transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-xl">
+              🌎
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-gray-900 dark:text-white">{{ $t('profile.language') }}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.select_language') }}</p>
+            </div>
+          </div>
+          
+          <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <button 
+              @click="setLocale('es')"
+              class="px-3 py-1.5 rounded-md text-xs font-bold transition-all"
+              :class="locale === 'es' ? 'bg-white dark:bg-gray-600 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 dark:text-gray-400'"
+            >
+              ES
+            </button>
+            <button 
+              @click="setLocale('en')"
+              class="px-3 py-1.5 rounded-md text-xs font-bold transition-all"
+              :class="locale === 'en' ? 'bg-white dark:bg-gray-600 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 dark:text-gray-400'"
+            >
+              EN
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Legal & About -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3">Legal y más</h3>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3">{{ $t('profile.legal') }}</h3>
         
         <div class="space-y-2">
           <button 
             @click="isTerminosModalOpen = true"
             class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.terms') }}</p>
           </button>
           <button 
             @click="isPrivacidadModalOpen = true"
             class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Política de privacidad</p>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.privacy') }}</p>
           </button>
           <button 
             @click="isAcercaModalOpen = true"
             class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de MiSeguro</p>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.about') }}</p>
           </button>
           <button 
             @click="handleLogout"
@@ -451,7 +483,7 @@
             class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200 flex items-center justify-between"
             :class="{'opacity-70 cursor-not-allowed': isLoggingOut}"
           >
-            <span class="text-sm font-medium text-red-600 dark:text-red-400">Cerrar sesión</span>
+            <span class="text-sm font-medium text-red-600 dark:text-red-400">{{ $t('profile.logout') }}</span>
             <LoadingSpinner v-if="isLoggingOut" class="w-4 h-4 text-red-500" />
           </button>
         </div>
@@ -568,22 +600,22 @@
                   >
                     <div v-if="selectedAccount" class="space-y-3">
                       <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
-                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de la cuenta:</h4>
+                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $t('profile.membership.account_details') }}:</h4>
                         <div class="space-y-1">
                           <div class="flex justify-between items-center py-1">
-                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Banco:</span>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ $t('profile.membership.bank') }}:</span>
                             <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.banco || 'N/A' }}</span>
                           </div>
                           <div class="flex justify-between items-center py-1">
-                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Cuenta:</span>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ $t('profile.membership.account_number') }}:</span>
                             <span class="text-xs font-mono font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.num_cuenta || 'N/A' }}</span>
                           </div>
                           <div class="flex justify-between items-center py-1">
-                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Beneficiario:</span>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ $t('marketplace.account_details.beneficiary') }}:</span>
                             <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">{{ getSelectedAccount?.beneficiario || 'N/A' }}</span>
                           </div>
                           <div class="flex justify-between items-center py-1">
-                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Tipo:</span>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ $t('auth.city') }}:</span>
                             <span class="text-xs font-semibold text-gray-800 dark:text-gray-100 capitalize">{{ getSelectedAccount?.tipo || 'N/A' }}</span>
                           </div>
                         </div>
@@ -592,21 +624,21 @@
                       <!-- Input para el número de comprobante mejorado -->
                       <div class="space-y-1">
                         <label for="comprobante" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                          Número de comprobante
+                          {{ $t('profile.membership.receipt_number') }}
                         </label>
                         <input
                           id="comprobante"
                           v-model="comprobante"
                           type="text"
                           class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 text-base"
-                          placeholder="Ej: 123456789"
+                          :placeholder="$t('profile.membership.receipt_placeholder')"
                           required
                         />
                         <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                           <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                           </svg>
-                          Ingresa el número de comprobante de tu transferencia o depósito
+                          {{ $t('profile.membership.receipt_desc') }}
                         </p>
                       </div>
                     </div>
@@ -632,20 +664,20 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Procesando...
+                  {{ $t('profile.membership.processing') }}
                 </span>
                 <span v-else class="flex items-center justify-center">
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  Confirmar Pago
+                  {{ $t('profile.membership.confirm_payment') }}
                 </span>
               </button>
               <button
                 @click="showRenewalModal = false"
                 class="w-full py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] text-sm"
               >
-                Cancelar
+                {{ $t('profile.membership.cancel') }}
               </button>
             </div>
           </div>
@@ -827,119 +859,13 @@
     </div>
 
     <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Aceptación de los Términos</h4>
-        <p>
-          Al registrarse y utilizar la plataforma MiSeguro, usted acepta de forma expresa
-          estos Términos y Condiciones. Si no está de acuerdo con alguno de ellos, deberá abstenerse de utilizar la plataforma.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Descripción del Servicio</h4>
-        <p>
-          MiSeguro es una plataforma tecnológica que facilita la conexión entre clientes y técnicos independientes
-          para la prestación de servicios de mantenimiento y reparación a domicilio.
-        </p>
-        <p class="mt-2">
-          <strong>Importante:</strong> MiSeguro no presta directamente los servicios, no emplea a los técnicos
-          y no asume una relación laboral con ellos. Los técnicos actúan de manera independiente y bajo su propia responsabilidad.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Medios de Pago</h4>
-        <p>
-          Todos los pagos de los servicios solicitados a través de la plataforma deberán realizarse exclusivamente 
-          mediante transferencia bancaria o medios electrónicos autorizados a las cuentas oficiales de MiSeguro.
-        </p>
-        <p class="mt-2">
-          <strong>Importante:</strong> Cualquier pago realizado fuera de la plataforma, en efectivo o a cuentas no autorizadas, 
-          no será reconocido por MiSeguro y no generará derechos de reclamo, garantía, crédito o soporte.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Precio del Servicio</h4>
-        <p>
-          El precio de la mano de obra es definido por el técnico y deberá ser aceptado por el cliente antes
-          de la ejecución del servicio. El precio incluye la comisión de la plataforma por intermediación.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Membresías y Créditos</h4>
-        <p>
-          MiSeguro ofrece membresías mensuales que otorgan beneficios, entre ellos la acumulación de crédito
-          utilizable como descuento al momento de pagar servicios dentro de la plataforma.
-        </p>
-        <p class="mt-2">El crédito acumulado:</p>
-        <ul class="list-disc pl-5 space-y-1">
-          <li>No es dinero en efectivo</li>
-          <li>No es transferible</li>
-          <li>Solo puede utilizarse para pagar servicios dentro de MiSeguro</li>
-          <li>Reduce el monto a pagar por el cliente, sin afectar el pago al técnico</li>
+      <section v-for="(section, index) in $t('profile.terms_content')" :key="index">
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ index + 1 }}. {{ section.title }}</h4>
+        <p v-html="section.text"></p>
+        <ul v-if="section.list" class="list-disc pl-5 space-y-1 mt-2">
+          <li v-for="(item, i) in section.list" :key="i">{{ item }}</li>
         </ul>
-        <p class="mt-2">
-          La membresía tiene una duración de 30 días. Si no es renovada dentro del período de gracia establecido,
-          el crédito acumulado podrá ser reiniciado a cero, sin posibilidad de reversión.
-        </p>
       </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Pago por Visita Técnica</h4>
-        <p>
-          En caso de que el cliente no cuente con una membresía activa, se cobrará una tarifa fija por visita técnica,
-          cuyo valor será informado previamente.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Limitación de Responsabilidad</h4>
-        <p>
-          Los servicios son prestados por técnicos independientes. MiSeguro no garantiza el resultado final del servicio,
-          salvo en los casos expresamente establecidos por la plataforma.
-        </p>
-        <p class="mt-2">
-          MiSeguro no será responsable por daños directos o indirectos derivados de la ejecución del servicio,
-          excepto cuando la legislación aplicable disponga lo contrario.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Privacidad y Protección de Datos</h4>
-        <p>
-          Los datos personales serán tratados conforme a la Política de Privacidad de MiSeguro
-          y utilizados únicamente para la operación y mejora de la plataforma.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Modificaciones</h4>
-        <p>
-          MiSeguro podrá modificar estos Términos y Condiciones en cualquier momento.
-          Las modificaciones entrarán en vigor desde su publicación en la plataforma.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">10. Ley Aplicable y Jurisdicción</h4>
-        <p>
-          Estos Términos se rigen por las leyes de la República de Honduras.
-          Cualquier controversia será sometida a los tribunales competentes de San Pedro Sula, Cortés.
-        </p>
-      </section>
-
-      <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">11. Garantía de los Servicios</h4>
-        <p>
-          Los servicios contratados a través de MiSeguro cuentan con una garantía de <strong>un (1) mes</strong>. 
-          En caso de que un trabajo no se haya realizado con los mejores estándares posibles y requiera una nueva 
-          intervención para hacer efectiva la garantía, no se le cobrará mano de obra de nuevo al cliente.
-        </p>
-      </section>
-
     </div>
 
     <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
@@ -961,7 +887,7 @@
           @click="isPrivacidadModalOpen = false"
           type="button"
           class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-          aria-label="Cerrar modal"
+          :aria-label="$t('profile.close_modal')"
         >
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -969,107 +895,17 @@
         </button>
 
         <div class="mb-4 flex-shrink-0 text-left">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Política de Privacidad</h3> 
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('profile.privacy') }}</h3> 
         </div>
 
         <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">1. Información que Recopilamos</h4>
-            <p>Recopilamos información personal que usted nos proporciona voluntariamente al registrarse y utilizar nuestros servicios. Esta información incluye:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Nombre completo y datos de contacto (teléfono, email)</li>
-              <li>Dirección y ubicación para facilitar los servicios</li>
-              <li>Información de pago para procesar transacciones</li>
-              <li>Historial de servicios solicitados y realizados</li>
-              <li>Comentarios y calificaciones sobre los servicios</li>
+          <section v-for="(section, index) in $t('profile.privacy_content')" :key="index">
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ index + 1 }}. {{ section.title }}</h4>
+            <p v-html="section.text"></p>
+            <ul v-if="section.list" class="list-disc pl-5 space-y-1 mt-2">
+              <li v-for="(item, i) in section.list" :key="i">{{ item }}</li>
             </ul>
           </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">2. Uso de la Información</h4>
-            <p>Utilizamos su información personal para:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Facilitar la conexión con técnicos calificados</li>
-              <li>Procesar pagos y gestionar su membresía</li>
-              <li>Mejorar la calidad de nuestros servicios</li>
-              <li>Enviar notificaciones importantes sobre su cuenta</li>
-              <li>Proporcionar soporte técnico y atención al cliente</li>
-              <li>Cumplir con obligaciones legales y regulatorias</li>
-            </ul>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">3. Compartir Información</h4>
-            <p>Compartimos su información únicamente en las siguientes circunstancias:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Con técnicos asignados para realizar los servicios solicitados</li>
-              <li>Con instituciones financieras para procesar pagos</li>
-              <li>Con autoridades gubernamentales cuando sea requerido por ley</li>
-              <li>Con proveedores de servicios que nos ayudan a operar la plataforma</li>
-            </ul>
-            <p class="mt-2">Nunca vendemos ni alquilamos su información personal a terceros con fines comerciales.</p>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">4. Seguridad de los Datos</h4>
-            <p>Implementamos medidas de seguridad técnicas y organizativas para proteger su información personal contra acceso no autorizado, pérdida, alteración o destrucción. Estas incluyen:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Encriptación de datos sensibles</li>
-              <li>Acceso restringido a la información personal</li>
-              <li>Monitoreo constante de nuestras systems</li>
-              <li>Capacitación regular de nuestro personal en seguridad</li>
-            </ul>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">5. Derechos del Usuario</h4>
-            <p>Usted tiene derecho a:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Acceder a su información personal que poseemos</li>
-              <li>Corregir información inexacta o incompleta</li>
-              <li>Solicitar la eliminación de sus datos personales</li>
-              <li>Limitar el uso de su información</li>
-              <li>Portar sus datos a otro proveedor de servicios</li>
-              <li>Presentar quejas ante autoridades de protección de datos</li>
-            </ul>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">6. Cookies y Tecnologías Similares</h4>
-            <p>Utilizamos cookies y tecnologías similares para mejorar su experiencia en nuestra plataforma. Estas nos permiten:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Mantener su sesión activa</li>
-              <li>Recordar sus preferencias</li>
-              <li>Analizar el uso de nuestra plataforma</li>
-              <li>Personalizar contenido y publicidad</li>
-            </ul>
-            <p class="mt-2">Puede configurar su navegador para rechazar cookies, aunque esto puede afectar algunas funcionalidades de la plataforma.</p>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">7. Retención de Datos</h4>
-            <p>Conservamos su información personal solo durante el tiempo necesario para cumplir con los propósitos para los cuales fue recopilada, incluyendo:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>El período necesario para proporcionar nuestros servicios</li>
-              <li>El tiempo requerido por obligaciones legales</li>
-              <li>El período necesario para resolver disputas o reclamaciones</li>
-            </ul>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">8. Menores de Edad</h4>
-            <p>Nuestros servicios no están dirigidos a menores de 18 años. No recopilamos intencionalmente información personal de menores. Si somos conscientes de haber recopilado información de un menor, tomaremos medidas para eliminarla inmediatamente.</p>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">9. Cambios a esta Política</h4>
-            <p>Pueden actualizar esta política de privacidad periódicamente para reflejar cambios en nuestras prácticas o por requisitos legales. Le notificaremos cualquier cambio significativo mediante:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Notificaciones en nuestra plataforma</li>
-              <li>Comunicación por correo electrónico</li>
-              <li>Avisos destacados en nuestro sitio web</li>
-            </ul>
-          </section> 
         </div>
 
         <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
@@ -1098,8 +934,8 @@
         </button>
 
         <div class="mb-4 flex-shrink-0 text-left">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acerca de MiSeguro</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Tu plataforma de confianza para servicios del hogar</p>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('profile.about_title') }}</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t('profile.about_subtitle') }}</p>
         </div>
 
         <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
@@ -1108,74 +944,28 @@
               🏠
             </div>
             <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">MiSeguro</h4>
-            <p class="text-gray-600 dark:text-gray-400">Conectando hogares con profesionales de confianza</p>
+            <p class="text-gray-600 dark:text-gray-400">{{ $t('profile.about_hero_desc') }}</p>
           </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestra Misión</h4>
-            <p>En MiSeguro, nos dedicamos a facilitar el acceso a servicios de alta calidad para el hogar, conectando a clientes con profesionales verificados y confiables. Buscamos convertir cada experiencia de servicio en una solución satisfactoria y segura.</p>
-          </section>
+          <section v-for="(section, index) in $t('profile.about_content')" :key="index">
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ section.title }}</h4>
+            <p v-if="section.text">{{ section.text }}</p>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestra Visión</h4>
-            <p>Ser la plataforma líder en Honduras para servicios del hogar, reconocida por nuestra excelencia en el servicio, la confianza generada en nuestros usuarios y el impacto positivo en la vida de las familias y profesionales técnicos.</p>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">¿Qué Hacemos?</h4>
-            <p>MiSeguro es una plataforma tecnológica que:</p>
-            <ul class="list-disc pl-5 space-y-1 mt-2">
-              <li>Conecta a clientes con técnicos profesionales calificados</li>
-              <li>Verifica la identidad y experiencia de todos nuestros técnicos</li>
-              <li>Facilita el proceso de cotización y pago de servicios</li>
-              <li>Ofrece un sistema de membresía con beneficios exclusivos</li>
-              <li>Proporciona garantía en los servicios realizados</li>
-              <li>Brinda soporte continuo a clientes y técnicos</li>
+            <ul v-if="section.list" class="list-disc pl-5 space-y-1 mt-2">
+              <li v-for="(item, i) in section.list" :key="i">{{ item }}</li>
             </ul>
-          </section>
 
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestros Valores</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• Confianza</h5>
-                <p class="text-gray-700 dark:text-gray-300 text-xs">Construimos relaciones basadas en la honestidad y transparencia.</p>
-              </div>
-              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• Calidad</h5>
-                <p class="text-gray-700 dark:text-gray-300 text-xs">Comprometidos con la excelencia en cada servicio.</p>
-              </div>
-              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• Seguridad</h5>
-                <p class="text-gray-700 dark:text-gray-300 text-xs">Priorizamos la protección de nuestros usuarios.</p>
-              </div>
-              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• Innovación</h5>
-                <p class="text-gray-700 dark:text-gray-300 text-xs">Mejoramos constantemente nuestra tecnología.</p>
+            <div v-if="section.grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              <div v-for="(val, vIdx) in section.grid" :key="vIdx" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• {{ val.title }}</h5>
+                <p class="text-gray-700 dark:text-gray-300 text-xs">{{ val.desc }}</p>
               </div>
             </div>
           </section>
 
           <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Servicios que Ofrecemos</h4>
-            <ul class="list-disc pl-5 space-y-1">
-              <li>Reparaciones eléctricas y plomería</li>
-              <li>Servicios de aire acondicionado y refrigeración</li>
-              <li>Mantenimiento de electrodomésticos</li>
-              <li>Instalaciones y reparaciones generales</li>
-              <li>Limpieza y mantenimiento de espacios</li> 
-              <li>Y mucho más</li>
-            </ul>
-          </section> 
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Nuestro Equipo</h4>
-            <p>Somos un equipo apasionado de profesionales comprometidos con transformar la forma en que los hogares acceden a servicios. Contamos con expertos en tecnología, atención al cliente y desarrollo de negocios trabajando juntos para ofrecer la mejor experiencia posible.</p>
-          </section>
-
-          <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">Contacto</h4>
-            <p>¿Necesitas ayuda? Estamos aquí para asistirte:</p>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ $t('profile.contact') }}</h4>
+            <p>{{ $t('profile.contact_desc') }}</p>
             <div class="space-y-2 mt-2">
               <div class="flex items-center space-x-2">
                 <span class="text-blue-600 dark:text-blue-400">📧</span>
@@ -1209,9 +999,9 @@
             <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
               🔕
             </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¿Desactivar notificaciones?</h3>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('profile.notifications.disable_title') }}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed px-2">
-              Dejarás de recibir avisos importantes sobre tus servicios y membresías en tiempo real.
+              {{ $t('profile.notifications.disable_desc') }}
             </p>
           </div>
           
@@ -1220,13 +1010,13 @@
               @click="confirmUnsubscribe"
               class="w-full py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-red-200 dark:shadow-none"
             >
-              Sí, desactivar
+              {{ $t('profile.notifications.confirm_disable') }}
             </button>
             <button 
               @click="showUnsubscribeModal = false"
               class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
             >
-              Mantener activas
+              {{ $t('profile.notifications.keep_active') }}
             </button>
           </div>
         </div>
@@ -1243,9 +1033,9 @@
             <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
               🔔
             </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¡Mantente informado!</h3>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('profile.notifications.subscribe_title') }}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed px-2">
-              Activando las notificaciones te avisaremos sobre el estado de tus servicios y promociones exclusivas.
+              {{ $t('profile.notifications.subscribe_desc') }}
             </p>
           </div>
           
@@ -1254,13 +1044,13 @@
               @click="confirmSubscribe"
               class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200 dark:shadow-none"
             >
-              Sí, activar alertas
+              {{ $t('profile.notifications.confirm_subscribe') }}
             </button>
             <button 
               @click="showSubscribeModal = false"
               class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
             >
-              Ahora no
+              {{ $t('profile.notifications.not_now') }}
             </button>
           </div>
         </div>
@@ -1580,15 +1370,18 @@ import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Multiselect from 'vue-multiselect'
 import { usePushNotifications } from '~/composables/usePushNotifications'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale, setLocale } = useI18n()
 
 const config = useRuntimeConfig()
 const { $api } = useNuxtApp();
 
 // SEO and Meta
 useHead({
-  title: 'MiSeguro - Perfil',
+  title: t('profile.title') + ' - MiSeguro',
   meta: [
-    { name: 'description', content: 'Perfil de usuario de MiSeguro - Gestiona tus servicios y membresía' },
+    { name: 'description', content: t('profile.title') + ' - MiSeguro' },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
@@ -1730,7 +1523,7 @@ const cargarCiudades = async () => {
     }
   } catch (error) {
     console.error('Error al cargar las ciudades:', error)
-    showError('Error', 'No se pudieron cargar las ciudades')
+    showError(t('common.error'), t('profile.messages.load_cities_error'))
   }
 }
 
@@ -1833,7 +1626,7 @@ const fetchUserData = async () => {
     return true
   } catch (error) {
     console.error('Error al obtener los datos del usuario:', error)
-    showError('Error', 'No se pudieron cargar los datos del perfil')
+    showError(t('common.error'), t('profile.messages.load_profile_error'))
   }
 }
 
@@ -1849,7 +1642,7 @@ const cargarDatosPerfil = async () => {
     return true
   } catch (error) {
     console.error('Error al cargar el perfil:', error)
-    showError('Error', 'No se pudo cargar la información del perfil')
+    showError(t('common.error'), t('profile.messages.load_profile_error'))
     return false
   }
 }
@@ -1922,7 +1715,7 @@ const handleLogout = async () => {
     console.error('Error al cerrar sesión:', error);
     toast.value = {
       show: true,
-      message: 'Error al cerrar sesión. Por favor, inténtalo de nuevo.',
+      message: t('profile.messages.logout_error'),
       type: 'error',
       duration: 3000
     };
@@ -1949,17 +1742,17 @@ const confirmSubscribe = async () => {
         const result = await subscribe()
         
         if (result.success) {
-            showSuccess('¡Éxito!', 'Notificaciones activadas correctamente')
+            showSuccess(t('common.success'), t('profile.messages.update_success'))
         } else if (result.error === 'denied') {
-            showError('Permiso denegado', 'Debes permitir las notificaciones en tu navegador')
+            showError(t('profile.messages.generic_error'), t('profile.permissions_denied'))
         } else if (result.error === 'supported') {
-            showError('No soportado', 'Tu navegador no soporta notificaciones push')
+            showError(t('common.error'), 'Your browser does not support push notifications')
         } else {
-            showError('Error', result.error || 'No se pudieron activar las notificaciones')
+            showError(t('common.error'), result.error || t('profile.messages.generic_error'))
         }
     } catch (error) {
         console.error('Error al suscribir:', error)
-        showError('Error', 'Ocurrió un error inesperado al activar las notificaciones')
+        showError(t('common.error'), t('profile.messages.generic_error'))
     }
 }
 
@@ -1967,9 +1760,12 @@ const confirmUnsubscribe = async () => {
   try {
     await unsubscribe()
     showUnsubscribeModal.value = false
-    toast.show = true
-    toast.message = 'Notificaciones desactivadas'
-    toast.type = 'info'
+    toast.value = {
+      show: true,
+      message: t('profile.messages.update_success'),
+      type: 'info',
+      duration: 3000
+    }
   } catch (error) {
     console.error('Error al desactivar:', error)
   }
@@ -2074,7 +1870,7 @@ const onFileChange = async (event) => {
   
   // Validar tamaño (máximo 5MB)
   if (file.size > 5 * 1024 * 1024) {
-    showError('Error', 'La imagen no debe superar los 5MB')
+    showError(t('common.error'), t('profile.messages.file_size_error'))
     return
   }
   
@@ -2097,19 +1893,19 @@ const uploadProfileImage = async (file) => {
       // Actualizar el store y la cookie
       const userCookie = useCookie('user')
       userCookie.value = { ...userCookie.value, imagen_url: response.data.imagen_url }
-      showSuccess('¡Éxito!', 'Imagen de perfil actualizada')
+      showSuccess(t('common.success'), t('profile.messages.photo_success'))
       isPhotoModalOpen.value = false
     }
   } catch (error) {
     console.error('Error al subir imagen:', error)
-    showError('Error', 'No se pudo subir la imagen')
+    showError(t('common.error'), t('profile.messages.upload_error'))
   } finally {
     isUploading.value = false
   }
 }
 
 const deleteProfileImage = async () => {
-  if (!confirm('¿Estás seguro de que quieres eliminar tu foto de perfil?')) return
+  if (!confirm(t('profile.messages.confirm_delete_photo'))) return
   
   isDeleting.value = true
   try {
@@ -2121,12 +1917,12 @@ const deleteProfileImage = async () => {
       user.value.imagen_url = null
       const userCookie = useCookie('user')
       userCookie.value = { ...userCookie.value, imagen_url: null }
-      showSuccess('¡Éxito!', 'Imagen de perfil eliminada')
+      showSuccess(t('common.success'), t('profile.messages.photo_delete_success'))
       isPhotoModalOpen.value = false
     }
   } catch (error) {
     console.error('Error al eliminar imagen:', error)
-    showError('Error', 'No se pudo eliminar la imagen')
+    showError(t('common.error'), t('profile.messages.delete_error'))
   } finally {
     isDeleting.value = false
   }
@@ -2138,7 +1934,7 @@ const onIdentityFileChange = async (event) => {
   if (!file) return
   
   if (file.size > 10 * 1024 * 1024) {
-    showError('Error', 'El archivo no debe superar los 10MB')
+    showError(t('common.error'), t('profile.messages.file_size_error'))
     return
   }
   
@@ -2158,7 +1954,7 @@ const uploadIdentityImage = async (file) => {
     
     if (response.success) {
       user.value.identidad_url = response.data.identidad_url
-      showSuccess('¡Éxito!', 'Foto de identidad subida correctamente')
+      showSuccess(t('common.success'), t('profile.messages.id_upload_success'))
       isIdentityModalOpen.value = false
       
       // Notificar a administradores y súper administradores
@@ -2183,7 +1979,7 @@ const uploadIdentityImage = async (file) => {
     }
   } catch (error) {
     console.error('Error al subir foto de identidad:', error)
-    showError('Error', 'No se pudo subir la foto de identidad')
+    showError(t('common.error'), t('profile.messages.upload_error'))
   } finally {
     isUploading.value = false
   }
@@ -2203,12 +1999,12 @@ const confirmDeleteIdentity = async () => {
     
     if (response.success) {
       user.value.identidad_url = null
-      showSuccess('¡Éxito!', 'Foto de identidad eliminada')
+      showSuccess(t('common.success'), t('profile.messages.id_delete_success'))
       isIdentityModalOpen.value = false
     }
   } catch (error) {
     console.error('Error al eliminar foto de identidad:', error)
-    showError('Error', 'No se pudo eliminar la foto de identidad')
+    showError(t('common.error'), t('profile.messages.delete_error'))
   } finally {
     isDeleting.value = false
   }
@@ -2245,7 +2041,7 @@ const saveProfile = async () => {
     // Mostrar notificación de éxito
     showToast({
       type: 'success',
-      message: '¡Perfil actualizado correctamente!',
+      message: t('profile.messages.update_success'),
       duration: 1500
     });
     
@@ -2254,7 +2050,7 @@ const saveProfile = async () => {
     
     // Obtener el mensaje de error del servidor
     const responseData = error.data || {};
-    let errorMessage = 'Error al guardar el perfil';
+    let errorMessage = t('profile.messages.save_error');
     
     // Registrar detalles del error en consola
     
@@ -2264,7 +2060,7 @@ const saveProfile = async () => {
     } else if (responseData.error === 'Error de validación' && responseData.field) {
       errorMessage = responseData.message || `Error en el campo ${responseData.field}`;
     } else if (error.statusCode === 500) {
-      errorMessage = 'Error interno del servidor. Por favor, intente nuevamente.';
+      errorMessage = t('profile.messages.server_error');
     }
     
     // Mostrar el mismo mensaje en consola
@@ -2285,7 +2081,7 @@ const updatePassword = async () => {
   if (newPassword.value !== confirmPassword.value) {
     showToast({
       type: 'error',
-      message: 'Las contraseñas no coinciden',
+      message: t('profile.password_mismatch'),
       duration: 3000
     });
     return;
@@ -2294,7 +2090,7 @@ const updatePassword = async () => {
   if (!currentPassword.value || !newPassword.value) {
     showToast({
       type: 'error',
-      message: 'Por favor completa todos los campos',
+      message: t('profile.messages.complete_fields'),
       duration: 3000
     });
     return;
@@ -2321,7 +2117,7 @@ const updatePassword = async () => {
     // Mostrar mensaje de éxito
     showToast({
       type: 'success',
-      message: '¡Contraseña actualizada correctamente!',
+      message: t('profile.messages.password_success'),
       duration: 3000
     });
     

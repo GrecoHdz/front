@@ -24,16 +24,16 @@
             </div>
             <div>
               <h1 class="text-xl font-black text-white tracking-tight">
-                MiSeguro
+                {{ $t('welcome') }}
               </h1>
-              <p class="text-emerald-100 text-xs font-medium">Soluciones profesionales</p>
+              <p class="text-emerald-100 text-xs font-medium">{{ $t('solutions') }}</p>
             </div>
           </div>
           <button 
             @click="isLogin = true; showLoginModal = true"
             class="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-300 text-sm"
           >
-            Ingresar
+            {{ $t('login') }}
           </button>
         </div>
 
@@ -47,13 +47,13 @@
                 </div>
                 
                 <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
-                  Demasiados intentos
+                  {{ $t('rate_limit_title') }}
                 </h3>
                 
                 <p class="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                  Has superado el límite de intentos fallidos. Por seguridad, tu cuenta ha sido bloqueada temporalmente.
+                  {{ $t('rate_limit_msg') }}
                   <br><br>
-                  <span class="font-bold text-red-600 dark:text-red-400">Por favor, intenta de nuevo en una hora.</span>
+                  <span class="font-bold text-red-600 dark:text-red-400">{{ $t('rate_limit_retry') }}</span>
                 </p> 
               </div>
             </div>
@@ -63,11 +63,11 @@
         <!-- Hero Content -->
         <div class="text-center text-white py-10">
           <h2 class="text-4xl font-black mb-4 tracking-tight leading-[1.1]">
-            Servicios<br>
-            <span class="text-yellow-300">Profesionales.</span>
+            {{ $t('hero_title') }}<br>
+            <span class="text-yellow-300">{{ $t('hero_professionals') }}</span>
           </h2>
           <p class="text-lg text-emerald-50/80 font-medium px-4">
-            Nosotros nos encargamos de todo.
+            {{ $t('hero_subtitle') }}
           </p>
         </div>
       </div>
@@ -79,11 +79,11 @@
       <!-- Value Proposition Hero -->
       <section class="px-4 py-6 text-center bg-white dark:bg-gray-800 rounded-t-[2.5rem] shadow-2xl relative z-10 border-t border-gray-100 dark:border-gray-700">
         <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4 leading-tight">
-          La solución para<br>
-          <span class="gradient-text">tus problemas</span>
+          {{ $t('value_prop_title1') }}<br>
+          <span class="gradient-text">{{ $t('value_prop_title2') }}</span>
         </h3>
         <p class="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-sm mx-auto">
-          Mantenimiento, cashback y asistencia profesional en la palma de tu mano.
+          {{ $t('value_prop_description') }}
         </p>
 
         <!-- Simple How it Works -->
@@ -92,19 +92,19 @@
             <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-emerald-100 dark:border-emerald-800 transition-transform group-hover:scale-110">
               📱
             </div>
-            <span class="text-[10px] text-gray-500 font-bold leading-tight">Solicítalo desde<br>tu teléfono</span>
+            <span class="text-[10px] text-gray-500 font-bold leading-tight" v-html="$t('step1').replace('desde', 'desde<br>')"></span>
           </div>
           <div class="flex flex-col items-center group">
             <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-blue-100 dark:border-blue-800 transition-transform group-hover:scale-110">
               👷
             </div>
-            <span class="text-[10px] text-gray-500 font-bold leading-tight">Asignación de<br>profesional</span>
+            <span class="text-[10px] text-gray-500 font-bold leading-tight" v-html="$t('step2').replace('de', 'de<br>')"></span>
           </div>
           <div class="flex flex-col items-center group">
             <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-amber-100 dark:border-amber-800 transition-transform group-hover:scale-110">
               ✅
             </div>
-            <span class="text-[10px] text-gray-500 font-bold leading-tight">Solución<br>garantizada</span>
+            <span class="text-[10px] text-gray-500 font-bold leading-tight" v-html="$t('step3').replace('Solución', 'Solución<br>')"></span>
           </div>
         </div>
 
@@ -113,17 +113,17 @@
             @click="isLogin = false; showLoginModal = true"
             class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95 mb-4"
           >
-            ¡Empezar ahora! ✨
+            {{ $t('cta_start') }}
           </button>
-          <p class="text-xs text-gray-400">Registro Gratis • en menos de 1 minuto</p>
+          <p class="text-xs text-gray-400">{{ $t('free_registration') }}</p>
         </div>
       </section>
 
       <!-- Services Carousel -->
       <section class="py-6 bg-gray-50 dark:bg-gray-900/50">
         <div class="px-6 mb-4 flex items-center justify-between">
-          <h4 class="font-black text-gray-900 dark:text-white">Servicios Cubiertos</h4>
-          <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Garantizados</span>
+          <h4 class="font-black text-gray-900 dark:text-white">{{ $t('covered_services') }}</h4>
+          <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">{{ $t('guaranteed') }}</span>
         </div>
         
         <div 
@@ -156,21 +156,20 @@
           <div class="relative z-10">
             <div class="text-center mb-8">
               <div class="inline-flex flex-col items-center">
-                <span class="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30 mb-3">Membresía Premium</span>
+                <span class="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30 mb-3">{{ $t('membership_premium') }}</span>
                 <div class="flex items-center justify-center space-x-3">
-                  <span v-if="isLoadingMembershipCost" class="text-2xl font-black text-white animate-pulse">Cargando...</span>
+                  <span v-if="isLoadingMembershipCost" class="text-2xl font-black text-white animate-pulse">{{ $t('loading') }}</span>
                   <span v-else class="text-5xl font-black text-white">L. {{ membershipCost.toLocaleString('es-HN') }}</span>
-                  <span class="px-2 py-0.5 bg-white/10 rounded text-[10px] text-emerald-300 font-bold uppercase tracking-tighter self-start mt-1 border border-white/10">Opcional</span>
+                  <span class="px-2 py-0.5 bg-white/10 rounded text-[10px] text-emerald-300 font-bold uppercase tracking-tighter self-start mt-1 border border-white/10">{{ $t('optional') }}</span>
                 </div>
-                <p class="text-[10px] text-emerald-100/50 mt-2 font-medium uppercase tracking-widest">Inversión mensual de ahorro</p>
+                <p class="text-[10px] text-emerald-100/50 mt-2 font-medium uppercase tracking-widest">{{ $t('monthly_investment') }}</p>
               </div>
             </div>
 
             <!-- Value Proposition: Money is not lost -->
             <div class="mb-4 p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 text-center">
-              <h4 class="text-xl font-black text-emerald-400 mb-2">¡Lo que pagas no se pierde! 💰</h4>
-              <p class="text-sm text-emerald-100/80 leading-relaxed">
-                Tus mensualidades se acumulan cada mes como <span class="font-bold text-white">Crédito Real</span>. El crédito puede ser usado para <span class="font-bold text-white">pagar cualquier servicio.</span>
+              <h4 class="text-xl font-black text-emerald-400 mb-2">{{ $t('money_not_lost') }}</h4>
+              <p class="text-sm text-emerald-100/80 leading-relaxed" v-html="$t('money_not_lost_desc').replace('Crédito Real', '<span class=\"font-bold text-white\">Crédito Real</span>').replace('pagar cualquier servicio.', '<span class=\"font-bold text-white\">pagar cualquier servicio.</span>')">
               </p>
             </div>
 
@@ -191,7 +190,7 @@
               @click="isLogin = false; showLoginModal = true"
               class="w-full py-4 bg-white text-emerald-900 font-black text-sm rounded-2xl shadow-xl hover:bg-emerald-50 transition-all active:scale-[0.98] uppercase tracking-wider"
             >
-              Convertir mi pago en ahorro
+              {{ $t('convert_savings') }}
             </button>
           </div>
         </div>
@@ -207,15 +206,15 @@
             <div class="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl shadow-xl flex items-center justify-center text-3xl mx-auto mb-6 transform -rotate-6">
               🤝
             </div>
-            <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-3">Programa de Referidos</h3>
+            <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-3">{{ $t('referral_program') }}</h3>
             <p class="text-gray-600 dark:text-gray-400 text-sm mb-8 leading-relaxed">
-              Invita a tus amigos y gana comisiones del <span class="text-indigo-600 dark:text-indigo-400 font-black">{{ referralPercentage }}%</span> por cada servicio contratado.
+              {{ $t('referral_desc', { percentage: referralPercentage }) }}
             </p>
             <button 
               @click="isLogin = false; showLoginModal = true"
               class="px-8 py-3 bg-indigo-600 text-white text-sm font-black rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:bg-indigo-700 active:scale-95"
             >
-              ¡Saber más y Ganar!
+              {{ $t('referral_cta') }}
             </button>
           </div>
         </div>
@@ -224,14 +223,14 @@
       <!-- Simple Final CTA -->
       <section class="px-4 pb-10 text-center">
         <div class="max-w-xs mx-auto">
-          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-4">¿Listo para empezar?</h3> 
+          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-4">{{ $t('ready_to_start') }}</h3> 
           <button 
             @click="isLogin = false; showLoginModal = true"
             class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95"
           >
-            Crear mi cuenta gratis ✨
+            {{ $t('create_account_free') }}
           </button>
-          <p class="mt-4 text-[10px] text-gray-400 font-medium tracking-wide uppercase">Registro en menos de 1 minuto</p>
+          <p class="mt-4 text-[10px] text-gray-400 font-medium tracking-wide uppercase">{{ $t('free_registration') }}</p>
         </div>
       </section>
 
@@ -272,7 +271,7 @@
                   ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-md ring-1 ring-black/5' 
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
               >
-                Crear cuenta
+                {{ $t('auth.create_account') }}
               </button>
               <button 
                 type="button"
@@ -282,15 +281,15 @@
                   ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-md ring-1 ring-black/5' 
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
               >
-                Ya tengo cuenta
+                {{ $t('auth.already_have_account') }}
               </button>
             </div>
 
             <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">
-              {{ isLogin ? 'Bienvenido' : 'Únete a MiSeguro' }}
+              {{ isLogin ? $t('auth.welcome_back') : $t('auth.join_prohogar') }}
             </h3>
             <p class="text-gray-600 dark:text-gray-400 text-sm">
-              {{ isLogin ? 'Ingresa a tu cuenta' : 'Crea tu cuenta gratuita' }}
+              {{ isLogin ? $t('auth.login_to_account') : $t('auth.create_free_account') }}
             </p>
           </div>
 
@@ -298,14 +297,14 @@
             <!-- Campos adicionales para registro -->
             <div v-if="!isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Nombre Completo
+                {{ $t('auth.full_name') }}
               </label>
               <input 
                 v-model="form.nombre"
                 type="text" 
                 class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 :class="formErrors.nombre ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
-                placeholder="Tu nombre completo"
+                :placeholder="$t('auth.full_name_placeholder')"
                 :required="!isLogin"
                 autocomplete="name"
                 @input="form.nombre = form.nombre.replace(/[0-9]/g, ''); formErrors.nombre = ''"
@@ -316,14 +315,14 @@
 
             <div v-if="!isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Correo Electrónico
+                {{ $t('auth.email') }}
               </label>
               <input 
                 v-model="form.email"
                 type="email" 
                 class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 :class="formErrors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
-                placeholder="tu@email.com"
+                :placeholder="$t('auth.email_placeholder')"
                 :required="!isLogin"
                 autocomplete="email"
                 @input="formErrors.email = ''"
@@ -333,14 +332,14 @@
 
             <div v-if="!isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Teléfono (Incluye código de país)
+                {{ $t('auth.phone') }}
               </label>
               <input 
                 v-model="form.telefono"
                 type="tel" 
                 class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 :class="{'border-red-500': formErrors.telefono, 'border-gray-200 dark:border-gray-600': !formErrors.telefono}"
-                placeholder="Ej: +504 9999 9999"
+                :placeholder="$t('auth.phone_placeholder')"
                 :required="!isLogin"
                 autocomplete="tel"
                 @input="handlePhoneInput"
@@ -353,7 +352,7 @@
 
             <div v-if="!isLogin">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Ciudad
+                {{ $t('auth.city') }}
               </label>
               <multiselect
                 v-model="form.ciudad"
@@ -361,7 +360,7 @@
                 :searchable="false"
                 :close-on-select="true"
                 :show-labels="false"
-                placeholder="Seleccionar ciudad"
+                :placeholder="$t('auth.city_placeholder')"
                 label="nombre"
                 track-by="id"
                 class="multiselect-custom"
@@ -389,14 +388,14 @@
 
             <div>
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Número de Identidad (sin guiones)
+                {{ $t('auth.identity') }}
               </label>
               <input 
                 v-model="form.identidad"
                 type="text" 
                 class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 :class="formErrors.identidad ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
-                placeholder="Ej: 0801199912345"
+                :placeholder="$t('auth.identity_placeholder')"
                 required
                 autocomplete="username"
                 @input="handleIdentityInput"
@@ -409,7 +408,7 @@
 
             <div>
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Contraseña
+                {{ $t('auth.password') }}
               </label>
               <div class="relative">
                 <input 
@@ -417,7 +416,7 @@
                   :type="showPassword ? 'text' : 'password'" 
                   class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   :class="formErrors.password ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
-                  :placeholder="isLogin ? 'Ingresa tu contraseña' : 'Crea una contraseña segura'"
+                  :placeholder="isLogin ? $t('auth.login_password_placeholder') : $t('auth.register_password_placeholder')"
                   required
                   :autocomplete="isLogin ? 'current-password' : 'new-password'"
                   @input="formErrors.password = ''"
@@ -449,7 +448,7 @@
                 class="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-0 focus:ring-offset-0 focus:outline-none"
               >
               <label for="registerAsTechnician" class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                Unirme como Técnico
+                {{ $t('auth.join_as_technician') }}
               </label>
             </div>
 
@@ -465,7 +464,7 @@
                   : 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-gray-400 dark:text-gray-500 cursor-not-allowed'
               ]"
             >
-              {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
+              {{ isLogin ? $t('auth.login_btn') : $t('auth.register_btn') }}
             </button>
           </form>
 
@@ -475,7 +474,7 @@
               @click="showForgotPassword = true"
               class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors focus:outline-none"
             >
-              ¿Olvidaste tu contraseña?
+              {{ $t('auth.forgot_password') }}
             </button>
           </div>
 
@@ -522,23 +521,23 @@
             <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl mx-auto mb-3 flex items-center justify-center">
               <span class="text-white text-xl">🔑</span>
             </div>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Recuperar contraseña</h2>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">{{ $t('forgot_password.title') }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+              {{ $t('forgot_password.desc') }}
             </p>
           </div>
 
           <form @submit.prevent="handlePasswordReset" class="space-y-4">
             <div>
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Correo electrónico
+                {{ $t('forgot_password.email_label') }}
               </label>
               <input 
                 v-model="emailForPasswordReset"
                 type="email" 
                 required
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-gray-800 dark:text-white"
-                placeholder="tucorreo@ejemplo.com"
+                :placeholder="$t('forgot_password.email_placeholder')"
               >
             </div>
 
@@ -547,13 +546,13 @@
               :disabled="isResettingPassword"
               class="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-xl transition-all duration-200 flex items-center justify-center"
             >
-              <span v-if="!isResettingPassword">Enviar enlace</span>
+              <span v-if="!isResettingPassword">{{ $t('forgot_password.send_link') }}</span>
               <span v-else class="flex items-center">
                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Enviando...
+                {{ $t('forgot_password.sending') }}
               </span>
             </button>
           </form>
@@ -563,7 +562,7 @@
               @click="showForgotPassword = false; isLogin = true"
               class="text-sm text-gray-600 dark:text-gray-400 hover:underline focus:outline-none"
             >
-              Volver al inicio de sesión
+              {{ $t('forgot_password.back_to_login') }}
             </button>
           </div>
         </div>

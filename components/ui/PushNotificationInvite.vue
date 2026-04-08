@@ -30,11 +30,11 @@
         
         <div class="space-y-3 relative z-10">
           <h2 class="text-2xl font-black text-slate-800 dark:text-white leading-tight">
-            ¡Mantente siempre <br/>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">conectado!</span>
+            {{ $t('notifications.push_invite.stay') }} <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">{{ $t('notifications.push_invite.connected') }}</span>
           </h2>
           <p class="text-slate-500 dark:text-slate-400 text-base px-2">
-            Necesitas activar las notificaciones para recibir actualizaciones en tiempo real sobre tus servicios y reportes.
+            {{ $t('notifications.push_invite.message') }}
           </p>
         </div>
         
@@ -43,14 +43,14 @@
             @click="handleSubscribe"
             class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-5 rounded-3xl text-lg font-extrabold hover:translate-y-[-2px] hover:shadow-xl hover:shadow-emerald-500/20 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-3 group"
           >
-            <span>Activar Notificaciones</span>
+            <span>{{ $t('notifications.push_invite.cta') }}</span>
             <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </button>
           
           <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">
-            Es obligatorio para continuar usando el sistema
+            {{ $t('notifications.push_invite.mandatory') }}
           </p>
         </div>
 

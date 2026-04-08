@@ -13,7 +13,7 @@
     <!-- Loading Spinner -->
     <LoadingSpinner 
       :loading="isLoading" 
-      :message="'Cargando programa de referidos...'"
+      :message="t('referral.loading')"
     />
 
     <!-- Contenido principal -->
@@ -38,24 +38,24 @@
                   <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3">
                     <span class="text-3xl">💰</span>
                   </div>
-                  <h1 class="text-2xl font-black mb-2">¡Gana Dinero Refiriendo!</h1>
+                  <h1 class="text-2xl font-black mb-2">{{ $t('referral.title') }}</h1>
                   <p class="text-white/90 font-medium mb-5 text-sm">
-                    Invita a tus amigos y familiares a MiSeguro y recibe el <span class="font-black">{{ referralReward }}%</span> de cada servicio que paguen 
+                    {{ $t('referral.hero_desc', { n: referralReward }) }}
                   </p>
                   
                   <!-- Stats -->
                   <div class="grid grid-cols-3 gap-3"> 
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
                       <div class="text-xl font-black">L. {{ stats.totalEarnings.toLocaleString('es-HN') }}</div>
-                      <div class="text-xs text-white/80">Total Ganado</div>
+                      <div class="text-xs text-white/80">{{ $t('referral.stats.total_earned') }}</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
                       <div class="text-xl font-black">L. {{ stats.retirado.toLocaleString('es-HN') }}</div>
-                      <div class="text-xs text-white/80">Total Retirado</div>
+                      <div class="text-xs text-white/80">{{ $t('referral.stats.total_withdrawn') }}</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
                       <div class="text-xl font-black">L. {{ stats.availableBalance.toLocaleString('es-HN') }}</div>
-                      <div class="text-xs text-white/80">Disponible</div>
+                      <div class="text-xs text-white/80">{{ $t('referral.stats.available') }}</div>
                     </div>
                   </div>
                 </div>
@@ -69,13 +69,13 @@
                   <div class="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-3">
                     <span class="text-white text-xl">🔗</span>
                   </div>
-                  <h2 class="text-xl font-black text-gray-900 dark:text-white mb-2">Tu Código de Referido</h2>
-                  <p class="text-gray-600 dark:text-gray-400 text-sm">Comparte tu código único y empieza a ganar</p>
+                  <h2 class="text-xl font-black text-gray-900 dark:text-white mb-2">{{ $t('referral.your_code') }}</h2>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">{{ $t('referral.share_desc') }}</p>
                 </div> 
 
                 <!-- Enlace de referido -->
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl mb-4">
-                  <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">ENLACE DE INVITACIÓN</p>
+                  <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">{{ $t('referral.invitation_link') }}</p>
                   <div class="flex items-center space-x-2">
                     <div class="flex-1 bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
                       <p class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ referralLink }}</p>
@@ -98,14 +98,14 @@
                     class="flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white p-3 rounded-xl transition-all duration-300 hover:scale-105"
                   >
                     <span class="text-lg">📱</span>
-                    <span class="font-bold text-sm">WhatsApp</span>
+                    <span class="font-bold text-sm">{{ $t('referral.share_whatsapp') }}</span>
                   </button>
                   <button 
                     @click="shareGeneral"
                     class="flex items-center justify-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-xl transition-all duration-300 hover:scale-105"
                   >
                     <span class="text-lg">🔗</span>
-                    <span class="font-bold text-sm">Compartir</span>
+                    <span class="font-bold text-sm">{{ $t('referral.share') }}</span>
                   </button>
                 </div>
               </div>
@@ -113,9 +113,9 @@
 
             <!-- Cómo Funciona -->
             <section class="px-4 mb-4">
-              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">¿Cómo Funciona?</h2>
+              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">{{ $t('referral.how_it_works') }}</h2>
               <div class="space-y-2">
-                <div v-for="(step, index) in howItWorksSteps" :key="`step-${index}`"
+                <div v-for="(step, index) in stepsArray" :key="`step-${index}`"
                      class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700">
                   <div class="flex items-start space-x-3">
                     <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -123,7 +123,7 @@
                     </div>
                     <div class="flex-1">
                       <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">{{ step.title }}</h3>
-                      <p class="text-gray-600 dark:text-gray-400 text-xs">{{ step.description }}</p>
+                      <p class="text-gray-600 dark:text-gray-400 text-xs">{{ step.desc }}</p>
                     </div>
                     <div class="text-xl">{{ step.icon }}</div>
                   </div>
@@ -133,7 +133,7 @@
 
             <!-- Historial de Ingresos/Retiros con pestañas -->
             <section class="px-4 mb-6">
-              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">Historial</h2>
+              <h2 class="text-lg font-black text-gray-900 dark:text-white mb-3">{{ $t('referral.history') }}</h2>
               <div class="flex items-center justify-between mb-4">
                 <div class="flex space-x-2">
                   <button 
@@ -144,7 +144,7 @@
                     }"
                     class="px-4 py-2 rounded-l-lg font-medium text-sm transition-colors"
                   >
-                    Ingresos
+                    {{ $t('referral.earnings') }}
                   </button>
                   <button 
                     @click="setActiveTab('retiros')"
@@ -154,7 +154,7 @@
                     }"
                     class="px-4 py-2 rounded-r-lg font-medium text-sm transition-colors"
                   >
-                    Retiros
+                    {{ $t('referral.withdrawals') }}
                   </button>
                 </div>
                 
@@ -184,7 +184,7 @@
                   <!-- Loading -->
                   <div v-if="isLoadingMovements" class="text-center py-8">
                     <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando ingresos...</p>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ $t('referral.loading_earnings') }}</p>
                   </div>
                   
                   <!-- Mostrar mensaje cuando no hay ingresos -->
@@ -194,7 +194,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                       </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin ingresos registrados</h3>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">{{ $t('referral.no_earnings') }}</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400">
                       {{ getNoEarningsMessage() }}
                     </p>
@@ -214,10 +214,10 @@
                           <div>
                             <p class="font-bold text-gray-900 dark:text-white text-sm">
                               <template v-if="earning.descripcion && earning.descripcion.includes('Comisión por referido')">
-                                {{ earning.descripcion.includes('(Paquete)') ? 'Paquete' : 'Servicio' }} adquirido {{ (earning.descripcion.split(' - ')[1] || 'Usuario').split(' ').slice(0, 2).join(' ') }}
+                                {{ earning.descripcion.includes('(Paquete)') ? $t('referral.earning_types.package') : $t('referral.earning_types.service') }} {{ $t('referral.earning_types.acquired_by', { name: (earning.descripcion.split(' - ')[1] || 'Usuario').split(' ').slice(0, 2).join(' ') }) }}
                               </template>
                               <template v-else>
-                                {{ earning.descripcion || 'Ingreso por referido' }}
+                                {{ earning.descripcion || $t('referral.earnings') }}
                               </template>
                             </p>
                             <p class="text-xs text-gray-600 dark:text-gray-400">
@@ -258,10 +258,10 @@
                         :disabled="isLoadingMovements"
                       >
                         <span v-if="isLoadingMovements">
-                          Cargando...
+                          {{ $t('common.loading') }}
                         </span>
                         <span v-else>
-                          Ver más ingresos ({{ totalMovements - filteredEarnings.length }} restantes)
+                          {{ $t('common.load_more') }} ({{ totalMovements - filteredEarnings.length }} {{ $t('referral.remaining') }})
                         </span>
                       </button>
                     </div>
@@ -287,7 +287,7 @@
                   <!-- Loading -->
                   <div v-if="isLoadingMovements" class="text-center py-8">
                     <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cargando retiros...</p>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ $t('referral.loading_withdrawals') }}</p>
                   </div>
                   
                   <!-- Mostrar mensaje cuando no hay retiros -->
@@ -297,7 +297,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                       </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Sin retiros registrados</h3>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">{{ $t('referral.no_withdrawals') }}</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400">
                       {{ getNoWithdrawalsMessage() }}
                     </p>
@@ -316,7 +316,7 @@
                           </div>
                           <div>
                             <p class="font-medium text-gray-900 dark:text-white">
-                              {{ `Retiro de fondos #${withdrawalCounter - filteredWithdrawals.findIndex(w => w.id === withdrawal.id)}` }}
+                              {{ $t('referral.withdrawal_count', { n: withdrawalCounter - filteredWithdrawals.findIndex(w => w.id === withdrawal.id) }) }}
                             </p>
                             <p class="text-xs text-gray-600 dark:text-gray-400">
                               {{ formatDate(withdrawal.fecha) }}
@@ -340,10 +340,10 @@
                         :disabled="isLoadingMovements"
                       >
                         <span v-if="isLoadingMovements">
-                          Cargando...
+                          {{ $t('common.loading') }}
                         </span>
                         <span v-else>
-                          Ver más retiros ({{ totalMovements - filteredWithdrawals.length }} restantes)
+                          {{ $t('common.load_more') }} ({{ totalMovements - filteredWithdrawals.length }} {{ $t('referral.remaining') }})
                         </span>
                       </button>
                     </div>
@@ -373,11 +373,11 @@
                       <span class="text-gray-700 dark:text-gray-300 text-xl">💳</span>
                     </div>
                     <div>
-                      <h2 class="text-xl font-black">Retirar Ganancias</h2>
+                      <h2 class="text-xl font-black">{{ $t('referral.withdraw_funds') }}</h2>
                       <p class="text-white/90 text-sm">
-                        Disponible: L. {{ (stats?.availableBalance || 0).toLocaleString('es-HN') }}
+                        {{ $t('referral.stats.available') }}: L. {{ (stats?.availableBalance || 0).toLocaleString('es-HN') }}
                         <span v-if="withdrawalPercentage > 0" class="block text-xs opacity-80">
-                          Puedes retirar hasta el {{ withdrawalPercentage }}%: L. {{ (maxWithdrawableAmount || 0).toLocaleString('es-HN') }}
+                          {{ $t('referral.can_withdraw_up_to', { n: withdrawalPercentage, amount: (maxWithdrawableAmount || 0).toLocaleString('es-HN') }) }}
                         </span>
                       </p>
                     </div>
@@ -391,14 +391,14 @@
                     >
                       <template v-if="stats?.availableBalance > 0">
                         <template v-if="stats.availableBalance >= minWithdrawAmount">
-                          Retirar Ahora
+                          {{ $t('referral.withdraw_now') }}
                         </template>
                         <template v-else>
-                          Mínimo L. {{ minWithdrawAmount.toFixed(2) }}
+                          {{ $t('referral.min_withdraw', { n: minWithdrawAmount.toFixed(2) }) }}
                         </template>
                       </template>
                       <template v-else>
-                        Sin saldo disponible
+                        {{ $t('referral.no_balance') }}
                       </template>
                     </button>
                   </div>
@@ -409,8 +409,8 @@
             <!-- Historial de Referidos -->
             <section class="px-4 mb-4">
               <div class="flex items-center justify-between mb-3">
-                <h2 class="text-lg font-black text-gray-900 dark:text-white">Tus Referidos</h2>
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ stats.totalReferrals || 0 }} personas</span>
+                <h2 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('referral.your_referrals') }}</h2>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $t('referral.people_count', { n: stats.totalReferrals || 0 }) }}</span>
               </div>
               
               <!-- Loading -->
@@ -424,8 +424,8 @@
                 <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
                   <span class="text-2xl">👥</span>
                 </div>
-                <h3 class="text-base font-black text-gray-900 dark:text-white mb-2">Aún no tienes referidos</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-3 text-sm">Comparte tu código y empieza a ganar dinero</p>
+                <h3 class="text-base font-black text-gray-900 dark:text-white mb-2">{{ $t('referral.no_referrals_title') }}</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-3 text-sm">{{ $t('referral.no_referrals_desc') }}</p>
               </div>
 
               <!-- Lista de referidos -->
@@ -491,9 +491,9 @@
                 <div class="flex items-start space-x-2">
                   <div class="text-amber-500 text-lg flex-shrink-0">📋</div>
                   <div>
-                    <h3 class="text-sm font-bold text-amber-800 dark:text-amber-200 mb-2">Términos del Programa</h3>
+                    <h3 class="text-sm font-bold text-amber-800 dark:text-amber-200 mb-2">{{ $t('referral.terms_title') }}</h3>
                     <ul class="space-y-1 text-xs text-amber-700 dark:text-amber-300">
-                      <li v-for="term in referralTerms" :key="term" class="flex items-start space-x-2">
+                      <li v-for="(term, index) in $t('referral.terms_list')" :key="index" class="flex items-start space-x-2">
                         <span class="text-amber-500 text-xs mt-0.5">•</span>
                         <span>{{ term }}</span>
                       </li>
@@ -551,8 +551,8 @@
                     💳
                   </div>
                   <div>
-                    <h3 class="text-base font-black text-gray-900 dark:text-white">Retirar Ganancias</h3>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Disponible: L. {{ stats.availableBalance.toLocaleString('es-HN') }}</p>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white">{{ $t('referral.withdraw_modal.title') }}</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ $t('referral.withdraw_modal.available') }} L. {{ stats.availableBalance.toLocaleString('es-HN') }}</p>
                   </div>
                 </div>
                 <button @click="closeWithdrawModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -569,7 +569,7 @@
                 <!-- Monto a Retirar -->
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                    Monto a Retirar ({{ withdrawalPercentage }}%)
+                    {{ $t('referral.withdraw_modal.amount_to_withdraw', { n: withdrawalPercentage }) }}
                   </label>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-bold">L.</span>
@@ -586,7 +586,7 @@
                 <!-- Monto a Crédito -->
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                    Monto a Crédito ({{ 100 - withdrawalPercentage }}%)
+                    {{ $t('referral.withdraw_modal.amount_to_credit', { n: 100 - withdrawalPercentage }) }}
                   </label>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-bold">L.</span>
@@ -603,13 +603,13 @@
                 <!-- Datos Bancarios -->
                 <div>
                   <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                    Datos Bancarios
+                    {{ $t('referral.withdraw_modal.bank_details') }}
                   </label>
                   <textarea
                     v-model="withdrawForm.bankDetails"
                     rows="3"
                     class="w-full px-3 py-3 text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
-                    placeholder="Ingrese los datos de su cuenta bancaria (Banco, # de cuenta, nombre del titular, identidad, tipo)"
+                    :placeholder="$t('referral.withdraw_modal.bank_details_placeholder')"
                     required
                   ></textarea>
                 </div>
@@ -621,14 +621,14 @@
                   class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
                 >
                   <span v-if="!isProcessingWithdraw">
-                    Solicitar Retiro
+                    {{ $t('referral.withdraw_modal.request_withdraw') }}
                   </span>
                   <span v-else class="flex items-center justify-center">
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Procesando...
+                    {{ $t('referral.withdraw_modal.processing') }}
                   </span>
                 </button>
               </form>
@@ -643,6 +643,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
+import { useI18n } from 'vue-i18n'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 
@@ -653,12 +654,14 @@ const { $api } = useNuxtApp();
 const router = useRouter()
 const userCookie = useCookie('user')
 
+const { t } = useI18n()
+
 // SEO and Meta
 useHead({
-  title: 'MiSeguro - Programa de Referidos',
+  title: t('referral.seo_title'),
   meta: [
-    { name: 'description', content: 'Gana dinero refiriendo amigos a MiSeguro - Programa de referidos' },
-    { name: 'keywords', content: 'MiSeguro, Programa de Referidos, Referir, Referidos' }, 
+    { name: 'description', content: t('referral.seo_desc') },
+    { name: 'keywords', content: t('referral.seo_keywords') }, 
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
@@ -667,38 +670,13 @@ useHead({
 // VARIABLES ESTÁTICAS
 // =========================
 
-// Pasos de cómo funciona
-const howItWorksSteps = [
-  {
-    title: 'Comparte tu código',
-    description: 'Envía tu enlace a amigos y familiares',
-    icon: '📱'
-  },
-  {
-    title: 'Ellos se registran',
-    description: 'Tus contactos se registran usando tu enlace',
-    icon: '✍️'
-  },
-  {
-    title: 'Contratan un servicio',
-    description: 'Por cada servicio que contraten tu ganas un porcentaje',
-    icon: '🏠'
-  },
-  {
-    title: 'Recibes tu recompensa',
-    description: 'Ganas dinero que puedes retirar inmediatamente',
-    icon: '💰'
-  }
-]
-
-// Términos del programa
-const referralTerms = [
-  '¡Gana un porcentaje cada vez que tu referido complete un servicio con éxito!',
-  'Tus ganancias se acumulan automáticamente y puedes retirarlas cuando quieras.',
-  'Al retirar tus ganancias un porcentaje lo recibirás como crédito', 
-  'No hay límite en la cantidad de personas que puedes referir',
-  'Los retiros se procesan en 24-72 horas hábiles'
-] 
+// How it works steps from locale
+const stepsArray = computed(() => [
+  { title: t('referral.steps.step1_title'), desc: t('referral.steps.step1_desc'), icon: '📱' },
+  { title: t('referral.steps.step2_title'), desc: t('referral.steps.step2_desc'), icon: '✍️' },
+  { title: t('referral.steps.step3_title'), desc: t('referral.steps.step3_desc'), icon: '🏠' },
+  { title: t('referral.steps.step4_title'), desc: t('referral.steps.step4_desc'), icon: '💰' }
+])
 
 // =========================
 // VARIABLES REACTIVAS
@@ -825,14 +803,20 @@ const filteredWithdrawals = computed(() => {
 // FUNCIONES UTILITARIAS
 // =========================
 
-const formatDate = (dateString) => {
+const formatDate = (dateString, monthOnly = false) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('es-ES', {
+  if (monthOnly) {
+    return date.toLocaleDateString(t('common.locale_code') || 'es-ES', {
+      month: 'long'
+    })
+  }
+  return date.toLocaleDateString(t('common.locale_code') || 'es-ES', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
   })
 }
+ Broadway 
 
 const formatCurrency = (amount) => {
   return parseFloat(amount).toLocaleString('es-HN', {
@@ -862,13 +846,12 @@ const getNoEarningsMessage = () => {
   const currentYear = new Date().getFullYear()
   const selectedYear = selectedMonth.value.split('-')[0]
   const selectedMonthNum = selectedMonth.value.split('-')[1]
-  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-  const monthName = monthNames[parseInt(selectedMonthNum) - 1]
+  const monthName = t(`common.months.${parseInt(selectedMonthNum) - 1}`)
   
   if (selectedYear === currentYear.toString()) {
-    return `No hay ingresos registrados para ${monthName} ${selectedYear}`
+    return t('referral.no_earnings_month', { month: `${monthName} ${selectedYear}` })
   } else {
-    return `No hay ingresos registrados para el período seleccionado`
+    return t('referral.no_earnings')
   }
 }
 
@@ -876,15 +859,15 @@ const getNoWithdrawalsMessage = () => {
   const currentYear = new Date().getFullYear()
   const selectedYear = selectedWithdrawMonth.value.split('-')[0]
   const selectedMonthNum = selectedWithdrawMonth.value.split('-')[1]
-  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-  const monthName = monthNames[parseInt(selectedMonthNum) - 1]
+  const monthName = t(`common.months.${parseInt(selectedMonthNum) - 1}`)
   
   if (selectedYear === currentYear.toString()) {
-    return `No hay retiros registrados para ${monthName} ${selectedYear}`
+    return t('referral.no_withdrawals_month', { month: `${monthName} ${selectedYear}` })
   } else {
-    return `No hay retiros registrados para el período seleccionado`
+    return t('referral.no_withdrawals')
   }
 }
+ Broadway 
 
 // =========================
 // FUNCIONES DE CARGA DE DATOS
@@ -955,14 +938,7 @@ const loadReferralData = async () => {
     // Generar código de referido
     userReferralCode.value = `HR${user.id_usuario.toString().padStart(6, '0')}`
     
-  } catch (error) {
-    console.error('Error al cargar datos de referidos:', error)
-    
-    // Generar código de respaldo
-    const user = useCookie('user').value
-    userReferralCode.value = user?.id_usuario ? `HR${user.id_usuario.toString().padStart(6, '0')}` : 'HR000001'
-    
-    showError('No se pudo cargar la información de recompensas. Mostrando valor por defecto.')
+    showError(t('referral.messages.load_error'))
   }
 }
 
@@ -997,7 +973,7 @@ const loadReferrals = async (page = 1) => {
     }
   } catch (error) {
     console.error('Error al cargar referidos:', error)
-    showError('Error al cargar los referidos')
+    showError(t('referral.messages.referrals_load_error'))
     referralHistory.value = []
   } finally {
     isLoadingReferrals.value = false
@@ -1084,7 +1060,7 @@ const loadMovements = async (tipo = 'ingreso_referido', month = null, loadMore =
     }
   } catch (error) {
     console.error(`Error al cargar ${tipo}:`, error)
-    showError(`Error al cargar los ${tipo === 'ingreso_referido' ? 'ingresos' : 'retiros'}`)
+    showError(t(`referral.messages.${tipo === 'ingreso_referido' ? 'earnings_load_error' : 'withdrawals_load_error'}`))
     if (tipo === 'ingreso_referido') {
       movementsHistory.value = []
     } else {
@@ -1143,7 +1119,7 @@ const loadMoreReferrals = async () => {
 const copyReferralLink = async () => {
   try {
     await navigator.clipboard.writeText(referralLink.value)
-    showSuccess('¡Enlace copiado!', 'El enlace se copió al portapapeles')
+    showSuccess(t('referral.messages.copy_link_success'))
   } catch (error) {
     const textArea = document.createElement('textarea')
     textArea.value = referralLink.value
@@ -1151,27 +1127,20 @@ const copyReferralLink = async () => {
     textArea.select()
     document.execCommand('copy')
     document.body.removeChild(textArea)
-    showSuccess('¡Enlace copiado!', 'El enlace se copió al portapapeles')
+    showSuccess(t('referral.messages.copy_link_success'))
   }
 }
 
 const shareWhatsApp = () => {
-  const message = `¡Hola! 👋 Te invito a unirte a MiSeguro, la mejor plataforma en Honduras para servicios del hogar. 🏠
-
-✅ Técnicos profesionales y certificados
-✅ Precios justos y transparentes
-✅ Atención rápida y garantizada
-
-Regístrate con mi enlace y obtén beneficios exclusivos: ${referralLink.value}`
-
+  const message = t('referral.messages.share_text', { url: referralLink.value })
   const encodedMessage = encodeURIComponent(message)
   window.open(`https://wa.me/?text=${encodedMessage}`, '_blank')
 }
 
 const shareGeneral = async () => {
   const shareData = {
-    title: 'MiSeguro - Servicios para tu hogar',
-    text: `¡Únete a MiSeguro ${userReferralCode.value}`,
+    title: t('referral.seo_title'),
+    text: t('referral.messages.share_text_short', { code: userReferralCode.value }),
     url: referralLink.value
   }
 
@@ -1210,7 +1179,7 @@ const processWithdraw = async () => {
   try {  
     const userCookie = useCookie('user');
     if (!userCookie.value || !userCookie.value.id_usuario) {
-      showError('No se pudo obtener la información del usuario. Por favor, inicia sesión nuevamente.');
+      showError(t('profile.messages.session_expired'));
       return;
     }
 
@@ -1231,14 +1200,14 @@ const processWithdraw = async () => {
     
     // Validar monto mínimo de retiro contra el saldo total
     if (montoRetiro < minWithdrawAmount) {
-      showError(`El monto mínimo de retiro es de L. ${minWithdrawAmount.toFixed(2)}. Tu saldo actual es de L. ${montoRetiro.toFixed(2)}`);
+      showError(t('referral.messages.min_withdraw_error', { min: minWithdrawAmount.toFixed(2), current: montoRetiro.toFixed(2) }));
       isProcessingWithdraw.value = false;
       return;
     }
 
     // Validar que el monto a retirar no sea mayor al permitido
     if (montoMaximoRetiro <= 0) {
-      showError('No tienes saldo disponible para retirar');
+      showError(t('referral.no_balance'));
       isProcessingWithdraw.value = false;
       return;
     }
@@ -1294,15 +1263,14 @@ const processWithdraw = async () => {
       
       if (montoCredito > 0) {
         try { 
-          
-          showSuccess('¡Retiro Solicitado!', 'El pago puede tardar hasta 72 horas en procesarse.');
+          showSuccess(t('referral.messages.withdraw_success_title'), t('referral.messages.withdraw_success_desc'));
         } catch (creditError) {
           console.error('Error al procesar el crédito:', creditError);
           // Mostrar mensaje de éxito parcial
-          showSuccess('Retiro Parcial', 'El retiro se procesó, pero hubo un error al aplicar el crédito. Contacta a soporte.');
+          showSuccess(t('referral.messages.withdraw_partial_title'), t('referral.messages.withdraw_partial_desc'));
         }
       } else {
-        showSuccess('¡Retiro Solicitado!', 'El pago puede tardar hasta 72 horas en procesarse.');
+        showSuccess(t('referral.messages.withdraw_success_title'), t('referral.messages.withdraw_success_desc'));
       }
     } else {
       const errorMessage = response?.message || 'Error al procesar el retiro. Por favor, inténtalo de nuevo.';

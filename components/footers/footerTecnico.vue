@@ -62,7 +62,7 @@ const navigateTo = async (path) => {
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
               </svg>
             </div>
-            <span class="text-xs font-bold">Inicio</span>
+            <span class="text-xs font-bold">{{ $t('nav.home') }}</span>
           </button>
           <button 
             @click="navigateTo('/tecnico/ServiciosTecnico')" 
@@ -75,7 +75,7 @@ const navigateTo = async (path) => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
               </svg>
             </div>
-            <span class="text-xs font-bold">Servicios</span>
+            <span class="text-xs font-bold">{{ $t('nav.services') }}</span>
           </button>
           <button 
             @click="navigateTo('/tecnico/MetricasTecnico')" 
@@ -88,7 +88,7 @@ const navigateTo = async (path) => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
               </svg>
             </div>
-            <span class="text-xs font-bold">Métricas</span>
+            <span class="text-xs font-bold">{{ $t('nav.metrics') }}</span>
           </button>
           <button 
             @click="navigateTo('/tecnico/PerfilTecnico')" 
@@ -101,7 +101,7 @@ const navigateTo = async (path) => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
               </svg>
             </div>
-            <span class="text-xs font-bold">Perfil</span>
+            <span class="text-xs font-bold">{{ $t('nav.profile') }}</span>
           </button>
         </div>
       </div>

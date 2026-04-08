@@ -13,6 +13,7 @@
       <!-- Loading Spinner -->
       <LoadingSpinner 
         :loading="isLoading || isLoggingOut"
+        :message="isLoggingOut ? $t('profile.logging_out') : $t('profile.loading_profile')"
       />
 
     <!-- Contenido principal -->
@@ -50,26 +51,26 @@
             <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-1 sm:mb-2">
               <span class="text-blue-600 dark:text-blue-400 text-sm sm:text-base">📅</span>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Registrado el</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.registered_on') }}</p>
             <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ formatShortDate(user.fecha_registro) }}</p>
           </div>
           <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center">
             <div class="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-1 sm:mb-2">
               <span class="text-purple-600 dark:text-purple-400 text-sm sm:text-base">🏙️</span>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Ciudad</p>
-            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || 'No especificada' }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.city') }}</p>
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ user.ciudad || $t('profile.not_specified') }}</p>
           </div>
         </div>
       </div>
 
       <!-- User Information -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 dark:border-gray-700 mb-4 sm:mb-6">
-        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Información Personal</h3>
+        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">{{ $t('profile.personal_info') }}</h3>
         
         <div class="space-y-3 sm:space-y-4">
           <div class="space-y-1.5 sm:space-y-2">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.full_name') }}</label>
             <input 
               v-model="user.nombre"
               type="text" 
@@ -79,7 +80,7 @@
           </div>
           
           <div class="space-y-1.5 sm:space-y-2">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.email') }}</label>
             <input 
               v-model="user.email"
               type="email" 
@@ -89,7 +90,7 @@
           </div>
           
           <div class="space-y-1.5 sm:space-y-2">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.phone') }}</label>
             <input 
               v-model="user.telefono"
               type="tel" 
@@ -99,7 +100,7 @@
           </div>
           
           <div class="space-y-1.5 sm:space-y-2">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Ciudad</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.city') }}</label>
             <div class="relative">
               <multiselect
                 v-model="user.ciudadSeleccionada"
@@ -139,7 +140,7 @@
                 </svg>
               </button>
               
-              <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Cambiar Contraseña</h3>
+              <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">{{ $t('profile.change_password') }}</h3>
               
               <form @submit.prevent="updatePassword" class="space-y-3 sm:space-y-4">
               <!-- Campo de usuario oculto para accesibilidad -->
@@ -156,7 +157,7 @@
                 >
               </div>
                 <div class="space-y-1.5 sm:space-y-2">
-                  <label for="currentPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña Actual</label>
+                  <label for="currentPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.current_password') }}</label>
                   <input 
                     id="currentPassword"
                     v-model="currentPassword"
@@ -170,7 +171,7 @@
                 </div>
                 
                 <div class="space-y-1.5 sm:space-y-2">
-                  <label for="newPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
+                  <label for="newPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.new_password') }}</label>
                   <input 
                     id="newPassword"
                     v-model="newPassword"
@@ -184,7 +185,7 @@
                 </div>
                 
                 <div class="space-y-1.5 sm:space-y-2">
-                  <label for="confirmPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nueva Contraseña</label>
+                  <label for="confirmPassword" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.confirm_new_password') }}</label>
                   <input 
                     id="confirmPassword"
                     v-model="confirmPassword"
@@ -203,8 +204,8 @@
                   :disabled="isUpdatingPassword || passwordMismatch"
                   class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
-                  <span v-if="isUpdatingPassword">Actualizando...</span>
-                  <span v-else>Actualizar Contraseña</span>
+                  <span v-if="isUpdatingPassword">{{ $t('profile.updating') }}</span>
+                  <span v-else>{{ $t('profile.update_password_btn') }}</span>
                 </button>
               </form>
             </div>
@@ -216,15 +217,15 @@
               :disabled="!hasChanges || isSaving"
               class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-blue-400 disabled:to-indigo-400 text-sm sm:text-base"
             >
-              <span v-if="isSaving">Guardando...</span>
-              <span v-else>Actualizar Perfil</span>
+              <span v-if="isSaving">{{ $t('profile.saving') }}</span>
+              <span v-else>{{ $t('profile.update_info') }}</span>
             </button>
             <button 
               @click="isPasswordModalOpen = true"
               type="button"
               class="w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm"
             >
-              Cambiar Contraseña
+              {{ $t('profile.change_password') }}
             </button>
             <button 
               @click="isPhotoModalOpen = true"
@@ -235,7 +236,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>Gestionar Foto</span>
+                <span>{{ $t('profile.manage_photo') }}</span>
               </div>
             </button>
           </div>
@@ -250,12 +251,12 @@
               🛠️
             </div>
             <div>
-              <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">Mis Especialidades</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Servicios que ofreces actualmente</p>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">{{ $t('profile.technician.specialties') }}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.technician.specialties_desc') }}</p>
             </div>
           </div>
           <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full">
-            {{ technicianServices.length }} Activos
+            {{ $t('profile.technician.active_count', { count: technicianServices.length }) }}
           </span>
         </div>
         
@@ -266,18 +267,18 @@
               <div class="w-12 h-12 border-4 border-blue-100 dark:border-gray-700 rounded-full"></div>
               <div class="absolute top-0 w-12 h-12 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
             </div>
-            <p class="mt-4 text-sm text-gray-500 font-medium">Sincronizando tus servicios...</p>
+            <p class="mt-4 text-sm text-gray-500 font-medium">{{ $t('profile.technician.syncing') }}</p>
           </div>
           
           <div v-else-if="technicianServices.length === 0" class="text-center py-10 bg-gray-50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
             <div class="text-4xl mb-3">✨</div>
-            <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">¿Aún no tienes servicios?</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 px-6">Agrega tus habilidades para empezar a recibir solicitudes de clientes cercanos.</p>
+            <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">{{ $t('profile.technician.no_services_title') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 px-6">{{ $t('profile.technician.no_services_desc') }}</p>
             <button 
               @click="showServiceModal = true"
               class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg hover:shadow-blue-200/50"
             >
-              Comenzar ahora
+              {{ $t('profile.technician.start_now') }}
             </button>
           </div>
           
@@ -295,7 +296,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate w-full">{{ service.nombre }}</p>
-                  <p class="hidden sm:block text-[10px] text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wider">Habilitado</p>
+                  <p class="hidden sm:block text-[10px] text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wider">{{ $t('profile.technician.enabled') }}</p>
                 </div>
                 <button 
                   @click="removeServiceFromTechnician(service.id_tecnico_servicio)"
@@ -319,7 +320,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
               </div>
-              <span class="text-[10px] sm:text-sm font-bold text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 text-center">Añadir</span>
+              <span class="text-[10px] sm:text-sm font-bold text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 text-center">{{ $t('profile.technician.add') }}</span>
             </button>
           </div>
         </div>
@@ -332,8 +333,8 @@
           <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-lg relative z-20 shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700 animate-slide-up">
             <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
               <div>
-                <h3 class="text-xl font-black text-gray-900 dark:text-white">Ampliar tu Perfil</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Selecciona servicios disponibles en tu ciudad</p>
+                <h3 class="text-xl font-black text-gray-900 dark:text-white">{{ $t('profile.technician.expand_profile') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.technician.select_city_services') }}</p>
               </div>
               <button @click="showServiceModal = false" class="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,14 +372,14 @@
                       @click="assignServiceToTechnician(service.id_servicio)"
                       class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl transition-all active:scale-95 flex items-center gap-2"
                     >
-                      Añadir <span class="text-lg leading-none">+</span>
+                      {{ $t('profile.technician.add_plus') }}
                     </button>
                     <span 
                       v-else
                       class="px-3 py-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px] font-black rounded-lg flex items-center gap-1"
                     >
                       <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                      ACTIVO
+                      {{ $t('profile.technician.active') }}
                     </span>
                   </div>
                 </div>
@@ -395,26 +396,26 @@
             💈
           </div>
           <div>
-            <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">Mi Barbería</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Registra tu local físico</p>
+            <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">{{ $t('profile.technician.my_barbershop') }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.technician.register_local') }}</p>
           </div>
         </div>
 
         <div class="space-y-4">
           <div class="space-y-2">
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre del Local</label>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('profile.technician.local_name') }}</label>
             <input v-model="barberia.nombre" type="text" placeholder="Ej: Barbería El Elegante" 
                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white text-sm">
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div class="space-y-2">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Colonia</label>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('profile.technician.neighborhood') }}</label>
               <input v-model="barberia.colonia" type="text" placeholder="Colonia" 
                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white text-sm">
             </div>
             <div class="space-y-2">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Dirección Precisa</label>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('profile.technician.precise_address') }}</label>
               <input v-model="barberia.direccion_precisa" type="text" placeholder="Calle, Bloque, Casa" 
                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white text-sm">
             </div>
@@ -424,13 +425,13 @@
           <div class="grid grid-cols-2 gap-4">
              <!-- Foto 1 -->
              <div class="space-y-2">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Foto Fachada</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('profile.technician.facade_photo') }}</label>
                 <div @click="fileInputBarberia1.click()" 
                      class="group relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-400 transition-all">
                    <img v-if="barberia.foto1" :src="barberia.foto1" class="absolute inset-0 w-full h-full object-cover group-hover:opacity-75 transition-opacity">
                    <div v-else class="text-center p-3">
                       <div class="text-2xl mb-1">📸</div>
-                      <p class="text-[10px] text-gray-400 font-bold">Subir Fachada</p>
+                      <p class="text-[10px] text-gray-400 font-bold">{{ $t('profile.technician.upload_facade') }}</p>
                    </div>
                    
                    <!-- Overlay de carga/edición -->
@@ -448,13 +449,13 @@
 
              <!-- Foto 2 -->
              <div class="space-y-2">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Foto Interior</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('profile.technician.interior_photo') }}</label>
                 <div @click="fileInputBarberia2.click()" 
                      class="group relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-400 transition-all">
                    <img v-if="barberia.foto2" :src="barberia.foto2" class="absolute inset-0 w-full h-full object-cover group-hover:opacity-75 transition-opacity">
                    <div v-else class="text-center p-3">
                       <div class="text-2xl mb-1">🛋️</div>
-                      <p class="text-[10px] text-gray-400 font-bold">Subir Interior</p>
+                      <p class="text-[10px] text-gray-400 font-bold">{{ $t('profile.technician.upload_interior') }}</p>
                    </div>
 
                    <!-- Overlay de carga/edición -->
@@ -473,39 +474,69 @@
 
           <button @click="saveBarberia" :disabled="isSavingBarberia || !hasBarberiaChanges"
                   class="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black rounded-2xl transition-all shadow-lg hover:shadow-indigo-200/50 disabled:opacity-50">
-            <span v-if="isSavingBarberia">Guardando...</span>
-            <span v-else>{{ barberia.id_barberia ? 'Actualizar Local' : 'Registrar Mi Local' }}</span>
+            <span v-if="isSavingBarberia">{{ $t('profile.saving') }}</span>
+            <span v-else>{{ barberia.id_barberia ? $t('profile.technician.update_local') : $t('profile.technician.register_local_btn') }}</span>
           </button>
         </div>
       </div>
 
-
+      <!-- Language Settings -->
+      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700/50 mb-6 transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+              🌎
+            </div>
+            <div>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">Idioma / Language</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Selecciona tu idioma preferido / Select preferred language</p>
+            </div>
+          </div>
+          
+          <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <button 
+              @click="setLocale('es')"
+              class="px-3 py-1.5 rounded-md text-xs font-bold transition-all"
+              :class="locale === 'es' ? 'bg-white dark:bg-gray-600 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 dark:text-gray-400'"
+            >
+              ES
+            </button>
+            <button 
+              @click="setLocale('en')"
+              class="px-3 py-1.5 rounded-md text-xs font-bold transition-all"
+              :class="locale === 'en' ? 'bg-white dark:bg-gray-600 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 dark:text-gray-400'"
+            >
+              EN
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Legal & About -->
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow border border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Legal y más</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $t('profile.legal') }}</h3>
         
         <div class="space-y-2 sm:space-y-3">
           <button 
             @click="isTerminosModalOpen = true"
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
-            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Términos y condiciones</p>
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.terms') }}</p>
           </button>
           
           <button 
             @click="isContratoTecnicoModalOpen = true"
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
-            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Contrato del Técnico</p>
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.technician.technician_contract') }}</p>
           </button>
           <button 
             @click="isPrivacidadModalOpen = true"
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
-            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Política de privacidad</p>
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.privacy') }}</p>
           </button>
           <button 
             @click="isAcercaModalOpen = true"
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
-            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de MiSeguro</p>
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.about') }}</p>
           </button>
           <button 
             @click="handleLogout"
@@ -513,7 +544,7 @@
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200 flex items-center justify-between"
             :class="{'opacity-70 cursor-not-allowed': isLoggingOut}"
           >
-            <span class="text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">Cerrar sesión</span>
+            <span class="text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">{{ $t('profile.logout') }}</span>
             <LoadingSpinner v-if="isLoggingOut" class="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
           </button>
         </div>
@@ -1202,6 +1233,9 @@ import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Multiselect from 'vue-multiselect'
+import { useI18n } from 'vue-i18n'
+
+const { locale, setLocale } = useI18n()
 
 
 
@@ -1214,11 +1248,11 @@ const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'MiSeguro - Perfil',
+  title: t('profile.title'),
   meta: [
-    { name: 'description', content: 'Perfil de usuario de MiSeguro - Gestiona tus servicios y membresía' },
-    { name: 'keywords', content: 'Perfil, usuario, servicios, membresía' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
+    { name: 'description', content: t('profile.personal_info') },
+    { name: 'keywords', content: 'MiSeguro, Perfil, Técnico, Perfil Técnico' }, 
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.9, user-scalable=no' }
   ]
 })
 
@@ -1463,7 +1497,7 @@ const fetchAvailableServices = async () => {
     }
   } catch (error) {
     console.error('Error al cargar servicios disponibles:', error)
-    showError('Error', 'No se pudieron cargar los servicios disponibles.')
+    showError(t('common.error'), t('profile.technician.messages.available_services_error'))
   } finally {
     loadingServices.value = false
   }
@@ -1485,7 +1519,7 @@ const fetchTechnicianServices = async () => {
     }
   } catch (error) {
     console.error('Error al cargar servicios del técnico:', error)
-    showError('Error', 'No se pudieron cargar tus servicios asignados.')
+    showError(t('common.error'), t('profile.technician.messages.assigned_services_error'))
   }
 }
 
@@ -1538,7 +1572,7 @@ const saveBarberia = async () => {
     })
 
     if (response.success) {
-      showSuccess('¡Éxito!', 'Información de barbería guardada.')
+      showSuccess(t('common.success'), t('profile.technician.messages.barberia_saved'))
       const barberData = response.data || barberia.value;
       if (!barberia.value.id_barberia) {
          barberia.value = barberData
@@ -1573,7 +1607,7 @@ const assignServiceToTechnician = async (serviceId) => {
     })
     
     if (response.success) {
-      showSuccess('¡Éxito!', 'Servicio asignado correctamente.')
+      showSuccess(t('common.success'), t('profile.technician.messages.service_assigned'))
       // Cerrar el panel automáticamente
       showServiceModal.value = false
       // Recargar los servicios del técnico
@@ -1597,7 +1631,7 @@ const removeServiceFromTechnician = async (tecnicoServicioId) => {
     })
     
     if (response.success) {
-      showSuccess('¡Éxito!', 'Servicio eliminado correctamente.')
+      showSuccess(t('common.success'), t('profile.technician.messages.service_removed'))
       // Recargar los servicios del técnico
       await fetchTechnicianServices()
       // Actualizar la lista de servicios disponibles
@@ -1666,7 +1700,7 @@ const fetchUserData = async () => {
     return true
   } catch (error) {
     console.error('Error al obtener los datos del usuario:', error)
-    showError('Error', 'No se pudieron cargar los datos del perfil')
+    showError(t('common.error'), t('profile.messages.load_error'))
     return false
   }
 }
@@ -1751,7 +1785,7 @@ const uploadProfileImage = async (file) => {
       user.value.imagen_url = response.data.imagen_url
       user.value.imagen_public_id = response.data.imagen_public_id
       
-      showSuccess('¡Éxito!', 'Imagen de perfil actualizada correctamente')
+      showSuccess(t('common.success'), t('profile.messages.photo_success'))
     } else {
       console.error('Error en la respuesta del servidor:', response)
       showError('Error', response.message || 'No se pudo actualizar la imagen de perfil')
@@ -1803,7 +1837,7 @@ const deleteProfileImage = async () => {
       user.value.imagen_url = null
       user.value.imagen_public_id = null
       
-      showSuccess('¡Éxito!', 'Imagen de perfil eliminada correctamente')
+      showSuccess(t('common.success'), t('profile.messages.photo_removed'))
     } else {
       console.error('Error en la respuesta del servidor (DELETE):', response)
       showError('Error', response.message || 'No se pudo eliminar la imagen de perfil')
@@ -1930,7 +1964,7 @@ const saveProfile = async () => {
     
     showToast({
       type: 'success',
-      message: '¡Perfil actualizado correctamente!',
+      message: t('profile.messages.save_success'),
       duration: 1500
     });
     
@@ -1996,7 +2030,7 @@ const updatePassword = async () => {
     
     showToast({
       type: 'success',
-      message: '¡Contraseña actualizada correctamente!',
+      message: t('profile.messages.password_success'),
       duration: 3000
     });
     

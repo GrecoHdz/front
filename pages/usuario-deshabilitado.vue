@@ -15,13 +15,13 @@
 
           <!-- Title -->
           <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-            Cuenta Deshabilitada
+            {{ $t('disabled_account.title') }}
           </h2>
 
           <!-- Description -->
           <div class="mt-4 space-y-2">
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Lo sentimos, tu cuenta está temporalmente deshabilitada. Reintenta más tarde.
+              {{ $t('disabled_account.desc') }}
             </p>
           </div>
 
@@ -30,7 +30,7 @@
             <button 
               @click="goToHome" 
               class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-              Reintentar
+              {{ $t('disabled_account.retry') }}
             </button>
           </div> 
         </div>

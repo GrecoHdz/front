@@ -3,7 +3,7 @@
     <!-- Loading Spinner -->
     <LoadingSpinner 
       :loading="isLoading" 
-      :message="'Cargando Dashboard...'"
+      :message="$t('dashboard_client.loading_dashboard')"
     />
 
     <!-- Contenido principal (oculto hasta completar autenticación) -->
@@ -41,15 +41,15 @@
               </div>
               <div>
                 <h2 class="text-lg font-black text-gray-900 dark:text-white">
-                  ¡Hola, {{ shortName }}!
+                  {{ $t('dashboard_client.welcome', { name: shortName }) }}
                 </h2>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Bienvenido a MiSeguro</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ $t('dashboard_client.welcome_subtitle') }}</p>
               </div>
             </div>
             
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-3 rounded-xl">
               <p class="text-emerald-800 dark:text-emerald-200 font-medium text-center text-sm">
-                 Servicios en la palma de tu mano ✅
+                 {{ $t('dashboard_client.ready_to_help') }}
               </p>
             </div>
           </div>
@@ -65,7 +65,7 @@
                 <span class="text-white text-lg">📊</span>
               </div>
               <div>
-                <p class="text-gray-600 dark:text-gray-400 text-xs">Servicios Totales</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ $t('dashboard_client.total_services') }}</p>
                 <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">{{ statsData.totalServices }}</p>
               </div>
             </div>
@@ -76,8 +76,8 @@
                 <span class="text-white text-lg">💰</span>
               </div>
               <div>
-                <p class="text-gray-600 dark:text-gray-400 text-xs">Crédito</p>
-                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">L. {{ (userCredit || 0).toLocaleString('es-HN') }}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ $t('dashboard_client.credit') }}</p>
+                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">{{ formatCurrency(userCredit) }}</p>
               </div>
             </div>
           </div>
@@ -88,8 +88,8 @@
                 <span class="text-white text-lg">🫂</span>
               </div>
               <div>
-                <p class="text-gray-600 dark:text-gray-400 text-xs">Referidos</p>
-                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">Invita y Gana</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ $t('dashboard_client.referrals') }}</p>
+                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">{{ $t('dashboard_client.invite_earn') }}</p>
               </div>
             </div>
           </div>
@@ -100,8 +100,8 @@
                 <span class="text-white text-lg">🛍️</span>
               </div>
               <div>
-                <p class="text-gray-600 dark:text-gray-400 text-xs">Marketplace</p>
-                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">Ver Ofertas</p>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">{{ $t('dashboard_client.marketplace') }}</p>
+                <p class="text-[15px] sm:text-xs md:text-sm font-black text-gray-900 dark:text-white">{{ $t('dashboard_client.view_offers') }}</p>
               </div>
             </div>
           </div>
@@ -115,7 +115,7 @@
           <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           <div class="relative">
             <h3 class="text-xl font-black mb-3 flex items-center space-x-2">
-              <span>Solicitar Servicio</span>
+              <span>{{ $t('dashboard_client.request_service') }}</span>
             </h3>
             
             <form @submit.prevent="handleRequestService" class="space-y-3">
@@ -127,7 +127,7 @@
                           :searchable="false"
                           :close-on-select="true"
                           :show-labels="false"
-                          placeholder="Selecciona un servicio"
+                          :placeholder="$t('dashboard_client.select_service')"
                           label="name"
                           track-by="id"
                           class="multiselect-transparent"
@@ -146,7 +146,7 @@
                           <span>{{ option.name }}</span>
                         </span>
                         <span v-if="option.isDisabled" class="text-[7px] font-black uppercase tracking-tighter bg-red-50 text-red-500 px-1.5 py-0.5 rounded-md border border-red-100">
-                          Verifica tu Perfil
+                          {{ $t('dashboard_client.verify_profile') }}
                         </span>
                       </div>
                     </template>
@@ -161,7 +161,7 @@
                     :searchable="false"
                     :allow-empty="true"
                     :show-labels="false"
-                    placeholder="Selecciona tipo"
+                    :placeholder="$t('dashboard_client.select_type')"
                     label="name"
                     track-by="id"
                     class="multiselect-transparent"
@@ -190,7 +190,7 @@
                     :options="barberiasList"
                     :searchable="false"
                     :show-labels="false"
-                    placeholder="Elige barbería"
+                    :placeholder="$t('dashboard_client.choose_barbershop')"
                     track-by="id_barberia"
                     class="multiselect-transparent"
                   >
@@ -215,7 +215,7 @@
                       <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span class="text-[10px] font-bold uppercase tracking-wider">Imagen Local 1</span>
+                      <span class="text-[10px] font-black uppercase tracking-wider">{{ $t('dashboard_client.local_image', { n: 1 }) }}</span>
                     </div>
                   </div>
                   <div class="aspect-video rounded-xl bg-white/10 border-2 border-dashed border-white/30 flex flex-col items-center justify-center text-white/50 overflow-hidden relative group">
@@ -224,14 +224,14 @@
                       <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span class="text-[10px] font-bold uppercase tracking-wider">Imagen Local 2</span>
+                      <span class="text-[10px] font-black uppercase tracking-wider">{{ $t('dashboard_client.local_image', { n: 2 }) }}</span>
                     </div>
                   </div>
                 </div>
               
               <div v-if="shouldShowFormFields" class="animate-fade-in">
                 <textarea v-model="serviceFormData.description" 
-                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? '¿Cuántas personas van y en cuánto tiempo lo necesitan?' : (selectedServiceObject?.name === 'Barbería' ? '¿Qué tipo de corte desea? Ejemplo: Fade medio con barba' : 'Describe el problema o servicio que necesitas...')"
+                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? $t('dashboard_client.taxi_placeholder') : (selectedServiceObject?.name === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
               </div>
@@ -241,7 +241,7 @@
                   <input v-model="serviceFormData.colonia" 
                          type="text"
                          :readonly="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
-                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? 'Lugar de recogida' : 'Colonia'"
+                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? $t('dashboard_client.pickup') : $t('dashboard_client.neighborhood')"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
                          :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
                 </div>
@@ -249,7 +249,7 @@
                   <input v-model="serviceFormData.direccion" 
                          type="text"
                          :readonly="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
-                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? 'Lugar de destino' : 'Dirección precisa'"
+                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? $t('dashboard_client.destination') : $t('dashboard_client.precise_address')"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
                          :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
                 </div>
@@ -263,8 +263,8 @@
                           ? 'bg-white/20 border-white/30 text-white hover:bg-white/30 hover:scale-105 cursor-pointer' 
                           : 'bg-white/10 border-white/10 text-white/50 cursor-not-allowed'
                       ]">
-                <span v-if="isSubmittingService">Solicitando...</span>
-                <span v-else>Solicitar Ahora</span>
+                <span v-if="isSubmittingService">{{ $t('dashboard_client.requesting') }}</span>
+                <span v-else>{{ $t('dashboard_client.request_now') }}</span>
               </button>
             </form>
           </div>
@@ -278,10 +278,10 @@
   <div class="flex items-end justify-between mb-6">
     <div>
       <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-        Mercado de Paquetes 💎
+        {{ $t('dashboard_client.package_market') }}
       </h3>
       <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-        Compra paquetes o canjéalos con tu crédito
+        {{ $t('dashboard_client.package_market_desc') }}
       </p>
     </div>
     <button 
@@ -289,7 +289,7 @@
       @click="navigateTo('/cliente/Marketplace')" 
       class="text-xs font-black text-blue-600 dark:text-blue-400 px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full"
     >
-      Ver todos
+      {{ $t('dashboard_client.view_all') }}
     </button>
   </div>
 
@@ -330,7 +330,7 @@
             class="absolute top-3 right-3 z-10"
           >
             <div class="px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-[9px] font-black text-white shadow-lg uppercase tracking-widest border border-white/20">
-              {{ getEstadoPaquete(paquete.id) }}
+              {{ $t('marketplace.' + getEstadoPaquete(paquete.id).toLowerCase().replace(' ', '_')) || getEstadoPaquete(paquete.id) }}
             </div>
           </div>
 
@@ -340,7 +340,7 @@
               {{ paquete.nombre }}
             </h4>
             <div class="flex items-center justify-between mt-1">
-              <span class="text-xs font-black text-blue-400">L. {{ formatNumber(paquete.costo) }}</span>
+              <span class="text-xs font-black text-blue-400">{{ formatCurrency(paquete.costo) }}</span>
               <div class="flex items-center space-x-1">
                 <span class="block w-1 h-1 bg-white/50 rounded-full"></span> 
               </div>
@@ -356,7 +356,7 @@
                ? 'bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 group-hover:bg-blue-600 group-hover:text-white' 
                : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'"
            >
-             {{ tienePaquete(paquete.id) ? 'Ver Detalles' : 'Adquirir' }}
+             {{ tienePaquete(paquete.id) ? $t('dashboard_client.details') : $t('marketplace.acquire') }}
            </button>
         </div>
       </div>
@@ -417,7 +417,7 @@
                 </div>
 
                 <div class="prose prose-sm dark:prose-invert text-gray-500 dark:text-gray-400">
-                   <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Descripción</h3>
+                   <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">{{ $t('dashboard_client.description') }}</h3>
                    <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">{{ selectedDetailPackage.descripcion || 'Servicio premium de mantenimiento preventivo y correctivo' }}</p>
                 </div>
              </div>
@@ -434,7 +434,7 @@
                   :disabled="getEstadoPaquete(selectedDetailPackage.id) !== 'Adquirido'"
                   class="w-full py-4 rounded-2xl font-black text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xl"
                >
-                  {{ getEstadoPaquete(selectedDetailPackage.id) === 'En uso' ? 'En Uso' : 'Usar Ahora' }}
+                  {{ getEstadoPaquete(selectedDetailPackage.id) === 'En uso' ? $t('dashboard_client.in_use') : $t('dashboard_client.use_now') }}
                </button>
             </div>
             
@@ -444,8 +444,8 @@
                   class="flex-1 py-4 rounded-2xl font-black text-base text-white shadow-xl active:scale-95 transition-transform"
                   :class="userCredit >= selectedDetailPackage.costo ? 'bg-blue-600' : 'bg-gray-900 dark:bg-gray-700'"
                >
-                  <span v-if="userCredit >= selectedDetailPackage.costo">Canjear Ahora</span>
-                  <span v-else>Adquirir por Transferencia</span>
+                  <span v-if="userCredit >= selectedDetailPackage.costo">{{ $t('dashboard_client.redeem_now') }}</span>
+                  <span v-else>{{ $t('dashboard_client.acquire_transfer') }}</span>
                </button>
             </div>
          </div>
@@ -460,12 +460,12 @@
      <div v-if="showConfirmarUsoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
         <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center modal-content-pop shadow-2xl">
            <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🚀</div>
-           <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">Usar Paquete</h3>
+           <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">{{ $t('dashboard_client.use_package') }}</h3>
            <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">{{ selectedPaquete?.nombre }}</p>
            <button @click="usarPaquete(selectedPaquete)" :disabled="isProcessingPayment" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-sm mb-2 shadow-lg shadow-blue-600/20 active:scale-95 transition-all">
-              {{ isProcessingPayment ? 'Activando...' : 'Confirmar' }}
+              {{ isProcessingPayment ? $t('dashboard_client.activating') : $t('dashboard_client.confirm_use') }}
            </button>
-           <button @click="showConfirmarUsoModal = false" class="text-xs text-gray-400 font-bold py-2 hover:text-gray-600 transition-colors">Cancelar</button>
+           <button @click="showConfirmarUsoModal = false" class="text-xs text-gray-400 font-bold py-2 hover:text-gray-600 transition-colors">{{ $t('common.cancel') }}</button>
         </div>
      </div>
   </Transition>
@@ -475,11 +475,11 @@
      <div v-if="showConfirmarCanjeoModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
         <div class="bg-white dark:bg-gray-800 w-full max-w-[300px] rounded-3xl p-6 text-center modal-content-pop shadow-2xl">
            <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">💎</div>
-           <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-4">Confirmar Canje</h3>
+           <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-4">{{ $t('dashboard_client.confirm_redeem') }}</h3>
            <button @click="confirmarCanjeo" :disabled="isProcessingPayment" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm mb-2 shadow-lg shadow-emerald-600/20 active:scale-95 transition-all">
-              {{ isProcessingPayment ? 'Procesando...' : 'Canjear' }}
+              {{ isProcessingPayment ? $t('marketplace.processing') : $t('dashboard_client.redeem') }}
            </button>
-           <button @click="showConfirmarCanjeoModal = false" class="text-xs text-gray-400 font-bold py-2 hover:text-gray-600 transition-colors">Cancelar</button>
+           <button @click="showConfirmarCanjeoModal = false" class="text-xs text-gray-400 font-bold py-2 hover:text-gray-600 transition-colors">{{ $t('common.cancel') }}</button>
         </div>
      </div>
   </Transition>
@@ -490,7 +490,7 @@
        <div class="px-4 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
           <div class="flex items-center space-x-2">
             <span class="w-2 h-2 bg-blue-600 rounded-full"></span>
-            <h2 class="font-black text-sm uppercase tracking-widest text-gray-500">Transferencia</h2>
+            <h2 class="font-black text-sm uppercase tracking-widest text-gray-500">{{ $t('marketplace.transfer') }}</h2>
           </div>
           <button @click="closePaquetePagoModal" class="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">✕</button>
        </div>
@@ -498,10 +498,10 @@
        <div class="flex-1 overflow-y-auto p-6">
           <div class="text-center mb-10">
              <h1 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">L. {{ formatNumber(selectedPaquete?.costo) }}</h1>
-             <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em] mt-2">Monto Total a Pagar</p>
+             <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em] mt-2">{{ $t('dashboard_client.transfer_amount') }}</p>
           </div>
 
-          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-1">Cuentas Disponibles</label>
+          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-1">{{ $t('dashboard_client.available_accounts') }}</label>
           <div class="grid grid-cols-3 gap-3 mb-10">
              <div 
                 v-for="acc in bankAccounts" 
@@ -525,13 +525,13 @@
              </div>
           </div>
 
-          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Referencia de Pago</label>
+          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">{{ $t('dashboard_client.payment_reference') }}</label>
           <div class="relative group mb-10">
             <input 
                v-model="numeroComprobante"
                type="text" 
                inputmode="numeric" 
-               placeholder="Ingrese el número de comprobante"
+               :placeholder="$t('dashboard_client.receipt_placeholder')"
                class="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 font-bold focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 transition-all outline-none"
             >
           </div>
@@ -541,7 +541,7 @@
              :disabled="!isValidPaymentForm || isProcessingPayment"
              class="w-full py-5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black text-base rounded-2xl shadow-xl active:scale-95 transition-all disabled:opacity-30"
           >
-             {{ isProcessingPayment ? 'Procesando...' : 'Enviar Comprobante' }}
+             {{ isProcessingPayment ? $t('marketplace.processing') : $t('dashboard_client.send_receipt') }}
           </button>
        </div>
     </div>
@@ -572,12 +572,12 @@
              <div class="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 mb-8">
                 <div class="space-y-6">
                    <div>
-                      <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Beneficiario</p>
+                      <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ $t('marketplace.beneficiary') }}</p>
                       <p class="text-base font-bold text-gray-900 dark:text-white">{{ viewingAccount?.beneficiario }}</p>
                    </div>
                    
                    <div class="pt-6 border-t border-gray-100 dark:border-gray-700">
-                      <p class="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Número de Cuenta</p>
+                      <p class="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">{{ $t('marketplace.account_number') }}</p>
                       <div class="flex items-center justify-between cursor-pointer active:opacity-60 transition-opacity" @click="handleCopyAndSelect">
                          <p class="font-mono font-black text-lg text-gray-900 dark:text-white tracking-tighter">
                             {{ viewingAccount?.num_cuenta }}
@@ -594,12 +594,12 @@
                 @click="handleCopyAndSelect"
                 class="w-full py-5 bg-gray-900 dark:bg-blue-600 text-white rounded-2xl font-black text-sm active:scale-95 transition-all shadow-xl shadow-gray-900/10"
              >
-                <span>Copiar y Continuar</span>
+                <span>{{ $t('dashboard_client.copy_continue') }}</span>
              </button>
 
              <div class="mt-8 pt-6 border-t border-gray-50 dark:border-gray-800 flex items-center justify-center gap-2 opacity-30">
                 <svg class="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
-                <span class="text-[8px] font-bold uppercase tracking-[0.3em]">Encriptación Bancaria</span>
+                <span class="text-[8px] font-bold uppercase tracking-[0.3em]">{{ $t('dashboard_client.bank_encryption') }}</span>
              </div>
           </div>
        </div>
@@ -615,10 +615,10 @@
             <div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
             <div class="relative">
               <div class="flex items-center justify-between mb-3">
-                <h3 class="text-xl font-black">Tu Progreso</h3>
+                <h3 class="text-xl font-black">{{ $t('dashboard_client.your_progress') }}</h3>
                 <div class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
-                  <span v-if="isLoadingProgress" class="text-xs font-bold">Cargando...</span>
-                  <span v-else class="text-xs font-bold">Mes {{ statsData.membershipMonths }}</span>
+                  <span v-if="isLoadingProgress" class="text-xs font-bold">{{ $t('common.loading') }}</span>
+                  <span v-else class="text-xs font-bold">{{ $t('dashboard_client.month_plural', { n: statsData.membershipMonths }) }}</span>
                 </div>
               </div>
               
@@ -636,7 +636,7 @@
                     <div class="text-center">
                       <div v-if="isLoadingProgress" class="text-lg font-black text-white">--</div>
                       <div v-else class="text-lg font-black text-white">{{ statsData.membershipMonths }}</div>
-                      <div class="text-xs text-white/80">Mes</div>
+                      <div class="text-xs text-white/80">{{ $t('dashboard_client.month') }}</div>
                     </div>
                   </div>
                 </div>
@@ -658,12 +658,12 @@
             <div v-else-if="benefitsError" class="text-center py-3 text-red-500 text-sm">
               {{ benefitsError }}
               <button @click="fetchBeneficios" class="mt-2 text-xs text-blue-600 hover:underline">
-                Reintentar
+                {{ $t('dashboard_client.retry') }}
               </button>
             </div>
             
             <div v-else-if="benefitsToShow.length === 0" class="text-center py-3 text-gray-500 text-sm">
-              No hay beneficios disponibles en este momento.
+              {{ $t('dashboard_client.no_benefits') }}
             </div>
             
             <div v-else class="grid grid-cols-2 gap-2">
@@ -677,7 +677,7 @@
                   </div>
                   <span class="text-xs font-bold"
                         :class="getBenefitTextStyle(benefit.mes_requerido)">
-                    Mes {{ benefit.mes_requerido }}
+                    {{ $t('dashboard_client.month_plural', { n: benefit.mes_requerido }) }}
                   </span>
                 </div>
                 <p class="text-xs font-semibold leading-tight mb-1"
@@ -729,9 +729,9 @@
                           'text-red-800 dark:text-red-200': isMembershipExpired,
                           'text-gray-800 dark:text-gray-200': isMembershipInactive
                         }">
-                        {{ isMembershipActive ? 'Membresía activa hasta' : 
-                           isMembershipPending ? 'Membresía pendiente' :
-                           isMembershipExpired ? 'Membresía vencida' : 'Estado de la membresía' }}
+                        {{ isMembershipActive ? $t('dashboard_client.membership_active_until') : 
+                           isMembershipPending ? $t('dashboard_client.membership_pending') :
+                           isMembershipExpired ? $t('dashboard_client.membership_expired') : $t('dashboard_client.membership_status') }}
                       </p>
                       <p class="text-xs font-bold truncate"
                         :class="{
@@ -760,15 +760,15 @@
                   
                   <div v-if="!isMembershipInactive" class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>Inicio: {{ membershipStartDate }}</span>
-                    <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% completado</span>
-                    <span v-else-if="membershipProgress >= 100 && !diasRestantesCredito">Expirada</span>
+                    <span v-if="membershipProgress > 0 && membershipProgress < 100">{{ membershipProgress }}% {{ $t('dashboard_client.completed') }}</span>
+                    <span v-else-if="membershipProgress >= 100 && !diasRestantesCredito">{{ $t('dashboard_client.expired') }}</span>
                   </div>
                   
                   <!-- Mensaje de días restantes para crédito -->
                   <div v-if="diasRestantesCredito > 0" class="mt-2 text-xs font-medium px-2 py-1 rounded-md text-center bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
                     <template v-if="diasRestantesCredito > 0">
-                      <span v-if="diasRestantesCredito === 1">⚠️ Tienes 1 día antes de perder tu crédito</span>
-                      <span v-else>⏳ Tienes {{ diasRestantesCredito }} días antes de perder tu crédito</span>
+                      <span v-if="diasRestantesCredito === 1">{{ $t('dashboard_client.lost_credit_warning') }}</span>
+                      <span v-else>{{ $t('dashboard_client.lost_credit_warning_plural', { n: diasRestantesCredito }) }}</span>
                     </template>
                   </div>
                 </div>
@@ -787,7 +787,7 @@
                   <svg v-if="isMembershipExpired || isMembershipInactive" class="w-3 h-3 mr-1 animate-pulse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                   </svg>
-                  {{ isMembershipActive ? 'Membresía Activa' : isMembershipPending ? 'Pendiente' : isMembershipInactive ? 'Activar ahora' : 'Renovar Ahora' }}
+                  {{ isMembershipActive ? $t('profile.membership.active') : isMembershipPending ? $t('profile.membership.pending') : isMembershipInactive ? $t('dashboard_client.active_now') : $t('dashboard_client.renovate_now') }}
                 </button>
               </div>
               
@@ -804,7 +804,7 @@
 
       <!-- Quick Actions -->
       <section class="px-4 mb-4">
-        <h3 class="text-lg font-black text-gray-900 dark:text-white mb-3">Acciones Rápidas</h3>
+        <h3 class="text-lg font-black text-gray-900 dark:text-white mb-3">{{ $t('dashboard_client.quick_actions') }}</h3>
         <div class="grid grid-cols-2 gap-3">
           <button @click="navigateTo('/cliente/Servicios')" class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 text-left">
             <div class="flex items-center space-x-2">
@@ -812,8 +812,8 @@
                 <span class="text-white text-lg">🏠</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-xs">Ver Servicios</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">Historial completo</p>
+                <p class="font-bold text-gray-900 dark:text-white text-xs">{{ $t('dashboard_client.view_history') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ $t('dashboard_client.history_desc') }}</p>
               </div>
             </div>
           </button>
@@ -824,8 +824,8 @@
                 <span class="text-white text-lg">👤</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-xs">Mi Perfil</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">Configuración</p>
+                <p class="font-bold text-gray-900 dark:text-white text-xs">{{ $t('dashboard_client.my_profile') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ $t('dashboard_client.config_desc') }}</p>
               </div>
             </div>
           </button>
@@ -836,8 +836,8 @@
                 <span class="text-white text-lg">💬</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-xs">Soporte</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">Ayuda 24/7</p>
+                <p class="font-bold text-gray-900 dark:text-white text-xs">{{ $t('dashboard_client.support') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ $t('dashboard_client.support_desc') }}</p>
               </div>
             </div>
           </button>
@@ -848,8 +848,8 @@
                 <span class="text-white text-lg">💰</span>
               </div>
               <div>
-                <p class="font-bold text-gray-900 dark:text-white text-xs">Referir</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">Ganá dinero</p>
+                <p class="font-bold text-gray-900 dark:text-white text-xs">{{ $t('dashboard_client.refer') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ $t('dashboard_client.earn_money') }}</p>
               </div>
             </div>
           </button>
@@ -1262,6 +1262,7 @@ html .multiselect-custom .multiselect__tags {
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
+import { useI18n } from 'vue-i18n'
 import Toast from '~/components/ui/Toast.vue'
 
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
@@ -1271,16 +1272,17 @@ import Multiselect from 'vue-multiselect'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
+const { t } = useI18n()
 
 const router = useRouter()
 const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'MiSeguro - Dashboard',
+  title: computed(() => `MiSeguro - ${t('dashboard_client.title')}`),
   meta: [
-    { name: 'description', content: 'Panel de control de MiSeguro - Gestiona tus servicios y membresía' },
-    { name: 'keywords', content: 'dashboard, MiSeguro, servicios, membresía, panel de control' },
+    { name: 'description', content: computed(() => t('dashboard_client.seo.description')) },
+    { name: 'keywords', content: computed(() => t('dashboard_client.seo.keywords')) },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
@@ -1354,15 +1356,15 @@ const getServiceLabel = (option) => {
   if (!option) return ''
   let label = `${option.icon} ${option.name}`
   if (option.name === 'Taxi VIP' && !isUserVerified.value) {
-    label += ' (Verificación Requerida)'
+    label += ` (${t('dashboard_client.verification_required')})`
   }
   return label
 }
 
 // Opciones para tipo de barbería
 const barberiaTypeOptions = [
-  { id: 'a domicilio', name: 'A domicilio', icon: '🏠' },
-  { id: 'en local', name: 'En local', icon: '💈' }
+  { id: 'a domicilio', name: t('technician.at_home'), icon: '🏠' },
+  { id: 'en local', name: t('technician.at_local'), icon: '💈' }
 ]
 
 const barberiaTypeSelected = computed({
@@ -1394,7 +1396,7 @@ const empresaPhoneNumber = ref('');
 
 // Obtener solo los dos primeros nombres
 const shortName = computed(() => {
-  if (!userData.value.nombre) return 'Invitado'
+  if (!userData.value.nombre) return t('common.guest')
   const names = userData.value.nombre.split(' ')
   return names.length > 2 ? `${names[0]} ${names[1]}` : userData.value.nombre
 })
@@ -1424,9 +1426,10 @@ const isMembershipInactive = computed(() => {
 const membershipProgress = computed(() => membershipData.value.progress || 0)
 
 const membershipEndDate = computed(() => {
-  if (!membershipData.value.endDate) return 'Fecha no disponible'
+  if (!membershipData.value.endDate) return t('common.no_date')
   
-  return new Date(membershipData.value.endDate).toLocaleDateString('es-ES', {
+  const { locale } = useI18n()
+  return new Date(membershipData.value.endDate).toLocaleDateString(locale.value === 'es' ? 'es-HN' : 'en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -1438,7 +1441,8 @@ const membershipEndDate = computed(() => {
 const membershipStartDate = computed(() => {
   if (!membershipData.value.startDate) return 'N/A';
   
-  return new Date(membershipData.value.startDate).toLocaleDateString('es-ES', {
+  const { locale } = useI18n()
+  return new Date(membershipData.value.startDate).toLocaleDateString(locale.value === 'es' ? 'es-HN' : 'en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -1451,14 +1455,13 @@ const membershipStatus = computed(() => {
   const status = membershipData.value.status || 'inactiva'
   
   const statusMap = {
-    'activa': 'Activa',
-    'pendiente': 'Pendiente de verificación',
-    'vencida': 'Vencida',
-    'inactiva': 'Sin membresía',
-    'vencida_reiniciada': 'Crédito reiniciado'
+    'activa': t('profile.membership.active'),
+    'pendiente': t('profile.membership.pending'),
+    'vencida': t('profile.membership.expired'),
+    'inactiva': t('dashboard_client.no_membership')
   }
   
-  return statusMap[status] || 'Sin membresía'
+  return statusMap[status] || t('dashboard_client.no_membership')
 })
 
 // Días restantes antes de perder el crédito (3 días después del vencimiento)
@@ -1489,7 +1492,7 @@ const benefitsToShow = computed(() => {
     .map(benefit => ({
       ...benefit,
       mes_requerido: benefit.mes_requerido || 0,
-      tipo_beneficio: benefit.tipo_beneficio || 'Beneficio',
+      tipo_beneficio: benefit.tipo_beneficio || t('common.benefit'),
       descripcion: benefit.descripcion || '',
       savings: benefit.savings || ''
     }));
@@ -1534,11 +1537,11 @@ const progressCount = computed(() => {
 
 const progressMessage = computed(() => {
   const month = statsData.value.membershipMonths
-  if (month >= 6) return '¡Has desbloqueado todos los beneficios!'
-  if (month >= 3) return 'Ya Puedes Adquirir el Paquete de Limpieza de Aire Acondicionado'
-  if (month >= 2) return 'Ya puedes usar lo abonado en Membresía para pagar Servicios'
-  if (month >= 1) return 'Ya tienes descuentos disponibles'
-  return 'Empieza a acumular beneficios con tu membresía'
+  if (month >= 6) return t('dashboard_client.unlocked_all')
+  if (month >= 3) return t('dashboard_client.unlocked_ac')
+  if (month >= 2) return t('dashboard_client.unlocked_credit')
+  if (month >= 1) return t('dashboard_client.unlocked_discounts')
+  return t('dashboard_client.start_accumulating')
 })
 
 const recentServicesDisplay = computed(() => {
@@ -1906,7 +1909,7 @@ const fetchServices = async () => {
     }
   } catch (error) {
     console.error('Error al cargar servicios:', error)
-    showToast('No se pudieron cargar los servicios. Intente nuevamente.', 'error')
+    showToast(t('common.error'), t('dashboard_client.messages.services_load_error'), 'error')
   } finally {
     isLoadingServices.value = false
   }
@@ -1968,17 +1971,27 @@ const fetchBeneficios = async () => {
     }
   } catch (error) {
     console.error('Error al cargar beneficios:', error);
-    benefitsError.value = 'No se pudieron cargar los beneficios. Intente más tarde.';
+    benefitsError.value = t('dashboard_client.messages.benefits_load_error');
     beneficios.value = []; // Asegurar que sea un array vacío en caso de error
   } finally {
     loadingBenefits.value = false;
   }
 }
 
+const formatCurrency = (value) => {
+  const { locale } = useI18n()
+  return new Intl.NumberFormat(locale.value === 'es' ? 'es-HN' : 'en-US', {
+    style: 'currency',
+    currency: 'HNL',
+    minimumFractionDigits: 2
+  }).format(value || 0).replace('HNL', 'L.');
+};
+
 // Función para formatear números con separadores de miles
 const formatNumber = (value) => {
+  const { locale } = useI18n()
   if (value === undefined || value === null) return '0.00';
-  return new Intl.NumberFormat('es-HN', {
+  return new Intl.NumberFormat(locale.value === 'es' ? 'es-HN' : 'en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value);
@@ -2020,29 +2033,28 @@ const sendWhatsAppMessage = async (data, type) => {
     
     if (type === 'package_payment') {
       // Mensaje para comprobante de pago de paquete
-      message = `*Comprobante de Pago de Paquete*\n\n` +
+      message = `*${t('dashboard_client.receipt_whatsapp.title')}*\n\n` +
         `*ID:* ${formattedDate}-${data.id_paquete_usuario}\n` +
-        `*Paquete:* ${data.nombre_paquete}\n` + 
-        `*N° de comprobante:* ${data.receiptNumber}\n` +
-        `*Monto:* L. ${formatNumber(data.amount)}\n\n` +
-        `Adjunto una captura del comprobante de pago para su verificación.`;
+        `*${t('marketplace.package')}:* ${data.nombre_paquete}\n` + 
+        `*${t('dashboard_client.receipt_whatsapp.number')}:* ${data.receiptNumber}\n` +
+        `*${t('marketplace.total_to_transfer')}:* ${formatCurrency(data.amount)}\n\n` +
+        `${t('dashboard_client.receipt_whatsapp.footer')}`;
     } else if (type === 'use_package') {
       // Mensaje para solicitud de uso de paquete
-      // Mensaje general para solicitud de uso de paquete
       message =
-        `*Solicitud de Uso de Paquete*\n\n` +
-        `Hola, deseo solicitar el uso de un paquete adquirido a través de la plataforma MiSeguro.\n\n` +
+        `*${t('dashboard_client.use_package_whatsapp.title')}*\n\n` +
+        `${t('dashboard_client.use_package_whatsapp.desc')}\n\n` +
         `*ID:* ${formattedDate}-${data.id_paquete_usuario}\n` +
-        `*Paquete:* ${data.nombre_paquete}\n` +
-        `Quedo atento(a) a la coordinación correspondiente.`;
+        `*${t('marketplace.package')}:* ${data.nombre_paquete}\n` +
+        `${t('dashboard_client.use_package_whatsapp.footer')}`;
     } else if (type === 'taxi_vip') {
       // Mensaje para solicitud de taxi VIP
-      message = `*Solicitud de Taxi VIP*\n\n` +
-        `*Usuario:* ${data.nombre_usuario}\n` +
-        `*Recoger en:* ${data.colonia}\n` +
-        `*Destino:* ${data.direccion}\n` +
-        `*Detalles:* ${data.description}\n\n` +
-        `Solicitado a través de la plataforma MiSeguro.`;
+      message = `*${t('dashboard_client.taxi_whatsapp.title')}*\n\n` +
+        `*${t('profile.dashboard.welcome')}* ${data.nombre_usuario}\n` +
+        `*${t('dashboard_client.pickup')}:* ${data.colonia}\n` +
+        `*${t('dashboard_client.destination')}:* ${data.direccion}\n` +
+        `*${t('services.labels.details')}:* ${data.description}\n\n` +
+        `${t('dashboard_client.taxi_whatsapp.footer')}`;
     }
     
     if (!message) return;
@@ -2259,7 +2271,7 @@ const handleCopyAndSelect = async () => {
    
    if (copied) {
       showAccountDetailModal.value = false
-      showToast('¡Copiado!', 'Número de cuenta copiado', 'success')
+      showToast(t('dashboard_client.messages.copied'), t('dashboard_client.messages.copied_desc'), 'success')
    } else {
       showToast('Error', 'No se pudo copiar el número de cuenta', 'error')
    }
@@ -2303,7 +2315,7 @@ const cargarPaquetesActivos = async () => {
     }));
   } catch (error) {
     console.error('Error al cargar paquetes:', error);
-    showToast('Error', 'No se pudieron cargar los paquetes', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.packages_load_error'), 'error');
   } finally {
     cargandoPaquetes.value = false;
   }
@@ -2318,7 +2330,7 @@ onMounted(async () => {
 
 const canjearPaquete = async (paquete) => {
   if (!paquete || !paquete.id) {
-    showToast('Error', 'Paquete no válido', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.invalid_package'), 'error');
     return;
   }
 
@@ -2385,7 +2397,7 @@ const confirmarCanjeo = async () => {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: 'Paquete Adquirido',
+            titulo: t('dashboard_client.notifications.package_acquired'),
             nombre_rol: 'admin'
             }
         });
@@ -2394,7 +2406,7 @@ const confirmarCanjeo = async () => {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: 'Paquete Adquirido',
+            titulo: t('dashboard_client.notifications.package_acquired'),
             nombre_rol: 'sa'
           }
         });
@@ -2404,8 +2416,8 @@ const confirmarCanjeo = async () => {
       
       // Mostrar notificación de éxito al usuario
       showToast(
-        '¡Paquete canjeado!', 
-        response.message || 'El paquete se ha canjeado exitosamente',
+        t('dashboard_client.messages.package_redeemed'), 
+        response.message || t('dashboard_client.messages.package_redeemed_desc'),
         'success'
       );
       
@@ -2420,8 +2432,8 @@ const confirmarCanjeo = async () => {
       response: error.response?.data,
       status: error.response?.status
     });
-    const errorMessage = error.data?.error || error.response?.data?.error || error.message || 'Ocurrió un error al procesar tu solicitud';
-    showToast('Error', errorMessage, 'error');
+    const errorMessage = error.data?.error || error.response?.data?.error || error.message || t('common.error_unexpected');
+    showToast(t('common.error'), errorMessage, 'error');
   }
 };
 
@@ -2459,26 +2471,26 @@ const getAccountLabel = (account) => {
 const procesarPagoPaquete = async () => {
   // Validar que se haya seleccionado un paquete y que el número de comprobante no esté vacío
   if (!selectedPaquete.value) {
-    showToast('Error', 'No se ha seleccionado ningún paquete', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.no_package_selected'), 'error');
     return;
   }
 
   // Validar el número de comprobante
   const numComprobante = numeroComprobante.value ? numeroComprobante.value.trim() : '';
   if (!numComprobante) {
-    showToast('Error', 'Por favor ingresa el número de comprobante', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.enter_receipt'), 'error');
     return;
   }
 
   // Validar que el número de comprobante solo contenga números
   if (!/^\d+$/.test(numComprobante)) {
-    showToast('Error', 'El número de comprobante solo puede contener números', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.receipt_numeric'), 'error');
     return;
   }
 
   const user = useCookie('user').value;
   if (!user || !user.id_usuario) {
-    showToast('Error', 'No se pudo obtener la información del usuario', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.user_error'), 'error');
     return;
   }
 
@@ -2487,7 +2499,7 @@ const procesarPagoPaquete = async () => {
   
   // Si es pago por transferencia, validar que se haya seleccionado una cuenta
   if (!esPagoConSaldo && !selectedAccountObject.value) {
-    showToast('Error', 'Por favor selecciona una cuenta bancaria para la transferencia', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.select_account'), 'error');
     return;
   }
 
@@ -2523,10 +2535,10 @@ const procesarPagoPaquete = async () => {
 
       // Mostrar mensaje de éxito
       showToast(
-        '¡Éxito!', 
+        t('common.success'), 
         esPagoConSaldo 
-          ? 'Paquete canjeado exitosamente' 
-          : 'Solicitud de pago por transferencia registrada. Por favor espera la verificación.',
+          ? t('dashboard_client.messages.package_redeemed') 
+          : t('dashboard_client.messages.transfer_registered'),
         'success'
       );
 
@@ -2543,7 +2555,7 @@ const procesarPagoPaquete = async () => {
         // Enviar notificaciones a los administradores
         try {
           const token = useCookie('token').value;
-          const notificationData = { titulo: 'Pago de Paquete Recibido' };
+          const notificationData = { titulo: t('dashboard_client.notifications.payment_received') };
           
           await Promise.all([
             $api('/notificaciones/enviar', {
@@ -2569,8 +2581,8 @@ const procesarPagoPaquete = async () => {
     }
   } catch (error) {
     console.error('Error al procesar el pago:', error);
-    const errorMessage = error.response?.data?.error || 'Error al procesar el pago';
-    showToast('Error', errorMessage, 'error');
+    const errorMessage = error.response?.data?.error || t('dashboard_client.messages.payment_error');
+    showToast(t('common.error'), errorMessage, 'error');
   } finally {
     isProcessingPayment.value = false;
   }
@@ -2601,7 +2613,7 @@ const cargarPaquetesUsuario = async () => {
     }
   } catch (error) {
     console.error('Error al cargar paquetes del usuario:', error);
-    showToast('Error', 'No se pudieron cargar tus paquetes', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.packages_user_error'), 'error');
   }
 };
 
@@ -2619,17 +2631,17 @@ const getEstadoPaquete = (paqueteId) => {
   
   // Prioridad 1: Verificando pago
   if (paquetes.some(p => p.estado === 'verificando_pago')) {
-    return 'Verificando pago...';
+    return t('marketplace.verifying_short');
   }
   
   // Prioridad 2: Activo (Disponible para usar)
   if (paquetes.some(p => p.estado === 'activo')) {
-    return 'Adquirido';
+    return t('marketplace.acquired_short');
   }
   
   // Prioridad 3: Utilizando (En uso)
   if (paquetes.some(p => p.estado === 'utilizando')) {
-    return 'En uso';
+    return t('dashboard_client.in_use');
   }
   
   return '';
@@ -2639,7 +2651,7 @@ const getEstadoPaquete = (paqueteId) => {
 const handlePaqueteClick = (paquete) => {
   const estado = getEstadoPaquete(paquete.id);
   
-  if (estado === 'Adquirido') {
+  if (estado === t('marketplace.acquired_short')) {
     selectedPaquete.value = paquete;
     showConfirmarUsoModal.value = true;
   }
@@ -2660,7 +2672,7 @@ const usarPaquete = async (paquete) => {
     );
 
     if (!paqueteUsuario) {
-      showToast('Error', 'No tienes este paquete disponible para usar', 'error');
+      showToast(t('common.error'), t('dashboard_client.messages.package_not_available'), 'error');
       isProcessingPayment.value = false;
       showConfirmarUsoModal.value = false; // Cerrar el modal en caso de error
       return;
@@ -2672,8 +2684,8 @@ const usarPaquete = async (paquete) => {
 
     if (response.success) {
       showToast(
-        '¡Paquete activado!', 
-        `El paquete ${paquete.nombre} está ahora en uso.`,
+        t('dashboard_client.messages.package_activated'), 
+        t('dashboard_client.messages.package_activated_desc', { name: paquete.nombre }),
         'success'
       );
       
@@ -2689,7 +2701,7 @@ const usarPaquete = async (paquete) => {
       // Notificar a los administradores y super administradores
       try {
         const user = useCookie('user').value;
-        const notificationData = { titulo: 'Solicitud Uso de Paquete' };
+        const notificationData = { titulo: t('dashboard_client.notifications.usage_request') };
         
         await Promise.all([
           $api('/notificaciones/enviar', {
@@ -2709,13 +2721,13 @@ const usarPaquete = async (paquete) => {
       // Cerrar el modal después de completar las operaciones
       showConfirmarUsoModal.value = false;
     } else {
-      showToast('Error', response.message || 'No se pudo activar el paquete', 'error');
+      showToast(t('common.error'), response.message || t('dashboard_client.messages.activation_error'), 'error');
       showConfirmarUsoModal.value = false; // Cerrar el modal en caso de error
     }
   } catch (error) {
     console.error('Error al usar el paquete:', error);
-    const errorMessage = error.response?.data?.message || error.message || 'Error al activar el paquete';
-    showToast('Error', errorMessage, 'error');
+    const errorMessage = error.response?.data?.message || error.message || t('dashboard_client.messages.activation_error');
+    showToast(t('common.error'), errorMessage, 'error');
   } finally {
     isProcessingPayment.value = false;
     showConfirmarUsoModal.value = false; // Asegurarse de que el modal se cierre en cualquier caso
@@ -2733,7 +2745,7 @@ const resetCredito = async () => {
     const userData = userCookie.value
     
     if (!userData || !userData.id_usuario) {
-      showToast('Error', 'No se pudo identificar al usuario', 'error')
+      showToast(t('common.error'), t('dashboard_client.messages.user_error'), 'error')
       return
     }
 
@@ -2745,7 +2757,7 @@ const resetCredito = async () => {
       await fetchUserCredit()  
       return response.data
     } else {
-      throw new Error(response?.message || 'Error al reiniciar el crédito')
+      throw new Error(response?.message || t('dashboard_client.messages.credit_reset_error'))
     }
   } catch (error) { 
     throw error
@@ -2761,23 +2773,23 @@ const handleRequestService = async () => {
     
     if (!serviceFormData.value.type || !serviceFormData.value.description || 
         !serviceFormData.value.colonia || !serviceFormData.value.direccion) {
-      throw new Error('Por favor completa todos los campos requeridos')
+      throw new Error(t('profile.services.messages.complete_all_fields'))
     }
 
     const userCookie = useCookie('user')
     const userData = userCookie.value
     
     if (!userData) {
-      throw new Error('No se pudo obtener la información del usuario. Por favor inicia sesión nuevamente.')
+      throw new Error(t('dashboard_client.messages.session_expired'))
     }
     
     if (!userData.id_ciudad) {
-      throw new Error('No se pudo determinar la ciudad del usuario. Por favor contacte al soporte.')
+      throw new Error(t('dashboard_client.messages.city_error'))
     }
 
     const selectedService = servicesList.value.find(s => s.name === serviceFormData.value.type)
     if (!selectedService) {
-      throw new Error('No se pudo encontrar el servicio seleccionado')
+      throw new Error(t('dashboard_client.messages.service_not_found'))
     }
 
     const isTaxiVIP = selectedService.name === 'Taxi VIP'
@@ -2827,8 +2839,8 @@ const handleRequestService = async () => {
     // Enviar notificación según el tipo de membresía
     try {
       const notificationData = noRequierePagoVisita
-        ? { titulo: 'Asignación Pendiente', nombre_rol: 'admin' }
-        : { titulo: 'Pago de visita pendiente', id_usuario: Number(userData.id_usuario) }
+        ? { titulo: t('dashboard_client.notifications.pending_assignment'), nombre_rol: 'admin' }
+        : { titulo: t('dashboard_client.notifications.pending_visit_payment'), id_usuario: Number(userData.id_usuario) }
 
       await $api('/notificaciones/enviar', {
         method: 'POST',
@@ -2839,7 +2851,7 @@ const handleRequestService = async () => {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: 'Asignación Pendiente',
+            titulo: t('dashboard_client.notifications.pending_assignment'),
             nombre_rol: 'sa'
           }
         });
@@ -2849,11 +2861,12 @@ const handleRequestService = async () => {
       // No mostramos error al usuario para no afectar su experiencia
     }
 
+    const { locale } = useI18n()
     const newService = {
       id: response.id_solicitud_servicio || Date.now(),
       title: serviceFormData.value.type,
       description: serviceFormData.value.description,
-      date: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
+      date: new Date().toLocaleDateString(locale.value === 'es' ? 'es-HN' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
       status: 'Pendiente',
       cost: 0,
       icon: selectedService.icon
@@ -2880,11 +2893,12 @@ const handleRequestService = async () => {
       selectedBarberia: null
     }
     
+    const serviceTypeKey = isTaxiVIP ? 'driver' : (isBarberia ? 'barber' : 'technician');
     showToast(
-      '¡Solicitud enviada!', 
+      t('dashboard_client.messages.request_sent'), 
       noRequierePagoVisita 
-        ? `Pronto se le asignará un ${selectedService.name === 'Taxi VIP' ? 'conductor' : (isBarberia ? 'barbero' : 'técnico')}.` 
-        : 'Ya puedes pagar la visita.',
+        ? t('dashboard_client.messages.assignment_soon', { type: t(`common.${serviceTypeKey}`) }) 
+        : t('dashboard_client.messages.ready_to_pay'),
       'success'
     )
     
@@ -2895,7 +2909,7 @@ const handleRequestService = async () => {
     
   } catch (error) {
     console.error('Error al enviar la solicitud de servicio:', error)
-    showToast('Error', 'No se pudo enviar la solicitud. Por favor, inténtalo mas tarde.', 'error')
+    showToast(t('common.error'), t('dashboard_client.messages.request_error'), 'error')
   } finally {
     isSubmittingService.value = false;
   }
@@ -2949,7 +2963,7 @@ const updateMembershipToExpired = async (membresiaId) => {
     });
     
     // Mostrar mensaje de error al usuario
-    showToast('Error', 'No se pudo actualizar el estado de la membresía', 'error');
+    showToast(t('common.error'), t('dashboard_client.messages.membership_update_error'), 'error');
     
     return { success: false, error };
   }
@@ -3035,7 +3049,7 @@ watch(() => selectedServiceObject.value, (newService) => {
   if (newService) {
     // Protección adicional: Si por alguna razón se intenta seleccionar Taxi VIP sin estar verificado
     if (newService.name === 'Taxi VIP' && !isUserVerified.value) {
-      showToast('Verificación Necesaria', 'Este servicio es exclusivo para usuarios con perfil verificado.', 'warning');
+      showToast(t('dashboard_client.verification_required'), t('dashboard_client.messages.verified_only'), 'warning');
       selectedServiceObject.value = null;
       return;
     }

@@ -22,8 +22,10 @@
         :loading="isLoading"
         class="fixed inset-0 z-50"
       />  
+      <NuxtPwaManifest />
       <NuxtLayout>
         <NuxtPage/>
+        <LanguageSelectorModal />
       </NuxtLayout>
       <Analytics />
     </div>

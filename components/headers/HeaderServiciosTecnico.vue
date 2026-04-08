@@ -24,9 +24,9 @@
               </div>
             </div>
             <div>
-              <h1 class="text-lg font-black text-white">Servicios Asignados</h1>
+              <h1 class="text-lg font-black text-white">{{ $t('technician.services.title') }}</h1>
               <div class="flex items-center space-x-2">
-                <p class="text-emerald-100 text-xs">{{ totalServices }} servicios</p>
+                <p class="text-emerald-100 text-xs">{{ $t('technician.services.service_count', { n: totalServices }) }}</p>
                 <span class="w-1 h-1 bg-emerald-200 rounded-full"></span>
                 <div class="flex items-center space-x-1"> 
                   <span class="text-emerald-100 text-xs">{{ (auth.user?.nombre || 'Técnico').split(' ').slice(0, 2).join(' ') }}</span>
@@ -56,7 +56,7 @@
     <!-- Filter Section -->
     <div v-if="showFilters" class="bg-white dark:bg-gray-800 shadow-lg">
       <div class="max-w-2xl mx-auto px-4 py-4">
-        <h3 class="font-black text-gray-900 dark:text-white mb-3 text-sm">Filtrar por:</h3>
+        <h3 class="font-black text-gray-900 dark:text-white mb-3 text-sm">{{ $t('technician.services.filter_by') }}</h3>
         
         <!-- Service Status Filter -->
         <div class="grid grid-cols-2 gap-2 mb-3">
@@ -70,13 +70,13 @@
               : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
           >
             <span class="text-sm">{{ filter.icon }}</span>
-            <span>{{ filter.label }}</span>
+            <span>{{ $t(`technician.services.filters.${filter.key}`) }}</span>
           </button>
         </div> 
         
         <!-- Service Type Filter -->
         <div class="mb-3">
-          <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">Tipo de servicio:</h4>
+          <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">{{ $t('technician.services.service_type') }}</h4>
           <div v-if="isLoadingServiceTypes" class="flex flex-wrap gap-1">
             <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-20"></div>
             <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-16"></div>
@@ -102,7 +102,7 @@
 
         <!-- Date Range Filter -->
         <div>
-          <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">Período:</h4>
+          <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">{{ $t('technician.services.period') }}</h4>
           <div class="grid grid-cols-3 gap-1">
             <button 
               v-for="period in datePeriods" 
@@ -113,7 +113,7 @@
                 ? 'bg-cyan-500 text-white' 
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
             >
-              {{ period.label }}
+              {{ $t(`technician.services.periods.${period.key}`) }}
             </button>
           </div>
         </div>
@@ -124,6 +124,7 @@
 
 <script setup>
 import { defineProps, defineEmits, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '~/middleware/auth.store';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 import { useRuntimeConfig } from '#imports';
@@ -225,7 +226,7 @@ const onNotificationClick = async (notification) => {
       error
     });
 
-    showToast('Error al marcar notificación', 'error', 3000);
+    showToast(t('errors.marking_notification'), 'error', 3000);
     
     // Desactivar loading en caso de error
     isLoading.value = false;

@@ -9,7 +9,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
       </svg>
-      <span>Notificaciones</span>
+      <span>{{ $t('nav.notifications') }}</span>
       <span 
         v-if="unreadCount > 0" 
         class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white"
@@ -55,15 +55,15 @@
         <div class="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
           <div class="flex items-start justify-between">
             <div class="space-y-1">
-              <h3 class="text-sm font-semibold text-white tracking-wide">Notificaciones Recientes</h3>
+              <h3 class="text-sm font-semibold text-white tracking-wide">{{ $t('notifications.recent_title') }}</h3>
               <p class="text-xs text-white/90 font-medium">
-                {{ unreadCount }} {{ unreadCount === 1 ? 'notificación' : 'notificaciones' }} sin leer
+                {{ unreadCount }} {{ unreadCount === 1 ? $t('notifications.singular') : $t('notifications.plural') }} {{ $t('notifications.unread') }}
               </p>
             </div>
             <button 
               @click="closeDropdown"
               class="p-1 -mt-1 -mr-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-              aria-label="Cerrar notificaciones"
+              :aria-label="$t('common.close')"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -98,7 +98,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
-              <p class="text-sm">No hay notificaciones nuevas</p>
+              <p class="text-sm">{{ $t('notifications.empty') }}</p>
             </div>
           </div>
           
@@ -148,7 +148,7 @@
                       'text-gray-500': notif.leido
                     }"
                   >
-                    {{ notif.titulo }}
+                    {{ translateNotificationTitle(notif.titulo) }}
                   </p>
                   <p 
                     class="mt-1 text-xs" 
@@ -184,7 +184,7 @@
                     <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Marcar todo como leído</span>
+                    <span>{{ $t('notifications.mark_all_read') }}</span>
                   </button>
                 </div>
                 <div class="flex items-center space-x-1">
@@ -266,8 +266,8 @@
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-lg font-black text-gray-900 dark:text-white">Perfil Incompleto</h3>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Completa tu perfil para continuar</p>
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('notifications.profile_warning.title') }}</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ $t('notifications.profile_warning.subtitle') }}</p>
                   </div>
                 </div>
                 <button @click="closeProfileWarning" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -292,20 +292,20 @@
               <!-- Mensaje principal -->
               <div class="text-center mb-6">
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Para ofrecer tus servicios, necesitas completar tu perfil con la siguiente información:
+                  {{ $t('notifications.profile_warning.message') }}
                 </p>
                 <ul class="text-left space-y-2 mb-4">
                   <li v-if="!hasProfileImage" class="flex items-center text-sm text-gray-700 dark:text-gray-300">
                     <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Foto de perfil
+                    {{ $t('profile.photo') }}
                   </li>
                   <li v-if="!hasServices" class="flex items-center text-sm text-gray-700 dark:text-gray-300">
                     <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Servicios ofrecidos
+                    {{ $t('notifications.profile_warning.services') }}
                   </li>
                 </ul>
               </div>
@@ -316,7 +316,7 @@
                   @click="navigateToProfile"
                   class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 transform hover:scale-[1.02]"
                 >
-                  Completar perfil
+                  {{ $t('notifications.profile_warning.cta') }}
                 </button>
               </div>
             </div>
@@ -371,8 +371,8 @@
                     💳
                   </div>
                   <div>
-                    <h3 class="text-lg font-black text-gray-900 dark:text-white">Aviso Importante</h3>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Pagos Pendientes</p>
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('notifications.payment_warning.title') }}</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ $t('notifications.payment_warning.subtitle') }}</p>
                   </div>
                 </div>
                 <button @click="closePaymentAdModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -397,7 +397,7 @@
               <!-- Mensaje principal -->
               <div class="text-center mb-6">
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Hola {{ auth.user.nombre }}, tienes un pago pendiente. Recuerda que los pagos deben realizarse únicamente a las cuentas proporcionadas por MiSeguro.
+                  {{ $t('notifications.payment_warning.message', { name: auth.user.nombre }) }}
                 </p>
               </div>
 
@@ -409,7 +409,7 @@
                   </svg>
                   <div>
                     <p class="text-xs text-red-700 dark:text-red-300">
-                      Cualquier pago realizado en efectivo a técnicos, terceros o a cuentas no autorizadas no será reconocido por la plataforma.
+                      {{ $t('notifications.payment_warning.warning') }}
                     </p>
                   </div>
                 </div>
@@ -423,9 +423,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useAuthStore } from '~/middleware/auth.store';
-import { useRuntimeConfig } from '#imports';
+import { useRuntimeConfig, useRoute, navigateTo, useNuxtApp } from '#imports';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
   // Permite personalizar el número de notificaciones por página
@@ -440,6 +441,80 @@ const emit = defineEmits(['notification-click']);
 const { $api } = useNuxtApp();
 const auth = useAuthStore();
 const config = useRuntimeConfig();
+const { t, locale } = useI18n();
+
+const NOTIFICATION_KEYS_MAP = {
+  // Servicios
+  'Servicio Asignado': 'service_assigned',
+  'Asignación Pendiente': 'pending_assignment',
+  'Tecnico Asignado': 'tech_assigned',
+  'Cotización Recibida': 'quotation_received',
+  'Cotización Aceptada': 'quotation_accepted',
+  'Cotización Rechazada': 'quotation_rejected',
+  'Cotización Enviada': 'quotation_sent',
+  'Cotización Editada': 'quotation_edited',
+  'Servicio Finalizado': 'finished',
+  'Servicio Cancelado': 'service_cancelled',
+  'Tarifa Rechazada': 'fare_rejected',
+  
+  // Financieros / Pagos
+  'Pago de visita recibido': 'visit_payment_received',
+  'Pago de visita pendiente': 'pending_visit_payment',
+  'Pago de Visita Aprobado': 'visit_payment_approved',
+  'Pago de Visita Rechazado': 'visit_payment_rejected',
+  'Pago de servicio recibido': 'service_payment_received',
+  'Pago de Servicio Pendiente': 'pending_service_payment',
+  'Pago de Servicio Aprobado': 'service_payment_approved',
+  'Pago de Servicio Rechazado': 'service_payment_rejected',
+  'Nueva Petición de Retiro': 'withdrawal_requested',
+  'Retiro Aprobado': 'withdrawal_approved',
+  'Retiro Rechazado': 'withdrawal_rejected',
+  'CashBack Recibido': 'cashback_received',
+  
+  // Membresía / Referidos
+  'Pago por membresía recibido': 'membership_payment_received',
+  'Pago de Membresía Aprobado': 'membership_payment_approved',
+  'Pago de Membresía Rechazado': 'membership_payment_rejected',
+  'Membresía vencida': 'membership_expired',
+  'Comisión por referido recibida': 'referral_commission_received',
+  'Comisión por Referido Recibida': 'referral_commission_received',
+  'Nuevo referido': 'new_referral',
+  
+  // Usuario / Verificación
+  'Calificacion Recibida': 'rating_received',
+  'Nuevo registro': 'new_registration',
+  'Identidad Verificada': 'identity_verified',
+  'Verificación Fallida': 'verification_failed',
+  'Solicitud de Verificación': 'verification_requested',
+  
+  // Tickets
+  'Nuevo Ticket': 'new_ticket',
+  'Respuesta de Ticket recibida': 'ticket_response_received',
+  
+  // Paquetes
+  'Paquete Adquirido': 'package_acquired',
+  'Solicitud Uso de Paquete': 'usage_request',
+  'Paquete Consumido': 'package_consumed',
+  'Pago de Paquete Recibido': 'package_payment_received',
+  'Pago de Paquete Aceptado': 'package_payment_accepted',
+  'Pago de Paquete Rechazado': 'package_payment_rejected',
+
+  // Sistema
+  'Notificación de prueba': 'test_notification'
+};
+
+const translateNotificationTitle = (titulo) => {
+  if (!titulo) return '';
+  const key = NOTIFICATION_KEYS_MAP[titulo];
+  if (key) {
+    const translated = t(`dashboard_client.notifications.${key}`);
+    // Si la traducción no es la misma llave (indicando que existe), retornarla
+    if (translated !== `dashboard_client.notifications.${key}`) {
+      return translated;
+    }
+  }
+  return titulo;
+};
 
 // ===== ESTADO DEL MODAL DE ANUNCIO DE PAGO =====
 const showPaymentAdModal = ref(false);
@@ -590,7 +665,7 @@ const obtenerNotificaciones = async (page = 1, forceRefresh = false) => {
     }
   } catch (err) {
     console.error('Error al obtener notificaciones:', err);
-    error.value = 'No se pudieron cargar las notificaciones';
+    error.value = t('errors.marking_notification');
   } finally {
     loading.value = false;
   }
@@ -651,7 +726,7 @@ const prevPage = async () => {
 
 const formatFecha = (fechaString) => {
   const fecha = new Date(fechaString);
-  return fecha.toLocaleDateString('es-MX', {
+  return fecha.toLocaleDateString(locale.value === 'es' ? 'es-HN' : 'en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

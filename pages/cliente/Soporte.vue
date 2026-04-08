@@ -4,7 +4,7 @@
       <!-- Loading Spinner -->
     <LoadingSpinner 
       :loading="isLoading" 
-      :message="'Verificando autenticación...'"
+      :message="$t('common.loading')"
     />
 
     <!-- Contenido principal (oculto hasta completar autenticación) -->
@@ -19,22 +19,22 @@
         :type="toast.type"
         @close="toast.show = false"
       />
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-5">Soporte Técnico</h1>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-5">{{ $t('support_page.title') }}</h1>
       <!-- Contact Card -->
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg mb-4">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Contáctanos</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">¿Tienes alguna pregunta o necesitas ayuda? Estamos aquí para ayudarte.</p>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">{{ $t('support_page.contact_us') }}</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">{{ $t('support_page.contact_desc') }}</p>
         
         <form @submit.prevent="submitForm" class="space-y-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asunto</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('support_page.subject') }}</label>
             <multiselect
               v-model="form.subjectObject"
               :options="subjectOptions"
               :searchable="false"
               :close-on-select="true"
               :show-labels="false"
-              placeholder="Selecciona un asunto"
+              :placeholder="$t('support_page.subject_placeholder')"
               label="label"
               track-by="value"
               class="multiselect-custom"
@@ -43,6 +43,8 @@
               :deselect-label="''"
               :selected-label="''"
               :custom-label="getSubjectLabel"
+              :no-options-label="$t('common.no_options')"
+              :no-result-label="$t('common.no_results')"
               @search-change="$event && $event.stopPropagation()"
               @search-focus="(e) => e && e.target && e.target.blur()"
               @touchstart.native.stop
@@ -57,7 +59,7 @@
           
           <!-- Selector de servicio (solo visible cuando se selecciona 'Problema con un Servicio Completado' y hay servicios disponibles) -->
           <div v-if="form.subject === 'falla' && serviciosFinalizados.length > 0">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Servicio con problema</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('support_page.service_issue') }}</label>
             <div class="relative">
               <multiselect
                 v-model="form.servicioObject"
@@ -65,7 +67,7 @@
                 :searchable="false"
                 :close-on-select="true"
                 :show-labels="false"
-                placeholder="Selecciona un servicio"
+                :placeholder="$t('support_page.select_service')"
                 label="descripcion"
                 track-by="id_solicitud"
                 class="multiselect-custom"
@@ -74,6 +76,8 @@
                 :deselect-label="''"
                 :selected-label="''"
                 :custom-label="getServicioLabel"
+                :no-options-label="$t('support_page.no_finished_services')"
+                :no-result-label="$t('marketplace.no_results')"
                 @search-change="$event && $event.stopPropagation()"
                 @search-focus="(e) => e && e.target && e.target.blur()"
                 @touchstart.native.stop
@@ -92,25 +96,25 @@
                 class="absolute -inset-1 bg-blue-500/20 rounded-lg animate-pulse z-0"
               ></div>
             </div>
-            <p v-if="cargandoServicios" class="text-sm text-blue-600 dark:text-blue-400 mt-1">Cargando servicios finalizados...</p>
+            <p v-if="cargandoServicios" class="text-sm text-blue-600 dark:text-blue-400 mt-1">{{ $t('support_page.loading_services') }}</p>
             <p v-if="errorCargaServicios" class="text-sm text-red-600 dark:text-red-400 mt-1">{{ errorCargaServicios }}</p>
           </div>
           
           <!-- Mensaje cuando no hay servicios finalizados -->
           <div v-if="form.subject === 'falla' && !cargandoServicios && serviciosFinalizados.length === 0 && !errorCargaServicios">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Servicio con problema</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('support_page.service_issue') }}</label>
             <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
-              <p class="text-sm text-gray-500 dark:text-gray-400">No tienes servicios finalizados</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('support_page.no_finished_services') }}</p>
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mensaje</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('support_page.message') }}</label>
             <textarea 
               v-model="form.message" 
               rows="4" 
               class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white text-base"
-              placeholder="Describe tu consulta o problema..."
+              :placeholder="$t('support_page.message_placeholder')"
               required
             ></textarea>
           </div>
@@ -120,15 +124,15 @@
             class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-base"
             :disabled="isSubmitting"
           >
-            <span v-if="!isSubmitting">Enviar Mensaje</span>
-            <span v-else>Enviando...</span>
+            <span v-if="!isSubmitting">{{ $t('support_page.send') }}</span>
+            <span v-else>{{ $t('common.sending') }}</span>
           </button>
         </form>
       </div>
 
       <!-- FAQ Section -->
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg mb-4">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Preguntas Frecuentes</h2>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">{{ $t('support_page.faq_title') }}</h2>
         
         <div class="space-y-3">
           <div v-for="(faq, index) in faqs" :key="index" class="border-b border-gray-200 dark:border-gray-700 pb-3">
@@ -158,7 +162,7 @@
 
       <!-- Contact Information -->
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Información de Contacto</h2>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-3">{{ $t('support_page.contact_info') }}</h2>
         
         <div class="space-y-3">
           <div class="flex items-start">
@@ -168,9 +172,9 @@
               </svg>
             </div>
             <div>
-              <h3 class="font-medium text-gray-900 dark:text-white text-sm">Correo Electrónico</h3>
+              <h3 class="font-medium text-gray-900 dark:text-white text-sm">{{ $t('support_page.email') }}</h3>
               <p class="text-gray-600 dark:text-gray-300 text-sm">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@prohogar.hn' }}</p>
-              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Respuesta en 24-48 horas</p>
+              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ $t('support_page.email_desc') }}</p>
             </div>
           </div>
           
@@ -181,9 +185,9 @@
               </svg>
             </div>
             <div>
-              <h3 class="font-medium text-gray-900 dark:text-white text-sm">Teléfono</h3>
+              <h3 class="font-medium text-gray-900 dark:text-white text-sm">{{ $t('support_page.phone') }}</h3>
               <p class="text-gray-600 dark:text-gray-300 text-sm">{{ contactInfo.find(c => c.type === 'phone')?.value || '+504 2234-5678' }}</p>
-              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Lunes a Domingo, 7:00 AM - 5:00 PM</p>
+              <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ $t('support_page.phone_desc') }}</p>
             </div>
           </div>
            
@@ -366,6 +370,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useHead, useCookie } from '#imports'
+import { useI18n } from 'vue-i18n'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
 import Multiselect from 'vue-multiselect'
@@ -374,15 +379,16 @@ import Multiselect from 'vue-multiselect'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
+const { t, locale } = useI18n()
 
 const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
-  title: 'MiSeguro - Soporte Técnico',
+  title: t('support_page.title'),
   meta: [
-    { name: 'description', content: 'Centro de soporte técnico de MiSeguro - Contáctanos para resolver tus dudas' },
-    { name: 'keywords', content: 'soporte técnico, MiSeguro, servicios, soporte, soporte técnico' },
+    { name: 'description', content: t('support_page.contact_desc') },
+    { name: 'keywords', content: t('support_page.seo_keywords') },
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
@@ -392,48 +398,49 @@ useHead({
 // =========================
 
 // Opciones de asunto
-const subjectOptions = [
-  { value: 'falla', label: 'Problema con un Servicio Completado' },
-  { value: 'duda', label: 'Duda con Servicios Ofrecidos' },
-  { value: 'queja', label: 'Queja sobre Técnico' },
-  { value: 'pago', label: 'Duda sobre Pagos' },
-  { value: 'otro', label: 'Otro' }
-]
+const subjectOptions = computed(() => [
+  { value: 'falla', label: t('support_page.subjects.falla') },
+  { value: 'duda', label: t('support_page.subjects.duda') },
+  { value: 'queja', label: t('support_page.subjects.queja') },
+  { value: 'pago', label: t('support_page.subjects.pago') },
+  { value: 'otro', label: t('support_page.subjects.otro') }
+])
 
 // FAQs
-const faqs = [
+const faqs = computed(() => [
   {
-    question: '¿Puedo solicitar un servicio sin membresia?',
-    answer: 'Sí, puedes solicitar un servicio sin membresia, solo tendrás que pagar la visita inicial. Y a la hora de pagar el servicio no se aplica ningún descuento.'
+    question: t('support_page.faqs[0].q'),
+    answer: t('support_page.faqs[0].a')
   },
   {
-    question: '¿Cómo puedo solicitar un servicio?',
-    answer: 'Para solicitar un servicio ve al Dashboard y selecciona el tipo de servicio que necesitas. Si no tienes membresia, tendrás que pagar la visita inicial. Luego el técnico hará el diagnóstico y la cotización, si la rechazas se asigará a otro técnico, si la aceptas se procede con el servicio.'
+    question: t('support_page.faqs[1].q'),
+    answer: t('support_page.faqs[1].a')
   },
   {
-    question: '¿Cuáles son los métodos de pago aceptados?',
-    answer: 'Por los momento solo transferencias bancarias y CRIPTO'
+    question: t('support_page.faqs[2].q'),
+    answer: t('support_page.faqs[2].a')
   },
   {
-    question: '¿Cuál es el tiempo de respuesta para soporte?',
-    answer: 'Nuestro equipo de soporte atiende consultas en un plazo máximo de 48 horas hábiles.'
+    question: t('support_page.faqs[3].q'),
+    answer: t('support_page.faqs[3].a')
   },
   {
-    question: '¿Ofrecen garantía por los servicios?',
-    answer: 'Sí, todos nuestros servicios incluyen una garantía de 30 días. Si el problema persiste después de nuestra intervención, volveremos sin costo adicional.'
+    question: t('support_page.faqs[4].q'),
+    answer: t('support_page.faqs[4].a')
   },
   {
-    question: '¿Cómo puedo cancelar o reprogramar un servicio?',
-    answer: 'Puedes cancelar un servicio siempre y cuando no hayas aceptado la cotización. Para reprogramar un servicio, debes cancelar el servicio y solicitarlo cuando lo necesites.'
+    question: t('support_page.faqs[5].q'),
+    answer: t('support_page.faqs[5].a')
   }
-]
+])
  
 const contactInfo = ref([
   {
     type: 'email',
-    title: 'Correo Electrónico',
-    value: 'cargando...',
-    description: 'Respuesta en 24-48 horas',
+    title: t('support_page.email'),
+    value: t('common.loading'),
+    description: t('support_page.email_desc'),
+    placeholder: 'soporte@prohogar.hn',
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
     iconColor: 'text-blue-600 dark:text-blue-400',
     iconPath: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 z',
@@ -441,9 +448,10 @@ const contactInfo = ref([
   },
   {
     type: 'phone',
-    title: 'Teléfono',
-    value: 'cargando...',
-    description: 'Lunes a Domingo, 7:00 AM - 5:00 PM',
+    title: t('support_page.phone'),
+    value: t('common.loading'),
+    description: t('support_page.phone_desc'),
+    placeholder: '+504 2234-5678',
     iconBg: 'bg-green-100 dark:bg-green-900/30',
     iconColor: 'text-green-600 dark:text-green-400',
     iconPath: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
@@ -520,8 +528,9 @@ const limitarTexto = (texto, maxPalabras = 7) => {
 }
 
 const formatDate = (dateString) => {
+  if (!dateString) return t('common.no_date')
   const options = { year: 'numeric', month: '2-digit', day: '2-digit' }
-  return new Date(dateString).toLocaleDateString('es-HN', options)
+  return new Date(dateString).toLocaleDateString(locale.value === 'es' ? 'es-HN' : 'en-US', options)
 }
 
 const toggleFaq = (index) => {
@@ -550,9 +559,9 @@ const fetchContactInfo = async () => {
         console.error(`Error al obtener ${contact.type}:`, error)
         // Mostrar un mensaje de error específico para cada campo
         if (contact.type === 'email') {
-          updateContactInfo('email', 'soporte@prohogar.hn')
+          updateContactInfo('email', contact.placeholder)
         } else if (contact.type === 'phone') {
-          updateContactInfo('phone', '+504 2234-5678')
+          updateContactInfo('phone', contact.placeholder)
         }
       }
     })
@@ -561,11 +570,12 @@ const fetchContactInfo = async () => {
     
   } catch (error) {
     console.error('Error general al obtener información de contacto:', error)
-    showError('No se pudieron cargar los datos de contacto. Se están utilizando valores por defecto.')
+    showError(t('support_page.messages.contact_load_error'))
     
     // Establecer valores por defecto en caso de error general
-    updateContactInfo('email', 'soporte@prohogar.hn')
-    updateContactInfo('phone', '+504 2234-5678')
+    contactInfo.value.forEach(contact => {
+       updateContactInfo(contact.type, contact.placeholder)
+    })
   }
 } 
 
@@ -599,8 +609,8 @@ const cargarServiciosFinalizados = async () => {
      
   } catch (error) {
     console.error('Error al cargar servicios:', error)
-    servicesError.value = 'No se pudieron cargar los servicios. Por favor, intente más tarde.'
-    showError('Error al cargar los servicios')
+    servicesError.value = t('dashboard_client.messages.services_load_error')
+    showError(t('dashboard_client.messages.services_load_error'))
   } finally {
     isLoadingServices.value = false
   }
@@ -616,7 +626,7 @@ const submitForm = async () => {
   try {
     const userCookie = useCookie('user').value
     if (!userCookie?.id_usuario) {
-      throw new Error('No se pudo obtener la información del usuario')
+      throw new Error(t('dashboard_client.messages.user_error'))
     }
 
     const dataToSend = {
@@ -637,14 +647,14 @@ const submitForm = async () => {
       await $api('/notificaciones/enviar', {
         method: 'POST',
         body: {
-          titulo: 'Nuevo Ticket',
+          titulo: t('dashboard_client.notifications.usage_request'),
           nombre_rol: 'admin'
         }
       });
       await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: 'Nuevo Ticket',
+            titulo: t('dashboard_client.notifications.usage_request'),
             nombre_rol: 'sa'
           }
         });
@@ -654,8 +664,8 @@ const submitForm = async () => {
     }
     
     showSuccess(
-      '¡Ticket enviado!',
-      'Pronto te contactaremos por WhatsApp.'
+      t('support_page.success_title'),
+      t('support_page.success_desc')
     )
     
     // Resetear formulario
@@ -666,7 +676,7 @@ const submitForm = async () => {
     }
     
   } catch (error) {
-    const errorMessage = error.response?._data?.message || 'Ocurrió un error al enviar tu solicitud. Por favor, inténtalo de nuevo.'
+    const errorMessage = error.response?._data?.message || t('common.error_unexpected')
     showError(errorMessage)
   } finally {
     isSubmitting.value = false
@@ -704,7 +714,7 @@ const showError = (message) => {
   console.error('Error:', message)
   
   showToast({
-    message: typeof message === 'string' ? message : 'Ocurrió un error inesperado',
+    message: typeof message === 'string' ? message : t('common.error_unexpected'),
     type: 'error',
     duration: 8000
   })
