@@ -398,6 +398,11 @@ import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
+
+// ===== CONFIGURACIÓN Y AUTENTICACIÓN =====
+const { $api } = useNuxtApp();
+const { locale, t } = useI18n()
+
 // SEO and Meta
 useHead({
   title: t('technician.dashboard.seo.title'),
@@ -407,10 +412,6 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
   ]
 })
-
-// ===== CONFIGURACIÓN Y AUTENTICACIÓN =====
-const { $api } = useNuxtApp();
-const { locale, t } = useI18n()
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const router = useRouter()

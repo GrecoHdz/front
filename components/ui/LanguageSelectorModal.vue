@@ -1,10 +1,14 @@
 <script setup>
-const { locale, setLocale } = useI18n()
+const { locale, setLocale, t } = useI18n()
 const showModal = ref(false)
 
 onMounted(() => {
-  // Check if user has already selected a language (via cookie)
-  const cookie = useCookie('i18n_redirected')
+  // Check if user has already selected a language via this modal
+  const cookie = useCookie('miseguro_language_selected', {
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+    path: '/'
+  })
+  
   if (!cookie.value) {
     showModal.value = true
   }
@@ -12,7 +16,10 @@ onMounted(() => {
 
 const selectLanguage = (code) => {
   setLocale(code)
-  const cookie = useCookie('i18n_redirected')
+  const cookie = useCookie('miseguro_language_selected', {
+    maxAge: 60 * 60 * 24 * 365,
+    path: '/'
+  })
   cookie.value = code
   showModal.value = false
 }
@@ -32,10 +39,10 @@ const selectLanguage = (code) => {
           </div>
           
           <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2 leading-tight">
-            Selecciona tu idioma
+            {{ $t('profile.language') }}
           </h3>
           <p class="text-gray-500 dark:text-gray-400 text-sm mb-8 font-medium">
-            Select your preferred language to continue.
+            {{ $t('profile.select_language') }}
           </p>
           
           <div class="space-y-3">
@@ -73,7 +80,7 @@ const selectLanguage = (code) => {
           </div>
           
           <p class="mt-8 text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
-            ProHogar • International
+            miseguro • International
           </p>
         </div>
       </div>

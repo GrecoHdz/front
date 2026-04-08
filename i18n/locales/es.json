@@ -143,10 +143,10 @@
     "password_mismatch": "Las contraseñas no coinciden",
     "push_notifications": "Notificaciones Push",
     "real_time_alerts": "Alertas en tiempo real",
-    "notifications_desc": "Activa las notificaciones para recibir actualizaciones sobre tus pedidos y mensajes incluso si no tienes la aplicación abierta.",
-    "permissions_denied": "⚠️ Permisos bloqueados en el navegador. Por favor, habilítalos en los ajustes del sitio.",
+    "notifications_description": "Activa las notificaciones para recibir actualizaciones sobre tus pedidos y mensajes incluso si no tienes la aplicación abierta.",
+    "notifications_blocked": "⚠️ Permisos bloqueados en el navegador. Por favor, habilítalos en los ajustes del sitio.",
     "language": "Idioma",
-    "language_select": "Selecciona tu idioma preferido",
+    "select_language": "Selecciona tu idioma preferido",
     "legal": "Legal y Acerca de",
     "terms": "Términos y Condiciones",
     "privacy": "Política de Privacidad",
@@ -289,7 +289,8 @@
     "profile": "Perfil",
     "support": "Soporte",
     "marketplace": "Marketplace",
-    "metrics": "Métricas"
+    "metrics": "Métricas",
+    "notifications": "Notificaciones"
   },
   "services": {
     "status": {
@@ -547,7 +548,7 @@
     "actions": {
       "use_now": "Usar Ahora",
       "redeem_now": "Canjear Ahora",
-      "adquire": "Adquirir L. {price}",
+      "acquire": "Adquirir L. {price}",
       "confirm": "Confirmar",
       "cancel": "Cancelar",
       "redeeming": "Canjeando...",

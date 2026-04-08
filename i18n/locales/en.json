@@ -130,10 +130,10 @@
     "password_mismatch": "Passwords do not match",
     "push_notifications": "Push Notifications",
     "real_time_alerts": "Real-time alerts",
-    "notifications_desc": "Activate notifications to receive updates about your orders and messages even if the app is closed.",
-    "permissions_denied": "⚠️ Browser permissions blocked. Please enable them in site settings.",
+    "notifications_description": "Activate notifications to receive updates about your orders and messages even if the app is closed.",
+    "notifications_blocked": "⚠️ Browser permissions blocked. Please enable them in site settings.",
     "language": "Language",
-    "language_select": "Select your preferred language",
+    "select_language": "Select your preferred language",
     "legal": "Legal & About",
     "terms": "Terms and Conditions",
     "privacy": "Privacy Policy",
@@ -276,7 +276,8 @@
     "profile": "Profile",
     "support": "Support",
     "marketplace": "Marketplace",
-    "metrics": "Metrics"
+    "metrics": "Metrics",
+    "notifications": "Notifications"
   },
   "services": {
     "status": {
@@ -534,7 +535,7 @@
     "actions": {
       "use_now": "Use Now",
       "redeem_now": "Redeem Now",
-      "adquire": "Acquire L. {price}",
+      "acquire": "Acquire L. {price}",
       "confirm": "Confirm",
       "cancel": "Cancel",
       "redeeming": "Redeeming...",
