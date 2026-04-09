@@ -39,9 +39,9 @@
         </div>
         
         <div class="w-full space-y-4 pt-2 relative z-10">
-          <!-- Botón para Android/Chrome -->
+          <!-- Botón para Android/Chrome (Si el navegador lo permite) -->
           <button 
-            v-if="!isIOS"
+            v-if="!isIOS && canInstall"
             @click="handleInstall"
             class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-5 rounded-3xl text-lg font-extrabold hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/20 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-3 group"
           >
@@ -51,15 +51,29 @@
             </svg>
           </button>
 
-          <!-- Instrucciones para iOS (Safari no soporta beforeinstallprompt) -->
-          <div v-else class="space-y-4">
+          <!-- Instrucciones manuales para Android si no hay prompt automático -->
+          <div v-else-if="!isIOS && !canInstall" class="space-y-4">
             <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl text-sm text-blue-700 dark:text-blue-300 flex flex-col gap-3">
-              <div class="flex items-center gap-3">
-                <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+              <div class="flex items-center gap-3 text-left">
+                <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">1</span>
+                <span>Toca los <strong>tres puntos</strong> <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v.01M12 12v.01M12 19v.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> en la esquina superior.</span>
+              </div>
+              <div class="flex items-center gap-3 text-left">
+                <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">2</span>
+                <span>Selecciona <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla de inicio"</strong>.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instrucciones para iOS (Safari no soporta beforeinstallprompt) -->
+          <div v-else-if="isIOS" class="space-y-4">
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl text-sm text-blue-700 dark:text-blue-300 flex flex-col gap-3">
+              <div class="flex items-center gap-3 text-left">
+                <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">1</span>
                 <span>Toca el icono de <strong>Compartir</strong> <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15V3m0 0l-4 4m4-4l4 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
               </div>
-              <div class="flex items-center gap-3">
-                <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+              <div class="flex items-center gap-3 text-left">
+                <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">2</span>
                 <span>Selecciona <strong>"Agregar al inicio"</strong> <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M12 8v8m-4-4h8" stroke-width="2" stroke-linecap="round"/></svg></span>
               </div>
             </div>
@@ -84,14 +98,18 @@ import { usePWA } from '~/composables/usePWA';
 
 const { isInstalled, isIOS, canInstall, installApp } = usePWA();
 const showDelayed = ref(false);
+const isForced = ref(false);
 
 const isVisible = computed(() => {
   // Mostramos si:
   // 1. NO está instalada
-  // 2. Ya pasaron los segundos de cortesía (para no asustar)
-  // 3. Si es Android, solo si 'canInstall' es true (el navegador dio permiso)
+  // 2. Ya pasaron los segundos de cortesía O es forzado (post-registro)
+  // 3. Si es Android, mostramos si 'canInstall' es true O si es forzado (para dar instrucciones manuales)
   // 4. Si es iOS, siempre (porque no tenemos el evento 'canInstall')
-  return !isInstalled.value && showDelayed.value && (isIOS.value || canInstall.value);
+  const timeReady = showDelayed.value || isForced.value;
+  const platformReady = isIOS.value || canInstall.value || isForced.value;
+  
+  return !isInstalled.value && timeReady && platformReady;
 });
 
 const handleInstall = async () => {
@@ -99,19 +117,26 @@ const handleInstall = async () => {
 };
 
 onMounted(() => {
-  // Retraso de 2 segundos para que el usuario vea la web antes del bloqueo
+  // Verificar si viene de un registro para forzar la vista
+  if (localStorage.getItem('pwa_force_show') === 'true') {
+    isForced.value = true;
+  }
+
+  // Retraso de 2 segundos para que el usuario vea la web antes del bloqueo (si no es forzado)
   setTimeout(() => {
     showDelayed.value = true;
   }, 2000);
 });
 
-// Emitimos un evento cuando se instale para que el componente de notificaciones sepa que puede salir
-const emit = defineEmits(['installed']);
+// Limpiar el flag cuando se instale
 watch(isInstalled, (newVal) => {
   if (newVal) {
+    localStorage.removeItem('pwa_force_show');
     emit('installed');
   }
 });
+
+const emit = defineEmits(['installed']);
 </script>
 
 <style scoped>

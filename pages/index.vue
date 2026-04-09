@@ -1805,6 +1805,9 @@ const handleAuth = async () => {
                 'usuario': '/cliente/DashboardCliente'
               }[userRole] || '/';
 
+              // Marcar que el usuario se acaba de registrar para forzar la invitación de PWA
+              localStorage.setItem('pwa_force_show', 'true');
+
               setTimeout(() => {
                 window.location.href = redirectPath;
               }, 500);
