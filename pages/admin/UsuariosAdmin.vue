@@ -141,33 +141,33 @@
                   <div class="flex space-x-2">
                     <div class="flex-1">
                       <multiselect
-                        v-model="selectedStatus"
-                        :options="statusOptions"
-                        :searchable="false"
+                        v-model="selectedService"
+                        :options="availableServices"
+                        :searchable="true"
                         :close-on-select="true"
                         :show-labels="false"
-                        placeholder="Estado"
-                        label="label"
-                        track-by="value"
+                        placeholder="Servicio"
+                        label="nombre"
+                        track-by="id_servicio"
                         class="multiselect-custom"
-                        :class="{ 'multiselect--active': selectedStatus }"
+                        :class="{ 'multiselect--active': selectedService }"
                         :select-label="''"
                         :deselect-label="''"
                         :selected-label="''"
-                        :no-options="'No hay opciones'"
+                        :no-options="'No hay servicios'"
                         :no-result="'No se encontraron resultados'"
                         @search-change="$event && $event.stopPropagation()"
                         @search-focus="(e) => e && e.target && e.target.blur()"
                         @touchstart.native.stop
                         @click.native.stop
-                        ref="statusSelect"
+                        ref="serviceSelect"
                         :options-limit="100"
                       >
                         <template #singleLabel="{ option }">
-                          <span class="text-[12px] truncate">{{ option.label }}</span>
+                          <span class="text-[12px] truncate">{{ option.nombre }}</span>
                         </template>
                         <template #option="{ option }">
-                          <span class="text-[12px]">{{ option.label }}</span>
+                          <span class="text-[12px]">{{ option.nombre }}</span>
                         </template>
                       </multiselect>
                     </div>
@@ -2538,6 +2538,7 @@ const loadingMoreUsers = ref(false)
 const loadingTechnicians = ref(false)
 const loadingRoles = ref(false)
 const loadingCities = ref(false)
+const loadingServices = ref(false)
 const loadingStats = ref(false)
 const isSaving = ref(false)
 const isEditing = ref(false)
@@ -2562,6 +2563,7 @@ const technicians = ref([])
 const administrators = ref([])
 const roles = ref([])
 const availableCities = ref([])
+const availableServices = ref([])
 const cities = ref([])
 const hasMoreUsers = ref(false)
 const totalAdmins = ref(0)
@@ -2650,12 +2652,12 @@ const servicesCurrentPage = ref(1)
 
 // ===== VARIABLES DE FILTROS =====
 const searchQuery = ref('') 
-const selectedStatus = ref('')
+const selectedService = ref(null)
 const selectedCity = ref('')
 const isSearching = ref(false)
 
 // Watchers para los filtros
-watch([selectedStatus, selectedCity], () => {
+watch([selectedService, selectedCity], () => {
   // Reiniciar a la primera página cuando cambian los filtros
   adminsCurrentPage.value = 1
   techniciansCurrentPage.value = 1
@@ -2843,7 +2845,7 @@ const toast = ref({
 })
 
 // ===== WATCHER PARA REINICIAR PAGINACIÓN AL CAMBIAR FILTROS =====
-watch([selectedStatus, selectedCity], () => {
+watch([selectedService, selectedCity], () => {
   usersCurrentPage.value = 1
   techniciansCurrentPage.value = 1
   adminsCurrentPage.value = 1
@@ -2861,7 +2863,7 @@ watch([selectedStatus, selectedCity], () => {
 const hasActiveFilters = computed(() => {
   return !!(
     searchQuery.value || 
-    selectedStatus.value || 
+    selectedService.value || 
     selectedCity.value
   );
 });
@@ -2877,15 +2879,15 @@ const filteredAdmins = computed(() => {
       (user.email && user.email.toLowerCase().includes(searchQuery)) ||
       (user.telefono && user.telefono.includes(searchQuery));
     
-    // Filter by status
-    const matchesStatus = !selectedStatus.value || 
-      user.estado === selectedStatus.value.value;
+    // Filter by service
+    const matchesService = !selectedService.value || 
+      (user.servicios && user.servicios.some(s => s.id_servicio === selectedService.value.id_servicio));
     
     // Filter by city
     const matchesCity = !selectedCity.value || 
       (user.ciudad && user.ciudad.id_ciudad === selectedCity.value);
     
-    return matchesSearch && matchesStatus && matchesCity;
+    return matchesSearch && matchesService && matchesCity;
   });
 });
 
@@ -3309,7 +3311,7 @@ const changeAdminsPage = (page) => {
 // Métodos para manejar los filtros
 const clearFilters = () => {
   searchQuery.value = ''
-  selectedStatus.value = ''
+  selectedService.value = null
   selectedCity.value = null
   
   // Reiniciar a la primera página
@@ -4301,7 +4303,7 @@ const loadUsers = async (page = 1) => {
     // Generar clave de caché que incluya filtros
     const filtersKey = JSON.stringify({ 
       search: searchQuery.value || '',
-      status: selectedStatus.value?.value || '',
+      service: selectedService.value?.id_servicio || '',
       city: selectedCity.value?.value || ''
     })
     const cacheKey = `${page}_${filtersKey}`
@@ -4331,8 +4333,8 @@ const loadUsers = async (page = 1) => {
       params.append('nombre', searchQuery.value)
     }
     
-    if (selectedStatus.value?.value) {
-      params.append('estado', selectedStatus.value.value)
+    if (selectedService.value?.id_servicio) {
+      params.append('id_servicio', selectedService.value.id_servicio.toString())
     }
     
     if (selectedCity.value?.value) {
@@ -4395,7 +4397,7 @@ const loadTechnicians = async (page = 1) => {
     // Generar clave de caché que incluya filtros
     const filtersKey = JSON.stringify({ 
       search: searchQuery.value || '',
-      status: selectedStatus.value?.value || selectedStatus.value || '',
+      service: selectedService.value?.id_servicio || '',
       city: selectedCity.value?.id || selectedCity.value?.value || selectedCity.value || ''
     })
     const cacheKey = `${page}_${filtersKey}`
@@ -4420,13 +4422,9 @@ const loadTechnicians = async (page = 1) => {
       params.append('nombre', searchQuery.value)
     }
     
-    // Manejar el filtro de estado
-    if (selectedStatus.value) {
-      if (typeof selectedStatus.value === 'object' && selectedStatus.value.value) {
-        params.append('estado', selectedStatus.value.value)
-      } else if (typeof selectedStatus.value === 'string') {
-        params.append('estado', selectedStatus.value)
-      }
+    // Manejar el filtro de servicio
+    if (selectedService.value?.id_servicio) {
+      params.append('id_servicio', selectedService.value.id_servicio.toString())
     }
     
     // Manejar el filtro de ciudad
@@ -4481,13 +4479,9 @@ const loadAdministrators = async (page = 1) => {
       ...(searchQuery.value && { nombre: searchQuery.value })
     }
     
-    // Manejar el filtro de estado
-    if (selectedStatus.value) {
-      if (typeof selectedStatus.value === 'object' && selectedStatus.value.value) {
-        query.estado = selectedStatus.value.value
-      } else if (typeof selectedStatus.value === 'string') {
-        query.estado = selectedStatus.value
-      }
+    // Manejar el filtro de servicio
+    if (selectedService.value?.id_servicio) {
+      query.id_servicio = selectedService.value.id_servicio
     }
     
     // Manejar el filtro de ciudad
@@ -4524,8 +4518,27 @@ const loadAdministrators = async (page = 1) => {
   } catch (error) {
     console.error('Error al cargar administradores:', error)
     showError('No se pudieron cargar los administradores')
-  } finally {
+    } finally {
     loadingUsers.value = false
+  }
+}
+
+const loadServices = async () => {
+  try {
+    loadingServices.value = true
+    const response = await $api('/servicios/activos', {
+      method: 'GET'
+    })
+    
+    availableServices.value = Array.isArray(response) ? response : (response?.data || [])
+      
+    return availableServices.value
+  } catch (error) {
+    console.error('Error al cargar servicios:', error)
+    showError('No se pudieron cargar los servicios')
+    return []
+  } finally {
+    loadingServices.value = false
   }
 }
 
@@ -4619,6 +4632,7 @@ onMounted(async () => {
       loadTechnicians(),
       loadAdministrators(),
       loadCities(),
+      loadServices(),
       fetchStatistics(),
       loadPendingVerificationUsers()
     ])
