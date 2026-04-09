@@ -1,33 +1,28 @@
 <script setup>
 const { locale, setLocale, t } = useI18n()
 const showModal = ref(false)
+const languageCookie = useCookie('i18n_redirected', {
+  maxAge: 60 * 60 * 24 * 365,
+  path: '/'
+})
 
 onMounted(() => {
-  // Check if user has already selected a language via this modal
-  const cookie = useCookie('miseguro_language_selected', {
-    maxAge: 60 * 60 * 24 * 365, // 1 year
-    path: '/'
-  })
-  
-  if (!cookie.value) {
+  // Check if language has been selected
+  if (!languageCookie.value) {
     showModal.value = true
   }
 })
 
 const selectLanguage = (code) => {
   setLocale(code)
-  const cookie = useCookie('miseguro_language_selected', {
-    maxAge: 60 * 60 * 24 * 365,
-    path: '/'
-  })
-  cookie.value = code
+  languageCookie.value = code
   showModal.value = false
 }
 </script>
 
 <template>
   <Transition name="fade">
-    <div v-if="showModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div v-if="showModal" class="fixed inset-0 z-[2000] flex items-center justify-center p-4">
       <!-- Backdrop -->
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
       

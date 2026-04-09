@@ -26,6 +26,8 @@
       <NuxtLayout>
         <NuxtPage/>
         <LanguageSelectorModal />
+        <PWAInstallInvite @installed="showNotifications = true" />
+        <PushNotificationInvite v-if="showNotifications" />
       </NuxtLayout>
       <Analytics />
     </div>
@@ -64,10 +66,15 @@ html, body, #__nuxt {
 import { ref, onMounted } from 'vue';
 import { Analytics } from '@vercel/analytics/nuxt';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
+import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue';
+import PushNotificationInvite from '~/components/ui/PushNotificationInvite.vue';
 import { useIABDetector } from '~/composables/useIABDetector';
+import { usePWA } from '~/composables/usePWA';
 
 const isLoading = ref(true);
+const showNotifications = ref(false);
 const { isIAB, isIOS, getExternalBrowserLink } = useIABDetector();
+const { isInstalled, initPWA } = usePWA();
 
 // Configuración del tema oscuro
 useHead({
@@ -109,6 +116,14 @@ onMounted(() => {
 
     applyDarkMode();
     hideSpinner();
+    
+    // Inicializar lógica de PWA
+    initPWA();
+
+    // Si ya está instalada, podemos mostrar notificaciones de una vez
+    if (isInstalled.value) {
+      showNotifications.value = true;
+    }
   }
 });
 </script>

@@ -868,12 +868,12 @@
       </section>
     </div>
 
-    <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
+    <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-100 dark:border-gray-700">
       <button 
         @click="isTerminosModalOpen = false"
-        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
       >
-        Cerrar
+        {{ $t('common.close') }}
       </button>
     </div>
 
@@ -908,12 +908,12 @@
           </section>
         </div>
 
-        <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
+        <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-100 dark:border-gray-700">
           <button 
             @click="isPrivacidadModalOpen = false"
-            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
           >
-            Cerrar
+            {{ $t('common.close') }}
           </button>
         </div>
       </div>
@@ -925,17 +925,17 @@
         <button 
           @click="isAcercaModalOpen = false"
           type="button"
-          class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-          aria-label="Cerrar modal"
+          class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 z-10"
+          :aria-label="$t('common.close')"
         >
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
         <div class="mb-4 flex-shrink-0 text-left">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('profile.about_title') }}</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t('profile.about_subtitle') }}</p>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('about.title') }}</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t('about.subtitle') }}</p>
         </div>
 
         <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
@@ -944,10 +944,10 @@
               🏠
             </div>
             <h4 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">MiSeguro</h4>
-            <p class="text-gray-600 dark:text-gray-400">{{ $t('profile.about_hero_desc') }}</p>
+            <p class="text-gray-600 dark:text-gray-400">{{ $t('about.hero_desc') }}</p>
           </section>
 
-          <section v-for="(section, index) in $t('profile.about_content')" :key="index">
+          <section v-for="(section, index) in $t('about.content')" :key="index">
             <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ section.title }}</h4>
             <p v-if="section.text">{{ section.text }}</p>
 
@@ -964,8 +964,8 @@
           </section>
 
           <section>
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ $t('profile.contact') }}</h4>
-            <p>{{ $t('profile.contact_desc') }}</p>
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ $t('about.contact') }}</h4>
+            <p>{{ $t('about.contact_desc') }}</p>
             <div class="space-y-2 mt-2">
               <div class="flex items-center space-x-2">
                 <span class="text-blue-600 dark:text-blue-400">📧</span>
@@ -979,12 +979,12 @@
           </section> 
         </div>
 
-        <div class="mt-4 pt-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
+        <div class="mt-6 pt-4 flex-shrink-0 border-t border-gray-100 dark:border-gray-700">
           <button 
             @click="isAcercaModalOpen = false"
-            class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+            class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
           >
-            Cerrar
+            {{ $t('common.close') }}
           </button>
         </div>
       </div>

@@ -100,6 +100,7 @@
     "title": "Profile",
     "verified": "Verified",
     "verified_account": "Verified Account",
+    "verify_identity": "Verify Identity",
     "registered_on": "Registered on",
     "city": "City",
     "not_specified": "Not specified",
@@ -137,6 +138,21 @@
     "legal": "Legal & About",
     "terms": "Terms and Conditions",
     "privacy": "Privacy Policy",
+    "terms_content": [
+      { "title": "Acceptance of Terms", "text": "By accessing and using MiSeguro, you agree to comply with these terms and conditions." },
+      { "title": "Services Offered", "text": "MiSeguro is a platform that connects professional technicians with clients for maintenance and repair work." },
+      { "title": "User Responsibilities", "list": ["Provide accurate information.", "Treat professionals with respect.", "Make payments only through authorized means."] },
+      { "title": "Payments and Cancellations", "text": "Payments are managed according to the accepted quote. Cancellations may be subject to visit fees." },
+      { "title": "Conduct on Site", "text": "The platform may not be used for illegal purposes or to contact technicians outside the official system." },
+      { "title": "Guarantees", "text": "All services performed through MiSeguro have a compliance guarantee according to industry standards." }
+    ],
+    "privacy_content": [
+      { "title": "Data Collection", "text": "We collect personal information such as name, email, phone, and location for service provision." },
+      { "title": "Use of Information", "text": "Your data is used to coordinate services, process payments, and improve your experience." },
+      { "title": "Security", "text": "We implement robust security measures to protect your data against unauthorized access." },
+      { "title": "Third-Party Sharing", "text": "We only share necessary information with assigned technicians to complete requested services." },
+      { "title": "Your Rights", "text": "You have the right to access, rectify, or delete your personal data at any time from your profile." }
+    ],
     "about": "About MiSeguro",
     "logout": "Logout",
     "identity_verification": "ID Verification",
@@ -182,6 +198,37 @@
       "id_delete_success": "Identification deleted",
       "generic_error": "An error occurred. Please try again."
     }
+  },
+  "about": {
+    "title": "About MiSeguro",
+    "subtitle": "Your trusted home services platform",
+    "hero_desc": "The comprehensive solution for your home maintenance and care in Honduras.",
+    "content": [
+      {
+        "title": "Our Mission",
+        "text": "Connecting the best professionals with homeowners to provide guaranteed, fast, and safe maintenance services."
+      },
+      {
+        "title": "Our Values",
+        "grid": [
+          { "title": "Trust", "desc": "Verified technicians with validated identity." },
+          { "title": "Quality", "desc": "Services with 100% satisfaction guarantee." },
+          { "title": "Savings", "desc": "Fair prices and membership program with cashback." },
+          { "title": "Support", "desc": "Personalized 24/7 attention for all your services." }
+        ]
+      },
+      {
+        "title": "How it works?",
+        "list": [
+          "Request the service you need from your phone.",
+          "We assign the nearest and most qualified professional.",
+          "Receive a transparent quote and decide whether to proceed.",
+          "Pay securely and rate your experience."
+        ]
+      }
+    ],
+    "contact": "Contact",
+    "contact_desc": "We are here to help. Contact us through any of our official channels:"
   },
   "referral": {
     "title": "Earn Money Referring!",
@@ -493,6 +540,7 @@
     }
   },
   "marketplace": {
+    "acquire": "Acquire",
     "title": "Marketplace",
     "balance": "Balance",
     "search_placeholder": "What do you need today?",
@@ -514,6 +562,10 @@
     "left": "{n} LEFT!",
     "tap_to_manage": "Tap to manage",
     "adquired_on": "Acquired:",
+    "verifying": "Verifying",
+    "acquired": "Acquired",
+    "in_use": "In use",
+    "used": "Used",
     "package": "Package",
     "total_to_transfer": "Total to transfer",
     "available_accounts": "Available Accounts",
@@ -528,7 +580,7 @@
     },
     "status": {
       "verifying": "Verifying",
-      "adquired": "Acquired",
+      "acquired": "Acquired",
       "in_use": "In use",
       "used": "Used"
     },
@@ -568,6 +620,10 @@
   },
   "services_page": {
     "title": "My Services",
+    "total_requested": "{n} services requested",
+    "filter_by": "Filter by:",
+    "service_type": "Service type:",
+    "period": "Period:",
     "active": "Active",
     "finished": "Finished",
     "pending_payment": "🟡 Pending Payment",
@@ -794,6 +850,22 @@
       "subtitle": "Pending Payments",
       "message": "Hello {name}, you have a pending payment. Remember that payments should only be made to the accounts provided by MiSeguro.",
       "warning": "Any cash payment made to technicians, third parties, or unauthorized accounts will not be recognized by the platform."
+    }
+  },
+  "pwa": {
+    "install_invite": {
+      "title": "Download the App from",
+      "subtitle": "MiSeguro",
+      "message_android": "Install our application for a better experience, quick access, and real-time notifications.",
+      "message_ios": "For a better experience, add MiSeguro to your home screen by following these steps:",
+      "cta": "Download Application",
+      "mandatory": "Installing the app is mandatory to continue"
+    }
+  },
+  "technician": {
+    "dashboard": {
+      "title": "Technician Panel",
+      "subtitle": "Service Management"
     }
   }
 }

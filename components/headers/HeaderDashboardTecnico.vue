@@ -33,8 +33,8 @@
             </div>
           </div>
           <div>
-            <h1 class="text-lg font-black text-white">{{ $t('technician.dashboard.title') }}</h1>
-            <p class="text-emerald-100 text-xs">{{ $t('technician.dashboard.subtitle') }}</p>
+            <h1 class="text-lg font-black text-white">Dashboard</h1>
+            <p class="text-emerald-100 text-xs">Panel de control</p>
           </div>
         </div>
         <!-- Componente de notificaciones -->
@@ -103,7 +103,7 @@ const onNotificationClick = async (notification) => {
       error
     });
 
-    showToast(t('errors.marking_notification'), 'error', 3000);
+    showToast('Error al marcar notificación', 'error', 3000);
     
     // Desactivar loading en caso de error
     isLoading.value = false;

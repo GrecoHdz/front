@@ -113,6 +113,7 @@
     "title": "Perfil",
     "verified": "Verificado",
     "verified_account": "Cuenta Verificada",
+    "verify_identity": "Verificar Identidad",
     "registered_on": "Registrado el",
     "city": "Ciudad",
     "not_specified": "No especificado",
@@ -150,6 +151,21 @@
     "legal": "Legal y Acerca de",
     "terms": "Términos y Condiciones",
     "privacy": "Política de Privacidad",
+    "terms_content": [
+      { "title": "Aceptación de Términos", "text": "Al acceder y utilizar MiSeguro, aceptas cumplir con estos términos y condiciones." },
+      { "title": "Servicios Ofrecidos", "text": "MiSeguro es una plataforma que conecta técnicos profesionales con clientes para labores de mantenimiento y reparación." },
+      { "title": "Responsabilidades del Usuario", "list": ["Proporcionar información verídica.", "Tratar con respeto a los profesionales.", "Realizar los pagos únicamente a través de los medios autorizados."] },
+      { "title": "Pagos y Cancelaciones", "text": "Los pagos se gestionan según la cotización aceptada. Las cancelaciones pueden estar sujetas a cargos de visita." },
+      { "title": "Conducta en el Sitio", "text": "No se permite el uso de la plataforma para fines ilícitos o para contactar técnicos por fuera del sistema oficial." },
+      { "title": "Garantías", "text": "Todos los servicios realizados a través de MiSeguro cuentan con una garantía de cumplimiento según los estándares de la industria." }
+    ],
+    "privacy_content": [
+      { "title": "Recolección de Datos", "text": "Recopilamos información personal como nombre, correo, teléfono y ubicación para la prestación de servicios." },
+      { "title": "Uso de la Información", "text": "Tus datos se utilizan para coordinar servicios, procesar pagos y mejorar tu experiencia." },
+      { "title": "Seguridad", "text": "Implementamos medidas de seguridad robustas para proteger tus datos contra accesos no autorizados." },
+      { "title": "Compartición con Terceros", "text": "Solo compartimos información necesaria con los técnicos asignados para completar el servicio solicitado." },
+      { "title": "Tus Derechos", "text": "Tienes derecho a acceder, rectificar o eliminar tus datos personales en cualquier momento desde tu perfil." }
+    ],
     "about": "Acerca de MiSeguro",
     "logout": "Cerrar sesión",
     "identity_verification": "Verificación de ID",
@@ -195,6 +211,37 @@
       "id_delete_success": "Identificación eliminada",
       "generic_error": "Ocurrió un error. Intente nuevamente."
     }
+  },
+  "about": {
+    "title": "Acerca de MiSeguro",
+    "subtitle": "Tu plataforma de confianza para el hogar",
+    "hero_desc": "La solución integral para el mantenimiento y cuidado de tu hogar en Honduras.",
+    "content": [
+      {
+        "title": "Nuestra Misión",
+        "text": "Conectar a los mejores profesionales con dueños de hogar para brindar servicios de mantenimiento garantizados, rápidos y seguros."
+      },
+      {
+        "title": "Nuestros Valores",
+        "grid": [
+          { "title": "Confianza", "desc": "Técnicos verificados y con identidad validada." },
+          { "title": "Calidad", "desc": "Servicios con garantía de satisfacción del 100%." },
+          { "title": "Ahorro", "desc": "Precios justos y programa de membresía con cashback." },
+          { "title": "Soporte", "desc": "Atención personalizada 24/7 para todos tus servicios." }
+        ]
+      },
+      {
+        "title": "¿Cómo funcionamos?",
+        "list": [
+          "Solicitas el servicio que necesitas desde tu celular.",
+          "Te asignamos al profesional más cercano y calificado.",
+          "Recibes una cotización transparente y decides si proceder.",
+          "Pagas de forma segura y calificas tu experiencia."
+        ]
+      }
+    ],
+    "contact": "Contacto",
+    "contact_desc": "Estamos aquí para ayudarte. Contáctanos por cualquiera de nuestros medios oficiales:"
   },
   "referral": {
     "title": "¡Gana Dinero Refiriendo!",
@@ -506,6 +553,7 @@
     }
   },
   "marketplace": {
+    "acquire": "Adquirir",
     "title": "Marketplace",
     "balance": "Saldo",
     "search_placeholder": "¿Qué necesitas hoy?",
@@ -541,7 +589,7 @@
     },
     "status": {
       "verifying": "Verificando",
-      "adquired": "Adquirido",
+      "acquired": "Adquirido",
       "in_use": "En uso",
       "used": "Utilizado"
     },
@@ -565,6 +613,10 @@
       "enter_receipt": "Por favor ingresa el número de comprobante",
       "redeem_confirm_desc": "¿Estás seguro que deseas canjear este paquete?"
     },
+    "verifying": "Verificando",
+    "acquired": "Adquirido",
+    "in_use": "En uso",
+    "used": "Utilizado",
     "verifying_short": "Verificando",
     "acquired_short": "Adquirido",
     "buy": "Comprar",
@@ -581,6 +633,10 @@
   },
   "services_page": {
     "title": "Mis Servicios",
+    "total_requested": "{n} servicios solicitados",
+    "filter_by": "Filtrar por:",
+    "service_type": "Tipo de servicio:",
+    "period": "Período:",
     "active": "Activos",
     "finished": "Finalizados",
     "pending_payment": "🟡 Pago Pendiente",
@@ -807,6 +863,22 @@
       "subtitle": "Pagos Pendientes",
       "message": "Hola {name}, tienes un pago pendiente. Recuerda que los pagos deben realizarse únicamente a las cuentas proporcionadas por MiSeguro.",
       "warning": "Cualquier pago realizado en efectivo a técnicos, terceros o a cuentas no autorizadas no será reconocido por la plataforma."
+    }
+  },
+  "pwa": {
+    "install_invite": {
+      "title": "Descarga la App de",
+      "subtitle": "MiSeguro",
+      "message_android": "Instala nuestra aplicación para recibir una mejor experiencia, acceso rápido y notificaciones en tiempo real.",
+      "message_ios": "Para una mejor experiencia, agrega MiSeguro a tu pantalla de inicio siguiendo estos pasos:",
+      "cta": "Descargar Aplicación",
+      "mandatory": "Es obligatorio instalar la app para continuar"
+    }
+  },
+  "technician": {
+    "dashboard": {
+      "title": "Panel Técnico",
+      "subtitle": "Gestión de Servicios"
     }
   }
 }
