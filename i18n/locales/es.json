@@ -288,11 +288,11 @@
     "no_referrals_desc": "Comparte tu código y empieza a ganar dinero",
     "terms_title": "Términos del Programa",
     "terms_list": [
-      "¡Gana un porcentaje cada vez que tu referido complete un servicio con éxito!",
-      "Tus ganancias se acumulan automáticamente y puedes retirarlas cuando quieras.",
-      "Al retirar tus ganancias un porcentaje lo recibirás como crédito",
-      "No hay límite en la cantidad de personas que puedes referir",
-      "Los retiros se procesan en 24-72 horas hábiles"
+      "¡Ganas una comisión cada vez que tu referido complete un servicio exitosamente!",
+      "Tus ganancias se acumulan automáticamente y puedes retirarlas cuando desees.",
+      "Al realizar un retiro, una parte se transferirá a tu cuenta y otra se recibirá como crédito para servicios.",
+      "No existe un límite de personas que puedes invitar al programa.",
+      "Las solicitudes de retiro se procesan en un periodo de 24 a 72 horas hábiles."
     ],
     "withdraw_modal": {
       "title": "Retirar Ganancias",
@@ -390,9 +390,9 @@
     "select_service": "Selecciona un servicio",
     "verification_required": "Verificación Requerida",
     "verify_profile": "Verifica tu Perfil",
-    "select_type": "Selecciona tipo",
-    "choose_barbershop": "Elige barbería",
-    "local_image": "Imagen Local {n}",
+    "select_type": "Modalidad de servicio",
+    "choose_barbershop": "Seleccione una barbería",
+    "local_image": "Imagen del local {n}",
     "taxi_placeholder": "¿Cuántas personas van y en cuánto tiempo lo necesitan?",
     "barber_placeholder": "¿Qué tipo de corte desea? Ejemplo: Fade medio con barba",
     "service_placeholder": "Describe el problema o servicio que necesitas...",
@@ -449,6 +449,7 @@
     "earn_money": "Ganá dinero",
     "loading_dashboard": "Cargando Dashboard...",
     "title": "Dashboard",
+    "subtitle": "Panel de control",
     "no_membership": "Sin membresía",
     "unlocked_all": "¡Has desbloqueado todos los beneficios!",
     "unlocked_ac": "Ya puedes adquirir el paquete de limpieza de aire acondicionado",
@@ -876,6 +877,8 @@
     }
   },
   "technician": {
+    "at_home": "A domicilio",
+    "at_local": "En establecimiento",
     "dashboard": {
       "title": "Panel Técnico",
       "subtitle": "Gestión de Servicios"

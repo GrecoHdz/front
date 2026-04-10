@@ -859,11 +859,11 @@
     </div>
 
     <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
-      <section v-for="(section, index) in $t('profile.terms_content')" :key="index">
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ index + 1 }}. {{ section.title }}</h4>
-        <p v-html="section.text"></p>
+      <section v-for="(section, index) in tm('profile.terms_content')" :key="index">
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ index + 1 }}. {{ rt(section.title) }}</h4>
+        <p v-html="rt(section.text)"></p>
         <ul v-if="section.list" class="list-disc pl-5 space-y-1 mt-2">
-          <li v-for="(item, i) in section.list" :key="i">{{ item }}</li>
+          <li v-for="(item, i) in section.list" :key="i">{{ rt(item) }}</li>
         </ul>
       </section>
     </div>
@@ -899,11 +899,11 @@
         </div>
 
         <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 text-left">
-          <section v-for="(section, index) in $t('profile.privacy_content')" :key="index">
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ index + 1 }}. {{ section.title }}</h4>
-            <p v-html="section.text"></p>
+          <section v-for="(section, index) in tm('profile.privacy_content')" :key="index">
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ index + 1 }}. {{ rt(section.title) }}</h4>
+            <p v-html="rt(section.text)"></p>
             <ul v-if="section.list" class="list-disc pl-5 space-y-1 mt-2">
-              <li v-for="(item, i) in section.list" :key="i">{{ item }}</li>
+              <li v-for="(item, i) in section.list" :key="i">{{ rt(item) }}</li>
             </ul>
           </section>
         </div>
@@ -947,18 +947,18 @@
             <p class="text-gray-600 dark:text-gray-400">{{ $t('about.hero_desc') }}</p>
           </section>
 
-          <section v-for="(section, index) in $t('about.content')" :key="index">
-            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ section.title }}</h4>
-            <p v-if="section.text">{{ section.text }}</p>
+          <section v-for="(section, index) in tm('about.content')" :key="index">
+            <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">{{ rt(section.title) }}</h4>
+            <p v-if="section.text">{{ rt(section.text) }}</p>
 
             <ul v-if="section.list" class="list-disc pl-5 space-y-1 mt-2">
-              <li v-for="(item, i) in section.list" :key="i">{{ item }}</li>
+              <li v-for="(item, i) in section.list" :key="i">{{ rt(item) }}</li>
             </ul>
 
             <div v-if="section.grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
               <div v-for="(val, vIdx) in section.grid" :key="vIdx" class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• {{ val.title }}</h5>
-                <p class="text-gray-700 dark:text-gray-300 text-xs">{{ val.desc }}</p>
+                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">• {{ rt(val.title) }}</h5>
+                <p class="text-gray-700 dark:text-gray-300 text-xs">{{ rt(val.desc) }}</p>
               </div>
             </div>
           </section>
@@ -1372,7 +1372,7 @@ import Multiselect from 'vue-multiselect'
 import { usePushNotifications } from '~/composables/usePushNotifications'
 import { useI18n } from 'vue-i18n'
 
-const { t, locale, setLocale } = useI18n()
+const { t, tm, rt, locale, setLocale } = useI18n()
 
 const config = useRuntimeConfig()
 const { $api } = useNuxtApp();

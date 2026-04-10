@@ -25,8 +25,8 @@
               </div>
             </div>
             <div>
-              <h1 class="text-lg font-black text-white">Mis Servicios</h1>
-              <p class="text-blue-100 text-xs">{{ totalServices }} servicios solicitados</p>
+              <h1 class="text-lg font-black text-white">{{ $t('services_page.title') }}</h1>
+              <p class="text-blue-100 text-xs">{{ $t('services_page.total_requested', { n: totalServices }) }}</p>
             </div>
           </div>
           
@@ -51,7 +51,7 @@
     <!-- Filter Section -->
     <div v-if="showFilters" class="bg-white dark:bg-gray-800 shadow-lg">
       <div class="max-w-2xl mx-auto px-4 py-4">
-        <h3 class="font-black text-gray-900 dark:text-white mb-3 text-sm">Filtrar por:</h3>
+        <h3 class="font-black text-gray-900 dark:text-white mb-3 text-sm">{{ $t('services_page.filter_by') }}</h3>
         <div class="grid grid-cols-2 gap-2 mb-3">
           <button 
             v-for="filter in serviceFilters" 
@@ -68,7 +68,7 @@
         
         <!-- Service Type Filter -->
         <div class="mb-3">
-          <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">Tipo de servicio:</h4>
+          <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">{{ $t('services_page.service_type') }}</h4>
           <div v-if="isLoadingServiceTypes" class="flex flex-wrap gap-1">
             <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-20"></div>
             <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-16"></div>
@@ -94,7 +94,7 @@
 
         <!-- Date Range Filter -->
         <div>
-          <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">Período:</h4>
+          <h4 class="font-bold text-gray-700 dark:text-gray-300 text-xs mb-2">{{ $t('services_page.period') }}</h4>
           <div class="grid grid-cols-3 gap-1">
             <button 
               v-for="period in datePeriods" 
@@ -116,6 +116,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import { useI18n } from 'vue-i18n';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
 import { useAuthStore } from '~/middleware/auth.store';
 import { useRuntimeConfig } from '#imports';
@@ -123,6 +124,7 @@ import { useRouter } from 'vue-router'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 // ===== CONFIGURACIÓN =====
+const { t } = useI18n()
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const isLoading = ref(false)
@@ -198,7 +200,7 @@ const onNotificationClick = async (notification) => {
       error
     });
 
-    showToast('Error al marcar notificación', 'error', 3000);
+    showToast(t('errors.marking_notification'), 'error', 3000);
     
     // Desactivar loading en caso de error
     isLoading.value = false;

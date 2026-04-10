@@ -493,9 +493,9 @@
                   <div>
                     <h3 class="text-sm font-bold text-amber-800 dark:text-amber-200 mb-2">{{ $t('referral.terms_title') }}</h3>
                     <ul class="space-y-1 text-xs text-amber-700 dark:text-amber-300">
-                      <li v-for="(term, index) in $t('referral.terms_list')" :key="index" class="flex items-start space-x-2">
+                      <li v-for="(term, index) in tm('referral.terms_list')" :key="index" class="flex items-start space-x-2">
                         <span class="text-amber-500 text-xs mt-0.5">•</span>
-                        <span>{{ term }}</span>
+                        <span>{{ rt(term) }}</span>
                       </li>
                     </ul>
                   </div>
@@ -654,7 +654,7 @@ const { $api } = useNuxtApp();
 const router = useRouter()
 const userCookie = useCookie('user')
 
-const { t } = useI18n()
+const { t, tm, rt } = useI18n()
 
 // SEO and Meta
 useHead({

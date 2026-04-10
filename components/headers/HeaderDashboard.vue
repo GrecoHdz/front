@@ -33,8 +33,8 @@
             </div>
           </div>
           <div>
-            <h1 class="text-lg font-black text-white">Dashboard</h1>
-            <p class="text-emerald-100 text-xs">Panel de control</p>
+            <h1 class="text-lg font-black text-white">{{ $t('dashboard_client.title') }}</h1>
+            <p class="text-emerald-100 text-xs">{{ $t('dashboard_client.subtitle') }}</p>
           </div>
         </div>
         <!-- Componente de notificaciones -->
@@ -48,6 +48,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '~/middleware/auth.store';
 import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
@@ -59,6 +60,7 @@ import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 // ===== CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
+const { t } = useI18n()
 const auth = useAuthStore()
 const isLoading = ref(false)
 const router = useRouter(); // Asegurar router importado y usado
@@ -104,7 +106,7 @@ const onNotificationClick = async (notification) => {
       error
     });
 
-    showToast('Error al marcar notificación', 'error', 3000);
+    showToast(t('errors.marking_notification'), 'error', 3000);
     
     // Desactivar loading en caso de error
     isLoading.value = false;

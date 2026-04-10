@@ -436,6 +436,7 @@
     "earn_money": "Earn money",
     "loading_dashboard": "Loading Dashboard...",
     "title": "Dashboard",
+    "subtitle": "Control panel",
     "no_membership": "No membership",
     "unlocked_all": "You have unlocked all benefits!",
     "unlocked_ac": "You can now acquire the AC cleaning package",
@@ -863,6 +864,8 @@
     }
   },
   "technician": {
+    "at_home": "At home",
+    "at_local": "At local",
     "dashboard": {
       "title": "Technician Panel",
       "subtitle": "Service Management"

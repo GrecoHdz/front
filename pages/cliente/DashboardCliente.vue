@@ -2793,8 +2793,9 @@ const handleRequestService = async () => {
     }
 
     const isTaxiVIP = selectedService.name === 'Taxi VIP'
-    const membershipStatus = await fetchMembershipData()
-    const tieneMembresiaActiva = membershipStatus?.estado === 'activa'
+    // Usar el estado reactivo ya cargado en vez de hacer otra llamada autenticada
+    // (evita fallos por JWT expirado en medio del envío del formulario)
+    const tieneMembresiaActiva = membershipData.value.status === 'activa'
     
     // Taxi VIP no requiere pago de visita y va directo a asignacion
     const noRequierePagoVisita = tieneMembresiaActiva || isTaxiVIP
