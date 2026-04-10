@@ -60,7 +60,7 @@
               </div>
               <div class="flex items-center gap-3 text-left">
                 <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">2</span>
-                <span>Selecciona <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla de inicio"</strong>.</span>
+                <span>Selecciona <strong>"Agregar a la pantalla de inicio"</strong>.</span>
               </div>
             </div>
           </div>
@@ -93,10 +93,13 @@
 </template>
 
 <script setup>
+console.log('DEBUG: PWAInstallInvite setup iniciado');
 import { ref, onMounted, computed, watch } from 'vue';
-import { usePWA } from '~/composables/usePWA';
+import { useRoute } from 'vue-router';
+import { useAppPWA } from '~/composables/useAppPWA';
 
-const { isInstalled, isIOS, canInstall, installApp } = usePWA();
+const { isInstalled, isIOS, canInstall, installApp } = useAppPWA();
+const route = useRoute();
 const showDelayed = ref(false);
 const isForced = ref(false);
 
@@ -119,13 +122,16 @@ const checkForceFlag = () => {
 const isVisible = computed(() => {
   // CRÍTICO: Si está instalada, NUNCA mostramos
   if (isInstalled.value) {
-    console.log('PWA: No se muestra porque ya detectó instalación');
+    return false;
+  }
+
+  // NO mostrar en la landing page (index)
+  if (route.path === '/') {
     return false;
   }
 
   // Si es forzado (post-registro), ignoramos el tiempo de delay
   if (isForced.value) {
-    console.log('PWA: Forzando visibilidad por registro reciente');
     return true;
   }
   
@@ -133,32 +139,20 @@ const isVisible = computed(() => {
   const timeReady = showDelayed.value;
   const platformReady = isIOS.value || canInstall.value;
   
-  console.log('PWA Estado:', {
-    timeReady,
-    platformReady,
-    isIOS: isIOS.value,
-    canInstall: canInstall.value,
-    isInstalled: isInstalled.value
-  });
-  
   return timeReady && platformReady;
 });
 
 const handleInstall = async () => {
-  console.log('PWA: Iniciando proceso de instalación...');
   await installApp();
 };
 
 onMounted(() => {
-  console.log('PWA Component: Montado');
   // Verificación inmediata del flag de registro
   checkForceFlag();
-  console.log('PWA isForced:', isForced.value);
 
   // Retraso de cortesía para visitas normales (2 segundos)
   setTimeout(() => {
     showDelayed.value = true;
-    console.log('PWA: Delay de cortesía completado');
   }, 2000);
 });
 

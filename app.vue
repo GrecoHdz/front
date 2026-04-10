@@ -26,9 +26,9 @@
       <NuxtLayout>
         <NuxtPage/>
         <LanguageSelectorModal />
-        <PWAInstallInvite @installed="showNotifications = true" />
-        <PushNotificationInvite v-if="showNotifications" />
       </NuxtLayout>
+      <PWAInstallInvite v-if="!isLoading" @installed="showNotifications = true" />
+      <PushNotificationInvite v-if="showNotifications" />
       <Analytics />
     </div>
   </div>
@@ -68,13 +68,14 @@ import { Analytics } from '@vercel/analytics/nuxt';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue';
 import PushNotificationInvite from '~/components/ui/PushNotificationInvite.vue';
+import LanguageSelectorModal from '~/components/ui/LanguageSelectorModal.vue';
 import { useIABDetector } from '~/composables/useIABDetector';
-import { usePWA } from '~/composables/usePWA';
+import { useAppPWA } from '~/composables/useAppPWA';
 
 const isLoading = ref(true);
 const showNotifications = ref(false);
 const { isIAB, isIOS, getExternalBrowserLink } = useIABDetector();
-const { isInstalled, initPWA } = usePWA();
+const { isInstalled, initPWA } = useAppPWA();
 
 // Configuración del tema oscuro
 useHead({

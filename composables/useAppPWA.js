@@ -5,7 +5,7 @@ const isInstalled = ref(false)
 const isIOS = ref(false)
 const canInstall = ref(false)
 
-export const usePWA = () => {
+export const useAppPWA = () => {
 
   const checkInstallState = () => {
     // Detectar si ya está instalada (standalone mode)
@@ -22,19 +22,16 @@ export const usePWA = () => {
   const initPWA = () => {
     if (!process.client) return
     
-    console.log('PWA: Inicializando composable...');
     checkInstallState()
     
     // Escuchar el evento de instalación para Chrome/Android
     window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('PWA: Evento beforeinstallprompt detectado');
       e.preventDefault()
       installPrompt.value = e
       canInstall.value = true
     })
 
-    window.addEventListener('appinstalled', (e) => {
-      console.log('PWA: App instalada con éxito');
+    window.addEventListener('appinstalled', () => {
       isInstalled.value = true
       canInstall.value = false
       installPrompt.value = null
@@ -48,10 +45,7 @@ export const usePWA = () => {
     const { outcome } = await installPrompt.value.userChoice
     
     if (outcome === 'accepted') {
-      console.log('El usuario aceptó la instalación')
       isInstalled.value = true
-    } else {
-      console.log('El usuario rechazó la instalación')
     }
     
     installPrompt.value = null

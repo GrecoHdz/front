@@ -57,6 +57,7 @@ export default defineNuxtConfig({
         }
       ]
     },
+    includeAssets: ['favicon.ico', 'pwa-192x192.png', 'pwa-512x512.png'],
     workbox: {
       navigateFallback: '/',
       importScripts: ['/sw-push.js'],
@@ -64,7 +65,7 @@ export default defineNuxtConfig({
     },
     devOptions: {
       enabled: true,
-      type: 'module'
+      type: 'classic'
     }
   },
   site: {

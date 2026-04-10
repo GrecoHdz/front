@@ -1807,7 +1807,6 @@ const handleAuth = async () => {
 
               // Marcar que el usuario se acaba de registrar para forzar la invitación de PWA
               if (process.client) {
-                console.log('PWA: Guardando flag de registro reciente...');
                 localStorage.setItem('pwa_force_show', 'true');
                 localStorage.setItem('pwa_force_show_time', Date.now().toString());
               }
