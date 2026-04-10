@@ -1806,11 +1806,15 @@ const handleAuth = async () => {
               }[userRole] || '/';
 
               // Marcar que el usuario se acaba de registrar para forzar la invitación de PWA
-              localStorage.setItem('pwa_force_show', 'true');
+              if (process.client) {
+                console.log('PWA: Guardando flag de registro reciente...');
+                localStorage.setItem('pwa_force_show', 'true');
+                localStorage.setItem('pwa_force_show_time', Date.now().toString());
+              }
 
               setTimeout(() => {
                 window.location.href = redirectPath;
-              }, 500);
+              }, 600);
               return; // Salir de handleAuth con éxito
             }
           } catch (loginError) {

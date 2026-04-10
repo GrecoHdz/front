@@ -100,38 +100,73 @@ const { isInstalled, isIOS, canInstall, installApp } = usePWA();
 const showDelayed = ref(false);
 const isForced = ref(false);
 
+// Comprobar flag de registro de forma agresiva
+const checkForceFlag = () => {
+  if (process.client) {
+    const flag = localStorage.getItem('pwa_force_show');
+    const flagTime = localStorage.getItem('pwa_force_show_time');
+    
+    // Si el flag existe y es de hace menos de 10 minutos (por seguridad)
+    if (flag === 'true') {
+      const timeDiff = flagTime ? Date.now() - parseInt(flagTime) : 0;
+      if (timeDiff < 10 * 60 * 1000) {
+        isForced.value = true;
+      }
+    }
+  }
+};
+
 const isVisible = computed(() => {
-  // Mostramos si:
-  // 1. NO está instalada
-  // 2. Ya pasaron los segundos de cortesía O es forzado (post-registro)
-  // 3. Si es Android, mostramos si 'canInstall' es true O si es forzado (para dar instrucciones manuales)
-  // 4. Si es iOS, siempre (porque no tenemos el evento 'canInstall')
-  const timeReady = showDelayed.value || isForced.value;
-  const platformReady = isIOS.value || canInstall.value || isForced.value;
+  // CRÍTICO: Si está instalada, NUNCA mostramos
+  if (isInstalled.value) {
+    console.log('PWA: No se muestra porque ya detectó instalación');
+    return false;
+  }
+
+  // Si es forzado (post-registro), ignoramos el tiempo de delay
+  if (isForced.value) {
+    console.log('PWA: Forzando visibilidad por registro reciente');
+    return true;
+  }
   
-  return !isInstalled.value && timeReady && platformReady;
+  // Lógica normal para otros casos
+  const timeReady = showDelayed.value;
+  const platformReady = isIOS.value || canInstall.value;
+  
+  console.log('PWA Estado:', {
+    timeReady,
+    platformReady,
+    isIOS: isIOS.value,
+    canInstall: canInstall.value,
+    isInstalled: isInstalled.value
+  });
+  
+  return timeReady && platformReady;
 });
 
 const handleInstall = async () => {
+  console.log('PWA: Iniciando proceso de instalación...');
   await installApp();
 };
 
 onMounted(() => {
-  // Verificar si viene de un registro para forzar la vista
-  if (localStorage.getItem('pwa_force_show') === 'true') {
-    isForced.value = true;
-  }
+  console.log('PWA Component: Montado');
+  // Verificación inmediata del flag de registro
+  checkForceFlag();
+  console.log('PWA isForced:', isForced.value);
 
-  // Retraso de 2 segundos para que el usuario vea la web antes del bloqueo (si no es forzado)
+  // Retraso de cortesía para visitas normales (2 segundos)
   setTimeout(() => {
     showDelayed.value = true;
+    console.log('PWA: Delay de cortesía completado');
   }, 2000);
 });
 
-// Limpiar el flag cuando se instale
+// Limpiar el flag solo cuando estemos 100% seguros de que se instaló
 watch(isInstalled, (newVal) => {
-  if (newVal) {
+  if (newVal && process.client) {
     localStorage.removeItem('pwa_force_show');
+    localStorage.removeItem('pwa_force_show_time');
     emit('installed');
   }
 });

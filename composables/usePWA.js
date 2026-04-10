@@ -20,22 +20,25 @@ export const usePWA = () => {
   }
 
   const initPWA = () => {
+    if (!process.client) return
+    
+    console.log('PWA: Inicializando composable...');
+    checkInstallState()
+    
+    // Escuchar el evento de instalación para Chrome/Android
     window.addEventListener('beforeinstallprompt', (e) => {
-      // Evitar que el navegador muestre su propio prompt automáticamente
+      console.log('PWA: Evento beforeinstallprompt detectado');
       e.preventDefault()
-      // Guardar el evento para dispararlo luego
       installPrompt.value = e
       canInstall.value = true
     })
 
-    window.addEventListener('appinstalled', () => {
+    window.addEventListener('appinstalled', (e) => {
+      console.log('PWA: App instalada con éxito');
       isInstalled.value = true
-      installPrompt.value = null
       canInstall.value = false
-      console.log('PWA instalada exitosamente')
+      installPrompt.value = null
     })
-
-    checkInstallState()
   }
 
   const installApp = async () => {
