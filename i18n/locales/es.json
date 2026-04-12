@@ -461,6 +461,7 @@
     },
     "taxi_whatsapp": {
       "title": "Solicitud de Taxi VIP",
+      "greeting": "¡Hola! Soy {name}, me gustaría solicitar un servicio de Taxi VIP con los siguientes detalles:",
       "footer": "Solicitado a través de la plataforma MiSeguro."
     },
     "receipt_whatsapp": {

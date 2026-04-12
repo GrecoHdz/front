@@ -93,7 +93,7 @@ export default defineNuxtConfig({
   // Configuración de impresión
   app: {
     head: {
-      title: 'MiSeguro - Servicios Profesionales a Domicilio',
+      title: 'MiSeguro - Servicios Profesionales en la palma de tu mano',
       meta: [
         { name: 'google-site-verification', content: 'GEPuBsyW3v_JTl_akiNBfF4DILNI3EVLggqEsYawrNM' },
         { charset: 'utf-8' },

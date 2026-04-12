@@ -448,6 +448,7 @@
     },
     "taxi_whatsapp": {
       "title": "Taxi VIP Request",
+      "greeting": "Hello! I am {name}, I would like to request a Taxi VIP service with the following details:",
       "footer": "Requested via the MiSeguro platform."
     },
     "receipt_whatsapp": {

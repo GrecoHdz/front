@@ -2050,7 +2050,7 @@ const sendWhatsAppMessage = async (data, type) => {
     } else if (type === 'taxi_vip') {
       // Mensaje para solicitud de taxi VIP
       message = `*${t('dashboard_client.taxi_whatsapp.title')}*\n\n` +
-        `*${t('dashboard_client.welcome', { name: data.nombre_usuario })}* \n` +
+        `*${t('dashboard_client.taxi_whatsapp.greeting', { name: data.nombre_usuario })}* \n` +
         `*${t('dashboard_client.pickup')}:* ${data.colonia}\n` +
         `*${t('dashboard_client.destination')}:* ${data.direccion}\n` +
         `*${t('dashboard_client.description')}:* ${data.description}\n\n` +
