@@ -2768,6 +2768,8 @@ const resetCredito = async () => {
 const handleRequestService = async () => {
   if (isSubmittingService.value) return;
   
+  const { locale } = useI18n()
+  
   try {
     isSubmittingService.value = true;
     
@@ -2839,9 +2841,10 @@ const handleRequestService = async () => {
 
     // Enviar notificación según el tipo de membresía
     try {
+      // Usamos títulos fijos en español porque el backend busca por título exacto en la DB
       const notificationData = noRequierePagoVisita
-        ? { titulo: t('dashboard_client.notifications.pending_assignment'), nombre_rol: 'admin' }
-        : { titulo: t('dashboard_client.notifications.pending_visit_payment'), id_usuario: Number(userData.id_usuario) }
+        ? { titulo: 'Asignación Pendiente', nombre_rol: 'admin' }
+        : { titulo: 'Pago de visita pendiente', id_usuario: Number(userData.id_usuario) }
 
       await $api('/notificaciones/enviar', {
         method: 'POST',
@@ -2852,7 +2855,7 @@ const handleRequestService = async () => {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: t('dashboard_client.notifications.pending_assignment'),
+            titulo: 'Asignación Pendiente',
             nombre_rol: 'sa'
           }
         });
@@ -2862,9 +2865,8 @@ const handleRequestService = async () => {
       // No mostramos error al usuario para no afectar su experiencia
     }
 
-    const { locale } = useI18n()
     const newService = {
-      id: response.id_solicitud_servicio || Date.now(),
+      id: response.id_solicitud || Date.now(),
       title: serviceFormData.value.type,
       description: serviceFormData.value.description,
       date: new Date().toLocaleDateString(locale.value === 'es' ? 'es-HN' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -2909,7 +2911,12 @@ const handleRequestService = async () => {
     }, 1500)
     
   } catch (error) {
-    console.error('Error al enviar la solicitud de servicio:', error)
+    console.error('Error detallado al enviar la solicitud de servicio:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      error
+    })
     showToast(t('common.error'), t('dashboard_client.messages.request_error'), 'error')
   } finally {
     isSubmittingService.value = false;
