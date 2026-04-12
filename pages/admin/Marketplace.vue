@@ -72,7 +72,7 @@
          <!-- 1. Mis Paquetes (Carril Horizontal) -->
          <section v-if="showLanes && ownedPackages.length > 0" class="pl-4">
             <div class="flex items-center justify-between pr-4 mb-3">
-               <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">{{ $t('marketplace.my_packages') }}</h2>
+               <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">{{ $t('marketplace.owned_packages') }}</h2>
             </div>
             
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
@@ -81,7 +81,7 @@
                   :key="'owned-'+paquete.id_paquete_usuario"
                   @click="openPackageDetail(paquete)"
                   class="snap-center shrink-0 w-72 text-white rounded-2xl p-4 relative overflow-hidden shadow-lg group active:scale-95 transition-all duration-300"
-                  :class="getEstadoPaquete(paquete.id) === 'En uso' 
+                  :class="getEstadoPaquete(paquete.id) === t('marketplace.status.in_use') 
                      ? 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 shadow-emerald-500/50 ring-2 ring-emerald-400/50' 
                      : 'bg-gray-900 dark:bg-gray-800'"
                >
@@ -92,7 +92,7 @@
                      <div>
                         <span 
                            class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold mb-2 border backdrop-blur-md"
-                           :class="getEstadoPaquete(paquete.id) === 'En uso' 
+                           :class="getEstadoPaquete(paquete.id) === t('marketplace.status.in_use') 
                               ? 'bg-white text-emerald-600 border-white shadow-lg animate-pulse-subtle' 
                               : 'bg-white/20 border-white/10'"
                         >
@@ -111,7 +111,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                      </div>
                      <div v-if="paquete.fecha_compra" class="text-[9px] text-white/50 flex items-center gap-1.5 mt-1">
-                        <span class="font-bold uppercase tracking-tighter">{{ $t('marketplace.acquired') }}</span>
+                        <span class="font-bold uppercase tracking-tighter">{{ $t('marketplace.acquired_on') }}</span>
                         <span>{{ formatDate(paquete.fecha_compra) }}</span>
                      </div>
                   </div>
@@ -140,7 +140,7 @@
                         {{ $t('marketplace.redeemable_badge') }}
                      </div>
                      <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute bottom-0 left-0 right-0 bg-orange-500/90 text-white text-[8px] font-bold text-center py-0.5">
-                        {{ $t('marketplace.low_stock', { n: paquete.cantidad }) }}
+                        {{ $t('marketplace.left', { n: paquete.cantidad }) }}
                      </div>
                   </div>
 
@@ -163,7 +163,7 @@
 
          <!-- 3. Carril 2: Recomendados (4 items) -->
          <section v-if="showLanes && lane2.length > 0" class="pl-4">
-            <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">{{ $t('marketplace.might_interest_you') }}</h2>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">{{ $t('marketplace.recommended') }}</h2>
             <div class="flex overflow-x-auto gap-3 pb-4 pr-4 -ml-4 pl-4 snap-x no-scrollbar">
                <div 
                   v-for="paquete in lane2" 
@@ -182,7 +182,7 @@
                         {{ $t('marketplace.redeemable_badge') }}
                      </div>
                      <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute bottom-0 left-0 right-0 bg-orange-500/90 text-white text-[7px] font-bold text-center py-0.5 uppercase tracking-tighter">
-                        {{ $t('marketplace.low_stock_short', { n: paquete.cantidad }) }}
+                        {{ $t('marketplace.left', { n: paquete.cantidad }) }}
                      </div>
                   </div>
                   <div class="p-2">
@@ -215,8 +215,8 @@
                      <h3 class="text-white font-bold text-lg leading-tight mb-1">{{ paquete.nombre }}</h3>
                      <div class="flex items-center space-x-2">
                         <span class="text-white font-black text-sm">L. {{ formatNumber(paquete.costo) }}</span>
-                        <span v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="text-[9px] bg-emerald-500/90 text-white px-1.5 py-0.5 rounded font-bold">{{ $t('marketplace.redeemable_badge') }}</span>
-                        <span v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="text-[9px] bg-orange-500 text-white px-1.5 py-0.5 rounded font-bold italic animate-pulse">{{ $t('marketplace.low_stock_short', { n: paquete.cantidad }) }}</span>
+                        <span v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="text-[9px] bg-emerald-500/90 text-white px-1.5 py-0.5 rounded font-bold">{{ $t('marketplace.redeemable') }}</span>
+                        <span v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="text-[9px] bg-orange-500 text-white px-1.5 py-0.5 rounded font-bold italic animate-pulse">🔥 {{ $t('marketplace.left', { n: paquete.cantidad }) }}</span>
                      </div>
                   </div>
                </div>
@@ -252,13 +252,13 @@
                         
                         <!-- Etiqueta Canjeable -->
                         <div v-if="userCredit >= paquete.costo && (paquete.cantidad === null || paquete.cantidad >= 5)" class="absolute top-2 left-2 bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm z-10">
-                           {{ $t('marketplace.redeemable_badge') }}
+                           {{ $t('marketplace.redeemable') }}
                         </div>
 
                         <!-- Etiqueta Stock Bajo -->
                         <div v-if="paquete.cantidad !== null && paquete.cantidad > 0 && paquete.cantidad < 5" class="absolute top-2 left-2 bg-orange-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm z-10 flex items-center gap-1">
                            <span class="w-1 h-1 bg-white rounded-full animate-ping"></span>
-                           {{ $t('marketplace.low_stock', { n: paquete.cantidad }) }}
+                           {{ $t('marketplace.left', { n: paquete.cantidad }) }}
                         </div>
 
                         <!-- Mini Badge de Precio -->
@@ -278,7 +278,7 @@
                      <!-- Fechas de historial -->
                      <div v-if="paquete.fecha_compra || paquete.fecha_uso" class="mt-2 pt-1 border-t border-gray-100 dark:border-gray-700/50 space-y-0.5">
                         <div v-if="paquete.fecha_compra" class="flex items-center gap-1.5 text-[8px] text-gray-400">
-                           <span class="font-bold uppercase tracking-tighter">Compra:</span>
+                           <span class="font-bold uppercase tracking-tighter">{{ $t('marketplace.acquired_on') }}</span>
                            <span class="font-medium">{{ formatDate(paquete.fecha_compra) }}</span>
                         </div>
                         <div v-if="paquete.fecha_uso" class="flex items-center gap-1.5 text-[8px] text-blue-500">
@@ -345,7 +345,7 @@
                      class="absolute top-0 left-0 w-32 h-32 overflow-hidden pointer-events-none z-10"
                   >
                      <div class="absolute top-[32px] left-[-48px] w-[170px] h-7 bg-red-600 dark:bg-red-500 shadow-lg transform -rotate-45 border-y border-white/20 flex items-center justify-center">
-                        <span class="text-[10px] font-black text-white uppercase tracking-tighter">{{ $t('marketplace.low_stock_short', { n: selectedDetailPackage.cantidad }) }}</span>
+                        <span class="text-[10px] font-black text-white uppercase tracking-tighter">🔥 {{ $t('marketplace.left', { n: selectedDetailPackage.cantidad }) }}</span>
                      </div>
                   </div>
                </div>
@@ -361,8 +361,8 @@
                   </div>
 
                   <div class="prose prose-sm dark:prose-invert text-gray-500 dark:text-gray-400">
-                     <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">Descripción</h3>
-                     <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">{{ selectedDetailPackage.descripcion || 'Sin descripción detallada.' }}</p>
+                     <h3 class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-wider">{{ $t('marketplace.description_label') }}</h3>
+                     <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">{{ selectedDetailPackage.descripcion || $t('marketplace.no_description') }}</p>
                   </div>
                </div>
             </div>
@@ -375,10 +375,10 @@
               <div v-if="tienePaquete(selectedDetailPackage.id)">
                  <button 
                     @click="initiateUse(selectedDetailPackage)"
-                    :disabled="getEstadoPaquete(selectedDetailPackage.id) !== 'Adquirido'"
+                    :disabled="getEstadoPaquete(selectedDetailPackage.id) !== t('marketplace.status.acquired')"
                     class="w-full py-4 rounded-2xl font-black text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xl"
                  >
-                    {{ getEstadoPaquete(selectedDetailPackage.id) === 'En uso' ? $t('marketplace.in_use') : $t('marketplace.use_now') }}
+                    {{ getEstadoPaquete(selectedDetailPackage.id) === t('marketplace.status.in_use') ? $t('marketplace.status.in_use') : $t('marketplace.actions.use_now') }}
                  </button>
               </div>
               
@@ -388,8 +388,8 @@
                     class="flex-1 py-4 rounded-2xl font-black text-base text-white shadow-xl active:scale-95 transition-transform"
                     :class="userCredit >= selectedDetailPackage.costo ? 'bg-blue-600' : 'bg-gray-900 dark:bg-gray-700'"
                  >
-                    <span v-if="userCredit >= selectedDetailPackage.costo">{{ $t('marketplace.redeem_now') }}</span>
-                    <span v-else>{{ $t('marketplace.acquire_for', { cost: formatNumber(selectedDetailPackage.costo) }) }}</span>
+                    <span v-if="userCredit >= selectedDetailPackage.costo">{{ $t('marketplace.actions.redeem_now') }}</span>
+                    <span v-else>{{ $t('marketplace.actions.acquire', { price: formatNumber(selectedDetailPackage.costo) }) }}</span>
                  </button>
               </div>
            </div>
@@ -711,9 +711,9 @@ const ownedPackages = computed(() => {
       const estadoB = getEstadoPaquete(b.id)
       
       const prioridad = {
-         'En uso': 1,
-         'Adquirido': 2,
-         'Verificando': 3
+         [t('marketplace.status.in_use')]: 1,
+         [t('marketplace.status.acquired')]: 2,
+         [t('marketplace.status.verifying')]: 3
       }
       
       return (prioridad[estadoA] || 999) - (prioridad[estadoB] || 999)
@@ -870,16 +870,10 @@ const formatDate = (dateString) => {
 }
 
 const getTranslationKeyForStatus = (status) => {
-  const statusMap = {
-    'Verificando': 'marketplace.confirm_use_title',
-    'Adquirido': 'marketplace.use_now',
-    'En uso': 'marketplace.in_use',
-    'Verificando_pago': 'marketplace.activating'
-  }
   const keyMap = {
-     'Verificando': 'marketplace.verifying_short',
-     'Adquirido': 'marketplace.acquired_short',
-     'En uso': 'marketplace.in_use'
+     [t('marketplace.status.verifying')]: 'marketplace.verifying_short',
+     [t('marketplace.status.acquired')]: 'marketplace.acquired_short',
+     [t('marketplace.status.in_use')]: 'marketplace.status.in_use'
   }
   return keyMap[status] || status
 }
@@ -962,9 +956,9 @@ const tienePaquete = (id) => paquetesUsuario.value.some(p => p.id_paquete === id
 const getEstadoPaquete = (id) => {
    const ps = paquetesUsuario.value.filter(p => p.id_paquete === id)
    if (!ps.length) return ''
-   if (ps.some(p => p.estado === 'verificando_pago')) return 'Verificando'
-   if (ps.some(p => p.estado === 'activo')) return 'Adquirido'
-   if (ps.some(p => p.estado === 'utilizando')) return 'En uso'
+   if (ps.some(p => p.estado === 'verificando_pago')) return t('marketplace.status.verifying')
+   if (ps.some(p => p.estado === 'activo')) return t('marketplace.status.acquired')
+   if (ps.some(p => p.estado === 'utilizando')) return t('marketplace.status.in_use')
    return ''
 }
 

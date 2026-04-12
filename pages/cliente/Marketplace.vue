@@ -111,7 +111,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                      </div>
                      <div v-if="paquete.fecha_compra" class="text-[9px] text-white/50 flex items-center gap-1.5 mt-1">
-                        <span class="font-bold uppercase tracking-tighter">{{ $t('marketplace.adquired_on') }}</span>
+                        <span class="font-bold uppercase tracking-tighter">{{ $t('marketplace.acquired_on') }}</span>
                         <span>{{ formatDate(paquete.fecha_compra) }}</span>
                      </div>
                   </div>
@@ -277,7 +277,7 @@
                      <!-- Fechas de historial -->
                      <div v-if="paquete.fecha_compra || paquete.fecha_uso" class="mt-2 pt-1 border-t border-gray-100 dark:border-gray-700/50 space-y-0.5">
                         <div v-if="paquete.fecha_compra" class="flex items-center gap-1.5 text-[8px] text-gray-400">
-                           <span class="font-bold uppercase tracking-tighter">{{ $t('marketplace.adquired_on') }}</span>
+                           <span class="font-bold uppercase tracking-tighter">{{ $t('marketplace.acquired_on') }}</span>
                            <span class="font-medium">{{ formatDate(paquete.fecha_compra) }}</span>
                         </div>
                         <div v-if="paquete.fecha_uso" class="flex items-center gap-1.5 text-[8px] text-blue-500">
@@ -374,7 +374,7 @@
               <div v-if="tienePaquete(selectedDetailPackage.id)">
                  <button 
                     @click="initiateUse(selectedDetailPackage)"
-                    :disabled="getEstadoPaquete(selectedDetailPackage.id) !== $t('marketplace.status.adquired')"
+                    :disabled="getEstadoPaquete(selectedDetailPackage.id) !== $t('marketplace.status.acquired')"
                     class="w-full py-4 rounded-2xl font-black text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xl"
                  >
                     {{ getEstadoPaquete(selectedDetailPackage.id) === $t('marketplace.status.in_use') ? $t('marketplace.status.in_use') : $t('marketplace.actions.use_now') }}
@@ -388,7 +388,7 @@
                     :class="userCredit >= selectedDetailPackage.costo ? 'bg-blue-600' : 'bg-gray-900 dark:bg-gray-700'"
                  >
                     <span v-if="userCredit >= selectedDetailPackage.costo">{{ $t('marketplace.actions.redeem_now') }}</span>
-                    <span v-else>{{ $t('marketplace.actions.adquire', { price: formatNumber(selectedDetailPackage.costo) }) }}</span>
+                    <span v-else>{{ $t('marketplace.actions.acquire', { price: formatNumber(selectedDetailPackage.costo) }) }}</span>
                  </button>
               </div>
            </div>
@@ -711,7 +711,7 @@ const ownedPackages = computed(() => {
       
       const prioridad = {
          [t('marketplace.status.in_use')]: 1,
-         [t('marketplace.status.adquired')]: 2,
+         [t('marketplace.status.acquired')]: 2,
          [t('marketplace.status.verifying')]: 3
       }
       
