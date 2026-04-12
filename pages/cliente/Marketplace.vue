@@ -608,7 +608,7 @@ const config = useRuntimeConfig()
 const auth = useAuthStore()
 const router = useRouter()
 const { t, locale } = useI18n()
-const userCookie = useCookie('auth')
+const userCookie = useCookie('user')
 
 // SEO and Meta
 useHead({
@@ -679,6 +679,13 @@ watch(anyModalOpen, (newValue) => {
 
 const displayPackages = computed(() => {
   let list = paquetesMantenimiento.value
+  
+  // Filtrar por ciudad del usuario si existe
+  const userCityId = userCookie.value?.id_ciudad
+  if (userCityId) {
+    list = list.filter(p => !p.id_ciudad || p.id_ciudad === userCityId || (Array.isArray(p.ciudades) && p.ciudades.some(c => c.id_ciudad === userCityId)))
+  }
+
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     list = list.filter(p => p.nombre?.toLowerCase().includes(q) || p.descripcion?.toLowerCase().includes(q))
@@ -907,7 +914,9 @@ const cargarPaquetes = async () => {
       costo: parseFloat(p.costo),
       estado: p.estado,
       imagen: p.imagen_url,
-      cantidad: p.cantidad
+      cantidad: p.cantidad,
+      id_ciudad: p.id_ciudad,
+      ciudades: p.ciudades
     }))
   } finally { cargandoPaquetes.value = false }
 }

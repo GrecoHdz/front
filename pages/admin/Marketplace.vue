@@ -36,6 +36,28 @@
             :placeholder="$t('marketplace.search_placeholder')"
           >
         </div>
+
+        <!-- City Selector for Admin -->
+        <div class="mt-3">
+          <multiselect
+            v-model="selectedCity"
+            :options="availableCities"
+            :searchable="true"
+            :close-on-select="true"
+            :show-labels="false"
+            :placeholder="'Filtrar por ciudad'"
+            label="label"
+            track-by="id"
+            class="multiselect-custom"
+          >
+            <template #singleLabel="{ option }">
+              <span class="text-xs font-bold">{{ option.label }}</span>
+            </template>
+            <template #option="{ option }">
+              <span class="text-xs">{{ option.label }}</span>
+            </template>
+          </multiselect>
+        </div>
       </div>
 
       <!-- Filtros Globales (Sticky con Header) -->
@@ -602,6 +624,7 @@ import { useDebounceFn } from '@vueuse/core'
 import { useHead, useCookie, useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
+import Multiselect from 'vue-multiselect'
 
 const { $api } = useNuxtApp()
 const { locale, t } = useI18n()
@@ -626,6 +649,8 @@ const userCredit = ref(0)
 const searchQuery = ref('')
 const tempSearchQuery = ref('')
 const activeFilter = ref('todos')
+const selectedCity = ref(null)
+const availableCities = ref([])
 
 const debouncedSearch = useDebounceFn((val) => {
    searchQuery.value = val
@@ -679,6 +704,14 @@ watch(anyModalOpen, (newValue) => {
 
 const displayPackages = computed(() => {
   let list = paquetesMantenimiento.value
+  
+  // Filtrar por ciudad seleccionada o por la ciudad del usuario
+  const cityIdToFilter = selectedCity.value?.id || userCookie.value?.id_ciudad
+  
+  if (cityIdToFilter) {
+    list = list.filter(p => !p.id_ciudad || p.id_ciudad === cityIdToFilter || (Array.isArray(p.ciudades) && p.ciudades.some(c => c.id_ciudad === cityIdToFilter)))
+  }
+
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     list = list.filter(p => p.nombre?.toLowerCase().includes(q) || p.descripcion?.toLowerCase().includes(q))
@@ -910,6 +943,15 @@ const fetchUserCredit = async () => {
   } catch(e) {}
 }
 
+const cargarCiudades = async () => {
+  try {
+    const res = await $api('/ciudades', { method: 'GET' })
+    if (Array.isArray(res)) {
+      availableCities.value = res.map(c => ({ id: c.id_ciudad, label: c.nombre_ciudad }))
+    }
+  } catch (e) {}
+}
+
 const cargarPaquetes = async () => {
   cargandoPaquetes.value = true
   try {
@@ -927,7 +969,9 @@ const cargarPaquetes = async () => {
       costo: parseFloat(p.costo),
       estado: p.estado,
       imagen: p.imagen_url,
-      cantidad: p.cantidad
+      cantidad: p.cantidad,
+      id_ciudad: p.id_ciudad,
+      ciudades: p.ciudades
     }))
   } finally { cargandoPaquetes.value = false }
 }
@@ -1182,11 +1226,17 @@ const copyToClipboard = async (text) => {
 }
 
 onMounted(async () => {
-   await Promise.all([fetchUserCredit(), cargarPaquetes(), cargarPaquetesUsuario()])
-   isLoading.value = false
+  await Promise.all([
+    fetchUserCredit(),
+    cargarPaquetes(),
+    cargarPaquetesUsuario(),
+    cargarCiudades()
+  ])
+  isLoading.value = false
 })
 </script>
 
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
 <style scoped>
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 .no-scrollbar::-webkit-scrollbar { display: none; }

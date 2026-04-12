@@ -493,235 +493,223 @@
     
     <!-- Modales Legales relocados para mejor contexto de apilamiento -->
     <!-- Modal de Términos y Condiciones -->
-    <Transition name="modal">
+    <Transition name="fade">
       <div v-if="isTerminosModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <Transition name="backdrop">
-          <div v-if="isTerminosModalOpen" class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="isTerminosModalOpen = false"></div>
-        </Transition>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="isTerminosModalOpen = false"></div>
         
-        <Transition name="modal-content">
-          <div v-if="isTerminosModalOpen" class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <!-- Header -->
-            <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
-              <h3 class="text-xl font-black text-gray-900 dark:text-white">
-                {{ $t('profile.terms') }}
-              </h3>
-              <button 
-                @click="isTerminosModalOpen = false"
-                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            
-            <!-- Content -->
-            <div class="flex-1 p-6 overflow-y-auto text-gray-600 dark:text-gray-300 space-y-6">
-              <template v-if="Array.isArray(tm('profile.terms_content'))">
-                <section v-for="(section, index) in tm('profile.terms_content')" :key="index" class="space-y-2">
-                  <h4 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-black">
-                      {{ index + 1 }}
-                    </span>
-                    {{ rt(section.title) }}
-                  </h4>
-                  <div class="pl-8">
-                    <p class="text-sm leading-relaxed" v-html="rt(section.text)"></p>
-                    <ul v-if="section.list" class="mt-3 space-y-2">
-                      <li v-for="(item, i) in section.list" :key="i" class="flex items-start gap-2 text-sm">
-                        <i class="fas fa-check text-blue-500 mt-1 text-[10px]"></i>
-                        <span>{{ rt(item) }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </section>
-              </template>
-              <div v-else class="text-center py-10">
-                <p>{{ $t('common.error_unexpected') }}</p>
-              </div>
-            </div>
-            
-            <!-- Footer -->
-            <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-              <button 
-                @click="isTerminosModalOpen = false"
-                class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
-              >
-                {{ $t('common.close') }}
-              </button>
+        <div class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <!-- Header -->
+          <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+            <h3 class="text-xl font-black text-gray-900 dark:text-white">
+              {{ $t('profile.terms') }}
+            </h3>
+            <button 
+              @click="isTerminosModalOpen = false"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <!-- Content -->
+          <div class="flex-1 p-6 overflow-y-auto text-gray-600 dark:text-gray-300 space-y-6">
+            <template v-if="Array.isArray(tm('profile.terms_content'))">
+              <section v-for="(section, index) in tm('profile.terms_content')" :key="index" class="space-y-2">
+                <h4 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-black">
+                    {{ index + 1 }}
+                  </span>
+                  {{ rt(section.title) }}
+                </h4>
+                <div class="pl-8">
+                  <p class="text-sm leading-relaxed" v-html="rt(section.text)"></p>
+                  <ul v-if="section.list" class="mt-3 space-y-2">
+                    <li v-for="(item, i) in section.list" :key="i" class="flex items-start gap-2 text-sm">
+                      <i class="fas fa-check text-blue-500 mt-1 text-[10px]"></i>
+                      <span>{{ rt(item) }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </template>
+            <div v-else class="text-center py-10">
+              <p>{{ $t('common.error_unexpected') }}</p>
             </div>
           </div>
-        </Transition>
+          
+          <!-- Footer -->
+          <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+            <button 
+              @click="isTerminosModalOpen = false"
+              class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
+            >
+              {{ $t('common.close') }}
+            </button>
+          </div>
+        </div>
       </div>
     </Transition>
 
     <!-- Modal de Política de Privacidad -->
-    <Transition name="modal">
+    <Transition name="fade">
       <div v-if="isPrivacidadModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <Transition name="backdrop">
-          <div v-if="isPrivacidadModalOpen" class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="isPrivacidadModalOpen = false"></div>
-        </Transition>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="isPrivacidadModalOpen = false"></div>
         
-        <Transition name="modal-content">
-          <div v-if="isPrivacidadModalOpen" class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <!-- Header -->
-            <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
-              <h3 class="text-xl font-black text-gray-900 dark:text-white">
-                {{ $t('profile.privacy') }}
-              </h3>
-              <button 
-                @click="isPrivacidadModalOpen = false"
-                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            
-            <!-- Content -->
-            <div class="flex-1 p-6 overflow-y-auto text-gray-600 dark:text-gray-300 space-y-6">
-              <template v-if="Array.isArray(tm('profile.privacy_content'))">
-                <section v-for="(section, index) in tm('profile.privacy_content')" :key="index" class="space-y-2">
-                  <h4 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-black">
-                      {{ index + 1 }}
-                    </span>
-                    {{ rt(section.title) }}
-                  </h4>
-                  <div class="pl-8">
-                    <p class="text-sm leading-relaxed" v-html="rt(section.text)"></p>
-                    <ul v-if="section.list" class="mt-3 space-y-2">
-                      <li v-for="(item, i) in section.list" :key="i" class="flex items-start gap-2 text-sm">
-                        <i class="fas fa-check text-emerald-500 mt-1 text-[10px]"></i>
-                        <span>{{ rt(item) }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </section>
-              </template>
-              <div v-else class="text-center py-10">
-                <p>{{ $t('common.error_unexpected') }}</p>
-              </div>
-            </div>
-            
-            <!-- Footer -->
-            <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-              <button 
-                @click="isPrivacidadModalOpen = false"
-                class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black rounded-2xl shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
-              >
-                {{ $t('common.close') }}
-              </button>
+        <div class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <!-- Header -->
+          <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+            <h3 class="text-xl font-black text-gray-900 dark:text-white">
+              {{ $t('profile.privacy') }}
+            </h3>
+            <button 
+              @click="isPrivacidadModalOpen = false"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <!-- Content -->
+          <div class="flex-1 p-6 overflow-y-auto text-gray-600 dark:text-gray-300 space-y-6">
+            <template v-if="Array.isArray(tm('profile.privacy_content'))">
+              <section v-for="(section, index) in tm('profile.privacy_content')" :key="index" class="space-y-2">
+                <h4 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-black">
+                    {{ index + 1 }}
+                  </span>
+                  {{ rt(section.title) }}
+                </h4>
+                <div class="pl-8">
+                  <p class="text-sm leading-relaxed" v-html="rt(section.text)"></p>
+                  <ul v-if="section.list" class="mt-3 space-y-2">
+                    <li v-for="(item, i) in section.list" :key="i" class="flex items-start gap-2 text-sm">
+                      <i class="fas fa-check text-emerald-500 mt-1 text-[10px]"></i>
+                      <span>{{ rt(item) }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </template>
+            <div v-else class="text-center py-10">
+              <p>{{ $t('common.error_unexpected') }}</p>
             </div>
           </div>
-        </Transition>
+          
+          <!-- Footer -->
+          <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+            <button 
+              @click="isPrivacidadModalOpen = false"
+              class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black rounded-2xl shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
+            >
+              {{ $t('common.close') }}
+            </button>
+          </div>
+        </div>
       </div>
     </Transition>
 
     <!-- Modal de Acerca de MiSeguro -->
-    <Transition name="modal">
+    <Transition name="fade">
       <div v-if="isAcercaModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <Transition name="backdrop">
-          <div v-if="isAcercaModalOpen" class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="isAcercaModalOpen = false"></div>
-        </Transition>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="isAcercaModalOpen = false"></div>
         
-        <Transition name="modal-content">
-          <div v-if="isAcercaModalOpen" class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <!-- Header -->
-            <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
-              <div>
-                <h3 class="text-xl font-black text-gray-900 dark:text-white">
-                  {{ $t('about.title') }}
-                </h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('about.subtitle') }}</p>
-              </div>
-              <button 
-                @click="isAcercaModalOpen = false"
-                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <i class="fas fa-times"></i>
-              </button>
+        <div class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <!-- Header -->
+          <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+            <div>
+              <h3 class="text-xl font-black text-gray-900 dark:text-white">
+                {{ $t('about.title') }}
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('about.subtitle') }}</p>
             </div>
-            
-            <!-- Content -->
-            <div class="flex-1 p-6 overflow-y-auto text-gray-600 dark:text-gray-300 space-y-8">
-              <section class="text-center pb-4">
-                <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl text-white mb-4 shadow-xl mx-auto rotate-3">
-                  🏠
-                </div>
-                <h4 class="font-black text-2xl text-gray-900 dark:text-white mb-2">MiSeguro</h4>
-                <p class="text-sm leading-relaxed max-w-md mx-auto">{{ $t('about.hero_desc') }}</p>
-              </section>
-
-              <template v-if="Array.isArray(tm('about.content'))">
-                <section v-for="(section, index) in tm('about.content')" :key="index" class="space-y-4">
-                  <h4 class="font-bold text-lg text-gray-900 dark:text-white border-l-4 border-blue-500 pl-4">
-                    {{ rt(section.title) }}
-                  </h4>
-                  
-                  <div class="space-y-3">
-                    <p v-if="section.text" class="text-sm leading-relaxed pl-5">{{ rt(section.text) }}</p>
-
-                    <ul v-if="section.list" class="space-y-2 pl-5">
-                      <li v-for="(item, i) in section.list" :key="i" class="flex items-start gap-3 text-sm">
-                        <div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
-                        <span>{{ rt(item) }}</span>
-                      </li>
-                    </ul>
-
-                    <div v-if="section.grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-5">
-                      <div v-for="(val, vIdx) in section.grid" :key="vIdx" class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
-                        <h5 class="font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                          <i class="fas fa-star text-amber-400 text-xs"></i>
-                          {{ rt(val.title) }}
-                        </h5>
-                        <p class="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">{{ rt(val.desc) }}</p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </template>
-
-              <!-- Contact Section -->
-              <section class="space-y-4 pt-4">
-                <h4 class="font-bold text-lg text-gray-900 dark:text-white border-l-4 border-blue-500 pl-4">
-                  {{ $t('about.contact') }}
-                </h4>
-                <div class="pl-5 space-y-4">
-                  <p class="text-sm leading-relaxed">{{ $t('about.contact_desc') }}</p>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
-                      <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white shadow-md">
-                        <i class="fas fa-envelope"></i>
-                      </div>
-                      <div>
-                        <p class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">Email</p>
-                        <p class="text-sm font-medium dark:text-gray-200">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@MiSeguro.com' }}</p>
-                      </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
-                      <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-md">
-                        <i class="fas fa-phone-alt"></i>
-                      </div>
-                      <div>
-                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Teléfono</p>
-                        <p class="text-sm font-medium dark:text-gray-200">{{ contactInfo.find(c => c.type === 'phone')?.value || '+504 3300-0000' }}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </div>
-            
-            <!-- Footer -->
-            <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-              <button 
-                @click="isAcercaModalOpen = false"
-                class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
-              >
-                {{ $t('common.close') }}
-              </button>
-            </div>
+            <button 
+              @click="isAcercaModalOpen = false"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <i class="fas fa-times"></i>
+            </button>
           </div>
-        </Transition>
+          
+          <!-- Content -->
+          <div class="flex-1 p-6 overflow-y-auto text-gray-600 dark:text-gray-300 space-y-8">
+            <section class="text-center pb-4">
+              <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl text-white mb-4 shadow-xl mx-auto rotate-3">
+                🏠
+              </div>
+              <h4 class="font-black text-2xl text-gray-900 dark:text-white mb-2">MiSeguro</h4>
+              <p class="text-sm leading-relaxed max-w-md mx-auto">{{ $t('about.hero_desc') }}</p>
+            </section>
+
+            <template v-if="Array.isArray(tm('about.content'))">
+              <section v-for="(section, index) in tm('about.content')" :key="index" class="space-y-4">
+                <h4 class="font-bold text-lg text-gray-900 dark:text-white border-l-4 border-blue-500 pl-4">
+                  {{ rt(section.title) }}
+                </h4>
+                
+                <div class="space-y-3">
+                  <p v-if="section.text" class="text-sm leading-relaxed pl-5">{{ rt(section.text) }}</p>
+
+                  <ul v-if="section.list" class="space-y-2 pl-5">
+                    <li v-for="(item, i) in section.list" :key="i" class="flex items-start gap-3 text-sm">
+                      <div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
+                      <span>{{ rt(item) }}</span>
+                    </li>
+                  </ul>
+
+                  <div v-if="section.grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-5">
+                    <div v-for="(val, vIdx) in section.grid" :key="vIdx" class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+                      <h5 class="font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                        <i class="fas fa-star text-amber-400 text-xs"></i>
+                        {{ rt(val.title) }}
+                      </h5>
+                      <p class="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">{{ rt(val.desc) }}</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </template>
+
+            <!-- Contact Section -->
+            <section class="space-y-4 pt-4">
+              <h4 class="font-bold text-lg text-gray-900 dark:text-white border-l-4 border-blue-500 pl-4">
+                {{ $t('about.contact') }}
+              </h4>
+              <div class="pl-5 space-y-4">
+                <p class="text-sm leading-relaxed">{{ $t('about.contact_desc') }}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div class="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white shadow-md">
+                      <i class="fas fa-envelope"></i>
+                    </div>
+                    <div>
+                      <p class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">Email</p>
+                      <p class="text-sm font-medium dark:text-gray-200">{{ contactInfo.find(c => c.type === 'email')?.value || 'soporte@MiSeguro.com' }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                    <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-md">
+                      <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div>
+                      <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Teléfono</p>
+                      <p class="text-sm font-medium dark:text-gray-200">{{ contactInfo.find(c => c.type === 'phone')?.value || '+504 3300-0000' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          
+          <!-- Footer -->
+          <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+            <button 
+              @click="isAcercaModalOpen = false"
+              class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform active:scale-95 text-sm uppercase tracking-widest"
+            >
+              {{ $t('common.close') }}
+            </button>
+          </div>
+        </div>
       </div>
     </Transition>
 
@@ -743,7 +731,6 @@
           leave-to-class="backdrop-leave-to"
         >
           <div 
-            v-if="showRenewalModal"
             class="absolute inset-0 bg-black/60 backdrop-blur-sm"
             @click="showRenewalModal = false"
           ></div>
@@ -758,7 +745,6 @@
           leave-to-class="modal-content-leave-to"
         >
           <div 
-            v-if="showRenewalModal"
             class="bg-white dark:bg-gray-800 rounded-2xl p-5 w-full max-w-sm max-h-[90vh] flex flex-col relative shadow-2xl border border-gray-200 dark:border-gray-700"
             @click.stop
           >
