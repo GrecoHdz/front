@@ -82,19 +82,9 @@ export default defineNuxtPlugin(() => {
   try {
     return await $fetch(url, fetchOptions);
   } catch (error: any) {
-    const status = error?.response?.status || error?.statusCode || error?.status || 0;
+    const status = error?.response?.status || error?.statusCode || error?.status;
 
     console.log(`❌ [Interceptor] Error en ${url}. Status: ${status}`, error);
-
-    // Si es un error de parseo (SyntaxError), intentar ver qué devolvió el servidor
-    if (error.name === 'SyntaxError' || (Number(status) >= 500)) {
-      try {
-        const text = await error.response?.text();
-        if (text) console.error(`📄 [Interceptor] Respuesta cruda del servidor:`, text);
-      } catch (e) {
-        // Ignorar si no se puede leer el texto
-      }
-    }
 
     // 3️⃣ Si NO es 401 o la ruta es pública → propagar error
     if (status != 401 || isExcluded) {

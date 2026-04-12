@@ -1272,7 +1272,7 @@ import Multiselect from 'vue-multiselect'
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const router = useRouter()
 const userCookie = useCookie('user')
@@ -2050,10 +2050,10 @@ const sendWhatsAppMessage = async (data, type) => {
     } else if (type === 'taxi_vip') {
       // Mensaje para solicitud de taxi VIP
       message = `*${t('dashboard_client.taxi_whatsapp.title')}*\n\n` +
-        `*${t('profile.dashboard.welcome')}* ${data.nombre_usuario}\n` +
+        `*${t('dashboard_client.welcome', { name: data.nombre_usuario })}* \n` +
         `*${t('dashboard_client.pickup')}:* ${data.colonia}\n` +
         `*${t('dashboard_client.destination')}:* ${data.direccion}\n` +
-        `*${t('services.labels.details')}:* ${data.description}\n\n` +
+        `*${t('dashboard_client.description')}:* ${data.description}\n\n` +
         `${t('dashboard_client.taxi_whatsapp.footer')}`;
     }
     
@@ -2768,8 +2768,6 @@ const resetCredito = async () => {
 const handleRequestService = async () => {
   if (isSubmittingService.value) return;
   
-  const { locale } = useI18n()
-  
   try {
     isSubmittingService.value = true;
     
@@ -2802,7 +2800,7 @@ const handleRequestService = async () => {
     // Taxi VIP no requiere pago de visita y va directo a asignacion
     const noRequierePagoVisita = tieneMembresiaActiva || isTaxiVIP
     const estadoInicial = noRequierePagoVisita ? 'pendiente_asignacion' : 'pendiente_pagovisita'
-    const visitaPagada = noRequierePagoVisita ? 0 : 1 
+    const visitaPagada = !!noRequierePagoVisita // Usar booleano real para la DB
 
     const isBarberia = selectedService.name === 'Barbería'
     const isEnLocal = serviceFormData.value.barberiaOption === 'en local'
@@ -2833,18 +2831,27 @@ const handleRequestService = async () => {
       pagar_visita: visitaPagada,
       estado: estadoInicial
     }
+    
+    // Log de datos enviados (Front -> Back)
+    console.log('--- ENVIANDO SOLICITUD DE SERVICIO ---', {
+      service: selectedService.name,
+      noRequierePagoVisita,
+      requestData
+    })
 
     const response = await $api('/solicitudservicio', {
       method: 'POST',
       body: requestData
     })
 
+    // Log de respuesta del servidor (Back -> Front)
+    console.log('--- RESPUESTA DEL SERVIDOR ---', response)
+
     // Enviar notificación según el tipo de membresía
     try {
-      // Usamos títulos fijos en español porque el backend busca por título exacto en la DB
       const notificationData = noRequierePagoVisita
-        ? { titulo: 'Asignación Pendiente', nombre_rol: 'admin' }
-        : { titulo: 'Pago de visita pendiente', id_usuario: Number(userData.id_usuario) }
+        ? { titulo: t('dashboard_client.notifications.pending_assignment'), nombre_rol: 'admin' }
+        : { titulo: t('dashboard_client.notifications.pending_visit_payment'), id_usuario: Number(userData.id_usuario) }
 
       await $api('/notificaciones/enviar', {
         method: 'POST',
@@ -2855,7 +2862,7 @@ const handleRequestService = async () => {
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: 'Asignación Pendiente',
+            titulo: t('dashboard_client.notifications.pending_assignment'),
             nombre_rol: 'sa'
           }
         });
@@ -2866,7 +2873,7 @@ const handleRequestService = async () => {
     }
 
     const newService = {
-      id: response.id_solicitud || Date.now(),
+      id: response.id_solicitud || response.id_solicitud_servicio || Date.now(),
       title: serviceFormData.value.type,
       description: serviceFormData.value.description,
       date: new Date().toLocaleDateString(locale.value === 'es' ? 'es-HN' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -2911,8 +2918,8 @@ const handleRequestService = async () => {
     }, 1500)
     
   } catch (error) {
-    console.error('Error detallado al enviar la solicitud de servicio:', {
-      name: error.name,
+    // Log de error detallado
+    console.error('--- ERROR EN SOLICITUD DE SERVICIO ---', {
       message: error.message,
       stack: error.stack,
       error
