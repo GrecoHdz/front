@@ -577,7 +577,7 @@
                 </label>
                 <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
                   <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ $t('auth.profile.membership.loading_accounts') }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ $t('profile.membership.loading_accounts') }}</p>
                 </div>
                 <div v-else class="space-y-3">
                   <multiselect
@@ -614,7 +614,7 @@
                     v-if="getSelectedAccount" 
                     class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
                   >
-                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $t('auth.profile.membership.account_details') }}</h4>
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $t('profile.membership.account_details') }}</h4>
                     <div class="space-y-1">
                       <div class="flex justify-between">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Banco:</span>
@@ -629,7 +629,7 @@
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ getSelectedAccount.tipo_cuenta }}</span>
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('auth.profile.membership.bank_account') }}:</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.membership.bank_account') }}:</span>
                         <div class="flex items-center space-x-2">
                           <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
                             {{ getSelectedAccount.numero_cuenta.length > 10 ? getSelectedAccount.numero_cuenta.slice(0, 10) + '...' : getSelectedAccount.numero_cuenta }}
@@ -682,7 +682,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      {{ $t('auth.profile.membership.processing') }}
+                      {{ $t('profile.membership.processing') }}
                     </span>
                   </button>
                 </div> 
@@ -765,7 +765,7 @@
 
             <!-- Información de Pago -->
             <div class="space-y-3">
-              <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('auth.profile.membership.select_account_desc') }}</h4>
+              <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('profile.membership.select_account_desc') }}</h4>
               
               <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
@@ -902,7 +902,7 @@
 
             <!-- Información de Pago -->
             <div class="space-y-3">
-              <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('auth.profile.membership.select_account_desc') }}</h4>
+              <h4 class="text-sm font-black text-gray-900 dark:text-white">{{ $t('profile.membership.select_account_desc') }}</h4>
               
               <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
@@ -1149,7 +1149,7 @@
                 </div>
                 <div>
                   <h3 class="text-base font-black text-gray-900 dark:text-white">
-                    {{ cancelModalTexts[selectedService.rawStatus]?.title || $t('services_page.modals.cancel_title') }}
+                    {{ cancelModalTexts[selectedService.rawStatus]?.title || $t('services_page.modal.cancel_service') }}
                   </h3>
                   <p class="text-xs text-gray-600 dark:text-gray-400">#{{ formatDateDDMMYY(selectedService.rawDate) }}-{{ selectedService.id }}</p>
                 </div>
@@ -1167,19 +1167,19 @@
             <div class="space-y-3">
               <div class="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-lg mb-3">
                 <p class="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                  {{ cancelModalTexts[selectedService.rawStatus]?.message || $t('services_page.modals.cancel_message') }}
+                  {{ cancelModalTexts[selectedService.rawStatus]?.message || $t('services_page.modal.cancel_warning') }}
                 </p>
               </div>
 
               <div class="space-y-2">
                 <p class="text-gray-600 dark:text-gray-300 text-sm">
-                  {{ $t('services_page.modals.cancel_reason') }}:
+                  {{ $t('services_page.modal.cancel_reason') }}:
                 </p>
                 <textarea 
                   v-model="cancelAdditionalInfo" 
                   rows="3" 
                   class="w-full px-3 py-3 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder-gray-400 transition-all duration-200"
-                  :placeholder="$t('services_page.modals.cancel_placeholder')"
+                  :placeholder="$t('services_page.modal.cancel_placeholder')"
                 ></textarea> 
               </div>
             </div>
@@ -1199,7 +1199,7 @@
               class="px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-rose-500 rounded-lg hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="!isCancelling">
-                {{ $t('services_page.modals.confirm_cancel') }}
+                {{ $t('services_page.modal.cancel_confirm') }}
               </span>
               <span v-else class="flex items-center justify-center">
                 <svg class="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -4495,4 +4495,39 @@ onMounted(async () => {
   }
 });
 
-</script> 
+</script>
+
+<style>
+/* Estilos personalizados para Multiselect - Limpieza total */
+.multiselect-custom :deep(.multiselect__option) {
+  text-shadow: none !important;
+}
+
+.multiselect-custom :deep(.multiselect__option--selected),
+.multiselect-custom :deep(.multiselect__option--selected:hover),
+.multiselect-custom :deep(.multiselect__option--selected.multiselect__option--highlight) {
+  background: transparent !important;
+  color: inherit !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+}
+
+.multiselect-custom :deep(.multiselect__option--highlight),
+.multiselect-custom :deep(.multiselect__option--highlight:hover) {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: inherit !important;
+  text-shadow: none !important;
+}
+
+.multiselect-custom :deep(.multiselect__single),
+.multiselect-custom :deep(.multiselect__input) {
+  background: transparent !important;
+  text-shadow: none !important;
+}
+
+.multiselect-custom :deep(.multiselect__option--highlight:after),
+.multiselect-custom :deep(.multiselect__option--selected:after) {
+  display: none !important;
+}
+</style>
+

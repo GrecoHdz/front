@@ -51,7 +51,9 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "days_ago": "{n} days ago",
-    "weeks_ago": "{n} weeks ago"
+    "weeks_ago": "{n} weeks ago",
+    "go_back": "Go back",
+    "cancelling": "Cancelling"
   },
   "time": {
     "just_now": "A few minutes ago",
@@ -689,7 +691,11 @@
       "report_problem": "Report Problem",
       "cancel_service": "Cancel Service",
       "cancel_trip": "Cancel Trip",
-      "cancel_request": "Cancel Request"
+      "cancel_request": "Cancel Request",
+      "cancel_warning": "This action cannot be undone. Please provide a reason for cancellation.",
+      "cancel_reason": "Cancellation reason",
+      "cancel_placeholder": "Briefly describe the reason...",
+      "cancel_confirm": "Confirm Cancellation"
     },
     "steps": {
       "pending_payment": {

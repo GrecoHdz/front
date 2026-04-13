@@ -64,7 +64,9 @@
     "today": "Hoy",
     "yesterday": "Ayer",
     "days_ago": "Hace {n} días",
-    "weeks_ago": "Hace {n} semanas"
+    "weeks_ago": "Hace {n} semanas",
+    "go_back": "Volver",
+    "cancelling": "Cancelando"
   },
   "time": {
     "just_now": "Hace unos minutos",
@@ -702,7 +704,11 @@
       "report_problem": "Reportar Problema",
       "cancel_service": "Cancelar Servicio",
       "cancel_trip": "Cancelar Viaje",
-      "cancel_request": "Cancelar Solicitud"
+      "cancel_request": "Cancelar Solicitud",
+      "cancel_warning": "Esta acción no se puede deshacer. Por favor indica el motivo de la cancelación.",
+      "cancel_reason": "Motivo de cancelación",
+      "cancel_placeholder": "Describe brevemente el motivo...",
+      "cancel_confirm": "Confirmar Cancelación"
     },
     "steps": {
       "pending_payment": {
