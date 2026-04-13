@@ -105,7 +105,7 @@
                   
                   <!-- Badges for extra info -->
                   <div class="flex flex-col items-end gap-1">
-                    <span v-if="service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita || service.rawStatus === 'pendiente_pagoservicio'" class="animate-pulse inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500 dark:border-amber-500 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 uppercase tracking-wide shadow-sm">
+                    <span v-if="service.rawStatus === 'pendiente_pagovisita' || service.rawStatus === 'pendiente_pagoservicio'" class="animate-pulse inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500 dark:border-amber-500 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 uppercase tracking-wide shadow-sm">
                       🟡 {{ $t('services_page.pending_payment') }}
                     </span>
                     <span v-if="service.rawStatus === 'pendiente_cotizacion'" class="animate-pulse inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500 dark:border-amber-500 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 uppercase tracking-wide shadow-sm">
@@ -373,7 +373,7 @@
             </div> 
 
             <!-- Acciones para Servicio Con Pago Pendiente -->
-            <div v-if="selectedService.rawStatus === 'pendiente_pagovisita' && selectedService.pagar_visita" class="mb-3"> 
+            <div v-if="selectedService.rawStatus === 'pendiente_pagovisita'" class="mb-3"> 
               <button 
                 @click="openVisitPaymentModal(selectedService)"
                 class="w-full flex items-center justify-between p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mb-2"
@@ -2678,7 +2678,7 @@ const hasVisibleActions = computed(() => {
   const status = selectedService.value.rawStatus;
   
   if (['pendiente_asignacion', 'asignado', 'cotizacion_pendiente', 'cotizacion_aprobada', 'cotizacion_rechazada'].includes(status)) return true;
-  if (status === 'pendiente_pagovisita' && selectedService.value.pagar_visita) return true;
+  if (status === 'pendiente_pagovisita') return true;
   if (status === 'pendiente_pagoservicio') return true;
   if (status === 'pendiente_cotizacion') return true;
   if (status === 'finalizado') return true;
@@ -2832,7 +2832,7 @@ const getCurrentStepNumber = (status) => {
 }
 
 const isActionRequired = (service) => {
-  return (service.rawStatus === 'pendiente_pagovisita' && service.pagar_visita) || 
+  return service.rawStatus === 'pendiente_pagovisita' || 
          service.rawStatus === 'pendiente_pagoservicio' || 
          service.rawStatus === 'pendiente_cotizacion' ||
          service.rawStatus === 'finalizado';

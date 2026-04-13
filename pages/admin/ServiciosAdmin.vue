@@ -103,76 +103,83 @@
                 <!-- Lista de Servicios con Acción Pendiente -->
                 <div v-else> 
                   <div v-if="pendingServices.length > 0" class="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div 
-                      v-for="service in pendingServices" 
-                      :key="service.id_solicitud"
-                      @click="viewService(service)"
-                      class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer"
-                    >
-                      <!-- Service Header -->
-                      <div class="flex items-start justify-between mb-1.5">
-                        <div class="flex items-center space-x-1.5">
-                          <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs"
-                               :class="getServiceTypeColor(service.servicio.nombre)">
-                            <span>{{ getServiceTypeIcon(service.servicio.nombre) }}</span>
+                    <template v-for="service in pendingServices" :key="service.id_solicitud">
+
+                      <!-- ===== TARJETA TAXI VIP (ancho completo) ===== -->
+                      <div
+                        v-if="service.servicio.nombre === 'Taxi VIP'"
+                        @click="viewService(service)"
+                        class="col-span-2 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800/60 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer relative overflow-hidden"
+                      >
+                        <!-- Fondo decorativo sutil -->
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -translate-y-6 translate-x-6 pointer-events-none"></div>
+
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-2">
+                          <div class="flex items-center space-x-2">
+                            <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center bg-blue-600 text-white text-sm shadow-sm">
+                              🚕
+                            </div>
+                            <div class="min-w-0">
+                              <p class="font-black text-blue-900 dark:text-blue-100 text-[11px] sm:text-xs leading-tight">Taxi VIP</p>
+                              <p class="text-[8px] text-blue-500 dark:text-blue-400">#{{ formatDateDDMMYY(service.fecha_solicitud) }}-{{ service.id_solicitud }}</p>
+                            </div>
                           </div>
-                          <div class="min-w-0">
-                            <p class="font-bold text-gray-900 dark:text-white text-[10px] sm:text-xs leading-tight line-clamp-2">{{ service.servicio.nombre }}</p>
-                            <p class="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">#{{ formatDateDDMMYY(service.fecha_solicitud) }}-{{ service.id_solicitud }}</p>
+                          <div class="flex items-center space-x-1.5">
+                            <span class="text-[8px] px-1.5 py-0.5 rounded-full font-bold"
+                                  :class="getStatusBadgeColor(service.estado)">
+                              {{ getStatusText(service.estado) }}
+                            </span>
                           </div>
-                        </div> 
-                      </div>
-                      
-                      <!-- Client Info - Compact -->
-                      <div class="mb-1">
-                        <div class="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-300">
-                          <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        </div>
+
+                        <!-- Cliente -->
+                        <div class="flex items-center space-x-1.5 mb-2">
+                          <svg class="w-3 h-3 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                          <span class="truncate text-[10px] sm:text-xs">{{ service.cliente.nombre }}</span>
+                          <span class="text-[10px] font-semibold text-blue-800 dark:text-blue-200 truncate">{{ service.cliente.nombre }}</span>
                         </div>
-                        <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span class="truncate text-[10px] sm:text-xs">{{ service.colonia }}</span>
+
+                        <!-- Recogida → Destino -->
+                        <div class="grid grid-cols-2 gap-1.5 mb-2">
+                          <div class="bg-blue-100 dark:bg-blue-800/40 p-1.5 rounded-lg border border-blue-200 dark:border-blue-700/50">
+                            <p class="text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-0.5">📍 Recogida</p>
+                            <p class="text-[10px] font-bold text-blue-900 dark:text-blue-100 truncate leading-tight">{{ service.colonia }}</p>
+                          </div>
+                          <div class="bg-emerald-100 dark:bg-emerald-800/40 p-1.5 rounded-lg border border-emerald-200 dark:border-emerald-700/50">
+                            <p class="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-0.5">🏁 Destino</p>
+                            <p class="text-[10px] font-bold text-emerald-900 dark:text-emerald-100 truncate leading-tight">{{ service.descripcion }}</p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <!-- Status and Actions -->
-                      <div class="flex items-center justify-between pt-0 border-t border-gray-100 dark:border-gray-700">
-                        <span class="text-[8px] sm:text-[8px] px-1 py-0.5 rounded-full font-medium"
-                              :class="getStatusBadgeColor(service.estado)">
-                          {{ getStatusText(service.estado) }}
-                        </span>
-                        
-                        <div class="flex space-x-0.5">
+
+                        <!-- Acciones -->
+                        <div class="flex items-center justify-end space-x-0.5 pt-1.5 border-t border-blue-200/60 dark:border-blue-700/40">
                           <button 
                             v-if="service.estado === 'pendiente_asignacion'"
                             @click.stop="assignTechnician(service)"
-                            class="p-0.5 text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300 transition-all duration-300 transform hover:scale-110"
-                            title="Asignar técnico"
+                            class="p-1 text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 transition-all hover:scale-110"
+                            title="Asignar conductor"
                           >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
                           </button>
                           <button 
-                            v-if="service.estado === 'verificando_pagovisita'"
-                            @click.stop="confirmPaymentVisit(service)"
-                            class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
-                            title="Gestionar pago de visita"
+                            v-if="service.estado === 'asignado'"
+                            @click.stop="assignTechnician(service)"
+                            class="p-1 text-orange-500 hover:text-orange-600 transition-all hover:scale-110"
+                            title="Cambiar conductor"
                           >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                           </button>
                           <button 
-                            v-if="service.estado === 'verificando_pagoservicio'"
-                            @click.stop="confirmPaymentService(service)"
-                            class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
-                            title="Gestionar pago de servicio"
+                            v-if="service.estado === 'verificando_pagovisita'"
+                            @click.stop="confirmPaymentVisit(service)"
+                            class="p-1 text-orange-500 hover:text-orange-600 transition-all hover:scale-110"
+                            title="Gestionar pago"
                           >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -181,7 +188,7 @@
                           <button 
                             v-if="service.estado === 'pendiente_pagovisita' || service.estado === 'asignado'"
                             @click.stop="confirmDeleteService(service)"
-                            class="p-0.5 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-all duration-300 transform hover:scale-110"
+                            class="p-1 text-red-500 hover:text-red-600 transition-all hover:scale-110"
                             title="Eliminar solicitud"
                           >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,18 +196,8 @@
                             </svg>
                           </button>
                           <button 
-                            v-if="service.estado === 'asignado'"
-                            @click.stop="assignTechnician(service)"
-                            class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
-                            title="Cambiar técnico"
-                          >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                          </button>
-                          <button 
                             @click.stop="viewService(service)"
-                            class="p-0.5 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 transform hover:scale-110"
+                            class="p-1 text-blue-500 hover:text-blue-600 transition-all hover:scale-110"
                             title="Ver detalles"
                           >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,7 +207,117 @@
                           </button>
                         </div>
                       </div>
-                    </div>
+
+                      <!-- ===== TARJETA SERVICIO NORMAL ===== -->
+                      <div 
+                        v-else
+                        @click="viewService(service)"
+                        class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer"
+                      >
+                        <!-- Service Header -->
+                        <div class="flex items-start justify-between mb-1.5">
+                          <div class="flex items-center space-x-1.5">
+                            <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs"
+                                 :class="getServiceTypeColor(service.servicio.nombre)">
+                              <span>{{ getServiceTypeIcon(service.servicio.nombre) }}</span>
+                            </div>
+                            <div class="min-w-0">
+                              <p class="font-bold text-gray-900 dark:text-white text-[10px] sm:text-xs leading-tight line-clamp-2">{{ service.servicio.nombre }}</p>
+                              <p class="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">#{{ formatDateDDMMYY(service.fecha_solicitud) }}-{{ service.id_solicitud }}</p>
+                            </div>
+                          </div> 
+                        </div>
+                        
+                        <!-- Client Info - Compact -->
+                        <div class="mb-1">
+                          <div class="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-300">
+                            <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span class="truncate text-[10px] sm:text-xs">{{ service.cliente.nombre }}</span>
+                          </div>
+                          <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="truncate text-[10px] sm:text-xs">{{ service.colonia }}</span>
+                          </div>
+                        </div>
+                        
+                        <!-- Status and Actions -->
+                        <div class="flex items-center justify-between pt-0 border-t border-gray-100 dark:border-gray-700">
+                          <span class="text-[8px] sm:text-[8px] px-1 py-0.5 rounded-full font-medium"
+                                :class="getStatusBadgeColor(service.estado)">
+                            {{ getStatusText(service.estado) }}
+                          </span>
+                          
+                          <div class="flex space-x-0.5">
+                            <button 
+                              v-if="service.estado === 'pendiente_asignacion'"
+                              @click.stop="assignTechnician(service)"
+                              class="p-0.5 text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300 transition-all duration-300 transform hover:scale-110"
+                              title="Asignar técnico"
+                            >
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                              </svg>
+                            </button>
+                            <button 
+                              v-if="service.estado === 'verificando_pagovisita'"
+                              @click.stop="confirmPaymentVisit(service)"
+                              class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
+                              title="Gestionar pago de visita"
+                            >
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </button>
+                            <button 
+                              v-if="service.estado === 'verificando_pagoservicio'"
+                              @click.stop="confirmPaymentService(service)"
+                              class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
+                              title="Gestionar pago de servicio"
+                            >
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </button>
+                            <button 
+                              v-if="service.estado === 'pendiente_pagovisita' || service.estado === 'asignado'"
+                              @click.stop="confirmDeleteService(service)"
+                              class="p-0.5 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-all duration-300 transform hover:scale-110"
+                              title="Eliminar solicitud"
+                            >
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                            <button 
+                              v-if="service.estado === 'asignado'"
+                              @click.stop="assignTechnician(service)"
+                              class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
+                              title="Cambiar técnico"
+                            >
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                            </button>
+                            <button 
+                              @click.stop="viewService(service)"
+                              class="p-0.5 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 transform hover:scale-110"
+                              title="Ver detalles"
+                            >
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                    </template>
                   </div>
                   
                   <!-- Mensaje cuando no hay servicios -->
