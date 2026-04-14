@@ -39,7 +39,7 @@
         <div class="flex flex-col items-center text-center mb-6">
           <div class="relative group">
             <div 
-              @click="isPhotoModalOpen = true"
+              @click="isIdentityModalOpen = true"
               class="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl text-white mb-3 shadow-xl overflow-hidden bg-gradient-to-br from-emerald-400 to-teal-500 border-4 border-white dark:border-gray-800 transition-transform duration-300 group-hover:scale-105 cursor-pointer"
             >
               <img 
@@ -62,7 +62,7 @@
               </div>
             </div>
             <button 
-              @click="isPhotoModalOpen = true"
+              @click="isIdentityModalOpen = true"
               class="absolute -bottom-1 -right-1 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-all border border-gray-100 dark:border-gray-700"
               :title="$t('profile.change_photo')"
             >
@@ -689,28 +689,53 @@
       </div>
     </Transition>
 
-    <!-- Modal para Gestionar Foto de Perfil -->
+    <!-- Modal Unificado: Foto de Perfil + Verificación de Identidad -->
     <Transition name="fade">
-      <div v-if="isPhotoModalOpen" @click.self="isPhotoModalOpen = false" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div v-if="isIdentityModalOpen" @click.self="isIdentityModalOpen = false" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <Transition name="modal">
-          <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
-            <div class="p-6">
-              <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-gray-900 dark:text-white">Foto de Perfil</h3>
-                <button @click="isPhotoModalOpen = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+          <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="p-5 pb-3 flex-shrink-0">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400 text-lg"></i>
+                  <h3 class="text-lg font-black text-gray-900 dark:text-white">Verificación de Cuenta</h3>
+                  <svg v-if="user.identidad_url" class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <button @click="isIdentityModalOpen = false" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
                   <i class="fas fa-times"></i>
                 </button>
               </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Sube ambas fotografías para completar tu verificación</p>
+            </div>
 
-              <div class="flex flex-col items-center gap-6">
-                <div class="w-32 h-32 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-4 border-emerald-500/20">
-                  <img v-if="user.imagen_url" :src="user.imagen_url" class="w-full h-full object-cover" />
-                  <div v-else class="w-full h-full flex items-center justify-center text-4xl text-gray-400">
-                    {{ userInitials }}
-                  </div>
+            <!-- Scrollable body -->
+            <div class="overflow-y-auto flex-1 px-5 pb-5 space-y-5">
+
+              <!-- ===== SECCIÓN 1: Foto de Perfil ===== -->
+              <div class="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2.5 flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
+                  <i class="fas fa-user-circle text-emerald-600 dark:text-emerald-400 text-sm"></i>
+                  <h4 class="text-sm font-bold text-emerald-800 dark:text-emerald-300">Foto de Perfil</h4>
+                  <span v-if="user.imagen_url" class="ml-auto text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full">✓ Subida</span>
                 </div>
-
-                <div class="w-full space-y-3">
+                <div class="p-4">
+                  <div class="flex items-center gap-4 mb-3">
+                    <!-- Preview actual -->
+                    <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-emerald-500/20 flex-shrink-0">
+                      <img v-if="user.imagen_url" :src="user.imagen_url" class="w-full h-full object-cover" />
+                      <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+                        <i class="fas fa-user text-2xl"></i>
+                      </div>
+                    </div>
+                    <div class="flex-1 text-xs text-gray-500 dark:text-gray-400">
+                      <p>Una foto clara de tu rostro. Esta se mostrará en tu perfil.</p>
+                      <p class="mt-1 text-gray-400">Máx. 5MB · JPG, PNG, WEBP</p>
+                    </div>
+                  </div>
+                  <!-- Input file oculto -->
                   <input 
                     type="file" 
                     ref="fileInput" 
@@ -721,89 +746,77 @@
                   <button 
                     @click="$refs.fileInput.click()"
                     :disabled="isUploading"
-                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-md"
+                    class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-xs shadow-sm"
                   >
                     <i v-if="isUploading" class="fas fa-circle-notch fa-spin"></i>
-                    <i v-else class="fas fa-upload"></i>
-                    {{ isUploading ? 'Subiendo...' : 'Subir Nueva Foto' }}
+                    <i v-else class="fas fa-camera"></i>
+                    {{ isUploading ? 'Subiendo...' : (user.imagen_url ? 'Cambiar Foto de Perfil' : 'Subir Foto de Perfil') }}
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </Transition>
 
-    <!-- Modal para Verificación de Identidad -->
-    <Transition name="fade">
-      <div v-if="isIdentityModalOpen" @click.self="isIdentityModalOpen = false" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <Transition name="modal">
-          <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800">
-            <div class="p-6">
-              <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center gap-2">
-                  <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400 text-xl"></i>
-                  <h3 class="text-xl font-black text-gray-900 dark:text-white">Verificación de ID</h3>
-                  <svg v-if="user.identidad_url" class="w-6 h-6 text-emerald-500 animate-bounce-subtle" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                  </svg>
-                </div> 
+              <!-- ===== SECCIÓN 2: Foto de Identificación ===== -->
+              <div class="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="bg-blue-50 dark:bg-blue-900/20 px-4 py-2.5 flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
+                  <i class="fas fa-id-card text-blue-600 dark:text-blue-400 text-sm"></i>
+                  <h4 class="text-sm font-bold text-blue-800 dark:text-blue-300">Identificación (DNI)</h4>
+                  <span v-if="user.identidad_url" class="ml-auto flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full">
+                    <i class="fas fa-check-circle"></i> Enviada
+                  </span>
+                  <span v-else class="ml-auto text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded-full">
+                    Pendiente
+                  </span>
+                </div>
+                <div class="p-4 space-y-3">
+
+                  <!-- Ya existe: solo mostrar imagen + aviso de bloqueo -->
+                  <template v-if="user.identidad_url">
+                    <div class="aspect-[1.6/1] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-emerald-500/20">
+                      <img :src="user.identidad_url" class="w-full h-full object-cover pointer-events-none" />
+                    </div>
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5">
+                      <i class="fas fa-lock text-gray-400 text-sm flex-shrink-0"></i>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                        Por seguridad, la identificación no puede modificarse una vez enviada.
+                      </p>
+                    </div>
+                  </template>
+
+                  <!-- No existe aún: placeholder + botón de subir (una sola vez) -->
+                  <template v-else>
+                    <div class="aspect-[1.6/1] rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/50">
+                      <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-1"></i>
+                      <span class="text-xs text-gray-400">Sin archivo seleccionado</span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Foto clara de tu identificación nacional. Máx. 10MB · JPG, PNG, PDF</p>
+                    <input 
+                      type="file" 
+                      ref="identityFileInput" 
+                      class="hidden" 
+                      accept="image/*,application/pdf"
+                      @change="onIdentityFileChange"
+                    />
+                    <button 
+                      @click="$refs.identityFileInput.click()"
+                      :disabled="isUploading"
+                      class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-xs shadow-sm"
+                    >
+                      <i v-if="isUploading" class="fas fa-circle-notch fa-spin"></i>
+                      <i v-else class="fas fa-id-card"></i>
+                      {{ isUploading ? 'Subiendo...' : 'Subir Identificación' }}
+                    </button>
+                  </template>
+                </div>
               </div>
 
-              <div class="space-y-6">
-                <p class="text-gray-600 dark:text-gray-400 text-sm">
-                  Para garantizar la seguridad de nuestra comunidad, solicitamos una foto clara de tu identificación nacional (DNI).
+              <!-- Aviso de privacidad -->
+              <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                <i class="fas fa-shield-alt text-amber-600 mt-0.5 text-sm"></i>
+                <p class="text-[11px] text-amber-700 dark:text-amber-500 leading-tight">
+                  Tus datos están protegidos. Esta información solo se utiliza para validar tu identidad y no será compartida con terceros.
                 </p>
-
-                <div v-if="user.identidad_url" class="aspect-[1.6/1] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-emerald-500/20 shadow-inner">
-                  <img :src="user.identidad_url" class="w-full h-full object-cover pointer-events-none" />
-                </div>
-                <div v-else class="aspect-[1.6/1] rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/50">
-                  <i class="fas fa-cloud-upload-alt text-4xl text-gray-300 mb-2"></i>
-                  <span class="text-sm text-gray-500">Sin archivo seleccionado</span>
-                </div>
-
-                <div :class="user.identidad_url ? 'grid grid-cols-2 gap-3' : 'space-y-3'">
-                  <input 
-                    type="file" 
-                    ref="identityFileInput" 
-                    class="hidden" 
-                    accept="image/*,application/pdf"
-                    @change="onIdentityFileChange"
-                  />
-                  <button 
-                    @click="$refs.identityFileInput.click()"
-                    :disabled="isUploading"
-                    class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs"
-                  >
-                    <i v-if="isUploading" class="fas fa-circle-notch fa-spin"></i>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a48.324 48.324 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                    </svg>
-                    {{ user.identidad_url ? 'Actualizar' : 'Subir Identificación' }}
-                  </button>
-
-                  <button 
-                    v-if="user.identidad_url"
-                    @click="deleteIdentityImage"
-                    :disabled="isDeleting"
-                    class="w-full py-3 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-all flex items-center justify-center gap-2 text-xs border border-red-100 dark:border-red-900/30"
-                  >
-                    <i v-if="isDeleting" class="fas fa-circle-notch fa-spin"></i>
-                    <i v-else class="fas fa-trash-alt"></i>
-                    Eliminar
-                  </button>
-                </div>
-                
-                <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/30">
-                  <i class="fas fa-shield-alt text-amber-600 mt-1"></i>
-                  <p class="text-[11px] text-amber-700 dark:text-amber-500 leading-tight">
-                    Tus datos están protegidos. Esta información solo se utiliza para validar tu identidad y no será compartida.
-                  </p>
-                </div>
               </div>
+
             </div>
           </div>
         </Transition>
@@ -1463,7 +1476,6 @@ const selectedCiudadObject = ref(null)
 const isTerminosModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
-const isPhotoModalOpen = ref(false);
 const isIdentityModalOpen = ref(false);
 const showDeleteIdentityConfirm = ref(false);
 
@@ -1476,7 +1488,6 @@ const anyModalOpen = computed(() => {
          showUnsubscribeModal.value || 
          showSubscribeModal.value ||
          showRenewalModal.value ||
-         isPhotoModalOpen.value || 
          isIdentityModalOpen.value || 
          showDeleteIdentityConfirm.value;
 })
@@ -1936,7 +1947,6 @@ const uploadProfileImage = async (file) => {
       const userCookie = useCookie('user')
       userCookie.value = { ...userCookie.value, imagen_url: response.data.imagen_url }
       showSuccess(t('common.success'), t('profile.messages.photo_success'))
-      isPhotoModalOpen.value = false
     }
   } catch (error) {
     console.error('Error al subir imagen:', error)
@@ -1960,7 +1970,6 @@ const deleteProfileImage = async () => {
       const userCookie = useCookie('user')
       userCookie.value = { ...userCookie.value, imagen_url: null }
       showSuccess(t('common.success'), t('profile.messages.photo_delete_success'))
-      isPhotoModalOpen.value = false
     }
   } catch (error) {
     console.error('Error al eliminar imagen:', error)

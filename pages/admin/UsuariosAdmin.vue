@@ -436,6 +436,14 @@
                     >
                       ⭐ Calificaciones
                     </button>
+                    <button 
+                      @click="deactivateTechnicians"
+                      :disabled="deactivatingTechnicians"
+                      class="text-[11px] xs:text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-md font-bold hover:bg-red-200 dark:hover:bg-red-900/50 whitespace-nowrap flex items-center space-x-1"
+                    >
+                      <span v-if="deactivatingTechnicians" class="w-3 h-3 border-2 border-red-700 border-t-transparent rounded-full animate-spin"></span>
+                      <span>{{ deactivatingTechnicians ? 'Procesando...' : '📴' }}</span>
+                    </button>
                   </div>
                 </div>
 
@@ -2543,6 +2551,7 @@ const loadingStats = ref(false)
 const isSaving = ref(false)
 const isEditing = ref(false)
 const isDeleting = ref(false) // Added missing reactive reference
+const deactivatingTechnicians = ref(false)
 
 // Estado para la vista previa de imágenes
 const imagePreview = ref({
@@ -4610,8 +4619,63 @@ const fetchStatistics = async () => {
   } catch (error) {
     console.error('Error al cargar estadísticas:', error)
     showError('No se pudieron cargar las estadísticas')
-  } finally {
+    } finally {
     loadingStats.value = false
+  }
+}
+
+// Función para desactivar todos los técnicos activos
+const deactivateTechnicians = async () => {
+  if (!confirm('¿Estás seguro de que deseas poner a todos los técnicos ACTIVOS en estado INACTIVO?\nEsta acción afectará a todos los técnicos del sistema.')) return
+  
+  try {
+    deactivatingTechnicians.value = true
+    
+    // 1. Obtener todos los técnicos activos
+    // Usamos un límite alto para asegurarnos de capturar a todos
+    const response = await $api('/usuarios/tecnicos?limit=2000', {
+      method: 'GET'
+    })
+    
+    if (!response || !response.data) {
+      showError('No se pudo obtener la lista de técnicos')
+      return
+    }
+    
+    const activeTechnicians = response.data.filter(t => (t.estado || 'activo') === 'activo')
+    
+    if (activeTechnicians.length === 0) {
+      showSuccess('No se encontraron técnicos activos para desactivar')
+      return
+    }
+    
+    // 2. Desactivar cada uno
+    // Usamos Promise.all para mayor rapidez, pero si son demasiados podría saturar
+    // Si hay más de 50, tal vez convenga hacerlo en bloques, pero por ahora vamos así
+    const updates = activeTechnicians.map(t => 
+      $api(`usuarios/${t.id_usuario}`, {
+        method: 'PUT',
+        body: { estado: 'inactivo' }
+      })
+    )
+    
+    await Promise.all(updates)
+    
+    // 3. Limpiar caché y recargar
+    for (const key in techniciansCache) {
+      delete techniciansCache[key]
+    }
+    
+    await loadTechnicians(1)
+    await fetchStatistics()
+    
+    showSuccess(`${activeTechnicians.length} técnicos han sido puestos en estado Inactivo`)
+    
+  } catch (error) {
+    console.error('Error deactivating technicians:', error)
+    showError('Error al desactivar los técnicos. Por favor, intente nuevamente.')
+  } finally {
+    deactivatingTechnicians.value = false
   }
 }
 

@@ -1398,8 +1398,27 @@
         </button>
       </div>
     </div>
+
+      <!-- Logout Button Section -->
+      <div class="mt-12 mb-8 flex justify-center">
+        <button 
+          @click="handleLogout"
+          :disabled="isLoggingOut"
+          class="flex items-center space-x-3 px-8 py-4 bg-white dark:bg-gray-800 border-2 border-red-500 text-red-600 dark:text-red-400 font-bold rounded-2xl transition-all hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/30 disabled:opacity-50 group transform hover:-translate-y-1 active:scale-95"
+        >
+          <div v-if="!isLoggingOut" class="flex items-center">
+            <span class="mr-3 text-2xl group-hover:rotate-12 transition-transform">🔒</span>
+            <span class="text-lg">Cerrar Sesión</span>
+          </div>
+          <div v-else class="flex items-center">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-current mr-3"></div>
+            <span class="text-lg">Cerrando sesión...</span>
+          </div>
+        </button>
+      </div>
+      
+    </div>
   </div>
-</div>
 
       </div>
     </div>
@@ -2724,6 +2743,7 @@ useHead({
 const isLoading = ref(true)
 const isSaving = ref(false)
 const referidorPredeterminado = ref(null)
+const isLoggingOut = ref(false)
 
 // Variables para el envío de notificaciones
 const nombreRolDestinoObject = ref(null)
@@ -5724,6 +5744,20 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+// Función para manejar el cierre de sesión
+const handleLogout = async () => {
+  try {
+    isLoggingOut.value = true;
+    await auth.logout();
+    router.push('/login');
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
+    showToastMessage('Error al cerrar sesión', 'error');
+  } finally {
+    isLoggingOut.value = false;
+  }
+}
 
 </script>
 
