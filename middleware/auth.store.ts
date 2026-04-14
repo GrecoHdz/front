@@ -4,6 +4,31 @@ import { ref, computed, useCookie } from '#imports';
 
 let _refreshPromise: Promise<boolean> | null = null;
 
+// ─── Helpers para PWA (localStorage refresh token) ───────────────────────────
+const PWA_RT_KEY = 'pwa_refresh_token';
+
+const isPWAMode = (): boolean => {
+  if (!process.client) return false;
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true
+  );
+};
+
+const savePWARefreshToken = (token: string | null) => {
+  if (!process.client) return;
+  if (token) {
+    localStorage.setItem(PWA_RT_KEY, token);
+  } else {
+    localStorage.removeItem(PWA_RT_KEY);
+  }
+};
+
+const getPWARefreshToken = (): string | null => {
+  if (!process.client) return null;
+  return localStorage.getItem(PWA_RT_KEY);
+};
+
 interface User {
   id_usuario: number;
   id_rol?: number;
@@ -82,10 +107,14 @@ export const useAuthStore = defineStore('auth', () => {
         baseURL: config.public.apiBase,
         credentials: 'include',
         body: credentials
-      }) as { token: string; user: User; disabled?: boolean; message?: string };
+      }) as { token: string; user: User; refreshToken?: string; disabled?: boolean; message?: string };
 
       if (response.token) {
         setToken(response.token);
+        // Guardar refresh token en localStorage si estamos en modo PWA
+        if (response.refreshToken) {
+          savePWARefreshToken(response.refreshToken);
+        }
         if (response.user) setUser(response.user);
         return { success: true, user: response.user };
       }
@@ -105,14 +134,17 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       const config = useRuntimeConfig();
+      const pwaToken = getPWARefreshToken();
       await $fetch('/auth/logout', {
         method: 'POST',
         baseURL: config.public.apiBase,
-        credentials: 'include'
+        credentials: 'include',
+        headers: pwaToken ? { 'X-Refresh-Token': pwaToken } : {}
       });
     } catch (err) {
       // No interrumpir el flujo por errores en el logout
     } finally {
+      savePWARefreshToken(null); // Limpiar siempre
       clearAuthState();
       navigateTo('/');
     }
@@ -213,16 +245,27 @@ export const useAuthStore = defineStore('auth', () => {
           'Accept': 'application/json'
         };
 
-        // No incluimos el token en el header para el refresh
+        // 📱 PWA Fallback: enviar refresh token por header si la cookie no está disponible
+        const pwaToken = getPWARefreshToken();
+        if (isPWAMode() && pwaToken) {
+          headers['X-Refresh-Token'] = pwaToken;
+          console.log('📱 [AuthStore] Modo PWA: enviando refresh token por header');
+        }
+
         const response = await $fetch('/auth/refresh-token', {
           method: 'POST',
           baseURL: config.public.apiBase,
           credentials: 'include',
           headers
-        }) as { token?: string; user?: any };
+        }) as { token?: string; refreshToken?: string; user?: any };
 
         if (response?.token) {
           setToken(response.token);
+
+          // Actualizar el refresh token en localStorage si el backend devuelve uno nuevo
+          if (response.refreshToken) {
+            savePWARefreshToken(response.refreshToken);
+          }
 
           // Normalizar los datos del usuario
           if (response.user) {
@@ -232,8 +275,6 @@ export const useAuthStore = defineStore('auth', () => {
               estado: response.user.estado || 'activo'
             };
             setUser(normalizedUser);
-
-            // Forzar una actualización del usuario para asegurar que los datos estén actualizados
             await fetchUser();
           }
 
@@ -242,7 +283,13 @@ export const useAuthStore = defineStore('auth', () => {
 
         return false;
       } catch (err) {
-        clearAuthState();
+        // Solo limpiar el estado si NO estamos en modo PWA (para no perder el RT almacenado)
+        if (!isPWAMode()) {
+          clearAuthState();
+        } else {
+          clearAuthState();
+          savePWARefreshToken(null); // RT inválido, limpiar también
+        }
         return false;
       } finally {
         _refreshPromise = null;

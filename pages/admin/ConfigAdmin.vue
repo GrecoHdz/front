@@ -1398,26 +1398,25 @@
         </button>
       </div>
     </div>
-
-      <!-- Logout Button Section -->
-      <div class="mt-12 mb-8 flex justify-center">
-        <button 
-          @click="handleLogout"
-          :disabled="isLoggingOut"
-          class="flex items-center space-x-3 px-8 py-4 bg-white dark:bg-gray-800 border-2 border-red-500 text-red-600 dark:text-red-400 font-bold rounded-2xl transition-all hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/30 disabled:opacity-50 group transform hover:-translate-y-1 active:scale-95"
-        >
-          <div v-if="!isLoggingOut" class="flex items-center">
-            <span class="mr-3 text-2xl group-hover:rotate-12 transition-transform">🔒</span>
-            <span class="text-lg">Cerrar Sesión</span>
-          </div>
-          <div v-else class="flex items-center">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-current mr-3"></div>
-            <span class="text-lg">Cerrando sesión...</span>
-          </div>
-        </button>
-      </div>
-      
     </div>
+  </div>
+
+  <!-- Logout Button Section -->
+  <div class="w-full flex justify-center pt-12 pb-32 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+    <button 
+      @click="handleLogout"
+      :disabled="isLoggingOut"
+      class="flex items-center space-x-4 px-10 py-4 bg-white dark:bg-gray-800 border-2 border-red-500 text-red-600 dark:text-red-400 font-bold rounded-2xl transition-all hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white shadow-xl hover:shadow-red-200 dark:hover:shadow-red-900/30 disabled:opacity-50 group transform hover:-translate-y-1 active:scale-95"
+    >
+      <div v-if="!isLoggingOut" class="flex items-center">
+        <span class="mr-3 text-2xl group-hover:rotate-12 transition-transform">🔒</span>
+        <span class="text-xl">Cerrar Sesión</span>
+      </div>
+      <div v-else class="flex items-center">
+        <div class="animate-spin rounded-full h-7 w-7 border-b-2 border-current mr-3"></div>
+        <span class="text-xl">Cerrando sesión...</span>
+      </div>
+    </button>
   </div>
 
       </div>
