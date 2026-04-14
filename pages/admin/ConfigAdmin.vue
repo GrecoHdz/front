@@ -1402,7 +1402,7 @@
   </div>
 
   <!-- Logout Button Section -->
-  <div class="w-full flex justify-center pt-12 pb-32 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+  <div class="w-full flex justify-center pt-12 pb-18 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
     <button 
       @click="handleLogout"
       :disabled="isLoggingOut"
@@ -5749,7 +5749,7 @@ const handleLogout = async () => {
   try {
     isLoggingOut.value = true;
     await auth.logout();
-    router.push('/login');
+    router.push('/');
   } catch (error) {
     console.error('Error al cerrar sesión:', error);
     showToastMessage('Error al cerrar sesión', 'error');

@@ -196,7 +196,7 @@
       "update_success": "Profile updated successfully",
       "password_success": "Password updated successfully",
       "photo_success": "Profile photo updated",
-      "id_success": "Identification sent successfully",
+      "id_upload_success": "Identification sent successfully",
       "id_delete_success": "Identification deleted",
       "generic_error": "An error occurred. Please try again."
     }

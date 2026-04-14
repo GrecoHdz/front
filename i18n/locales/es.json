@@ -209,7 +209,7 @@
       "update_success": "Perfil actualizado correctamente",
       "password_success": "Contraseña actualizada correctamente",
       "photo_success": "Foto de perfil actualizada",
-      "id_success": "Identificación enviada correctamente",
+      "id_upload_success": "Identificación enviada correctamente",
       "id_delete_success": "Identificación eliminada",
       "generic_error": "Ocurrió un error. Intente nuevamente."
     }
