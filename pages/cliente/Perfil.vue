@@ -2090,7 +2090,7 @@ const saveProfile = async () => {
       return;
     } else {
       const onlyDigits = user.value.telefono.replace(/\D/g, '');
-      if (/^(.)\1+$/.test(onlyDigits)) {
+      if (/(.)\1{5,}/.test(onlyDigits)) {
         showError(t('common.error'), 'El número de teléfono parece ser falso');
         return;
       }

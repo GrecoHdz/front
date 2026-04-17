@@ -1003,7 +1003,7 @@ const validateForm = () => {
       errors.telefono = 'Ingresa un número de teléfono válido (ej: +504 9999-9999)'
     } else {
       const onlyDigits = form.value.telefono.replace(/\D/g, '')
-      if (/^(.)\1+$/.test(onlyDigits)) {
+      if (/(.)\1{5,}/.test(onlyDigits)) {
         errors.telefono = 'El número de teléfono parece ser falso'
       }
     }
@@ -1012,7 +1012,7 @@ const validateForm = () => {
     const identidadRegex = /^\d{12,17}$/
     if (!form.value.identidad || !identidadRegex.test(form.value.identidad)) {
       errors.identidad = 'El número de identidad debe tener entre 12 y 17 dígitos'
-    } else if (/^(.)\1+$/.test(form.value.identidad)) {
+    } else if (/(.)\1{5,}/.test(form.value.identidad)) {
       errors.identidad = 'El número de identidad parece ser falso'
     }
   }
@@ -2000,7 +2000,7 @@ const validateIdentity = () => {
       formErrors.identidad = 'El número de identidad debe tener entre 12 y 17 dígitos'
       return false
     }
-    if (/^(.)\1+$/.test(form.identidad.toString())) {
+    if (/(.)\1{5,}/.test(form.identidad.toString())) {
       formErrors.identidad = 'El número de identidad parece ser falso'
       return false
     }
@@ -2091,7 +2091,7 @@ const validatePhoneNumber = (phoneNumber) => {
     formErrors.telefono = `El número es demasiado corto. Mínimo ${minLength} dígitos incluyendo el código de país`;
   } else if (digitCount > maxLength) {
     formErrors.telefono = `El número es demasiado largo. Máximo ${maxLength} dígitos incluyendo el código de país`;
-  } else if (/^(.)\1+$/.test(cleanNumber.replace(/\+/g, ''))) {
+  } else if (/(.)\1{5,}/.test(cleanNumber.replace(/\+/g, ''))) {
     formErrors.telefono = 'El número de teléfono parece ser falso';
   }
   
