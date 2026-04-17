@@ -401,7 +401,7 @@
                 @input="handleIdentityInput"
                 @blur="validateIdentity"
                 @keydown="preventLetterInput"
-                maxlength="15"
+                maxlength="17"
               />
               <p v-if="formErrors.identidad" class="mt-1 text-sm text-red-500">{{ formErrors.identidad }}</p>
             </div>
@@ -568,6 +568,10 @@
         </div>
       </div>
     </div>
+
+    <!-- Language Selector Modal (primer uso) -->
+    <LanguageSelectorModal />
+
   </div>
 </template>
 <style>
@@ -861,7 +865,9 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
+import LanguageSelectorModal from '~/components/ui/LanguageSelectorModal.vue';
 import Multiselect from 'vue-multiselect'
+import { useAutoTranslate } from '~/composables/useAutoTranslate.js'
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
@@ -869,6 +875,9 @@ const config = useRuntimeConfig()
 const router = useRouter()
 const auth = useAuthStore()
 const userCookie = useCookie('user')
+
+// ===== AUTO-TRADUCCIÓN =====
+const { trList } = useAutoTranslate()
 
 // SEO and Meta
 useHead({
@@ -983,10 +992,10 @@ const validateForm = () => {
       errors.telefono = 'Ingresa un número de teléfono válido (ej: +504 9999-9999)'
     }
     
-    // Validar número de identidad (13 a 15 dígitos)
-    const identidadRegex = /^\d{13,15}$/
+    // Validar número de identidad (12 a 17 dígitos)
+    const identidadRegex = /^\d{12,17}$/
     if (!form.value.identidad || !identidadRegex.test(form.value.identidad)) {
-      errors.identidad = 'El número de identidad debe tener entre 13 y 15 dígitos'
+      errors.identidad = 'El número de identidad debe tener entre 12 y 17 dígitos'
     } 
   }
   
@@ -1078,10 +1087,14 @@ const stopAutoScroll = () => {
   if (animationFrame) cancelAnimationFrame(animationFrame);
 };
 
+// Servicios traducidos automáticamente según idioma activo
+const servicesTranslated = trList(services, ['name', 'description'])
+
 // Computed property para duplicar elementos (infinite scroll effect)
 const carouselItems = computed(() => {
-  if (!services.value.length) return []
-  return [...services.value, ...services.value]
+  const list = servicesTranslated.value.length ? servicesTranslated.value : services.value
+  if (!list.length) return []
+  return [...list, ...list]
 })
 
 // Reiniciar scroll si cambian los servicios
@@ -1134,7 +1147,9 @@ const cargarCiudades = async () => {
     if (Array.isArray(data)) {
       ciudades.value = data.map(ciudad => ({
         id: ciudad.id_ciudad,
-        nombre: ciudad.nombre_ciudad
+        nombre: ciudad.nombre_ciudad,
+        // Guardar nombre original en español para búsquedas internas
+        nombre_es: ciudad.nombre_ciudad
       }))
     }
   } catch (error) { 
@@ -1380,8 +1395,15 @@ const loadMembershipBenefits = async () => {
 }
 
 
+// Beneficios traducidos automáticamente
+const membershipBenefitsTranslated = trList(membershipBenefitsList, ['title', 'description', 'savings'])
+
 // Beneficios de membresía como propiedad computada
-const membershipBenefits = computed(() => membershipBenefitsList.value)
+const membershipBenefits = computed(() =>
+  membershipBenefitsTranslated.value.length
+    ? membershipBenefitsTranslated.value
+    : membershipBenefitsList.value
+)
 
 // Función para cargar los servicios desde la API
 const loadServices = async () => {
@@ -1595,9 +1617,9 @@ const handleAuth = async () => {
     return
   }
   
-  // Validar formato de identidad (min 13 dígitos max 15 dígitos)
-  if (form.value.identidad && !/^\d{13,15}$/.test(form.value.identidad)) {
-    showToast('El número de identidad debe tener entre 13 y 15 dígitos', 'error')
+  // Validar formato de identidad (min 12 dígitos max 17 dígitos)
+  if (form.value.identidad && !/^\d{12,17}$/.test(form.value.identidad)) {
+    showToast('El número de identidad debe tener entre 12 y 17 dígitos', 'error')
     return
   }
   
@@ -1945,14 +1967,15 @@ const handleIdentityInput = (e) => {
   // Solo permite números
   form.identidad = form.identidad.toString().replace(/\D/g, '')
   // Limpia el mensaje de error al escribir
-  if (form.identidad.length >= 13) {
+  if (form.identidad.length >= 12) {
     formErrors.identidad = ''
   }
 }
 
 const validateIdentity = () => {
-  if (form.identidad && form.identidad.length < 13) {
-    formErrors.identidad = 'La identidad debe tener al menos 13 dígitos'
+  const len = form.identidad ? form.identidad.length : 0
+  if (len > 0 && (len < 12 || len > 17)) {
+    formErrors.identidad = 'El número de identidad debe tener entre 12 y 17 dígitos'
     return false
   }
   formErrors.identidad = ''

@@ -2453,7 +2453,7 @@ const serviceSteps = computed(() => {
     return [
       { id: 1, title: $t('services_page.steps.pending_assignment.title'), description: $t('services_page.steps.pending_assignment.desc') },
       { id: 2, title: $t('services_page.steps.assigned.title'), description: $t('services_page.steps.assigned.desc') },
-      { id: 3, title: $t('services_page.quotation.taxi_title'), description: $t('services_page.steps.quotation.desc') },
+      { id: 3, title: $t('services_page.quotation.trip_title'), description: $t('services_page.steps.quotation.desc') },
       { id: 4, title: $t('services_page.steps.in_progress.title'), description: $t('services_page.steps.in_progress.desc') },
       { id: 5, title: $t('services_page.steps.finished.title'), description: $t('services_page.steps.finished.desc') }
     ]
@@ -2912,7 +2912,7 @@ const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
   const statusMap = {
     'pendiente_pagovisita': $t('services_page.steps.pending_payment.title'),
     'verificando_pagovisita': $t('services_page.status_labels.verifying_visit'),
-    'pendiente_asignacion': servicio.title === 'Taxi VIP' ? $t('services_page.status_labels.waiting_driver') : $t('services_page.status_labels.req_received'),
+    'pendiente_asignacion': servicio.title === 'Viaje Privado' ? $t('services_page.status_labels.waiting_driver') : $t('services_page.status_labels.req_received'),
     'asignado': $t('services_page.status_labels.tech_assigned'),
     'pendiente_cotizacion': $t('services_page.status_labels.pending_quote'),
     'en_proceso': $t('services_page.status_labels.in_progress'),
@@ -3287,7 +3287,7 @@ const openPaymentModal = async (service) => {
     selectedServiceId.value = service?.id || null
     
     // Mostrar el modal según el tipo de servicio
-    if (service?.title === 'Taxi VIP') {
+    if (service?.title === 'Viaje Privado') {
       showTaxiPaymentModal.value = true
     } else if (service?.title === 'Barbería') {
       showBarberiaPaymentModal.value = true
@@ -3331,8 +3331,8 @@ const getDiscountedPrice = () => {
   const amount = parseFloat(quotationData.value?.monto_manodeobra || 0)
   if (!amount) return '0.00'
   
-  // Si es Taxi VIP y el método de pago es efectivo, no hay beneficio de descuento de membresía/crédito
-  if (selectedService.value?.title === 'Taxi VIP' && taxiPaymentMethod.value === 'efectivo') {
+  // Si es Viaje Privado y el método de pago es efectivo, no hay beneficio de descuento de membresía/crédito
+  if (selectedService.value?.title === 'Viaje Privado' && taxiPaymentMethod.value === 'efectivo') {
     return amount.toFixed(2)
   }
   
@@ -3372,7 +3372,7 @@ const openQuotationModal = async (service) => {
     taxiCashBillAmount.value = '';
     
     // Mostrar el modal según el tipo de servicio
-    if (service.title === 'Taxi VIP') {
+    if (service.title === 'Viaje Privado') {
       showTaxiQuotationModal.value = true;
     } else if (service.title === 'Barbería') {
       showBarberiaQuotationModal.value = true;
@@ -3661,8 +3661,8 @@ const acceptQuotation = async () => {
     // 1. Aceptar la cotización 
     const cotizacionUpdate = { estado: 'aceptado' }; 
     
-    // Si es Taxi VIP y pago en efectivo, resetear campos de transferencia y beneficios
-    if (selectedService.value?.title === 'Taxi VIP' && taxiPaymentMethod.value === 'efectivo') {
+    // Si es Viaje Privado y pago en efectivo, resetear campos de transferencia y beneficios
+    if (selectedService.value?.title === 'Viaje Privado' && taxiPaymentMethod.value === 'efectivo') {
       cotizacionUpdate.id_cuenta = null;
       cotizacionUpdate.num_comprobante = null;
       cotizacionUpdate.descuento_membresia = 0;
@@ -3679,8 +3679,8 @@ const acceptQuotation = async () => {
     
     const solicitudUpdate = { estado: 'en_proceso' };
     
-    // Agregar información de pago en la descripción si es Taxi VIP y efectivo
-    if (selectedService.value?.title === 'Taxi VIP' && taxiPaymentMethod.value === 'efectivo') {
+    // Agregar información de pago en la descripción si es Viaje Privado y efectivo
+    if (selectedService.value?.title === 'Viaje Privado' && taxiPaymentMethod.value === 'efectivo') {
       const amount = taxiCashBillAmount.value || '0';
       // Actualizar la descripción agregando el detalle del efectivo
       const currentDesc = selectedService.value.description || '';
@@ -4530,4 +4530,4 @@ onMounted(async () => {
   display: none !important;
 }
 </style>
-
+

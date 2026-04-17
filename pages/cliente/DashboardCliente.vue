@@ -1264,15 +1264,18 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useHead, useCookie, useRouter } from '#imports'
 import { useI18n } from 'vue-i18n'
 import Toast from '~/components/ui/Toast.vue'
-
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
-import Multiselect from 'vue-multiselect' 
+import Multiselect from 'vue-multiselect'
+import { useAutoTranslate } from '~/composables/useAutoTranslate.js'
 
 // =========================
 // CONFIGURACIÓN Y SETUP
 // =========================
 const { $api } = useNuxtApp();
 const { t, locale } = useI18n()
+
+// ===== AUTO-TRADUCCIÓN =====
+const { trList } = useAutoTranslate()
 
 const router = useRouter()
 const userCookie = useCookie('user')
@@ -1483,11 +1486,17 @@ const diasRestantesCredito = computed(() => {
   return hoy > fechaVencimiento ? Math.max(0, diffDays) : null;
 })
 
+// Beneficios traducidos automáticamente
+const beneficiosTranslated = trList(beneficios, ['tipo_beneficio', 'descripcion'])
+
 // Computed para mapear los beneficios al formato esperado por la UI
 const benefitsToShow = computed(() => {
-  if (!beneficios.value || !Array.isArray(beneficios.value)) return [];
-  
-  return [...beneficios.value]
+  const source = beneficiosTranslated.value?.length
+    ? beneficiosTranslated.value
+    : (beneficios.value || []);
+  if (!Array.isArray(source)) return [];
+
+  return [...source]
     .sort((a, b) => (a.mes_requerido || 0) - (b.mes_requerido || 0))
     .map(benefit => ({
       ...benefit,
@@ -1510,10 +1519,16 @@ watch(paquetesMantenimiento, (newVal) => {
   }
 }, { immediate: true, deep: true })
 
+// Paquetes traducidos automáticamente
+const displayedPaquetesTranslated = trList(displayedPaquetes, ['nombre', 'descripcion'])
+
 // Lista duplicada para el scroll infinito (estable)
 const carouselItems = computed(() => {
-  if (!displayedPaquetes.value.length) return []
-  return [...displayedPaquetes.value, ...displayedPaquetes.value]
+  const list = displayedPaquetesTranslated.value?.length
+    ? displayedPaquetesTranslated.value
+    : displayedPaquetes.value
+  if (!list.length) return []
+  return [...list, ...list]
 })
 
 // Computed para obtener el mes actual relativo al inicio de la membresía
@@ -1587,16 +1602,27 @@ const isFormValid = computed(() => {
     serviceFormData.value.direccion.trim() !== ''
 })
 
+// Servicios traducidos automáticamente
+const servicesListTranslated = trList(servicesList, ['name', 'description'])
+
 // Mostrar todos los servicios, pero marcar Viaje Privado como deshabilitado si no está verificado y ponerlo de primero
 const filteredServicesList = computed(() => {
-  return [...servicesList.value]
+  // Usar lista traducida si está disponible, si no la original
+  const source = servicesListTranslated.value?.length
+    ? servicesListTranslated.value
+    : servicesList.value
+
+  return [...source]
     .map(s => ({
       ...s,
-      isDisabled: s.name === 'Viaje Privado' && !isUserVerified.value
+      // La comparación siempre usa el nombre original (en español)
+      isDisabled: (s.name_es ?? s.name) === 'Viaje Privado' && !isUserVerified.value
     }))
     .sort((a, b) => {
-      if (a.name === 'Viaje Privado') return -1;
-      if (b.name === 'Viaje Privado') return 1;
+      const aIsViaje = (a.name_es ?? a.name) === 'Viaje Privado'
+      const bIsViaje = (b.name_es ?? b.name) === 'Viaje Privado'
+      if (aIsViaje) return -1;
+      if (bIsViaje) return 1;
       return 0;
     });
 })
@@ -1903,6 +1929,7 @@ const fetchServices = async () => {
       servicesList.value = data.map(service => ({
         id: service.id_servicio,
         name: service.nombre,
+        name_es: service.nombre,   // nombre original para comparaciones internas
         description: service.descripcion,
         icon: getServiceIcon(service.nombre)
       }))
