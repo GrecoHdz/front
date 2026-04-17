@@ -1494,6 +1494,103 @@
       </div>
     </Transition>
 
+    <!-- ======================================================= -->
+    <!-- Modal: Seleccionar canal de notificación WhatsApp        -->
+    <!-- ======================================================= -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="showWhatsAppSelectModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showWhatsAppSelectModal = false"></div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm relative z-10 overflow-hidden">
+          <!-- Header con gradiente verde WhatsApp -->
+          <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-white">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                  <span class="text-lg">💬</span>
+                </div>
+                <div>
+                  <h3 class="font-bold text-base">Notificar al Técnico</h3>
+                  <p class="text-xs text-white/80">Elige cómo enviar el mensaje</p>
+                </div>
+              </div>
+              <button @click="showWhatsAppSelectModal = false" class="text-white/70 hover:text-white p-1 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Técnico info -->
+          <div v-if="pendingWhatsAppData" class="px-4 pt-4 pb-2">
+            <div class="flex items-center space-x-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+              <div class="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ pendingWhatsAppData.technician?.nombre }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">📱 {{ pendingWhatsAppData.technician?.telefono || 'Sin teléfono' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Opciones -->
+          <div class="p-4 space-y-3">
+            <!-- Opción 1: WhatsApp directo (wa.me) -->
+            <button
+              @click="notifyViaWhatsAppDirect"
+              class="w-full flex items-center space-x-3 p-3 rounded-xl border-2 border-green-200 dark:border-green-800 hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all group"
+            >
+              <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-sm">
+                <span class="text-xl">📱</span>
+              </div>
+              <div class="text-left min-w-0">
+                <p class="font-bold text-sm text-gray-900 dark:text-white">WhatsApp</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Abre WhatsApp con el mensaje listo para enviar</p>
+              </div>
+              <svg class="w-4 h-4 text-gray-400 group-hover:text-green-500 ml-auto flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            <!-- Opción 2: WhatsApp Business API -->
+            <button
+              @click="notifyViaWhatsAppBusiness"
+              class="w-full flex items-center space-x-3 p-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
+            >
+              <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-sm">
+                <span class="text-xl">🤖</span>
+              </div>
+              <div class="text-left min-w-0">
+                <p class="font-bold text-sm text-gray-900 dark:text-white">WhatsApp Business API</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">El servidor envía el mensaje automáticamente</p>
+              </div>
+              <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500 ml-auto flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            <!-- Omitir -->
+            <button
+              @click="showWhatsAppSelectModal = false"
+              class="w-full py-2 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              Omitir notificación
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Payment Confirmation Modal with Transitions -->
 <Transition
   name="modal"
@@ -2577,6 +2674,9 @@ const showPackagePaymentDetailsModal = ref(false)
 const showFacturaModal = ref(false)
 const showDeleteConfirmModal = ref(false)
 const serviceToDelete = ref(null)
+// Modal de selección del canal de WhatsApp
+const showWhatsAppSelectModal = ref(false)
+const pendingWhatsAppData = ref(null) // { technician, service }
 
 const anyModalOpen = computed(() => {
   return showDetailModal.value || 
@@ -2590,7 +2690,8 @@ const anyModalOpen = computed(() => {
          showConfirmModal.value || 
          showPackagePaymentDetailsModal.value || 
          showFacturaModal.value ||
-         showDeleteConfirmModal.value
+         showDeleteConfirmModal.value ||
+         showWhatsAppSelectModal.value
 })
 
 watch(anyModalOpen, (newValue) => {
@@ -3988,41 +4089,72 @@ const selectTechnician = (technician) => {
   showConfirmModal.value = true
 }
 
-const sendWhatsAppNotification = (technician, service) => {
+// ─── Canal 1: WhatsApp directo (wa.me) ────────────────────────────────────
+// Construye el link y lo abre en el navegador.
+// En desktop abre WhatsApp Web; en móvil abre la app de WhatsApp instalada.
+const notifyViaWhatsAppDirect = () => {
+  showWhatsAppSelectModal.value = false
+  const { technician, service } = pendingWhatsAppData.value || {}
+  if (!technician || !service) return
+
+  const techPhone = technician.telefono
+  if (!techPhone) {
+    showError('El técnico no tiene número de teléfono registrado')
+    return
+  }
+
+  const dateStr = formatDateDDMMYY(service.fecha_solicitud)
+  const message =
+    `*Nuevo Servicio Asignado* 🔧\n\n` +
+    `Hola *${technician.nombre}*,\n` +
+    `Se te ha asignado un nuevo servicio en *MiSeguro*.\n\n` +
+    `*ID:* ${dateStr}-${service.id_solicitud}\n` +
+    `*Servicio:* ${service.servicio?.nombre || 'Servicio'}\n` +
+    `*Cliente:* ${service.cliente?.nombre || 'Cliente'}\n` +
+    `*Colonia:* ${service.colonia || 'No especificada'}\n\n` +
+    `Por favor, ingresa a la plataforma para ver los detalles.`
+
+  const cleanPhone = techPhone.toString().replace(/\D/g, '')
+  const finalPhone = cleanPhone.length === 8 ? `504${cleanPhone}` : cleanPhone
+  window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`, '_blank')
+  pendingWhatsAppData.value = null
+}
+
+// ─── Canal 2: WhatsApp Business Cloud API ─────────────────────────────────
+// El servidor envía el mensaje directamente; no depende del dispositivo del admin.
+const notifyViaWhatsAppBusiness = async () => {
+  showWhatsAppSelectModal.value = false
+  const { technician, service } = pendingWhatsAppData.value || {}
+  if (!technician || !service) return
+
   try {
-    const techName = technician.nombre;
-    const techPhone = technician.telefono;
-    
+    const techPhone = technician.telefono
     if (!techPhone) {
-      console.warn('El técnico no tiene número de teléfono registrado');
-      return;
+      showError('El técnico no tiene número de teléfono registrado')
+      return
     }
 
-    const serviceName = service.servicio?.nombre || 'Servicio';
-    const clientName = service.cliente?.nombre || 'Cliente';
-    const serviceId = service.id_solicitud;
-    const dateStr = formatDateDDMMYY(service.fecha_solicitud);
-    
-    const message = `*Nuevo Servicio Asignado*\n\n` +
-      `Hola *${techName}*,\n` +
-      `Se te ha asignado un nuevo servicio en MiSeguro.\n\n` +
-      `*ID:* ${dateStr}-${serviceId}\n` +
-      `*Servicio:* ${serviceName}\n` +
-      `*Cliente:* ${clientName}\n` +
-      `*Colonia:* ${service.colonia || 'No especificada'}\n\n` +
-      `Por favor, ingresa a la plataforma para ver los detalles.`;
+    await $api('/notificaciones/whatsapp-tecnico', {
+      method: 'POST',
+      body: {
+        telefono: techPhone,
+        nombre: technician.nombre,
+        servicio: service.servicio?.nombre || 'Servicio',
+        cliente: service.cliente?.nombre || 'Cliente',
+        colonia: service.colonia || 'No especificada',
+        id_solicitud: service.id_solicitud,
+        fecha: formatDateDDMMYY(service.fecha_solicitud)
+      }
+    })
 
-    const encodedMessage = encodeURIComponent(message);
-    
-    // Limpiar el número y asegurar prefijo 504
-    const cleanPhone = techPhone.toString().replace(/\D/g, '');
-    const finalPhone = cleanPhone.length === 8 ? `504${cleanPhone}` : cleanPhone;
-
-    window.open(`https://wa.me/${finalPhone}?text=${encodedMessage}`, '_blank');
+    showSuccess('✅ Mensaje enviado al técnico por WhatsApp Business')
   } catch (error) {
-    console.error('Error al preparar el mensaje de WhatsApp para el técnico:', error);
+    showError('No se pudo enviar por WhatsApp Business. Verifica la configuración de la API.')
+    console.error('Error WhatsApp Business:', error)
+  } finally {
+    pendingWhatsAppData.value = null
   }
-};
+}
 
 // Función para confirmar la asignación del técnico
 const confirmTechnicianAssignment = async () => {
@@ -4076,8 +4208,9 @@ const confirmTechnicianAssignment = async () => {
       }
     }
     
-    // Notificar al técnico vía WhatsApp
-    sendWhatsAppNotification(techToNotify, serviceToNotify)
+    // Mostrar selector de canal WhatsApp después de la asignación
+    pendingWhatsAppData.value = { technician: techToNotify, service: serviceToNotify }
+    showWhatsAppSelectModal.value = true
     
     showConfirmModal.value = false
     showAssignmentModal.value = false
