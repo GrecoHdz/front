@@ -106,7 +106,7 @@
     "password": "Password",
     "login_password_placeholder": "Enter your password",
     "register_password_placeholder": "Create a secure password",
-    "join_as_technician": "Join as Technician",
+    "join_as_technician": "Join as Service Provider",
     "login_btn": "Login",
     "register_btn": "Create Account",
     "forgot_password": "Forgot your password?"
