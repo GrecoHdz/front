@@ -794,6 +794,26 @@
       "finished": {
         "title": "Service Finished",
         "desc": "Job has been completed successfully"
+      },
+      "trip_pending_assignment": {
+        "title": "Finding Driver",
+        "desc": "We are assigning the nearest driver for your trip"
+      },
+      "trip_assigned": {
+        "title": "Driver Assigned",
+        "desc": "A driver has accepted your trip and is on the way"
+      },
+      "trip_quotation": {
+        "title": "Trip Fare",
+        "desc": "The driver has sent the fare for your route"
+      },
+      "trip_in_progress": {
+        "title": "Trip Confirmed",
+        "desc": "The driver will pick you up at the agreed time."
+      },
+      "trip_finished": {
+        "title": "Trip Finished",
+        "desc": "You have arrived at your destination. Thanks for traveling with us!"
       }
     },
     "payment": {

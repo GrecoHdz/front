@@ -2454,11 +2454,11 @@ const isViajePrivado = (title) => title?.trim().toLowerCase() === 'viaje privado
 const serviceSteps = computed(() => {
   if (isViajePrivado(selectedService.value?.title)) {
     return [
-      { id: 1, title: $t('services_page.steps.pending_assignment.title'), description: $t('services_page.steps.pending_assignment.desc') },
-      { id: 2, title: $t('services_page.steps.assigned.title'), description: $t('services_page.steps.assigned.desc') },
-      { id: 3, title: $t('services_page.quotation.viaje_privado_title'), description: $t('services_page.steps.quotation.desc') },
-      { id: 4, title: $t('services_page.steps.in_progress.title'), description: $t('services_page.steps.in_progress.desc') },
-      { id: 5, title: $t('services_page.steps.finished.title'), description: $t('services_page.steps.finished.desc') }
+      { id: 1, title: $t('services_page.steps.trip_pending_assignment.title'), description: $t('services_page.steps.trip_pending_assignment.desc') },
+      { id: 2, title: $t('services_page.steps.trip_assigned.title'), description: $t('services_page.steps.trip_assigned.desc') },
+      { id: 3, title: $t('services_page.steps.trip_quotation.title'), description: $t('services_page.steps.trip_quotation.desc') },
+      { id: 4, title: $t('services_page.steps.trip_in_progress.title'), description: $t('services_page.steps.trip_in_progress.desc') },
+      { id: 5, title: $t('services_page.steps.trip_finished.title'), description: $t('services_page.steps.trip_finished.desc') }
     ]
   } else if (selectedService.value?.title === 'Barbería') {
     return [

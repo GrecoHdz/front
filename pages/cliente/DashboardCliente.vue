@@ -1419,7 +1419,9 @@ const isMembershipExpired = computed(() => {
 })
 
 const isUserVerified = computed(() => {
-  return !!userData.value.identidad_url || !!userCookie.value?.identidad_url
+  const hasIdentity = !!userData.value.identidad_url || !!userCookie.value?.identidad_url
+  const hasPhoto = !!userData.value.imagen_url || !!userCookie.value?.imagen_url
+  return hasIdentity && hasPhoto
 })
 
 const isMembershipInactive = computed(() => {

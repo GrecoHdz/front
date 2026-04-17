@@ -794,6 +794,26 @@
       "finished": {
         "title": "Servicio Finalizado",
         "desc": "El trabajo ha sido completado exitosamente"
+      },
+      "trip_pending_assignment": {
+        "title": "Buscando Conductor",
+        "desc": "Estamos asignando al conductor más cercano para tu viaje"
+      },
+      "trip_assigned": {
+        "title": "Conductor Asignado",
+        "desc": "Un conductor ha aceptado tu viaje y está en camino"
+      },
+      "trip_quotation": {
+        "title": "Tarifa de Viaje",
+        "desc": "El conductor ha enviado la tarifa para tu viaje"
+      },
+      "trip_in_progress": {
+        "title": "Viaje Confirmado",
+        "desc": "El conductor te recogerá en el horario acordado"
+      },
+      "trip_finished": {
+        "title": "Viaje Finalizado",
+        "desc": "Has llegado a tu destino. ¡Gracias por viajar con nosotros!"
       }
     },
     "payment": {
