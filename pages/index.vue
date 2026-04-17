@@ -977,6 +977,13 @@ const handleImageUpload = (event) => {
 
 // Validación del formulario
 const validateForm = () => {
+  // 3. Restricción por dispositivo (Local Check)
+  if (process.client && localStorage.getItem('ph_dev_banned') === 'true') {
+    errors.general = 'El acceso desde este dispositivo ha sido restringido por seguridad.';
+    showToastMessage('Este dispositivo tiene restringido el acceso a nuevos registros.', 'error');
+    return;
+  }
+
   const errors = {}
   
   // Solo validar estos campos si es registro
@@ -984,6 +991,12 @@ const validateForm = () => {
     // Validar nombre (mínimo 2 palabras)
     if (!form.value.nombre || form.value.nombre.trim().split(' ').filter(Boolean).length < 2) {
       errors.nombre = 'Por favor ingresa tu nombre completo (mínimo 2 palabras)'
+    } else {
+      const nombreLower = form.value.nombre.toLowerCase().trim();
+      const nombresFalsosExactos = ['fulano de tal', 'fulano detalt', 'test user', 'dummy user'];
+      if (nombresFalsosExactos.includes(nombreLower) || nombreLower.includes('prueba')) {
+        errors.nombre = 'Por favor utiliza un nombre real para tu registro';
+      }
     }
     
     // Validar email
@@ -1005,6 +1018,11 @@ const validateForm = () => {
       const onlyDigits = form.value.telefono.replace(/\D/g, '')
       if (/(.)\1{5,}/.test(onlyDigits)) {
         errors.telefono = 'El número de teléfono parece ser falso'
+      } else if (onlyDigits.includes('504')) {
+        const match = onlyDigits.match(/504([0-9])/);
+        if (match && !['2', '3', '7', '8', '9'].includes(match[1])) {
+          errors.telefono = 'Número no válido para Honduras (debe empezar con 2, 3, 7, 8 o 9)';
+        }
       }
     }
     
@@ -1204,6 +1222,13 @@ const checkAuthStatus = async () => {
   } catch (error) { 
   } finally {
     isCheckingAuth.value = false
+    // Registrar marca de baneo si el servidor lo indica
+    if (error.statusCode === 403 && error.data?.message?.includes('dispositivo')) {
+      if (process.client) {
+        localStorage.setItem('ph_dev_banned', 'true');
+      }
+    }
+    
     isLoading.value = false
   }
 }
@@ -1729,6 +1754,7 @@ const handleAuth = async () => {
     } else {
       // Lógica de registro
       try { 
+        const device_id = await getDeviceId();
         const registerData = {
           nombre: form.value.nombre,
           email: form.value.email,
@@ -1736,8 +1762,9 @@ const handleAuth = async () => {
           identidad: form.value.identidad,
           password_hash: form.value.password, // Cambiado a password_hash para coincidir con el backend
           id_ciudad: form.value.ciudad?.id,
-          es_tecnico: registerAsTechnician.value ? 1 : 0
-        };  
+          es_tecnico: registerAsTechnician.value ? 1 : 0,
+          device_id
+        };
         
         // Realizar la petición de registro
         
@@ -1904,6 +1931,13 @@ const handleAuth = async () => {
             showRateLimitModal.value = true;
           }, 100);
           return;
+        }
+        
+        // Registrar marca de baneo si el servidor lo indica (403 Dispositivo restringido)
+        if (statusCode == 403 && errorMessage.toLowerCase().includes('dispositivo')) {
+          if (process.client) {
+            localStorage.setItem('ph_dev_banned', 'true');
+          }
         }
         
         if (errorData) {
@@ -2093,6 +2127,12 @@ const validatePhoneNumber = (phoneNumber) => {
     formErrors.telefono = `El número es demasiado largo. Máximo ${maxLength} dígitos incluyendo el código de país`;
   } else if (/(.)\1{5,}/.test(cleanNumber.replace(/\+/g, ''))) {
     formErrors.telefono = 'El número de teléfono parece ser falso';
+  } else if (cleanNumber.includes('504')) {
+    const onlyDigits = cleanNumber.replace(/\D/g, '');
+    const match = onlyDigits.match(/504([0-9])/);
+    if (match && !['2', '3', '7', '8', '9'].includes(match[1])) {
+      formErrors.telefono = 'Número no válido para Honduras (debe empezar con 2, 3, 7, 8 o 9)';
+    }
   }
   
   // Devolver si el número es válido
@@ -2289,5 +2329,61 @@ onMounted(() => {
   // Retornar función de limpieza
   return () => observer.disconnect()
 })
-</script> 
- 
+
+// Función para obtener o generar un ID único de dispositivo (Fingerprint + UUID)
+const getDeviceId = async () => {
+  if (process.server) return null;
+  
+  let deviceId = localStorage.getItem('ph_device_id');
+  
+  if (!deviceId) {
+    // Generar firma basada en características del navegador
+    const fingerprint = [
+      navigator.userAgent,
+      screen.width,
+      screen.height,
+      navigator.language,
+      new Date().getTimezoneOffset(),
+      navigator.hardwareConcurrency || 'unknown',
+      navigator.deviceMemory || 'unknown'
+    ].join('|');
+    
+    // Generar un UUID aleatorio
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    
+    // Combinar para crear el ID final
+    // Usamos btoa para que no sea texto plano obvio
+    deviceId = btoa(fingerprint).substring(0, 32) + '-' + uuid;
+    localStorage.setItem('ph_device_id', deviceId);
+    
+    // También guardar en una cookie persistente por si borran localStorage
+    const d = new Date();
+    d.setTime(d.getTime() + (365*24*60*60*1000)); // 1 año
+    document.cookie = `ph_device_id=${deviceId};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+  }
+  
+  return deviceId;
+};
+
+// Cargar ID al inicio
+onMounted(() => {
+  if (process.client) {
+    getDeviceId();
+    
+    // Sincronizar cookie con localStorage si uno falta
+    const cookieMatch = document.cookie.match(/ph_device_id=([^;]+)/);
+    const localId = localStorage.getItem('ph_device_id');
+    
+    if (cookieMatch && !localId) {
+      localStorage.setItem('ph_device_id', cookieMatch[1]);
+    } else if (!cookieMatch && localId) {
+      const d = new Date();
+      d.setTime(d.getTime() + (365*24*60*60*1000));
+      document.cookie = `ph_device_id=${localId};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+    }
+  }
+});
+</script>
