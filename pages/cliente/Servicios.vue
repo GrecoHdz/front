@@ -109,7 +109,7 @@
                       🟡 {{ $t('services_page.pending_payment') }}
                     </span>
                     <span v-if="service.rawStatus === 'pendiente_cotizacion'" class="animate-pulse inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500 dark:border-amber-500 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 uppercase tracking-wide shadow-sm">
-                      🟡 {{ service.title === 'Taxi VIP' ? $t('services_page.fare_ready') : $t('services_page.quote_ready') }}
+                      🟡 {{ service.title === 'Viaje Privado' ? $t('services_page.fare_ready') : $t('services_page.quote_ready') }}
                     </span>
                   </div>
                 </div>
@@ -117,8 +117,8 @@
 
               <!-- Location and Schedule Grid -->
               <div class="mb-3">
-                 <!-- Taxi VIP Special Layout -->
-                 <div v-if="service.title === 'Taxi VIP'" class="grid grid-cols-2 gap-2">
+                 <!-- Viaje Privado Special Layout -->
+                 <div v-if="service.title === 'Viaje Privado'" class="grid grid-cols-2 gap-2">
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
                       <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">📍 Recogida</p>
                       <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.fullLocation.colonia }}</p>
@@ -149,7 +149,7 @@
                 </div>
                 <div class="flex items-center space-x-1">
                   <span class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest inline-block" :class="{ 'animate-bounce': service.rawStatus === 'finalizado' }">
-                    {{ service.rawStatus === 'finalizado' ? (service.title === 'Taxi VIP' ? $t('services_page.rate_trip') : $t('services_page.rate_service')) : $t('services_page.view_details') }}
+                    {{ service.rawStatus === 'finalizado' ? (service.title === 'Viaje Privado' ? $t('services_page.rate_trip') : $t('services_page.rate_service')) : $t('services_page.view_details') }}
                   </span>
                   <svg class="w-3 h-3 text-blue-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -282,7 +282,7 @@
         <!-- 2. Técnico/Conductor Asignado -->
         <div v-if="selectedService.technician && selectedService.rawStatus === 'asignado'" class="mb-4">
           <h4 class="text-sm font-black text-gray-900 dark:text-white mb-2">
-            {{ selectedService.title === 'Taxi VIP' ? 'Conductor Asignado' : 'Técnico Asignado' }}
+            {{ selectedService.title === 'Viaje Privado' ? 'Conductor Asignado' : 'Técnico Asignado' }}
           </h4>
           <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
             <div class="flex items-center space-x-2 mb-2">
@@ -314,7 +314,7 @@
               <div>
                 <div class="flex flex-col">
                   <h5 class="font-bold text-emerald-800 dark:text-emerald-200 text-sm">
-                    {{ selectedService.technicianName || (selectedService.title === 'Taxi VIP' ? 'Conductor' : 'Técnico') }}
+                    {{ selectedService.technicianName || (selectedService.title === 'Viaje Privado' ? 'Conductor' : 'Técnico') }}
                   </h5>
                   <div class="flex items-center space-x-1">
                     <span class="flex">
@@ -414,7 +414,7 @@
                   <span class="text-base">📋</span>
                   <span class="font-bold text-gray-800 dark:text-gray-200 text-sm">
                     {{ 
-                      selectedService.title === 'Taxi VIP' ? $t('services_page.modal.view_trip_details') : 
+                      selectedService.title === 'Viaje Privado' ? $t('services_page.modal.view_trip_details') : 
                       (selectedService.title === 'Barbería' ? $t('services_page.modal.view_cut_details') : $t('services_page.modal.view_quotation')) 
                     }}
                   </span>
@@ -435,7 +435,7 @@
                 <div class="flex items-center space-x-2">
                   <span class="text-base">⭐</span>
                   <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">
-                    {{ selectedService.title === 'Taxi VIP' ? 'Calificar Viaje' : 'Calificar Servicio' }}
+                    {{ selectedService.title === 'Viaje Privado' ? 'Calificar Viaje' : 'Calificar Servicio' }}
                   </span>
                 </div>
                 <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2449,7 +2449,7 @@ const switchTab = async (tab) => {
 
 // Service steps
 const serviceSteps = computed(() => {
-  if (selectedService.value?.title === 'Taxi VIP') {
+  if (selectedService.value?.title === 'Viaje Privado') {
     return [
       { id: 1, title: $t('services_page.steps.pending_assignment.title'), description: $t('services_page.steps.pending_assignment.desc') },
       { id: 2, title: $t('services_page.steps.assigned.title'), description: $t('services_page.steps.assigned.desc') },
@@ -2705,7 +2705,7 @@ const getSelectedAccount = computed(() => {
 
 const getCancelButtonText = computed(() => {
   const status = selectedService.value?.rawStatus || 'default'
-  const isTaxi = selectedService.value?.title === 'Taxi VIP'
+  const isTaxi = selectedService.value?.title === 'Viaje Privado'
   
   if (status === 'cancelado') return isTaxi ? $t('services_page.status.trip_scheduled') : $t('services_page.status.cancelled') // This is a bit weird but let's use keys
   if (status === 'completado') return isTaxi ? $t('services_page.steps.finished.title') : $t('services_page.steps.finished.title')

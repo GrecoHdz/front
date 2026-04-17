@@ -231,7 +231,7 @@
               
               <div v-if="shouldShowFormFields" class="animate-fade-in">
                 <textarea v-model="serviceFormData.description" 
-                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? $t('dashboard_client.taxi_placeholder') : (selectedServiceObject?.name === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
+                         :placeholder="selectedServiceObject?.name === 'Viaje Privado' ? $t('dashboard_client.taxi_placeholder') : (selectedServiceObject?.name === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
               </div>
@@ -241,7 +241,7 @@
                   <input v-model="serviceFormData.colonia" 
                          type="text"
                          :readonly="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
-                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? $t('dashboard_client.pickup') : $t('dashboard_client.neighborhood')"
+                         :placeholder="selectedServiceObject?.name === 'Viaje Privado' ? $t('dashboard_client.pickup') : $t('dashboard_client.neighborhood')"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
                          :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
                 </div>
@@ -249,7 +249,7 @@
                   <input v-model="serviceFormData.direccion" 
                          type="text"
                          :readonly="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
-                         :placeholder="selectedServiceObject?.name === 'Taxi VIP' ? $t('dashboard_client.destination') : $t('dashboard_client.precise_address')"
+                         :placeholder="selectedServiceObject?.name === 'Viaje Privado' ? $t('dashboard_client.destination') : $t('dashboard_client.precise_address')"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
                          :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
                 </div>
@@ -1355,7 +1355,7 @@ const selectedServiceObject = ref(null)
 const getServiceLabel = (option) => {
   if (!option) return ''
   let label = `${option.icon} ${option.name}`
-  if (option.name === 'Taxi VIP' && !isUserVerified.value) {
+  if (option.name === 'Viaje Privado' && !isUserVerified.value) {
     label += ` (${t('dashboard_client.verification_required')})`
   }
   return label
@@ -1587,23 +1587,23 @@ const isFormValid = computed(() => {
     serviceFormData.value.direccion.trim() !== ''
 })
 
-// Mostrar todos los servicios, pero marcar Taxi VIP como deshabilitado si no está verificado y ponerlo de primero
+// Mostrar todos los servicios, pero marcar Viaje Privado como deshabilitado si no está verificado y ponerlo de primero
 const filteredServicesList = computed(() => {
   return [...servicesList.value]
     .map(s => ({
       ...s,
-      isDisabled: s.name === 'Taxi VIP' && !isUserVerified.value
+      isDisabled: s.name === 'Viaje Privado' && !isUserVerified.value
     }))
     .sort((a, b) => {
-      if (a.name === 'Taxi VIP') return -1;
-      if (b.name === 'Taxi VIP') return 1;
+      if (a.name === 'Viaje Privado') return -1;
+      if (b.name === 'Viaje Privado') return 1;
       return 0;
     });
 })
 
-// Si el usuario pierde la verificación y tenía 'Taxi VIP' seleccionado, limpiar la selección
+// Si el usuario pierde la verificación y tenía 'Viaje Privado' seleccionado, limpiar la selección
 watch(isUserVerified, (isVerified) => {
-  if (!isVerified && selectedServiceObject.value?.name === 'Taxi VIP') {
+  if (!isVerified && selectedServiceObject.value?.name === 'Viaje Privado') {
     selectedServiceObject.value = null
     serviceFormData.value.type = ''
   }

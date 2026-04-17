@@ -1,23 +1,33 @@
 <script setup>
+import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 const { locale, setLocale, t } = useI18n()
 const showModal = ref(false)
-const languageCookie = useCookie('i18n_redirected', {
-  maxAge: 60 * 60 * 24 * 365,
-  path: '/'
-})
+
+// Use localStorage as fallback alongside cookie
+const LANG_KEY = 'prohogar_language'
 
 onMounted(() => {
-  // Check if language has been selected
-  if (!languageCookie.value) {
+  const saved = localStorage.getItem(LANG_KEY)
+  if (saved) {
+    // Apply saved language
+    setLocale(saved)
+  } else {
+    // No language saved — show selector modal
     showModal.value = true
   }
 })
 
 const selectLanguage = (code) => {
   setLocale(code)
-  languageCookie.value = code
+  localStorage.setItem(LANG_KEY, code)
   showModal.value = false
 }
+
+// Expose so parent (HeaderDashboard) can open the modal
+const openModal = () => { showModal.value = true }
+defineExpose({ openModal })
 </script>
 
 <template>

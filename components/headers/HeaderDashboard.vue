@@ -8,10 +8,13 @@
     @close="toast.show = false"
   />
 
-   <!-- Loading Spinner -->
-    <LoadingSpinner 
-      :loading="isLoading"
-    />
+  <!-- Loading Spinner -->
+  <LoadingSpinner 
+    :loading="isLoading"
+  />
+
+  <!-- Language Selector Modal -->
+  <LanguageSelectorModal ref="langModal" />
   
   <!-- Mobile Header -->
   <header class="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 overflow-hidden">
@@ -37,30 +40,51 @@
             <p class="text-emerald-100 text-xs">{{ $t('dashboard_client.subtitle') }}</p>
           </div>
         </div>
-        <!-- Componente de notificaciones -->
-        <NotificationsDropdown 
-          @notification-click="onNotificationClick"
-        />
+        <!-- Acciones derecha: idioma + notificaciones -->
+        <div class="flex items-center space-x-2">
+          <!-- Botón selector de idioma -->
+          <button
+            @click="langModal?.openModal()"
+            class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/15 hover:bg-white/30 border border-white/25 backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-95"
+            :title="currentLocale === 'es' ? 'Cambiar idioma' : 'Change language'"
+          >
+            <span class="text-lg leading-none select-none">
+              {{ currentLocale === 'es' ? '🇪🇸' : '🇺🇸' }}
+            </span>
+          </button>
+
+          <!-- Componente de notificaciones -->
+          <NotificationsDropdown 
+            @notification-click="onNotificationClick"
+          />
+        </div>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '~/middleware/auth.store';
 import Toast from '~/components/ui/Toast.vue';
 import NotificationsDropdown from '~/components/ui/NotificationsDropdown.vue';
+import LanguageSelectorModal from '~/components/ui/LanguageSelectorModal.vue';
 import { useRuntimeConfig, useNuxtApp } from '#imports';
-import { useRouter } from 'vue-router' 
+import { useRouter } from 'vue-router'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 
 
 // ===== CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+// Ref al modal de idioma
+const langModal = ref(null)
+
+// Locale actual (reactivo para el flag)
+const currentLocale = computed(() => locale.value)
 const auth = useAuthStore()
 const isLoading = ref(false)
 const router = useRouter(); // Asegurar router importado y usado
