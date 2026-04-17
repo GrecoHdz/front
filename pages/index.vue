@@ -977,14 +977,14 @@ const handleImageUpload = (event) => {
 
 // Validación del formulario
 const validateForm = () => {
+  const errors = {}
+  
   // 3. Restricción por dispositivo (Local Check)
   if (process.client && localStorage.getItem('ph_dev_banned') === 'true') {
     errors.general = 'El acceso desde este dispositivo ha sido restringido por seguridad.';
-    showToastMessage('Este dispositivo tiene restringido el acceso a nuevos registros.', 'error');
-    return;
+    showToast('Este dispositivo tiene restringido el acceso a nuevos registros.', 'error');
+    return errors;
   }
-
-  const errors = {}
   
   // Solo validar estos campos si es registro
   if (!isLogin.value) {
@@ -1219,16 +1219,15 @@ const checkAuthStatus = async () => {
       
       navigateTo(dashboardPath, { replace: true })
     }
-  } catch (error) { 
-  } finally {
-    isCheckingAuth.value = false
+  } catch (error) {
     // Registrar marca de baneo si el servidor lo indica
-    if (error.statusCode === 403 && error.data?.message?.includes('dispositivo')) {
+    if (error.statusCode === 403 && error.data?.message?.toLowerCase().includes('dispositivo')) {
       if (process.client) {
         localStorage.setItem('ph_dev_banned', 'true');
       }
     }
-    
+  } finally {
+    isCheckingAuth.value = false
     isLoading.value = false
   }
 }
