@@ -279,10 +279,10 @@
           </div>
         </div>
 
-        <!-- 2. Técnico/Conductor Asignado -->
+        <!-- 2. Profesional/Conductor Asignado -->
         <div v-if="selectedService.technician && selectedService.rawStatus === 'asignado'" class="mb-4">
           <h4 class="text-sm font-black text-gray-900 dark:text-white mb-2">
-            {{ selectedService.title === 'Viaje Privado' ? 'Conductor Asignado' : 'Técnico Asignado' }}
+            {{ selectedService.title === 'Viaje Privado' ? 'Conductor Asignado' : 'Profesional Asignado' }}
           </h4>
           <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
             <div class="flex items-center space-x-2 mb-2">
@@ -293,11 +293,11 @@
                 showImageModal = true
               }"
               class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 relative focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-              aria-label="Ver imagen del técnico"
+              aria-label="Ver imagen del Profesional"
             >
               <img 
                 :src="getOptimizedImage(selectedService.tecnico.imagen_url, 100, 100)" 
-                :alt="'Foto de ' + (selectedService.technicianName || 'Técnico')"
+                :alt="'Foto de ' + (selectedService.technicianName || 'Profesional')"
                 class="w-full h-full object-cover transition-opacity duration-300 hover:opacity-90"
                 :class="{ 'opacity-0': !imageLoaded }"
                 @load="imageLoaded = true"
@@ -314,7 +314,7 @@
               <div>
                 <div class="flex flex-col">
                   <h5 class="font-bold text-emerald-800 dark:text-emerald-200 text-sm">
-                    {{ selectedService.technicianName || (selectedService.title === 'Viaje Privado' ? 'Conductor' : 'Técnico') }}
+                    {{ selectedService.technicianName || (selectedService.title === 'Viaje Privado' ? 'Conductor' : 'Profesional') }}
                   </h5>
                   <div class="flex items-center space-x-1">
                     <span class="flex">
@@ -849,7 +849,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-2">
                 <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-base">
-                  🚕
+                  🚗
                 </div>
                 <div>
                   <h3 class="text-base font-black text-black leading-none">{{ $t('services_page.payment.trip_title') }}</h3>
@@ -956,7 +956,7 @@
                 </button>
 
                 <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg border border-blue-100 dark:border-blue-800 flex items-start space-x-2">
-                  <span class="text-xs">🚕</span>
+                  <span class="text-xs">🚗</span>
                   <p class="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">{{ $t('services_page.payment.receipt_desc') }}</p>
                 </div>
               </div>
@@ -1349,7 +1349,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-2">
                 <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-base">
-                  🚕
+                  🚗
                 </div>
                 <div>
                   <h3 class="text-base font-black text-black leading-none">{{ $t('services_page.modals.trip_tariff') }}</h3>
@@ -1704,7 +1704,7 @@
           <!-- Cuerpo del modal -->
           <div class="p-4">
             <p class="text-gray-700 dark:text-gray-300 mb-4 text-sm">
-              Al rechazar esta cotización, se asignará un nuevo técnico para que realice una nueva valoración. 
+              Al rechazar esta cotización, se asignará un nuevo Profesional para que realice una nueva valoración. 
               ¿Deseas continuar con el rechazo de la cotización actual?
             </p>
             
@@ -1769,7 +1769,7 @@
           <!-- Encabezado con Icono -->
           <div class="bg-yellow-400 p-4 flex items-center space-x-3">
             <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center shadow-lg transform -rotate-3">
-              <span class="text-xl">🚕</span>
+              <span class="text-xl">🚗</span>
             </div>
             <div>
               <h3 class="text-base font-black text-black leading-tight">¿No te convence la tarifa?</h3>
@@ -2447,13 +2447,16 @@ const switchTab = async (tab) => {
     await loadServices(true)
 }
 
+// Helper para detectar Viaje Privado sin importar capitalización
+const isViajePrivado = (title) => title?.trim().toLowerCase() === 'viaje privado'
+
 // Service steps
 const serviceSteps = computed(() => {
-  if (selectedService.value?.title === 'Viaje Privado') {
+  if (isViajePrivado(selectedService.value?.title)) {
     return [
       { id: 1, title: $t('services_page.steps.pending_assignment.title'), description: $t('services_page.steps.pending_assignment.desc') },
       { id: 2, title: $t('services_page.steps.assigned.title'), description: $t('services_page.steps.assigned.desc') },
-      { id: 3, title: $t('services_page.quotation.trip_title'), description: $t('services_page.steps.quotation.desc') },
+      { id: 3, title: $t('services_page.quotation.viaje_privado_title'), description: $t('services_page.steps.quotation.desc') },
       { id: 4, title: $t('services_page.steps.in_progress.title'), description: $t('services_page.steps.in_progress.desc') },
       { id: 5, title: $t('services_page.steps.finished.title'), description: $t('services_page.steps.finished.desc') }
     ]
@@ -2638,7 +2641,7 @@ const pendingServices = computed(() => servicesData.value.pendientes || allServi
 // Referencia reactiva para almacenar el servicio seleccionado
 const selectedServiceRef = ref({})
 
-// Estado para controlar la carga de la imagen del técnico
+// Estado para controlar la carga de la imagen del Profesional
 const imageLoaded = ref(false)
 
 // Propiedad computada para acceder al servicio seleccionado
@@ -2780,7 +2783,7 @@ const formatDateDDMMYY = (dateString) => {
 const getServiceIcon = (serviceName) => {
   if (!serviceName) return '🛠️'
   const name = serviceName.toLowerCase()
-  if (name.includes('taxi')) return '🚕'
+  if (name.includes('viaje')) return '🚗'
   if (name.includes('barber')) return '💈'
   return '🛠️'
 }
@@ -2912,7 +2915,7 @@ const mapApiStatusToLocal = (apiStatus, servicio = {}) => {
   const statusMap = {
     'pendiente_pagovisita': $t('services_page.steps.pending_payment.title'),
     'verificando_pagovisita': $t('services_page.status_labels.verifying_visit'),
-    'pendiente_asignacion': servicio.title === 'Viaje Privado' ? $t('services_page.status_labels.waiting_driver') : $t('services_page.status_labels.req_received'),
+    'pendiente_asignacion': isViajePrivado(servicio.title) ? $t('services_page.status_labels.waiting_driver') : $t('services_page.status_labels.req_received'),
     'asignado': $t('services_page.status_labels.tech_assigned'),
     'pendiente_cotizacion': $t('services_page.status_labels.pending_quote'),
     'en_proceso': $t('services_page.status_labels.in_progress'),
@@ -3104,7 +3107,7 @@ const loadServices = async (reset = true) => {
     // Mapear los servicios con la información de pago actualizada
     const newMappedServices = solicitudesConPago.map(solicitud => {
       const servicioMapeado = mapApiServiceToLocal(solicitud);
-      // Agregar el nombre del técnico si está disponible
+      // Agregar el nombre del Profesional si está disponible
       if (solicitud.tecnico?.nombre) {
         servicioMapeado.technicianName = solicitud.tecnico.nombre;
       }
@@ -3250,13 +3253,13 @@ const openServiceModal = async (service) => {
   selectedServiceRef.value = service;
   showServiceModal.value = true;
   
-  // Si hay un técnico asignado, cargar su calificación
+  // Si hay un Profesional asignado, cargar su calificación
   if (service.technician) {
-    // Usar el nombre del técnico si está disponible
+    // Usar el nombre del Profesional si está disponible
     if (!service.technicianName && service.tecnico?.nombre) {
       service.technicianName = service.tecnico.nombre;
     } else if (!service.technicianName) {
-      service.technicianName = `Técnico #${service.technician}`;
+      service.technicianName = `Profesional #${service.technician}`;
     }
      
     await fetchTecnicoRating(service.technician);
@@ -3287,7 +3290,7 @@ const openPaymentModal = async (service) => {
     selectedServiceId.value = service?.id || null
     
     // Mostrar el modal según el tipo de servicio
-    if (service?.title === 'Viaje Privado') {
+    if (isViajePrivado(service?.title)) {
       showTaxiPaymentModal.value = true
     } else if (service?.title === 'Barbería') {
       showBarberiaPaymentModal.value = true
@@ -3332,7 +3335,7 @@ const getDiscountedPrice = () => {
   if (!amount) return '0.00'
   
   // Si es Viaje Privado y el método de pago es efectivo, no hay beneficio de descuento de membresía/crédito
-  if (selectedService.value?.title === 'Viaje Privado' && taxiPaymentMethod.value === 'efectivo') {
+  if (isViajePrivado(selectedService.value?.title) && taxiPaymentMethod.value === 'efectivo') {
     return amount.toFixed(2)
   }
   
@@ -3372,7 +3375,7 @@ const openQuotationModal = async (service) => {
     taxiCashBillAmount.value = '';
     
     // Mostrar el modal según el tipo de servicio
-    if (service.title === 'Viaje Privado') {
+    if (isViajePrivado(service.title)) {
       showTaxiQuotationModal.value = true;
     } else if (service.title === 'Barbería') {
       showBarberiaQuotationModal.value = true;
@@ -3589,7 +3592,7 @@ const submitRating = async () => {
         }
       }) 
 
-      // Notificar al técnico sobre la calificación
+      // Notificar al Profesional sobre la calificación
       try {
         await $api('/notificaciones/enviar', {
           method: 'POST',
@@ -3662,7 +3665,7 @@ const acceptQuotation = async () => {
     const cotizacionUpdate = { estado: 'aceptado' }; 
     
     // Si es Viaje Privado y pago en efectivo, resetear campos de transferencia y beneficios
-    if (selectedService.value?.title === 'Viaje Privado' && taxiPaymentMethod.value === 'efectivo') {
+    if (isViajePrivado(selectedService.value?.title) && taxiPaymentMethod.value === 'efectivo') {
       cotizacionUpdate.id_cuenta = null;
       cotizacionUpdate.num_comprobante = null;
       cotizacionUpdate.descuento_membresia = 0;
@@ -3694,11 +3697,11 @@ const acceptQuotation = async () => {
     
     // 3. Registrar movimiento
     
-    // Obtener el ID del técnico de los datos del servicio
+    // Obtener el ID del Profesional de los datos del servicio
     const servicioActual = servicesData.value.solicitudes.find(s => s.id_solicitud === selectedServiceId.value);
     const idTecnico = servicioActual?.id_tecnico;
     
-    if (!idTecnico) throw new Error('No se encontró el ID del técnico en la solicitud de servicio');
+    if (!idTecnico) throw new Error('No se encontró el ID del Profesional en la solicitud de servicio');
     
     const configResponse = await $api('/config/valor/comision_por_servicio', {
       method: 'GET'
@@ -3734,7 +3737,7 @@ const acceptQuotation = async () => {
       body: movimientoData
     });
     
-    // Notificar al técnico sobre la cotización aceptada
+    // Notificar al Profesional sobre la cotización aceptada
     try {
       const servicioActual = servicesData.value.solicitudes.find(s => s.id_solicitud === selectedServiceId.value);
       const idTecnico = servicioActual?.id_tecnico;
@@ -3749,7 +3752,7 @@ const acceptQuotation = async () => {
         });
       }
     } catch (error) {
-      console.error('Error al enviar notificación al técnico:', error);
+      console.error('Error al enviar notificación al Profesional:', error);
     }
     
     // Cerrar modal y recargar datos
@@ -3825,14 +3828,14 @@ const rejectQuotation = async () => {
       }
     }
     
-    // Notificar al técnico y administradores sobre la cotización rechazada
+    // Notificar al Profesional y administradores sobre la cotización rechazada
     try {
       const servicioActual = servicesData.value.solicitudes.find(s => s.id_solicitud === selectedServiceId.value);
       const idTecnico = servicioActual?.id_tecnico;
       const isTaxi = selectedService.value?.title === 'Taxi VIP';
       const tituloNotif = isTaxi ? 'Tarifa Rechazada' : 'Cotización Rechazada';
       
-      // Notificar al técnico/conductor
+      // Notificar al Profesional/conductor
       if (idTecnico) {
         await $api('/notificaciones/enviar', {
           method: 'POST',
@@ -3875,7 +3878,7 @@ const rejectQuotation = async () => {
     await loadServices()
     
     // Mostrar notificación de éxito después de actualizar todo
-    showSuccess('Cotización rechazada correctamente. Un nuevo técnico será asignado a tu solicitud.')
+    showSuccess('Cotización rechazada correctamente. Un nuevo Profesional será asignado a tu solicitud.')
     
   } catch (error) {
     console.error('Error al rechazar la cotización:', {
@@ -3983,7 +3986,7 @@ if (response?.data?.id_pagovisita) {
     // Mostrar mensaje de éxito
     showSuccess(
       '¡Pago Enviado!',
-      'Una vez se verifique el pago, se le asignará un técnico.'
+      'Una vez se verifique el pago, se le asignará un Profesional.'
     ); 
      //Enviar mensaje por WhatsApp
     sendWhatsAppMessage(
@@ -4144,10 +4147,10 @@ const cancelarSolicitud = async () => {
       }
     });
 
-    // Notificar al técnico si está asignado, de lo contrario notificar a los administradores
+    // Notificar al Profesional si está asignado, de lo contrario notificar a los administradores
     try {
       if (currentService?.technician) {
-        // Notificar al técnico asignado
+        // Notificar al Profesional asignado
         await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
@@ -4286,7 +4289,7 @@ watch(() => selectedAccountObject.value, (newAccount) => {
   }
 }, { immediate: true });
 
-// Obtener calificación del técnico - solo para servicios calificados
+// Obtener calificación del Profesional - solo para servicios calificados
 const fetchTecnicoRating = async (idTecnico) => { 
   if (!idTecnico) return
   
@@ -4311,7 +4314,7 @@ const fetchTecnicoRating = async (idTecnico) => {
       tecnicoRating.value = 0
     }
   } catch (error) {
-    console.error('Error al obtener calificación del técnico:', error)
+    console.error('Error al obtener calificación del Profesional:', error)
     tecnicoRating.value = 0
   } finally {
     isLoadingTecnicoRating.value = false
