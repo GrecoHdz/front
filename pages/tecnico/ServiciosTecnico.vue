@@ -1286,7 +1286,8 @@ const isCashService = (description = '') => {
 }
 
 const getServiceIcon = (estado, serviceTitle = '') => {
-  if (serviceTitle === 'Taxi VIP') return '🚕'
+  const title = (serviceTitle || '').toLowerCase()
+  if (title.includes('viaje') || title.includes('taxi')) return '🚗'
   if (isBarberíaService(serviceTitle)) return '💇'
   const iconMap = {
     'verificando_pagovisita': '💰',

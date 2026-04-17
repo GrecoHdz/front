@@ -2783,8 +2783,18 @@ const formatDateDDMMYY = (dateString) => {
 const getServiceIcon = (serviceName) => {
   if (!serviceName) return '🛠️'
   const name = serviceName.toLowerCase()
-  if (name.includes('viaje')) return '🚗'
-  if (name.includes('barber')) return '💈'
+  if (name.includes('viaje') || name.includes('taxi')) return '🚗'
+  if (name.includes('barber') || name.includes('peluquería') || name.includes('salón')) return '💈'
+  if (name.includes('aire') || name.includes('ac') || name.includes('clima')) return '❄️'
+  if (name.includes('fontanería') || name.includes('plomería') || name.includes('tubo')) return '🔧'
+  if (name.includes('electricidad') || name.includes('luz')) return '💡'
+  if (name.includes('limpieza') || name.includes('aseo')) return '🧹'
+  if (name.includes('carpintería') || name.includes('madera')) return '🚪'
+  if (name.includes('pintura')) return '🎨'
+  if (name.includes('jardín') || name.includes('planta')) return '🌿'
+  if (name.includes('cámara')) return '🎥'
+  if (name.includes('cerrajería') || name.includes('llave')) return '🔑'
+  if (name.includes('mudanza')) return '🚚'
   return '🛠️'
 }
 
