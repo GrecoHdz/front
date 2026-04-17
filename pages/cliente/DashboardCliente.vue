@@ -1679,7 +1679,7 @@ const getServiceIcon = (serviceName) => {
   if (name.includes('jardinería')) return '🌱'
   if (name.includes('limpieza')) return '🧹'
   if (name.includes('aire') || name.includes('clima')) return '❄️'
-  if (name.includes('viaje')) return '🚕'
+  if (name.includes('viaje')) return '🚗'
   if (name.includes('barbería')) return '💈'
   return '🔧'
 }

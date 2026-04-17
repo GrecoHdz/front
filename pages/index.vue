@@ -1445,7 +1445,7 @@ const getServiceIcon = (serviceName) => {
     'jardinería': '🌿',
     'limpieza': '🧹',
     'mudanza': '🚚',
-    'Viaje': '🚗',
+    'Viaje Privado': '🚗',
     'carpintería': '🚪',
     'reparación de teléfonos/computadoras': '💻', 
     'barbería/salón a domicilio': '✂️',
