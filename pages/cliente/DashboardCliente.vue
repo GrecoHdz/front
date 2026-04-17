@@ -231,7 +231,7 @@
               
               <div v-if="shouldShowFormFields" class="animate-fade-in">
                 <textarea v-model="serviceFormData.description" 
-                         :placeholder="selectedServiceObject?.name === 'Viaje Privado' ? $t('dashboard_client.taxi_placeholder') : (selectedServiceObject?.name === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
+                         :placeholder="selectedServiceObject?.name === 'Viaje Privado' ? $t('dashboard_client.viaje_privado_placeholder') : (selectedServiceObject?.name === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
               </div>
@@ -1651,7 +1651,7 @@ const getServiceIcon = (serviceName) => {
   if (name.includes('jardinería')) return '🌱'
   if (name.includes('limpieza')) return '🧹'
   if (name.includes('aire') || name.includes('clima')) return '❄️'
-  if (name.includes('taxi')) return '🚕'
+  if (name.includes('viaje')) return '🚕'
   if (name.includes('barbería')) return '💈'
   return '🔧'
 }
@@ -2047,14 +2047,14 @@ const sendWhatsAppMessage = async (data, type) => {
         `*ID:* ${formattedDate}-${data.id_paquete_usuario}\n` +
         `*${t('marketplace.package')}:* ${data.nombre_paquete}\n` +
         `${t('dashboard_client.use_package_whatsapp.footer')}`;
-    } else if (type === 'taxi_vip') {
-      // Mensaje para solicitud de taxi VIP
-      message = `*${t('dashboard_client.taxi_whatsapp.title')}*\n\n` +
-        `*${t('dashboard_client.taxi_whatsapp.greeting', { name: data.nombre_usuario })}* \n` +
+    } else if (type === 'viaje_privado') {
+      // Mensaje para solicitud de viaje privado
+      message = `*${t('dashboard_client.viaje_privado_whatsapp.title')}*\n\n` +
+        `*${t('dashboard_client.viaje_privado_whatsapp.greeting', { name: data.nombre_usuario })}* \n` +
         `*${t('dashboard_client.pickup')}:* ${data.colonia}\n` +
         `*${t('dashboard_client.destination')}:* ${data.direccion}\n` +
         `*${t('dashboard_client.description')}:* ${data.description}\n\n` +
-        `${t('dashboard_client.taxi_whatsapp.footer')}`;
+        `${t('dashboard_client.viaje_privado_whatsapp.footer')}`;
     }
     
     if (!message) return;
@@ -2792,13 +2792,13 @@ const handleRequestService = async () => {
       throw new Error(t('dashboard_client.messages.service_not_found'))
     }
 
-    const isTaxiVIP = selectedService.name === 'Taxi VIP'
+    const isViajePrivado = selectedService.name === 'Viaje Privado'
     // Usar el estado reactivo ya cargado en vez de hacer otra llamada autenticada
     // (evita fallos por JWT expirado en medio del envío del formulario)
     const tieneMembresiaActiva = membershipData.value.status === 'activa'
     
-    // Taxi VIP no requiere pago de visita y va directo a asignacion
-    const noRequierePagoVisita = tieneMembresiaActiva || isTaxiVIP
+    // Viaje Privado no requiere pago de visita y va directo a asignacion
+    const noRequierePagoVisita = tieneMembresiaActiva || isViajePrivado
     const estadoInicial = noRequierePagoVisita ? 'pendiente_asignacion' : 'pendiente_pagovisita'
     const visitaPagada = !!noRequierePagoVisita // Usar booleano real para la DB
 
@@ -2884,14 +2884,14 @@ const handleRequestService = async () => {
     
     recentServicesData.value.unshift(newService)
     
-    // Si es Taxi VIP, enviar WhatsApp con los detalles ANTES de limpiar el formulario
-    if (isTaxiVIP) {
+    // Si es Viaje Privado, enviar WhatsApp con los detalles ANTES de limpiar el formulario
+    if (isViajePrivado) {
       sendWhatsAppMessage({
         nombre_usuario: userData.nombre,
         colonia: serviceFormData.value.colonia,
         direccion: serviceFormData.value.direccion,
         description: serviceFormData.value.description
-      }, 'taxi_vip');
+      }, 'viaje_privado');
     }
     
     serviceFormData.value = { 
@@ -2903,7 +2903,7 @@ const handleRequestService = async () => {
       selectedBarberia: null
     }
     
-    const serviceTypeKey = isTaxiVIP ? 'driver' : (isBarberia ? 'barber' : 'technician');
+    const serviceTypeKey = isViajePrivado ? 'driver' : (isBarberia ? 'barber' : 'technician');
     showToast(
       t('dashboard_client.messages.request_sent'), 
       noRequierePagoVisita 
@@ -3062,8 +3062,8 @@ watch(() => serviceFormData.value.type, (newType) => {
 // Watch para sincronizar selectedServiceObject con serviceFormData.type
 watch(() => selectedServiceObject.value, (newService) => {
   if (newService) {
-    // Protección adicional: Si por alguna razón se intenta seleccionar Taxi VIP sin estar verificado
-    if (newService.name === 'Taxi VIP' && !isUserVerified.value) {
+    // Protección adicional: Si por alguna razón se intenta seleccionar Viaje Privado sin estar verificado
+    if (newService.name === 'Viaje Privado' && !isUserVerified.value) {
       showToast(t('dashboard_client.verification_required'), t('dashboard_client.messages.verified_only'), 'warning');
       selectedServiceObject.value = null;
       return;

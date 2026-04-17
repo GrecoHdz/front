@@ -20,6 +20,17 @@
       <div 
         class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden flex flex-col items-center text-center gap-6"
       >
+        <!-- Botón de Cerrar (Solo para Admin/SA) -->
+        <button 
+          v-if="canClose"
+          @click="dismissed = true"
+          class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-90 z-20"
+          title="Cerrar"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
         <!-- Icono Principal -->
         <div class="relative">
           <div class="absolute inset-0 bg-blue-500 blur-2xl opacity-20 scale-150"></div>
@@ -97,11 +108,19 @@ console.log('DEBUG: PWAInstallInvite setup iniciado');
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppPWA } from '~/composables/useAppPWA';
+import { useAuthStore } from '~/middleware/auth.store';
 
 const { isInstalled, isIOS, canInstall, installApp } = useAppPWA();
+const authStore = useAuthStore();
 const route = useRoute();
 const showDelayed = ref(false);
 const isForced = ref(false);
+const dismissed = ref(false);
+
+const canClose = computed(() => {
+  const role = authStore.user?.role;
+  return role === 'sa' || role === 'admin';
+});
 
 // Comprobar flag de registro de forma agresiva
 const checkForceFlag = () => {
@@ -120,6 +139,11 @@ const checkForceFlag = () => {
 };
 
 const isVisible = computed(() => {
+  // Si el usuario lo cerró manualmente
+  if (dismissed.value) {
+    return false;
+  }
+
   // CRÍTICO: Si está instalada, NUNCA mostramos
   if (isInstalled.value) {
     return false;

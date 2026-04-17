@@ -155,19 +155,56 @@
     "terms": "Términos y Condiciones",
     "privacy": "Política de Privacidad",
     "terms_content": [
-      { "title": "Aceptación de Términos", "text": "Al acceder y utilizar MiSeguro, aceptas cumplir con estos términos y condiciones." },
-      { "title": "Servicios Ofrecidos", "text": "MiSeguro es una plataforma que conecta técnicos profesionales con clientes para labores de mantenimiento y reparación." },
-      { "title": "Responsabilidades del Usuario", "list": ["Proporcionar información verídica.", "Tratar con respeto a los profesionales.", "Realizar los pagos únicamente a través de los medios autorizados."] },
-      { "title": "Pagos y Cancelaciones", "text": "Los pagos se gestionan según la cotización aceptada. Las cancelaciones pueden estar sujetas a cargos de visita." },
-      { "title": "Conducta en el Sitio", "text": "No se permite el uso de la plataforma para fines ilícitos o para contactar técnicos por fuera del sistema oficial." },
-      { "title": "Garantías", "text": "Todos los servicios realizados a través de MiSeguro cuentan con una garantía de cumplimiento según los estándares de la industria." }
+      {
+        "title": "Aceptación de Términos",
+        "text": "Al acceder y utilizar MiSeguro, aceptas cumplir con estos términos y condiciones."
+      },
+      {
+        "title": "Servicios Ofrecidos",
+        "text": "MiSeguro es una plataforma que conecta técnicos profesionales con clientes para labores de mantenimiento y reparación."
+      },
+      {
+        "title": "Responsabilidades del Usuario",
+        "list": [
+          "Proporcionar información verídica.",
+          "Tratar con respeto a los profesionales.",
+          "Realizar los pagos únicamente a través de los medios autorizados."
+        ]
+      },
+      {
+        "title": "Pagos y Cancelaciones",
+        "text": "Los pagos se gestionan según la cotización aceptada. Las cancelaciones pueden estar sujetas a cargos de visita."
+      },
+      {
+        "title": "Conducta en el Sitio",
+        "text": "No se permite el uso de la plataforma para fines ilícitos o para contactar técnicos por fuera del sistema oficial."
+      },
+      {
+        "title": "Garantías",
+        "text": "Todos los servicios realizados a través de MiSeguro cuentan con una garantía de cumplimiento según los estándares de la industria."
+      }
     ],
     "privacy_content": [
-      { "title": "Recolección de Datos", "text": "Recopilamos información personal como nombre, correo, teléfono y ubicación para la prestación de servicios." },
-      { "title": "Uso de la Información", "text": "Tus datos se utilizan para coordinar servicios, procesar pagos y mejorar tu experiencia." },
-      { "title": "Seguridad", "text": "Implementamos medidas de seguridad robustas para proteger tus datos contra accesos no autorizados." },
-      { "title": "Compartición con Terceros", "text": "Solo compartimos información necesaria con los técnicos asignados para completar el servicio solicitado." },
-      { "title": "Tus Derechos", "text": "Tienes derecho a acceder, rectificar o eliminar tus datos personales en cualquier momento desde tu perfil." }
+      {
+        "title": "Recolección de Datos",
+        "text": "Recopilamos información personal como nombre, correo, teléfono y ubicación para la prestación de servicios."
+      },
+      {
+        "title": "Uso de la Información",
+        "text": "Tus datos se utilizan para coordinar servicios, procesar pagos y mejorar tu experiencia."
+      },
+      {
+        "title": "Seguridad",
+        "text": "Implementamos medidas de seguridad robustas para proteger tus datos contra accesos no autorizados."
+      },
+      {
+        "title": "Compartición con Terceros",
+        "text": "Solo compartimos información necesaria con los técnicos asignados para completar el servicio solicitado."
+      },
+      {
+        "title": "Tus Derechos",
+        "text": "Tienes derecho a acceder, rectificar o eliminar tus datos personales en cualquier momento desde tu perfil."
+      }
     ],
     "about": "Acerca de MiSeguro",
     "logout": "Cerrar sesión",
@@ -237,10 +274,22 @@
       {
         "title": "Nuestros Valores",
         "grid": [
-          { "title": "Confianza", "desc": "Técnicos verificados y con identidad validada." },
-          { "title": "Calidad", "desc": "Servicios con garantía de satisfacción del 100%." },
-          { "title": "Ahorro", "desc": "Precios justos y programa de membresía con cashback." },
-          { "title": "Soporte", "desc": "Atención personalizada 24/7 para todos tus servicios." }
+          {
+            "title": "Confianza",
+            "desc": "Técnicos verificados y con identidad validada."
+          },
+          {
+            "title": "Calidad",
+            "desc": "Servicios con garantía de satisfacción del 100%."
+          },
+          {
+            "title": "Ahorro",
+            "desc": "Precios justos y programa de membresía con cashback."
+          },
+          {
+            "title": "Soporte",
+            "desc": "Atención personalizada 24/7 para todos tus servicios."
+          }
         ]
       },
       {
@@ -406,7 +455,7 @@
     "select_type": "Modalidad de servicio",
     "choose_barbershop": "Seleccione una barbería",
     "local_image": "Imagen del local {n}",
-    "taxi_placeholder": "¿Cuántas personas van y en cuánto tiempo lo necesitan?",
+    "viaje_privado_placeholder": "¿Cuántas personas van y en cuánto tiempo lo necesitan?",
     "barber_placeholder": "¿Qué tipo de corte desea? Ejemplo: Fade medio con barba",
     "service_placeholder": "Describe el problema o servicio que necesitas...",
     "pickup": "Recoger en",
@@ -472,9 +521,9 @@
     "seo": {
       "keywords": "dashboard, MiSeguro, servicios, membresía, panel de control"
     },
-    "taxi_whatsapp": {
-      "title": "Solicitud de Taxi VIP",
-      "greeting": "¡Hola! Soy {name}, me gustaría solicitar un servicio de Taxi VIP con los siguientes detalles:",
+    "viaje_privado_whatsapp": {
+      "title": "Solicitud de Viaje Privado",
+      "greeting": "¡Hola! Soy {name}, me gustaría solicitar un servicio de Viaje Privado con los siguientes detalles:",
       "footer": "Solicitado a través de la plataforma MiSeguro."
     },
     "receipt_whatsapp": {
@@ -768,7 +817,7 @@
     },
     "quotation": {
       "title": "Propuesta Técnica",
-      "taxi_title": "Tarifa de Viaje",
+      "viaje_privado_title": "Tarifa de Viaje",
       "barber_title": "Costo de Servicio",
       "diagnostic": "Diagnóstico",
       "notes": "Notas del Conductor",
@@ -791,8 +840,8 @@
       "accept_barber": "ACEPTAR COSTO",
       "confirm_reject_title": "¿Estás seguro?",
       "confirm_reject_desc": "Al rechazar esta cotización, se asignará un nuevo técnico para que realice una nueva valoración. ¿Deseas continuar?",
-      "confirm_taxi_reject_title": "¿No te convence la tarifa?",
-      "confirm_taxi_reject_desc": "Al cancelar este viaje, buscaremos un nuevo conductor disponible cerca de ti."
+      "confirm_viaje_privado_reject_title": "¿No te convence la tarifa?",
+      "confirm_viaje_privado_reject_desc": "Al cancelar este viaje, buscaremos un nuevo conductor disponible cerca de ti."
     },
     "rating": {
       "title": "Calificar Servicio",

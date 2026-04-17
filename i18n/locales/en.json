@@ -27,7 +27,20 @@
     "success": "Success!",
     "error": "Error",
     "error_unexpected": "An unexpected error occurred. Please try again.",
-    "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "months": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
     "no_date": "No date",
     "invalid_date": "Invalid date",
     "now": "Now",
@@ -142,19 +155,56 @@
     "terms": "Terms and Conditions",
     "privacy": "Privacy Policy",
     "terms_content": [
-      { "title": "Acceptance of Terms", "text": "By accessing and using MiSeguro, you agree to comply with these terms and conditions." },
-      { "title": "Services Offered", "text": "MiSeguro is a platform that connects professional technicians with clients for maintenance and repair work." },
-      { "title": "User Responsibilities", "list": ["Provide accurate information.", "Treat professionals with respect.", "Make payments only through authorized means."] },
-      { "title": "Payments and Cancellations", "text": "Payments are managed according to the accepted quote. Cancellations may be subject to visit fees." },
-      { "title": "Conduct on Site", "text": "The platform may not be used for illegal purposes or to contact technicians outside the official system." },
-      { "title": "Guarantees", "text": "All services performed through MiSeguro have a compliance guarantee according to industry standards." }
+      {
+        "title": "Acceptance of Terms",
+        "text": "By accessing and using MiSeguro, you agree to comply with these terms and conditions."
+      },
+      {
+        "title": "Services Offered",
+        "text": "MiSeguro is a platform that connects professional technicians with clients for maintenance and repair work."
+      },
+      {
+        "title": "User Responsibilities",
+        "list": [
+          "Provide accurate information.",
+          "Treat professionals with respect.",
+          "Make payments only through authorized means."
+        ]
+      },
+      {
+        "title": "Payments and Cancellations",
+        "text": "Payments are managed according to the accepted quote. Cancellations may be subject to visit fees."
+      },
+      {
+        "title": "Conduct on Site",
+        "text": "The platform may not be used for illegal purposes or to contact technicians outside the official system."
+      },
+      {
+        "title": "Guarantees",
+        "text": "All services performed through MiSeguro have a compliance guarantee according to industry standards."
+      }
     ],
     "privacy_content": [
-      { "title": "Data Collection", "text": "We collect personal information such as name, email, phone, and location for service provision." },
-      { "title": "Use of Information", "text": "Your data is used to coordinate services, process payments, and improve your experience." },
-      { "title": "Security", "text": "We implement robust security measures to protect your data against unauthorized access." },
-      { "title": "Third-Party Sharing", "text": "We only share necessary information with assigned technicians to complete requested services." },
-      { "title": "Your Rights", "text": "You have the right to access, rectify, or delete your personal data at any time from your profile." }
+      {
+        "title": "Data Collection",
+        "text": "We collect personal information such as name, email, phone, and location for service provision."
+      },
+      {
+        "title": "Use of Information",
+        "text": "Your data is used to coordinate services, process payments, and improve your experience."
+      },
+      {
+        "title": "Security",
+        "text": "We implement robust security measures to protect your data against unauthorized access."
+      },
+      {
+        "title": "Third-Party Sharing",
+        "text": "We only share necessary information with assigned technicians to complete requested services."
+      },
+      {
+        "title": "Your Rights",
+        "text": "You have the right to access, rectify, or delete your personal data at any time from your profile."
+      }
     ],
     "about": "About MiSeguro",
     "logout": "Logout",
@@ -224,10 +274,22 @@
       {
         "title": "Our Values",
         "grid": [
-          { "title": "Trust", "desc": "Verified technicians with validated identity." },
-          { "title": "Quality", "desc": "Services with 100% satisfaction guarantee." },
-          { "title": "Savings", "desc": "Fair prices and membership program with cashback." },
-          { "title": "Support", "desc": "Personalized 24/7 attention for all your services." }
+          {
+            "title": "Trust",
+            "desc": "Verified technicians with validated identity."
+          },
+          {
+            "title": "Quality",
+            "desc": "Services with 100% satisfaction guarantee."
+          },
+          {
+            "title": "Savings",
+            "desc": "Fair prices and membership program with cashback."
+          },
+          {
+            "title": "Support",
+            "desc": "Personalized 24/7 attention for all your services."
+          }
         ]
       },
       {
@@ -393,7 +455,7 @@
     "select_type": "Select type",
     "choose_barbershop": "Choose barbershop",
     "local_image": "Local Image {n}",
-    "taxi_placeholder": "How many people and when do they need it?",
+    "viaje_privado_placeholder": "How many people and when do they need it?",
     "barber_placeholder": "What kind of cut? Example: Mid fade with beard",
     "service_placeholder": "Describe the problem or service you need...",
     "pickup": "Pickup at",
@@ -459,9 +521,9 @@
     "seo": {
       "keywords": "dashboard, MiSeguro, services, membership, control panel"
     },
-    "taxi_whatsapp": {
-      "title": "Taxi VIP Request",
-      "greeting": "Hello! I am {name}, I would like to request a Taxi VIP service with the following details:",
+    "viaje_privado_whatsapp": {
+      "title": "Private Trip Request",
+      "greeting": "Hello! I am {name}, I would like to request a Private Trip service with the following details:",
       "footer": "Requested via the MiSeguro platform."
     },
     "receipt_whatsapp": {
@@ -755,7 +817,7 @@
     },
     "quotation": {
       "title": "Technical Proposal",
-      "taxi_title": "Trip Fare",
+      "viaje_privado_title": "Trip Fare",
       "barber_title": "Service Cost",
       "diagnostic": "Diagnosis",
       "notes": "Driver Notes",
@@ -778,8 +840,8 @@
       "accept_barber": "ACCEPT COST",
       "confirm_reject_title": "Are you sure?",
       "confirm_reject_desc": "By rejecting this quote, a new technician will be assigned for a new assessment. Do you want to continue?",
-      "confirm_taxi_reject_title": "Not satisfied with the fare?",
-      "confirm_taxi_reject_desc": "By cancelling this trip, we will look for a new available driver near you."
+      "confirm_viaje_privado_reject_title": "Not satisfied with the fare?",
+      "confirm_viaje_privado_reject_desc": "By cancelling this trip, we will look for a new available driver near you."
     },
     "rating": {
       "title": "Rate Service",
