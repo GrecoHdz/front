@@ -1275,11 +1275,6 @@ const getTimeAgo = (dateString) => {
   return `Hace ${Math.floor(diffInHours / 24)} días`
 }
 
-// Helper: detects barberia service regardless of accent/case
-const isBarberíaService = (title = '') => {
-  return title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'barberia'
-}
-
 // Helper: detects cash payment based on description
 const isCashService = (description = '') => {
   return (description || '').toLowerCase().includes('pago efectivo')
@@ -1288,17 +1283,22 @@ const isCashService = (description = '') => {
 const getServiceIcon = (estado, serviceTitle = '') => {
   const title = (serviceTitle || '').toLowerCase()
   if (title.includes('viaje') || title.includes('taxi')) return '🚗'
-  if (isBarberíaService(serviceTitle)) return '💇'
+  if (title.includes('barber') || title.includes('peluquería') || title.includes('salón')) return '💈'
+  if (title.includes('aire') || title.includes('ac') || title.includes('clima')) return '❄️'
+  if (title.includes('fontan') || title.includes('plomer') || title.includes('tubo')) return '💧'
+  if (title.includes('electri') || title.includes('luz')) return '💡'
+  
   const iconMap = {
     'verificando_pagovisita': '💰',
     'asignado': '👨‍🔧',
     'en_proceso': '⚡',
     'finalizado': '✅',
     'calificado': '⭐',
-    'cancelado': '❌'
+    'cancelado': '❌',
+    'pendiente_cotizacion': '📋'
   }
   
-  return iconMap[estado] || '🔧'
+  return iconMap[estado] || '🛠️'
 }
 
 const mapApiStatusToLocal = (apiStatus, title = '') => {

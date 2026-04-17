@@ -986,17 +986,35 @@ const validateForm = () => {
       errors.nombre = 'Por favor ingresa tu nombre completo (mínimo 2 palabras)'
     }
     
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!form.value.email || !emailRegex.test(form.value.email)) {
+      errors.email = 'Por favor ingresa un correo electrónico válido'
+    } else {
+      const [userPart] = form.value.email.split('@')
+      if (/^(.)\1+$/.test(userPart)) {
+        errors.email = 'El correo electrónico parece ser falso'
+      }
+    }
+
     // Validar teléfono (código de país + número)
     const phoneRegex = /^\+?[0-9\s-]{10,15}$/
     if (!form.value.telefono || !phoneRegex.test(form.value.telefono)) {
       errors.telefono = 'Ingresa un número de teléfono válido (ej: +504 9999-9999)'
+    } else {
+      const onlyDigits = form.value.telefono.replace(/\D/g, '')
+      if (/^(.)\1+$/.test(onlyDigits)) {
+        errors.telefono = 'El número de teléfono parece ser falso'
+      }
     }
     
     // Validar número de identidad (12 a 17 dígitos)
     const identidadRegex = /^\d{12,17}$/
     if (!form.value.identidad || !identidadRegex.test(form.value.identidad)) {
       errors.identidad = 'El número de identidad debe tener entre 12 y 17 dígitos'
-    } 
+    } else if (/^(.)\1+$/.test(form.value.identidad)) {
+      errors.identidad = 'El número de identidad parece ser falso'
+    }
   }
   
   // Validar contraseña (mínimo 6 caracteres)
@@ -1436,19 +1454,22 @@ const loadServices = async () => {
 // Función auxiliar para asignar iconos según el nombre del servicio
 const getServiceIcon = (serviceName) => {
   const icons = {
-    'fontanería': '🔧',
-    'electricidad': '💡',
-    'cámaras': '🎥',
+    'fontan': '💧',
+    'electri': '💡',
+    'cámara': '🎥',
     'aire': '❄️', 
-    'pintura': '🎨', 
-    'cerrajería': '🔑',
-    'jardinería': '🌿',
-    'limpieza': '🧹',
-    'mudanza': '🚚',
-    'viaje privado': '🚗',
-    'carpintería': '🚪',
-    'reparación de teléfonos/computadoras': '💻', 
-    'barbería': '💈',
+    'ac': '❄️',
+    'pintur': '🎨', 
+    'cerraj': '🔑',
+    'jardin': '🌿',
+    'limpie': '🧹',
+    'mudanz': '🚚',
+    'viaje': '🚗',
+    'carpin': '🚪',
+    'teléfono': '💻', 
+    'computadora': '💻', 
+    'barber': '💈',
+    'peluquería': '💈'
   }
   
   if (!serviceName) return '🛠️'
@@ -1973,10 +1994,16 @@ const handleIdentityInput = (e) => {
 }
 
 const validateIdentity = () => {
-  const len = form.identidad ? form.identidad.length : 0
-  if (len > 0 && (len < 12 || len > 17)) {
-    formErrors.identidad = 'El número de identidad debe tener entre 12 y 17 dígitos'
-    return false
+  const len = form.identidad ? form.identidad.toString().length : 0
+  if (len > 0) {
+    if (len < 12 || len > 17) {
+      formErrors.identidad = 'El número de identidad debe tener entre 12 y 17 dígitos'
+      return false
+    }
+    if (/^(.)\1+$/.test(form.identidad.toString())) {
+      formErrors.identidad = 'El número de identidad parece ser falso'
+      return false
+    }
   }
   formErrors.identidad = ''
   return true
@@ -2064,6 +2091,8 @@ const validatePhoneNumber = (phoneNumber) => {
     formErrors.telefono = `El número es demasiado corto. Mínimo ${minLength} dígitos incluyendo el código de país`;
   } else if (digitCount > maxLength) {
     formErrors.telefono = `El número es demasiado largo. Máximo ${maxLength} dígitos incluyendo el código de país`;
+  } else if (/^(.)\1+$/.test(cleanNumber.replace(/\+/g, ''))) {
+    formErrors.telefono = 'El número de teléfono parece ser falso';
   }
   
   // Devolver si el número es válido

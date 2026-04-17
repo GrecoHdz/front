@@ -325,10 +325,19 @@
                             }"
                             title="Editar"
                           >
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                           </button> 
+                          <button 
+                            @click.stop="confirmDeleteUser(user)"
+                            class="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            title="Eliminar"
+                          >
+                            <svg class="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
                         </div>
                       </div>
                       
@@ -520,10 +529,19 @@
                             }"
                             title="Editar"
                           >
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                           </button> 
+                          <button 
+                            @click.stop="confirmDeleteUser(technician)"
+                            class="p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            title="Eliminar"
+                          >
+                            <svg class="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
                         </div>
                       </div>
                       
@@ -689,10 +707,19 @@
                             }"
                             title="Editar"
                           >
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                           </button> 
+                          <button 
+                            @click.stop="confirmDeleteUser(admin)"
+                            class="p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            title="Eliminar"
+                          >
+                            <svg class="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
                         </div>
                       </div>
                       
@@ -993,6 +1020,21 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   <span>Cambiar Contraseña</span>
+                </button>
+              </div>
+
+              <!-- Botón de eliminar (solo visible si se está editando un usuario existente) -->
+              <div class="pt-2">
+                <button 
+                  type="button"
+                  @click="confirmDeleteUser(userForm)"
+                  class="w-full py-2 mb-2 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm"
+                  :disabled="isDeleting"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>{{ isDeleting ? 'Eliminando...' : 'Eliminar Usuario' }}</span>
                 </button>
               </div>
 
@@ -4126,6 +4168,62 @@ const saveUser = async () => {
     isSaving.value = false;
   }
 };
+
+// Confirmar eliminación de usuario
+const confirmDeleteUser = (user) => {
+  if (!user) return
+  
+  const userName = user.nombre || 'este usuario'
+  if (confirm(`¿Estás seguro de que deseas eliminar permanentemente a ${userName}? Esta acción no se puede deshacer y borrará todos sus datos asociados.`)) {
+    deleteUser(user.id_usuario || user.id)
+  }
+}
+
+// Eliminar usuario permanentemente
+const deleteUser = async (userId) => {
+  if (!userId) {
+    showError('No se pudo identificar al usuario para eliminar')
+    return
+  }
+
+  try {
+    isDeleting.value = true
+    
+    const response = await $api(`/usuarios/${userId}`, {
+      method: 'DELETE'
+    })
+    
+    if (response) {
+      showSuccess('Usuario eliminado exitosamente')
+      
+      // Cerrar el modal de edición si estaba abierto para este usuario
+      if (showEditModal.value && userForm.value.id_usuario === userId) {
+        closeModal()
+      }
+      
+      // Limpiar caches
+      Object.keys(usersCache).forEach(key => delete usersCache[key])
+      Object.keys(techniciansCache).forEach(key => delete techniciansCache[key])
+      
+      // Recargar todas las listas para reflejar el cambio
+      await Promise.all([
+        loadUsers(usersCurrentPage.value),
+        loadTechnicians(techniciansCurrentPage.value),
+        loadAdministrators(adminsCurrentPage.value),
+        fetchStatistics()
+      ])
+      
+    } else {
+      showError('No se pudo eliminar el usuario')
+    }
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error)
+    const errorMessage = error.data?.message || 'Error al intentar eliminar el usuario'
+    showError(errorMessage)
+  } finally {
+    isDeleting.value = false
+  }
+}
 
 // Función para cargar usuarios pendientes de verificación
 const loadPendingVerificationUsers = async () => {

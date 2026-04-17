@@ -890,6 +890,7 @@
         </div>
       </div>
     </Transition>
+    
     <!-- Modal de Confirmación Activar Notificaciones -->
     <Transition name="fade">
       <div v-if="showSubscribeModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -2064,6 +2065,36 @@ const confirmDeleteIdentity = async () => {
 const saveProfile = async () => {
   try {
     const config = useRuntimeConfig();
+
+    // Validaciones básicas
+    if (!user.value.nombre || user.value.nombre.trim().split(' ').filter(Boolean).length < 2) {
+      showError(t('common.error'), 'Por favor ingresa tu nombre completo (mínimo 2 palabras)');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!user.value.email || !emailRegex.test(user.value.email)) {
+      showError(t('common.error'), 'Por favor ingresa un correo electrónico válido');
+      return;
+    } else {
+      const [userPart] = user.value.email.split('@');
+      if (/^(.)\1+$/.test(userPart)) {
+        showError(t('common.error'), 'El correo electrónico parece ser falso');
+        return;
+      }
+    }
+
+    const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
+    if (!user.value.telefono || !phoneRegex.test(user.value.telefono)) {
+      showError(t('common.error'), 'Ingresa un número de teléfono válido (ej: +504 9999-9999)');
+      return;
+    } else {
+      const onlyDigits = user.value.telefono.replace(/\D/g, '');
+      if (/^(.)\1+$/.test(onlyDigits)) {
+        showError(t('common.error'), 'El número de teléfono parece ser falso');
+        return;
+      }
+    }
     
     // Datos que se enviarán al backend
     const userData = {
@@ -2073,6 +2104,7 @@ const saveProfile = async () => {
       id_ciudad: user.value.id_ciudad
     }; 
     
+    isSaving.value = true;
     const response = await $api(`/usuarios/${user.value.id_usuario}`, {
       method: 'PUT',
       body: userData

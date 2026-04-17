@@ -481,6 +481,44 @@
 
 
 
+      <!-- Push Notifications Settings -->
+      <div v-if="isSupported" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4 transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-xl">
+              🔔
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-gray-900 dark:text-white">{{ $t('profile.push_notifications') }}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.real_time_alerts') }}</p>
+            </div>
+          </div>
+          
+          <!-- Toggle Switch -->
+          <button 
+            @click="handleToggleNotifications"
+            :disabled="permission === 'denied'"
+            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            :class="isSubscribed ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'"
+          >
+            <span
+              class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm"
+              :class="isSubscribed ? 'translate-x-6' : 'translate-x-1'"
+            />
+          </button>
+        </div>
+
+        <div class="mt-4">
+          <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+            {{ $t('profile.notifications_description') }}
+          </p>
+          
+          <p v-if="permission === 'denied'" class="mt-2 text-[10px] text-red-500 dark:text-red-400">
+            ⚠️ {{ $t('profile.notifications_blocked') }}
+          </p>
+        </div>
+      </div>
+
       <!-- Legal & About -->
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow border border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Legal y más</h3>
@@ -1191,6 +1229,69 @@
   </div>
 </Transition>
 
+
+    <!-- Modales de Notificaciones -->
+    <Transition name="fade">
+      <div v-if="showUnsubscribeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[150] p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 w-full max-w-sm relative shadow-2xl border border-gray-100 dark:border-gray-700 text-center animate-slide-up">
+          <div class="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+            🔕
+          </div>
+          <h3 class="text-xl font-black text-gray-900 dark:text-white mb-3">
+            {{ $t('profile.notifications.disable_title') }}
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+            {{ $t('profile.notifications.disable_desc') }}
+          </p>
+          
+          <div class="space-y-3">
+            <button 
+              @click="confirmUnsubscribe"
+              class="w-full py-4 bg-gray-100 dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 font-bold rounded-2xl transition-all active:scale-95"
+            >
+              {{ $t('profile.notifications.confirm_disable') }}
+            </button>
+            <button 
+              @click="showUnsubscribeModal = false"
+              class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200 dark:shadow-none"
+            >
+              {{ $t('profile.notifications.keep_active') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="fade">
+      <div v-if="showSubscribeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[150] p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 w-full max-w-sm relative shadow-2xl border border-gray-100 dark:border-gray-700 text-center animate-slide-up">
+          <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+            🔔
+          </div>
+          <h3 class="text-xl font-black text-gray-900 dark:text-white mb-3">
+            {{ $t('profile.notifications.subscribe_title') }}
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+            {{ $t('profile.notifications.subscribe_desc') }}
+          </p>
+          
+          <div class="space-y-3">
+            <button 
+              @click="confirmSubscribe"
+              class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200 dark:shadow-none"
+            >
+              {{ $t('profile.notifications.confirm_subscribe') }}
+            </button>
+            <button 
+              @click="showSubscribeModal = false"
+              class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
+            >
+              {{ $t('profile.notifications.not_now') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
   
 </template>
@@ -1202,6 +1303,10 @@ import Toast from '~/components/ui/Toast.vue'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Multiselect from 'vue-multiselect'
+import { usePushNotifications } from '~/composables/usePushNotifications'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 
 
@@ -1234,6 +1339,9 @@ const isTerminosModalOpen = ref(false)
 const isContratoTecnicoModalOpen = ref(false)
 const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
+const showUnsubscribeModal = ref(false)
+const showSubscribeModal = ref(false)
+const { subscribe, unsubscribe, isSubscribed, isSupported, permission } = usePushNotifications()
 
 
 
@@ -1263,7 +1371,9 @@ const anyModalOpen = computed(() => {
          isContratoTecnicoModalOpen.value || 
          isPrivacidadModalOpen.value || 
          isAcercaModalOpen.value || 
-         showServiceModal.value
+         showServiceModal.value ||
+         showUnsubscribeModal.value ||
+         showSubscribeModal.value
 })
 
 watch(anyModalOpen, (newValue) => {
@@ -1486,6 +1596,46 @@ const fetchTechnicianServices = async () => {
   } catch (error) {
     console.error('Error al cargar servicios del técnico:', error)
     showError('Error', 'No se pudieron cargar tus servicios asignados.')
+  }
+}
+
+const handleToggleNotifications = async () => {
+  if (isSubscribed.value) {
+    showUnsubscribeModal.value = true
+  } else {
+    showSubscribeModal.value = true
+  }
+}
+
+const confirmSubscribe = async () => {
+  try {
+    showSubscribeModal.value = false
+    const result = await subscribe()
+    
+    if (result.success) {
+      showSuccess(t('common.success'), t('profile.messages.update_success'))
+    } else if (result.error === 'denied') {
+      showError(t('profile.messages.generic_error'), t('profile.permissions_denied'))
+    } else {
+      showError(t('common.error'), result.error || t('profile.messages.generic_error'))
+    }
+  } catch (error) {
+    console.error('Error al suscribir:', error)
+    showError(t('common.error'), t('profile.messages.generic_error'))
+  }
+}
+
+const confirmUnsubscribe = async () => {
+  try {
+    await unsubscribe()
+    showUnsubscribeModal.value = false
+    showToast({
+      message: t('profile.messages.update_success'),
+      type: 'info',
+      duration: 3000
+    })
+  } catch (error) {
+    console.error('Error al desactivar:', error)
   }
 }
 
@@ -1908,6 +2058,36 @@ const fileInputBarberia2 = ref(null)
 // ===== FUNCIONES DE ACCIONES =====
 const saveProfile = async () => {
   try {
+    // Validaciones básicas
+    if (!user.value.nombre || user.value.nombre.trim().split(' ').filter(Boolean).length < 2) {
+      showError('Error', 'Por favor ingresa tu nombre completo (mínimo 2 palabras)');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!user.value.email || !emailRegex.test(user.value.email)) {
+      showError('Error', 'Por favor ingresa un correo electrónico válido');
+      return;
+    } else {
+      const [userPart] = user.value.email.split('@');
+      if (/^(.)\1+$/.test(userPart)) {
+        showError('Error', 'El correo electrónico parece ser falso');
+        return;
+      }
+    }
+
+    const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
+    if (!user.value.telefono || !phoneRegex.test(user.value.telefono)) {
+      showError('Error', 'Ingresa un número de teléfono válido (ej: +504 9999-9999)');
+      return;
+    } else {
+      const onlyDigits = user.value.telefono.replace(/\D/g, '');
+      if (/^(.)\1+$/.test(onlyDigits)) {
+        showError('Error', 'El número de teléfono parece ser falso');
+        return;
+      }
+    }
+
     const userData = {
       nombre: user.value.nombre,
       email: user.value.email,
@@ -1915,6 +2095,7 @@ const saveProfile = async () => {
       id_ciudad: user.value.id_ciudad
     }; 
     
+    isSaving.value = true;
     const response = await $api(`/usuarios/${userCookie.value.id_usuario}`, {
       method: 'PUT',
       body: userData

@@ -1401,6 +1401,52 @@
     </div>
   </div>
 
+  
+        <!-- Card: Configuración de Notificaciones Push (Admin) -->
+        <div v-if="isSupported" class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 transition-all duration-300">
+          <div class="flex items-center mb-4 sm:mb-6">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 dark:bg-emerald-900 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+              <span class="text-lg sm:text-2xl">🔔</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-[14px] sm:text-xs md:text-base font-bold text-gray-900 dark:text-white leading-tight">
+                {{ $t('profile.push_notifications') }}
+              </h3>
+              <p class="text-[12px] sm:text-xs md:text-base text-gray-600 dark:text-gray-300 mt-1">
+                {{ $t('profile.real_time_alerts') }}
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ isSubscribed ? 'Notificaciones Activas' : 'Notificaciones Desactivadas' }}
+              </span>
+              <!-- Toggle Switch -->
+              <button 
+                @click="handleToggleNotifications"
+                :disabled="permission === 'denied'"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                :class="isSubscribed ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm"
+                  :class="isSubscribed ? 'translate-x-6' : 'translate-x-1'"
+                />
+              </button>
+            </div>
+            
+            <p class="text-xs text-gray-600 dark:text-gray-400">
+              {{ $t('profile.notifications_description') }}
+            </p>
+            
+            <p v-if="permission === 'denied'" class="mt-2 text-[10px] text-red-500 dark:text-red-400">
+              ⚠️ {{ $t('profile.notifications_blocked') }}
+            </p>
+          </div>
+        </div>
+
   <!-- Logout Button Section -->
   <div class="w-full flex justify-center pt-12 pb-18 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
     <button 
@@ -2702,6 +2748,69 @@
       </div>
     </div>
   </Transition>
+
+    <!-- Modales de Notificaciones Push -->
+    <Transition name="fade">
+      <div v-if="showUnsubscribeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[150] p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 w-full max-w-sm relative shadow-2xl border border-gray-100 dark:border-gray-700 text-center animate-slide-up">
+          <div class="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+            🔕
+          </div>
+          <h3 class="text-xl font-black text-gray-900 dark:text-white mb-3">
+            {{ $t('profile.notifications.disable_title') }}
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+            {{ $t('profile.notifications.disable_desc') }}
+          </p>
+          
+          <div class="space-y-3">
+            <button 
+              @click="confirmUnsubscribe"
+              class="w-full py-4 bg-gray-100 dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 font-bold rounded-2xl transition-all active:scale-95"
+            >
+              {{ $t('profile.notifications.confirm_disable') }}
+            </button>
+            <button 
+              @click="showUnsubscribeModal = false"
+              class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200 dark:shadow-none"
+            >
+              {{ $t('profile.notifications.keep_active') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="fade">
+      <div v-if="showSubscribeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[150] p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 w-full max-w-sm relative shadow-2xl border border-gray-100 dark:border-gray-700 text-center animate-slide-up">
+          <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+            🔔
+          </div>
+          <h3 class="text-xl font-black text-gray-900 dark:text-white mb-3">
+            {{ $t('profile.notifications.subscribe_title') }}
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+            {{ $t('profile.notifications.subscribe_desc') }}
+          </p>
+          
+          <div class="space-y-3">
+            <button 
+              @click="confirmSubscribe"
+              class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200 dark:shadow-none"
+            >
+              {{ $t('profile.notifications.confirm_subscribe') }}
+            </button>
+            <button 
+              @click="showSubscribeModal = false"
+              class="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-all active:scale-95"
+            >
+              {{ $t('profile.notifications.not_now') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
 </template>
 
 <script setup>
@@ -2716,8 +2825,47 @@ const isValidEmail = (email) => {
 import { useAuthStore } from '~/middleware/auth.store'
 import { useHead, useCookie, useRuntimeConfig } from '#imports';
 import { useRouter, useRoute } from 'vue-router'
+import { usePushNotifications } from '~/composables/usePushNotifications'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // ===== CONFIGURACIÓN =====
+const handleToggleNotifications = async () => {
+  if (isSubscribed.value) {
+    showUnsubscribeModal.value = true
+  } else {
+    showSubscribeModal.value = true
+  }
+}
+
+const confirmSubscribe = async () => {
+  try {
+    showSubscribeModal.value = false
+    const result = await subscribe()
+    
+    if (result.success) {
+      showToastMessage(t('profile.messages.update_success'), 'success')
+    } else if (result.error === 'denied') {
+      showToastMessage(t('profile.notifications_blocked'), 'error')
+    } else {
+      showToastMessage(result.error || 'Error al activar notificaciones', 'error')
+    }
+  } catch (error) {
+    console.error('Error al suscribir:', error)
+    showToastMessage('Error inesperado al activar notificaciones', 'error')
+  }
+}
+
+const confirmUnsubscribe = async () => {
+  try {
+    await unsubscribe()
+    showUnsubscribeModal.value = false
+    showToastMessage(t('profile.messages.update_success'), 'info')
+  } catch (error) {
+    console.error('Error al desactivar:', error)
+  }
+}
 const { $api } = useNuxtApp();
 const config = useRuntimeConfig()
 const auth = useAuthStore()
@@ -2765,6 +2913,9 @@ const mostrarModalNuevaCuenta = ref(false)
 const mostrarModalDetallesCuenta = ref(false)
 const mostrarModalNuevaCiudad = ref(false)
 const mostrarModalCorrelativo = ref(false)
+const showUnsubscribeModal = ref(false)
+const showSubscribeModal = ref(false)
+const { subscribe, unsubscribe, isSubscribed, isSupported, permission } = usePushNotifications()
 
 const anyModalOpen = computed(() => {
   return mostrarModalEnvio.value || 
@@ -2779,7 +2930,9 @@ const anyModalOpen = computed(() => {
          mostrarModalNuevaCuenta.value || 
          mostrarModalDetallesCuenta.value || 
          mostrarModalNuevaCiudad.value || 
-         mostrarModalCorrelativo.value
+         mostrarModalCorrelativo.value ||
+         showUnsubscribeModal.value ||
+         showSubscribeModal.value
 })
 
 watch(anyModalOpen, (newValue) => {
