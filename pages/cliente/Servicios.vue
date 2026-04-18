@@ -361,15 +361,6 @@
                   {{ $t('services_page.modal.waiting_decision') }}
                 </p>
               </div>
-              <button class="w-full flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
-                <div class="flex items-center space-x-2">
-                  <span class="text-base">💬</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ $t('services_page.modal.contact_technician') }}</span>
-                </div>
-                <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </button>
             </div> 
 
             <!-- Acciones para Servicio Con Pago Pendiente -->
@@ -1304,7 +1295,7 @@
                 <!-- Cashback Info -->
                 <div v-if="shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
                   <div class="flex justify-between items-center mb-1">
-                    <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">✨ Cashback</span>
+                    <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">✨ {{ $t('marketplace.featured') }}</span>
                     <span class="text-xs font-black text-emerald-700 dark:text-emerald-300">+L. {{ formatCurrency(cashbackAmount) }}</span>
                   </div>
                   <p class="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-medium leading-tight">
@@ -1501,10 +1492,10 @@
               <!-- Acciones -->
               <div class="flex gap-2 pt-2">
                 <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
-                  {{ $t('common.cancel') }}
+                  {{ $t('common.reject') }}
                 </button>
                 <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
-                  <span v-if="!isProcessingQuotation">ACEPTAR VIAJE</span>
+                  <span v-if="!isProcessingQuotation">{{ $t('services_page.modals.accept_cost') }}</span>
                   <div v-else class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                 </button>
               </div>
@@ -1537,7 +1528,7 @@
                   💈
                 </div>
                 <div>
-                  <h3 class="text-base font-black text-white leading-none">Costo de Servicio</h3>
+                  <h3 class="text-base font-black text-white leading-none">{{ $t('services_page.modals.service_cost') }}</h3>
                   <p class="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-1">BARBER-{{ selectedService.id }}</p>
                 </div>
               </div>
@@ -1568,14 +1559,14 @@
                   }"
                 >
                 <div>
-                  <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Barbero</p>
+                  <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ $t('services_page.modals.barber') }}</p>
                   <p class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedService.tecnico.nombre }}</p>
                 </div>
               </div>
 
               <!-- Localidad -->
               <div class="space-y-1">
-                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Lugar</h4>
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">{{ $t('services_page.modals.location') }}</h4>
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600 space-y-2 shadow-sm">
                   <div class="flex items-start space-x-3">
                     <div class="mt-0.5 w-4 h-4 rounded-full border-2 border-red-500 bg-white dark:bg-gray-800 flex items-center justify-center flex-shrink-0 shadow-sm shadow-red-500/20">
@@ -1597,7 +1588,7 @@
 
               <!-- Notas del Barbero -->
               <div v-if="quotationData?.comentario" class="space-y-2">
-                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">Notas del Barbero</h4>
+                <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1">{{ $t('services_page.modals.barber_notes') }}</h4>
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 shadow-sm">
                   <p class="text-xs font-medium text-blue-800 dark:text-blue-200 leading-relaxed italic text-center">
                     "{{ quotationData.comentario }}"
@@ -1609,12 +1600,12 @@
               <div class="bg-gradient-to-br from-gray-900 to-black p-4 rounded-lg shadow-xl shadow-blue-900/10 border border-gray-800 relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-blue-500"></div>
                 <div class="flex flex-col items-center mt-1">
-                  <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Costo Estimado</p>
+                  <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">{{ $t('services_page.modals.estimated_cost') }}</p>
                   <div class="text-3xl font-black tabular-nums transition-colors" :class="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0) ? 'line-through text-white/50' : 'text-white'">
                     L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
                   </div>
                   <div v-if="Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-white/80 uppercase">
-                    Pago con App: <span class="text-xs text-blue-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
+                    {{ $t('services_page.modals.app_payment') }}: <span class="text-xs text-blue-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
                   </div>
                 </div>
               </div>
@@ -1633,10 +1624,10 @@
               <!-- Acciones -->
               <div class="flex gap-2 pt-2">
                 <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50 border border-gray-200 dark:border-gray-600 shadow-sm">
-                  RECHAZAR
+                  {{ $t('common.reject') }}
                 </button>
                 <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
-                  <span v-if="!isProcessingQuotation">ACEPTAR COSTO</span>
+                  <span v-if="!isProcessingQuotation">{{ $t('services_page.modals.accept_cost') }}</span>
                   <div v-else class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
                 </button>
               </div>

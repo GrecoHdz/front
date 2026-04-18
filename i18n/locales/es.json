@@ -66,7 +66,8 @@
     "days_ago": "Hace {n} días",
     "weeks_ago": "Hace {n} semanas",
     "go_back": "Volver",
-    "cancelling": "Cancelando"
+    "cancelling": "Cancelando",
+    "reject": "Rechazar"
   },
   "time": {
     "just_now": "Hace unos minutos",
@@ -850,7 +851,8 @@
       "receipt_placeholder": "Ingresa el número de comprobante",
       "receipt_desc": "Realiza la transferencia e ingresa el número de comprobante. Una vez enviado serás redirigido a WhatsApp para adjuntar la captura.",
       "process_payment": "Procesar Pago",
-      "confirm_payment": "Confirmar Pago"
+      "confirm_payment": "Confirmar Pago",
+      "cashback_desc": "Este monto se acreditará a tu saldo después de completar el pago."
     },
     "quotation": {
       "title": "Propuesta Técnica",
@@ -885,6 +887,40 @@
       "desc": "Por favor califica el servicio recibido. Tu opinión nos ayuda a mejorar.",
       "placeholder": "¿Cómo fue tu experiencia con el servicio?",
       "submit": "Enviar calificación"
+    },
+    "modals": {
+      "technical_proposal": "Propuesta Técnica",
+      "trip_tariff": "Tarifa de Viaje",
+      "service_cost": "Costo de Servicio",
+      "order_prefix": "Orden",
+      "diagnosis": "Diagnóstico del Técnico",
+      "diagnosis_ready": "El técnico ha completado el diagnóstico.",
+      "investment": "Desglose de Inversión",
+      "membership_credit": "Crédito ProHogar",
+      "net_total": "Total a Pagar",
+      "materials": "Inversión en Materiales",
+      "materials_desc": "Este monto es una estimación del técnico. Los materiales se adquieren de forma externa y el costo final puede variar.",
+      "confirm_proposal": "Aceptar y Confirmar",
+      "driver": "Conductor",
+      "driver_notes": "Notas del Conductor",
+      "itinerary": "Itinerario",
+      "pickup": "Recogida",
+      "departure_point": "Punto de partida",
+      "destination": "Destino",
+      "final_destination": "Destino final",
+      "payment_method": "Método de Pago",
+      "app_transfer": "Transferencia",
+      "cash": "Efectivo",
+      "cash_amount": "¿Con cuánto pagarás?",
+      "cash_placeholder": "Ej: 500",
+      "cash_change_desc": "El conductor llevará cambio basado en este monto.",
+      "app_payment": "Pago con App",
+      "cash_benefit_desc": "Beneficios de membresía solo aplican en pagos vía App.",
+      "barber": "Barbero",
+      "location": "Lugar",
+      "barber_notes": "Notas del Barbero",
+      "estimated_cost": "Costo Estimado",
+      "accept_cost": "Aceptar Costo"
     }
   },
   "support_page": {

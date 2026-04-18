@@ -66,7 +66,8 @@
     "days_ago": "{n} days ago",
     "weeks_ago": "{n} weeks ago",
     "go_back": "Go back",
-    "cancelling": "Cancelling"
+    "cancelling": "Cancelling",
+    "reject": "Reject"
   },
   "time": {
     "just_now": "A few minutes ago",
@@ -850,7 +851,8 @@
       "receipt_placeholder": "Enter receipt number",
       "receipt_desc": "Perform the transfer and enter the receipt number. Once sent you will be redirected to WhatsApp to attach the screenshot.",
       "process_payment": "Process Payment",
-      "confirm_payment": "Confirm Payment"
+      "confirm_payment": "Confirm Payment",
+      "cashback_desc": "This amount will be credited to your balance after payment is completed."
     },
     "quotation": {
       "title": "Technical Proposal",
@@ -885,6 +887,40 @@
       "desc": "Please rate the service received. Your opinion helps us improve.",
       "placeholder": "How was your experience with the service?",
       "submit": "Submit rating"
+    },
+    "modals": {
+      "technical_proposal": "Technical Proposal",
+      "trip_tariff": "Trip Fare",
+      "service_cost": "Service Cost",
+      "order_prefix": "Order",
+      "diagnosis": "Technical Diagnosis",
+      "diagnosis_ready": "The technician has completed the diagnosis.",
+      "investment": "Investment Breakdown",
+      "membership_credit": "ProHogar Credit",
+      "net_total": "Total to Pay",
+      "materials": "Materials Investment",
+      "materials_desc": "This amount is a technician's estimate. Materials are sourced externally and final cost may vary.",
+      "confirm_proposal": "Accept & Confirm",
+      "driver": "Driver",
+      "driver_notes": "Driver's Notes",
+      "itinerary": "Itinerary",
+      "pickup": "Pickup",
+      "departure_point": "Departure point",
+      "destination": "Destination",
+      "final_destination": "Final destination",
+      "payment_method": "Payment Method",
+      "app_transfer": "App Transfer",
+      "cash": "Cash",
+      "cash_amount": "How much will you pay with?",
+      "cash_placeholder": "Ex: 20",
+      "cash_change_desc": "The driver will bring change based on this amount.",
+      "app_payment": "App Payment",
+      "cash_benefit_desc": "Membership benefits only apply to App payments.",
+      "barber": "Barber",
+      "location": "Location",
+      "barber_notes": "Barber's Notes",
+      "estimated_cost": "Estimated Cost",
+      "accept_cost": "Accept Cost"
     }
   },
   "support_page": {
