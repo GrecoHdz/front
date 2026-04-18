@@ -631,7 +631,8 @@
       "ready_to_pay": "Ya puedes pagar la visita.",
       "request_error": "No se pudo enviar la solicitud. Por favor, inténtalo mas tarde.",
       "membership_update_error": "No se pudo actualizar el estado de la membresía",
-      "verified_only": "Este servicio es exclusivo para usuarios con perfil verificado."
+      "verified_only": "Este servicio es exclusivo para usuarios con perfil verificado.",
+      "photo_required": "Debes subir una foto de perfil antes de solicitar un servicio."
     }
   },
   "marketplace": {

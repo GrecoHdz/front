@@ -108,7 +108,7 @@
 
                 <!-- Location & Client Grid (Double Divs) -->
                 <div class="grid grid-cols-2 gap-2 mb-3">
-                  <div v-if="service.title === 'Taxi VIP'" class="grid grid-cols-2 gap-2 col-span-2">
+                  <div v-if="isTaxiService(service.title)" class="grid grid-cols-2 gap-2 col-span-2">
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
                       <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">📍 Recogida</p>
                       <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.location?.neighborhood }}</p>
@@ -283,7 +283,7 @@
                   {{ isBarberíaService(selectedService.title) ? 'Ubicación del Corte' : 'Ubicación del Servicio' }}
                 </h4>
                 
-                <div v-if="selectedService.title === 'Taxi VIP'" class="grid grid-cols-2 gap-3">
+                <div v-if="isTaxiService(selectedService.title)" class="grid grid-cols-2 gap-3">
                   <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border-l-4 border-blue-500">
                     <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-1">📍 Recogida</p>
                     <p class="font-bold text-gray-900 dark:text-white text-[12px] sm:text-xs md:text-base">{{ selectedService.location?.neighborhood }}</p>
@@ -301,7 +301,7 @@
               </div>
 
               <!-- Service Description -->
-              <div v-if="selectedService.title !== 'Taxi VIP'" class="mb-4 sm:mb-6">
+              <div v-if="!isTaxiService(selectedService.title)" class="mb-4 sm:mb-6">
                 <h4 class="text-sm sm:text-base font-black text-gray-900 dark:text-white mb-2 sm:mb-3">
                   {{ isBarberíaService(selectedService.title) ? 'Detalles del Corte' : 'Descripción del Problema' }}
                 </h4>
@@ -595,16 +595,16 @@
                            step="1" 
                            min="0" 
                            required
-                           :readonly="selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip"
+                           :readonly="isTaxiService(selectedService.title) && selectedService.isFirstTrip"
                            :class="[
                              'w-full pl-12 pr-4 py-4 border-2 border-transparent focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-2xl font-black transition-all outline-none',
-                             selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip 
+                             isTaxiService(selectedService.title) && selectedService.isFirstTrip 
                                ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 cursor-not-allowed' 
                                : 'bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500'
                            ]"
                            placeholder="0">
                   </div>
-                  <p v-if="selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip" class="text-[9px] font-bold text-amber-600 dark:text-amber-400 mt-2 px-1 uppercase tracking-wider">
+                  <p v-if="isTaxiService(selectedService.title) && selectedService.isFirstTrip" class="text-[9px] font-bold text-amber-600 dark:text-amber-400 mt-2 px-1 uppercase tracking-wider">
                     ✨ ¡Primer viaje gratis! El monto está fijado en 0 por sistema.
                   </p>
                 </div>
@@ -635,20 +635,20 @@
                         :disabled="isSubmittingQuotation || (quotationForm.monto_manodeobra === null || quotationForm.monto_manodeobra === undefined || quotationForm.monto_manodeobra === '')"
                         :class="[
                           'group relative w-full py-4 border border-white/10 text-white font-black rounded-2xl overflow-hidden transition-all active:scale-[0.98] disabled:opacity-50',
-                          selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip 
+                          isTaxiService(selectedService.title) && selectedService.isFirstTrip 
                             ? 'bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg shadow-amber-500/30' 
                             : 'bg-gray-900'
                         ]">
                   <div v-if="!isSubmittingQuotation" class="relative z-10 flex items-center justify-center space-x-2">
                     <span class="uppercase tracking-[0.2em] text-xs">
-                      {{ selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip ? 'Confirmar Viaje Gratuito' : 'Confirmar Precio' }}
+                      {{ (isTaxiService(selectedService.title) && selectedService.isFirstTrip) ? 'Confirmar Viaje Gratuito' : 'Confirmar Precio' }}
                     </span>
                     <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                   </div>
                   <div v-else class="flex items-center justify-center">
                     <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                   </div>
-                  <div v-if="!(selectedService.title === 'Taxi VIP' && selectedService.isFirstTrip)" class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity translate-y-full group-hover:translate-y-0 duration-300"></div>
+                  <div v-if="!(isTaxiService(selectedService.title) && selectedService.isFirstTrip)" class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity translate-y-full group-hover:translate-y-0 duration-300"></div>
                 </button>
               </form>
             </div>
@@ -805,17 +805,17 @@
             <!-- Modal Header -->
             <div :class="[
               'sticky top-0 p-3 sm:p-4 border-b rounded-t-xl sm:rounded-t-2xl',
-              selectedService.title === 'Taxi VIP' ? 'bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-blue-100 dark:border-blue-800/30' : 
+              isTaxiService(selectedService.title) ? 'bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-blue-100 dark:border-blue-800/30' : 
               isBarberíaService(selectedService.title) ? 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-100 dark:border-amber-800/30' : 
               'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
             ]">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                  <div v-if="selectedService.title === 'Taxi VIP'" class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-blue-500/30">🚕</div>
+                  <div v-if="isTaxiService(selectedService.title)" class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-blue-500/30">🚕</div>
                   <div v-else-if="isBarberíaService(selectedService.title)" class="w-8 h-8 sm:w-10 sm:h-10 bg-amber-600 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-amber-500/30">💇</div>
                   
                   <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
-                    {{ selectedService.title === 'Taxi VIP' ? 'Editar Precio de Viaje' : (isBarberíaService(selectedService.title) ? 'Editar Detalles del Corte' : 'Editar Cotización') }}
+                    {{ isTaxiService(selectedService.title) ? 'Editar Precio de Viaje' : (isBarberíaService(selectedService.title) ? 'Editar Detalles del Corte' : 'Editar Cotización') }}
                   </h3>
                 </div>
                 <button @click="closeViewQuotationModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -832,21 +832,21 @@
                 <!-- Comentario/Diagnóstico -->
                 <div>
                   <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                    {{ selectedService.title === 'Taxi VIP' ? 'Notas del Viaje' : (isBarberíaService(selectedService.title) ? 'Notas del Barbero' : 'Diagnóstico') }}
+                    {{ isTaxiService(selectedService.title) ? 'Notas del Viaje' : (isBarberíaService(selectedService.title) ? 'Notas del Barbero' : 'Diagnóstico') }}
                   </label>
                   <textarea 
                     v-model="currentQuotation.comentario" 
                     rows="4" 
                     required
                     class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                    :placeholder="selectedService.title === 'Taxi VIP' ? 'Ej: Ford Escape Gris, llego en 5 min...' : (isBarberíaService(selectedService.title) ? 'Escriba los detalles del servicio realizado' : 'Escriba su Diagnóstico')">
+                    :placeholder="isTaxiService(selectedService.title) ? 'Ej: Ford Escape Gris, llego en 5 min...' : (isBarberíaService(selectedService.title) ? 'Escriba los detalles del servicio realizado' : 'Escriba su Diagnóstico')">
                   </textarea>
                 </div>
 
                 <!-- Monto Mano de Obra -->
                 <div>
                   <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                    {{ selectedService.title === 'Taxi VIP' ? 'Monto del Viaje (L.)' : (isBarberíaService(selectedService.title) ? 'Precio del Corte (L.)' : 'Monto Mano de Obra (L.)') }}
+                    {{ isTaxiService(selectedService.title) ? 'Monto del Viaje (L.)' : (isBarberíaService(selectedService.title) ? 'Precio del Corte (L.)' : 'Monto Mano de Obra (L.)') }}
                   </label>
                   <input 
                     v-model.number="currentQuotation.monto_manodeobra" 
@@ -859,7 +859,7 @@
                 </div>
 
                 <!-- Monto Materiales -->
-                <div v-if="selectedService.title !== 'Taxi VIP' && !isBarberíaService(selectedService.title)">
+                <div v-if="!isTaxiService(selectedService.title) && !isBarberíaService(selectedService.title)">
                   <label class="block text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Monto Materiales (L.) - Estimado</label>
                   <input 
                     v-model.number="currentQuotation.monto_materiales" 
@@ -1286,6 +1286,12 @@ const isBarberíaService = (title = '') => {
   return t.includes('barber') || t.includes('peluquería') || t.includes('salón')
 }
 
+// Helper: detecta si un servicio es de transporte/viaje
+const isTaxiService = (title = '') => {
+  const t = (title || '').toLowerCase()
+  return t.includes('taxi') || t.includes('viaje')
+}
+
 const getServiceIcon = (estado, serviceTitle = '') => {
   const title = (serviceTitle || '').toLowerCase()
   if (title.includes('viaje') || title.includes('taxi')) return '🚗'
@@ -1308,7 +1314,7 @@ const getServiceIcon = (estado, serviceTitle = '') => {
 }
 
 const mapApiStatusToLocal = (apiStatus, title = '') => {
-  const isTaxi = title === 'Taxi VIP';
+  const isTaxi = isTaxiService(title);
   const isBarberia = isBarberíaService(title);
   const statusMap = {
     'pendiente_asignacion': 'Cotización Rechazada',
@@ -1625,7 +1631,7 @@ const openQuotationModal = async () => {
       monto_materiales: 0
     }
     
-    if (selectedService.value.title === 'Taxi VIP') {
+    if (isTaxiService(selectedService.value.title)) {
       quotationForm.value.monto_manodeobra = selectedService.value.isFirstTrip ? 0 : 0;
       showTaxiQuotationModal.value = true
     } else if (isBarberíaService(selectedService.value.title)) {
@@ -1673,7 +1679,7 @@ const confirmCancelService = () => {
 // ===== FUNCIONES DE ACCIONES =====
 const submitQuotation = async () => {
   // Validación específica: El comentario es obligatorio para servicios normales, opcional para Taxi VIP
-  const isTaxi = selectedService.value?.title === 'Taxi VIP'
+  const isTaxi = isTaxiService(selectedService.value?.title)
   const isCommentEmpty = !quotationForm.value.comentario || !quotationForm.value.comentario.trim()
   const isAmountInvalid = quotationForm.value.monto_manodeobra === null || quotationForm.value.monto_manodeobra === undefined || quotationForm.value.monto_manodeobra < 0
 
@@ -1689,7 +1695,7 @@ const submitQuotation = async () => {
     
     const cotizacionData = {
       id_solicitud: selectedService.value.id,
-      comentario: isCommentEmpty && isTaxi ? 'Servicio Taxi VIP' : quotationForm.value.comentario.trim(),
+      comentario: isCommentEmpty && isTaxi ? 'Servicio de Transporte' : quotationForm.value.comentario.trim(),
       monto_manodeobra: parseFloat(quotationForm.value.monto_manodeobra),
       monto_materiales: parseFloat(quotationForm.value.monto_materiales) || 0,
       fecha: new Date().toISOString()
@@ -1860,7 +1866,7 @@ const confirmCompleteService = async () => {
   isCompleting.value = true
   
   try {
-    const isTaxiFirstTrip = currentServiceToComplete.value?.title === 'Taxi VIP' && currentServiceToComplete.value?.isFirstTrip;
+    const isTaxiFirstTrip = isTaxiService(currentServiceToComplete.value?.title) && currentServiceToComplete.value?.isFirstTrip;
     const isCashPayment = isCashService(currentServiceToComplete.value?.description);
     const setAsFinalized = isTaxiFirstTrip || isCashPayment;
     

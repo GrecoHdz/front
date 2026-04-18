@@ -631,7 +631,8 @@
       "ready_to_pay": "You can now pay for the visit.",
       "request_error": "Could not send the request. Please try again later.",
       "membership_update_error": "Could not update membership status",
-      "verified_only": "This service is exclusive to users with a verified profile."
+      "verified_only": "This service is exclusive to users with a verified profile.",
+      "photo_required": "You must upload a profile photo before requesting a service."
     }
   },
   "marketplace": {

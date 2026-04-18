@@ -119,6 +119,19 @@
             </h3>
             
             <form @submit.prevent="handleRequestService" class="space-y-3">
+              <!-- Warning if profile photo is missing -->
+              <div v-if="!hasProfilePhoto" class="bg-red-500/20 backdrop-blur-md border border-red-500/30 p-3 rounded-xl flex items-center gap-3 animate-pulse">
+                <span class="text-xl">📸</span>
+                <div class="flex-1">
+                  <p class="text-[11px] font-black text-white leading-tight">
+                    {{ $t('dashboard_client.messages.photo_required') }}
+                  </p>
+                  <button @click="navigateTo('/cliente/perfil')" type="button" class="mt-1 text-[10px] font-black uppercase tracking-widest text-white underline decoration-white/50">
+                    {{ $t('profile.upload_photo') }}
+                  </button>
+                </div>
+              </div>
+
               <div class="grid" :class="selectedServiceObject?.name === 'Barbería' ? 'grid-cols-2 gap-2' : 'grid-cols-1'">
                 <!-- Select Principal de Servicio -->
                 <div class="multiselect-service-wrapper">
@@ -1424,6 +1437,10 @@ const isUserVerified = computed(() => {
   return hasIdentity && hasPhoto
 })
 
+const hasProfilePhoto = computed(() => {
+  return !!userData.value.imagen_url || !!userCookie.value?.imagen_url
+})
+
 const isMembershipInactive = computed(() => {
   return !membershipData.value.status || membershipData.value.status === 'inactiva' || membershipData.value.status === 'rechazada'
 })
@@ -1599,6 +1616,8 @@ const isFormValid = computed(() => {
     }
   }
   
+  if (!hasProfilePhoto.value) return false;
+
   return basicFields &&
     serviceFormData.value.colonia.trim() !== '' &&
     serviceFormData.value.direccion.trim() !== ''
@@ -2801,6 +2820,12 @@ const resetCredito = async () => {
 // Event handlers
 const handleRequestService = async () => {
   if (isSubmittingService.value) return;
+  
+  // Requirement: User must have a profile photo to request any service
+  if (!hasProfilePhoto.value) {
+    showToast(t('common.error'), t('dashboard_client.messages.photo_required'), 'error')
+    return;
+  }
   
   try {
     isSubmittingService.value = true;
