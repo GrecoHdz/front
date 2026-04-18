@@ -3719,14 +3719,12 @@ const acceptQuotation = async () => {
     
     const montoTecnico = montoManoObra * factorComision;
     const montoCliente = montoManoObra - montoTecnico;
-    const fechaActual = new Date().toISOString().split('T')[0];
 
     const movimientoData = {
       id_usuario: idTecnico,
       id_cotizacion: cotizacionId,
       tipo: 'ingreso',
       monto: Number(montoCliente.toFixed(2)), 
-      fecha: fechaActual,
       estado: 'pendiente'
     };
     
