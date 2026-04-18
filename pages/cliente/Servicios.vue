@@ -1485,7 +1485,11 @@
                 <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
                   {{ $t('common.reject') }}
                 </button>
-                <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
+                <button 
+                  @click="acceptQuotation" 
+                  :disabled="isProcessingQuotation || (taxiPaymentMethod === 'efectivo' && (!taxiCashBillAmount || taxiCashBillAmount <= 0))" 
+                  class="flex-[2] py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-lg shadow-lg shadow-yellow-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center"
+                >
                   <span v-if="!isProcessingQuotation">{{ $t('services_page.modals.accept_cost') }}</span>
                   <div v-else class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                 </button>
