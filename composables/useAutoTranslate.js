@@ -21,6 +21,12 @@ import { useI18n } from 'vue-i18n'
 const CACHE_KEY = 'prohogar_translations_cache'
 const API_URL = 'https://api.mymemory.translated.net/get'
 
+const MANUAL_MAP = {
+  'Viaje Privado': 'Private Trip',
+  'Barbería': 'Barbershop'
+}
+
+
 // Cache compartida entre todos los componentes (singleton)
 let cache = null
 
@@ -49,8 +55,12 @@ async function translateText(text) {
   const store = loadCache()
   const cacheKey = text.trim()
 
-  // Retornar desde caché si ya existe
+  // 1. Manual map override (highest priority)
+  if (MANUAL_MAP[cacheKey]) return MANUAL_MAP[cacheKey]
+
+  // 2. Retornar desde caché si ya existe
   if (store[cacheKey]) return store[cacheKey]
+
 
   try {
     const params = new URLSearchParams({

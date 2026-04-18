@@ -120,11 +120,11 @@
                  <!-- Viaje Privado Special Layout -->
                  <div v-if="service.title === 'Viaje Privado'" class="grid grid-cols-2 gap-2">
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
-                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">📍 Recogida</p>
+                      <p class="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase mb-0.5">{{ $t('services_page.pickup') }}</p>
                       <p class="font-bold text-blue-900 dark:text-blue-200 text-[10px] truncate">{{ service.fullLocation.colonia }}</p>
                     </div>
                     <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
-                      <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-0.5">🏁 Destino</p>
+                      <p class="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase mb-0.5">{{ $t('services_page.destination') }}</p>
                       <p class="font-bold text-emerald-900 dark:text-emerald-200 text-[10px] truncate">{{ service.fullLocation.direccion }}</p>
                     </div>
                  </div>

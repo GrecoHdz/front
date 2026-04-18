@@ -132,7 +132,7 @@
                 </div>
               </div>
 
-              <div class="grid" :class="selectedServiceObject?.name === 'Barbería' ? 'grid-cols-2 gap-2' : 'grid-cols-1'">
+              <div class="grid" :class="selectedServiceObject?.name_es === 'Barbería' ? 'grid-cols-2 gap-2' : 'grid-cols-1'">
                 <!-- Select Principal de Servicio -->
                 <div class="multiselect-service-wrapper">
                   <multiselect v-model="selectedServiceObject" 
@@ -167,7 +167,7 @@
                 </div>
 
                 <!-- Select Tipo de Barbería (Solo si es Barbería) -->
-                <div v-if="selectedServiceObject?.name === 'Barbería'" class="multiselect-service-wrapper animate-fade-in">
+                <div v-if="selectedServiceObject?.name_es === 'Barbería'" class="multiselect-service-wrapper animate-fade-in">
                   <multiselect
                     v-model="barberiaTypeSelected"
                     :options="barberiaTypeOptions"
@@ -196,7 +196,7 @@
               </div>
               
               <!-- Selección de Barbería Específica (En local) -->
-              <div v-if="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'" class="space-y-3">
+              <div v-if="selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'" class="space-y-3">
                 <div class="multiselect-service-wrapper animate-fade-in">
                   <multiselect
                     v-model="serviceFormData.selectedBarberia"
@@ -221,7 +221,7 @@
               </div>
 
                 <!-- Image Placeholders for 'En local' -->
-                <div v-if="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local' && serviceFormData.selectedBarberia" class="grid grid-cols-2 gap-3 animate-fade-in">
+                <div v-if="selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local' && serviceFormData.selectedBarberia" class="grid grid-cols-2 gap-3 animate-fade-in">
                   <div class="aspect-video rounded-xl bg-white/10 border-2 border-dashed border-white/30 flex flex-col items-center justify-center text-white/50 overflow-hidden relative group">
                     <img v-if="serviceFormData.selectedBarberia.foto1" :src="serviceFormData.selectedBarberia.foto1" class="absolute inset-0 w-full h-full object-cover">
                     <div v-else class="flex flex-col items-center">
@@ -244,7 +244,7 @@
               
               <div v-if="shouldShowFormFields" class="animate-fade-in">
                 <textarea v-model="serviceFormData.description" 
-                         :placeholder="selectedServiceObject?.name === 'Viaje Privado' ? $t('dashboard_client.viaje_privado_placeholder') : (selectedServiceObject?.name === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
+                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.viaje_privado_placeholder') : (selectedServiceObject?.name_es === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
               </div>
@@ -253,18 +253,18 @@
                 <div>
                   <input v-model="serviceFormData.colonia" 
                          type="text"
-                         :readonly="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
-                         :placeholder="selectedServiceObject?.name === 'Viaje Privado' ? $t('dashboard_client.pickup') : $t('dashboard_client.neighborhood')"
+                         :readonly="selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
+                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.pickup') : $t('dashboard_client.neighborhood')"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
-                         :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
+                         :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
                 </div>
                 <div>
                   <input v-model="serviceFormData.direccion" 
                          type="text"
-                         :readonly="selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
-                         :placeholder="selectedServiceObject?.name === 'Viaje Privado' ? $t('dashboard_client.destination') : $t('dashboard_client.precise_address')"
+                         :readonly="selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
+                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.destination') : $t('dashboard_client.precise_address')"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
-                         :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
+                         :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
                 </div>
               </div>
 
@@ -1371,7 +1371,7 @@ const selectedServiceObject = ref(null)
 const getServiceLabel = (option) => {
   if (!option) return ''
   let label = `${option.icon} ${option.name}`
-  if (option.name === 'Viaje Privado' && !isUserVerified.value) {
+  if ((option.name_es || option.name) === 'Viaje Privado' && !isUserVerified.value) {
     label += ` (${t('dashboard_client.verification_required')})`
   }
   return label
@@ -1584,7 +1584,7 @@ const recentServicesDisplay = computed(() => {
 
 const shouldShowFormFields = computed(() => {
   // Solo aplicar lógica de ocultar para el servicio de Barbería
-  if (selectedServiceObject.value?.name === 'Barbería') {
+  if (selectedServiceObject.value?.name_es === 'Barbería') {
     if (serviceFormData.value.barberiaOption === 'a domicilio') return true;
     if (serviceFormData.value.barberiaOption === 'en local' && serviceFormData.value.selectedBarberia) return true;
     return false; // Ocultos mientras selecciona modalidad/local
@@ -1595,7 +1595,7 @@ const shouldShowFormFields = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  const isBarberia = selectedServiceObject.value?.name === 'Barbería';
+  const isBarberia = selectedServiceObject.value?.name_es === 'Barbería';
   const isEnLocal = serviceFormData.value.barberiaOption === 'en local';
   const isDomicilio = serviceFormData.value.barberiaOption === 'a domicilio';
   
@@ -1650,7 +1650,7 @@ const filteredServicesList = computed(() => {
 
 // Si el usuario pierde la verificación y tenía 'Viaje Privado' seleccionado, limpiar la selección
 watch(isUserVerified, (isVerified) => {
-  if (!isVerified && selectedServiceObject.value?.name === 'Viaje Privado') {
+  if (!isVerified && selectedServiceObject.value?.name_es === 'Viaje Privado') {
     selectedServiceObject.value = null
     serviceFormData.value.type = ''
   }
@@ -2846,12 +2846,12 @@ const handleRequestService = async () => {
       throw new Error(t('dashboard_client.messages.city_error'))
     }
 
-    const selectedService = servicesList.value.find(s => s.name === serviceFormData.value.type)
+    const selectedService = selectedServiceObject.value
     if (!selectedService) {
       throw new Error(t('dashboard_client.messages.service_not_found'))
     }
 
-    const isViajePrivado = selectedService.name === 'Viaje Privado'
+    const isViajePrivado = selectedService.name_es === 'Viaje Privado'
     // Usar el estado reactivo ya cargado en vez de hacer otra llamada autenticada
     // (evita fallos por JWT expirado en medio del envío del formulario)
     const tieneMembresiaActiva = membershipData.value.status === 'activa'
@@ -2861,7 +2861,7 @@ const handleRequestService = async () => {
     const estadoInicial = noRequierePagoVisita ? 'pendiente_asignacion' : 'pendiente_pagovisita'
     const visitaPagada = !!noRequierePagoVisita // Usar booleano real para la DB
 
-    const isBarberia = selectedService.name === 'Barbería'
+    const isBarberia = selectedService.name_es === 'Barbería'
     const isEnLocal = serviceFormData.value.barberiaOption === 'en local'
 
     const colonia = (isBarberia && isEnLocal) 
@@ -3122,7 +3122,7 @@ watch(() => serviceFormData.value.type, (newType) => {
 watch(() => selectedServiceObject.value, (newService) => {
   if (newService) {
     // Protección adicional: Si por alguna razón se intenta seleccionar Viaje Privado sin estar verificado
-    if (newService.name === 'Viaje Privado' && !isUserVerified.value) {
+    if (newService.name_es === 'Viaje Privado' && !isUserVerified.value) {
       showToast(t('dashboard_client.verification_required'), t('dashboard_client.messages.verified_only'), 'warning');
       selectedServiceObject.value = null;
       return;
