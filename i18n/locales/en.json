@@ -853,7 +853,9 @@
       "receipt_desc": "Perform the transfer and enter the receipt number. Once sent you will be redirected to WhatsApp to attach the screenshot.",
       "process_payment": "Process Payment",
       "confirm_payment": "Confirm Payment",
-      "cashback_desc": "This amount will be credited to your balance after payment is completed."
+      "cashback_desc": "This amount will be credited to your balance after payment is completed.",
+      "summary": "Payment Summary",
+      "tariff": "Trip Fare"
     },
     "quotation": {
       "title": "Technical Proposal",

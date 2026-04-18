@@ -853,7 +853,9 @@
       "receipt_desc": "Realiza la transferencia e ingresa el número de comprobante. Una vez enviado serás redirigido a WhatsApp para adjuntar la captura.",
       "process_payment": "Procesar Pago",
       "confirm_payment": "Confirmar Pago",
-      "cashback_desc": "Este monto se acreditará a tu saldo después de completar el pago."
+      "cashback_desc": "Este monto se acreditará a tu saldo después de completar el pago.",
+      "summary": "Resumen de Pago",
+      "tariff": "Tarifa de Viaje"
     },
     "quotation": {
       "title": "Propuesta Técnica",

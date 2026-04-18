@@ -859,12 +859,12 @@
                   </div>
 
                   <div v-if="shouldShowCreditBenefit && creditApplied > 0" class="flex justify-between items-center text-xs text-blue-600 dark:text-blue-400">
-                    <span class="font-bold">💳 Crédito Aplicado</span>
+                    <span class="font-bold">{{ $t('services_page.payment.credit_applied') }}</span>
                     <span class="font-black">−L. {{ formatCurrency(creditApplied) }}</span>
                   </div>
 
                   <div class="pt-2 border-t border-blue-200 dark:border-blue-800 flex justify-between items-center">
-                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">Total a Pagar</span>
+                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">{{ $t('services_page.payment.total_pay') }}</span>
                     <span class="text-base font-black text-blue-600 dark:text-blue-400">L. {{ (totalAPagar || 0).toFixed(2) }}</span>
                   </div>
                 </div>
@@ -897,7 +897,7 @@
                   :searchable="false"
                   :close-on-select="true"
                   :show-labels="false"
-                  placeholder="Elige cuenta destino"
+                  :placeholder="$t('services_page.payment.select_account')"
                   label="banco"
                   track-by="id_cuenta"
                   class="multiselect-custom taxi-select"
@@ -996,12 +996,12 @@
                   </div>
 
                   <div v-if="shouldShowCreditBenefit && creditApplied > 0" class="flex justify-between items-center text-xs text-blue-600 dark:text-blue-400">
-                    <span class="font-bold">💳 Crédito Aplicado</span>
+                    <span class="font-bold">{{ $t('services_page.payment.credit_applied') }}</span>
                     <span class="font-black">−L. {{ formatCurrency(creditApplied) }}</span>
                   </div>
 
                   <div class="pt-2 border-t border-blue-200 dark:border-blue-800 flex justify-between items-center">
-                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">Total a Pagar</span>
+                    <span class="text-sm font-black text-blue-900 dark:text-white uppercase">{{ $t('services_page.payment.total_pay') }}</span>
                     <span class="text-base font-black text-blue-600 dark:text-blue-400">L. {{ (totalAPagar || 0).toFixed(2) }}</span>
                   </div>
                 </div>
@@ -1034,7 +1034,7 @@
                   :searchable="false"
                   :close-on-select="true"
                   :show-labels="false"
-                  placeholder="Elige cuenta destino"
+                  :placeholder="$t('services_page.payment.select_account')"
                   label="banco"
                   track-by="id_cuenta"
                   class="multiselect-custom taxi-select"
