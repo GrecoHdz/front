@@ -761,6 +761,7 @@
       "in_progress": "Service in Progress",
       "pending_quote": "Quotation Pending",
       "tech_assigned": "Technician Assigned",
+      "driver_assigned": "Driver Assigned",
       "req_received": "Request Received",
       "waiting_driver": "Waiting for Driver",
       "unrated": "Service unrated",
