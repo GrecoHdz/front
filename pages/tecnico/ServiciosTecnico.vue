@@ -1901,24 +1901,25 @@ const confirmCompleteService = async () => {
             if (isCashPayment) {
               try {
                 const manoObra = parseFloat(cotizacion.monto_manodeobra) || 0;
-                const materiales = parseFloat(cotizacion.monto_materiales) || 0;
-                const totalRetiro = manoObra + materiales;
-                const userCookieValue = useCookie('user').value;
+                  // Calculamos la ganancia del conductor/técnico
+                  const techCommissionRate = (100 - commissionPercentage.value) / 100;
+                  const gananciaConductor = manoObra * techCommissionRate;
+                  const userCookieValue = useCookie('user').value;
 
-                if (totalRetiro > 0 && userCookieValue?.id_usuario) {
-                  await $api('/movimientos', {
-                    method: 'POST',
-                    body: {
-                      id_usuario: userCookieValue.id_usuario,
-                      id_cotizacion: cotId,
-                      tipo: 'retiro',
-                      monto: totalRetiro,
-                      estado: 'completado',
-                      descripcion: `Retiro automático (Cobro en efectivo) - Servicio #${currentServiceToComplete.value.id}`
-                    }
-                  });
-                  console.log(`Movimiento de retiro automático creado por L. ${totalRetiro}`);
-                }
+                  if (gananciaConductor > 0 && userCookieValue?.id_usuario) {
+                    await $api('/movimientos', {
+                      method: 'POST',
+                      body: {
+                        id_usuario: userCookieValue.id_usuario,
+                        id_cotizacion: cotId,
+                        tipo: 'retiro',
+                        monto: Number(gananciaConductor.toFixed(2)),
+                        estado: 'completado',
+                        descripcion: `Retiro automático (Ganancia pago en efectivo) - Servicio #${currentServiceToComplete.value.id}`
+                      }
+                    });
+                    console.log(`Movimiento de retiro automático creado por L. ${gananciaConductor.toFixed(2)} (Comisión del conductor ${(techCommissionRate * 100).toFixed(0)}%)`);
+                  }
               } catch (movError) {
                 console.error('Error al crear movimiento de retiro automático:', movError);
               }

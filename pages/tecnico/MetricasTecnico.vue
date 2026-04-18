@@ -806,8 +806,8 @@ const formatCurrency = (value) => {
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
-  const options = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }
-  return new Date(dateString).toLocaleDateString('es-ES', options)
+  const options = { day: '2-digit', month: 'short', year: 'numeric' }
+  return new Date(dateString).toLocaleDateString('es-HN', options)
 }
 
 const getStatusColor = (status) => {
