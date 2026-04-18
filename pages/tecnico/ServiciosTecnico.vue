@@ -1895,6 +1895,34 @@ const confirmCompleteService = async () => {
               body: { estado: 'confirmado' }
             });
             console.log(`Cotización ${cotId} confirmada automáticamente para servicio finalizado directamente`);
+
+            // Si es pago en efectivo, crear movimiento de retiro automático para balancear el ingreso
+            // Esto evita que el técnico solicite un retiro de dinero que ya recibió en mano
+            if (isCashPayment) {
+              try {
+                const manoObra = parseFloat(cotizacion.monto_manodeobra) || 0;
+                const materiales = parseFloat(cotizacion.monto_materiales) || 0;
+                const totalRetiro = manoObra + materiales;
+                const userCookieValue = useCookie('user').value;
+
+                if (totalRetiro > 0 && userCookieValue?.id_usuario) {
+                  await $api('/movimientos', {
+                    method: 'POST',
+                    body: {
+                      id_usuario: userCookieValue.id_usuario,
+                      id_cotizacion: cotId,
+                      tipo: 'retiro',
+                      monto: totalRetiro,
+                      estado: 'completado',
+                      descripcion: `Retiro automático (Cobro en efectivo) - Servicio #${currentServiceToComplete.value.id}`
+                    }
+                  });
+                  console.log(`Movimiento de retiro automático creado por L. ${totalRetiro}`);
+                }
+              } catch (movError) {
+                console.error('Error al crear movimiento de retiro automático:', movError);
+              }
+            }
           }
         }
       } catch (quotationError) {
