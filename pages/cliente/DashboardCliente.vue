@@ -1675,7 +1675,7 @@ const getServiceIcon = (serviceName) => {
   const name = serviceName.toLowerCase()
   if (name.includes('viaje') || name.includes('taxi')) return '🚗'
   if (name.includes('barber') || name.includes('peluquería') || name.includes('salón')) return '💈'
-  if (name.includes('aire') || name.includes('ac') || name.includes('clima')) return '❄️'
+  if (name.includes('aire') || name.includes('clima')) return '❄️'
   if (name.includes('fontan') || name.includes('plomer') || name.includes('tubo')) return '💧'
   if (name.includes('electri') || name.includes('luz')) return '💡'
   if (name.includes('limpie') || name.includes('aseo')) return '🧹'
@@ -1684,7 +1684,7 @@ const getServiceIcon = (serviceName) => {
   if (name.includes('jardin') || name.includes('planta')) return '🌿'
   if (name.includes('cámara')) return '🎥'
   if (name.includes('cerraj') || name.includes('llave')) return '🔑'
-  if (name.includes('mudanz')) return '🚚'
+  if (name.includes('repara')) return '🔧'
   if (name.includes('teléfono') || name.includes('computadora') || name.includes('laptop')) return '💻'
   return '🛠️'
 }

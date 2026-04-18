@@ -420,7 +420,6 @@
                   required
                   :autocomplete="isLogin ? 'current-password' : 'new-password'"
                   @input="formErrors.password = ''"
-                  maxlength="10"
                 />
                 <button
                   type="button"
