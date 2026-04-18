@@ -1280,6 +1280,12 @@ const isCashService = (description = '') => {
   return (description || '').toLowerCase().includes('pago efectivo')
 }
 
+// Helper: detecta si un servicio es de barbería
+const isBarberíaService = (title = '') => {
+  const t = (title || '').toLowerCase()
+  return t.includes('barber') || t.includes('peluquería') || t.includes('salón')
+}
+
 const getServiceIcon = (estado, serviceTitle = '') => {
   const title = (serviceTitle || '').toLowerCase()
   if (title.includes('viaje') || title.includes('taxi')) return '🚗'
@@ -2033,7 +2039,7 @@ const checkAuthAndLoad = async () => {
     const user = useCookie('user')
     
     if (!token.value || !user.value) { 
-      window.location.reload()
+      navigateTo('/')
       return
     }
     
@@ -2044,7 +2050,9 @@ const checkAuthAndLoad = async () => {
       loadCommission()
     ])
   } catch (error) { 
-    window.location.reload() 
+    console.error('Error durante la inicialización:', error)
+    // Evitar recarga infinita, redirigir al login si falla la auth
+    navigateTo('/')
   }
 }
 
