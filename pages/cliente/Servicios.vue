@@ -354,15 +354,6 @@
           <h4 v-if="hasVisibleActions" class="text-sm font-black text-gray-900 dark:text-white mb-2">{{ $t('services_page.modal.actions') }}</h4>
           <div class="space-y-2">
 
-            <!-- Acciones para Cotización Pendiente -->
-            <div v-if="selectedService.status === 'Cotización Pendiente'">
-            <div class="bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg mb-2">
-                <p class="text-yellow-800 dark:text-yellow-200 text-xs font-bold text-center">
-                  {{ $t('services_page.modal.waiting_decision') }}
-                </p>
-              </div>
-            </div> 
-
             <!-- Acciones para Servicio Con Pago Pendiente -->
             <div v-if="selectedService.rawStatus === 'pendiente_pagovisita'" class="mb-3"> 
               <button 
