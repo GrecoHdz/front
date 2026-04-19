@@ -1021,7 +1021,17 @@
       "message_android": "Install our application for a better experience, quick access, and real-time notifications.",
       "message_ios": "For a better experience, add MiSeguro to your home screen by following these steps:",
       "cta": "Download Application",
-      "mandatory": "Installing the app is mandatory to continue"
+      "mandatory": "Installing the app is mandatory to continue",
+      "step_android_1_1": "Tap the",
+      "step_android_1_2": "three dots",
+      "step_android_1_3": "in the upper corner.",
+      "step_android_2_1": "Select",
+      "step_android_2_2": "\"Add to Home Screen\".",
+      "step_ios_1_1": "Tap the",
+      "step_ios_1_2": "Share",
+      "step_ios_1_3": "icon",
+      "step_ios_2_1": "Select",
+      "step_ios_2_2": "\"Add to Home Screen\""
     }
   },
   "technician": {

@@ -1021,7 +1021,17 @@
       "message_android": "Instala nuestra aplicación para recibir una mejor experiencia, acceso rápido y notificaciones en tiempo real.",
       "message_ios": "Para una mejor experiencia, agrega MiSeguro a tu pantalla de inicio siguiendo estos pasos:",
       "cta": "Descargar Aplicación",
-      "mandatory": "Es obligatorio instalar la app para continuar"
+      "mandatory": "Es obligatorio instalar la app para continuar",
+      "step_android_1_1": "Toca los",
+      "step_android_1_2": "tres puntos",
+      "step_android_1_3": "en la esquina superior.",
+      "step_android_2_1": "Selecciona",
+      "step_android_2_2": "\"Agregar a la pantalla de inicio\".",
+      "step_ios_1_1": "Toca el icono de",
+      "step_ios_1_2": "Compartir",
+      "step_ios_1_3": "",
+      "step_ios_2_1": "Selecciona",
+      "step_ios_2_2": "\"Agregar al inicio\""
     }
   },
   "technician": {

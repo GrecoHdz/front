@@ -25,7 +25,7 @@
           v-if="canClose"
           @click="dismissed = true"
           class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-90 z-20"
-          title="Cerrar"
+          :title="$t('common.close')"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -67,11 +67,11 @@
             <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl text-sm text-blue-700 dark:text-blue-300 flex flex-col gap-3">
               <div class="flex items-center gap-3 text-left">
                 <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">1</span>
-                <span>Toca los <strong>tres puntos</strong> <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v.01M12 12v.01M12 19v.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> en la esquina superior.</span>
+                <span>{{ $t('pwa.install_invite.step_android_1_1') }} <strong>{{ $t('pwa.install_invite.step_android_1_2') }}</strong> <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v.01M12 12v.01M12 19v.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> {{ $t('pwa.install_invite.step_android_1_3') }}</span>
               </div>
               <div class="flex items-center gap-3 text-left">
                 <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">2</span>
-                <span>Selecciona <strong>"Agregar a la pantalla de inicio"</strong>.</span>
+                <span>{{ $t('pwa.install_invite.step_android_2_1') }} <strong>{{ $t('pwa.install_invite.step_android_2_2') }}</strong></span>
               </div>
             </div>
           </div>
@@ -81,11 +81,11 @@
             <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl text-sm text-blue-700 dark:text-blue-300 flex flex-col gap-3">
               <div class="flex items-center gap-3 text-left">
                 <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">1</span>
-                <span>Toca el icono de <strong>Compartir</strong> <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15V3m0 0l-4 4m4-4l4 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span>{{ $t('pwa.install_invite.step_ios_1_1') }} <strong>{{ $t('pwa.install_invite.step_ios_1_2') }}</strong> {{ $t('pwa.install_invite.step_ios_1_3') }} <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15V3m0 0l-4 4m4-4l4 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
               </div>
               <div class="flex items-center gap-3 text-left">
                 <span class="bg-blue-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">2</span>
-                <span>Selecciona <strong>"Agregar al inicio"</strong> <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M12 8v8m-4-4h8" stroke-width="2" stroke-linecap="round"/></svg></span>
+                <span>{{ $t('pwa.install_invite.step_ios_2_1') }} <strong>{{ $t('pwa.install_invite.step_ios_2_2') }}</strong> <svg class="inline w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M12 8v8m-4-4h8" stroke-width="2" stroke-linecap="round"/></svg></span>
               </div>
             </div>
           </div>
