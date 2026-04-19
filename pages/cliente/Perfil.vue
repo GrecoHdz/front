@@ -1764,7 +1764,6 @@ const handleLogout = async () => {
   try {
     isLoggingOut.value = true;
     await auth.logout();
-    // La redirección se manejará en el watch de auth.user
   } catch (error) {
     console.error('Error al cerrar sesión:', error);
     toast.value = {
@@ -1773,7 +1772,6 @@ const handleLogout = async () => {
       type: 'error',
       duration: 3000
     };
-  } finally {
     isLoggingOut.value = false;
   }
 }

@@ -135,18 +135,28 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const config = useRuntimeConfig();
       const pwaToken = getPWARefreshToken();
+      
+      // Intentar logout en el servidor (no bloqueante para el resto del proceso)
       await $fetch('/auth/logout', {
         method: 'POST',
         baseURL: config.public.apiBase,
         credentials: 'include',
         headers: pwaToken ? { 'X-Refresh-Token': pwaToken } : {}
-      });
+      }).catch(err => console.error('Server logout error:', err));
+      
     } catch (err) {
-      // No interrumpir el flujo por errores en el logout
+      console.error('Logout error:', err);
     } finally {
-      savePWARefreshToken(null); // Limpiar siempre
+      // Limpiar TODO el estado local SIEMPRE
+      savePWARefreshToken(null);
       clearAuthState();
-      navigateTo('/');
+      
+      // Redirección forzada para limpiar memoria
+      if (process.client) {
+        window.location.href = '/';
+      } else {
+        await navigateTo('/', { replace: true });
+      }
     }
   };
 

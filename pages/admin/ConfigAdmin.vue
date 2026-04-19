@@ -5902,11 +5902,9 @@ const handleLogout = async () => {
   try {
     isLoggingOut.value = true;
     await auth.logout();
-    router.push('/');
   } catch (error) {
     console.error('Error al cerrar sesión:', error);
     showToastMessage('Error al cerrar sesión', 'error');
-  } finally {
     isLoggingOut.value = false;
   }
 }

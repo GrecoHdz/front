@@ -105,9 +105,9 @@
                   <div v-if="pendingServices.length > 0" class="grid grid-cols-2 gap-2 sm:gap-3">
                     <template v-for="service in pendingServices" :key="service.id_solicitud">
 
-                      <!-- ===== TARJETA TAXI VIP (ancho completo) ===== -->
+                      <!-- ===== TARJETA Viaje Privado (ancho completo) ===== -->
                       <div
-                        v-if="service.servicio.nombre === 'Taxi VIP'"
+                        v-if="service.servicio.nombre === 'Viaje Privado'"
                         @click="viewService(service)"
                         class="col-span-2 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800/60 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer relative overflow-hidden"
                       >
@@ -121,7 +121,7 @@
                               🚕
                             </div>
                             <div class="min-w-0">
-                              <p class="font-black text-blue-900 dark:text-blue-100 text-[11px] sm:text-xs leading-tight">Taxi VIP</p>
+                              <p class="font-black text-blue-900 dark:text-blue-100 text-[11px] sm:text-xs leading-tight">Viaje Privado</p>
                               <p class="text-[8px] text-blue-500 dark:text-blue-400">#{{ formatDateDDMMYY(service.fecha_solicitud) }}-{{ service.id_solicitud }}</p>
                             </div>
                           </div>
@@ -3872,7 +3872,7 @@ const getServiceTypeIcon = (serviceName) => {
     'Carpintería': '🪚',
     'Carpintería - Puerta': '🪚',
     'Limpieza de Hogar': '🧹',
-    'Taxi VIP':'🚕'
+    'Viaje Privado':'🚕'
   }
   
   // Buscar por coincidencia exacta primero

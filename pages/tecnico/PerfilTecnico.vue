@@ -2218,7 +2218,6 @@ const handleLogout = async () => {
       type: 'error',
       duration: 3000
     };
-  } finally {
     isLoggingOut.value = false;
   }
 }
