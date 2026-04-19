@@ -2115,11 +2115,22 @@ const sendWhatsAppMessage = async (data, type) => {
     // Codificar el mensaje para la URL
     const encodedMessage = encodeURIComponent(message);
     
-    // Usar el número de teléfono de la empresa o uno por defecto
-    const phoneNumber = empresaPhoneNumber.value || '1234567890';
+    // Limpiar el número de teléfono (solo números)
+    const phoneNumber = (empresaPhoneNumber.value || '1234567890').replace(/\D/g, '');
     
-    // Abrir WhatsApp Web con el mensaje predefinido
-    window.open(`https://wa.me/+504${phoneNumber}?text=${encodedMessage}`, '_blank');
+    // Construir URL de WhatsApp
+    const url = `https://wa.me/+504${phoneNumber}?text=${encodedMessage}`;
+    
+    // Detectar si es dispositivo móvil para usar redirección directa o nueva pestaña
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // En móvil, la redirección directa funciona mejor con los bloqueadores de popups tras llamadas async
+      window.location.assign(url);
+    } else {
+      // En escritorio, abrimos en una nueva pestaña
+      window.open(url, '_blank');
+    }
   } catch (error) {
     console.error('Error al preparar el mensaje de WhatsApp:', error);
   }
@@ -3168,7 +3179,8 @@ onMounted(async () => {
       fetchBeneficios(),
       fetchTotalSolicitudes(),
       fetchUserCredit(),
-      fetchBarberias()
+      fetchBarberias(),
+      fetchEmpresaPhoneNumber()
     ])
   } catch (error) {
     console.error('Error initialization:', error)
