@@ -63,7 +63,7 @@ html, body, #__nuxt {
 </style>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { Analytics } from '@vercel/analytics/nuxt';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue';
@@ -76,6 +76,15 @@ const isLoading = ref(true);
 const showNotifications = ref(false);
 const { isIAB, isIOS, getExternalBrowserLink } = useIABDetector();
 const { isInstalled, initPWA } = useAppPWA();
+
+// Lógica de actualización de PWA
+const { needRefresh, updateServiceWorker } = useRegisterSW();
+watch(needRefresh, (refresh) => {
+  if (refresh) {
+    console.log('🔄 Nueva versión detectada. Actualizando...');
+    updateServiceWorker(true);
+  }
+});
 
 // Configuración del tema oscuro
 useHead({

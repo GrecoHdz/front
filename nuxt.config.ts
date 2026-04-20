@@ -77,6 +77,9 @@ export default defineNuxtConfig({
       navigateFallback: '/',
       importScripts: ['/sw-push.js'],
       globPatterns: ['**/*.{js,css,html,png,jpg,jpeg,svg,json,woff2,woff}'],
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+      skipWaiting: true
     },
     devOptions: {
       enabled: true,
@@ -152,7 +155,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       appName: 'MiSeguro',
-      appVersion: '1.3.2',
+      appVersion: '1.3.3',
       apiBase: process.env.NUXT_PUBLIC_API_URL
     }
   }
