@@ -77,14 +77,15 @@ const showNotifications = ref(false);
 const { isIAB, isIOS, getExternalBrowserLink } = useIABDetector();
 const { isInstalled, initPWA } = useAppPWA();
 
+const { $pwa } = useNuxtApp();
+
 // Lógica de actualización de PWA
-const { needRefresh, updateServiceWorker } = useRegisterSW();
-watch(needRefresh, (refresh) => {
+watch(() => $pwa?.needRefresh, (refresh) => {
   if (refresh) {
     console.log('🔄 Nueva versión detectada. Actualizando...');
-    updateServiceWorker(true);
+    $pwa.updateServiceWorker();
   }
-});
+}, { immediate: true });
 
 // Configuración del tema oscuro
 useHead({
