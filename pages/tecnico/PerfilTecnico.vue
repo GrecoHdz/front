@@ -545,6 +545,12 @@
             class="w-full text-left p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg sm:rounded-xl transition-colors duration-200">
             <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Acerca de MiSeguro</p>
           </button>
+          <!-- App Version Display -->
+          <div class="px-3 py-2.5 mb-2 flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700 mx-2.5 sm:mx-3">
+            <span class="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Versión de la aplicación</span>
+            <span class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300">v{{ config.public.appVersion }}</span>
+          </div>
+
           <button 
             @click="handleLogout"
             :disabled="isLoggingOut"
@@ -1312,8 +1318,9 @@ const { t } = useI18n()
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
-const config = useRuntimeConfig()
-const router = useRouter()
+const config = useRuntimeConfig();
+
+// Datos del usuario (del store o cookie)
 const auth = useAuthStore()
 const userCookie = useCookie('user')
 

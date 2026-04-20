@@ -1595,6 +1595,9 @@ const shouldShowFormFields = computed(() => {
 })
 
 const isFormValid = computed(() => {
+  // 1. Requisito universal: Foto de perfil
+  if (!hasProfilePhoto.value) return false;
+
   const isBarberia = selectedServiceObject.value?.name_es === 'Barbería';
   const isEnLocal = serviceFormData.value.barberiaOption === 'en local';
   const isDomicilio = serviceFormData.value.barberiaOption === 'a domicilio';
@@ -1602,6 +1605,7 @@ const isFormValid = computed(() => {
   const basicFields = serviceFormData.value.type &&
     serviceFormData.value.description.trim() !== '';
 
+  // 2. Lógica específica para Barbería
   if (isBarberia) {
     if (!serviceFormData.value.barberiaOption) return false;
     
@@ -1616,11 +1620,10 @@ const isFormValid = computed(() => {
     }
   }
   
-  if (!hasProfilePhoto.value) return false;
-
+  // 3. Lógica para el resto de servicios
   return basicFields &&
     serviceFormData.value.colonia.trim() !== '' &&
-    serviceFormData.value.direccion.trim() !== ''
+    serviceFormData.value.direccion.trim() !== '';
 })
 
 // Servicios traducidos automáticamente

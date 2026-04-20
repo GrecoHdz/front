@@ -34,6 +34,7 @@ export default defineNuxtConfig({
     }
   },
   pwa: {
+    registerType: 'autoUpdate',
     manifest: {
       id: '/',
       name: 'MiSeguro',
@@ -151,7 +152,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       appName: 'MiSeguro',
-      appVersion: '1.0.0',
+      appVersion: '1.3.2',
       apiBase: process.env.NUXT_PUBLIC_API_URL
     }
   }

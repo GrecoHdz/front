@@ -482,6 +482,12 @@
             class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors duration-200">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('profile.about') }}</p>
           </button>
+          <!-- App Version Display -->
+          <div class="px-3 py-2 mb-2 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Versión de la aplicación</span>
+            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">v{{ config.public.appVersion }}</span>
+          </div>
+
           <button 
             @click="handleLogout"
             :disabled="isLoggingOut"
@@ -2386,6 +2392,9 @@ const fetchMembershipCost = async () => {
 };
 
 // Cargar datos al montar el componente de forma unificada
+const config = useRuntimeConfig();
+
+// Inicialización de datos
 onMounted(async () => {
   console.log('🚀 [Perfil] Iniciando inicialización...');
   try {

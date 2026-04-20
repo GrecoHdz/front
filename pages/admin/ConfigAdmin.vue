@@ -1447,6 +1447,14 @@
           </div>
         </div>
 
+  <!-- App Version Display -->
+  <div class="w-full flex justify-center mb-4">
+    <div class="px-6 py-2 bg-gray-100 dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 flex items-center gap-3">
+      <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Versión del Sistema</span>
+      <span class="text-xs font-bold text-gray-900 dark:text-white">v{{ config.public.appVersion }}</span>
+    </div>
+  </div>
+
   <!-- Logout Button Section -->
   <div class="w-full flex justify-center pt-12 pb-18 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
     <button 
@@ -5865,6 +5873,8 @@ const cargarReferidorPredeterminado = async () => {
 };
 
 // ===== INICIALIZACIÓN =====
+const config = useRuntimeConfig();
+
 onMounted(async () => {
   try {
     // Verificar autenticación
