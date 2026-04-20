@@ -1299,6 +1299,7 @@ const getServiceIcon = (estado, serviceTitle = '') => {
   if (title.includes('aire') || title.includes('ac') || title.includes('clima')) return '❄️'
   if (title.includes('fontan') || title.includes('plomer') || title.includes('tubo')) return '💧'
   if (title.includes('electri') || title.includes('luz')) return '💡'
+  if (title.includes('edecanes')) return '🧖‍♀️'
   
   const iconMap = {
     'verificando_pagovisita': '💰',

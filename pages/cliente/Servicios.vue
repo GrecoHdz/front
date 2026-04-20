@@ -2782,6 +2782,7 @@ const getServiceIcon = (serviceName) => {
   if (name.includes('cerraj') || name.includes('llave')) return '🔑'
   if (name.includes('mudanz')) return '🚚'
   if (name.includes('teléfono') || name.includes('computadora') || name.includes('laptop')) return '💻'
+  if (name.includes('edecanes')) return '🧖‍♀️'
   return '🛠️'
 }
 

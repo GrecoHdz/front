@@ -5873,7 +5873,6 @@ const cargarReferidorPredeterminado = async () => {
 };
 
 // ===== INICIALIZACIÓN =====
-const config = useRuntimeConfig();
 
 onMounted(async () => {
   try {

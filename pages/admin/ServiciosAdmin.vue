@@ -3886,6 +3886,7 @@ const getServiceTypeIcon = (serviceName) => {
   if (lowerName.includes('pintura')) return '🎨'
   if (lowerName.includes('carpint')) return '🪚'
   if (lowerName.includes('limpieza')) return '🧹'
+  if (lowerName.includes('edecanes')) return '🧖‍♀️'
   
   return '🔧'
 }
@@ -3918,6 +3919,7 @@ const getServiceTypeColor = (serviceName) => {
   if (lowerName.includes('pintura')) return 'bg-pink-500'
   if (lowerName.includes('carpint')) return 'bg-amber-500'
   if (lowerName.includes('limpieza')) return 'bg-green-500'
+  if (lowerName.includes('edecanes')) return 'bg-purple-500'
   
   return 'bg-gray-500'
 }

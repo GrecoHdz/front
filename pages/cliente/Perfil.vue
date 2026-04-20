@@ -1435,8 +1435,7 @@ import { usePushNotifications } from '~/composables/usePushNotifications'
 import { useI18n } from 'vue-i18n'
 
 const { t, tm, rt, locale, setLocale } = useI18n()
-
-const config = useRuntimeConfig()
+const config = useRuntimeConfig();
 const { $api } = useNuxtApp();
 
 // SEO and Meta
@@ -2068,7 +2067,6 @@ const confirmDeleteIdentity = async () => {
 
 const saveProfile = async () => {
   try {
-    const config = useRuntimeConfig();
 
     // Validaciones básicas
     if (!user.value.nombre || user.value.nombre.trim().split(' ').filter(Boolean).length < 2) {
@@ -2392,21 +2390,15 @@ const fetchMembershipCost = async () => {
 };
 
 // Cargar datos al montar el componente de forma unificada
-const config = useRuntimeConfig();
 
 // Inicialización de datos
 onMounted(async () => {
-  console.log('🚀 [Perfil] Iniciando inicialización...');
   try {
     const token = useCookie('token')
     const userCookie = useCookie('user')
     
-    console.log('🔑 [Perfil] Token:', !!token.value ? 'Presente' : 'Ausente');
-    console.log('👤 [Perfil] Cookie User:', !!userCookie.value ? 'Presente' : 'Ausente');
-    
     // Si no hay token o cookie, redirigir al inicio en lugar de recargar infinitamente
     if (!token.value || !userCookie.value) {
-      console.warn('⚠️ [Perfil] Sesión no encontrada. Redirigiendo al Home...');
       navigateTo('/');
       return;
     }
