@@ -186,7 +186,6 @@
                             </svg>
                           </button>
                           <button 
-                            v-if="service.estado === 'pendiente_pagovisita' || service.estado === 'asignado'"
                             @click.stop="confirmDeleteService(service)"
                             class="p-1 text-red-500 hover:text-red-600 transition-all hover:scale-110"
                             title="Eliminar solicitud"
@@ -284,7 +283,6 @@
                               </svg>
                             </button>
                             <button 
-                              v-if="service.estado === 'pendiente_pagovisita' || service.estado === 'asignado'"
                               @click.stop="confirmDeleteService(service)"
                               class="p-0.5 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-all duration-300 transform hover:scale-110"
                               title="Eliminar solicitud"
@@ -957,7 +955,6 @@
                         
                         <div class="flex space-x-0.5">
                           <button 
-                            v-if="service.estado === 'pendiente_pagovisita' || service.estado === 'asignado'"
                             @click.stop="confirmDeleteService(service)"
                             class="p-0.5 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-all duration-300 transform hover:scale-110"
                             title="Eliminar solicitud"
@@ -1145,6 +1142,31 @@
                   <span class="font-bold text-yellow-800 dark:text-yellow-200">{{ selectedService.calificacion.calificacion }}/5</span>
                 </div>
                 <p v-if="selectedService.calificacion.comentario" class="text-yellow-700 dark:text-yellow-300 text-sm">{{ selectedService.calificacion.comentario }}</p>
+              </div>
+            </div>
+
+            <!-- Status Modification -->
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+              <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-2">Cambiar Estado Manualmente</h4>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                <select 
+                  v-model="selectedService.estado"
+                  @change="changeServiceStatus(selectedService)"
+                  class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 sm:p-2.5 outline-none transition-colors"
+                >
+                  <option value="pendiente_asignacion">Pendiente Asignación</option>
+                  <option value="pendiente_pagovisita">Pendiente Pago Visita</option>
+                  <option value="verificando_pagovisita">Verificando Pago Visita</option>
+                  <option value="asignado">Asignado</option>
+                  <option value="pendiente_cotizacion">Pendiente Cotización</option>
+                  <option value="en_proceso">En Proceso</option>
+                  <option value="pendiente_pagoservicio">Pendiente Pago Servicio</option>
+                  <option value="verificando_pagoservicio">Verificando Pago Servicio</option>
+                  <option value="finalizado">Finalizado</option>
+                  <option value="calificado">Calificado</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+                <p class="text-[10px] text-gray-500 mt-1 dark:text-gray-400">El estado de esta solicitud se actualizará en tiempo real para el cliente y el técnico.</p>
               </div>
             </div>
 
@@ -4227,6 +4249,28 @@ const confirmTechnicianAssignment = async () => {
 const confirmDeleteService = (service) => {
   serviceToDelete.value = service
   showDeleteConfirmModal.value = true
+}
+
+const changeServiceStatus = async (service) => {
+  try {
+    await $api(`/solicitudservicio/${service.id_solicitud}`, {
+      method: 'PUT',
+      body: {
+        estado: service.estado
+      }
+    })
+    
+    showSuccess(`Estado actualizado exitosamente`)
+    
+    // Refresh the lists directly
+    if (typeof loadPendingServices === 'function') await loadPendingServices(currentPendingPage.value, true)
+    if (typeof loadHistoryServices === 'function') await loadHistoryServices(currentHistoryPage.value, true)
+    if (typeof loadStats === 'function') await loadStats()
+    
+  } catch (error) {
+    console.error('Error al cambiar el estado:', error)
+    showError('Error al cambiar el estado del servicio')
+  }
 }
 
 const deleteService = async () => {

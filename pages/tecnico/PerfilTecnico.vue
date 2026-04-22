@@ -886,7 +886,23 @@
       </section>
 
       <section>
-        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Aceptación del Contrato</h4>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">12. Servicio de Movilidad (Viaje Privado)</h4>
+        <p>
+          El servicio de Viaje Privado es una funcionalidad accesoria dentro de la plataforma, cuyo propósito principal es facilitar el traslado de profesionales y usuarios en relación con los servicios ofrecidos dentro de MiSeguro.
+        </p>
+        <p class="mt-2">
+          Este servicio permite a los usuarios conectarse con conductores independientes para coordinar traslados de manera práctica.
+        </p>
+        <p class="mt-2">
+          MiSeguro no presta servicios de transporte, no es propietario de vehículos ni mantiene relación laboral con los conductores.
+        </p>
+        <p class="mt-2">
+          Todos los traslados son realizados por terceros independientes, quienes actúan bajo su propia responsabilidad y conforme a la normativa aplicable.
+        </p>
+      </section>
+
+      <section>
+        <h4 class="font-semibold text-base text-gray-900 dark:text-white mb-2">13. Aceptación del Contrato</h4>
         <p>
           El uso, acceso y permanencia en la Plataforma implica la aceptación expresa,
           automática e incondicional del presente contrato.
