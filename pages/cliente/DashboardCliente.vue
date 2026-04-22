@@ -1629,7 +1629,7 @@ const isFormValid = computed(() => {
 // Servicios traducidos automáticamente
 const servicesListTranslated = trList(servicesList, ['name', 'description'])
 
-// Mostrar todos los servicios, pero marcar Viaje Privado como deshabilitado si no está verificado y ponerlo de primero
+// Mostrar todos los servicios, pero marcar Viaje Privado como deshabilitado si no está verificado y ponerlo de último
 const filteredServicesList = computed(() => {
   // Usar lista traducida si está disponible, si no la original
   const source = servicesListTranslated.value?.length
@@ -1645,8 +1645,8 @@ const filteredServicesList = computed(() => {
     .sort((a, b) => {
       const aIsViaje = (a.name_es ?? a.name) === 'Viaje Privado'
       const bIsViaje = (b.name_es ?? b.name) === 'Viaje Privado'
-      if (aIsViaje) return -1;
-      if (bIsViaje) return 1;
+      if (aIsViaje) return 1;
+      if (bIsViaje) return -1;
       return 0;
     });
 })
@@ -1708,7 +1708,7 @@ const getServiceIcon = (serviceName) => {
   if (name.includes('cerraj') || name.includes('llave')) return '🔑'
   if (name.includes('repara')) return '🔧'
   if (name.includes('teléfono') || name.includes('computadora') || name.includes('laptop')) return '💻'
-  if (name.includes('edecanes')) return '🧖‍♀️'
+  if (name.includes('edecanes')) return '🧜‍♀️'
   return '🛠️'
 }
 

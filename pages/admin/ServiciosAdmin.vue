@@ -105,11 +105,11 @@
                   <div v-if="pendingServices.length > 0" class="grid grid-cols-2 gap-2 sm:gap-3">
                     <template v-for="service in pendingServices" :key="service.id_solicitud">
 
-                      <!-- ===== TARJETA Viaje Privado (ancho completo) ===== -->
+                      <!-- ===== TARJETA Viaje Privado (compacta) ===== -->
                       <div
                         v-if="service.servicio.nombre === 'Viaje Privado'"
                         @click="viewService(service)"
-                        class="col-span-2 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800/60 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer relative overflow-hidden"
+                        class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800/60 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer relative overflow-hidden"
                       >
                         <!-- Fondo decorativo sutil -->
                         <div class="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -translate-y-6 translate-x-6 pointer-events-none"></div>
@@ -118,7 +118,7 @@
                         <div class="flex items-center justify-between mb-2">
                           <div class="flex items-center space-x-2">
                             <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center bg-blue-600 text-white text-sm shadow-sm">
-                              🚕
+                              🚗
                             </div>
                             <div class="min-w-0">
                               <p class="font-black text-blue-900 dark:text-blue-100 text-[11px] sm:text-xs leading-tight">Viaje Privado</p>
@@ -142,14 +142,14 @@
                         </div>
 
                         <!-- Recogida → Destino -->
-                        <div class="grid grid-cols-2 gap-1.5 mb-2">
-                          <div class="bg-blue-100 dark:bg-blue-800/40 p-1.5 rounded-lg border border-blue-200 dark:border-blue-700/50">
-                            <p class="text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-0.5">📍 Recogida</p>
-                            <p class="text-[10px] font-bold text-blue-900 dark:text-blue-100 truncate leading-tight">{{ service.colonia }}</p>
+                        <div class="space-y-1 mb-2">
+                          <div class="flex items-center space-x-1.5 text-xs text-blue-700 dark:text-blue-300">
+                            <span class="text-[10px]">📍</span>
+                            <span class="truncate text-[10px] sm:text-xs leading-tight">{{ service.colonia }}</span>
                           </div>
-                          <div class="bg-emerald-100 dark:bg-emerald-800/40 p-1.5 rounded-lg border border-emerald-200 dark:border-emerald-700/50">
-                            <p class="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-0.5">🏁 Destino</p>
-                            <p class="text-[10px] font-bold text-emerald-900 dark:text-emerald-100 truncate leading-tight">{{ service.descripcion }}</p>
+                          <div class="flex items-center space-x-1.5 text-xs text-emerald-700 dark:text-emerald-300">
+                            <span class="text-[10px]">🏁</span>
+                            <span class="truncate text-[10px] sm:text-xs leading-tight">{{ service.direccion_precisa }}</span>
                           </div>
                         </div>
 
@@ -3886,7 +3886,7 @@ const getServiceTypeIcon = (serviceName) => {
   if (lowerName.includes('pintura')) return '🎨'
   if (lowerName.includes('carpint')) return '🪚'
   if (lowerName.includes('limpieza')) return '🧹'
-  if (lowerName.includes('edecanes')) return '🧖‍♀️'
+  if (lowerName.includes('edecanes')) return '🧜‍♀️'
   
   return '🔧'
 }

@@ -1493,7 +1493,7 @@ const getServiceIcon = (serviceName) => {
     'computadora': '💻', 
     'barber': '💈',
     'peluquería': '💈',
-    'edecanes': '🧖‍♀️'
+    'edecanes': '🧜‍♀️'
   }
   
   if (!serviceName) return '🛠️'

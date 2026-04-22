@@ -1411,26 +1411,13 @@
               <!-- Selector de Pago -->
               <div class="space-y-2">
                 <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1 text-center">{{ $t('services_page.modals.payment_method') }}</h4>
-                <div class="grid grid-cols-2 gap-2">
-                  <button 
-                    @click="taxiPaymentMethod = 'transferencia'"
-                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
-                    :class="taxiPaymentMethod === 'transferencia' 
-                      ? 'border-yellow-400 bg-yellow-400/10 dark:bg-yellow-400/5' 
-                      : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
-                  >
-                    <span class="text-xl">💳</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'transferencia' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">{{ $t('services_page.modals.app_transfer') }}</span>
-                  </button>
+                <div class="grid grid-cols-1 gap-2">
                   <button 
                     @click="taxiPaymentMethod = 'efectivo'"
-                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
-                    :class="taxiPaymentMethod === 'efectivo' 
-                      ? 'border-yellow-400 bg-yellow-400/10 dark:bg-yellow-400/5' 
-                      : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1 border-yellow-400 bg-yellow-400/10 dark:bg-yellow-400/5"
                   >
                     <span class="text-xl">💵</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'efectivo' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">{{ $t('services_page.modals.cash') }}</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-center text-yellow-700 dark:text-yellow-400">{{ $t('services_page.modals.cash') }}</span>
                   </button>
                 </div>
               </div>
@@ -1457,27 +1444,13 @@
               <div class="bg-black p-4 rounded-lg shadow-xl shadow-black/10">
                 <div class="flex flex-col items-center text-center">
                   <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">{{ $t('services_page.payment.total_pay') }}</p>
-                  <div class="text-3xl font-black tabular-nums transition-colors" :class="taxiPaymentMethod === 'transferencia' && Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0) ? 'line-through text-white/50' : 'text-white'">
+                  <div class="text-3xl font-black tabular-nums transition-colors text-white">
                     L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
                   </div>
-                  <div v-if="taxiPaymentMethod === 'transferencia' && Number(getDiscountedPrice()) < Number(quotationData?.monto_manodeobra || 0)" class="mt-2 text-[10px] font-black text-yellow-400/80 uppercase">
-                    {{ $t('services_page.modals.app_payment') }}: <span class="text-xs text-yellow-400 tracking-wider underline decoration-2 underline-offset-4">L. {{ getDiscountedPrice() }}</span>
-                  </div>
-                  <div v-else-if="taxiPaymentMethod === 'efectivo'" class="mt-2 text-[9px] font-bold text-gray-400 uppercase tracking-tight">
+                  <div class="mt-2 text-[9px] font-bold text-gray-400 uppercase tracking-tight">
                     * {{ $t('services_page.modals.cash_benefit_desc') }}
                   </div>
                 </div>
-              </div>
-
-              <!-- Cashback Taxi Info -->
-              <div v-if="taxiPaymentMethod === 'transferencia' && shouldShowDiscountBenefit && cashbackAmount > 0" class="p-3 bg-yellow-400/10 dark:bg-yellow-400/5 border border-yellow-400/20 rounded-lg">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-[10px] font-black text-yellow-700 dark:text-yellow-500 uppercase tracking-widest">✨ Cashback</span>
-                  <span class="text-xs font-black text-yellow-800 dark:text-yellow-400">+L. {{ formatCurrency(cashbackAmount) }}</span>
-                </div>
-                <p class="text-[9px] text-yellow-700/70 dark:text-yellow-500/70 font-medium leading-tight">
-                  * {{ $t('services_page.payment.cashback_desc') }}
-                </p>
               </div>
 
               <!-- Acciones -->
@@ -2576,7 +2549,7 @@ const showTaxiRejectConfirmation = ref(false)
 const rejectReason = ref('') 
 
 // Estados de pago Taxi VIP
-const taxiPaymentMethod = ref('transferencia') // 'transferencia' o 'efectivo'
+const taxiPaymentMethod = ref('efectivo') // Solo 'efectivo'
 const taxiCashBillAmount = ref('')
 
 // Estados de filtros
@@ -2782,7 +2755,7 @@ const getServiceIcon = (serviceName) => {
   if (name.includes('cerraj') || name.includes('llave')) return '🔑'
   if (name.includes('mudanz')) return '🚚'
   if (name.includes('teléfono') || name.includes('computadora') || name.includes('laptop')) return '💻'
-  if (name.includes('edecanes')) return '🧖‍♀️'
+  if (name.includes('edecanes')) return '🧜‍♀️'
   return '🛠️'
 }
 
@@ -3370,7 +3343,7 @@ const openQuotationModal = async (service) => {
     await Promise.all(promises);
     
     // Reset variables de pago Taxi VIP
-    taxiPaymentMethod.value = 'transferencia';
+    taxiPaymentMethod.value = 'efectivo';
     taxiCashBillAmount.value = '';
     
     // Mostrar el modal según el tipo de servicio
