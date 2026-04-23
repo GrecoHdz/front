@@ -65,6 +65,21 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null;
     tokenCookie.value = null;
     userCookie.value = null;
+    
+    // Forzar la eliminación de cookies a nivel de documento para evitar race conditions
+    if (process.client) {
+      const cookieOptions = "; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      const extraOptions = process.env.NODE_ENV === 'production' ? "; SameSite=None; Secure" : "";
+      
+      document.cookie = "token=" + cookieOptions + extraOptions;
+      document.cookie = "user=" + cookieOptions + extraOptions;
+      document.cookie = "refreshToken=" + cookieOptions + extraOptions;
+      
+      // Intentar también sin las opciones extra por si acaso
+      document.cookie = "token=" + cookieOptions;
+      document.cookie = "user=" + cookieOptions;
+      document.cookie = "refreshToken=" + cookieOptions;
+    }
   };
 
   const setUser = (userData: User | null) => {
@@ -136,24 +151,41 @@ export const useAuthStore = defineStore('auth', () => {
       const config = useRuntimeConfig();
       const pwaToken = getPWARefreshToken();
       
-      // Intentar logout en el servidor (no bloqueante para el resto del proceso)
-      $fetch('/auth/logout', {
-        method: 'POST',
-        baseURL: config.public.apiBase,
-        credentials: 'include',
-        headers: pwaToken ? { 'X-Refresh-Token': pwaToken } : {}
-      }).catch(err => console.error('Server logout error:', err));
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      let timeoutId;
+      if (controller) {
+        timeoutId = setTimeout(() => controller.abort(), 2000);
+      }
+      
+      try {
+        await $fetch('/auth/logout', {
+          method: 'POST',
+          baseURL: config.public.apiBase,
+          credentials: 'include',
+          headers: pwaToken ? { 'X-Refresh-Token': pwaToken } : {},
+          signal: controller ? controller.signal : undefined
+        });
+      } catch (err) {
+        console.error('Server logout error:', err);
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+      }
       
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
       // Limpiar TODO el estado local SIEMPRE
+      if (process.client) {
+        localStorage.setItem('just_logged_out', 'true');
+      }
       savePWARefreshToken(null);
       clearAuthState();
       
-      // Redirección forzada para limpiar memoria
+      // Redirección forzada para limpiar memoria y estado
       if (process.client) {
-        window.location.href = '/';
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 50);
       } else {
         await navigateTo('/', { replace: true });
       }

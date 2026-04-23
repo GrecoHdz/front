@@ -1195,8 +1195,16 @@ const cargarCiudades = async () => {
 
 // Verificar autenticación al cargar la página
 const checkAuthStatus = async () => {
+  if (process.client && localStorage.getItem('just_logged_out') === 'true') {
+    console.log('Skipping auto-login because user just logged out');
+    localStorage.removeItem('just_logged_out');
+    isCheckingAuth.value = false;
+    isLoading.value = false;
+    return;
+  }
+
   try {
-    const isAuthenticated = await authStore.checkAuth()
+    const isAuthenticated = await auth.checkAuth()
     
     if (isAuthenticated) {
       // Si está autenticado, redirigir al dashboard correspondiente según su rol
@@ -1680,14 +1688,14 @@ const handleAuth = async () => {
         }; 
         
         // Usar el store de autenticación para el login
-        const loginResult = await authStore.login(loginData); 
+        const loginResult = await auth.login(loginData); 
         
         if (loginResult?.success) {
           authStatus.value = 'success';
           
           await new Promise(resolve => setTimeout(resolve, 800));
           
-          const userRole = authStore.user?.role?.toLowerCase() || '';
+          const userRole = auth.user?.role?.toLowerCase() || '';
           
           showLoginModal.value = false;
           showSuccess.value = true;
@@ -1857,13 +1865,13 @@ const handleAuth = async () => {
         } else {
           // Flujo para usuarios normales: Login automático
           try {
-            const loginResult = await authStore.login({
+            const loginResult = await auth.login({
               identidad: form.value.identidad,
               password: form.value.password
             });
 
             if (loginResult?.success) {
-              const userRole = authStore.user?.role?.toLowerCase() || '';
+              const userRole = auth.user?.role?.toLowerCase() || '';
               showLoginModal.value = false;
               showSuccess.value = true;
               
