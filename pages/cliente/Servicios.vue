@@ -328,27 +328,28 @@
               </div>
             </div> 
 
-            <!-- Foto del Vehículo (Solo Viaje Privado y cuando esté Asignado) -->
-            <div v-if="isViajePrivado(selectedService.title) && assignedVehiculo && selectedService.rawStatus === 'asignado'" class="mt-3 space-y-2">
-              <div class="flex items-center gap-2 bg-sky-50 dark:bg-sky-900/20 p-2 rounded-lg border border-sky-100 dark:border-sky-800/50">
-                <span class="text-lg">🚗</span>
-                <div class="flex-1 min-w-0">
-                  <p class="text-sky-900 dark:text-sky-200 font-bold text-xs truncate">
-                    {{ assignedVehiculo.modelo || 'Vehículo del conductor' }}
-                  </p>
-                  <p class="text-sky-600 dark:text-sky-400 text-[10px] font-medium">
-                    {{ [assignedVehiculo.color, assignedVehiculo.placa].filter(Boolean).join(' · ') || 'Datos del vehículo' }}
-                  </p>
+            <!-- Información del Vehículo (Compacta con Botón) -->
+            <div v-if="isViajePrivado(selectedService.title) && assignedVehiculo && ['asignado', 'en_proceso'].includes(selectedService.rawStatus)" class="mt-3">
+              <div class="flex items-center justify-between gap-3 bg-sky-50 dark:bg-sky-900/20 p-2.5 rounded-xl border border-sky-100 dark:border-sky-800/50 shadow-sm animate-fade-in">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-8 h-8 bg-white dark:bg-sky-900/40 rounded-lg flex items-center justify-center text-lg shadow-inner">
+                    🚗
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sky-900 dark:text-sky-200 font-black text-xs truncate">
+                      {{ assignedVehiculo.modelo || 'Vehículo' }}
+                    </p>
+                    <p class="text-sky-600 dark:text-sky-400 text-[10px] font-bold uppercase tracking-tight">
+                      {{ assignedVehiculo.color }} • {{ assignedVehiculo.placa }}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              
-              <div v-if="assignedVehiculo.foto1" 
-                   class="group relative aspect-video bg-gray-100 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden cursor-pointer"
-                   @click="selectedImage = getOptimizedImage(assignedVehiculo.foto1, 1200, 800, 'fit'), showImageModal = true">
-                <img :src="getOptimizedImage(assignedVehiculo.foto1, 600, 400)" class="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110">
-                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
+                
+                <button v-if="assignedVehiculo.foto1" 
+                        @click="selectedImage = getOptimizedImage(assignedVehiculo.foto1, 1200, 800, 'fit'), showImageModal = true"
+                        class="flex-shrink-0 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg shadow-md shadow-blue-500/20 active:scale-90 transition-all">
+                  Ver Auto
+                </button>
               </div>
             </div>
           </div>
@@ -3261,8 +3262,8 @@ const openServiceModal = async (service) => {
      
     await fetchTecnicoRating(service.technician);
 
-    // Si es Viaje Privado y está asignado, cargar datos del vehículo
-    if (isViajePrivado(service.title) && service.rawStatus === 'asignado') {
+    // Si es Viaje Privado y está asignado o en proceso, cargar datos del vehículo
+    if (isViajePrivado(service.title) && ['asignado', 'en_proceso'].includes(service.rawStatus)) {
       await fetchAssignedVehiculo(service.technician);
     } else {
       assignedVehiculo.value = null;
