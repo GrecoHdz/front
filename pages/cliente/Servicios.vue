@@ -327,6 +327,30 @@
                 </div>
               </div>
             </div> 
+
+            <!-- Foto del Vehículo (Solo Viaje Privado y cuando esté Asignado) -->
+            <div v-if="isViajePrivado(selectedService.title) && assignedVehiculo && selectedService.rawStatus === 'asignado'" class="mt-3 space-y-2">
+              <div class="flex items-center gap-2 bg-sky-50 dark:bg-sky-900/20 p-2 rounded-lg border border-sky-100 dark:border-sky-800/50">
+                <span class="text-lg">🚗</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sky-900 dark:text-sky-200 font-bold text-xs truncate">
+                    {{ assignedVehiculo.modelo || 'Vehículo del conductor' }}
+                  </p>
+                  <p class="text-sky-600 dark:text-sky-400 text-[10px] font-medium">
+                    {{ [assignedVehiculo.color, assignedVehiculo.placa].filter(Boolean).join(' · ') || 'Datos del vehículo' }}
+                  </p>
+                </div>
+              </div>
+              
+              <div v-if="assignedVehiculo.foto1" 
+                   class="group relative aspect-video bg-gray-100 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden cursor-pointer"
+                   @click="selectedImage = getOptimizedImage(assignedVehiculo.foto1, 1200, 800, 'fit'), showImageModal = true">
+                <img :src="getOptimizedImage(assignedVehiculo.foto1, 600, 400)" class="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2382,6 +2406,8 @@ const serviceFilters = computed(() => [
 ])
 
 const currentTab = ref('active')
+const assignedVehiculo = ref(null)
+const loadingVehiculo = ref(false)
 const toast = ref({
     show: false,
     message: '',
@@ -3227,7 +3253,6 @@ const openServiceModal = async (service) => {
   
   // Si hay un Profesional asignado, cargar su calificación
   if (service.technician) {
-    // Usar el nombre del Profesional si está disponible
     if (!service.technicianName && service.tecnico?.nombre) {
       service.technicianName = service.tecnico.nombre;
     } else if (!service.technicianName) {
@@ -3235,11 +3260,38 @@ const openServiceModal = async (service) => {
     }
      
     await fetchTecnicoRating(service.technician);
+
+    // Si es Viaje Privado y está asignado, cargar datos del vehículo
+    if (isViajePrivado(service.title) && service.rawStatus === 'asignado') {
+      await fetchAssignedVehiculo(service.technician);
+    } else {
+      assignedVehiculo.value = null;
+    }
+  } else {
+    assignedVehiculo.value = null;
   }
 }
 
 const closeServiceModal = () => {
   showServiceModal.value = false
+  assignedVehiculo.value = null
+}
+
+const fetchAssignedVehiculo = async (tecnicoId) => {
+  try {
+    loadingVehiculo.value = true
+    const data = await $api(`/vehiculos/conductor/${tecnicoId}`)
+    if (data) {
+      assignedVehiculo.value = data
+    } else {
+      assignedVehiculo.value = null
+    }
+  } catch (error) {
+    console.error('Error al cargar vehículo asignado:', error)
+    assignedVehiculo.value = null
+  } finally {
+    loadingVehiculo.value = false
+  }
 }
 
 const openVisitPaymentModal = async (service) => {

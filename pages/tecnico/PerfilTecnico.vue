@@ -481,7 +481,82 @@
 
 
 
+      <!-- Mi Vehículo (Solo si es Conductor de Viaje Privado) -->
+      <div v-if="isDriver" class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700/50 mb-6 transition-all duration-300 animate-fade-in">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 bg-sky-50 dark:bg-sky-900/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+            🚗
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">Mi Vehículo</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Sube fotos para que los clientes vean tu vehículo</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Datos del vehículo -->
+          <div class="grid grid-cols-3 gap-3">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Placa</label>
+              <input v-model="vehiculo.placa" type="text" placeholder="Ej: HND-1234"
+                     class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-sky-500 text-gray-900 dark:text-white text-sm">
+            </div>
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Modelo</label>
+              <input v-model="vehiculo.modelo" type="text" placeholder="Ej: Toyota Corolla 2020"
+                     class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-sky-500 text-gray-900 dark:text-white text-sm">
+            </div>
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Color</label>
+              <input v-model="vehiculo.color" type="text" placeholder="Ej: Blanco"
+                     class="w-full px-3 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-sky-500 text-gray-900 dark:text-white text-sm">
+            </div>
+          </div>
+
+          <!-- Foto del Vehículo -->
+          <div class="space-y-2">
+             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Foto Exterior del Auto</label>
+             <div @click="fileInputVehiculo1.click()"
+                  class="group relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden cursor-pointer hover:border-sky-400 transition-all">
+                <img v-if="vehiculo.foto1" :src="vehiculo.foto1" class="absolute inset-0 w-full h-full object-cover group-hover:opacity-75 transition-opacity">
+                <div v-else class="text-center p-3">
+                   <div class="text-3xl mb-2">🚘</div>
+                   <p class="text-xs text-gray-400 font-bold">Subir Foto del Exterior</p>
+                </div>
+
+                <!-- Overlay de carga -->
+                <div v-if="isUploadingVehiculo" class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                   <div class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                </div>
+                <div v-if="vehiculo.foto1 && !isUploadingVehiculo" class="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
+                   <button @click.stop="deleteVehiculoImage('foto1')" class="p-2 bg-red-500/20 hover:bg-red-500/40 text-white rounded-full backdrop-blur-md transition-all">
+                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                   </button>
+                </div>
+             </div>
+             <input type="file" ref="fileInputVehiculo1" class="hidden" accept="image/*" @change="onVehiculoFileChange($event, 'foto1')">
+          </div>
+
+          <!-- Info tip -->
+          <div class="flex items-start gap-2 bg-sky-50 dark:bg-sky-900/20 rounded-xl p-3">
+            <span class="text-sky-500 text-lg mt-0.5">💡</span>
+            <p class="text-xs text-sky-700 dark:text-sky-300 leading-relaxed">
+              Guarda primero los datos del vehículo antes de subir su foto exterior. Esto ayudará a que tus clientes te identifiquen fácilmente al llegar.
+            </p>
+          </div>
+
+          <button @click="saveVehiculo" :disabled="isSavingVehiculo || !hasVehiculoChanges"
+                  class="w-full py-4 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-black rounded-2xl transition-all shadow-lg hover:shadow-sky-200/50 disabled:opacity-50">
+            <span v-if="isSavingVehiculo">Guardando...</span>
+            <span v-else>{{ vehiculo.id_vehiculo ? 'Actualizar Vehículo' : 'Registrar Mi Vehículo' }}</span>
+          </button>
+        </div>
+      </div>
+
+
+
       <!-- Push Notifications Settings -->
+
       <div v-if="isSupported" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 mb-4 transition-all duration-300">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -1386,6 +1461,20 @@ const barberia = ref({
 const loadingBarberia = ref(false)
 const isSavingBarberia = ref(false)
 
+// Variables para gestión de vehículo (Viaje Privado)
+const vehiculo = ref({
+  id_vehiculo: null,
+  id_tecnico: null,
+  placa: '',
+  modelo: '',
+  color: '',
+  foto1: '',
+  foto2: ''
+})
+const loadingVehiculo = ref(false)
+const isSavingVehiculo = ref(false)
+const isUploadingVehiculo = ref(false)
+
 // Bloquear scroll cuando un modal está abierto
 const anyModalOpen = computed(() => {
   return isPasswordModalOpen.value || 
@@ -1504,6 +1593,12 @@ const isBarber = computed(() => {
   return technicianServices.value.some(s => s.nombre.toLowerCase().includes('barbería'));
 })
 
+const isDriver = computed(() => {
+  return technicianServices.value.some(s =>
+    s.nombre.toLowerCase().includes('viaje') || s.nombre.toLowerCase().includes('privado')
+  );
+})
+
 const hasBarberiaChanges = computed(() => {
   if (!originalBarberiaData.value) return !!barberia.value.nombre;
   
@@ -1511,6 +1606,16 @@ const hasBarberiaChanges = computed(() => {
     barberia.value.nombre !== originalBarberiaData.value.nombre ||
     barberia.value.colonia !== originalBarberiaData.value.colonia ||
     barberia.value.direccion_precisa !== originalBarberiaData.value.direccion_precisa
+  );
+})
+
+const originalVehiculoData = ref(null)
+const hasVehiculoChanges = computed(() => {
+  if (!originalVehiculoData.value) return !!(vehiculo.value.placa || vehiculo.value.modelo || vehiculo.value.color);
+  return (
+    vehiculo.value.placa !== originalVehiculoData.value.placa ||
+    vehiculo.value.modelo !== originalVehiculoData.value.modelo ||
+    vehiculo.value.color !== originalVehiculoData.value.color
   );
 })
 
@@ -1864,7 +1969,8 @@ const cargarDatosPerfil = async () => {
       fetchUserData(),
       fetchAvailableServices(),
       fetchTechnicianServices(),
-      fetchTechnicianBarberia()
+      fetchTechnicianBarberia(),
+      fetchTechnicianVehiculo()
     ])
     
     return true
@@ -2077,8 +2183,141 @@ const deleteBarberiaImage = async (campo) => {
 const fileInput = ref(null)
 const fileInputBarberia1 = ref(null)
 const fileInputBarberia2 = ref(null)
+const fileInputVehiculo1 = ref(null)
+const fileInputVehiculo2 = ref(null)
+
+// ===== FUNCIONES DE VEHÍCULO (VIAJE PRIVADO) =====
+const fetchTechnicianVehiculo = async () => {
+  try {
+    const userId = auth.user?.id_usuario || userCookie.value?.id_usuario
+    if (!userId) return
+
+    loadingVehiculo.value = true
+    const data = await $api(`/vehiculos/conductor/${userId}`)
+    if (data) {
+      vehiculo.value = data
+      originalVehiculoData.value = { ...data }
+    } else {
+      vehiculo.value = {
+        id_vehiculo: null,
+        id_tecnico: userId,
+        placa: '',
+        modelo: '',
+        color: '',
+        foto1: ''
+      }
+      originalVehiculoData.value = null
+    }
+  } catch (error) {
+    console.error('Error al cargar vehículo del conductor:', error)
+  } finally {
+    loadingVehiculo.value = false
+  }
+}
+
+const saveVehiculo = async () => {
+  try {
+    const userId = auth.user?.id_usuario || userCookie.value?.id_usuario
+    if (!userId) return
+
+    isSavingVehiculo.value = true
+    const payload = { ...vehiculo.value, id_tecnico: userId }
+
+    let response
+    if (vehiculo.value.id_vehiculo) {
+      response = await $api(`/vehiculos/${vehiculo.value.id_vehiculo}`, { method: 'PUT', body: payload })
+    } else {
+      response = await $api('/vehiculos', { method: 'POST', body: payload })
+    }
+
+    if (response.success) {
+      if (!vehiculo.value.id_vehiculo && response.data?.id_vehiculo) {
+        vehiculo.value.id_vehiculo = response.data.id_vehiculo
+      }
+      originalVehiculoData.value = { ...vehiculo.value }
+      showSuccess('¡Éxito!', 'Datos del vehículo guardados correctamente.')
+    } else {
+      showError('Error', response.error || 'No se pudo guardar el vehículo.')
+    }
+  } catch (error) {
+    console.error('Error al guardar vehículo:', error)
+    showError('Error', 'Ocurrió un error inesperado.')
+  } finally {
+    isSavingVehiculo.value = false
+  }
+}
+
+const onVehiculoFileChange = (event, campo) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!validTypes.includes(file.type)) {
+    showError('Error', 'Formato no válido. Use JPG, PNG o WebP.')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showError('Error', 'La imagen supera los 5MB.')
+    return
+  }
+
+  uploadVehiculoImage(file, campo)
+}
+
+const uploadVehiculoImage = async (file, campo) => {
+  if (!vehiculo.value.id_vehiculo) {
+    showError('Aviso', 'Primero guarda los datos del vehículo antes de subir fotos.')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('imagen', file)
+
+  try {
+    isUploadingVehiculo.value = true
+    const response = await $api(`/vehiculos/foto/${vehiculo.value.id_vehiculo}/${campo}`, {
+      method: 'POST',
+      body: formData
+    })
+
+    if (response.success) {
+      vehiculo.value[campo] = response.data.url
+      showSuccess('¡Éxito!', 'Foto del vehículo actualizada.')
+    } else {
+      showError('Error', response.error || 'No se pudo subir la imagen.')
+    }
+  } catch (error) {
+    console.error('Error al subir imagen del vehículo:', error)
+    showError('Error', 'Error al procesar la subida.')
+  } finally {
+    isUploadingVehiculo.value = false
+    if (campo === 'foto1' && fileInputVehiculo1.value) fileInputVehiculo1.value.value = ''
+  }
+}
+
+const deleteVehiculoImage = async (campo) => {
+  if (!vehiculo.value.id_vehiculo || !vehiculo.value[campo]) return
+
+  try {
+    isUploadingVehiculo.value = true
+    const response = await $api(`/vehiculos/foto/${vehiculo.value.id_vehiculo}/${campo}`, {
+      method: 'DELETE'
+    })
+
+    if (response.success) {
+      vehiculo.value[campo] = null
+      showSuccess('¡Éxito!', 'Foto eliminada correctamente.')
+    }
+  } catch (error) {
+    console.error('Error al eliminar foto del vehículo:', error)
+    showError('Error', 'No se pudo eliminar la foto.')
+  } finally {
+    isUploadingVehiculo.value = false
+  }
+}
 
 // ===== FUNCIONES DE ACCIONES =====
+
 const saveProfile = async () => {
   try {
     // Validaciones básicas

@@ -39,7 +39,7 @@ export default defineNuxtConfig({
       id: '/',
       name: 'MiSeguro',
       short_name: 'MiSeguro',
-      description: 'Servicios técnicos profesionales a domicilio.',
+      description: 'Servicios en la palma de tu mano.',
       theme_color: '#2563eb',
       background_color: '#ffffff',
       display: 'standalone',
@@ -97,19 +97,19 @@ export default defineNuxtConfig({
   // Configuración de impresión
   app: {
     head: {
-      title: 'MiSeguro - Servicios Profesionales en la palma de tu mano',
+      title: 'MiSeguro - Servicios en la palma de tu mano',
       meta: [
         { name: 'google-site-verification', content: 'GEPuBsyW3v_JTl_akiNBfF4DILNI3EVLggqEsYawrNM' },
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Servicios Profesionales en la palma de tu mano.' },
+        { name: 'description', content: 'Servicios en la palma de tu mano.' },
         { name: 'theme-color', content: '#2563eb' },
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
         // Open Graph
-        { property: 'og:title', content: 'MiSeguro - Servicios Profesionales en la palma de tu mano.' },
-        { property: 'og:description', content: 'Servicios Profesionales en la palma de tu mano.' },
+        { property: 'og:title', content: 'MiSeguro - Servicios en la palma de tu mano.' },
+        { property: 'og:description', content: 'Servicios en la palma de tu mano.' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://miseguro.vercel.app/' },
         { property: 'og:image', content: 'https://miseguro.vercel.app/favicon.ico' },
@@ -155,7 +155,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       appName: 'MiSeguro',
-      appVersion: '1.3.4',
+      appVersion: '1.3.5',
       apiBase: process.env.NUXT_PUBLIC_API_URL
     }
   }

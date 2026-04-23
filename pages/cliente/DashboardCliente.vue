@@ -242,12 +242,15 @@
                   </div>
                 </div>
               
+
+
               <div v-if="shouldShowFormFields" class="animate-fade-in">
                 <textarea v-model="serviceFormData.description" 
                          :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.viaje_privado_placeholder') : (selectedServiceObject?.name_es === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
               </div>
+
               
               <div v-if="shouldShowFormFields" class="grid grid-cols-2 gap-2 animate-fade-in">
                 <div>
@@ -1364,6 +1367,8 @@ const serviceFormData = ref({
 
 const barberiasList = ref([])
 
+// Estado para el vehículo del conductor (Viaje Privado)
+const conductorVehiculo = ref(null)
 
 const selectedServiceObject = ref(null)
 
