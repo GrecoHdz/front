@@ -137,7 +137,7 @@ export const useAuthStore = defineStore('auth', () => {
       const pwaToken = getPWARefreshToken();
       
       // Intentar logout en el servidor (no bloqueante para el resto del proceso)
-      await $fetch('/auth/logout', {
+      $fetch('/auth/logout', {
         method: 'POST',
         baseURL: config.public.apiBase,
         credentials: 'include',

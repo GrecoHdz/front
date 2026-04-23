@@ -1773,10 +1773,16 @@ const handleLogout = async () => {
     console.error('Error al cerrar sesión:', error);
     toast.value = {
       show: true,
-      message: t('profile.messages.logout_error'),
+      message: t('profile.messages.logout_error') + '. Forzando salida...',
       type: 'error',
       duration: 3000
     };
+    if (process.client) {
+       setTimeout(() => {
+         window.location.href = '/';
+       }, 1500);
+    }
+  } finally {
     isLoggingOut.value = false;
   }
 }

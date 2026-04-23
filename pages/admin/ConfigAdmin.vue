@@ -5913,7 +5913,13 @@ const handleLogout = async () => {
     await auth.logout();
   } catch (error) {
     console.error('Error al cerrar sesión:', error);
-    showToastMessage('Error al cerrar sesión', 'error');
+    showToastMessage('Error al cerrar sesión. Forzando salida...', 'error');
+    if (process.client) {
+       setTimeout(() => {
+         window.location.href = '/';
+       }, 1500);
+    }
+  } finally {
     isLoggingOut.value = false;
   }
 }

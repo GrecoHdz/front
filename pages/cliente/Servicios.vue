@@ -280,7 +280,7 @@
         </div>
 
         <!-- 2. Profesional/Conductor Asignado -->
-        <div v-if="selectedService.technician && selectedService.rawStatus === 'asignado'" class="mb-4">
+        <div v-if="selectedService.technician && ['asignado', 'en_proceso'].includes(selectedService.rawStatus)" class="mb-4">
           <h4 class="text-sm font-black text-gray-900 dark:text-white mb-2">
             {{ selectedService.title === 'Viaje Privado' ? 'Conductor Asignado' : 'Profesional Asignado' }}
           </h4>
@@ -1471,9 +1471,6 @@
                   <p class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-1">{{ $t('services_page.payment.total_pay') }}</p>
                   <div class="text-3xl font-black tabular-nums transition-colors text-white">
                     L. {{ formatCurrency(quotationData?.monto_manodeobra || '0.00') }}
-                  </div>
-                  <div class="mt-2 text-[9px] font-bold text-gray-400 uppercase tracking-tight">
-                    * {{ $t('services_page.modals.cash_benefit_desc') }}
                   </div>
                 </div>
               </div>

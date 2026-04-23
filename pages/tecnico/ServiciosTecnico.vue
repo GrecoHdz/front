@@ -615,7 +615,7 @@
                   <textarea v-model="quotationForm.comentario" 
                             rows="2" 
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl text-sm font-medium text-gray-900 dark:text-white transition-all outline-none resize-none" 
-                            placeholder="Ej: Ford Escape Gris, llego en 5 min..."></textarea>
+                            placeholder="Ej: Llego en 15 min..."></textarea>
                 </div>
 
                 <!-- Earning Preview -->
@@ -839,7 +839,7 @@
                     rows="4" 
                     required
                     class="w-full px-2.5 sm:px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                    :placeholder="isTaxiService(selectedService.title) ? 'Ej: Ford Escape Gris, llego en 5 min...' : (isBarberíaService(selectedService.title) ? 'Escriba los detalles del servicio realizado' : 'Escriba su Diagnóstico')">
+                    :placeholder="isTaxiService(selectedService.title) ? 'Ej: Llego en 15 min...' : (isBarberíaService(selectedService.title) ? 'Escriba los detalles del servicio realizado' : 'Escriba su Diagnóstico')">
                   </textarea>
                 </div>
 
