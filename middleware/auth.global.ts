@@ -27,6 +27,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     '/forgot-password'
   ];
 
+  console.log(`🔍 [Middleware] Ruta: ${currentPath} | Token: ${!!auth.token} | Fresh: ${auth.isFetched}`);
+
   // Verificar si la ruta actual es una ruta de restablecimiento de contraseña
   const isResetPasswordPath = currentPath.startsWith('/reset-password/');
 
@@ -46,12 +48,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // 💡 Mejora: Si el usuario ya tiene un token y está en la raíz (/), 
     // intentamos redirigirlo a su dashboard proactivamente.
     if (currentPath === '/' && auth.token) {
+      console.log('🏠 [Middleware] Usuario en home con token. Verificando rol...');
       // 🔄 IMPORTANTE: Si es la primera carga y tenemos token, 
       // SIEMPRE refrescamos el usuario para asegurar el rol real antes de redirigir.
       if (!auth.isFetched) {
         try {
+          console.log('📡 [Middleware] Refrescando datos del usuario...');
           await auth.fetchUser();
         } catch (e) {
+          console.error('❌ [Middleware] Error al refrescar usuario:', e);
           return;
         }
       }
@@ -59,6 +64,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
       if (auth.user) {
         const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
         const targetDashboard = getDashboardPath(userRole);
+        console.log(`🚀 [Middleware] Redirigiendo a dashboard: ${targetDashboard} (Rol: ${userRole})`);
         if (targetDashboard !== '/') {
           return navigateTo(targetDashboard, { replace: true });
         }

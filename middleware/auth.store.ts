@@ -235,8 +235,10 @@ export const useAuthStore = defineStore('auth', () => {
       };
 
       isFetched.value = true; // Marcar como datos validados por el servidor
+      console.log('✅ [AuthStore] Datos de usuario actualizados correctamente.');
       return setUser(normalizedUser);
     } catch (err) {
+      console.error('❌ [AuthStore] Error en fetchUser:', err);
       clearAuthState();
       return null;
     }

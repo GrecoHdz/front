@@ -63,7 +63,7 @@ html, body, #__nuxt {
 </style>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { Analytics } from '@vercel/analytics/nuxt';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue';
@@ -71,11 +71,24 @@ import PushNotificationInvite from '~/components/ui/PushNotificationInvite.vue';
 import LanguageSelectorModal from '~/components/ui/LanguageSelectorModal.vue';
 import { useIABDetector } from '~/composables/useIABDetector';
 import { useAppPWA } from '~/composables/useAppPWA';
+import { useAuthStore } from '~/middleware/auth.store';
 
-const isLoading = ref(true);
+const auth = useAuthStore();
+const initialLoading = ref(true);
 const showNotifications = ref(false);
 const { isIAB, isIOS, getExternalBrowserLink } = useIABDetector();
 const { isInstalled, initPWA } = useAppPWA();
+
+// 🔄 Spinner inteligente: espera montaje inicial y validación de sesión si hay token
+const isLoading = computed(() => {
+  const result = (auth.token && !auth.isFetched) || initialLoading.value;
+  return result;
+});
+
+// Debug del spinner (solo en desarrollo)
+watch(isLoading, (val) => {
+  console.log(`⏳ [App] Estado de carga: ${val} (Initial: ${initialLoading.value}, Token: ${!!auth.token}, Fresh: ${auth.isFetched})`);
+}, { immediate: true });
 
 const { $pwa } = useNuxtApp();
 
@@ -119,14 +132,14 @@ onMounted(() => {
     };
 
     // Ocultar el spinner de forma proactiva
-    const hideSpinner = () => {
+    const hideInitialSpinner = () => {
       setTimeout(() => {
-        isLoading.value = false;
-      }, 300);
+        initialLoading.value = false;
+      }, 500);
     };
 
     applyDarkMode();
-    hideSpinner();
+    hideInitialSpinner();
     
     // Inicializar lógica de PWA
     initPWA();
