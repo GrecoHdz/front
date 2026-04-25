@@ -9,10 +9,14 @@ const PWA_RT_KEY = 'pwa_refresh_token';
 
 const isPWAMode = (): boolean => {
   if (!process.client) return false;
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
-  );
+  
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                     (window.navigator as any).standalone === true;
+                     
+  // En algunos navegadores móviles, al abrir desde notificación no se detecta standalone de inmediato
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  return isStandalone || isMobile;
 };
 
 const savePWARefreshToken = (token: string | null) => {
@@ -289,9 +293,13 @@ export const useAuthStore = defineStore('auth', () => {
 
         // 📱 PWA Fallback: enviar refresh token por header si la cookie no está disponible
         const pwaToken = getPWARefreshToken();
-        if (isPWAMode() && pwaToken) {
+        if (pwaToken) {
           headers['X-Refresh-Token'] = pwaToken;
-          console.log('📱 [AuthStore] Modo PWA: enviando refresh token por header');
+          if (isPWAMode()) {
+            console.log('📱 [AuthStore] Modo PWA detectado: enviando refresh token');
+          } else {
+            console.log('📱 [AuthStore] Enviando refresh token de localStorage como fallback');
+          }
         }
 
         const response = await $fetch('/auth/refresh-token', {
@@ -317,6 +325,10 @@ export const useAuthStore = defineStore('auth', () => {
               estado: response.user.estado || 'activo'
             };
             setUser(normalizedUser);
+            // No llamar a fetchUser() aquí si la respuesta ya trae al usuario,
+            // para evitar race conditions y peticiones innecesarias
+          } else {
+            // Solo si la respuesta no trae al usuario, intentamos cargarlo
             await fetchUser();
           }
 

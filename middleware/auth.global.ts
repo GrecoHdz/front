@@ -30,12 +30,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Verificar si la ruta actual es una ruta de restablecimiento de contraseña
   const isResetPasswordPath = currentPath.startsWith('/reset-password/');
 
-  // 1. Si es una ruta pública o de restablecimiento de contraseña, permitir acceso
-  if (publicPaths.includes(currentPath) || isResetPasswordPath) {
-    return;
-  }
-
-  // 2. Obtener el dashboard correspondiente al rol
+  // Obtener el dashboard correspondiente al rol
   const getDashboardPath = (role: string | undefined): string => {
     switch (role?.toLowerCase()) {
       case 'admin': return '/admin/DashboardAdmin';
@@ -45,6 +40,29 @@ export default defineNuxtRouteMiddleware(async (to) => {
       default: return '/';
     }
   };
+
+  // 1. Si es una ruta pública o de restablecimiento de contraseña, permitir acceso
+  if (publicPaths.includes(currentPath) || isResetPasswordPath) {
+    // 💡 Mejora: Si el usuario ya tiene un token y está en la raíz (/), 
+    // intentamos redirigirlo a su dashboard proactivamente.
+    if (currentPath === '/' && auth.token) {
+      if (!auth.user) {
+        try {
+          await auth.fetchUser();
+        } catch (e) {
+          // Si falla, permitimos que se quede en la raíz (landing)
+          return;
+        }
+      }
+      
+      if (auth.user) {
+        const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
+        return navigateTo(getDashboardPath(userRole), { replace: true });
+      }
+    }
+    return;
+  }
+
 
   // 3. Verificar si hay token
   if (!auth.token) {
