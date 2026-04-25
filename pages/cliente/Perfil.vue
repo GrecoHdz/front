@@ -1660,22 +1660,18 @@ const fetchUserData = async () => {
         status: 'inactiva',
         endDate: new Date().toISOString()
       },
-  role: data.role || 'usuario',
-  identidad_url: data.identidad_url || null,
-  imagen_url: data.imagen_url || null
-}
-    
-    
+      // ✅ Corregir: Usar la misma lógica de normalización que el resto de la app
+      role: data.rol?.nombre_rol?.toLowerCase() || data.role || 'usuario',
+      identidad_url: data.identidad_url || null,
+      imagen_url: data.imagen_url || null
+    }
     
     // Actualizar el estado local del usuario
     user.value = {
       ...user.value,
       ...safeUserData,
-      fecha_registro: safeUserData.fecha_registro || new Date().toISOString(),
-      rol_nombre: safeUserData.rol_nombre || 'Usuario'
+      fecha_registro: safeUserData.fecha_registro || new Date().toISOString()
     }
-    
-    
     
     // Actualizar el store de autenticación
     if (auth) {

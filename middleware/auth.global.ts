@@ -46,18 +46,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // 💡 Mejora: Si el usuario ya tiene un token y está en la raíz (/), 
     // intentamos redirigirlo a su dashboard proactivamente.
     if (currentPath === '/' && auth.token) {
-      if (!auth.user) {
+      // 🔄 IMPORTANTE: Si es la primera carga y tenemos token, 
+      // SIEMPRE refrescamos el usuario para asegurar el rol real antes de redirigir.
+      if (!auth.isFetched) {
         try {
           await auth.fetchUser();
         } catch (e) {
-          // Si falla, permitimos que se quede en la raíz (landing)
           return;
         }
       }
       
       if (auth.user) {
         const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
-        return navigateTo(getDashboardPath(userRole), { replace: true });
+        const targetDashboard = getDashboardPath(userRole);
+        if (targetDashboard !== '/') {
+          return navigateTo(targetDashboard, { replace: true });
+        }
       }
     }
     return;
@@ -81,13 +85,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  // 4. Si no hay usuario, intentar cargarlo
-  if (!auth.user) {
+  // 4. Si no hay usuario o los datos son de cookie (no fetched), intentar cargarlos
+  if (auth.token && (!auth.user || !auth.isFetched)) {
     try {
       await auth.fetchUser();
     } catch (error) {
-      console.error('❌ [auth.global] Error al cargar usuario:', error);
-      return navigateTo('/', { replace: true });
+      console.error('❌ [auth.global] Error al validar usuario:', error);
+      if (!publicPaths.includes(currentPath)) {
+        return navigateTo('/', { replace: true });
+      }
     }
   }
 

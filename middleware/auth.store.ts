@@ -64,9 +64,11 @@ export const useAuthStore = defineStore('auth', () => {
   const token = tokenCookie;
   const isAuthenticated = computed(() => !!token.value);
   const isInitialized = ref(false);
+  const isFetched = ref(false); // Indica si los datos vienen del servidor en esta sesión
 
   const clearAuthState = () => {
     user.value = null;
+    isFetched.value = false; // Resetear al limpiar estado
     tokenCookie.value = null;
     userCookie.value = null;
     
@@ -232,6 +234,7 @@ export const useAuthStore = defineStore('auth', () => {
         estado: response.estado
       };
 
+      isFetched.value = true; // Marcar como datos validados por el servidor
       return setUser(normalizedUser);
     } catch (err) {
       clearAuthState();
@@ -325,6 +328,7 @@ export const useAuthStore = defineStore('auth', () => {
               estado: response.user.estado || 'activo'
             };
             setUser(normalizedUser);
+            isFetched.value = true; // El refresh token también trae datos frescos
             // No llamar a fetchUser() aquí si la respuesta ya trae al usuario,
             // para evitar race conditions y peticiones innecesarias
           } else {
@@ -371,6 +375,7 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     clearAuthState,
     fetchUser,
+    isFetched: computed(() => isFetched.value),
     userName,
     userId
   };
