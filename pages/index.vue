@@ -568,9 +568,6 @@
       </div>
     </div>
 
-    <!-- Language Selector Modal (primer uso) -->
-    <LanguageSelectorModal />
-
   </div>
 </template>
 <style>

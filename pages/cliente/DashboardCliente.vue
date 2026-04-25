@@ -25,7 +25,8 @@
         <main class="pb-4">
       
       <!-- Invitación a notificaciones push -->
-      <UiPushNotificationInvite />
+      <PWAInstallInvite v-if="!isLoading" @installed="showNotifications = true" />
+      <PushNotificationInvite v-if="showNotifications && isInstalled" />
       
       <!-- Welcome Section -->
       <section class="px-4 py-4">
@@ -1283,6 +1284,9 @@ import Toast from '~/components/ui/Toast.vue'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Multiselect from 'vue-multiselect'
 import { useAutoTranslate } from '~/composables/useAutoTranslate.js'
+import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue'
+import PushNotificationInvite from '~/components/ui/PushNotificationInvite.vue'
+import { useAppPWA } from '~/composables/useAppPWA'
 
 // =========================
 // CONFIGURACIÓN Y SETUP
@@ -1410,6 +1414,10 @@ const toast = ref({
 
 // Variable reactiva para almacenar el número de teléfono de la empresa
 const empresaPhoneNumber = ref('');
+
+// Estados para PWA y Notificaciones
+const { isInstalled } = useAppPWA();
+const showNotifications = ref(false);
 
 // =========================
 // COMPUTED PROPERTIES
@@ -2399,6 +2407,11 @@ onMounted(async () => {
   await cargarPaquetesActivos();
   await cargarPaquetesUsuario();
   startAutoScroll();
+  
+  // Lógica de invitaciones
+  if (isInstalled.value) {
+    showNotifications.value = true;
+  }
 });
 
 const canjearPaquete = async (paquete) => {

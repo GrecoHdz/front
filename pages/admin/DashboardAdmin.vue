@@ -26,7 +26,8 @@
           <main class="pb-4">
 
             <!-- Invitación a notificaciones push -->
-            <UiPushNotificationInvite />
+            <PWAInstallInvite v-if="!isLoading" @installed="showNotifications = true" />
+            <PushNotificationInvite v-if="showNotifications && isInstalled" />
             
             <!-- Hero Section -->
             <section class="px-2 sm:px-4 py-3 sm:py-6">
@@ -452,6 +453,9 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
 import Toast from '~/components/ui/Toast.vue'
+import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue'
+import PushNotificationInvite from '~/components/ui/PushNotificationInvite.vue'
+import { useAppPWA } from '~/composables/useAppPWA'
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
@@ -501,6 +505,10 @@ const isLoading = ref(true)
 const startDate = ref('')
 const endDate = ref('')
 const recentActivities = ref([])
+
+// Estados para PWA y Notificaciones
+const { isInstalled } = useAppPWA();
+const showNotifications = ref(false);
  
 // ===== FUNCIONES PARA ALERTAS DE CORRELATIVOS =====
 const verificarCorrelativos = async () => {
@@ -550,6 +558,11 @@ onMounted(async () => {
 
     // Usar initializeDashboard que respeta la caché
     await initializeDashboard()
+    
+    // Lógica de invitaciones
+    if (isInstalled.value) {
+      showNotifications.value = true;
+    }
     
   } catch (error) {
     window.location.reload()

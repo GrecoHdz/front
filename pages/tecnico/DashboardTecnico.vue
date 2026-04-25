@@ -23,7 +23,8 @@
         <main class="pb-4">
 
           <!-- Invitación a notificaciones push -->
-          <UiPushNotificationInvite /> 
+          <PWAInstallInvite v-if="!isLoading" @installed="showNotifications = true" />
+          <PushNotificationInvite v-if="showNotifications && isInstalled" /> 
           
           <!-- Welcome Section -->
           <section class="px-4 sm:px-6 py-4 sm:py-6">
@@ -397,6 +398,9 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
 import Toast from '~/components/ui/Toast.vue'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
+import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue'
+import PushNotificationInvite from '~/components/ui/PushNotificationInvite.vue'
+import { useAppPWA } from '~/composables/useAppPWA'
 
 // SEO and Meta
 useHead({
@@ -421,6 +425,10 @@ const loadingAvailability = ref(false)
 const isLoading = ref(false) // Para el spinner de carga general
 const services = ref([])
 const isAvailable = ref(false)
+
+// Estados para PWA y Notificaciones
+const { isInstalled } = useAppPWA();
+const showNotifications = ref(false);
 
 // Estadísticas y reseñas
 const stats = ref({
@@ -962,6 +970,11 @@ const initializeDashboard = async () => {
 
 onMounted(() => {
   initializeDashboard()
+  
+  // Lógica de invitaciones
+  if (isInstalled.value) {
+    showNotifications.value = true;
+  }
 })
 
 onUnmounted(() => {

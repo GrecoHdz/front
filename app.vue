@@ -27,8 +27,6 @@
         <NuxtPage/>
         <LanguageSelectorModal />
       </NuxtLayout>
-      <PWAInstallInvite v-if="!isLoading" @installed="showNotifications = true" />
-      <PushNotificationInvite v-if="showNotifications" />
       <Analytics />
     </div>
   </div>
@@ -66,8 +64,6 @@ html, body, #__nuxt {
 import { ref, onMounted, watch, computed } from 'vue';
 import { Analytics } from '@vercel/analytics/nuxt';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
-import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue';
-import PushNotificationInvite from '~/components/ui/PushNotificationInvite.vue';
 import LanguageSelectorModal from '~/components/ui/LanguageSelectorModal.vue';
 import { useIABDetector } from '~/composables/useIABDetector';
 import { useAppPWA } from '~/composables/useAppPWA';
@@ -75,7 +71,6 @@ import { useAuthStore } from '~/middleware/auth.store';
 
 const auth = useAuthStore();
 const initialLoading = ref(true);
-const showNotifications = ref(false);
 const { isIAB, isIOS, getExternalBrowserLink } = useIABDetector();
 const { isInstalled, initPWA } = useAppPWA();
 
@@ -143,11 +138,6 @@ onMounted(() => {
     
     // Inicializar lógica de PWA
     initPWA();
-
-    // Si ya está instalada, podemos mostrar notificaciones de una vez
-    if (isInstalled.value) {
-      showNotifications.value = true;
-    }
   }
 });
 </script>
