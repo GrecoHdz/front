@@ -86,6 +86,7 @@ watch(isLoading, (val) => {
 }, { immediate: true });
 
 const { $pwa } = useNuxtApp();
+const route = useRoute();
 
 // Lógica de actualización de PWA
 watch(() => $pwa?.needRefresh, (refresh) => {
@@ -94,6 +95,13 @@ watch(() => $pwa?.needRefresh, (refresh) => {
     $pwa.updateServiceWorker();
   }
 }, { immediate: true });
+
+// 🚀 Forzar búsqueda de actualización al cambiar de página (mejor UX en SPAs)
+watch(() => route.path, () => {
+  if (process.client && $pwa?.updateServiceWorker) {
+    $pwa.updateServiceWorker();
+  }
+});
 
 // Configuración del tema oscuro
 useHead({
