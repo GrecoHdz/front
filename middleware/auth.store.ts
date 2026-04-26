@@ -136,7 +136,10 @@ export const useAuthStore = defineStore('auth', () => {
         if (response.refreshToken) {
           savePWARefreshToken(response.refreshToken);
         }
-        if (response.user) setUser(response.user);
+        if (response.user) {
+          setUser(response.user);
+          isFetched.value = true;
+        }
         return { success: true, user: response.user };
       }
 
@@ -230,7 +233,7 @@ export const useAuthStore = defineStore('auth', () => {
       // 🔹 Normalizar el rol y estado
       const normalizedUser: User = {
         ...response,
-        role: response.rol?.nombre_rol?.toLowerCase() || 'usuario',
+        role: response.rol?.nombre_rol?.toLowerCase() || (response as any).role || 'usuario',
         estado: response.estado
       };
 
@@ -326,7 +329,7 @@ export const useAuthStore = defineStore('auth', () => {
           if (response.user) {
             const normalizedUser = {
               ...response.user,
-              role: response.user.rol?.nombre_rol?.toLowerCase() || 'usuario',
+              role: response.user.rol?.nombre_rol?.toLowerCase() || response.user.role || 'usuario',
               estado: response.user.estado || 'activo'
             };
             setUser(normalizedUser);
