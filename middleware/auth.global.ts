@@ -69,7 +69,39 @@ export default defineNuxtRouteMiddleware(async (to) => {
           return navigateTo(targetDashboard, { replace: true });
         }
       }
+    } else if (currentPath === '/' && !auth.token) {
+      // 🔄 NUEVO: Manejar el caso de PWA push notifications o volver al home tras expiración en RAM
+      // Si llegamos a `/` sin token en memoria, pero con rastros de sesión, intentar revivirla
+      const userCookieVal = useCookie('user').value;
+      let hasPWAToken = false;
+      
+      if (process.client) {
+         hasPWAToken = !!localStorage.getItem('pwa_refresh_token');
+         // Si acabamos de hacer logout explícito, limpiamos la bandera y no intentamos revivir
+         if (localStorage.getItem('just_logged_out') === 'true') {
+           localStorage.removeItem('just_logged_out');
+           return;
+         }
+      }
+      
+      if (userCookieVal || hasPWAToken) {
+        try {
+          console.log('🔄 [Middleware] Intentando restaurar sesión proactivamente en home...');
+          const refreshed = await auth.refreshToken();
+          if (refreshed && auth.user) {
+            const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
+            const targetDashboard = getDashboardPath(userRole);
+            console.log(`🚀 [Middleware] Sesión restaurada, redirigiendo a: ${targetDashboard}`);
+            if (targetDashboard !== '/') {
+              return navigateTo(targetDashboard, { replace: true });
+            }
+          }
+        } catch (e) {
+          console.error('❌ [Middleware] Falló restauración proactiva:', e);
+        }
+      }
     }
+    
     return;
   }
 

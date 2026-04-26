@@ -26,14 +26,25 @@ self.addEventListener('notificationclick', (event) => {
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            // Check if there is already a window/tab open with the target URL
+            // Find any open window for our PWA
+            let client = null;
             for (let i = 0; i < windowClients.length; i++) {
-                const client = windowClients[i];
-                if (client.url === urlToOpen && 'focus' in client) {
-                    return client.focus();
+                if (windowClients[i].url.startsWith(self.registration.scope)) {
+                    client = windowClients[i];
+                    break;
                 }
             }
-            // If not, open a new window
+
+            if (client && 'focus' in client) {
+                client.focus();
+                // Navigate if the target URL is different from current
+                if ('navigate' in client && client.url !== (new URL(urlToOpen, self.location.origin).href)) {
+                    client.navigate(urlToOpen);
+                }
+                return;
+            }
+
+            // If not open, open a new window
             if (clients.openWindow) {
                 return clients.openWindow(urlToOpen);
             }
