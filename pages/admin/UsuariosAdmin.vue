@@ -143,7 +143,7 @@
                       <multiselect
                         v-model="selectedService"
                         :options="availableServices"
-                        :searchable="true"
+                        :searchable="false"
                         :close-on-select="true"
                         :show-labels="false"
                         placeholder="Servicio"

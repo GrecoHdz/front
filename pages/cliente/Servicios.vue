@@ -612,7 +612,7 @@
                     :loading="isLoadingAccounts"
                   >
                     <template #singleLabel="{ option }">
-                      <span class="text-xs truncate">{{ getAccountLabel(option) }}</span>
+                      <span class="text-xs truncate font-medium">{{ getAccountLabel(option) }}</span>
                     </template>
                   </multiselect>
 
@@ -796,7 +796,7 @@
                   :custom-label="getAccountLabel"
                 >
                   <template #singleLabel="{ option }">
-                    <span class="text-xs truncate font-bold">{{ getAccountLabel(option) }}</span>
+                    <span class="text-xs truncate font-medium">{{ getAccountLabel(option) }}</span>
                   </template>
                 </multiselect>
 
@@ -925,7 +925,7 @@
                   :placeholder="$t('services_page.payment.select_account')"
                   label="banco"
                   track-by="id_cuenta"
-                  class="multiselect-custom taxi-select"
+                  class="multiselect-custom"
                   :class="{ 'multiselect--active': selectedAccountObject }"
                   :select-label="''"
                   :deselect-label="''"
@@ -933,7 +933,7 @@
                   :custom-label="getAccountLabel"
                 >
                   <template #singleLabel="{ option }">
-                    <span class="text-xs truncate font-bold text-blue-900 dark:text-blue-100">{{ getAccountLabel(option) }}</span>
+                    <span class="text-xs truncate font-medium">{{ getAccountLabel(option) }}</span>
                   </template>
                 </multiselect>
 
@@ -1062,7 +1062,7 @@
                   :placeholder="$t('services_page.payment.select_account')"
                   label="banco"
                   track-by="id_cuenta"
-                  class="multiselect-custom taxi-select"
+                  class="multiselect-custom"
                   :class="{ 'multiselect--active': selectedAccountObject }"
                   :select-label="''"
                   :deselect-label="''"
@@ -1070,7 +1070,7 @@
                   :custom-label="getAccountLabel"
                 >
                   <template #singleLabel="{ option }">
-                    <span class="text-xs truncate font-bold text-blue-900 dark:text-blue-100">{{ getAccountLabel(option) }}</span>
+                    <span class="text-xs truncate font-medium">{{ getAccountLabel(option) }}</span>
                   </template>
                 </multiselect>
 
@@ -2165,14 +2165,14 @@ body {
   padding: 10px 40px 10px 12px !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 0.75rem !important;
-  background-color: rgb(249 250 251) !important;
+  background-color: transparent !important;
   font-size: 16px !important;
   transition: all 0.2s ease !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
 }
 
 .dark .multiselect-custom :deep(.multiselect__tags) {
-  background-color: rgb(55 65 81) !important;
+  background-color: transparent !important;
   border-color: rgb(75 85 99) !important;
   color: white !important;
 }
@@ -2186,8 +2186,8 @@ body {
 }
 
 .multiselect-custom.multiselect--active :deep(.multiselect__tags) {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  border-color: #e5e7eb !important;
+  box-shadow: none !important;
 }
 
 .multiselect-custom :deep(.multiselect__placeholder) {

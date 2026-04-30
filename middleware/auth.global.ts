@@ -1,5 +1,16 @@
-// auth.global.ts 
+// auth.global.ts
 import { useAuthStore } from './auth.store';
+
+// Comprueba si un JWT (formato header.payload.signature) ya expiró
+const isJwtExpired = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    // Margen de 30 s para compensar diferencias de reloj entre cliente y servidor
+    return payload.exp * 1000 - Date.now() < 30_000;
+  } catch {
+    return true; // Si no se puede decodificar, tratar como expirado
+  }
+};
 
 type UserRole = 'admin' | 'tecnico' | 'usuario' | 'sa';
 
@@ -45,65 +56,88 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // 1. Si es una ruta pública o de restablecimiento de contraseña, permitir acceso
   if (publicPaths.includes(currentPath) || isResetPasswordPath) {
-    // 💡 Mejora: Si el usuario ya tiene un token y está en la raíz (/), 
-    // intentamos redirigirlo a su dashboard proactivamente.
-    if (currentPath === '/' && auth.token) {
-      console.log('🏠 [Middleware] Usuario en home con token. Verificando rol...');
-      // 🔄 IMPORTANTE: Si es la primera carga y tenemos token, 
-      // SIEMPRE refrescamos el usuario para asegurar el rol real antes de redirigir.
-      if (!auth.isFetched) {
-        try {
-          console.log('📡 [Middleware] Refrescando datos del usuario...');
-          await auth.fetchUser();
-        } catch (e) {
-          console.error('❌ [Middleware] Error al refrescar usuario:', e);
-          return;
-        }
-      }
-      
-      if (auth.user) {
-        const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
-        const targetDashboard = getDashboardPath(userRole);
-        console.log(`🚀 [Middleware] Redirigiendo a dashboard: ${targetDashboard} (Rol: ${userRole})`);
-        if (targetDashboard !== '/') {
-          return navigateTo(targetDashboard, { replace: true });
-        }
-      }
-    } else if (currentPath === '/' && !auth.token) {
-      // 🔄 NUEVO: Manejar el caso de PWA push notifications o volver al home tras expiración en RAM
-      // Si llegamos a `/` sin token en memoria, pero con rastros de sesión, intentar revivirla
-      const userCookieVal = useCookie('user').value;
-      let hasPWAToken = false;
-      
-      if (process.client) {
-         hasPWAToken = !!localStorage.getItem('pwa_refresh_token');
-         // Si acabamos de hacer logout explícito, limpiamos la bandera y no intentamos revivir
-         if (localStorage.getItem('just_logged_out') === 'true') {
-           localStorage.removeItem('just_logged_out');
-           return;
-         }
-      }
-      
-      if (userCookieVal || hasPWAToken) {
-        try {
-          console.log('🔄 [Middleware] Intentando restaurar sesión proactivamente en home...');
+    // Helper local: leer el destino del query param enviado por el service worker
+    const getRedirectTarget = (): string | null => {
+      if (!process.client) return null;
+      const redirectParam = to.query.redirect as string | undefined;
+      if (redirectParam && redirectParam.startsWith('/')) return redirectParam;
+      return null;
+    };
+
+    if (currentPath === '/') {
+      // ── Caso A: Hay token en memoria ─────────────────────────────────────────
+      if (auth.token) {
+        console.log('🏠 [Middleware] Usuario en home con token. Verificando rol...');
+
+        // Si el token está expirado, refrescar primero (evita 401 en fetchUser)
+        if (isJwtExpired(auth.token as string)) {
+          console.log('⏰ [Middleware/Home] Token expirado. Intentando refresh...');
           const refreshed = await auth.refreshToken();
-          if (refreshed && auth.user) {
-            const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
-            const targetDashboard = getDashboardPath(userRole);
-            console.log(`🚀 [Middleware] Sesión restaurada, redirigiendo a: ${targetDashboard}`);
-            if (targetDashboard !== '/') {
-              return navigateTo(targetDashboard, { replace: true });
-            }
+          if (!refreshed) {
+            // El RT también expiró: mostrar login
+            console.warn('⚠️ [Middleware/Home] Refresh falló. Mostrando login.');
+            return; // Dejamos que se muestre la página de login (/)
           }
-        } catch (e) {
-          console.error('❌ [Middleware] Falló restauración proactiva:', e);
+        } else if (!auth.isFetched) {
+          // Token válido pero datos no refrescados
+          try {
+            console.log('📡 [Middleware] Refrescando datos del usuario...');
+            await auth.fetchUser();
+          } catch (e) {
+            console.error('❌ [Middleware] Error al refrescar usuario:', e);
+            return;
+          }
+        }
+
+        if (auth.user) {
+          const redirectTarget = getRedirectTarget();
+          const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
+          const targetDashboard = redirectTarget || getDashboardPath(userRole);
+          console.log(`🚀 [Middleware] Redirigiendo a: ${targetDashboard} (Rol: ${userRole})`);
+          if (targetDashboard !== '/') {
+            return navigateTo(targetDashboard, { replace: true });
+          }
+        }
+      }
+
+      // ── Caso B: Sin token → intentar restaurar desde RT ──────────────────────
+      else {
+        const userCookieVal = useCookie('user').value;
+        let hasPWAToken = false;
+
+        if (process.client) {
+          hasPWAToken = !!localStorage.getItem('pwa_refresh_token');
+          // Si acabamos de hacer logout explícito, no intentamos revivir la sesión
+          if (localStorage.getItem('just_logged_out') === 'true') {
+            localStorage.removeItem('just_logged_out');
+            return;
+          }
+        }
+
+        if (userCookieVal || hasPWAToken) {
+          try {
+            console.log('🔄 [Middleware] Intentando restaurar sesión proactivamente en home...');
+            const refreshed = await auth.refreshToken();
+            if (refreshed && auth.user) {
+              const redirectTarget = getRedirectTarget();
+              const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
+              const targetDashboard = redirectTarget || getDashboardPath(userRole);
+              console.log(`🚀 [Middleware] Sesión restaurada, redirigiendo a: ${targetDashboard}`);
+              if (targetDashboard !== '/') {
+                return navigateTo(targetDashboard, { replace: true });
+              }
+            }
+          } catch (e) {
+            console.error('❌ [Middleware] Falló restauración proactiva:', e);
+          }
         }
       }
     }
-    
+
     return;
   }
+
+
 
 
   // 3. Verificar si hay token
@@ -123,7 +157,19 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  // 4. Si no hay usuario o los datos son de cookie (no fetched), intentar cargarlos
+  // 4. Si el token existe pero está expirado, refrescar primero antes de llamar a fetchUser.
+  // Sin este check, fetchUser recibe un 401 y borra la sesión aunque el RT sea válido.
+  // auth.token es el valor del cookie (string), no un Ref.
+  if (auth.token && isJwtExpired(auth.token as string)) {
+    console.log('⏰ [Middleware] Token expirado detectado. Intentando refresh antes de fetchUser...');
+    const refreshed = await auth.refreshToken();
+    if (!refreshed) {
+      console.warn('⚠️ [Middleware] Refresh falló tras token expirado. Redirigiendo a login.');
+      return navigateTo('/', { replace: true });
+    }
+  }
+
+  // 5. Si no hay usuario o los datos son de cookie (no fetched), intentar cargarlos
   if (auth.token && (!auth.user || !auth.isFetched)) {
     try {
       await auth.fetchUser();
@@ -135,7 +181,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  // 5. Verificar si el usuario está deshabilitado
+  // 6. Verificar si el usuario está deshabilitado
   if (auth.user?.estado === 'deshabilitado') {
     if (currentPath !== '/usuario-deshabilitado') {
       return navigateTo('/usuario-deshabilitado', { replace: true });
@@ -143,18 +189,18 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
-  // 6. Obtener el rol del usuario
+  // 7. Obtener el rol del usuario
   const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
 
-  // 7. Obtener el dashboard correspondiente al rol
+  // 8. Obtener el dashboard correspondiente al rol
   const dashboardPath = getDashboardPath(userRole);
 
-  // 8. Si ya está en su dashboard, permitir acceso
+  // 9. Si ya está en su dashboard, permitir acceso
   if (currentPath === dashboardPath) {
     return;
   }
 
-  // 9. Definir rutas permitidas por rol
+  // 10. Definir rutas permitidas por rol
   const allowedPaths: Record<UserRole, string[]> = {
     admin: ['/admin'],
     tecnico: ['/tecnico'],
@@ -162,12 +208,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
     sa: ['/admin']
   };
 
-  // 10. Verificar si la ruta actual está permitida para el rol
+  // 11. Verificar si la ruta actual está permitida para el rol
   const isPathAllowed = allowedPaths[userRole]?.some(path =>
     currentPath === path || currentPath.startsWith(path + '/')
   );
 
-  // 11. Si la ruta no está permitida, redirigir al dashboard
+  // 12. Si la ruta no está permitida, redirigir al dashboard
   if (!isPathAllowed) {
     return navigateTo(dashboardPath, { replace: true });
   }

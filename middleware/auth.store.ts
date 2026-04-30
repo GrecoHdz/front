@@ -9,14 +9,14 @@ const PWA_RT_KEY = 'pwa_refresh_token';
 
 const isPWAMode = (): boolean => {
   if (!process.client) return false;
-  
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                     (window.navigator as any).standalone === true;
-                     
-  // En algunos navegadores móviles, al abrir desde notificación no se detecta standalone de inmediato
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
-  return isStandalone || isMobile;
+
+  // Solo se considera PWA cuando la app está instalada y abierta en modo standalone.
+  // No usar userAgent móvil como sustituto: un usuario en Chrome móvil normal
+  // NO debe recibir el tratamiento PWA (evita borrar RT de localStorage por errores de red).
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true
+  );
 };
 
 const savePWARefreshToken = (token: string | null) => {
