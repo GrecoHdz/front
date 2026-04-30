@@ -1320,6 +1320,49 @@
                 </div>
               </div>
 
+              <!-- Selector de Pago -->
+              <div class="space-y-2">
+                <h4 class="text-xs font-black text-gray-900 dark:text-white ml-1 text-center uppercase tracking-widest">{{ $t('services_page.modals.payment_method') }}</h4>
+                <div class="grid grid-cols-2 gap-2">
+                  <button 
+                    @click="taxiPaymentMethod = 'transferencia'"
+                    type="button"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
+                    :class="taxiPaymentMethod === 'transferencia' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
+                  >
+                    <span class="text-xl">💳</span>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'transferencia' ? 'text-blue-700 dark:text-blue-400' : 'text-gray-500'">{{ $t('services_page.modals.transfer') || 'Transferencia' }}</span>
+                  </button>
+                  <button 
+                    @click="taxiPaymentMethod = 'efectivo'"
+                    type="button"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
+                    :class="taxiPaymentMethod === 'efectivo' ? 'border-green-600 bg-green-50 dark:bg-green-900/20' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
+                  >
+                    <span class="text-xl">💵</span>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'efectivo' ? 'text-green-700 dark:text-green-400' : 'text-gray-500'">{{ $t('services_page.modals.cash') }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Input Billete (Solo si es efectivo) -->
+              <Transition name="slide-down">
+                <div v-if="taxiPaymentMethod === 'efectivo'" class="space-y-2">
+                  <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{{ $t('services_page.modals.cash_amount') }}</h4>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">L.</span>
+                    <input 
+                      v-model="taxiCashBillAmount"
+                      type="number"
+                      inputmode="numeric"
+                      :placeholder="$t('services_page.modals.cash_placeholder')"
+                      class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 outline-none font-bold text-sm transition-all"
+                    >
+                  </div>
+                  <p class="text-[9px] text-gray-500 italic ml-1">* {{ $t('services_page.modals.cash_change_desc') }}</p>
+                </div>
+              </Transition>
+
               <!-- Acciones -->
               <div class="flex gap-2 pt-2">
                 <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
@@ -1436,13 +1479,24 @@
               <!-- Selector de Pago -->
               <div class="space-y-2">
                 <h4 class="text-sm font-black text-gray-900 dark:text-white ml-1 text-center">{{ $t('services_page.modals.payment_method') }}</h4>
-                <div class="grid grid-cols-1 gap-2">
+                <div class="grid grid-cols-2 gap-2">
+                  <button 
+                    @click="taxiPaymentMethod = 'transferencia'"
+                    type="button"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
+                    :class="taxiPaymentMethod === 'transferencia' ? 'border-yellow-400 bg-yellow-400/10' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
+                  >
+                    <span class="text-xl">💳</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'transferencia' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">{{ $t('services_page.modals.transfer') || 'Transferencia' }}</span>
+                  </button>
                   <button 
                     @click="taxiPaymentMethod = 'efectivo'"
-                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1 border-yellow-400 bg-yellow-400/10 dark:bg-yellow-400/5"
+                    type="button"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
+                    :class="taxiPaymentMethod === 'efectivo' ? 'border-yellow-400 bg-yellow-400/10' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
                   >
                     <span class="text-xl">💵</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-center text-yellow-700 dark:text-yellow-400">{{ $t('services_page.modals.cash') }}</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'efectivo' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500'">{{ $t('services_page.modals.cash') }}</span>
                   </button>
                 </div>
               </div>
@@ -1610,6 +1664,49 @@
                   * Como beneficio exclusivo de tu membresía activa, este monto se agregará a tu crédito.
                 </p>
               </div>
+
+              <!-- Selector de Pago -->
+              <div class="space-y-2">
+                <h4 class="text-xs font-black text-gray-900 dark:text-white ml-1 text-center uppercase tracking-widest">{{ $t('services_page.modals.payment_method') }}</h4>
+                <div class="grid grid-cols-2 gap-2">
+                  <button 
+                    @click="taxiPaymentMethod = 'transferencia'"
+                    type="button"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
+                    :class="taxiPaymentMethod === 'transferencia' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
+                  >
+                    <span class="text-xl">💳</span>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'transferencia' ? 'text-blue-700 dark:text-blue-400' : 'text-gray-500'">{{ $t('services_page.modals.transfer') || 'Transferencia' }}</span>
+                  </button>
+                  <button 
+                    @click="taxiPaymentMethod = 'efectivo'"
+                    type="button"
+                    class="p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center space-y-1"
+                    :class="taxiPaymentMethod === 'efectivo' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'"
+                  >
+                    <span class="text-xl">💵</span>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-center" :class="taxiPaymentMethod === 'efectivo' ? 'text-red-700 dark:text-red-400' : 'text-gray-500'">{{ $t('services_page.modals.cash') }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Input Billete (Solo si es efectivo) -->
+              <Transition name="slide-down">
+                <div v-if="taxiPaymentMethod === 'efectivo'" class="space-y-2">
+                  <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{{ $t('services_page.modals.cash_amount') }}</h4>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">L.</span>
+                    <input 
+                      v-model="taxiCashBillAmount"
+                      type="number"
+                      inputmode="numeric"
+                      :placeholder="$t('services_page.modals.cash_placeholder')"
+                      class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none font-bold text-sm transition-all"
+                    >
+                  </div>
+                  <p class="text-[9px] text-gray-500 italic ml-1">* {{ $t('services_page.modals.cash_change_desc') }}</p>
+                </div>
+              </Transition>
 
               <!-- Acciones -->
               <div class="flex gap-2 pt-2">
@@ -2728,6 +2825,11 @@ const shouldShowCreditBenefit = computed(() => {
 }); 
 
 const cashbackAmount = computed(() => {
+  // Si el método de pago seleccionado es efectivo, no hay beneficio de cashback
+  if (taxiPaymentMethod.value === 'efectivo') {
+    return 0;
+  }
+
   const basePrice = getDiscountedPrice();
   const netTotal = parseFloat(basePrice);
   if (!netTotal) return 0;
@@ -3356,8 +3458,8 @@ const getDiscountedPrice = () => {
   const amount = parseFloat(quotationData.value?.monto_manodeobra || 0)
   if (!amount) return '0.00'
   
-  // Si es Viaje Privado y el método de pago es efectivo, no hay beneficio de descuento de membresía/crédito
-  if (isViajePrivado(selectedService.value?.title) && taxiPaymentMethod.value === 'efectivo') {
+  // Si el método de pago es efectivo, no hay beneficio de descuento de membresía/crédito
+  if (taxiPaymentMethod.value === 'efectivo') {
     return amount.toFixed(2)
   }
   
@@ -3686,8 +3788,8 @@ const acceptQuotation = async () => {
     // 1. Aceptar la cotización 
     const cotizacionUpdate = { estado: 'aceptado' }; 
     
-    // Si es Viaje Privado y pago en efectivo, resetear campos de transferencia y beneficios
-    if (isViajePrivado(selectedService.value?.title) && taxiPaymentMethod.value === 'efectivo') {
+    // Si el método de pago es efectivo, resetear campos de transferencia y beneficios en la cotización
+    if (taxiPaymentMethod.value === 'efectivo') {
       cotizacionUpdate.id_cuenta = null;
       cotizacionUpdate.num_comprobante = null;
       cotizacionUpdate.descuento_membresia = 0;
@@ -3704,10 +3806,10 @@ const acceptQuotation = async () => {
     
     const solicitudUpdate = { estado: 'en_proceso' };
     
-    // Agregar información de pago en la descripción si es Viaje Privado y efectivo
-    if (selectedService.value?.title === 'Viaje Privado' && taxiPaymentMethod.value === 'efectivo') {
+    // Agregar información de pago en la descripción si es efectivo
+    if (taxiPaymentMethod.value === 'efectivo') {
       const amount = taxiCashBillAmount.value || '0';
-      // Actualizar la descripción agregando el detalle del efectivo
+      // Actualizar la descripción agregando el detalle del efectivo (necesario para detección en ServiciosTecnico.vue)
       const currentDesc = selectedService.value.description || '';
       solicitudUpdate.descripcion = `${currentDesc} Pago efectivo (L. ${amount})`.trim();
     }
