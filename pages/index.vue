@@ -29,12 +29,23 @@
               <p class="text-emerald-100 text-xs font-medium">{{ $t('solutions') }}</p>
             </div>
           </div>
-          <button 
-            @click="isLogin = true; showLoginModal = true"
-            class="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-300 text-sm"
-          >
-            {{ $t('login') }}
-          </button>
+          <div class="flex items-center gap-2">
+            <button 
+              @click="langModal?.openModal()"
+              class="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-xl hover:bg-white/30 transition-all duration-300"
+              :title="$t('profile.language')"
+            >
+              <span class="text-lg leading-none select-none">
+                {{ currentLocale === 'es' ? '🇪🇸' : '🇺🇸' }}
+              </span>
+            </button>
+            <button 
+              @click="isLogin = true; showLoginModal = true"
+              class="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-300 text-sm"
+            >
+              {{ $t('login') }}
+            </button>
+          </div>
         </div>
 
         <!-- Rate Limit Modal (Posicionado aquí para máxima visibilidad) -->
@@ -568,6 +579,7 @@
       </div>
     </div>
 
+    <LanguageSelectorModal ref="langModal" />
   </div>
 </template>
 <style>
@@ -856,6 +868,7 @@ html {
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { navigateTo } from '#imports'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
@@ -871,6 +884,9 @@ const config = useRuntimeConfig()
 const router = useRouter()
 const auth = useAuthStore()
 const userCookie = useCookie('user')
+const { locale } = useI18n()
+const langModal = ref(null)
+const currentLocale = computed(() => locale.value)
 
 // ===== AUTO-TRADUCCIÓN =====
 const { trList } = useAutoTranslate()

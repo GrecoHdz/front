@@ -155,7 +155,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       appName: 'MiSeguro',
-      appVersion: '1.4.9',
+      appVersion: '1.5.0',
       apiBase: process.env.NUXT_PUBLIC_API_URL
     }
   }
