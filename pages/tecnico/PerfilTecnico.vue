@@ -2474,17 +2474,8 @@ const handleLogout = async () => {
     await auth.logout();
   } catch (error) {
     console.error('Error al cerrar sesión:', error);
-    toast.value = {
-      show: true,
-      message: 'Error al cerrar sesión. Forzando salida...',
-      type: 'error',
-      duration: 3000
-    };
-    // Forzar salida si falla el método del store
     if (process.client) {
-       setTimeout(() => {
-         window.location.href = '/';
-       }, 1500);
+       window.location.replace('/');
     }
   } finally {
     isLoggingOut.value = false;

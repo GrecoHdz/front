@@ -72,19 +72,28 @@ export const useAuthStore = defineStore('auth', () => {
     tokenCookie.value = null;
     userCookie.value = null;
     
-    // Forzar la eliminación de cookies a nivel de documento para evitar race conditions
+    // Forzar la eliminación de cookies a nivel de documento para evitar re-logins automáticos
     if (process.client) {
-      const cookieOptions = "; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      const extraOptions = process.env.NODE_ENV === 'production' ? "; SameSite=None; Secure" : "";
-      
-      document.cookie = "token=" + cookieOptions + extraOptions;
-      document.cookie = "user=" + cookieOptions + extraOptions;
-      document.cookie = "refreshToken=" + cookieOptions + extraOptions;
-      
-      // Intentar también sin las opciones extra por si acaso
-      document.cookie = "token=" + cookieOptions;
-      document.cookie = "user=" + cookieOptions;
-      document.cookie = "refreshToken=" + cookieOptions;
+      try {
+        const cookieOptions = "; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        const domain = window.location.hostname;
+        const extraOptions = process.env.NODE_ENV === 'production' ? "; SameSite=None; Secure" : "";
+        
+        const cookieNames = ["token", "user", "refreshToken", "pwa_refresh_token"];
+        
+        cookieNames.forEach(name => {
+          document.cookie = name + "=" + cookieOptions;
+          document.cookie = name + "=" + cookieOptions + "domain=" + domain + ";";
+          if (extraOptions) {
+            document.cookie = name + "=" + cookieOptions + extraOptions;
+          }
+        });
+        
+        // Limpiar localStorage relacionado
+        localStorage.removeItem('pwa_refresh_token');
+      } catch (e) {
+        console.error('Error in clearAuthState:', e);
+      }
     }
   };
 
@@ -185,16 +194,23 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       // Limpiar TODO el estado local SIEMPRE
       if (process.client) {
+        // Usar una cookie temporal para indicar logout explícito (leída por middleware global)
+        const justLoggedOut = useCookie('just_logged_out', { maxAge: 10, path: '/' });
+        justLoggedOut.value = 'true';
+        
+        // También en localStorage por si acaso
         localStorage.setItem('just_logged_out', 'true');
       }
+      
       savePWARefreshToken(null);
       clearAuthState();
       
       // Redirección forzada para limpiar memoria y estado
       if (process.client) {
+        // Pequeño delay para asegurar que cookies y localStorage se persistan
         setTimeout(() => {
-          window.location.href = '/';
-        }, 50);
+          window.location.replace('/');
+        }, 100);
       } else {
         await navigateTo('/', { replace: true });
       }

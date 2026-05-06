@@ -108,8 +108,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
         if (process.client) {
           hasPWAToken = !!localStorage.getItem('pwa_refresh_token');
           // Si acabamos de hacer logout explícito, no intentamos revivir la sesión
-          if (localStorage.getItem('just_logged_out') === 'true') {
+          const justLoggedOutCookie = useCookie('just_logged_out').value;
+          if (justLoggedOutCookie === 'true' || localStorage.getItem('just_logged_out') === 'true') {
             localStorage.removeItem('just_logged_out');
+            // La cookie se borrará sola por su maxAge corto, pero podemos limpiarla proactivamente
+            // if (process.client) useCookie('just_logged_out').value = null; 
             return;
           }
         }

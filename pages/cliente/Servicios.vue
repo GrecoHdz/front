@@ -374,23 +374,28 @@
           </div>
         </div> 
 
-        <!-- 3. Acciones - Solo se muestra si hay acciones disponibles -->
+        <!-- 3. Acciones - Diseño Premium y Llamativo -->
         <div v-if="hasActions" class="mb-3">
-          <h4 v-if="hasVisibleActions" class="text-sm font-black text-gray-900 dark:text-white mb-2">{{ $t('services_page.modal.actions') }}</h4>
-          <div class="space-y-2">
+          <h4 v-if="hasVisibleActions" class="text-xs font-black text-gray-400 dark:text-gray-500 mb-3 uppercase tracking-widest ml-1">{{ $t('services_page.modal.actions') }}</h4>
+          <div class="space-y-3">
 
             <!-- Acciones para Servicio Con Pago Pendiente -->
-            <div v-if="selectedService.rawStatus === 'pendiente_pagovisita'" class="mb-3"> 
+            <div v-if="selectedService.rawStatus === 'pendiente_pagovisita'"> 
               <button 
                 @click="openVisitPaymentModal(selectedService)"
-                class="w-full flex items-center justify-between p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mb-2"
+                class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg shadow-amber-500/30 active:scale-95 transition-all duration-300"
               >
-                <div class="flex items-center space-x-2">
-                  <span class="text-base">💳</span>
-                  <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">{{ $t('services_page.modal.pay_visit') }}</span>
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl backdrop-blur-sm">
+                    💳
+                  </div>
+                  <div class="text-left">
+                    <span class="block font-black text-sm leading-none">{{ $t('services_page.modal.pay_visit') }}</span>
+                    <span class="text-[10px] font-medium text-white/80 mt-1 uppercase tracking-tighter">Acción Requerida</span>
+                  </div>
                 </div>
-                <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                <svg class="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
               </button>
             </div>
@@ -399,14 +404,19 @@
             <div v-if="selectedService.rawStatus === 'pendiente_pagoservicio'"> 
               <button 
                 @click="openPaymentModal(selectedService)"
-                class="w-full flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors mb-2"
+                class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/30 active:scale-95 transition-all duration-300"
               >
-                <div class="flex items-center space-x-2">
-                  <span class="text-base">💰</span>
-                  <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">{{ $t('services_page.modal.pay_service') }}</span>
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl backdrop-blur-sm">
+                    💰
+                  </div>
+                  <div class="text-left">
+                    <span class="block font-black text-sm leading-none">{{ $t('services_page.modal.pay_service') }}</span>
+                    <span class="text-[10px] font-medium text-white/80 mt-1 uppercase tracking-tighter">Confirmar Finalización</span>
+                  </div>
                 </div>
-                <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                <svg class="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
               </button>
             </div>
@@ -415,73 +425,71 @@
             <div v-if="selectedService.rawStatus === 'pendiente_cotizacion'">
               <button 
                 @click="openQuotationModal(selectedService)"
-                class="w-full flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors mb-2"
+                class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 rounded-xl shadow-lg shadow-yellow-500/30 active:scale-95 transition-all duration-300"
               >
-                <div class="flex items-center space-x-2">
-                  <span class="text-base">📋</span>
-                  <span class="font-bold text-gray-800 dark:text-gray-200 text-sm">
-                    {{ 
-                      selectedService.title === 'Viaje Privado' ? $t('services_page.modal.view_trip_details') : 
-                      (selectedService.title === 'Barbería' ? $t('services_page.modal.view_cut_details') : $t('services_page.modal.view_quotation')) 
-                    }}
-                  </span>
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-black/5 rounded-lg flex items-center justify-center text-xl backdrop-blur-sm">
+                    📋
+                  </div>
+                  <div class="text-left">
+                    <span class="block font-black text-sm leading-none">
+                      {{ 
+                        selectedService.title === 'Viaje Privado' ? $t('services_page.modal.view_trip_details') : 
+                        (selectedService.title === 'Barbería' ? $t('services_page.modal.view_cut_details') : $t('services_page.modal.view_quotation')) 
+                      }}
+                    </span>
+                    <span class="text-[10px] font-bold text-gray-800/60 mt-1 uppercase tracking-tighter">Propuesta de Profesional</span>
+                  </div>
                 </div>
-                <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                <svg class="w-5 h-5 text-gray-900/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
               </button>
             </div>
             
             <!-- Acciones para Servicio Finalizado -->
-            <div v-if="selectedService.rawStatus === 'finalizado'" class="space-y-2">
+            <div v-if="selectedService.rawStatus === 'finalizado'" class="space-y-3">
               <!-- Botón de Calificar -->
               <button 
                 @click="openRatingModal(selectedService)"
-                class="w-full flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors"
+                class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 rounded-xl shadow-lg shadow-yellow-500/30 active:scale-95 transition-all duration-300"
               >
-                <div class="flex items-center space-x-2">
-                  <span class="text-base">⭐</span>
-                  <span class="font-bold text-yellow-800 dark:text-yellow-200 text-sm">
-                    {{ selectedService.title === 'Viaje Privado' ? 'Calificar Viaje' : 'Calificar Servicio' }}
-                  </span>
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-black/5 rounded-lg flex items-center justify-center text-xl backdrop-blur-sm">
+                    ⭐
+                  </div>
+                  <div class="text-left">
+                    <span class="block font-black text-sm leading-none">
+                      {{ selectedService.title === 'Viaje Privado' ? 'Calificar Viaje' : 'Calificar Servicio' }}
+                    </span>
+                    <span class="text-[10px] font-bold text-gray-800/60 mt-1 uppercase tracking-tighter">Tu opinión es importante</span>
+                  </div>
                 </div>
-                <svg class="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                <svg class="w-5 h-5 text-gray-900/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
               </button>
             </div> 
 
-            <!-- Botón de Cancelar - Visible solo en estados específicos -->
-            <div v-if="['pendiente_pagovisita', 'pendiente_asignacion', 'asignado'].includes(selectedService.rawStatus)" class="mb-2">
+            <!-- Botón de Cancelar - Más sutil pero claro -->
+            <div v-if="['pendiente_pagovisita', 'pendiente_asignacion', 'asignado'].includes(selectedService.rawStatus)">
               <button 
                 @click="confirmarCancelar"
-                class="w-full flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                class="w-full flex items-center justify-center p-3 text-red-600 dark:text-red-400 font-black text-xs uppercase tracking-widest active:scale-95 transition-all"
               >
-                <div class="flex items-center space-x-2">
-                  <span class="text-base">❌</span>
-                  <span class="font-bold text-red-800 dark:text-red-200 text-sm">
-                    {{ getCancelButtonText }}
-                  </span>
-                </div>
-                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
+                <span class="mr-2">❌</span>
+                {{ getCancelButtonText }}
               </button>
             </div> 
 
-            <div v-if="selectedService.rawStatus === 'calificado' || selectedService.rawStatus === 'finalizado'" class="space-y-2">
+            <div v-if="selectedService.rawStatus === 'calificado' || selectedService.rawStatus === 'finalizado'">
               <!-- Botón de Reportar Problema -->
               <button 
                 @click="reportarProblema"
-                class="w-full flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                class="w-full flex items-center justify-center p-3 text-gray-500 dark:text-gray-400 font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-all"
               >
-                <div class="flex items-center space-x-2">
-                  <span class="text-base">⚠️</span>
-                  <span class="font-bold text-red-800 dark:text-red-200 text-sm">Reportar Problema</span>
-                </div>
-                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
+                <span class="mr-2 text-xs">⚠️</span>
+                Reportar un problema
               </button>
             </div>
         </div>
@@ -2362,29 +2370,30 @@ body {
 }
 
 .multiselect-custom :deep(.multiselect__option:hover) {
-  background-color: #f3f4f6 !important;
+  background-color: transparent !important;
   color: #111827 !important;
 }
 
 .dark .multiselect-custom :deep(.multiselect__option:hover) {
-  background-color: #374151 !important;
+  background-color: transparent !important;
   color: white !important;
 }
 
 .multiselect-custom :deep(.multiselect__option--selected) {
-  background-color: #dbeafe !important;
+  background-color: transparent !important;
   color: #1e40af !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
 }
 
 .dark .multiselect-custom :deep(.multiselect__option--selected) {
-    background-color: #4b5563 !important;
+    background-color: transparent !important;
     color: #f9fafb !important;
 }
 
 .multiselect-custom :deep(.multiselect__option--highlight) {
-  background-color: #3b82f6 !important;
-  color: white !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  font-weight: 700 !important;
 }
 
 .multiselect-custom .multiselect__option--highlight::after {
@@ -4650,9 +4659,10 @@ onMounted(async () => {
 
 .multiselect-custom :deep(.multiselect__option--highlight),
 .multiselect-custom :deep(.multiselect__option--highlight:hover) {
-  background: rgba(59, 130, 246, 0.1) !important;
+  background: transparent !important;
   color: inherit !important;
   text-shadow: none !important;
+  font-weight: bold !important;
 }
 
 .multiselect-custom :deep(.multiselect__single),
