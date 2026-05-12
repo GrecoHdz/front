@@ -110,7 +110,13 @@
     "join_as_technician": "Join as Service Provider",
     "login_btn": "Login",
     "register_btn": "Create Account",
-    "forgot_password": "Forgot your password?"
+    "forgot_password": "Forgot your password?",
+    "select_role_title": "Select your profile",
+    "select_role_subtitle": "How do you want to join MiSeguro?",
+    "client_role": "I am a Client",
+    "client_role_desc": "I am looking for professional services for my home",
+    "provider_role": "I am a Provider",
+    "provider_role_desc": "I want to offer my services and earn money"
   },
   "profile": {
     "title": "Profile",
@@ -1020,6 +1026,12 @@
     }
   },
   "pwa": {
+    "pre_invite": {
+      "title": "Upgrade your experience!",
+      "message": "Install our app for real-time notifications, faster access, and better performance.",
+      "cta_yes": "Install the app",
+      "cta_no": "Continue on web"
+    },
     "install_invite": {
       "title": "Download the App from",
       "subtitle": "MiSeguro",

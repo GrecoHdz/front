@@ -449,18 +449,7 @@
               <p v-if="formErrors.password" class="mt-1 text-sm text-red-500">{{ formErrors.password }}</p>
             </div>
 
-            <!-- Checkbox para registro como técnico -->
-            <div v-if="!isLogin" class="flex items-center mb-4">
-              <input 
-                type="checkbox" 
-                id="registerAsTechnician" 
-                v-model="registerAsTechnician"
-                class="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-0 focus:ring-offset-0 focus:outline-none"
-              >
-              <label for="registerAsTechnician" class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ $t('auth.join_as_technician') }}
-              </label>
-            </div>
+
 
             
 
@@ -492,6 +481,72 @@
         </div>
       </div>
     </div>
+    </transition>
+    
+    <!-- Modal de Selección de Rol -->
+    <transition name="modal">
+      <div v-if="showRoleSelectionModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm relative overflow-hidden">
+          <div class="p-8">
+            <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl shadow-sm border border-emerald-100 dark:border-emerald-800">
+                ✨
+              </div>
+              <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">
+                {{ $t('auth.select_role_title') }}
+              </h3>
+              <p class="text-gray-600 dark:text-gray-400 text-sm">
+                {{ $t('auth.select_role_subtitle') }}
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Opción Cliente -->
+              <button 
+                @click="completeRegistration(false)"
+                class="w-full p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/20 group transition-all duration-300 text-left flex items-center space-x-4 bg-gray-50/50 dark:bg-gray-900/30"
+              >
+                <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-800 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                  🏠
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-900 dark:text-white">
+                    {{ $t('auth.client_role') }}
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ $t('auth.client_role_desc') }}
+                  </p>
+                </div>
+              </button>
+
+              <!-- Opción Proveedor -->
+              <button 
+                @click="completeRegistration(true)"
+                class="w-full p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/30 dark:hover:bg-blue-900/20 group transition-all duration-300 text-left flex items-center space-x-4 bg-gray-50/50 dark:bg-gray-900/30"
+              >
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                  👷
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-900 dark:text-white">
+                    {{ $t('auth.provider_role') }}
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ $t('auth.provider_role_desc') }}
+                  </p>
+                </div>
+              </button>
+            </div>
+            
+            <button 
+              @click="showRoleSelectionModal = false; showLoginModal = true"
+              class="w-full mt-6 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            >
+              {{ $t('common.go_back') }}
+            </button>
+          </div>
+        </div>
+      </div>
     </transition>
 
     <!-- Loading Spinner -->
@@ -905,6 +960,8 @@ useHead({
 const showLoginModal = ref(false)
 const showRateLimitModal = ref(false)
 const showForgotPassword = ref(false)
+const showRoleSelectionModal = ref(false)
+const pendingRegisterData = ref(null)
 
 const anyModalOpen = computed(() => {
   return showLoginModal.value || showRateLimitModal.value || showForgotPassword.value
@@ -1772,219 +1829,146 @@ const handleAuth = async () => {
         return;
       }
     } else {
-      // Lógica de registro
+      // Lógica de registro - Ahora diferida a completeRegistration
       try { 
         const device_id = await getDeviceId();
-        const registerData = {
+        pendingRegisterData.value = {
           nombre: form.value.nombre,
           email: form.value.email,
           telefono: form.value.telefono,
           identidad: form.value.identidad,
-          password_hash: form.value.password, // Cambiado a password_hash para coincidir con el backend
+          password_hash: form.value.password,
           id_ciudad: form.value.ciudad?.id,
-          es_tecnico: registerAsTechnician.value ? 1 : 0,
           device_id
         };
         
-        // Realizar la petición de registro
-        
-        // Usar fetch directamente para tener más control sobre la respuesta
-        const response = await $api('/usuarios/nuevo', {
-          method: 'POST',
-          body: registerData
-        }); 
-        
-        // La respuesta del interceptor $api ya es el objeto parseado, pero el código original esperaba un fetch response
-        // Así que simularemos la estructura mínima necesaria para que el código siguiente no rompa
-        const responseData = response;
-        
-        // Simular response.ok para el flujo de error original
-        if (responseData.error || responseData.status === 'error') {
-          const errorMessage = responseData.message || 'Error en el registro';
-          const error = new Error(errorMessage);
-          error.data = responseData;
-          throw error;
-        }
-        
-        // Obtener el ID del usuario de la respuesta
-        const userId = responseData.id_usuario || responseData.id;
-        if (!userId) {
-          throw new Error('No se pudo obtener el ID del usuario del registro');
-        }
-        
-        // Mostrar mensaje de éxito
-        if (registerAsTechnician.value) {
-          showToast('¡Solicitud de técnico enviada! Tu perfil está en revisión. Te notificaremos cuando sea aprobado.', 'success');
-        } else {
-          showToast('¡Registro exitoso! Iniciando sesión...', 'success');
-        }
-        trackCompleteRegistration();
-        
-        // Manejar referido después del registro exitoso
-        try {
-          await handleReferral(userId);
-        } catch (error) {
-          // No interrumpir el flujo por errores en el referido
-        }
-        
-        // Enviar notificaciones a administradores en segundo plano
-        const sendAdminNotifications = async () => {
-          try {
-            await $api('/notificaciones/enviar', {
-              method: 'POST',
-              body: {
-                titulo: 'Nuevo registro',
-                nombre_rol: 'admin'
-              }
-            });
-            await $api('/notificaciones/enviar', {
-              method: 'POST',
-              body: {
-                titulo: 'Nuevo registro',
-                nombre_rol: 'sa'
-              }
-            });
-          } catch (error) {
-            // No interrumpir el flujo por errores en las notificaciones
-          }
-        };
-        sendAdminNotifications();
-
-        if (registerAsTechnician.value) {
-          // Flujo específico para técnicos
-          const formData = { ...form.value };
-          
-          setTimeout(() => {
-            const nombreTecnico = formData.nombre || 'Nuevo Técnico';
-            sendTechnicianRegistrationMessage(nombreTecnico, formData);
-            
-            setTimeout(() => {
-              // Limpiar el formulario
-              form.value = {
-                nombre: '',
-                email: '',
-                telefono: '',
-                ciudad: null,
-                identidad: '',
-                password: ''
-              };
-              registerAsTechnician.value = false;
-              isLoading.value = false;
-              showLoginModal.value = false;
-              authStatus.value = '';
-            }, 2000);
-          }, 0);
-          
-        } else {
-          // Flujo para usuarios normales: Login automático
-          try {
-            const loginResult = await auth.login({
-              identidad: form.value.identidad,
-              password: form.value.password
-            });
-
-            if (loginResult?.success) {
-              const userRole = auth.user?.role?.toLowerCase() || '';
-              showLoginModal.value = false;
-              showSuccess.value = true;
-              
-              const redirectPath = {
-                'admin': '/admin/DashboardAdmin',
-                'sa': '/admin/DashboardAdmin',
-                'tecnico': '/tecnico/DashboardTecnico',
-                'usuario': '/cliente/DashboardCliente'
-              }[userRole] || '/';
-
-              // Marcar que el usuario se acaba de registrar para forzar la invitación de PWA
-              if (process.client) {
-                localStorage.setItem('pwa_force_show', 'true');
-                localStorage.setItem('pwa_force_show_time', Date.now().toString());
-              }
-
-              setTimeout(() => {
-                window.location.href = redirectPath;
-              }, 600);
-              return; // Salir de handleAuth con éxito
-            }
-          } catch (loginError) {
-            console.error('Error en login automático:', loginError);
-          }
-
-          // Si el login automático falla, cambiar a pestaña de login con datos preservados
-          isLogin.value = true;
-          
-          // Preservar credenciales para que el modal ya las tenga listas
-          const savedIdentidad = form.value.identidad;
-          const savedPassword = form.value.password;
-          
-          // Limpiar el resto del formulario
-          form.value = {
-            nombre: '',
-            email: '',
-            telefono: '',
-            identidad: savedIdentidad,
-            password: savedPassword,
-            ciudad: null
-          };
-          
-          formErrors.value = {};
-          profileImage.value = null;
-          profileImagePreview.value = '';
-          registerAsTechnician.value = false;
-          
-          // Desactivar loading
-          setTimeout(() => {
-            isLoading.value = false;
-            authStatus.value = '';
-          }, 1000);
-        }
-      } catch (error) {
-        const errorData = error.data || error.response?._data || error.response?.data;
-        const statusCode = error.statusCode || error.status || error.response?.status;
-        const errorMessage = errorData?.message || error?.message || '';
-
-        if (statusCode == 429 || errorMessage.includes('Demasiados intentos')) {
-          showLoginModal.value = false;
-          isLoading.value = false;
-          authStatus.value = '';
-          setTimeout(() => {
-            showRateLimitModal.value = true;
-          }, 100);
-          return;
-        }
-        
-        // Registrar marca de baneo si el servidor lo indica (403 Dispositivo restringido)
-        if (statusCode == 403 && errorMessage.toLowerCase().includes('dispositivo')) {
-          if (process.client) {
-            localStorage.setItem('ph_dev_banned', 'true');
-          }
-        }
-        
-        if (errorData) {
-          const registerErrorMessage = errorData.message || 'Error en el registro. Por favor, inténtalo de nuevo.';
-          
-          // Si hay un campo específico con error, resaltarlo
-          if (errorData.field) {
-            formErrors.value[errorData.field] = registerErrorMessage;
-          }
-          
-          // Mostrar el mensaje de error al usuario
-          showToast(registerErrorMessage, 'error');
-        } else if (error.message) {
-          // Si no hay respuesta del servidor pero hay un mensaje de error
-          showToast(error.message, 'error');
-        } else {
-          // Mensaje genérico si no hay información de error
-          showToast('Error al procesar la solicitud. Por favor, inténtalo de nuevo.', 'error');
-        }
-        
-        // Desactivar loading en caso de error
+        showLoginModal.value = false;
+        showRoleSelectionModal.value = true;
         isLoading.value = false;
-        authStatus.value = '';
+        return;
+      } catch (error) {
+        console.error('Error preparando registro:', error);
+        showToast('Error al procesar el registro. Por favor, inténtalo de nuevo.', 'error');
+        isLoading.value = false;
       }
     }
   } catch (error) {
     showToast('Error inesperado. Por favor, inténtalo de nuevo.', 'error');
+    isLoading.value = false;
+    authStatus.value = '';
+  }
+}
+
+// Nueva función para completar el registro después de elegir el rol
+const completeRegistration = async (isTechnician) => {
+  if (!pendingRegisterData.value) return;
+  
+  isLoading.value = true;
+  loadingMessage.value = isTechnician ? 'Procesando registro como técnico...' : 'Creando tu cuenta...';
+  registerAsTechnician.value = isTechnician;
+
+  try {
+    const registerData = {
+      ...pendingRegisterData.value,
+      es_tecnico: isTechnician ? 1 : 0
+    };
+    
+    // Realizar la petición de registro
+    const response = await $api('/usuarios/nuevo', {
+      method: 'POST',
+      body: registerData
+    }); 
+    
+    const responseData = response;
+    
+    if (responseData.error || responseData.status === 'error') {
+      const errorMessage = responseData.message || 'Error en el registro';
+      throw new Error(errorMessage);
+    }
+    
+    const userId = responseData.id_usuario || responseData.id;
+    if (!userId) {
+      throw new Error('No se pudo obtener el ID del usuario del registro');
+    }
+    
+    // Mostrar mensaje de éxito
+    if (isTechnician) {
+      showToast('¡Solicitud de técnico enviada! Tu perfil está en revisión.', 'success');
+    } else {
+      showToast('¡Registro exitoso! Iniciando sesión...', 'success');
+    }
+    
+    trackCompleteRegistration();
+    await handleReferral(userId);
+    
+    // Notificaciones en segundo plano
+    $api('/notificaciones/enviar', { method: 'POST', body: { titulo: 'Nuevo registro', nombre_rol: 'admin' } }).catch(() => {});
+    $api('/notificaciones/enviar', { method: 'POST', body: { titulo: 'Nuevo registro', nombre_rol: 'sa' } }).catch(() => {});
+
+    if (isTechnician) {
+      const formData = { ...form.value };
+      showRoleSelectionModal.value = false;
+      
+      setTimeout(() => {
+        sendTechnicianRegistrationMessage(formData.nombre, formData);
+        
+        setTimeout(() => {
+          // Limpiar el formulario
+          form.value = {
+            nombre: '',
+            email: '',
+            telefono: '',
+            ciudad: null,
+            identidad: '',
+            password: ''
+          };
+          registerAsTechnician.value = false;
+          isLoading.value = false;
+          authStatus.value = '';
+          pendingRegisterData.value = null;
+        }, 1500);
+      }, 0);
+    } else {
+      // Login automático para usuarios normales
+      try {
+        const loginResult = await auth.login({
+          identidad: form.value.identidad,
+          password: form.value.password
+        });
+
+        if (loginResult?.success) {
+          const userRole = auth.user?.role?.toLowerCase() || '';
+          showRoleSelectionModal.value = false;
+          showSuccess.value = true;
+          
+          const redirectPath = {
+            'admin': '/admin/DashboardAdmin',
+            'sa': '/admin/DashboardAdmin',
+            'tecnico': '/tecnico/DashboardTecnico',
+            'usuario': '/cliente/DashboardCliente'
+          }[userRole] || '/';
+
+
+
+          setTimeout(() => {
+            window.location.href = redirectPath;
+          }, 600);
+          return;
+        }
+      } catch (loginError) {
+        console.error('Error en login automático:', loginError);
+      }
+
+      // Si falla el login automático
+      isLogin.value = true;
+      showRoleSelectionModal.value = false;
+      isLoading.value = false;
+      pendingRegisterData.value = null;
+    }
+  } catch (error) {
+    console.error('Error finalizando registro:', error);
+    const errorMessage = error?.data?.message || error?.message || 'Error en el registro';
+    showToast(errorMessage, 'error');
     isLoading.value = false;
     authStatus.value = '';
   }

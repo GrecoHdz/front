@@ -110,7 +110,13 @@
     "join_as_technician": "Unirme como Proveedor de Servicios",
     "login_btn": "Iniciar Sesión",
     "register_btn": "Crear Cuenta",
-    "forgot_password": "¿Olvidaste tu contraseña?"
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "select_role_title": "Selecciona tu perfil",
+    "select_role_subtitle": "¿Cómo deseas unirte a MiSeguro?",
+    "client_role": "Soy Cliente",
+    "client_role_desc": "Busco servicios profesionales para mi hogar",
+    "provider_role": "Soy Proveedor",
+    "provider_role_desc": "Quiero ofrecer mis servicios y ganar dinero"
   },
   "profile": {
     "title": "Perfil",
@@ -1020,6 +1026,12 @@
     }
   },
   "pwa": {
+    "pre_invite": {
+      "title": "¡Mejora tu experiencia!",
+      "message": "Instala nuestra aplicación para obtener notificaciones en tiempo real, acceso más rápido y mejor rendimiento.",
+      "cta_yes": "Instalar aplicación",
+      "cta_no": "Continuar en la web"
+    },
     "install_invite": {
       "title": "Descarga la App de",
       "subtitle": "MiSeguro",
