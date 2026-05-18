@@ -952,27 +952,48 @@
         </div>
       </section>
 
-      <!-- Selector de Gráficos -->
       <section class="px-3 sm:px-4 mb-3 sm:mb-4 relative z-1">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Análisis de Datos</h2>
-          <multiselect 
-            v-model="selectedChartObject"
-            :options="availableCharts"
-            :searchable="false"
-            :close-on-select="true"
-            :show-labels="false"
-            placeholder="Seleccionar gráfico"
-            label="name"
-            track-by="id"
-            class="multiselect-admin-filter w-48"
-            :custom-label="getChartLabel"
-            :options-limit="100"
-          >
-            <template #singleLabel="{ option }">
-              <span class="text-[9px] sm:text-xs truncate">{{ getChartLabel(option) }}</span>
-            </template>
-          </multiselect>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white line-clamp-1">Análisis de Datos</h2>
+          <div class="flex items-center space-x-2">
+            <!-- Selector de Ciudad (Dinámico) -->
+            <multiselect 
+              v-if="['serviceTypeCity', 'techCity', 'cities'].includes(selectedChart)"
+              v-model="selectedCityChart"
+              :options="availableCities"
+              :searchable="true"
+              :close-on-select="true"
+              :show-labels="false"
+              placeholder="Todas las ciudades"
+              label="nombre_ciudad"
+              track-by="id_ciudad"
+              class="multiselect-admin-filter w-40 sm:w-48"
+              select-label=""
+              deselect-label=""
+            >
+              <template #singleLabel="{ option }">
+                <span class="text-[10px] sm:text-xs truncate">📍 {{ option.nombre_ciudad }}</span>
+              </template>
+            </multiselect>
+
+            <multiselect 
+              v-model="selectedChartObject"
+              :options="availableCharts"
+              :searchable="false"
+              :close-on-select="true"
+              :show-labels="false"
+              placeholder="Seleccionar gráfico"
+              label="name"
+              track-by="id"
+              class="multiselect-admin-filter w-44 sm:w-48"
+              :custom-label="getChartLabel"
+              :options-limit="100"
+            >
+              <template #singleLabel="{ option }">
+                <span class="text-[9px] sm:text-xs truncate">{{ getChartLabel(option) }}</span>
+              </template>
+            </multiselect>
+          </div>
         </div>
       </section>
 
@@ -1459,6 +1480,8 @@ const isLoadingData = ref(false);
 const isLoadingTransactions = ref(false);
 const selectedChart = ref('earnings');
 const selectedChartObject = ref(null);
+const availableCities = ref([{ id_ciudad: 'all', nombre_ciudad: 'Todas las ciudades' }]);
+const selectedCityChart = ref({ id_ciudad: 'all', nombre_ciudad: 'Todas las ciudades' });
 
 // Variables de datos de empresa
 const empresaNombre = ref('MiSeguro');
@@ -3593,7 +3616,9 @@ const availableCharts = [
   { id: 'serviceTypes', name: '🛠️ Servicios por Tipo' },
   { id: 'services', name: '📊 Servicios por Mes' },
   { id: 'users', name: '👥 Crecimiento de Usuarios' },
-  { id: 'cities', name: '🏙️ Servicios por Ciudad' }
+  { id: 'cities', name: '🏙️ Servicios por Ciudad' },
+  { id: 'serviceTypeCity', name: '🏢 Servicios por Tipo/Ciudad' },
+  { id: 'techCity', name: '👨‍🔧 Servicios Técnicos/Ciudad' }
 ];
 
 // Función para etiquetar gráficos
@@ -3637,7 +3662,9 @@ const getChartTitle = () => {
       serviceTypes: 'Distribución de Servicios por Tipo', 
       services: 'Servicios Realizados por Mes',
       users: 'Crecimiento de Usuarios',
-      cities: 'Servicios por Ciudad'
+      cities: 'Servicios por Ciudad',
+      serviceTypeCity: selectedCityChart.value?.id_ciudad === 'all' ? 'Servicios por Tipo en cada Ciudad' : `Servicios en ${selectedCityChart.value?.nombre_ciudad}`,
+      techCity: 'Servicios Realizados por Técnicos según su Ciudad'
     };
     return chartTitles[selectedChart.value] || 'Gráfico';
   } catch (error) {
@@ -3728,8 +3755,8 @@ const createChart = async () => {
                 display: true,
                 position: 'top',
                 labels: {
-                  color: isDark ? '#9CA3AF' : '#6B7280',
-                  font: { size: 11, family: 'sans-serif', weight: 500 }
+                  color: isDark ? '#F3F4F6' : '#111827',
+                  font: { size: 11, family: 'sans-serif', weight: 'bold' }
                 }
               },
               tooltip: {
@@ -3748,17 +3775,126 @@ const createChart = async () => {
               y: {
                 beginAtZero: true,
                 ticks: {
-                  color: isDark ? '#9CA3AF' : '#6B7280',
+                  color: isDark ? '#D1D5DB' : '#374151',
                   callback: function(value) {
                     return 'L. ' + (value/1000) + 'K';
                   }
                 },
                 grid: {
-                  color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)'
+                  color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'
                 }
               },
               x: {
-                ticks: { color: isDark ? '#9CA3AF' : '#6B7280' },
+                ticks: { color: isDark ? '#D1D5DB' : '#374151' },
+                grid: { display: false }
+              }
+            }
+          }
+        };
+        break;
+      
+      case 'serviceTypeCity':
+        if (selectedCityChart.value?.id_ciudad !== 'all') {
+          // Si hay ciudad seleccionada, mostrar dona
+          config = {
+            type: 'doughnut',
+            data: {
+              labels: [],
+              datasets: [{
+                data: [],
+                backgroundColor: ['#3B82F6', '#EF4444', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#06B6D4', '#71717A'],
+                borderWidth: 0
+              }]
+            },
+            plugins: [DataLabelsPlugin],
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '50%',
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'right',
+                  labels: { color: isDark ? '#9CA3AF' : '#6B7280', font: { size: 10 } }
+                },
+                datalabels: {
+                  display: true,
+                  color: '#FFFFFF',
+                  font: { weight: 'bold', size: 11 },
+                  formatter: (value, context) => {
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = Math.round((value / total) * 100);
+                    return percentage > 5 ? `${percentage}%` : '';
+                  }
+                }
+              }
+            }
+          };
+        } else {
+          // Si no hay ciudad, mostrar barras agrupadas
+          config = {
+            type: 'bar',
+            data: {
+              labels: [],
+              datasets: []
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'top',
+                  labels: { color: isDark ? '#F3F4F6' : '#111827', font: { weight: 'bold' } }
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: { color: isDark ? '#D1D5DB' : '#374151' },
+                  grid: { color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }
+                },
+                x: {
+                  ticks: { color: isDark ? '#D1D5DB' : '#374151' },
+                  grid: { display: false }
+                }
+              }
+            }
+          };
+        }
+        break;
+
+      case 'techCity':
+        config = {
+          type: 'bar',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Servicios por Ciudad de Origen del Técnico',
+              data: [],
+              backgroundColor: '#8B5CF6',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: { color: isDark ? '#D1D5DB' : '#374151' },
+                grid: { color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }
+              },
+              y: {
+                ticks: { color: isDark ? '#D1D5DB' : '#374151' },
                 grid: { display: false }
               }
             }
@@ -3788,8 +3924,8 @@ const createChart = async () => {
                 display: true,
                 position: 'right',
                 labels: {
-                  color: isDark ? '#9CA3AF' : '#6B7280',
-                  font: { size: 10 }
+                  color: isDark ? '#F3F4F6' : '#111827',
+                  font: { size: 10, weight: 'bold' }
                 }
               },
               datalabels: {
@@ -3812,6 +3948,7 @@ const createChart = async () => {
         config = {
           type: 'line',
           data: selectedChart.value === 'services' ? servicesData : usersData,
+          plugins: [DataLabelsPlugin],
           options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -3819,17 +3956,31 @@ const createChart = async () => {
               legend: {
                 display: true,
                 position: 'top',
-                labels: { color: isDark ? '#9CA3AF' : '#6B7280' }
+                labels: { 
+                  color: isDark ? '#F3F4F6' : '#111827',
+                  font: { size: 11, weight: 'bold' }
+                }
+              },
+              datalabels: {
+                display: true,
+                align: 'top',
+                color: isDark ? '#F3F4F6' : '#1F2937',
+                font: { weight: 'bold', size: 10 },
+                offset: 2
               }
             },
             scales: {
               y: {
                 beginAtZero: true,
-                ticks: { color: isDark ? '#9CA3AF' : '#6B7280' },
-                grid: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)' }
+                ticks: { 
+                  color: isDark ? '#D1D5DB' : '#374151' 
+                },
+                grid: { color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }
               },
               x: {
-                ticks: { color: isDark ? '#9CA3AF' : '#6B7280' },
+                ticks: { 
+                  color: isDark ? '#D1D5DB' : '#374151'
+                },
                 grid: { display: false }
               }
             }
@@ -3858,6 +4009,12 @@ const createChart = async () => {
         break;
       case 'cities':
         await loadServicesByCityData();
+        break;
+      case 'serviceTypeCity':
+        await loadServiceTypeByCityData();
+        break;
+      case 'techCity':
+        await loadTechnicianServicesByCityData();
         break;
     }
   } catch (error) {
@@ -3956,6 +4113,47 @@ const loadServicesByCityData = async () => {
   } catch (error) {
     console.error('Error al cargar datos de servicios por ciudad:', error);
     showToast('Error al cargar los datos del gráfico de servicios por ciudad', 'error');
+  }
+};
+
+const loadServiceTypeByCityData = async () => {
+  try { 
+    const idCiudad = selectedCityChart.value?.id_ciudad || 'all';
+    const response = await $api(`/solicitudservicio/grafica/servicios-tipo-ciudad?id_ciudad=${idCiudad}`, {
+      method: 'GET'
+    });
+    
+    if (response?.success && response.data && window.currentChart) {
+      if (response.isDoughnut) {
+        window.currentChart.data.labels = response.data.labels || [];
+        window.currentChart.data.datasets[0].data = response.data.data || [];
+      } else {
+        window.currentChart.data.labels = response.data.labels || [];
+        window.currentChart.data.datasets = response.data.datasets || [];
+      }
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de servicios por tipo/ciudad:', error);
+    showToast('Error al cargar datos de servicios por tipo/ciudad', 'error');
+  }
+};
+
+const loadTechnicianServicesByCityData = async () => {
+  try { 
+    const idCiudad = selectedCityChart.value?.id_ciudad || 'all';
+    const response = await $api(`/solicitudservicio/grafica/servicios-tecnicos-ciudad?id_ciudad=${idCiudad}`, {
+      method: 'GET'
+    });
+    
+    if (response?.success && response.data && window.currentChart) {
+      window.currentChart.data.labels = response.data.labels || [];
+      window.currentChart.data.datasets[0].data = response.data.data || [];
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de servicios técnicos por ciudad:', error);
+    showToast('Error al cargar datos de servicios técnicos por ciudad', 'error');
   }
 };
 
@@ -5846,6 +6044,25 @@ watch(selectedChart, async (newVal) => {
   }
 });
 
+// Watch para cuando cambia la ciudad del gráfico
+watch(selectedCityChart, async () => {
+  createChart();
+});
+
+const loadCities = async () => {
+  try {
+    const response = await $api('/ciudades', { method: 'GET' });
+    if (response?.success) {
+      availableCities.value = [
+        { id_ciudad: 'all', nombre_ciudad: 'Todas las ciudades' },
+        ...response.data
+      ];
+    }
+  } catch (error) {
+    console.error('Error al cargar ciudades para gráfico:', error);
+  }
+};
+
 // ===== LIFECYCLE HOOKS =====
 // Watch for changes to initialStats
 watch(initialStats, (newVal) => {
@@ -5865,6 +6082,9 @@ onMounted(async () => {
     
     // Cargar configuración de la empresa
     await loadEmpresaConfig();
+    
+    // Cargar ciudades para los filtros de gráficos
+    await loadCities();
     
     // Inicializar selectedChartObject con la primera opción
     initializeChartObject();  
