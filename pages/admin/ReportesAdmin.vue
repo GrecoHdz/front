@@ -6051,11 +6051,13 @@ watch(selectedCityChart, async () => {
 
 const loadCities = async () => {
   try {
-    const response = await $api('/ciudades', { method: 'GET' });
-    if (response?.success) {
+    const response = await $api('/ciudad', { method: 'GET' });
+    const list = Array.isArray(response) ? response : (response?.data || []);
+    
+    if (list.length > 0) {
       availableCities.value = [
         { id_ciudad: 'all', nombre_ciudad: 'Todas las ciudades' },
-        ...response.data
+        ...list
       ];
     }
   } catch (error) {
