@@ -3664,7 +3664,7 @@ const getChartTitle = () => {
       users: 'Crecimiento de Usuarios',
       cities: 'Servicios por Ciudad',
       serviceTypeCity: selectedCityChart.value?.id_ciudad === 'all' ? 'Servicios por Tipo en cada Ciudad' : `Servicios en ${selectedCityChart.value?.nombre_ciudad}`,
-      techCity: 'Servicios Realizados por Técnicos según su Ciudad'
+      techCity: selectedCityChart.value?.id_ciudad === 'all' ? 'Servicios Realizados por Técnicos según su Ciudad' : `Servicios realizados por técnicos en ${selectedCityChart.value?.nombre_ciudad}`
     };
     return chartTitles[selectedChart.value] || 'Gráfico';
   } catch (error) {
@@ -4147,8 +4147,11 @@ const loadTechnicianServicesByCityData = async () => {
     });
     
     if (response?.success && response.data && window.currentChart) {
+      const isSpecificCity = selectedCityChart.value?.id_ciudad !== 'all';
+      
       window.currentChart.data.labels = response.data.labels || [];
       window.currentChart.data.datasets[0].data = response.data.data || [];
+      window.currentChart.data.datasets[0].label = isSpecificCity ? 'Servicios por Técnico' : 'Servicios por Ciudad del Técnico';
       window.currentChart.update();
     }
   } catch (error) {
