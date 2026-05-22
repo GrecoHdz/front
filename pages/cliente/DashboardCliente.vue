@@ -3212,6 +3212,7 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+</script>
 
 <style scoped>
 @keyframes bounce-subtle {
