@@ -961,7 +961,7 @@
               v-if="['serviceTypeCity', 'techCity', 'cities'].includes(selectedChart)"
               v-model="selectedCityChart"
               :options="availableCities"
-              :searchable="true"
+              :searchable="false"
               :close-on-select="true"
               :show-labels="false"
               placeholder="Todas las ciudades"
