@@ -50,7 +50,7 @@
             </button>
             <button 
               @click="handleDecline"
-              class="w-full py-4 text-sm font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              class="w-full py-4 rounded-2xl text-sm font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-all active:scale-[0.98] shadow-sm"
             >
               {{ $t('pwa.pre_invite.cta_no') }}
             </button>

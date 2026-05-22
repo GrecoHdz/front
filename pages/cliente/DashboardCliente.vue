@@ -121,13 +121,15 @@
             
             <form @submit.prevent="handleRequestService" class="space-y-3">
               <!-- Warning if profile photo is missing -->
-              <div v-if="!hasProfilePhoto" class="bg-red-500/20 backdrop-blur-md border border-red-500/30 p-3 rounded-xl flex items-center gap-3 animate-pulse">
-                <span class="text-xl">📸</span>
+              <div v-if="!hasProfilePhoto" class="bg-amber-50 dark:bg-amber-900/40 border-2 border-amber-400 dark:border-amber-500/50 p-4 rounded-2xl flex items-center gap-4 shadow-xl animate-bounce-subtle group">
+                <div class="w-12 h-12 bg-amber-400 dark:bg-amber-500 rounded-[1.25rem] flex items-center justify-center text-2xl shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                  📸
+                </div>
                 <div class="flex-1">
-                  <p class="text-[11px] font-black text-white leading-tight">
+                  <p class="text-[11px] font-black text-amber-900 dark:text-amber-50 leading-tight mb-2">
                     {{ $t('dashboard_client.messages.photo_required') }}
                   </p>
-                  <button @click="navigateTo('/cliente/perfil')" type="button" class="mt-1 text-[10px] font-black uppercase tracking-widest text-white underline decoration-white/50">
+                  <button @click="navigateTo('/cliente/perfil')" type="button" class="text-[10px] font-black uppercase tracking-[0.1em] bg-amber-400 dark:bg-amber-500 text-amber-950 dark:text-white px-4 py-1.5 rounded-full shadow-sm hover:translate-y-[-1px] active:translate-y-[0px] transition-all">
                     {{ $t('profile.upload_photo') }}
                   </button>
                 </div>
@@ -3210,4 +3212,31 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-</script> 
+
+<style scoped>
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 3s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
