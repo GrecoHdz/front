@@ -1803,7 +1803,7 @@ const updateQuotation = async () => {
       body: requestData
     })
     
-    if ((response && response.status === 'success') || (Array.isArray(response) && response.length > 0)) {
+    if ((response && (response.status === 'success' || response.success)) || (Array.isArray(response) && response.length > 0)) {
       // Notificar al usuario sobre la actualización de la cotización
       try {
         const userId = selectedService.value.rawData.cliente?.id_usuario;

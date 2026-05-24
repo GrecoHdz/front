@@ -1106,7 +1106,7 @@
             </div>
 
             <!-- Cotizacion -->
-            <div v-if="selectedService?.cotizacion && ['en_proceso', 'pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(selectedService.estado)">
+            <div v-if="selectedService?.cotizacion && ['pendiente_cotizacion','en_proceso', 'pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(selectedService.estado)">
               <div class="flex justify-between items-center mb-2">
                 <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Cotización</h4>
                 <button 
@@ -1964,6 +1964,10 @@
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
                     <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
+                  </div>
+                  <div v-if="serviceToPayment.cotizacion.comentario" class="mt-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border border-green-100 dark:border-green-900/30">
+                    <span class="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold block mb-1">Diagnóstico Técnico</span>
+                    <p class="text-gray-900 dark:text-white italic leading-relaxed">{{ serviceToPayment.cotizacion.comentario }}</p>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
