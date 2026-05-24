@@ -3178,7 +3178,7 @@ const totalTechPages = ref(1)
 const selectedService = ref(null)
 const serviceToAssign = ref(null)
 const serviceToPayment = ref(null)
-const paymentType = ref('') // 'visit' or 'service'
+
 
 // Estado para la confirmación de pago
 const pendingPaymentAction = ref(null) // 'approve' or 'reject'
