@@ -2035,6 +2035,8 @@
           </div>
         </div>
       </div>
+    </Transition>
+
     <!-- Modal de Diagnóstico -->
     <Transition
       name="modal"
@@ -2840,7 +2842,8 @@ const anyModalOpen = computed(() => {
          showPackagePaymentDetailsModal.value || 
          showFacturaModal.value ||
          showDeleteConfirmModal.value ||
-         showWhatsAppSelectModal.value
+         showWhatsAppSelectModal.value ||
+         showDiagnosisModal.value
 })
 
 watch(anyModalOpen, (newValue) => {
