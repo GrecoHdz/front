@@ -292,6 +292,16 @@
                               </svg>
                             </button>
                             <button 
+                              v-if="service.cotizacion?.comentario"
+                              @click.stop="openDiagnosisModal(service.cotizacion.comentario)"
+                              class="p-0.5 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 transition-all duration-300 transform hover:scale-110"
+                              title="Ver diagnóstico técnico"
+                            >
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </button>
+                            <button 
                               v-if="service.estado === 'asignado'"
                               @click.stop="assignTechnician(service)"
                               class="p-0.5 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-300 transform hover:scale-110"
@@ -955,6 +965,16 @@
                         
                         <div class="flex space-x-0.5">
                           <button 
+                            v-if="service.cotizacion?.comentario"
+                            @click.stop="openDiagnosisModal(service.cotizacion.comentario)"
+                            class="p-0.5 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 transition-all duration-300 transform hover:scale-110"
+                            title="Ver diagnóstico técnico"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </button>
+                          <button 
                             @click.stop="confirmDeleteService(service)"
                             class="p-0.5 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-all duration-300 transform hover:scale-110"
                             title="Eliminar solicitud"
@@ -1107,17 +1127,36 @@
 
             <!-- Cotizacion -->
             <div v-if="selectedService?.cotizacion && ['pendiente_cotizacion','en_proceso', 'pendiente_pagoservicio', 'verificando_pagoservicio', 'finalizado', 'calificado'].includes(selectedService.estado)">
-              <div class="flex justify-between items-center mb-2">
-                <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Cotización</h4>
+              <div class="flex flex-col gap-2 mb-2">
+                <div class="flex justify-between items-center">
+                  <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">Cotización</h4>
+                  <button 
+                    @click="openAmountDetails('service', selectedService)"
+                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs flex items-center bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-lg transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Detalles del Monto
+                  </button>
+                </div>
+                
                 <button 
-                  @click="openAmountDetails('service', selectedService)"
-                  class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs flex items-center"
+                  v-if="selectedService?.cotizacion?.comentario"
+                  @click="openDiagnosisModal(selectedService.cotizacion.comentario)"
+                  class="w-full flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40 rounded-xl text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all font-medium group"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <span class="text-xs sm:text-sm">Ver Diagnóstico del Técnico</span>
+                  </div>
+                  <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
-                  Ver detalles
                 </button>
               </div>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
@@ -1965,10 +2004,6 @@
                     <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
                     <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
                   </div>
-                  <div v-if="serviceToPayment.cotizacion.comentario" class="mt-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border border-green-100 dark:border-green-900/30">
-                    <span class="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold block mb-1">Diagnóstico Técnico</span>
-                    <p class="text-gray-900 dark:text-white italic leading-relaxed">{{ serviceToPayment.cotizacion.comentario }}</p>
-                  </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
                     <span class="font-medium text-green-600 dark:text-green-400">-L. {{ serviceToPayment.cotizacion.descuento_membresia || 0 }}</span>
@@ -1984,7 +2019,87 @@
                   </div>
                 </div>
               </div>
+              
+              <div v-if="serviceToPayment?.cotizacion?.comentario" class="mt-3">
+                <button 
+                  @click="openDiagnosisModal(serviceToPayment.cotizacion.comentario)"
+                  class="w-full flex items-center justify-center p-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40 rounded-xl text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all font-bold text-xs group"
+                >
+                  <svg class="w-4 h-4 mr-2 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Ver Diagnóstico Técnico
+                </button>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+    <!-- Modal de Diagnóstico -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showDiagnosisModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDiagnosisModal = false"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col relative z-10 overflow-hidden border border-gray-100 dark:border-gray-700">
+          <!-- Header -->
+          <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-emerald-50/50 dark:bg-emerald-900/10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-black text-gray-900 dark:text-white">Diagnóstico Técnico</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Detalles técnicos del servicio</p>
+                </div>
+              </div>
+              <button @click="showDiagnosisModal = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 overflow-y-auto p-6">
+            <div class="prose dark:prose-invert max-w-none">
+              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-gray-800 min-h-[150px]">
+                <p class="text-gray-700 dark:text-gray-300 text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
+                  {{ diagnosisText }}
+                </p>
+              </div>
+            </div>
+            
+            <!-- Metadata sutil -->
+            <div class="mt-6 flex items-center justify-between text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 px-1">
+              <div class="flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Registrado por el técnico
+              </div>
+              <div v-if="selectedService?.id_solicitud">
+                Servicio #{{ selectedService.id_solicitud }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/20 text-center">
+            <button 
+              @click="showDiagnosisModal = false"
+              class="w-full sm:w-auto px-8 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-xl hover:opacity-90 transition-opacity text-sm"
+            >
+              Cerrar Diagnóstico
+            </button>
           </div>
         </div>
       </div>
@@ -2686,6 +2801,14 @@ const loadingPackages = ref(false)
 const isProcessingPayment = ref(false)
 const isVerifying = ref(false)
 const showPaymentConfirmationModal = ref(false)
+const showDiagnosisModal = ref(false)
+const diagnosisText = ref('')
+const paymentType = ref('visit') // 'visit' o 'service'
+
+const openDiagnosisModal = (text) => {
+  diagnosisText.value = text
+  showDiagnosisModal.value = true
+}
 const showDetailModal = ref(false)
 const showLiquidacionModal = ref(false)
 const techSearchQuery = ref('')
