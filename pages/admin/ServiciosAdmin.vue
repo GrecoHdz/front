@@ -293,7 +293,7 @@
                             </button>
                             <button 
                               v-if="service.cotizacion?.comentario"
-                              @click.stop="openDiagnosisModal(service.cotizacion.comentario)"
+                              @click.stop="openDiagnosisModal(service.cotizacion.comentario, service)"
                               class="p-0.5 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 transition-all duration-300 transform hover:scale-110"
                               title="Ver diagnóstico técnico"
                             >
@@ -2022,7 +2022,7 @@
               
               <div v-if="serviceToPayment?.cotizacion?.comentario" class="mt-3">
                 <button 
-                  @click="openDiagnosisModal(serviceToPayment.cotizacion.comentario)"
+                  @click="openDiagnosisModal(serviceToPayment.cotizacion.comentario, serviceToPayment)"
                   class="w-full flex items-center justify-center p-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40 rounded-xl text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all font-bold text-xs group"
                 >
                   <svg class="w-4 h-4 mr-2 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2807,8 +2807,11 @@ const showDiagnosisModal = ref(false)
 const diagnosisText = ref('')
 const paymentType = ref('visit') // 'visit' o 'service'
 
-const openDiagnosisModal = (text) => {
+const openDiagnosisModal = (text, service = null) => {
   diagnosisText.value = text
+  if (service) {
+    selectedService.value = service
+  }
   showDiagnosisModal.value = true
 }
 const showDetailModal = ref(false)
