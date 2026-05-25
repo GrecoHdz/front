@@ -1140,27 +1140,9 @@
                     Detalles del Monto
                   </button>
                 </div>
-                
-                <button 
-                  v-if="selectedService?.cotizacion?.comentario"
-                  @click="openDiagnosisModal(selectedService.cotizacion.comentario)"
-                  class="w-full flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40 rounded-xl text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all font-medium group"
-                >
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <span class="text-xs sm:text-sm">Ver Diagnóstico del Técnico</span>
-                  </div>
-                  <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
               </div>
               <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ selectedService.cotizacion.total }}</p>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">L. {{ selectedService.cotizacion.total }}</p>
               </div>
             </div>
             
