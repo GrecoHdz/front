@@ -1504,7 +1504,7 @@ const initializeChartObject = () => {
 const activeTab = ref('membership');
 const selectedMonthTransactions = ref('');
 const selectedMonthPayments = ref('');
-const selectedMonthReports = ref(new Date().toISOString().slice(0, 7));
+const selectedMonthReports = ref(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`);
 const statusFilter = ref('all');
 const showServiceDetailModal = ref(false);
 const showDetailsModal = ref(false);
@@ -1552,7 +1552,7 @@ const transactions = ref([]);
 const isProcessingBilling = ref(false);
 const isApproving = ref(false);
 const isRejecting = ref(false);
-const billingMonth = ref(new Date().toISOString().slice(0, 7));
+const billingMonth = ref(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`);
 const pendingBillingItems = ref([]);
 const currentBillingItem = ref(null);
 const billingForm = reactive({

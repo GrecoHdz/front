@@ -779,7 +779,6 @@
               </div>
             </section>
 
-
             <!-- SECCIÓN: HISTORIAL -->
             <section class="px-3 sm:px-6 mb-4 sm:mb-6">
               <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
@@ -2932,7 +2931,8 @@ const selectedStatus = ref('')
 const selectedServiceType = ref('')
 const selectedCity = ref('')
 const selectedTechCity = ref('')
-const selectedMonth = ref(new Date().toISOString().slice(0, 7)) // Formato YYYY-MM
+const now = new Date()
+const selectedMonth = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`) // Formato YYYY-MM (hora local)
 
 // Variables para el manejo de pestañas y estados
 const activePackageTab = ref('verificando_pago'); // 'verificando_pago' o 'utilizando'
