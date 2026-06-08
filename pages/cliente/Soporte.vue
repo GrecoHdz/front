@@ -45,10 +45,6 @@
               :custom-label="getSubjectLabel"
               :no-options-label="$t('common.no_options')"
               :no-result-label="$t('common.no_results')"
-              @search-change="$event && $event.stopPropagation()"
-              @search-focus="(e) => e && e.target && e.target.blur()"
-              @touchstart.native.stop
-              @click.native.stop
               :options-limit="100"
             >
               <template #singleLabel="{ option }">
@@ -78,13 +74,9 @@
                 :custom-label="getServicioLabel"
                 :no-options-label="$t('support_page.no_finished_services')"
                 :no-result-label="$t('marketplace.no_results')"
-                @search-change="$event && $event.stopPropagation()"
-                @search-focus="(e) => e && e.target && e.target.blur()"
-                @touchstart.native.stop
-                @click.native.stop
                 :options-limit="100"
-                :disabled="cargandoServicios"
-                :loading="cargandoServicios"
+                :disabled="isLoadingServices"
+                :loading="isLoadingServices"
               >
                 <template #singleLabel="{ option }">
                   <span class="text-sm truncate">{{ getServicioLabel(option) }}</span>
@@ -96,12 +88,12 @@
                 class="absolute -inset-1 bg-blue-500/20 rounded-lg animate-pulse z-0"
               ></div>
             </div>
-            <p v-if="cargandoServicios" class="text-sm text-blue-600 dark:text-blue-400 mt-1">{{ $t('support_page.loading_services') }}</p>
-            <p v-if="errorCargaServicios" class="text-sm text-red-600 dark:text-red-400 mt-1">{{ errorCargaServicios }}</p>
+            <p v-if="isLoadingServices" class="text-sm text-blue-600 dark:text-blue-400 mt-1">{{ $t('support_page.loading_services') }}</p>
+            <p v-if="servicesError" class="text-sm text-red-600 dark:text-red-400 mt-1">{{ servicesError }}</p>
           </div>
           
           <!-- Mensaje cuando no hay servicios finalizados -->
-          <div v-if="form.subject === 'falla' && !cargandoServicios && serviciosFinalizados.length === 0 && !errorCargaServicios">
+          <div v-if="form.subject === 'falla' && !isLoadingServices && serviciosFinalizados.length === 0 && !servicesError">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('support_page.service_issue') }}</label>
             <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
               <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('support_page.no_finished_services') }}</p>
@@ -671,8 +663,10 @@ const submitForm = async () => {
     // Resetear formulario
     form.value = {
       subject: '',
+      subjectObject: null,
       message: '',
-      servicio_id: ''
+      servicio_id: '',
+      servicioObject: null
     }
     
   } catch (error) {
@@ -748,12 +742,12 @@ onMounted(async () => {
 
 // Watch para sincronizar subject con subjectObject
 watch(() => form.value.subject, (newVal) => {
-  if (newVal && subjectOptions.length > 0) {
-    const subjectObject = subjectOptions.find(s => s.value === newVal);
+  if (newVal && subjectOptions.value && subjectOptions.value.length > 0) {
+    const subjectObject = subjectOptions.value.find(s => s.value === newVal);
     if (subjectObject) {
       form.value.subjectObject = subjectObject;
     }
-  } else {
+  } else if (!newVal) {
     form.value.subjectObject = null;
   }
 });
@@ -768,7 +762,7 @@ watch(() => form.value.subjectObject, (newSubject) => {
 });
 
 // Watch para cargar servicios cuando se selecciona "Problema con un Servicio Completado"
-watch(() => form.subject, async (newVal) => {
+watch(() => form.value.subject, async (newVal) => {
   // Si se selecciona "Problema con un Servicio Completado", cargar los servicios
   if (newVal === 'falla') {
     await cargarServiciosFinalizados()
@@ -782,7 +776,7 @@ watch(() => form.value.servicio_id, (newId) => {
     if (servicioObject) {
       form.value.servicioObject = servicioObject;
     }
-  } else {
+  } else if (!newId) {
     form.value.servicioObject = null;
   }
 });
