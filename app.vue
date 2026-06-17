@@ -11,7 +11,7 @@
             class="w-full max-w-sm py-5 bg-blue-600 text-white font-black rounded-3xl shadow-2xl shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-3"
             target="_blank"
         >
-            🚀 Abrir en mi navegador
+            Abrir en mi navegador
         </a>
     </div>
 

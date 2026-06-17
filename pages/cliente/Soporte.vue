@@ -639,14 +639,14 @@ const submitForm = async () => {
       await $api('/notificaciones/enviar', {
         method: 'POST',
         body: {
-          titulo: t('dashboard_client.notifications.usage_request'),
+          titulo: t('dashboard_client.notifications.new_ticket'),
           nombre_rol: 'admin'
         }
       });
       await $api('/notificaciones/enviar', {
           method: 'POST',
           body: {
-            titulo: t('dashboard_client.notifications.usage_request'),
+            titulo: t('dashboard_client.notifications.new_ticket'),
             nombre_rol: 'sa'
           }
         });

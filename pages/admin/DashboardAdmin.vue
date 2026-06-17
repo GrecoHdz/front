@@ -456,9 +456,11 @@ import Toast from '~/components/ui/Toast.vue'
 import PWAInstallInvite from '~/components/ui/PWAInstallInvite.vue'
 import PushNotificationInvite from '~/components/ui/PushNotificationInvite.vue'
 import { useAppPWA } from '~/composables/useAppPWA'
+import { useI18n } from 'vue-i18n'
 
 // ===== VARIABLES DE CONFIGURACIÓN =====
 const { $api } = useNuxtApp();
+const { t } = useI18n()
 const config = useRuntimeConfig()
 const auth = useAuthStore()
 const userCookie = useCookie('user')
@@ -791,6 +793,7 @@ const fetchSupportTickets = async () => {
 
         return {
           id: ticket.id_soporte,
+          id_usuario: ticket.id_usuario,
           subject: ticket.asunto,
           message: ticket.mensaje,
           user: ticket.usuario.nombre,
@@ -1391,6 +1394,21 @@ const handleResolveClick = async () => {
     
     // Realizar la petición
     await marcarComoResuelto(selectedTicket.value)
+    
+    // Enviar notificación al usuario de que su ticket ha recibido respuesta/resuelto
+    try {
+      if (selectedTicket.value.id_usuario) {
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          body: {
+            titulo: t('dashboard_client.notifications.ticket_response_received'),
+            id_usuario: selectedTicket.value.id_usuario
+          }
+        });
+      }
+    } catch (notifError) {
+      console.error('Error al enviar notificación de respuesta de ticket:', notifError)
+    }
     
     // Mostrar mensaje de éxito
     showSuccess('El ticket se ha marcado como resuelto correctamente')
