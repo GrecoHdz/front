@@ -92,30 +92,52 @@
         <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4 leading-tight">
           {{ $t('value_prop_title1') }}<br>
           <span class="gradient-text">{{ $t('value_prop_title2') }}</span>
-        </h3>
-        <p class="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-sm mx-auto">
-          {{ $t('value_prop_description') }}
-        </p>
+        </h3>  
 
-        <!-- Simple How it Works -->
-        <div class="grid grid-cols-3 gap-2 mb-8 max-w-md mx-auto px-2">
-          <div class="flex flex-col items-center group">
-            <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-emerald-100 dark:border-emerald-800 transition-transform group-hover:scale-110">
-              📱
+        <!-- Premium How it Works -->
+        <div class="relative mb-8 max-w-sm mx-auto px-2">
+          <!-- Connector line -->
+          <div class="absolute top-6 left-[calc(16.66%+8px)] right-[calc(16.66%+8px)] h-px border-t-2 border-dashed border-gray-200 dark:border-gray-700 z-0"></div>
+
+          <div class="grid grid-cols-3 gap-2 relative z-10">
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center group cursor-default">
+              <div class="relative mb-2">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-2xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-emerald-200 dark:group-hover:shadow-emerald-900/50">
+                  📱
+                </div>
+                <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-emerald-400 flex items-center justify-center">
+                  <span class="text-[9px] font-black text-emerald-500 leading-none">1</span>
+                </div>
+              </div>
+              <span class="text-[10px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step1') }}</span>
             </div>
-            <span class="text-[10px] text-gray-500 font-bold leading-tight" v-html="$t('step1').replace('desde', 'desde<br>')"></span>
-          </div>
-          <div class="flex flex-col items-center group">
-            <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-blue-100 dark:border-blue-800 transition-transform group-hover:scale-110">
-              👷
+
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center group cursor-default">
+              <div class="relative mb-2">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-blue-200 dark:group-hover:shadow-blue-900/50">
+                  👷
+                </div>
+                <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-blue-500 flex items-center justify-center">
+                  <span class="text-[9px] font-black text-blue-500 leading-none">2</span>
+                </div>
+              </div>
+              <span class="text-[10px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step2') }}</span>
             </div>
-            <span class="text-[10px] text-gray-500 font-bold leading-tight" v-html="$t('step2').replace('de', 'de<br>')"></span>
-          </div>
-          <div class="flex flex-col items-center group">
-            <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-xl mb-2 border border-amber-100 dark:border-amber-800 transition-transform group-hover:scale-110">
-              ✅
+
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center group cursor-default">
+              <div class="relative mb-2">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-amber-200 dark:group-hover:shadow-amber-900/50">
+                  ✅
+                </div>
+                <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-amber-400 flex items-center justify-center">
+                  <span class="text-[9px] font-black text-amber-500 leading-none">3</span>
+                </div>
+              </div>
+              <span class="text-[10px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step3') }}</span>
             </div>
-            <span class="text-[10px] text-gray-500 font-bold leading-tight" v-html="$t('step3').replace('Solución', 'Solución<br>')"></span>
           </div>
         </div>
 
