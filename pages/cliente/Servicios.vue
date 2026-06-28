@@ -786,7 +786,7 @@
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
               
-              <div v-else>
+              <div v-else class="space-y-3">
                 <multiselect
                   v-model="selectedAccountObject"
                   :options="bankAccounts"
@@ -923,7 +923,7 @@
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
               
-              <div v-else>
+              <div v-else class="space-y-3">
                 <multiselect
                   v-model="selectedAccountObject"
                   :options="bankAccounts"
@@ -1060,7 +1060,7 @@
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
               
-              <div v-else>
+              <div v-else class="space-y-3">
                 <multiselect
                   v-model="selectedAccountObject"
                   :options="bankAccounts"
@@ -4644,6 +4644,27 @@ onMounted(async () => {
 
 <style>
 /* Estilos personalizados para Multiselect - Limpieza total */
+
+/* FIX: Eliminar el gap entre el label/h4 y el multiselect.
+   vue-multiselect aplica padding-top: 8px por defecto en __tags,
+   lo que crea un espacio vacío visible entre el texto y el widget. */
+.multiselect-custom :deep(.multiselect__tags) {
+  padding-top: 4px !important;
+  min-height: 38px !important;
+}
+
+.multiselect-custom :deep(.multiselect__placeholder) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  line-height: 28px !important;
+}
+
+.multiselect-custom :deep(.multiselect__single) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  line-height: 28px !important;
+}
+
 .multiselect-custom :deep(.multiselect__option) {
   text-shadow: none !important;
 }
