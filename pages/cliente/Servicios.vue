@@ -786,7 +786,7 @@
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
               
-              <div v-else class="space-y-3">
+              <div v-else>
                 <multiselect
                   v-model="selectedAccountObject"
                   :options="bankAccounts"
@@ -923,7 +923,7 @@
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
               
-              <div v-else class="space-y-3">
+              <div v-else>
                 <multiselect
                   v-model="selectedAccountObject"
                   :options="bankAccounts"
@@ -1060,7 +1060,7 @@
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
               
-              <div v-else class="space-y-3">
+              <div v-else>
                 <multiselect
                   v-model="selectedAccountObject"
                   :options="bankAccounts"
