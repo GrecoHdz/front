@@ -1559,7 +1559,7 @@ const getServiceIcon = (serviceName) => {
     'electri': '💡',
     'cámara': '🎥',
     'aire': '❄️', 
-    'ac': '❄️',
+    'reparaci': '🔧',
     'pintur': '🎨', 
     'cerraj': '🔑',
     'jardin': '🌿',
