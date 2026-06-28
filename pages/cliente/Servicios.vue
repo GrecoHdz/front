@@ -780,7 +780,7 @@
 
             <!-- Información de Pago -->
             <div>
-              <h4 class="text-sm font-black text-gray-900 dark:text-white mb-1">{{ $t('profile.membership.select_account_desc') }}</h4>
+              <p class="text-sm font-black text-gray-900 dark:text-white mb-1">{{ $t('profile.membership.select_account_desc') }}</p>
               
               <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
@@ -917,7 +917,7 @@
 
             <!-- Información de Pago -->
             <div>
-              <h4 class="text-sm font-black text-gray-900 dark:text-white mb-1">{{ $t('profile.membership.select_account_desc') }}</h4>
+              <p class="text-sm font-black text-gray-900 dark:text-white mb-1">{{ $t('profile.membership.select_account_desc') }}</p>
               
               <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
@@ -1054,7 +1054,7 @@
 
             <!-- Información de Pago -->
             <div>
-              <h4 class="text-sm font-black text-gray-900 dark:text-white mb-1">{{ $t('auth.profile.membership.select_account_desc') }}</h4>
+              <p class="text-sm font-black text-gray-900 dark:text-white mb-1">{{ $t('auth.profile.membership.select_account_desc') }}</p>
               
               <div v-if="isLoadingAccounts" class="p-6 flex justify-center">
                 <div class="w-6 h-6 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
