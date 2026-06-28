@@ -4643,57 +4643,55 @@ onMounted(async () => {
 </script>
 
 <style>
-/* Estilos personalizados para Multiselect - Limpieza total */
+/* Estilos personalizados para Multiselect (non-scoped: sin :deep()) */
 
-/* FIX: Eliminar el gap entre el label/h4 y el multiselect.
-   vue-multiselect aplica padding-top: 8px por defecto en __tags,
-   lo que crea un espacio vacío visible entre el texto y el widget. */
-.multiselect-custom :deep(.multiselect__tags) {
+/* FIX GAP: el padding-top:8px por defecto en __tags crea el espacio entre
+   el label/h4 y el multiselect. Con el style NO scoped, se escribe CSS normal. */
+.multiselect-custom .multiselect__tags {
   padding-top: 4px !important;
   min-height: 38px !important;
 }
 
-.multiselect-custom :deep(.multiselect__placeholder) {
+.multiselect-custom .multiselect__placeholder {
   margin-top: 0 !important;
   padding-top: 0 !important;
   line-height: 28px !important;
 }
 
-.multiselect-custom :deep(.multiselect__single) {
+.multiselect-custom .multiselect__single {
   margin-top: 0 !important;
   padding-top: 0 !important;
   line-height: 28px !important;
 }
 
-.multiselect-custom :deep(.multiselect__option) {
+.multiselect-custom .multiselect__input {
+  background: transparent !important;
   text-shadow: none !important;
 }
 
-.multiselect-custom :deep(.multiselect__option--selected),
-.multiselect-custom :deep(.multiselect__option--selected:hover),
-.multiselect-custom :deep(.multiselect__option--selected.multiselect__option--highlight) {
+.multiselect-custom .multiselect__option {
+  text-shadow: none !important;
+}
+
+.multiselect-custom .multiselect__option--selected,
+.multiselect-custom .multiselect__option--selected:hover,
+.multiselect-custom .multiselect__option--selected.multiselect__option--highlight {
   background: transparent !important;
   color: inherit !important;
   font-weight: bold !important;
   text-shadow: none !important;
 }
 
-.multiselect-custom :deep(.multiselect__option--highlight),
-.multiselect-custom :deep(.multiselect__option--highlight:hover) {
+.multiselect-custom .multiselect__option--highlight,
+.multiselect-custom .multiselect__option--highlight:hover {
   background: transparent !important;
   color: inherit !important;
   text-shadow: none !important;
   font-weight: bold !important;
 }
 
-.multiselect-custom :deep(.multiselect__single),
-.multiselect-custom :deep(.multiselect__input) {
-  background: transparent !important;
-  text-shadow: none !important;
-}
-
-.multiselect-custom :deep(.multiselect__option--highlight:after),
-.multiselect-custom :deep(.multiselect__option--selected:after) {
+.multiselect-custom .multiselect__option--highlight:after,
+.multiselect-custom .multiselect__option--selected:after {
   display: none !important;
 }
 </style>
