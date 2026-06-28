@@ -92,7 +92,11 @@
         <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4 leading-tight">
           {{ $t('value_prop_title1') }}<br>
           <span class="gradient-text">{{ $t('value_prop_title2') }}</span>
-        </h3>  
+        </h3>
+
+        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6 max-w-xs mx-auto leading-relaxed">
+          {{ $t('value_prop_description') }}
+        </p>
 
         <!-- Premium How it Works -->
         <div class="relative mb-8 max-w-sm mx-auto px-2">
@@ -107,10 +111,9 @@
                   📱
                 </div>
                 <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-emerald-400 flex items-center justify-center">
-                  <span class="text-[9px] font-black text-emerald-500 leading-none">1</span>
                 </div>
               </div>
-              <span class="text-[10px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step1') }}</span>
+              <span class="text-[9px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step1') }}</span>
             </div>
 
             <!-- Step 2 -->
@@ -120,10 +123,9 @@
                   👷
                 </div>
                 <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-blue-500 flex items-center justify-center">
-                  <span class="text-[9px] font-black text-blue-500 leading-none">2</span>
                 </div>
               </div>
-              <span class="text-[10px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step2') }}</span>
+              <span class="text-[9px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step2') }}</span>
             </div>
 
             <!-- Step 3 -->
@@ -133,10 +135,9 @@
                   ✅
                 </div>
                 <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-amber-400 flex items-center justify-center">
-                  <span class="text-[9px] font-black text-amber-500 leading-none">3</span>
                 </div>
               </div>
-              <span class="text-[10px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step3') }}</span>
+              <span class="text-[9px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step3') }}</span>
             </div>
           </div>
         </div>
