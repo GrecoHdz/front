@@ -109,11 +109,9 @@
               <div class="relative mb-2">
                 <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-2xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-emerald-200 dark:group-hover:shadow-emerald-900/50">
                   📱
-                </div>
-                <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-emerald-400 flex items-center justify-center">
-                </div>
+                </div> 
               </div>
-              <span class="text-[9px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step1') }}</span>
+              <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step1') }}</span>
             </div>
 
             <!-- Step 2 -->
@@ -122,10 +120,8 @@
                 <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-blue-200 dark:group-hover:shadow-blue-900/50">
                   👷
                 </div>
-                <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-blue-500 flex items-center justify-center">
-                </div>
               </div>
-              <span class="text-[9px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step2') }}</span>
+              <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step2') }}</span>
             </div>
 
             <!-- Step 3 -->
@@ -134,10 +130,8 @@
                 <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-amber-200 dark:group-hover:shadow-amber-900/50">
                   ✅
                 </div>
-                <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-2 border-amber-400 flex items-center justify-center">
-                </div>
               </div>
-              <span class="text-[9px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step3') }}</span>
+              <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step3') }}</span>
             </div>
           </div>
         </div>
