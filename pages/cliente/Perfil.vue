@@ -89,15 +89,6 @@
               <span class="text-[10px] font-black uppercase tracking-[0.1em]">{{ $t('profile.verify_identity') }}</span>
               <i class="fas fa-chevron-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
             </button>
-            <div 
-              v-else
-              class="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-800/30 shadow-sm"
-            >
-              <div class="flex items-center justify-center w-4 h-4 bg-emerald-500 rounded-full">
-                <i class="fas fa-check text-white text-[8px]"></i>
-              </div>
-              <span class="text-[10px] font-black uppercase tracking-widest">{{ $t('profile.verified_account') }}</span>
-            </div>
           </div>
         </div>
         
