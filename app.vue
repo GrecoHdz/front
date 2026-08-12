@@ -74,6 +74,8 @@ const initialLoading = ref(true);
 const { isIAB, isIOS, getExternalBrowserLink } = useIABDetector();
 const { isInstalled, initPWA } = useAppPWA();
 
+const route = useRoute();
+
 // 🔄 Spinner inteligente: espera montaje inicial y validación de sesión si hay token
 const isLoading = computed(() => {
   const publicPathsWithoutFetch = [
@@ -96,7 +98,6 @@ watch(isLoading, (val) => {
 }, { immediate: true });
 
 const { $pwa } = useNuxtApp();
-const route = useRoute();
 
 // Lógica de actualización de PWA
 watch(() => $pwa?.needRefresh, (refresh) => {
