@@ -76,6 +76,16 @@ const { isInstalled, initPWA } = useAppPWA();
 
 // 🔄 Spinner inteligente: espera montaje inicial y validación de sesión si hay token
 const isLoading = computed(() => {
+  const publicPathsWithoutFetch = [
+    '/registro',
+    '/auth',
+    '/usuario-deshabilitado',
+    '/reset-password',
+    '/forgot-password'
+  ];
+  if (publicPathsWithoutFetch.includes(route.path)) {
+    return initialLoading.value;
+  }
   const result = (auth.token && !auth.isFetched) || initialLoading.value;
   return result;
 });
