@@ -1294,6 +1294,10 @@ const checkAuthStatus = async () => {
     const isAuthenticated = await auth.checkAuth()
     
     if (isAuthenticated) {
+      if (auth.user?.estado === 'deshabilitado') {
+        navigateTo('/usuario-deshabilitado', { replace: true })
+        return
+      }
       // Si está autenticado, redirigir al dashboard correspondiente según su rol
       const userRole = auth.user?.role?.toLowerCase() || 'usuario';
       let dashboardPath = '/cliente/DashboardCliente'; // Default
@@ -1782,6 +1786,15 @@ const handleAuth = async () => {
           
           await new Promise(resolve => setTimeout(resolve, 800));
           
+          if (auth.user?.estado === 'deshabilitado') {
+            showLoginModal.value = false;
+            showSuccess.value = true;
+            setTimeout(() => {
+              window.location.href = '/usuario-deshabilitado';
+            }, 300);
+            return;
+          }
+
           const userRole = auth.user?.role?.toLowerCase() || '';
           
           showLoginModal.value = false;

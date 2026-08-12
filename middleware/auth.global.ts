@@ -90,6 +90,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
         }
 
         if (auth.user) {
+          if (auth.user.estado === 'deshabilitado') {
+            console.log('🚫 [Middleware] Usuario deshabilitado. Redirigiendo a /usuario-deshabilitado');
+            return navigateTo('/usuario-deshabilitado', { replace: true });
+          }
           const redirectTarget = getRedirectTarget();
           const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
           const targetDashboard = redirectTarget || getDashboardPath(userRole);
@@ -122,6 +126,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
             console.log('🔄 [Middleware] Intentando restaurar sesión proactivamente en home...');
             const refreshed = await auth.refreshToken();
             if (refreshed && auth.user) {
+              if (auth.user.estado === 'deshabilitado') {
+                console.log('🚫 [Middleware] Usuario deshabilitado en sesión restaurada. Redirigiendo a /usuario-deshabilitado');
+                return navigateTo('/usuario-deshabilitado', { replace: true });
+              }
               const redirectTarget = getRedirectTarget();
               const userRole = (auth.user?.role?.toLowerCase() as UserRole) || 'usuario';
               const targetDashboard = redirectTarget || getDashboardPath(userRole);
