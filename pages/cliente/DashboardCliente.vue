@@ -133,9 +133,7 @@
                     {{ $t('profile.upload_photo') }}
                   </button>
                 </div>
-              </div>
-
-              <div class="grid" :class="selectedServiceObject?.name_es === 'Barbería' ? 'grid-cols-2 gap-2' : 'grid-cols-1'">
+              <div class="grid" :class="isBarberiaServiceSelected ? 'grid-cols-2 gap-2' : 'grid-cols-1'">
                 <!-- Select Principal de Servicio -->
                 <div class="multiselect-service-wrapper">
                   <multiselect v-model="selectedServiceObject" 
@@ -170,7 +168,7 @@
                 </div>
 
                 <!-- Select Tipo de Barbería (Solo si es Barbería) -->
-                <div v-if="selectedServiceObject?.name_es === 'Barbería'" class="multiselect-service-wrapper animate-fade-in">
+                <div v-if="isBarberiaServiceSelected" class="multiselect-service-wrapper animate-fade-in">
                   <multiselect
                     v-model="barberiaTypeSelected"
                     :options="barberiaTypeOptions"
@@ -199,7 +197,7 @@
               </div>
               
               <!-- Selección de Barbería Específica (En local) -->
-              <div v-if="selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'" class="space-y-3">
+              <div v-if="isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local'" class="space-y-3">
                 <div class="multiselect-service-wrapper animate-fade-in">
                   <multiselect
                     v-model="serviceFormData.selectedBarberia"
@@ -223,55 +221,43 @@
                 </div>
               </div>
 
-                <!-- Image Placeholders for 'En local' -->
-                <div v-if="selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local' && serviceFormData.selectedBarberia" class="grid grid-cols-2 gap-3 animate-fade-in">
-                  <div class="aspect-video rounded-xl bg-white/10 border-2 border-dashed border-white/30 flex flex-col items-center justify-center text-white/50 overflow-hidden relative group">
-                    <img v-if="serviceFormData.selectedBarberia.foto1" :src="serviceFormData.selectedBarberia.foto1" class="absolute inset-0 w-full h-full object-cover">
-                    <div v-else class="flex flex-col items-center">
-                      <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span class="text-[10px] font-black uppercase tracking-wider">{{ $t('dashboard_client.local_image', { n: 1 }) }}</span>
-                    </div>
-                  </div>
-                  <div class="aspect-video rounded-xl bg-white/10 border-2 border-dashed border-white/30 flex flex-col items-center justify-center text-white/50 overflow-hidden relative group">
-                    <img v-if="serviceFormData.selectedBarberia.foto2" :src="serviceFormData.selectedBarberia.foto2" class="absolute inset-0 w-full h-full object-cover">
-                    <div v-else class="flex flex-col items-center">
-                      <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span class="text-[10px] font-black uppercase tracking-wider">{{ $t('dashboard_client.local_image', { n: 2 }) }}</span>
-                    </div>
-                  </div>
-                </div>
-              
-
-
+              <!-- Dirección: COLONIA+DIRECCION (Único input arriba de las fotos del local) -->
               <div v-if="shouldShowFormFields" class="animate-fade-in">
-                <textarea v-model="serviceFormData.description" 
-                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.viaje_privado_placeholder') : (selectedServiceObject?.name_es === 'Barbería' ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
-                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
-                />
+                <input v-model="direccionCompletaInput" 
+                       type="text"
+                       :readonly="isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local'"
+                       :placeholder="isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local' ? 'Dirección: COLONIA+DIRECCION' : (selectedServiceObject?.name_es === 'Viaje Privado' ? 'Dirección: ORIGEN - DESTINO' : 'Dirección: COLONIA - DIRECCIÓN')"
+                       class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
+                       :class="{'opacity-70 cursor-not-allowed': isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local'}">
               </div>
 
+              <!-- Image Placeholders for 'En local' -->
+              <div v-if="isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local' && serviceFormData.selectedBarberia" class="grid grid-cols-2 gap-3 animate-fade-in">
+                <div class="aspect-video rounded-xl bg-white/10 border-2 border-dashed border-white/30 flex flex-col items-center justify-center text-white/50 overflow-hidden relative group">
+                  <img v-if="serviceFormData.selectedBarberia.foto1" :src="serviceFormData.selectedBarberia.foto1" class="absolute inset-0 w-full h-full object-cover">
+                  <div v-else class="flex flex-col items-center">
+                    <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-[10px] font-black uppercase tracking-wider">{{ $t('dashboard_client.local_image', { n: 1 }) }}</span>
+                  </div>
+                </div>
+                <div class="aspect-video rounded-xl bg-white/10 border-2 border-dashed border-white/30 flex flex-col items-center justify-center text-white/50 overflow-hidden relative group">
+                  <img v-if="serviceFormData.selectedBarberia.foto2" :src="serviceFormData.selectedBarberia.foto2" class="absolute inset-0 w-full h-full object-cover">
+                  <div v-else class="flex flex-col items-center">
+                    <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-[10px] font-black uppercase tracking-wider">{{ $t('dashboard_client.local_image', { n: 2 }) }}</span>
+                  </div>
+                </div>
+              </div>
               
-              <div v-if="shouldShowFormFields" class="grid grid-cols-2 gap-2 animate-fade-in">
-                <div>
-                  <input v-model="serviceFormData.colonia" 
-                         type="text"
-                         :readonly="selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
-                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.pickup') : $t('dashboard_client.neighborhood')"
-                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
-                         :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
-                </div>
-                <div>
-                  <input v-model="serviceFormData.direccion" 
-                         type="text"
-                         :readonly="selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'"
-                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.destination') : $t('dashboard_client.precise_address')"
-                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
-                         :class="{'opacity-70 cursor-not-allowed': selectedServiceObject?.name_es === 'Barbería' && serviceFormData.barberiaOption === 'en local'}">
-                </div>
+              <div v-if="shouldShowFormFields" class="animate-fade-in">
+                <textarea v-model="serviceFormData.description" 
+                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.viaje_privado_placeholder') : (isBarberiaServiceSelected ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
+                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
+                />
               </div>
 
               <button type="submit" 
@@ -1378,6 +1364,43 @@ const conductorVehiculo = ref(null)
 
 const selectedServiceObject = ref(null)
 
+const isBarberiaServiceSelected = computed(() => {
+  if (!selectedServiceObject.value) return false
+  const name = (selectedServiceObject.value.name_es || selectedServiceObject.value.name || '').toLowerCase()
+  return name.includes('barberia') || name.includes('barbería')
+})
+
+const direccionCompletaInput = computed({
+  get: () => {
+    if (isBarberiaServiceSelected.value && serviceFormData.value.barberiaOption === 'en local') {
+      if (serviceFormData.value.selectedBarberia) {
+        const col = serviceFormData.value.selectedBarberia.colonia || ''
+        const dir = serviceFormData.value.selectedBarberia.direccion_precisa || ''
+        return `Dirección: ${col} - ${dir}`
+      }
+      return ''
+    }
+    if (serviceFormData.value.colonia && serviceFormData.value.direccion) {
+      return `${serviceFormData.value.colonia} - ${serviceFormData.value.direccion}`
+    }
+    return serviceFormData.value.colonia || serviceFormData.value.direccion || ''
+  },
+  set: (val) => {
+    if (isBarberiaServiceSelected.value && serviceFormData.value.barberiaOption === 'en local') {
+      return
+    }
+    const separator = val.includes('-') ? '-' : (val.includes(',') ? ',' : null)
+    if (separator) {
+      const parts = val.split(separator)
+      serviceFormData.value.colonia = parts[0].trim()
+      serviceFormData.value.direccion = parts.slice(1).join(separator).trim()
+    } else {
+      serviceFormData.value.colonia = val.trim()
+      serviceFormData.value.direccion = ''
+    }
+  }
+})
+
 // Función para obtener la etiqueta del servicio
 const getServiceLabel = (option) => {
   if (!option) return ''
@@ -1599,7 +1622,7 @@ const recentServicesDisplay = computed(() => {
 
 const shouldShowFormFields = computed(() => {
   // Solo aplicar lógica de ocultar para el servicio de Barbería
-  if (selectedServiceObject.value?.name_es === 'Barbería') {
+  if (isBarberiaServiceSelected.value) {
     if (serviceFormData.value.barberiaOption === 'a domicilio') return true;
     if (serviceFormData.value.barberiaOption === 'en local' && serviceFormData.value.selectedBarberia) return true;
     return false; // Ocultos mientras selecciona modalidad/local
@@ -1613,7 +1636,7 @@ const isFormValid = computed(() => {
   // 1. Requisito universal: Foto de perfil
   if (!hasProfilePhoto.value) return false;
 
-  const isBarberia = selectedServiceObject.value?.name_es === 'Barbería';
+  const isBarberia = isBarberiaServiceSelected.value;
   const isEnLocal = serviceFormData.value.barberiaOption === 'en local';
   const isDomicilio = serviceFormData.value.barberiaOption === 'a domicilio';
   
@@ -1989,8 +2012,11 @@ const fetchServices = async () => {
 
 const fetchBarberias = async () => {
   try {
+    const user = useCookie('user').value
+    const id_ciudad = user?.id_ciudad
     const data = await $api('/barberias', {
-      method: 'GET'
+      method: 'GET',
+      params: id_ciudad ? { id_ciudad } : {}
     })
     if (Array.isArray(data)) {
       barberiasList.value = data
@@ -2896,7 +2922,7 @@ const handleRequestService = async () => {
     const estadoInicial = noRequierePagoVisita ? 'pendiente_asignacion' : 'pendiente_pagovisita'
     const visitaPagada = !!noRequierePagoVisita // Usar booleano real para la DB
 
-    const isBarberia = selectedService.name_es === 'Barbería'
+    const isBarberia = selectedService?.name_es?.toLowerCase().includes('barberia') || selectedService?.name_es?.toLowerCase().includes('barbería')
     const isEnLocal = serviceFormData.value.barberiaOption === 'en local'
 
     const colonia = (isBarberia && isEnLocal) 

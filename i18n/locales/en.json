@@ -481,7 +481,7 @@
     "verification_required": "Verification Required",
     "verify_profile": "Verify your Profile",
     "select_type": "Select type",
-    "choose_barbershop": "Choose barbershop",
+    "choose_barbershop": "Choose one of the following",
     "local_image": "Local Image {n}",
     "viaje_privado_placeholder": "How many people and when do they need it?",
     "barber_placeholder": "What kind of cut? Example: Mid fade with beard",
@@ -1030,13 +1030,13 @@
       "title": "Upgrade your experience!",
       "message": "Install our app for real-time notifications, faster access, and better performance.",
       "cta_yes": "Install the app",
-      "cta_no": "Continue on web"
+      "cta_no": "Continue without the app"
     },
     "install_invite": {
-      "title": "Download the App from",
+      "title": "Install the App",
       "subtitle": "MiSeguro",
-      "message_android": "Install our application for a better experience, quick access, and real-time notifications.",
-      "message_ios": "For a better experience, add MiSeguro to your home screen by following these steps:",
+      "message_android": "To install MiSeguro app, follow these steps:",
+      "message_ios": "To install MiSeguro app, follow these steps:",
       "cta": "Download Application",
       "mandatory": "Installing the app is mandatory to continue",
       "step_android_1_1": "Tap the",

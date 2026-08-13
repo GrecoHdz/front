@@ -481,7 +481,7 @@
     "verification_required": "Verificación Requerida",
     "verify_profile": "Verifica tu Perfil",
     "select_type": "Modalidad de servicio",
-    "choose_barbershop": "Seleccione una barbería",
+    "choose_barbershop": "Selecciona un establecimiento",
     "local_image": "Imagen del local {n}",
     "viaje_privado_placeholder": "¿Cuántas personas van y en cuánto tiempo lo necesitan?",
     "barber_placeholder": "¿Qué tipo de corte desea? Ejemplo: Fade medio con barba",
@@ -1028,15 +1028,15 @@
   "pwa": {
     "pre_invite": {
       "title": "¡Mejora tu experiencia!",
-      "message": "Instala nuestra aplicación para obtener notificaciones en tiempo real, acceso más rápido y mejor rendimiento.",
+      "message": "Instala nuestra aplicación para obtener notificaciones en tiempo real, acceso más rápido y mejor rendimiento. Tomará solo 3 clics.",
       "cta_yes": "Instalar aplicación",
-      "cta_no": "Continuar en la web"
+      "cta_no": "Continuar sin la app"
     },
     "install_invite": {
-      "title": "Descarga la App de",
+      "title": "Instala la App de",
       "subtitle": "MiSeguro",
-      "message_android": "Instala nuestra aplicación para recibir una mejor experiencia, acceso rápido y notificaciones en tiempo real.",
-      "message_ios": "Para una mejor experiencia, agrega MiSeguro a tu pantalla de inicio siguiendo estos pasos:",
+      "message_android": "Para instalar la aplicación de MiSeguro, sigue estos pasos:",
+      "message_ios": "Para instalar la aplicación de MiSeguro, sigue estos pasos:",
       "cta": "Descargar Aplicación",
       "mandatory": "Es obligatorio instalar la app para continuar",
       "step_android_1_1": "Toca los",
