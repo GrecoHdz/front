@@ -133,6 +133,8 @@
                     {{ $t('profile.upload_photo') }}
                   </button>
                 </div>
+              </div>
+
               <div class="grid" :class="isBarberiaServiceSelected ? 'grid-cols-2 gap-2' : 'grid-cols-1'">
                 <!-- Select Principal de Servicio -->
                 <div class="multiselect-service-wrapper">
