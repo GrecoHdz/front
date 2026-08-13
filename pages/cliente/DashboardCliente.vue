@@ -223,12 +223,12 @@
                 </div>
               </div>
 
-              <!-- Dirección: COLONIA+DIRECCION (Único input arriba de las fotos del local) -->
-              <div v-if="shouldShowFormFields" class="animate-fade-in">
+              <!-- Dirección: COLONIA+DIRECCION (Único input arriba de las fotos del local, solo para barbería) -->
+              <div v-if="shouldShowFormFields && isBarberiaServiceSelected" class="animate-fade-in">
                 <input v-model="direccionCompletaInput" 
                        type="text"
                        :readonly="isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local'"
-                       :placeholder="isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local' ? 'Dirección: COLONIA+DIRECCION' : (selectedServiceObject?.name_es === 'Viaje Privado' ? 'Dirección: ORIGEN - DESTINO' : 'Dirección: COLONIA - DIRECCIÓN')"
+                       :placeholder="isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local' ? 'Dirección: COLONIA+DIRECCION' : 'Dirección: COLONIA - DIRECCIÓN'"
                        class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50"
                        :class="{'opacity-70 cursor-not-allowed': isBarberiaServiceSelected && serviceFormData.barberiaOption === 'en local'}">
               </div>
@@ -255,11 +255,27 @@
                 </div>
               </div>
               
-              <div v-if="shouldShowFormFields" class="animate-fade-in">
+              <div v-if="shouldShowFormFields" class="animate-fade-in mb-3">
                 <textarea v-model="serviceFormData.description" 
                          :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.viaje_privado_placeholder') : (isBarberiaServiceSelected ? $t('dashboard_client.barber_placeholder') : $t('dashboard_client.service_placeholder'))"
                          class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none h-20"
                 />
+              </div>
+
+              <!-- Inputs de Colonia y Dirección normales (para otros servicios que no son barbería) -->
+              <div v-if="shouldShowFormFields && !isBarberiaServiceSelected" class="grid grid-cols-2 gap-2 animate-fade-in mb-3">
+                <div>
+                  <input v-model="serviceFormData.colonia" 
+                         type="text"
+                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.pickup') : $t('dashboard_client.neighborhood')"
+                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50">
+                </div>
+                <div>
+                  <input v-model="serviceFormData.direccion" 
+                         type="text"
+                         :placeholder="selectedServiceObject?.name_es === 'Viaje Privado' ? $t('dashboard_client.destination') : $t('dashboard_client.precise_address')"
+                         class="w-full px-3 py-3 text-base border-2 border-white/30 rounded-xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 disabled:opacity-50">
+                </div>
               </div>
 
               <button type="submit" 
