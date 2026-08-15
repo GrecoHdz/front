@@ -951,6 +951,75 @@
       <FootersFooter /> 
     </div>
   </div>
+
+  <!-- ===== Bottom Sheet: Selector de Servicio ===== -->
+  <Transition name="bottom-sheet">
+    <div v-if="showServicesSheet" class="fixed inset-0 z-[9999] flex flex-col justify-end" role="dialog" aria-modal="true">
+      <!-- Backdrop -->
+      <div class="bs-backdrop absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showServicesSheet = false"></div>
+
+      <!-- Sheet Content -->
+      <div class="bs-content relative z-10 w-full max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl overflow-hidden">
+        <!-- Handle -->
+        <div class="flex justify-center pt-3 pb-1">
+          <div class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+          <h3 class="text-base font-black text-gray-900 dark:text-white">{{ $t('dashboard_client.select_service') }}</h3>
+          <button @click="showServicesSheet = false" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Services List -->
+        <div class="overflow-y-auto max-h-[60vh] no-scrollbar divide-y divide-gray-100 dark:divide-gray-800 pb-6">
+          <button
+            v-for="service in filteredServicesList"
+            :key="service.id"
+            type="button"
+            @click="!service.isDisabled && selectService(service)"
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-all duration-150"
+            :class="[
+              service.isDisabled
+                ? 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800/50'
+                : 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20 active:scale-[0.98] cursor-pointer',
+              selectedServiceObject?.id === service.id && !service.isDisabled
+                ? 'bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500'
+                : ''
+            ]"
+          >
+            <!-- Icon -->
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 shadow-sm"
+              :class="service.isDisabled ? 'bg-gray-200 dark:bg-gray-700 grayscale' : 'bg-gradient-to-br from-emerald-400/20 to-teal-400/20'"
+            >
+              {{ service.icon || '🔧' }}
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-sm text-gray-900 dark:text-white truncate">{{ service.name }}</p>
+              <p v-if="service.description" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{{ service.description }}</p>
+              <p v-if="service.isDisabled" class="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1 flex items-center gap-1">
+                <span>🔒</span> {{ $t('dashboard_client.verification_required') }}
+              </p>
+            </div>
+
+            <!-- Check if selected -->
+            <div v-if="selectedServiceObject?.id === service.id && !service.isDisabled" class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+              <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
 </template>
 
 <style scoped>
