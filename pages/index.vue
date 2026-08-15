@@ -414,24 +414,23 @@
               <p v-if="formErrors.ciudad" class="mt-1 text-sm text-red-500">{{ formErrors.ciudad }}</p>
             </div>
 
-            <div>
+            <!-- Campo de teléfono para Login -->
+            <div v-if="isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                {{ $t('auth.identity') }}
+                {{ $t('auth.phone') }}
               </label>
               <input 
-                v-model="form.identidad"
-                type="text" 
+                v-model="form.loginTelefono"
+                type="tel" 
                 class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
-                :class="formErrors.identidad ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
-                :placeholder="$t('auth.identity_placeholder')"
-                required
-                autocomplete="username"
-                @input="handleIdentityInput"
-                @blur="validateIdentity"
+                :class="formErrors.loginTelefono ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
+                :placeholder="$t('auth.phone_placeholder')"
+                :required="isLogin"
+                autocomplete="tel"
+                @input="formErrors.loginTelefono = ''"
                 @keydown="preventLetterInput"
-                maxlength="17"
               />
-              <p v-if="formErrors.identidad" class="mt-1 text-sm text-red-500">{{ formErrors.identidad }}</p>
+              <p v-if="formErrors.loginTelefono" class="mt-1 text-sm text-red-500">{{ formErrors.loginTelefono }}</p>
             </div>
 
             <div>
@@ -1061,11 +1060,30 @@ const handleImageUpload = (event) => {
   formErrors.value.profileImage = ''
 }
 
+// Función para normalizar un número de teléfono: quita espacios, guiones y código de país
+// para que siempre se pueda buscar sin importar el formato ingresado
+const normalizarTelefono = (phone) => {
+  if (!phone) return ''
+  // Quitar espacios, guiones y paréntesis
+  let clean = phone.replace(/[\s\-()]/g, '')
+  // Si empieza con +, quitar el +
+  if (clean.startsWith('+')) clean = clean.substring(1)
+  // Si empieza con código de país de Honduras (504), extraer el número local
+  if (clean.startsWith('504') && clean.length > 8) {
+    clean = clean.substring(3)
+  }
+  // Si empieza con 00504, quitarlo
+  if (clean.startsWith('00504') && clean.length > 9) {
+    clean = clean.substring(5)
+  }
+  return clean
+}
+
 // Validación del formulario
 const validateForm = () => {
   const errors = {}
   
-  // 3. Restricción por dispositivo (Local Check)
+  // Restricción por dispositivo (Local Check)
   if (process.client && localStorage.getItem('ph_dev_banned') === 'true') {
     errors.general = 'El acceso desde este dispositivo ha sido restringido por seguridad.';
     showToast('Este dispositivo tiene restringido el acceso a nuevos registros.', 'error');
@@ -1096,7 +1114,7 @@ const validateForm = () => {
       }
     }
 
-    // Validar teléfono (código de país + número)
+    // Validar teléfono de registro (código de país + número)
     const phoneRegex = /^\+?[0-9\s-]{10,15}$/
     if (!form.value.telefono || !phoneRegex.test(form.value.telefono)) {
       errors.telefono = 'Ingresa un número de teléfono válido (ej: +504 9999-9999)'
@@ -1111,13 +1129,10 @@ const validateForm = () => {
         }
       }
     }
-    
-    // Validar número de identidad (12 a 17 dígitos)
-    const identidadRegex = /^\d{12,17}$/
-    if (!form.value.identidad || !identidadRegex.test(form.value.identidad)) {
-      errors.identidad = 'El número de identidad debe tener entre 12 y 17 dígitos'
-    } else if (/(.)\1{5,}/.test(form.value.identidad)) {
-      errors.identidad = 'El número de identidad parece ser falso'
+  } else {
+    // Validar teléfono de login
+    if (!form.value.loginTelefono || form.value.loginTelefono.trim().length < 7) {
+      errors.loginTelefono = 'Por favor ingresa tu número de teléfono'
     }
   }
   
@@ -1427,7 +1442,7 @@ const form = ref({
   nombre: '',
   email: '',
   telefono: '',
-  identidad: '',
+  loginTelefono: '',
   password: '',
   confirmPassword: '',
   ciudad: null,
@@ -1746,11 +1761,6 @@ const trackCompleteRegistration = () => {
 };
 
 const handleAuth = async () => {
-  // Validar identidad antes de continuar
-  if (!validateIdentity()) {
-    return
-  }
-  
   // Resetear estado
   authStatus.value = ''
   formErrors.value = {}
@@ -1761,12 +1771,6 @@ const handleAuth = async () => {
     return
   }
   
-  // Validar formato de identidad (min 12 dígitos max 17 dígitos)
-  if (form.value.identidad && !/^\d{12,17}$/.test(form.value.identidad)) {
-    showToast('El número de identidad debe tener entre 12 y 17 dígitos', 'error')
-    return
-  }
-  
   isLoading.value = true
   
   try {
@@ -1774,7 +1778,7 @@ const handleAuth = async () => {
       // Lógica de login
       try {
         const loginData = {
-          identidad: form.value.identidad,
+          telefono: normalizarTelefono(form.value.loginTelefono),
           password: form.value.password
         }; 
         
@@ -1866,7 +1870,6 @@ const handleAuth = async () => {
           nombre: form.value.nombre,
           email: form.value.email,
           telefono: form.value.telefono,
-          identidad: form.value.identidad,
           password_hash: form.value.password,
           id_ciudad: form.value.ciudad?.id,
           device_id
@@ -1959,10 +1962,10 @@ const completeRegistration = async (isTechnician) => {
         }, 1500);
       }, 0);
     } else {
-      // Login automático para usuarios normales
+      // Login automático para usuarios normales (usar teléfono normalizado)
       try {
         const loginResult = await auth.login({
-          identidad: form.value.identidad,
+          telefono: normalizarTelefono(form.value.telefono),
           password: form.value.password
         });
 
@@ -2286,11 +2289,11 @@ const sendTechnicianRegistrationMessage = async (nombre, formData = {}) => {
 
     // Asegurarse de que tenemos los valores
     const nombreUsuario = nombre?.trim() || formData?.nombre?.trim() || 'Usuario';
-    const identidadUsuario = formData?.identidad || 'No proporcionada';
+    const telefonoUsuario = formData?.telefono || 'No proporcionado';
     
     // Mantener el formato original del mensaje
     const message = `Hola, mi nombre es ${nombreUsuario}\n` +
-      `*Identidad:* ${identidadUsuario}\n\n` +  
+      `*Teléfono:* ${telefonoUsuario}\n\n` +  
       `Como proveedor de servicios en la ciudad de ${formData?.ciudad?.nombre || ''} y quiero continuar con mi validación.\n\n` +
       `Me dedico a:\n` +
       `(escribir aquí qué servicios u oficios ofrece)\n\n` +
@@ -2315,13 +2318,12 @@ const sendTechnicianRegistrationMessage = async (nombre, formData = {}) => {
 // Computed property para verificar si el formulario está completo
 const isFormValid = computed(() => {
   if (isLogin.value) {
-    return form.value.identidad && form.value.password;
+    return form.value.loginTelefono && form.value.password;
   } else {
     const basicFields = form.value.nombre && 
                        form.value.email && 
                        form.value.telefono && 
                        form.value.ciudad && 
-                       form.value.identidad && 
                        form.value.password; 
     
     return basicFields;

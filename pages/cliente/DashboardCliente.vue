@@ -137,36 +137,27 @@
 
               <div class="grid" :class="isBarberiaServiceSelected ? 'grid-cols-2 gap-2' : 'grid-cols-1'">
                 <!-- Select Principal de Servicio -->
-                <div class="multiselect-service-wrapper">
-                  <multiselect v-model="selectedServiceObject" 
-                          :options="filteredServicesList"
-                          :searchable="false"
-                          :close-on-select="true"
-                          :show-labels="false"
-                          :placeholder="$t('dashboard_client.select_service')"
-                          label="name"
-                          track-by="id"
-                          class="multiselect-transparent"
-                          :custom-label="getServiceLabel"
-                          :options-limit="100"
-                          :option-disabled="'isDisabled'"
-                          :disabled="isLoadingServices || servicesList.length === 0"
-                          :loading="isLoadingServices">
-                    <template #singleLabel="{ option }">
-                      <span class="truncate">{{ getServiceLabel(option) }}</span>
-                    </template>
-                    <template #option="{ option }">
-                      <div class="flex items-center gap-2" :class="{'opacity-40 grayscale pointer-events-none': option.isDisabled}">
-                        <span class="flex items-center gap-2">
-                          <span>{{ option.icon }}</span>
-                          <span>{{ option.name }}</span>
-                        </span>
-                        <span v-if="option.isDisabled" class="text-[7px] font-black uppercase tracking-tighter bg-red-50 text-red-500 px-1.5 py-0.5 rounded-md border border-red-100">
-                          {{ $t('dashboard_client.verify_profile') }}
-                        </span>
-                      </div>
-                    </template>
-                  </multiselect>
+                <div 
+                  class="multiselect-service-wrapper flex items-center justify-between !pr-3" 
+                  @click="!(isLoadingServices || servicesList.length === 0) && (showServicesSheet = true)"
+                  :class="{'opacity-50 cursor-not-allowed': isLoadingServices || servicesList.length === 0}"
+                >
+                  <div class="flex items-center gap-2 truncate text-white">
+                    <span v-if="isLoadingServices" class="flex items-center gap-2">
+                      <span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                      <span class="text-white/70">{{ $t('common.loading') }}</span>
+                    </span>
+                    <span v-else-if="selectedServiceObject" class="flex items-center gap-2 truncate">
+                      <span>{{ selectedServiceObject.icon }}</span>
+                      <span class="truncate">{{ selectedServiceObject.name }}</span>
+                    </span>
+                    <span v-else class="text-white/70">
+                      {{ $t('dashboard_client.select_service') }}
+                    </span>
+                  </div>
+                  <svg class="w-4 h-4 text-white/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
 
                 <!-- Select Tipo de Barbería (Solo si es Barbería) -->
@@ -470,6 +461,81 @@
                   <span v-if="userCredit >= selectedDetailPackage.costo">{{ $t('dashboard_client.redeem_now') }}</span>
                   <span v-else>{{ $t('dashboard_client.acquire_transfer') }}</span>
                </button>
+            </div>
+         </div>
+       </div>
+     </div>
+   </Transition>
+
+  <!-- Panel de Selección de Servicios (Marketplace Style Bottom Sheet) -->
+  <Transition name="bottom-sheet">
+     <div 
+       v-if="showServicesSheet" 
+       class="fixed inset-0 z-[100] flex flex-col justify-end isolate"
+       @touchmove.stop
+     >
+       <!-- Backdrop -->
+       <div 
+         class="absolute inset-0 bg-black/60 bs-backdrop"
+         @click="showServicesSheet = false"
+         @touchmove.prevent.stop
+       ></div>
+
+       <!-- Contenido -->
+       <div 
+         class="relative w-full bg-white dark:bg-gray-900 rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] overflow-hidden max-h-[70vh] flex flex-col bs-content"
+         @touchmove.stop
+       >
+         <!-- Cabecera -->
+         <div class="w-full flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800 relative z-20">
+            <div class="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-3"></div>
+            <h3 class="text-lg font-black text-gray-900 dark:text-white mt-1">
+              {{ $t('dashboard_client.select_service') }}
+            </h3>
+            <button 
+               @click="showServicesSheet = false"
+               class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center active:scale-90 transition-transform"
+               type="button"
+            >
+               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+         </div>
+
+         <!-- Área de Scroll Interno con Listado de Servicios -->
+         <div class="overflow-y-auto overscroll-contain no-scrollbar p-6 space-y-3 pb-12">
+            <div 
+              v-for="service in filteredServicesList" 
+              :key="service.id"
+              @click="!service.isDisabled && selectService(service)"
+              class="flex items-center justify-between p-4 rounded-2xl border transition-all duration-200"
+              :class="[
+                service.isDisabled 
+                  ? 'opacity-40 grayscale cursor-not-allowed border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30' 
+                  : 'cursor-pointer border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.98]',
+                selectedServiceObject?.id === service.id && !service.isDisabled
+                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-950/30 ring-1 ring-blue-500'
+                  : ''
+              ]"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">{{ service.icon }}</span>
+                <div class="text-left">
+                  <p class="font-bold text-gray-900 dark:text-white text-base">{{ service.name }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{{ service.description }}</p>
+                </div>
+              </div>
+              
+              <!-- Badge de estado o checkmark -->
+              <div>
+                <span v-if="service.isDisabled" class="text-[9px] font-black uppercase tracking-wider bg-red-50 dark:bg-red-950/50 text-red-500 px-2.5 py-1 rounded-lg border border-red-100 dark:border-red-900/50">
+                  {{ $t('dashboard_client.verify_profile') }}
+                </span>
+                <div v-else-if="selectedServiceObject?.id === service.id" class="w-6 h-6 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </div>
             </div>
          </div>
        </div>
@@ -1381,6 +1447,12 @@ const barberiasList = ref([])
 const conductorVehiculo = ref(null)
 
 const selectedServiceObject = ref(null)
+const showServicesSheet = ref(false)
+
+const selectService = (service) => {
+  selectedServiceObject.value = service
+  showServicesSheet.value = false
+}
 
 const isBarberiaServiceSelected = computed(() => {
   if (!selectedServiceObject.value) return false
@@ -2370,7 +2442,8 @@ const anyModalOpen = computed(() => {
          showPaquetePagoModal.value || 
          showAccountDetailModal.value || 
          showConfirmarUsoModal.value || 
-         showConfirmarCanjeoModal.value
+         showConfirmarCanjeoModal.value ||
+         showServicesSheet.value
 })
 
 watch(anyModalOpen, (newValue) => {

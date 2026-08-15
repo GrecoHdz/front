@@ -44,7 +44,7 @@ interface User {
 }
 
 interface LoginCredentials {
-  identidad: string;
+  telefono: string;
   password: string;
 }
 

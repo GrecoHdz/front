@@ -549,29 +549,29 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
               </div>
-              <h3 class="text-lg font-black text-gray-900 dark:text-white mb-1">Renovar Membresía</h3>
-              <p class="text-gray-600 dark:text-gray-300 text-sm">Selecciona una cuenta para realizar el pago</p>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white mb-1">{{ $t('profile.membership.renewal_title') }}</h3>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">{{ $t('profile.membership.select_account_desc') }}</p>
             </div>
 
             <div class="overflow-y-auto flex-1 pr-1 space-y-4 mb-2">
               <!-- Costo de la membresía mejorado -->
               <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-xl border border-blue-200 dark:border-blue-800">
                 <div class="flex justify-between items-center">
-                  <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">Costo de la membresía:</span>
+                  <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">{{ $t('profile.membership.membership_cost') }}</span>
                   <span v-if="isLoadingMembershipCost" class="h-5 w-20 bg-blue-200 dark:bg-blue-700 rounded animate-pulse"></span>
                   <span v-else class="text-lg font-black text-blue-600 dark:text-blue-400">L. {{ Number(membershipCost).toFixed(2) }}</span>
                 </div>
-                <p class="text-xs text-blue-600 dark:text-blue-300 mt-1 font-medium"> Válido por 30 días a partir de hoy</p>
+                <p class="text-xs text-blue-600 dark:text-blue-300 mt-1 font-medium">{{ $t('profile.membership.valid_period') }}</p>
               </div>
 
               <!-- Selector de cuenta bancaria mejorado -->
               <div class="space-y-2 text-left">
                 <label for="bank-account" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Cuenta bancaria
+                  {{ $t('profile.membership.bank_account') }}
                 </label>
                 <div v-if="isLoadingAccounts" class="py-6 flex flex-col items-center justify-center">
                   <div class="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Cargando cuentas...</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ $t('profile.membership.loading_accounts') }}</p>
                 </div>
                 <div v-else class="space-y-3">
                   <multiselect
@@ -646,7 +646,7 @@
                   </Transition>
                   
                   <div v-if="bankAccounts.length === 0" class="text-center py-3">
-                    <p class="text-sm text-amber-600 dark:text-amber-400 font-medium">⚠️ No se encontraron cuentas bancarias</p>
+                    <p class="text-sm text-amber-600 dark:text-amber-400 font-medium">{{ $t('profile.membership.no_accounts') }}</p>
                   </div>
                 </div>
               </div>
@@ -696,7 +696,7 @@
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
                   <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400 text-lg"></i>
-                  <h3 class="text-lg font-black text-gray-900 dark:text-white">Verificación de Cuenta</h3>
+                  <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('profile.verification.title') }}</h3>
                   <svg v-if="user.identidad_url" class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                   </svg>
@@ -705,7 +705,7 @@
                   <i class="fas fa-times"></i>
                 </button>
               </div>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Sube ambas fotografías para completar tu verificación</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('profile.verification.subtitle') }}</p>
             </div>
 
             <!-- Scrollable body -->
@@ -715,8 +715,8 @@
               <div class="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2.5 flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
                   <i class="fas fa-user-circle text-emerald-600 dark:text-emerald-400 text-sm"></i>
-                  <h4 class="text-sm font-bold text-emerald-800 dark:text-emerald-300">Foto de Perfil</h4>
-                  <span v-if="user.imagen_url" class="ml-auto text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full">✓ Subida</span>
+                  <h4 class="text-sm font-bold text-emerald-800 dark:text-emerald-300">{{ $t('profile.verification.profile_photo') }}</h4>
+                  <span v-if="user.imagen_url" class="ml-auto text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full">✓ {{ $t('profile.verification.photo_uploaded') }}</span>
                 </div>
                 <div class="p-4">
                   <div class="flex items-center gap-4 mb-3">
@@ -728,8 +728,8 @@
                       </div>
                     </div>
                     <div class="flex-1 text-xs text-gray-500 dark:text-gray-400">
-                      <p>Una foto clara de tu rostro. Esta se mostrará en tu perfil.</p>
-                      <p class="mt-1 text-gray-400">Máx. 5MB · JPG, PNG, WEBP</p>
+                      <p>{{ $t('profile.verification.photo_desc') }}</p>
+                      <p class="mt-1 text-gray-400">{{ $t('profile.verification.photo_specs') }}</p>
                     </div>
                   </div>
                   <!-- Input file oculto -->
@@ -747,7 +747,7 @@
                   >
                     <i v-if="isUploading" class="fas fa-circle-notch fa-spin"></i>
                     <i v-else class="fas fa-camera"></i>
-                    {{ isUploading ? 'Subiendo...' : (user.imagen_url ? 'Cambiar Foto de Perfil' : 'Subir Foto de Perfil') }}
+                    {{ isUploading ? $t('profile.verification.uploading') : (user.imagen_url ? $t('profile.verification.change_photo') : $t('profile.verification.upload_photo')) }}
                   </button>
                 </div>
               </div>
@@ -756,12 +756,12 @@
               <div class="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="bg-blue-50 dark:bg-blue-900/20 px-4 py-2.5 flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
                   <i class="fas fa-id-card text-blue-600 dark:text-blue-400 text-sm"></i>
-                  <h4 class="text-sm font-bold text-blue-800 dark:text-blue-300">Identificación (DNI)</h4>
+                  <h4 class="text-sm font-bold text-blue-800 dark:text-blue-300">{{ $t('profile.verification.identity_card') }}</h4>
                   <span v-if="user.identidad_url" class="ml-auto flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full">
-                    <i class="fas fa-check-circle"></i> Enviada
+                    <i class="fas fa-check-circle"></i> {{ $t('profile.verification.sent') }}
                   </span>
                   <span v-else class="ml-auto text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded-full">
-                    Pendiente
+                    {{ $t('profile.verification.pending') }}
                   </span>
                 </div>
                 <div class="p-4 space-y-3">
@@ -774,18 +774,35 @@
                     <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5">
                       <i class="fas fa-lock text-gray-400 text-sm flex-shrink-0"></i>
                       <p class="text-xs text-gray-500 dark:text-gray-400 leading-tight">
-                        Por seguridad, la identificación no puede modificarse una vez enviada.
+                        {{ $t('profile.verification.lock_message') }}
                       </p>
                     </div>
                   </template>
 
                   <!-- No existe aún: placeholder + botón de subir (una sola vez) -->
                   <template v-else>
+                    <!-- Campo de texto para ingresar Identidad -->
+                    <div class="space-y-1.5 mb-3 text-left">
+                      <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                        {{ $t('profile.verification.identity_label') }}
+                      </label>
+                      <input 
+                        v-model="inputIdentidad"
+                        type="text" 
+                        class="w-full px-3 py-2 text-sm border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-all duration-200"
+                        :class="errorIdentidad ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'"
+                        :placeholder="$t('profile.verification.identity_placeholder')"
+                        maxlength="17"
+                        @input="inputIdentidad = inputIdentidad.replace(/\D/g, ''); errorIdentidad = ''"
+                      />
+                      <p v-if="errorIdentidad" class="text-[10px] text-red-500">{{ errorIdentidad }}</p>
+                    </div>
+
                     <div class="aspect-[1.6/1] rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/50">
                       <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-1"></i>
-                      <span class="text-xs text-gray-400">Sin archivo seleccionado</span>
+                      <span class="text-xs text-gray-400">{{ $t('profile.no_file_selected') }}</span>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Foto clara de tu identificación nacional. Máx. 10MB · JPG, PNG, PDF</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.verification.photo_clear_id') }}</p>
                     <input 
                       type="file" 
                       ref="identityFileInput" 
@@ -800,7 +817,7 @@
                     >
                       <i v-if="isUploading" class="fas fa-circle-notch fa-spin"></i>
                       <i v-else class="fas fa-id-card"></i>
-                      {{ isUploading ? 'Subiendo...' : 'Subir Identificación' }}
+                      {{ isUploading ? $t('profile.verification.uploading') : $t('profile.verification.upload_identity') }}
                     </button>
                   </template>
                 </div>
@@ -810,7 +827,7 @@
               <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/30">
                 <i class="fas fa-shield-alt text-amber-600 mt-0.5 text-sm"></i>
                 <p class="text-[11px] text-amber-700 dark:text-amber-500 leading-tight">
-                  Tus datos están protegidos. Esta información solo se utiliza para validar tu identidad y no será compartida con terceros.
+                  {{ $t('profile.verification.privacy_message') }}
                 </p>
               </div>
 
@@ -829,8 +846,8 @@
               <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
                 <i class="fas fa-trash-alt"></i>
               </div>
-              <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">¿Eliminar documento?</h3>
-              <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Esta acción no se puede deshacer y perderás tu estado de verificado.</p>
+              <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">{{ $t('profile.verification.delete_title') }}</h3>
+              <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">{{ $t('profile.verification.delete_desc') }}</p>
               
               <div class="flex flex-col gap-2">
                 <button 
@@ -838,13 +855,13 @@
                   :disabled="isDeleting"
                   class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-600/20 disabled:opacity-50"
                 >
-                  {{ isDeleting ? 'Eliminando...' : 'Sí, eliminar documento' }}
+                  {{ isDeleting ? $t('profile.verification.uploading') : $t('profile.verification.delete_confirm') }}
                 </button>
                 <button 
                   @click="showDeleteIdentityConfirm = false" 
                   class="w-full py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all font-sans"
                 >
-                  Cancelar
+                  {{ $t('profile.membership.cancel') }}
                 </button>
               </div>
             </div>
@@ -1475,6 +1492,8 @@ const isPrivacidadModalOpen = ref(false)
 const isAcercaModalOpen = ref(false)
 const isIdentityModalOpen = ref(false);
 const showDeleteIdentityConfirm = ref(false);
+const inputIdentidad = ref('');
+const errorIdentidad = ref('');
 
 // Bloquear scroll cuando un modal está abierto
 const anyModalOpen = computed(() => {
@@ -1662,6 +1681,11 @@ const fetchUserData = async () => {
       ...user.value,
       ...safeUserData,
       fecha_registro: safeUserData.fecha_registro || new Date().toISOString()
+    }
+    
+    // Rellenar campo identidad si ya existe en la información de usuario
+    if (safeUserData.identidad) {
+      inputIdentidad.value = safeUserData.identidad;
     }
     
     // Actualizar el store de autenticación
@@ -1973,6 +1997,21 @@ const onIdentityFileChange = async (event) => {
   const file = event.target.files[0]
   if (!file) return
   
+  // Validar identidad antes de proceder a la subida
+  if (!inputIdentidad.value || inputIdentidad.value.length < 12 || inputIdentidad.value.length > 17) {
+    errorIdentidad.value = t('profile.verification.identity_error')
+    showError('Validación', t('profile.verification.identity_error'))
+    event.target.value = '' // Limpiar file input
+    return
+  }
+  
+  if (/(.)\1{5,}/.test(inputIdentidad.value)) {
+    errorIdentidad.value = t('profile.verification.identity_error') // Usar el mismo mensaje genérico o traducido
+    showError('Validación', t('profile.verification.identity_error'))
+    event.target.value = ''
+    return
+  }
+
   if (file.size > 10 * 1024 * 1024) {
     showError(t('common.error'), t('profile.messages.file_size_error'))
     return
@@ -1986,6 +2025,7 @@ const uploadIdentityImage = async (file) => {
   try {
     const formData = new FormData()
     formData.append('imagen', file)
+    formData.append('identidad', inputIdentidad.value)
     
     const response = await $api(`/usuarios/identidad-foto/${user.value.id_usuario}`, {
       method: 'POST',
