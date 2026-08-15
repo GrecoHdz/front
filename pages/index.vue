@@ -360,14 +360,14 @@
 
             <div v-if="!isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                {{ $t('auth.phone') }}
+                {{ $t('auth.phone_register') }}
               </label>
               <input 
                 v-model="form.telefono"
                 type="tel" 
                 class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 :class="{'border-red-500': formErrors.telefono, 'border-gray-200 dark:border-gray-600': !formErrors.telefono}"
-                :placeholder="$t('auth.phone_placeholder')"
+                :placeholder="$t('auth.phone_register_placeholder')"
                 :required="!isLogin"
                 autocomplete="tel"
                 @input="handlePhoneInput"
@@ -382,49 +382,42 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {{ $t('auth.city') }}
               </label>
-              <multiselect
-                v-model="form.ciudad"
-                :options="ciudades"
-                :searchable="false"
-                :close-on-select="true"
-                :show-labels="false"
-                :placeholder="$t('auth.city_placeholder')"
-                label="nombre"
-                track-by="id"
-                class="multiselect-custom"
-                :class="{ 'multiselect--active': form.ciudad }"
-                :select-label="''"
-                :deselect-label="''"
-                :selected-label="''"
-                :no-options="loadingCiudades ? 'Cargando ciudades...' : 'No hay ciudades disponibles'"
-                :no-result="'No se encontraron resultados'"
-                :loading="loadingCiudades"
-                :disabled="loadingCiudades || !ciudades.length"
-                :custom-label="getCityLabel"
-                @search-change="$event && $event.stopPropagation()"
-                @search-focus="(e) => e && e.target && e.target.blur()"
-                @touchstart.native.stop
-                @click.native.stop
-                :options-limit="100"
+              <div 
+                class="multiselect-custom flex items-center justify-between !pr-3 w-full px-3 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white cursor-pointer transition-all duration-200" 
+                @click="openCitiesSheet"
+                :class="formErrors.ciudad ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
               >
-                <template #singleLabel="{ option }">
-                  <span class="text-base truncate">{{ getCityLabel(option) }}</span>
-                </template>
-              </multiselect>
+                <div class="flex items-center gap-2 truncate">
+                  <span v-if="loadingCiudades" class="flex items-center gap-2 text-gray-500">
+                    <span class="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"></span>
+                    <span class="text-sm">Cargando ciudades...</span>
+                  </span>
+                  <span v-else-if="form.ciudad" class="flex items-center gap-2 truncate">
+                    <span>📍</span>
+                    <span class="truncate text-base">{{ getCityLabel(form.ciudad) }}</span>
+                  </span>
+                  <span v-else class="text-gray-450 dark:text-gray-400 text-base">
+                    {{ $t('auth.city_placeholder') }}
+                  </span>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
               <p v-if="formErrors.ciudad" class="mt-1 text-sm text-red-500">{{ formErrors.ciudad }}</p>
             </div>
 
             <!-- Campo de teléfono para Login -->
             <div v-if="isLogin">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                {{ $t('auth.phone') }}
+                {{ $t('auth.phone_login') }}
               </label>
               <input 
                 v-model="form.loginTelefono"
                 type="tel" 
                 class="w-full px-3 py-3 text-base border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                 :class="formErrors.loginTelefono ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'"
-                :placeholder="$t('auth.phone_placeholder')"
+                :placeholder="$t('auth.phone_login_placeholder')"
                 :required="isLogin"
                 autocomplete="tel"
                 @input="formErrors.loginTelefono = ''"
@@ -523,7 +516,7 @@
                 class="w-full p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/20 group transition-all duration-300 text-left flex items-center space-x-4 bg-gray-50/50 dark:bg-gray-900/30"
               >
                 <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-800 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                  🏠
+                  👤
                 </div>
                 <div>
                   <h4 class="font-bold text-gray-900 dark:text-white">
@@ -649,6 +642,71 @@
         </div>
       </div>
     </div>
+
+    <!-- Bottom Sheet para seleccionar ciudad -->
+    <Transition name="bottom-sheet">
+      <div 
+        v-if="showCitiesSheet" 
+        class="fixed inset-0 z-[100] flex flex-col justify-end isolate"
+        @touchmove.stop
+      >
+        <!-- Backdrop -->
+        <div 
+          class="absolute inset-0 bg-black/60 bs-backdrop"
+          @click="showCitiesSheet = false"
+          @touchmove.prevent.stop
+        ></div>
+
+        <!-- Contenido -->
+        <div 
+          class="relative w-full bg-white dark:bg-gray-900 rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] overflow-hidden max-h-[70vh] flex flex-col bs-content"
+          @touchmove.stop
+        >
+          <!-- Cabecera -->
+          <div class="w-full flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800 relative z-20">
+             <div class="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-3"></div>
+             <h3 class="text-lg font-black text-gray-950 dark:text-white mt-1">
+               {{ $t('auth.city_placeholder') }}
+             </h3>
+             <button 
+                @click="showCitiesSheet = false"
+                class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center active:scale-90 transition-transform"
+                type="button"
+             >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+             </button>
+          </div>
+
+          <!-- Listado de ciudades -->
+          <div class="overflow-y-auto overscroll-contain no-scrollbar p-6 space-y-3 pb-12">
+             <div 
+               v-for="city in ciudades" 
+               :key="city.id"
+               @click="selectCity(city)"
+               class="flex items-center justify-between p-4 rounded-2xl border cursor-pointer border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.98] transition-all duration-200"
+               :class="[
+                 form.ciudad?.id === city.id
+                   ? 'border-emerald-500 dark:border-emerald-450 bg-emerald-50/50 dark:bg-emerald-950/30 ring-1 ring-emerald-500'
+                   : ''
+               ]"
+             >
+               <div class="flex items-center gap-3">
+                 <span class="text-xl">📍</span>
+                 <div class="text-left">
+                   <p class="font-bold text-gray-950 dark:text-white text-base">{{ city.nombre }}</p>
+                 </div>
+               </div>
+               
+               <div v-if="form.ciudad?.id === city.id" class="w-6 h-6 rounded-full bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center text-white">
+                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                 </svg>
+               </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <LanguageSelectorModal ref="langModal" />
   </div>
@@ -935,6 +993,42 @@ html {
   transform: scale(0.9) translateY(20px);
   opacity: 0;
 }
+
+/* Bottom Sheet Transitions */
+.bottom-sheet-enter-active, .bottom-sheet-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.bs-content {
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15) !important;
+  will-change: transform;
+}
+
+.bottom-sheet-enter-active .bs-backdrop { transition: opacity 0.3s ease; }
+.bottom-sheet-enter-from .bs-backdrop { opacity: 0; }
+.bottom-sheet-enter-to .bs-backdrop { opacity: 1; }
+
+.bottom-sheet-leave-active .bs-backdrop { transition: opacity 0.25s ease; }
+.bottom-sheet-leave-from .bs-backdrop { opacity: 1; }
+.bottom-sheet-leave-to .bs-backdrop { opacity: 0; }
+
+.bottom-sheet-enter-active .bs-content {
+  animation: slide-up-custom 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.bottom-sheet-leave-active .bs-content {
+  transition: transform 0.4s ease-in;
+  transform: translateY(0);
+}
+
+.bottom-sheet-leave-to .bs-content {
+  transform: translateY(100%);
+}
+
+@keyframes slide-up-custom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
 </style>
 
 <script setup>
@@ -978,9 +1072,19 @@ const showRateLimitModal = ref(false)
 const showForgotPassword = ref(false)
 const showRoleSelectionModal = ref(false)
 const pendingRegisterData = ref(null)
+const showCitiesSheet = ref(false)
+
+const selectCity = (city) => {
+  form.value.ciudad = city
+  showCitiesSheet.value = false
+}
+
+const openCitiesSheet = () => {
+  showCitiesSheet.value = true
+}
 
 const anyModalOpen = computed(() => {
-  return showLoginModal.value || showRateLimitModal.value || showForgotPassword.value
+  return showLoginModal.value || showRateLimitModal.value || showForgotPassword.value || showCitiesSheet.value
 })
 
 watch(anyModalOpen, (newValue) => {

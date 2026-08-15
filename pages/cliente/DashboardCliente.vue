@@ -139,8 +139,8 @@
                 <!-- Select Principal de Servicio -->
                 <div 
                   class="multiselect-service-wrapper flex items-center justify-between !pr-3" 
-                  @click="!(isLoadingServices || servicesList.length === 0) && (showServicesSheet = true)"
-                  :class="{'opacity-50 cursor-not-allowed': isLoadingServices || servicesList.length === 0}"
+                  @click="openServicesSheet"
+                  :class="{'opacity-50 cursor-not-allowed': isLoadingServices}"
                 >
                   <div class="flex items-center gap-2 truncate text-white">
                     <span v-if="isLoadingServices" class="flex items-center gap-2">
@@ -1452,6 +1452,10 @@ const showServicesSheet = ref(false)
 const selectService = (service) => {
   selectedServiceObject.value = service
   showServicesSheet.value = false
+}
+
+const openServicesSheet = () => {
+  showServicesSheet.value = true
 }
 
 const isBarberiaServiceSelected = computed(() => {
