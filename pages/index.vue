@@ -678,7 +678,7 @@
           </div>
 
           <!-- Listado de ciudades -->
-          <div class="overflow-y-auto overscroll-contain no-scrollbar p-6 space-y-3 pb-12">
+          <div class="overflow-y-auto overscroll-contain no-scrollbar p-6 grid grid-cols-2 gap-3 pb-12">
              <div 
                v-for="city in ciudades" 
                :key="city.id"
@@ -2193,7 +2193,7 @@ const preventNumberInput = (e) => {
 
 const preventLetterInput = (e) => {
   // Permitir teclas de control (backspace, delete, tab, etc.)
-  if ([8, 9, 13, 27, 46, 37, 38, 39, 40, 32].includes(e.keyCode) || 
+  if ([8, 9, 13, 27, 46, 37, 38, 39, 40].includes(e.keyCode) || 
       // Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
       (e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode))) {
     return;
@@ -2201,14 +2201,11 @@ const preventLetterInput = (e) => {
   
   // Si estamos en el campo de teléfono
   if (e.target.name === 'telefono' || e.target.getAttribute('type') === 'tel') {
-    // Permitir números, +, -
-    if (/^[0-9+-]$/.test(e.key)) {
+    // Permitir números y +
+    if (/^[0-9+]$/.test(e.key)) {
       return;
     }
-    // Prevenir cualquier otra tecla que no sea espacio
-    if (e.key !== ' ') {
-      e.preventDefault();
-    }
+    e.preventDefault();
   }
 }
 
@@ -2224,10 +2221,8 @@ const handlePhoneInput = (e) => {
     return;
   }
   
-  // Filtrar solo caracteres permitidos y limpiar espacios múltiples
-  value = value
-    .replace(/[^0-9+\s-]/g, '')
-    .replace(/\s{2,}/g, ' ');
+  // Filtrar solo caracteres permitidos (números y +)
+  value = value.replace(/[^0-9+]/g, '');
   
   // Limitar la longitud total
   if (value.length > 20) {
@@ -2285,8 +2280,8 @@ const handlePhonePaste = (e) => {
   // Obtener el texto pegado
   const pastedText = (e.clipboardData || window.clipboardData).getData('text');
   
-  // Filtrar solo caracteres permitidos (números, +, -, espacios)
-  const filteredText = pastedText.replace(/[^0-9+\s-]/g, '');
+  // Filtrar solo caracteres permitidos (números y +)
+  const filteredText = pastedText.replace(/[^0-9+]/g, '');
   
   // Actualizar el valor del campo
   form.telefono = form.telefono + filteredText;
