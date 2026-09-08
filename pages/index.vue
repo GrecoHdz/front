@@ -147,6 +147,75 @@
         </div>
       </section>
 
+      <!-- Dedicated Uber-style Transport Section -->
+      <section class="px-4 py-6">
+        <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-emerald-950 rounded-[2.5rem] p-6 text-white shadow-2xl border border-emerald-500/20">
+          <!-- Decorative Glow & Background Pattern -->
+          <div class="absolute -top-12 -right-12 w-44 h-44 bg-cyan-500/20 rounded-full blur-3xl"></div>
+          <div class="absolute -bottom-12 -left-12 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl"></div>
+          <div class="absolute top-4 right-6 text-7xl opacity-10 font-black select-none">🚕</div>
+
+          <div class="relative z-10">
+            <!-- Header Badge & Title -->
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                {{ $t('transport_tag') }}
+              </span>
+            </div>
+
+            <h3 class="text-2xl font-black mb-2 text-white leading-tight">
+              {{ $t('transport_title') }}
+            </h3>
+            <p class="text-xs text-emerald-100/70 mb-5 leading-relaxed">
+              {{ $t('transport_subtitle') }}
+            </p>
+
+            <!-- Mock Ride Request Card (Interactive simulation) -->
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 mb-5 space-y-3">
+              <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
+                   @click="isLogin = false; showLoginModal = true">
+                <div class="w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20 flex-shrink-0"></div>
+                <span class="text-xs text-gray-300 font-medium truncate">{{ $t('transport_pickup_placeholder') }}</span>
+              </div>
+              
+              <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
+                   @click="isLogin = false; showLoginModal = true">
+                <div class="w-3 h-3 rounded-sm bg-cyan-400 ring-4 ring-cyan-400/20 flex-shrink-0"></div>
+                <span class="text-xs text-gray-300 font-medium truncate">{{ $t('transport_destination_placeholder') }}</span>
+              </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-3 gap-2 mb-6">
+              <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+                <span class="text-xl mb-1">⚡</span>
+                <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_1_title') }}</span>
+                <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_1_desc') }}</span>
+              </div>
+              <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+                <span class="text-xl mb-1">🏷️</span>
+                <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_2_title') }}</span>
+                <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_2_desc') }}</span>
+              </div>
+              <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+                <span class="text-xl mb-1">🕒</span>
+                <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_3_title') }}</span>
+                <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_3_desc') }}</span>
+              </div>
+            </div>
+
+            <!-- CTA Button -->
+            <button 
+              @click="isLogin = false; showLoginModal = true"
+              class="w-full py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-black text-sm rounded-2xl shadow-xl hover:opacity-95 transition-all active:scale-95 uppercase tracking-wider flex items-center justify-center space-x-2"
+            >
+              <span>{{ $t('transport_cta') }}</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
       <!-- Services Carousel -->
       <section class="py-6 bg-gray-50 dark:bg-gray-900/50">
         <div class="px-6 mb-4 flex items-center justify-between">
