@@ -147,15 +147,15 @@
         </div>
       </section>
 
-      <!-- Dedicated Uber-style Transport Section -->
-      <section class="px-4 py-6">
-        <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-emerald-950 rounded-[2.5rem] p-6 text-white shadow-2xl border border-emerald-500/20">
+      <!-- Dedicated Uber-style Transport Section (Full Width, Seamless spacing) -->
+      <section class="w-full py-1">
+        <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-emerald-950 px-6 py-6 text-white shadow-xl border-y border-emerald-500/20">
           <!-- Decorative Glow & Background Pattern -->
           <div class="absolute -top-12 -right-12 w-44 h-44 bg-cyan-500/20 rounded-full blur-3xl"></div>
           <div class="absolute -bottom-12 -left-12 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl"></div>
-          <div class="absolute top-4 right-6 text-7xl opacity-10 font-black select-none">🚕</div>
+          <div class="absolute top-4 right-6 text-7xl opacity-10 font-black select-none">🚘</div>
 
-          <div class="relative z-10">
+          <div class="relative z-10 max-w-sm mx-auto">
             <!-- Header Badge & Title -->
             <div class="flex items-center space-x-2 mb-3">
               <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/30 flex items-center gap-1.5">
@@ -217,7 +217,7 @@
       </section>
 
       <!-- Services Carousel -->
-      <section class="py-6 bg-gray-50 dark:bg-gray-900/50">
+      <section class="py-4 bg-gray-50 dark:bg-gray-900/50">
         <div class="px-6 mb-4 flex items-center justify-between">
           <h4 class="font-black text-gray-900 dark:text-white">{{ $t('covered_services') }}</h4>
           <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">{{ $t('guaranteed') }}</span>
@@ -342,8 +342,12 @@
 
     <!-- Modal de Login/Registro -->
     <transition name="modal">
-      <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto overflow-x-hidden relative">
+      <div 
+        v-if="showLoginModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overscroll-none"
+        @touchmove.prevent
+      >
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto overflow-x-hidden relative" @touchmove.stop>
         <button 
           @click="showLoginModal = false" 
           class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 z-10"
@@ -1160,9 +1164,10 @@ watch(anyModalOpen, (newValue) => {
   if (process.client) {
     const overflowValue = newValue ? 'hidden' : ''
     document.body.style.overflow = overflowValue
+    document.body.style.touchAction = newValue ? 'none' : ''
     document.documentElement.style.overflow = overflowValue
   }
-})
+}, { immediate: true })
 
 const showSuccess = ref(false)
 const isLogin = ref(true)
