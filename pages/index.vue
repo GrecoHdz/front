@@ -147,17 +147,17 @@
         </div>
       </section>
 
-      <!-- Dedicated Uber-style Transport Section (Full Width, Seamless spacing) -->
-      <section class="w-full py-1">
-        <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-emerald-950 px-6 py-6 text-white shadow-xl border-y border-emerald-500/20">
+      <!-- Dedicated Uber-style Transport Section -->
+      <section class="px-4 py-6">
+        <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-emerald-950 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-2xl border border-emerald-500/20">
           <!-- Decorative Glow & Background Pattern -->
           <div class="absolute -top-12 -right-12 w-44 h-44 bg-cyan-500/20 rounded-full blur-3xl"></div>
           <div class="absolute -bottom-12 -left-12 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl"></div>
-          <div class="absolute top-4 right-6 text-7xl opacity-10 font-black select-none">🚘</div>
+          <div class="absolute top-4 right-6 text-7xl opacity-10 font-black select-none">🚗</div>
 
-          <div class="relative z-10 max-w-sm mx-auto">
+          <div class="relative z-10 max-w-xs sm:max-w-sm mx-auto text-center sm:text-left">
             <!-- Header Badge & Title -->
-            <div class="flex items-center space-x-2 mb-3">
+            <div class="flex items-center justify-center sm:justify-start space-x-2 mb-3">
               <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/30 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 {{ $t('transport_tag') }}
@@ -172,7 +172,7 @@
             </p>
 
             <!-- Mock Ride Request Card (Interactive simulation) -->
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 mb-5 space-y-3">
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 mb-5 space-y-3 text-left">
               <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
                    @click="isLogin = false; showLoginModal = true">
                 <div class="w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20 flex-shrink-0"></div>
@@ -346,8 +346,9 @@
         v-if="showLoginModal" 
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overscroll-none"
         @touchmove.prevent
+        @wheel.prevent
       >
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto overflow-x-hidden relative" @touchmove.stop>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto overflow-x-hidden relative overscroll-contain" @touchmove.stop @wheel.stop>
         <button 
           @click="showLoginModal = false" 
           class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 z-10"
@@ -1160,12 +1161,23 @@ const anyModalOpen = computed(() => {
   return showLoginModal.value || showRateLimitModal.value || showForgotPassword.value || showCitiesSheet.value
 })
 
+let scrollPosition = 0
+
 watch(anyModalOpen, (newValue) => {
   if (process.client) {
-    const overflowValue = newValue ? 'hidden' : ''
-    document.body.style.overflow = overflowValue
-    document.body.style.touchAction = newValue ? 'none' : ''
-    document.documentElement.style.overflow = overflowValue
+    if (newValue) {
+      scrollPosition = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollPosition}px`
+      document.body.style.width = '100%'
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      document.body.style.overflow = ''
+      window.scrollTo(0, scrollPosition)
+    }
   }
 }, { immediate: true })
 
