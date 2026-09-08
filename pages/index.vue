@@ -88,197 +88,190 @@
     <main class="relative -mt-6 pb-1">
       
       <!-- Value Proposition Hero -->
-      <section class="px-4 py-6 text-center bg-white dark:bg-gray-800 rounded-t-[2.5rem] shadow-2xl relative z-10 border-t border-gray-100 dark:border-gray-700">
-        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4 leading-tight">
-          {{ $t('value_prop_title1') }}<br>
-          <span class="gradient-text">{{ $t('value_prop_title2') }}</span>
-        </h3>
+      <section class="px-2 py-6 text-center bg-white dark:bg-gray-800 rounded-t-[2.5rem] shadow-2xl relative z-10 border-t border-gray-100 dark:border-gray-700">
+  <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4 leading-tight">
+    {{ $t('value_prop_title1') }}<br>
+    <span class="gradient-text">{{ $t('value_prop_title2') }}</span>
+  </h3>
 
-        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6 max-w-xs mx-auto leading-relaxed">
-          {{ $t('value_prop_description') }}
-        </p>
+  <p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6 max-w-xs mx-auto leading-relaxed">
+    {{ $t('value_prop_description') }}
+  </p>
 
-        <!-- Premium How it Works -->
-        <div class="relative mb-8 max-w-sm mx-auto px-2">
-          <!-- Connector line -->
-          <div class="absolute top-6 left-[calc(16.66%+8px)] right-[calc(16.66%+8px)] h-px border-t-2 border-dashed border-gray-200 dark:border-gray-700 z-0"></div>
+  <div class="relative mb-8 max-w-sm mx-auto px-2">
+    <div class="absolute top-6 left-[calc(16.66%+8px)] right-[calc(16.66%+8px)] h-px border-t-2 border-dashed border-gray-200 dark:border-gray-700 z-0"></div>
 
-          <div class="grid grid-cols-3 gap-2 relative z-10">
-            <!-- Step 1 -->
-            <div class="flex flex-col items-center group cursor-default">
-              <div class="relative mb-2">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-2xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-emerald-200 dark:group-hover:shadow-emerald-900/50">
-                  📱
-                </div> 
-              </div>
-              <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step1') }}</span>
-            </div>
+    <div class="grid grid-cols-3 gap-2 relative z-10">
+      <div class="flex flex-col items-center group cursor-default">
+        <div class="relative mb-2">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-2xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-emerald-200 dark:group-hover:shadow-emerald-900/50">
+            📱
+          </div> 
+        </div>
+        <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step1') }}</span>
+      </div>
 
-            <!-- Step 2 -->
-            <div class="flex flex-col items-center group cursor-default">
-              <div class="relative mb-2">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-blue-200 dark:group-hover:shadow-blue-900/50">
-                  🕒
-                </div>
-              </div>
-              <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step2') }}</span>
-            </div>
-
-            <!-- Step 3 -->
-            <div class="flex flex-col items-center group cursor-default">
-              <div class="relative mb-2">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-amber-200 dark:group-hover:shadow-amber-900/50">
-                  ✅
-                </div>
-              </div>
-              <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step3') }}</span>
-            </div>
+      <div class="flex flex-col items-center group cursor-default">
+        <div class="relative mb-2">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-blue-200 dark:group-hover:shadow-blue-900/50">
+            🕒
           </div>
         </div>
+        <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step2') }}</span>
+      </div>
 
-        <div class="px-4">
-          <button 
-            @click="isLogin = false; showLoginModal = true"
-            class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95 mb-4"
-          >
-            {{ $t('cta_start') }}
-          </button>
-          <p class="text-xs text-gray-400">{{ $t('free_registration') }}</p>
+      <div class="flex flex-col items-center group cursor-default">
+        <div class="relative mb-2">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-amber-200 dark:group-hover:shadow-amber-900/50">
+            ✅
+          </div>
         </div>
-      </section>
-
-      <!-- Dedicated Uber-style Transport Section -->
-       <section class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-emerald-950 px-4 py-8 sm:px-8 text-white shadow-2xl">
-  <!-- Decorative Glow & Background Pattern -->
-  <div class="absolute -top-12 -right-12 w-44 h-44 bg-cyan-500/20 rounded-full blur-3xl"></div>
-  <div class="absolute -bottom-12 -left-12 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl"></div>
-  <div class="absolute top-4 right-6 text-7xl opacity-10 font-black select-none">🚗</div>
-
-  <div class="relative z-10 text-left">
-    <!-- Header Badge & Title -->
-    <div class="flex items-center justify-start space-x-2 mb-3">
-      <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/30 flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        {{ $t('transport_tag') }}
-      </span>
-    </div>
-
-    <h3 class="text-2xl font-black mb-2 text-white leading-tight">
-      {{ $t('transport_title') }}
-    </h3>
-    <p class="text-xs text-emerald-100/70 mb-5 leading-relaxed max-w-md">
-      {{ $t('transport_subtitle') }}
-    </p>
-
-    <!-- Mock Ride Request Card (Interactive simulation) -->
-    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 mb-5 space-y-3 text-left max-w-md">
-      <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
-           @click="isLogin = false; showLoginModal = true">
-        <div class="w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20 flex-shrink-0"></div>
-        <span class="text-xs text-gray-300 font-medium truncate">{{ $t('transport_pickup_placeholder') }}</span>
-      </div>
-      
-      <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
-           @click="isLogin = false; showLoginModal = true">
-        <div class="w-3 h-3 rounded-sm bg-cyan-400 ring-4 ring-cyan-400/20 flex-shrink-0"></div>
-        <span class="text-xs text-gray-300 font-medium truncate">{{ $t('transport_destination_placeholder') }}</span>
+        <span class="text-[8px] text-gray-600 dark:text-gray-400 font-bold leading-tight text-center tracking-wide uppercase">{{ $t('step3') }}</span>
       </div>
     </div>
+  </div>
 
-    <!-- Features Grid -->
-    <div class="grid grid-cols-3 gap-2 mb-6 max-w-md">
-      <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-        <span class="text-xl mb-1">⚡</span>
-        <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_1_title') }}</span>
-        <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_1_desc') }}</span>
-      </div>
-      <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-        <span class="text-xl mb-1">🏷️</span>
-        <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_2_title') }}</span>
-        <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_2_desc') }}</span>
-      </div>
-      <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-        <span class="text-xl mb-1">🕒</span>
-        <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_3_title') }}</span>
-        <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_3_desc') }}</span>
-      </div>
-    </div>
-
-    <!-- CTA Button -->
+  <div class="px-2">
     <button 
       @click="isLogin = false; showLoginModal = true"
-      class="w-full sm:w-auto sm:min-w-[280px] py-4 px-8 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-black text-sm rounded-2xl shadow-xl hover:opacity-95 transition-all active:scale-95 uppercase tracking-wider flex items-center justify-center space-x-2"
+      class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95 mb-4"
     >
-      <span>{{ $t('transport_cta') }}</span>
+      {{ $t('cta_start') }}
     </button>
+    <p class="text-xs text-gray-400">{{ $t('free_registration') }}</p>
   </div>
 </section>
 
-      <!-- Services Carousel -->
-      <section class="py-4 bg-gray-50 dark:bg-gray-900/50">
-        <div class="px-6 mb-4 flex items-center justify-between">
-          <h4 class="font-black text-gray-900 dark:text-white">{{ $t('covered_services') }}</h4>
-          <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">{{ $t('guaranteed') }}</span>
+<-- Seccion de transporte -->
+<section class="px-2 py-6">
+  <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-emerald-950 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-2xl border border-emerald-500/20">
+    <div class="absolute -top-12 -right-12 w-44 h-44 bg-cyan-500/20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-12 -left-12 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl"></div>
+    <div class="absolute top-4 right-6 text-7xl opacity-10 font-black select-none">🚗</div>
+
+    <div class="relative z-10 text-center">
+      <div class="flex items-center justify-center space-x-2 mb-3">
+        <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          {{ $t('transport_tag') }}
+        </span>
+      </div>
+
+      <h3 class="text-2xl font-black mb-2 text-white leading-tight">
+        {{ $t('transport_title') }}
+      </h3>
+      <p class="text-xs text-emerald-100/70 mb-5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">
+        {{ $t('transport_subtitle') }}
+      </p>
+
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 mb-5 space-y-3 text-left max-w-sm mx-auto">
+        <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
+             @click="isLogin = false; showLoginModal = true">
+          <div class="w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20 flex-shrink-0"></div>
+          <span class="text-xs text-gray-300 font-medium truncate">{{ $t('transport_pickup_placeholder') }}</span>
         </div>
         
-        <div 
-          ref="carruselRef"
-          class="flex overflow-x-auto pb-4 px-6 space-x-4 no-scrollbar cursor-grab active:cursor-grabbing select-none"
-          @mouseenter="isHovering = true"
-          @mouseleave="isHovering = false"
-          @touchstart="handleInteraction"
-          @mousedown="handleInteraction"
-          @scroll="onManualScroll"
-        >
-          <div v-for="(service, index) in carouselItems" :key="index"
-               @click="isLogin = false; showLoginModal = true"
-               class="flex-shrink-0 w-[140px]">
-            <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center h-full min-h-[140px] justify-center transition-transform hover:scale-105 active:scale-95">
-              <div class="text-3xl mb-3">{{ service.icon }}</div>
-              <h4 class="font-bold text-gray-900 dark:text-white text-xs leading-tight">
-                {{ service.name }}
-              </h4>
-            </div>
-          </div>
+        <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
+             @click="isLogin = false; showLoginModal = true">
+          <div class="w-3 h-3 rounded-sm bg-cyan-400 ring-4 ring-cyan-400/20 flex-shrink-0"></div>
+          <span class="text-xs text-gray-300 font-medium truncate">{{ $t('transport_destination_placeholder') }}</span>
         </div>
-      </section>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 mb-6 max-w-sm mx-auto">
+        <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+          <span class="text-xl mb-1">⚡</span>
+          <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_1_title') }}</span>
+          <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_1_desc') }}</span>
+        </div>
+        <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+          <span class="text-xl mb-1">🏷️</span>
+          <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_2_title') }}</span>
+          <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_2_desc') }}</span>
+        </div>
+        <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+          <span class="text-xl mb-1">🕒</span>
+          <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_3_title') }}</span>
+          <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_3_desc') }}</span>
+        </div>
+      </div>
+
+      <div class="max-w-xs sm:max-w-sm mx-auto">
+        <button 
+          @click="isLogin = false; showLoginModal = true"
+          class="w-full py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-black text-sm rounded-2xl shadow-xl hover:opacity-95 transition-all active:scale-95 uppercase tracking-wider flex items-center justify-center space-x-2"
+        >
+          <span>{{ $t('transport_cta') }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+      <section class="py-4 bg-gray-50 dark:bg-gray-900/50">
+  <div class="px-2 mb-4 flex items-center justify-between">
+    <h4 class="font-black text-gray-900 dark:text-white">{{ $t('covered_services') }}</h4>
+    <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">{{ $t('guaranteed') }}</span>
+  </div>
+  
+  <div 
+    ref="carruselRef"
+    class="flex overflow-x-auto pb-4 px-2 space-x-4 no-scrollbar cursor-grab active:cursor-grabbing select-none"
+    @mouseenter="isHovering = true"
+    @mouseleave="isHovering = false"
+    @touchstart="handleInteraction"
+    @mousedown="handleInteraction"
+    @scroll="onManualScroll"
+  >
+    <div v-for="(service, index) in carouselItems" :key="index"
+         @click="isLogin = false; showLoginModal = true"
+         class="flex-shrink-0 w-[140px]">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center h-full min-h-[140px] justify-center transition-transform hover:scale-105 active:scale-95">
+        <div class="text-3xl mb-3">{{ service.icon }}</div>
+        <h4 class="font-bold text-gray-900 dark:text-white text-xs leading-tight">
+          {{ service.name }}
+        </h4>
+      </div>
+    </div>
+  </div>
+</section>
 
        <!-- Membership & Savings -->
-<section class="bg-gradient-to-br from-gray-900 to-emerald-900 px-4 py-8 sm:px-8 text-white relative overflow-hidden shadow-2xl">
-  <div class="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl"></div>
-  
-  <div class="relative z-10">
-    <div class="text-center mb-8">
-      <div class="inline-flex flex-col items-center">
-        <span class="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30 mb-3">{{ $t('membership_premium') }}</span>
-        <div class="flex items-center justify-center space-x-3">
-          <span v-if="isLoadingMembershipCost" class="text-2xl font-black text-white animate-pulse">{{ $t('loading') }}</span>
-          <span v-else class="text-5xl font-black text-white">L. {{ membershipCost.toLocaleString('es-HN') }}</span>
-          <span class="px-2 py-0.5 bg-white/10 rounded text-[10px] text-emerald-300 font-bold uppercase tracking-tighter self-start mt-1 border border-white/10">{{ $t('optional') }}</span>
-        </div>
-        <p class="text-[10px] text-emerald-100/50 mt-2 font-medium uppercase tracking-widest">{{ $t('monthly_investment') }}</p>
-      </div>
-    </div>
-
-    <div class="mb-4 p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 text-center max-w-md mx-auto">
-      <h4 class="text-xl font-black text-emerald-400 mb-2">{{ $t('money_not_lost') }}</h4>
-      <p class="text-sm text-emerald-100/80 leading-relaxed" v-html="$t('money_not_lost_desc').replace('Crédito Real', '<span class=\'font-bold text-white\'>Crédito Real</span>').replace('pagar cualquier servicio.', '<span class=\'font-bold text-white\'>pagar cualquier servicio.</span>')">
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-8 max-w-2xl mx-auto">
-      <div v-for="(benefit, index) in membershipBenefits.slice(0, 3)" :key="benefit.id" class="flex items-center space-x-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-        <div class="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center text-xl">
-          {{ index === 0 ? '✨' : index === 1 ? '💸' : '🛠️' }}
-        </div>
-        <div class="flex-1">
-          <h5 class="text-sm font-black text-white">{{ benefit.title }}</h5>
-          <p class="text-xs text-emerald-100/60 mt-0.5">{{ benefit.description }}</p>
+<section class="px-2">
+  <div class="bg-gradient-to-br from-gray-900 to-emerald-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+    <div class="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10">
+      <div class="text-center mb-8">
+        <div class="inline-flex flex-col items-center">
+          <span class="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30 mb-3">{{ $t('membership_premium') }}</span>
+          <div class="flex items-center justify-center space-x-3">
+            <span v-if="isLoadingMembershipCost" class="text-2xl font-black text-white animate-pulse">{{ $t('loading') }}</span>
+            <span v-else class="text-5xl font-black text-white">L. {{ membershipCost.toLocaleString('es-HN') }}</span>
+            <span class="px-2 py-0.5 bg-white/10 rounded text-[10px] text-emerald-300 font-bold uppercase tracking-tighter self-start mt-1 border border-white/10">{{ $t('optional') }}</span>
+          </div>
+          <p class="text-[10px] text-emerald-100/50 mt-2 font-medium uppercase tracking-widest">{{ $t('monthly_investment') }}</p>
         </div>
       </div>
-    </div>
 
-    <div class="max-w-xs mx-auto">
+      <div class="mb-4 p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 text-center">
+        <h4 class="text-xl font-black text-emerald-400 mb-2">{{ $t('money_not_lost') }}</h4>
+        <p class="text-sm text-emerald-100/80 leading-relaxed" v-html="$t('money_not_lost_desc').replace('Crédito Real', '<span class=\'font-bold text-white\'>Crédito Real</span>').replace('pagar cualquier servicio.', '<span class=\'font-bold text-white\'>pagar cualquier servicio.</span>')">
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2 mb-8">
+        <div v-for="(benefit, index) in membershipBenefits.slice(0, 3)" :key="benefit.id" class="flex items-center space-x-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+          <div class="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center text-xl">
+            {{ index === 0 ? '✨' : index === 1 ? '💸' : '🛠️' }}
+          </div>
+          <div class="flex-1">
+            <h5 class="text-sm font-black text-white">{{ benefit.title }}</h5>
+            <p class="text-xs text-emerald-100/60 mt-0.5">{{ benefit.description }}</p>
+          </div>
+        </div>
+      </div>
+
       <button 
         @click="isLogin = false; showLoginModal = true"
         class="w-full py-4 bg-white text-emerald-900 font-black text-sm rounded-2xl shadow-xl hover:bg-emerald-50 transition-all active:scale-[0.98] uppercase tracking-wider"
@@ -290,40 +283,42 @@
 </section>
 
       <!-- Referral Program - Modern Glassmorphism Design -->
-<section class="relative overflow-hidden bg-gradient-to-br from-indigo-600/10 to-purple-600/10 dark:from-indigo-500/5 dark:to-purple-500/5 px-4 py-8 sm:px-8 border-t border-b border-white/10 backdrop-blur-sm">
-  <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
-  <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
-  
-  <div class="relative z-10 text-center max-w-xs sm:max-w-sm mx-auto">
-    <div class="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl shadow-xl flex items-center justify-center text-3xl mx-auto mb-6 transform -rotate-6">
-      🤝
+<section class="px-2 py-6">
+  <div class="relative overflow-hidden bg-gradient-to-br from-indigo-600/10 to-purple-600/10 dark:from-indigo-500/5 dark:to-purple-500/5 rounded-[2.5rem] p-8 border border-white/10 backdrop-blur-sm">
+    <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 text-center max-w-xs mx-auto">
+      <div class="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl shadow-xl flex items-center justify-center text-3xl mx-auto mb-6 transform -rotate-6">
+        🤝
+      </div>
+      <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-3">{{ $t('referral_program') }}</h3>
+      <p class="text-gray-600 dark:text-gray-400 text-sm mb-8 leading-relaxed">
+        {{ $t('referral_desc', { percentage: referralPercentage }) }}
+      </p>
+      <button 
+        @click="isLogin = false; showLoginModal = true"
+        class="px-8 py-3 bg-indigo-600 text-white text-sm font-black rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:bg-indigo-700 active:scale-95"
+      >
+        {{ $t('referral_cta') }}
+      </button>
     </div>
-    <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-3">{{ $t('referral_program') }}</h3>
-    <p class="text-gray-600 dark:text-gray-400 text-sm mb-8 leading-relaxed">
-      {{ $t('referral_desc', { percentage: referralPercentage }) }}
-    </p>
-    <button 
-      @click="isLogin = false; showLoginModal = true"
-      class="px-8 py-3 bg-indigo-600 text-white text-sm font-black rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:bg-indigo-700 active:scale-95"
-    >
-      {{ $t('referral_cta') }}
-    </button>
   </div>
 </section>
 
       <!-- Simple Final CTA -->
-      <section class="px-4 pb-10 text-center">
-        <div class="max-w-xs mx-auto">
-          <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-4">{{ $t('ready_to_start') }}</h3> 
-          <button 
-            @click="isLogin = false; showLoginModal = true"
-            class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95"
-          >
-            {{ $t('create_account_free') }}
-          </button>
-          <p class="mt-4 text-[10px] text-gray-400 font-medium tracking-wide uppercase">{{ $t('free_registration') }}</p>
-        </div>
-      </section>
+      <section class="px-2 pb-10 text-center">
+  <div class="max-w-xs mx-auto">
+    <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-4">{{ $t('ready_to_start') }}</h3> 
+    <button 
+      @click="isLogin = false; showLoginModal = true"
+      class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95"
+    >
+      {{ $t('create_account_free') }}
+    </button>
+    <p class="mt-4 text-[10px] text-gray-400 font-medium tracking-wide uppercase">{{ $t('free_registration') }}</p>
+  </div>
+</section>
 
     </main>
    <!-- Login/Register Modal -->
