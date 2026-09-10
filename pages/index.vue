@@ -1203,24 +1203,6 @@ const vehicleTypes = [
   { id: 'Bus', i18nKey: 'transport_bus' }
 ]
 
-const empresaPhoneNumber = ref('')
-
-const fetchEmpresaPhoneNumber = async () => {
-  try {
-    const response = await $api('/config/valor/numero_empresa', {
-      method: 'GET'
-    })
-    if (response && response.valor) {
-      empresaPhoneNumber.value = response.valor
-    } else {
-      empresaPhoneNumber.value = '1234567890'
-    }
-  } catch (error) {
-    console.error('Error al obtener el número de teléfono de la empresa:', error)
-    empresaPhoneNumber.value = '1234567890'
-  }
-}
-
 const cotizarTransporteWhatsApp = async () => {
   const recogida = transportForm.value.recogida ? transportForm.value.recogida.trim() : ''
   const destino = transportForm.value.destino ? transportForm.value.destino.trim() : ''
