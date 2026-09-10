@@ -242,14 +242,13 @@
                 type="button"
                 @click="transportForm.tipoVehiculo = v.id"
                 :class="[
-                  'p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center cursor-pointer',
+                  'py-2.5 px-2 rounded-xl border text-center transition-all flex items-center justify-center cursor-pointer',
                   transportForm.tipoVehiculo === v.id
-                    ? 'bg-emerald-500/30 border-emerald-400 text-white ring-2 ring-emerald-500/50 shadow-lg scale-95'
-                    : 'bg-black/30 border-white/5 text-gray-300 hover:bg-black/50 hover:border-white/20'
+                    ? 'bg-emerald-500/30 border-emerald-400 text-white font-black ring-2 ring-emerald-500/50 shadow-lg scale-95'
+                    : 'bg-black/30 border-white/5 text-gray-300 hover:bg-black/50 hover:border-white/20 font-medium'
                 ]"
               >
-                <span class="text-xl mb-1 select-none">{{ v.icon }}</span>
-                <span class="text-[9px] font-bold leading-none truncate w-full">{{ v.name }}</span>
+                <span class="text-[10px] leading-tight truncate w-full">{{ v.name }}</span>
               </button>
             </div>
           </div>
@@ -1196,13 +1195,11 @@ const transportForm = ref({
 })
 
 const vehicleTypes = [
-  { id: 'Turismo', name: 'Turismo', icon: '🚗' },
-  { id: 'Camioneta', name: 'Camioneta', icon: '🛻' },
-  { id: 'Mini Van', name: 'Mini Van', icon: '🚐' },
-  { id: 'Bus', name: 'Bus', icon: '🚌' }
+  { id: 'Turismo', name: 'Turismo' },
+  { id: 'Camioneta', name: 'Camioneta' },
+  { id: 'Mini Van', name: 'Mini Van' },
+  { id: 'Bus', name: 'Bus' }
 ]
-
-const empresaPhoneNumber = ref('')
 
 const fetchEmpresaPhoneNumber = async () => {
   try {
