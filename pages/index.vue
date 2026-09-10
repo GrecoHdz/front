@@ -164,7 +164,7 @@
              @click="isLogin = false; showLoginModal = true"
              class="flex-shrink-0 w-[140px]">
           <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center h-full min-h-[140px] justify-center transition-transform hover:scale-105 active:scale-95">
-            <div class="text-3xl mb-3">{{ service.icon }}</div>
+            <div class="text-3xl mb-1">{{ service.icon }}</div>
             <h4 class="font-bold text-gray-900 dark:text-white text-xs leading-tight">
               {{ service.name }}
             </h4>
@@ -184,103 +184,105 @@
       <div class="absolute top-4 right-6 text-7xl opacity-10 font-black select-none">🚗</div>
 
       <div class="relative z-10 text-center">
-        <div class="flex items-center justify-center space-x-2 mb-3">
+        <div class="flex items-center justify-start space-x-2 mb-3">
           <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/30 flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             {{ $t('transport_tag') }}
           </span>
         </div>
 
-        <h3 class="text-2xl font-black mb-2 text-white leading-tight">
+        <h3 class="text-2xl sm:text-3xl font-black mb-2 text-white leading-tight">
           {{ $t('transport_title') }}
         </h3>
-        <p class="text-xs text-emerald-100/70 mb-5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">
+        <p class="text-xs sm:text-sm text-emerald-100/70 mb-6 leading-relaxed">
           {{ $t('transport_subtitle') }}
         </p>
 
         <!-- Formulario de Cotización Interactivo -->
-        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 mb-5 space-y-3 text-left max-w-sm mx-auto">
-          <div>
-            <label class="block text-[10px] font-bold uppercase tracking-wider text-emerald-300 mb-1.5 flex items-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Punto de Recogida
-            </label>
-            <div class="flex items-center space-x-3 bg-black/40 rounded-xl px-3 py-2.5 border border-white/10 focus-within:border-emerald-400 transition-colors">
-              <span class="text-emerald-400 text-sm">📍</span>
-              <input 
-                v-model="transportForm.recogida" 
-                type="text" 
-                placeholder="¿Dónde te recogemos?" 
-                class="w-full bg-transparent text-xs text-white placeholder-gray-400 focus:outline-none font-medium"
-              />
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-white/10 mb-6 space-y-4 text-left w-full">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label class="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300 mb-1.5 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> {{ $t('transport_pickup') }}
+              </label>
+              <div class="flex items-center space-x-3 bg-black/40 rounded-xl px-3 py-3 border border-white/10 focus-within:border-emerald-400 transition-colors">
+                <span class="text-emerald-400 text-base">📍</span>
+                <input 
+                  v-model="transportForm.recogida" 
+                  type="text" 
+                  :placeholder="$t('transport_pickup_placeholder')" 
+                  class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-gray-400 focus:outline-none font-medium"
+                />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label class="block text-[10px] font-bold uppercase tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1">
-              <span class="w-2 h-2 rounded-sm bg-cyan-400"></span> Destino
-            </label>
-            <div class="flex items-center space-x-3 bg-black/40 rounded-xl px-3 py-2.5 border border-white/10 focus-within:border-cyan-400 transition-colors">
-              <span class="text-cyan-400 text-sm">🏁</span>
-              <input 
-                v-model="transportForm.destino" 
-                type="text" 
-                placeholder="¿A dónde vas?" 
-                class="w-full bg-transparent text-xs text-white placeholder-gray-400 focus:outline-none font-medium"
-              />
+            <div>
+              <label class="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-sm bg-cyan-400"></span> {{ $t('transport_destination') }}
+              </label>
+              <div class="flex items-center space-x-3 bg-black/40 rounded-xl px-3 py-3 border border-white/10 focus-within:border-cyan-400 transition-colors">
+                <span class="text-cyan-400 text-base">📍</span>
+                <input 
+                  v-model="transportForm.destino" 
+                  type="text" 
+                  :placeholder="$t('transport_destination_placeholder')" 
+                  class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-gray-400 focus:outline-none font-medium"
+                />
+              </div>
             </div>
           </div>
 
           <!-- Selección de Tipo de Auto -->
           <div>
-            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-300 mb-2">
-              Tipo de Vehículo
+            <label class="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">
+              {{ $t('transport_vehicle_type') }}
             </label>
-            <div class="grid grid-cols-4 gap-1.5">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button 
                 v-for="v in vehicleTypes" 
                 :key="v.id"
                 type="button"
                 @click="transportForm.tipoVehiculo = v.id"
                 :class="[
-                  'py-2.5 px-2 rounded-xl border text-center transition-all flex items-center justify-center cursor-pointer',
+                  'py-3 px-2 rounded-xl border text-center transition-all flex items-center justify-center cursor-pointer',
                   transportForm.tipoVehiculo === v.id
                     ? 'bg-emerald-500/30 border-emerald-400 text-white font-black ring-2 ring-emerald-500/50 shadow-lg scale-95'
                     : 'bg-black/30 border-white/5 text-gray-300 hover:bg-black/50 hover:border-white/20 font-medium'
                 ]"
               >
-                <span class="text-[10px] leading-tight truncate w-full">{{ v.name }}</span>
+                <span class="text-xs sm:text-sm leading-tight truncate w-full">{{ $t(v.i18nKey) }}</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 mb-6 max-w-sm mx-auto">
-          <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-            <span class="text-xl mb-1">⚡</span>
-            <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_1_title') }}</span>
-            <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_1_desc') }}</span>
+        <div class="w-full mb-6">
+          <button 
+            @click="cotizarTransporteWhatsApp"
+            class="w-full py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-black text-sm sm:text-base rounded-2xl shadow-xl hover:opacity-95 transition-all active:scale-[0.98] uppercase tracking-wider flex items-center justify-center space-x-2 cursor-pointer"
+          >
+            <span>{{ $t('transport_quick_quote') }}</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+            <span class="text-2xl mb-1">⚡</span>
+            <span class="text-xs font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_1_title') }}</span>
+            <span class="text-[10px] text-gray-400 leading-tight mt-1">{{ $t('transport_feature_1_desc') }}</span>
           </div>
-          <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-            <span class="text-xl mb-1">🏷️</span>
-            <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_2_title') }}</span>
-            <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_2_desc') }}</span>
+          <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+            <span class="text-2xl mb-1">🏷️</span>
+            <span class="text-xs font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_2_title') }}</span>
+            <span class="text-[10px] text-gray-400 leading-tight mt-1">{{ $t('transport_feature_2_desc') }}</span>
           </div>
-          <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-            <span class="text-xl mb-1">🕒</span>
-            <span class="text-[10px] font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_3_title') }}</span>
-            <span class="text-[8px] text-gray-400 leading-tight mt-0.5">{{ $t('transport_feature_3_desc') }}</span>
+          <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+            <span class="text-2xl mb-1">🕒</span>
+            <span class="text-xs font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_3_title') }}</span>
+            <span class="text-[10px] text-gray-400 leading-tight mt-1">{{ $t('transport_feature_3_desc') }}</span>
           </div>
         </div>
 
-        <div class="max-w-xs sm:max-w-sm mx-auto">
-          <button 
-            @click="cotizarTransporteWhatsApp"
-            class="w-full py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-black text-sm rounded-2xl shadow-xl hover:opacity-95 transition-all active:scale-95 uppercase tracking-wider flex items-center justify-center space-x-2 cursor-pointer"
-          >
-            <span class="text-lg">💬</span>
-            <span>Cotizar por WhatsApp</span>
-          </button>
-        </div>
       </div>
     </div>
   </section>
@@ -1162,7 +1164,7 @@ const config = useRuntimeConfig()
 const router = useRouter()
 const auth = useAuthStore()
 const userCookie = useCookie('user')
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const langModal = ref(null)
 const currentLocale = computed(() => locale.value)
 
@@ -1195,12 +1197,29 @@ const transportForm = ref({
 })
 
 const vehicleTypes = [
-  { id: 'Turismo', name: 'Turismo' },
-  { id: 'Camioneta', name: 'Camioneta' },
-  { id: 'Mini Van', name: 'Mini Van' },
-  { id: 'Bus', name: 'Bus' }
+  { id: 'Turismo', i18nKey: 'transport_turismo' },
+  { id: 'Camioneta', i18nKey: 'transport_camioneta' },
+  { id: 'Mini Van', i18nKey: 'transport_minivan' },
+  { id: 'Bus', i18nKey: 'transport_bus' }
 ]
 
+const empresaPhoneNumber = ref('')
+
+const fetchEmpresaPhoneNumber = async () => {
+  try {
+    const response = await $api('/config/valor/numero_empresa', {
+      method: 'GET'
+    })
+    if (response && response.valor) {
+      empresaPhoneNumber.value = response.valor
+    } else {
+      empresaPhoneNumber.value = '1234567890'
+    }
+  } catch (error) {
+    console.error('Error al obtener el número de teléfono de la empresa:', error)
+    empresaPhoneNumber.value = '1234567890'
+  }
+}
 
 const cotizarTransporteWhatsApp = async () => {
   const recogida = transportForm.value.recogida ? transportForm.value.recogida.trim() : ''
@@ -1208,7 +1227,7 @@ const cotizarTransporteWhatsApp = async () => {
   const vehiculo = transportForm.value.tipoVehiculo || 'Turismo'
 
   if (!recogida || !destino) {
-    showToast('Por favor ingresa el punto de recogida y destino para la cotización', 'error')
+    showToast(t('transport_whatsapp.missing_fields_error'), 'error')
     return
   }
 
@@ -1217,11 +1236,14 @@ const cotizarTransporteWhatsApp = async () => {
       await fetchEmpresaPhoneNumber()
     }
 
-    const message = `*Cotización de Transporte - ProHogar* 🚗\n\n` +
-      `📍 *Punto de Recogida:* ${recogida}\n` +
-      `🏁 *Punto de Destino:* ${destino}\n` +
-      `🚘 *Tipo de Vehículo:* ${vehiculo}\n\n` +
-      `Hola, me gustaría solicitar la cotización para esta ruta de transporte. ¡Gracias!`
+    const vehicleObj = vehicleTypes.find(v => v.id === vehiculo)
+    const nombreVehiculo = vehicleObj ? t(vehicleObj.i18nKey) : vehiculo
+
+    const message = `*${t('transport_whatsapp.title')}* 🚗\n\n` +
+      `📍 *${t('transport_whatsapp.pickup')}:* ${recogida}\n` +
+      `🏁 *${t('transport_whatsapp.destination')}:* ${destino}\n` +
+      `🚘 *${t('transport_whatsapp.vehicle_type')}:* ${nombreVehiculo}\n\n` +
+      `${t('transport_whatsapp.greeting')}`
 
     const encodedMessage = encodeURIComponent(message)
     const phoneNumber = (empresaPhoneNumber.value || '1234567890').replace(/\D/g, '')
@@ -1235,7 +1257,7 @@ const cotizarTransporteWhatsApp = async () => {
     }
   } catch (error) {
     console.error('Error al enviar cotización por WhatsApp:', error)
-    showToast('Error al preparar la cotización', 'error')
+    showToast(t('transport_whatsapp.prep_error'), 'error')
   }
 }
 

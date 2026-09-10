@@ -30,6 +30,23 @@
   "transport_feature_3_title": "24/7 Disponible",
   "transport_feature_3_desc": "Viajes directos desde tu celular",
   "transport_cta": "Solicitar un Viaje Ahora 🚗",
+  "transport_pickup": "Punto de Recogida",
+  "transport_destination": "Destino",
+  "transport_vehicle_type": "Tipo de Vehículo",
+  "transport_turismo": "Turismo",
+  "transport_camioneta": "Camioneta",
+  "transport_minivan": "Mini Van",
+  "transport_bus": "Bus",
+  "transport_quick_quote": "Cotización Rápida",
+  "transport_whatsapp": {
+    "title": "Cotización de Transporte",
+    "pickup": "Punto de Recogida",
+    "destination": "Punto de Destino",
+    "vehicle_type": "Tipo de Vehículo",
+    "greeting": "Hola, me gustaría solicitar una cotización para esta ruta de transporte. ¡Gracias!",
+    "missing_fields_error": "Por favor ingresa el punto de recogida y destino para la cotización",
+    "prep_error": "Error al preparar la cotización"
+  },
   "membership_premium": "Membresía Premium Opcional",
   "loading": "Cargando...",
   "common": {
