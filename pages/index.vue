@@ -145,7 +145,7 @@
 
   <!-- Services Carousel -->
   <section class="px-2 py-2">
-    <div class="bg-gray-50 dark:bg-gray-900/50 rounded-[2.5rem] py-4">
+    <div class="bg-gray-50 dark:bg-gray-900/50 rounded-[2.5rem]">
       <div class="px-4 mb-4 flex items-center justify-between">
         <h4 class="font-black text-gray-900 dark:text-white">{{ $t('covered_services') }}</h4>
         <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">{{ $t('guaranteed') }}</span>
@@ -198,17 +198,60 @@
           {{ $t('transport_subtitle') }}
         </p>
 
+        <!-- Formulario de Cotización Interactivo -->
         <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 mb-5 space-y-3 text-left max-w-sm mx-auto">
-          <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
-               @click="isLogin = false; showLoginModal = true">
-            <div class="w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20 flex-shrink-0"></div>
-            <span class="text-xs text-gray-300 font-medium truncate">{{ $t('transport_pickup_placeholder') }}</span>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-emerald-300 mb-1.5 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Punto de Recogida
+            </label>
+            <div class="flex items-center space-x-3 bg-black/40 rounded-xl px-3 py-2.5 border border-white/10 focus-within:border-emerald-400 transition-colors">
+              <span class="text-emerald-400 text-sm">📍</span>
+              <input 
+                v-model="transportForm.recogida" 
+                type="text" 
+                placeholder="¿Dónde te recogemos?" 
+                class="w-full bg-transparent text-xs text-white placeholder-gray-400 focus:outline-none font-medium"
+              />
+            </div>
           </div>
-          
-          <div class="flex items-center space-x-3 bg-black/30 rounded-xl p-3 border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
-               @click="isLogin = false; showLoginModal = true">
-            <div class="w-3 h-3 rounded-sm bg-cyan-400 ring-4 ring-cyan-400/20 flex-shrink-0"></div>
-            <span class="text-xs text-gray-300 font-medium truncate">{{ $t('transport_destination_placeholder') }}</span>
+
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-sm bg-cyan-400"></span> Destino
+            </label>
+            <div class="flex items-center space-x-3 bg-black/40 rounded-xl px-3 py-2.5 border border-white/10 focus-within:border-cyan-400 transition-colors">
+              <span class="text-cyan-400 text-sm">🏁</span>
+              <input 
+                v-model="transportForm.destino" 
+                type="text" 
+                placeholder="¿A dónde vas?" 
+                class="w-full bg-transparent text-xs text-white placeholder-gray-400 focus:outline-none font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- Selección de Tipo de Auto -->
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-300 mb-2">
+              Tipo de Vehículo
+            </label>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button 
+                v-for="v in vehicleTypes" 
+                :key="v.id"
+                type="button"
+                @click="transportForm.tipoVehiculo = v.id"
+                :class="[
+                  'p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center cursor-pointer',
+                  transportForm.tipoVehiculo === v.id
+                    ? 'bg-emerald-500/30 border-emerald-400 text-white ring-2 ring-emerald-500/50 shadow-lg scale-95'
+                    : 'bg-black/30 border-white/5 text-gray-300 hover:bg-black/50 hover:border-white/20'
+                ]"
+              >
+                <span class="text-xl mb-1 select-none">{{ v.icon }}</span>
+                <span class="text-[9px] font-bold leading-none truncate w-full">{{ v.name }}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -232,10 +275,11 @@
 
         <div class="max-w-xs sm:max-w-sm mx-auto">
           <button 
-            @click="isLogin = false; showLoginModal = true"
-            class="w-full py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-black text-sm rounded-2xl shadow-xl hover:opacity-95 transition-all active:scale-95 uppercase tracking-wider flex items-center justify-center space-x-2"
+            @click="cotizarTransporteWhatsApp"
+            class="w-full py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-black text-sm rounded-2xl shadow-xl hover:opacity-95 transition-all active:scale-95 uppercase tracking-wider flex items-center justify-center space-x-2 cursor-pointer"
           >
-            <span>{{ $t('transport_cta') }}</span>
+            <span class="text-lg">💬</span>
+            <span>Cotizar por WhatsApp</span>
           </button>
         </div>
       </div>
@@ -1143,6 +1187,75 @@ const showForgotPassword = ref(false)
 const showRoleSelectionModal = ref(false)
 const pendingRegisterData = ref(null)
 const showCitiesSheet = ref(false)
+
+// Estado para la cotización de transporte
+const transportForm = ref({
+  recogida: '',
+  destino: '',
+  tipoVehiculo: 'Turismo'
+})
+
+const vehicleTypes = [
+  { id: 'Turismo', name: 'Turismo', icon: '🚗' },
+  { id: 'Camioneta', name: 'Camioneta', icon: '🛻' },
+  { id: 'Mini Van', name: 'Mini Van', icon: '🚐' },
+  { id: 'Bus', name: 'Bus', icon: '🚌' }
+]
+
+const empresaPhoneNumber = ref('')
+
+const fetchEmpresaPhoneNumber = async () => {
+  try {
+    const response = await $api('/config/valor/numero_empresa', {
+      method: 'GET'
+    })
+    if (response && response.valor) {
+      empresaPhoneNumber.value = response.valor
+    } else {
+      empresaPhoneNumber.value = '1234567890'
+    }
+  } catch (error) {
+    console.error('Error al obtener el número de teléfono de la empresa:', error)
+    empresaPhoneNumber.value = '1234567890'
+  }
+}
+
+const cotizarTransporteWhatsApp = async () => {
+  const recogida = transportForm.value.recogida ? transportForm.value.recogida.trim() : ''
+  const destino = transportForm.value.destino ? transportForm.value.destino.trim() : ''
+  const vehiculo = transportForm.value.tipoVehiculo || 'Turismo'
+
+  if (!recogida || !destino) {
+    showToast('Por favor ingresa el punto de recogida y destino para la cotización', 'error')
+    return
+  }
+
+  try {
+    if (!empresaPhoneNumber.value) {
+      await fetchEmpresaPhoneNumber()
+    }
+
+    const message = `*Cotización de Transporte - ProHogar* 🚗\n\n` +
+      `📍 *Punto de Recogida:* ${recogida}\n` +
+      `🏁 *Punto de Destino:* ${destino}\n` +
+      `🚘 *Tipo de Vehículo:* ${vehiculo}\n\n` +
+      `Hola, me gustaría solicitar la cotización para esta ruta de transporte. ¡Gracias!`
+
+    const encodedMessage = encodeURIComponent(message)
+    const phoneNumber = (empresaPhoneNumber.value || '1234567890').replace(/\D/g, '')
+    const url = `https://wa.me/+504${phoneNumber}?text=${encodedMessage}`
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    if (isMobile) {
+      window.location.assign(url)
+    } else {
+      window.open(url, '_blank')
+    }
+  } catch (error) {
+    console.error('Error al enviar cotización por WhatsApp:', error)
+    showToast('Error al preparar la cotización', 'error')
+  }
+}
 
 const selectCity = (city) => {
   form.value.ciudad = city
@@ -2513,6 +2626,7 @@ const isFormValid = computed(() => {
 
 // Forzar modo oscuro
 onMounted(() => {
+  fetchEmpresaPhoneNumber()
   // Forzar modo oscuro en el elemento html
   document.documentElement.classList.add('dark')
   document.documentElement.style.colorScheme = 'dark'
