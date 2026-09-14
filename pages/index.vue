@@ -88,7 +88,7 @@
 <main class="relative -mt-6 pb-1">
   
   <!-- Value Proposition Hero -->
-  <section class="px-2 py-2 text-center bg-white dark:bg-gray-800 rounded-t-[2.5rem] shadow-2xl relative z-10 border-t border-gray-100 dark:border-gray-700">
+  <section class="px-2 py-4 text-center bg-white dark:bg-gray-800 rounded-t-[2.5rem] shadow-2xl relative z-10 border-t border-gray-100 dark:border-gray-700">
     <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4 leading-tight">
       {{ $t('value_prop_title1') }}<br>
       <span class="gradient-text">{{ $t('value_prop_title2') }}</span>
@@ -144,7 +144,7 @@
   </section>
 
   <!-- Services Carousel -->
-  <section class="px-2 py-2">
+  <section class="px-2">
     <div class="bg-gray-50 dark:bg-gray-900/50 rounded-[2.5rem]">
       <div class="px-4 mb-4 flex items-center justify-between">
         <h4 class="font-black text-gray-900 dark:text-white">{{ $t('covered_services') }}</h4>
@@ -210,6 +210,7 @@
                 <input 
                   v-model="transportForm.recogida" 
                   type="text" 
+                  maxlength="30"
                   :placeholder="$t('transport_pickup_placeholder')" 
                   class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-gray-400 focus:outline-none font-medium"
                 />
@@ -225,6 +226,7 @@
                 <input 
                   v-model="transportForm.destino" 
                   type="text" 
+                  maxlength="30"
                   :placeholder="$t('transport_destination_placeholder')" 
                   class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-gray-400 focus:outline-none font-medium"
                 />
@@ -265,19 +267,19 @@
           </button>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-            <span class="text-2xl mb-1">⚡</span>
+        <div class="grid grid-cols-3 gap-2 sm:gap-3">
+          <div class="bg-white/5 p-2 sm:p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+            <span class="text-xl sm:text-2xl mb-1">⚡</span>
             <span class="text-xs font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_1_title') }}</span>
             <span class="text-[10px] text-gray-400 leading-tight mt-1">{{ $t('transport_feature_1_desc') }}</span>
           </div>
-          <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-            <span class="text-2xl mb-1">🏷️</span>
+          <div class="bg-white/5 p-2 sm:p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+            <span class="text-xl sm:text-2xl mb-1">🏷️</span>
             <span class="text-xs font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_2_title') }}</span>
             <span class="text-[10px] text-gray-400 leading-tight mt-1">{{ $t('transport_feature_2_desc') }}</span>
           </div>
-          <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
-            <span class="text-2xl mb-1">🕒</span>
+          <div class="bg-white/5 p-2 sm:p-4 rounded-xl border border-white/5 text-center flex flex-col items-center justify-center">
+            <span class="text-xl sm:text-2xl mb-1">🕒</span>
             <span class="text-xs font-bold text-emerald-300 leading-tight">{{ $t('transport_feature_3_title') }}</span>
             <span class="text-[10px] text-gray-400 leading-tight mt-1">{{ $t('transport_feature_3_desc') }}</span>
           </div>
