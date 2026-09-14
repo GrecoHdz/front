@@ -144,7 +144,7 @@
   </section>
 
   <!-- Services Carousel -->
-  <section class="px-2">
+  <section class="px-2 py-2">
     <div class="bg-gray-50 dark:bg-gray-900/50 rounded-[2.5rem]">
       <div class="px-4 mb-4 flex items-center justify-between">
         <h4 class="font-black text-gray-900 dark:text-white">{{ $t('covered_services') }}</h4>
