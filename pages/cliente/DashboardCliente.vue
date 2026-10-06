@@ -3077,12 +3077,13 @@ const handleRequestService = async () => {
     }
 
     const isViajePrivado = selectedService.name_es === 'Viaje Privado'
+    const isFumigacion = selectedService.name_es === 'Fumigación' || selectedService.name_es === 'Fumigacion'
     // Usar el estado reactivo ya cargado en vez de hacer otra llamada autenticada
     // (evita fallos por JWT expirado en medio del envío del formulario)
     const tieneMembresiaActiva = membershipData.value.status === 'activa'
     
-    // Viaje Privado no requiere pago de visita y va directo a asignacion
-    const noRequierePagoVisita = tieneMembresiaActiva || isViajePrivado
+    // Viaje Privado y Fumigación no requieren pago de visita y van directo a asignacion
+    const noRequierePagoVisita = tieneMembresiaActiva || isViajePrivado || isFumigacion
     const estadoInicial = noRequierePagoVisita ? 'pendiente_asignacion' : 'pendiente_pagovisita'
     const visitaPagada = !!noRequierePagoVisita // Usar booleano real para la DB
 
