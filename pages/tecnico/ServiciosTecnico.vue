@@ -181,7 +181,7 @@
     <!-- FAB: Iniciar Servicio (flujo asistido por técnico) -->
     <button
       @click="abrirAsistido"
-      class="fixed right-4 bottom-20 sm:right-6 sm:bottom-24 z-40 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all duration-200 font-black tracking-wide text-sm border border-white/20">
+      class="fixed right-4 bottom-24 sm:right-6 sm:bottom-28 z-40 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all duration-200 font-black tracking-wide text-sm border border-white/20">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
       <span>Iniciar servicio</span> 
     </button>
