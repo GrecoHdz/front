@@ -1513,6 +1513,7 @@ const getServiceIcon = (estado, serviceTitle = '') => {
   if (title.includes('fontan') || title.includes('plomer') || title.includes('tubo')) return '💧'
   if (title.includes('electri') || title.includes('luz')) return '💡'
   if (title.includes('edecanes')) return '🧖‍♀️'
+  if (title.includes('fumig')) return '🪲'
   
   const iconMap = {
     'verificando_pagovisita': '💰',

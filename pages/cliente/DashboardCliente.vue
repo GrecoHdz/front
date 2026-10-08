@@ -1910,6 +1910,7 @@ const getServiceIcon = (serviceName) => {
   if (name.includes('repara')) return '🔧'
   if (name.includes('teléfono') || name.includes('computadora') || name.includes('laptop')) return '💻'
   if (name.includes('edecanes')) return '🧜‍♀️'
+  if (name.includes('fumig')) return '🪲'
   return '🛠️'
 }
 
