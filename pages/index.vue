@@ -18,7 +18,7 @@
         <div class="relative">
           <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20">
             <div class="w-6 h-6 rounded-md flex items-center justify-center">
-              <img src="/pwa-192x192.png" alt="MiSeguro" class="w-full h-full object-contain" />
+             <img src="/pwa-192x192.png" alt="MiSeguro" class="w-full h-full object-contain" />
             </div>
           </div>
         </div>
@@ -403,7 +403,7 @@
         <div class="p-6">
           <div class="text-center mb-6 pt-4">
             <div class="w-14 h-14 bg-emerald-50 rounded-xl mx-auto mb-4 flex items-center justify-center border border-emerald-100 shadow-sm">
-              <img src="/favicon.ico" alt="Logo" class="w-8 h-8 object-contain" />
+             <!-- <img src="/favicon.ico" alt="Logo" class="w-8 h-8 object-contain" />-->
             </div>
 
             <!-- Tabs de navegación -->

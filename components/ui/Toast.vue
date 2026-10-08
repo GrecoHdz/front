@@ -41,9 +41,9 @@
           ></div>
         </div>
         
-        <!-- Contenido del mensaje con soporte para saltos de línea -->
+        <!-- Contenido del mensaje -->
         <div class="flex-1 min-w-0">
-          <p class="text-white font-medium text-sm leading-relaxed message-text" style="white-space: pre-line; word-break: break-word;">
+          <p class="text-white font-medium text-sm leading-relaxed message-text" style="word-break: break-word;">
             {{ formattedMessage }}
           </p>
         </div>
@@ -65,19 +65,6 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { X, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-vue-next';
 
-// Función para insertar saltos de línea cada 5 palabras por defecto
-const insertLineBreaks = (text, wordsPerLine = 5) => {
-  if (!text) return '';
-  const words = text.split(' ');
-  let result = [];
-  
-  for (let i = 0; i < words.length; i += wordsPerLine) {
-    result.push(words.slice(i, i + wordsPerLine).join(' '));
-  }
-  
-  return result.join('\n');
-};
-
 const props = defineProps({
   message: {
     type: String,
@@ -96,7 +83,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
-// Estados reactivos - CORREGIDO: show inicia en false para permitir animación de entrada
+// Estados reactivos
 const show = ref(false);
 const isEntering = ref(false);
 const progressWidth = ref(100);
@@ -112,7 +99,7 @@ let remainingTime = props.duration;
 
 // Computed properties
 const formattedMessage = computed(() => {
-  return insertLineBreaks(props.message, 5);
+  return props.message || '';
 });
 
 const toastIcon = computed(() => {

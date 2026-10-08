@@ -35,13 +35,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
     '/auth',
     '/usuario-deshabilitado',
     '/reset-password',
-    '/forgot-password'
+    '/forgot-password',
+    '/completar-perfil'
   ];
 
   console.log(`🔍 [Middleware] Ruta: ${currentPath} | Token: ${!!auth.token} | Fresh: ${auth.isFetched}`);
 
-  // Verificar si la ruta actual es una ruta de restablecimiento de contraseña
+  // Verificar si la ruta actual es una ruta de restablecimiento de contraseña o completar perfil
   const isResetPasswordPath = currentPath.startsWith('/reset-password/');
+  const isCompletarPerfilPath = currentPath.startsWith('/completar-perfil/');
 
   // Obtener el dashboard correspondiente al rol
   const getDashboardPath = (role: string | undefined): string => {
@@ -54,8 +56,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   };
 
-  // 1. Si es una ruta pública o de restablecimiento de contraseña, permitir acceso
-  if (publicPaths.includes(currentPath) || isResetPasswordPath) {
+  // 1. Si es una ruta pública, de restablecimiento de contraseña o completar perfil, permitir acceso
+  if (publicPaths.includes(currentPath) || isResetPasswordPath || isCompletarPerfilPath) {
     // Helper local: leer el destino del query param enviado por el service worker
     const getRedirectTarget = (): string | null => {
       if (!process.client) return null;

@@ -178,6 +178,15 @@
       </div>
     </div>
 
+    <!-- FAB: Iniciar Servicio (flujo asistido por técnico) -->
+    <button
+      @click="abrirAsistido"
+      class="fixed right-4 bottom-20 sm:right-6 sm:bottom-24 z-40 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all duration-200 font-black tracking-wide text-sm border border-white/20">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span class="hidden sm:inline">Iniciar servicio</span>
+      <span class="sm:hidden">Iniciar</span>
+    </button>
+
     <FootersFooterTecnico /> 
     </div>
   </div>
@@ -375,11 +384,20 @@
                 </template>
 
                 <template v-else-if="selectedService.rawStatus === 'pendiente_cotizacion'">
-                  <button 
-                    @click="openQuotationModal" 
-                    class="w-full py-2.5 sm:py-3 bg-blue-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors text-sm">
-                    {{ isBarberíaService(selectedService.title) ? '✏️ Editar Detalles' : '✏️ Editar Cotización' }}
-                  </button>
+                  <div class="flex flex-col gap-2 w-full">
+                    <button 
+                      @click="openQuotationModal" 
+                      class="w-full py-2.5 sm:py-3 bg-blue-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors text-sm">
+                      {{ isBarberíaService(selectedService.title) ? '✏️ Editar Detalles' : '✏️ Editar Cotización' }}
+                    </button>
+                    <button
+                      :disabled="isProcessingVerbal"
+                      @click="handleVerbalAccept"
+                      class="w-full py-2.5 sm:py-3 bg-green-600 text-white font-bold rounded-lg sm:rounded-xl hover:bg-green-700 active:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed transition-all text-sm shadow">
+                      <span v-if="!isProcessingVerbal">🤝 Aceptación verbal del cliente</span>
+                      <span v-else>Procesando…</span>
+                    </button>
+                  </div>
                 </template>
               </div>
             </div>
@@ -1003,6 +1021,51 @@
       </div>
     </Transition>
 
+    <!-- Modal Confirmación Aceptación Verbal -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to">
+      <div v-if="showVerbalAcceptConfirmation" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="!isProcessingVerbal && (showVerbalAcceptConfirmation = false)"></div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-5 sm:p-6 relative z-10 text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-2xl bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-2xl mb-4 shadow-sm">
+            🤝
+          </div>
+          <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">
+            Aceptación verbal del cliente
+          </h3>
+          <p class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-6 leading-relaxed">
+            ¿El cliente aceptó la cotización verbalmente? El servicio pasará a estado <strong>'En Proceso'</strong> como <strong>pago en efectivo</strong> (sin créditos ni descuentos de membresía).
+          </p>
+          
+          <div class="flex gap-3">
+            <button 
+              type="button"
+              @click="showVerbalAcceptConfirmation = false"
+              :disabled="isProcessingVerbal"
+              class="flex-1 py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-200 font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm disabled:opacity-50">
+              Cancelar
+            </button>
+            <button 
+              type="button"
+              @click="confirmVerbalAccept"
+              :disabled="isProcessingVerbal"
+              class="flex-1 py-3 px-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition text-sm shadow-lg shadow-green-500/20 disabled:opacity-60 flex items-center justify-center gap-2">
+              <span v-if="!isProcessingVerbal">✓ Confirmar</span>
+              <span v-else class="flex items-center gap-1.5">
+                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Procesando…
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Modal para ver imagen en grande -->
     <Transition
       enter-active-class="transition-opacity duration-300"
@@ -1035,10 +1098,119 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Modal Asistido: 2 pasos -->
+    <Transition name="modal" enter-active-class="modal-enter-active" leave-active-class="modal-leave-active" enter-from-class="modal-enter-from" leave-to-class="modal-leave-to">
+      <div v-if="showAsistidoModal" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <Transition name="backdrop" enter-active-class="backdrop-enter-active" leave-active-class="backdrop-leave-active" enter-from-class="backdrop-enter-from" leave-to-class="backdrop-leave-to">
+          <div v-if="showAsistidoModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="!isSubmittingAsistido && cerrarAsistido()"></div>
+        </Transition>
+        <div class="relative w-full sm:max-w-lg bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+          <div class="flex items-center justify-between px-5 sm:px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+            <div>
+              <h3 class="font-black text-lg sm:text-xl tracking-tight">Iniciar servicio</h3>
+              <p class="text-xs sm:text-sm text-blue-100 mt-0.5">
+                Paso {{ asistidoPaso }} de 2 · {{ asistidoPaso === 1 ? 'Datos del cliente' : 'Detalles del servicio' }}
+              </p>
+            </div>
+            <button type="button" @click="!isSubmittingAsistido && cerrarAsistido()" :disabled="isSubmittingAsistido" class="p-2 rounded-full hover:bg-white/15 transition-colors disabled:opacity-50">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6"/></svg>
+            </button>
+          </div>
+
+          <div class="flex gap-2 px-5 sm:px-6 py-3 bg-blue-50 dark:bg-blue-950/40">
+            <div :class="['h-2 flex-1 rounded-full transition-all', asistidoPaso >= 1 ? 'bg-blue-600' : 'bg-blue-200 dark:bg-gray-700']"></div>
+            <div :class="['h-2 flex-1 rounded-full transition-all', asistidoPaso >= 2 ? 'bg-blue-600' : 'bg-blue-200 dark:bg-gray-700']"></div>
+          </div>
+
+          <div class="overflow-y-auto px-5 sm:px-6 py-5 space-y-5">
+            <template v-if="asistidoPaso === 1">
+              <div>
+                <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Nombre completo del cliente</label>
+                <input v-model="asistidoForm.nombre" type="text" maxlength="80" placeholder="Ej. María García"
+                  :disabled="isSubmittingAsistido"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold placeholder:text-gray-400 dark:placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 transition shadow-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Teléfono</label>
+                <input v-model="asistidoForm.telefono" type="tel" maxlength="20" placeholder="Ej. 9988-7766"
+                  :disabled="isSubmittingAsistido"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold placeholder:text-gray-400 dark:placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 transition shadow-sm">
+                <p class="mt-1.5 text-[11px] text-gray-600 dark:text-gray-400 font-medium">Si el teléfono ya está registrado se recuperará el cliente existente.</p>
+              </div>
+            </template>
+
+            <template v-else>
+              <div>
+                <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Tipo de servicio</label>
+                <select v-model="asistidoForm.id_servicio"
+                  :disabled="isSubmittingAsistido"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold disabled:bg-gray-100 disabled:text-gray-500 transition shadow-sm">
+                  <option value="" disabled class="text-gray-400">Selecciona un servicio…</option>
+                  <option v-for="svc in serviceTypes" :key="svc.id" :value="svc.id" class="text-gray-900 dark:text-white font-semibold">{{ svc.name }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Descripción corta</label>
+                <textarea v-model="asistidoForm.descripcion" rows="2" maxlength="300" placeholder="Problema breve a diagnosticar"
+                  :disabled="isSubmittingAsistido"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold placeholder:text-gray-400 dark:placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 transition resize-none shadow-sm"></textarea>
+              </div>
+              <div class="grid grid-cols-1 gap-4">
+                <div>
+                  <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Colonia</label>
+                  <input v-model="asistidoForm.colonia" type="text" maxlength="120" placeholder="Ej. El Centro"
+                    :disabled="isSubmittingAsistido"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold placeholder:text-gray-400 dark:placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 transition shadow-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Dirección precisa</label>
+                  <input v-model="asistidoForm.direccion_precisa" type="text" maxlength="255" placeholder="Calle, casa, referencias…"
+                    :disabled="isSubmittingAsistido"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold placeholder:text-gray-400 dark:placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 transition shadow-sm">
+                </div>
+              </div>
+              <div v-if="!asistidoResult.usuarioExistente && asistidoResult.enlaceCompletar" class="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3 text-xs text-blue-900 dark:text-blue-100">
+                <p class="font-black text-blue-800 dark:text-blue-300 mb-1">Enlace para completar perfil (Cliente nuevo):</p>
+                <p class="break-all text-blue-950 dark:text-blue-200 font-mono text-[11px] select-all bg-white/80 dark:bg-black/30 p-2 rounded border border-blue-200 dark:border-blue-800 mb-2">{{ asistidoResult.enlaceCompletar }}</p>
+                <p v-if="asistidoResult.wa_me">
+                  <a :href="asistidoResult.wa_me" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-black text-green-700 dark:text-green-400 hover:text-green-800 underline decoration-dotted">
+                    📱 Re-enviar WhatsApp al cliente
+                  </a>
+                </p>
+              </div>
+            </template>
+          </div>
+
+          <div class="px-5 sm:px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex gap-3">
+            <button v-if="asistidoPaso === 2" type="button"
+              @click="paso2Volver"
+              :disabled="isSubmittingAsistido"
+              class="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-black hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 text-sm transition">
+              ← Volver
+            </button>
+            <button v-if="asistidoPaso === 1" type="button"
+              @click="paso1Siguiente"
+              :disabled="isSubmittingAsistido"
+              class="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60 text-sm shadow-lg shadow-blue-500/20 transition">
+              <span v-if="!isSubmittingAsistido">Continuar →</span>
+              <span v-else>Procesando…</span>
+            </button>
+            <button v-else type="button"
+              @click="paso2Confirmar"
+              :disabled="isSubmittingAsistido"
+              class="flex-1 py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-black hover:from-green-700 hover:to-emerald-700 disabled:opacity-60 text-sm shadow-lg shadow-green-500/20 transition">
+              <span v-if="!isSubmittingAsistido">✓ Confirmar y diagnosticar</span>
+              <span v-else>Guardando…</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, reactive, watch } from 'vue'
 import { useHead, useCookie } from '#imports'
 import { useAuthStore } from '~/middleware/auth.store'
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue'
@@ -1084,6 +1256,46 @@ const showBarberiaQuotationModal = ref(false)
 const showImageModal = ref(false)
 const selectedImage = ref('')
 
+// ===== FLUJO ASISTIDO POR TÉCNICO =====
+const showAsistidoModal = ref(false)
+const asistidoPaso = ref(1)
+const isSubmittingAsistido = ref(false)
+const asistidoForm = reactive({
+  nombre: '',
+  telefono: '',
+  id_cliente: null,
+  id_servicio: '',
+  descripcion: '',
+  colonia: '',
+  direccion_precisa: ''
+})
+const asistidoResult = reactive({
+  wa_me: null,
+  enlaceCompletar: null,
+  clienteCreado: null,
+  usuarioExistente: false
+})
+
+const resetAsistidoForm = () => {
+  asistidoPaso.value = 1
+  asistidoForm.nombre = ''
+  asistidoForm.telefono = ''
+  asistidoForm.id_cliente = null
+  asistidoForm.id_servicio = ''
+  asistidoForm.descripcion = ''
+  asistidoForm.colonia = ''
+  asistidoForm.direccion_precisa = ''
+  asistidoResult.wa_me = null
+  asistidoResult.enlaceCompletar = null
+  asistidoResult.clienteCreado = null
+  asistidoResult.usuarioExistente = false
+  isSubmittingAsistido.value = false
+}
+
+// ===== ACEPTACIÓN VERBAL DEL CLIENTE =====
+const showVerbalAcceptConfirmation = ref(false)
+const isProcessingVerbal = ref(false)
+
 // Bloquear scroll cuando un modal está abierto
 const anyModalOpen = computed(() => {
   return showServiceModal.value || 
@@ -1093,7 +1305,9 @@ const anyModalOpen = computed(() => {
          showViewQuotationModal.value || 
          showCancelConfirmation.value || 
          showCompleteConfirmation.value ||
-         showImageModal.value
+         showVerbalAcceptConfirmation.value ||
+         showImageModal.value ||
+         showAsistidoModal.value
 })
 
 watch(anyModalOpen, (newValue) => {
@@ -1499,23 +1713,29 @@ const loadServiceTypes = async () => {
   try {
     isLoadingServiceTypes.value = true
     const user = useCookie('user').value
-    const id_ciudad = user?.id_ciudad
+    const id_tecnico = user?.id_usuario
 
-    const data = await $api('/servicios/activos', {
-      method: 'GET',
-      params: id_ciudad ? { id_ciudad } : {}
+    if (!id_tecnico) {
+      serviceTypes.value = []
+      return
+    }
+
+    const response = await $api(`/tecnicoServicio/${id_tecnico}`, {
+      method: 'GET'
     })
     
-    serviceTypes.value = data.map(service => ({
-      id: service.id_servicio,
-      name: service.nombre,
-      description: service.descripcion,
-      active: service.estado
+    const servicios = response?.data || (Array.isArray(response) ? response : [])
+
+    serviceTypes.value = servicios.map(item => ({
+      id: item.id_servicio,
+      name: item.nombre,
+      description: item.descripcion || '',
+      active: true
     }))
   } catch (error) {
-    console.error('Error al cargar tipos de servicio:', error)
+    console.error('Error al cargar tipos de servicio del técnico:', error)
     showToast({
-      message: 'No se pudieron cargar los tipos de servicio',
+      message: 'No se pudieron cargar los tipos de servicio asociados al técnico',
       type: 'error'
     })
   } finally {
@@ -2100,6 +2320,315 @@ const openImageModal = (url) => {
   if (!url) return
   selectedImage.value = url
   showImageModal.value = true
+}
+
+// ===== FLUJO ASISTIDO: Handlers =====
+const abrirAsistido = () => {
+  resetAsistidoForm()
+  showAsistidoModal.value = true
+}
+const cerrarAsistido = () => {
+  resetAsistidoForm()
+  showAsistidoModal.value = false
+}
+const paso1Siguiente = async () => {
+  if (!asistidoForm.nombre || asistidoForm.nombre.trim().length < 2) {
+    showToast('Introduce el nombre del cliente (mínimo 2 caracteres)', 'error')
+    return
+  }
+  if (!asistidoForm.telefono || asistidoForm.telefono.replace(/\D/g, '').length < 7) {
+    showToast('Introduce un teléfono válido (mínimo 7 dígitos)', 'error')
+    return
+  }
+  isSubmittingAsistido.value = true
+  try {
+    const res = await $api('/usuarios/registro-asistido', {
+      method: 'POST',
+      body: {
+        nombre: asistidoForm.nombre.trim(),
+        telefono: asistidoForm.telefono.trim()
+      }
+    })
+    if (!res || !res.success) {
+      showToast(res?.error || res?.message || 'Error al registrar cliente', 'error')
+      return
+    }
+    asistidoForm.id_cliente = res.usuario?.id_usuario || null
+    asistidoResult.enlaceCompletar = res.enlaceCompletar || null
+    asistidoResult.wa_me = res.wa_me || null
+    asistidoResult.clienteCreado = res.usuario || null
+    asistidoResult.usuarioExistente = !!res.usuarioExistente
+
+    if (res.usuarioExistente) {
+      showToast('Cliente encontrado!', 'success')
+    } else {
+      showToast(res.whatsapp_enviado ? 'Cliente creado. Enlace enviado por WhatsApp.' : 'Cliente creado.', res.whatsapp_enviado ? 'success' : 'info')
+    }
+    if (res.wa_me && !res.whatsapp_enviado && !res.usuarioExistente) {
+      try {
+        window.open(res.wa_me, '_blank', 'noopener,noreferrer')
+      } catch (e) {
+        console.warn('No se pudo abrir wa.me:', e)
+      }
+    }
+    asistidoPaso.value = 2
+  } catch (err) {
+    console.error('[asistido] paso 1 error:', err)
+    const msg = err?.data?.error || err?.data?.message || err?.message || 'Error al registrar cliente'
+    showToast(msg, 'error')
+  } finally {
+    isSubmittingAsistido.value = false
+  }
+}
+
+const paso2Volver = () => {
+  asistidoPaso.value = 1
+}
+const paso2Confirmar = async () => {
+  if (!asistidoForm.id_cliente) {
+    showToast('Cliente no válido. Vuelve al paso 1.', 'error')
+    return
+  }
+  if (!asistidoForm.id_servicio) {
+    showToast('Selecciona un tipo de servicio', 'error')
+    return
+  }
+  if (!asistidoForm.descripcion || asistidoForm.descripcion.trim().length < 3) {
+    showToast('Descripción corta requerida (mínimo 3 caracteres)', 'error')
+    return
+  }
+  if (!asistidoForm.colonia || asistidoForm.colonia.trim().length < 2) {
+    showToast('Introduce la colonia', 'error')
+    return
+  }
+  if (!asistidoForm.direccion_precisa || asistidoForm.direccion_precisa.trim().length < 5) {
+    showToast('Dirección precisa requerida (mínimo 5 caracteres)', 'error')
+    return
+  }
+  isSubmittingAsistido.value = true
+  try {
+    const res = await $api('/solicitudservicio/asistida', {
+      method: 'POST',
+      body: {
+        id_cliente: asistidoForm.id_cliente,
+        id_servicio: Number(asistidoForm.id_servicio),
+        descripcion: asistidoForm.descripcion.trim(),
+        colonia: asistidoForm.colonia.trim(),
+        direccion_precisa: asistidoForm.direccion_precisa.trim()
+      }
+    })
+    if (!res || !res.success) {
+      showToast(res?.error || res?.message || 'Error al crear la solicitud', 'error')
+      return
+    }
+    showToast('Servicio iniciado. Continúa con el diagnóstico y la cotización.', 'success')
+
+    // Preparar el objeto en formato compatible con mapSolicitudToService y abrir modal
+    const solicitudRaw = res.solicitud || {}
+    const servicioData = res.servicio || {}
+    const clienteData = res.cliente || asistidoResult.clienteCreado || {}
+    const mock = mapSolicitudToService({
+      id_solicitud: solicitudRaw.id_solicitud,
+      estado: solicitudRaw.estado || 'asignado',
+      fecha_solicitud: solicitudRaw.fecha_solicitud || new Date().toISOString(),
+      descripcion: solicitudRaw.descripcion,
+      colonia: solicitudRaw.colonia,
+      direccion_precisa: solicitudRaw.direccion_precisa,
+      pagar_visita: solicitudRaw.pagar_visita,
+      id_ciudad: solicitudRaw.id_ciudad,
+      id_tecnico: solicitudRaw.id_tecnico,
+      servicio: {
+        id_servicio: servicioData.id_servicio || Number(asistidoForm.id_servicio),
+        nombre: servicioData.nombre || (serviceTypes.value.find(s => s.id === Number(asistidoForm.id_servicio))?.name) || 'Servicio General'
+      },
+      cliente: {
+        id_usuario: clienteData.id_usuario || asistidoForm.id_cliente,
+        nombre: clienteData.nombre || asistidoForm.nombre,
+        telefono: clienteData.telefono || asistidoForm.telefono,
+        imagen_url: clienteData.imagen_url || null
+      }
+    })
+    // Si el cliente ya existía, enviar mensaje por WhatsApp avisándole que se ha iniciado el servicio
+    if (asistidoResult.usuarioExistente) {
+      const rawTel = clienteData.telefono || asistidoForm.telefono || ''
+      const cleanPhone = rawTel.replace(/\D/g, '')
+      if (cleanPhone.length >= 7) {
+        const phoneFormatted = cleanPhone.startsWith('504') ? cleanPhone : `504${cleanPhone}`
+        const originUrl = window.location.origin || 'https://prohogar.com'
+        const linkServicios = `${originUrl}/cliente/Servicios`
+        const nombreCliente = clienteData.nombre || asistidoForm.nombre || 'estimado(a) cliente'
+        
+        const textMsg = `Hola ${nombreCliente}, tu servicio ha sido iniciado exitosamente en MiSeguro. Puedes ver más detalles e información de tu servicio aquí:\n${linkServicios}`
+        const waUrl = `https://wa.me/${phoneFormatted}?text=${encodeURIComponent(textMsg)}`
+
+        try {
+          window.open(waUrl, '_blank', 'noopener,noreferrer')
+        } catch (e) {
+          console.warn('No se pudo abrir WhatsApp para notificar al cliente existente:', e)
+        }
+      }
+    }
+
+    cerrarAsistido()
+    await nextTick()
+    await loadServices(false)
+    await nextTick()
+    await openServiceModal(mock)
+    // Si el rawStatus recién creado es asignado, abrir cotizacion automáticamente
+    if (mock.rawStatus === 'asignado') {
+      await nextTick()
+      await openQuotationModal()
+    }
+  } catch (err) {
+    console.error('[asistido] paso 2 error:', err)
+    const msg = err?.data?.error || err?.data?.message || err?.message || 'Error al crear la solicitud'
+    showToast(msg, 'error')
+  } finally {
+    isSubmittingAsistido.value = false
+  }
+}
+
+// ===== ACEPTACIÓN VERBAL DEL CLIENTE (mismo efecto que acceptQuotation en efectivo) =====
+const handleVerbalAccept = () => {
+  if (!selectedService.value || !selectedService.value.id) {
+    showToast('No hay servicio seleccionado', 'error')
+    return
+  }
+  showVerbalAcceptConfirmation.value = true
+}
+
+const confirmVerbalAccept = async () => {
+  if (!selectedService.value || !selectedService.value.id) {
+    showToast('No hay servicio seleccionado', 'error')
+    showVerbalAcceptConfirmation.value = false
+    return
+  }
+  if (isProcessingVerbal.value) return
+  isProcessingVerbal.value = true
+  try {
+    // 1) Cargar cotización si no la tenemos
+    let cotizacionId = currentQuotation.value?.id || null
+    if (!cotizacionId) {
+      try {
+        const resp = await $api(`cotizacion/solicitud/${selectedService.value.id}`, { method: 'GET' })
+        if (resp && resp.status === 'success' && resp.data && resp.data.id_cotizacion) {
+          cotizacionId = resp.data.id_cotizacion
+          currentQuotation.value = {
+            id: resp.data.id_cotizacion,
+            monto_manodeobra: parseFloat(resp.data.monto_manodeobra) || 0,
+            monto_materiales: parseFloat(resp.data.monto_materiales) || 0,
+            comentario: resp.data.comentario || '',
+            fecha: resp.data.fecha || new Date().toISOString(),
+            estado: resp.data.estado
+          }
+        }
+      } catch (errCot) {
+        console.warn('No se pudo cargar cotización existente:', errCot)
+      }
+    }
+    if (!cotizacionId) {
+      showToast('No hay una cotización registrada para este servicio. Primero envía la propuesta técnica.', 'error')
+      showVerbalAcceptConfirmation.value = false
+      return
+    }
+
+    // 2) Actualizar cotización a 'aceptado' con créditos y descuento membresía a 0 (mismo efecto que pago efectivo)
+    try {
+      await $api(`cotizacion/${cotizacionId}`, {
+        method: 'PUT',
+        body: {
+          estado: 'aceptado',
+          monto_credito: 0,
+          descuento_membresia: 0
+        }
+      })
+    } catch (errUpd) {
+      console.warn('PUT cotizacion error (no crítico si backend ya se actualizó por accept):', errUpd)
+    }
+
+    // 3) Actualizar solicitud a 'en_proceso', concatenando bandera de efectivo en descripción si no la tiene
+    const descripcionOriginal = selectedService.value.description || ''
+    const banda = '\n\n— [Pago efectivo — Aceptación verbal]'
+    const comentarioFinal = descripcionOriginal.includes('[Pago efectivo') ? descripcionOriginal : (descripcionOriginal + banda)
+    try {
+      await $api(`solicitudservicio/${selectedService.value.id}`, {
+        method: 'PUT',
+        body: {
+          estado: 'en_proceso',
+          descripcion: comentarioFinal
+        }
+      })
+    } catch (errSol) {
+      console.error('PUT solicitudservicio error:', errSol)
+      showToast('Aceptación registrada pero no se pudo cambiar el estado del servicio.', 'error')
+    }
+
+    // 4) Registrar movimiento de ingreso técnico si el endpoint existe (replicando exacto la comisión de mano de obra de acceptQuotation de cliente)
+    try {
+      const user = useCookie('user').value || {}
+      const montoManoObra = Number(currentQuotation.value.monto_manodeobra || 0)
+
+      // Obtener porcentaje de comisión configurado
+      let porcentajeComision = 10; // Valor fallback por si acaso
+      try {
+        const configResponse = await $api('/config/valor/comision_por_servicio', { method: 'GET' })
+        if (configResponse?.valor) {
+          porcentajeComision = parseFloat(configResponse.valor)
+        }
+      } catch (errConfig) {
+        console.warn('No se pudo obtener la comisión por servicio, usando 10% por defecto:', errConfig)
+      }
+
+      const factorComision = porcentajeComision / 100
+      const montoTecnicoComision = montoManoObra * factorComision
+      const montoClienteTecnico = Number((montoManoObra - montoTecnicoComision).toFixed(2))
+
+      await $api('/movimientos', {
+        method: 'POST',
+        body: {
+          id_usuario: user.id_usuario || selectedService.value.technicianId || null,
+          id_solicitud: selectedService.value.id,
+          id_cotizacion: cotizacionId,
+          tipo: 'ingreso',
+          monto: montoClienteTecnico,
+          descripcion: 'Ingreso técnico - Aceptación verbal cliente (efectivo)',
+          estado: 'pendiente'
+        }
+      })
+    } catch (errMov) {
+      console.warn('No se pudo crear movimiento (continuando flujo).', errMov)
+    }
+
+    // 5) Notificar al cliente sobre la aceptación del servicio ("Servicio Asignado")
+    try {
+      const clienteId = selectedService.value?.customer?.id || selectedService.value?.customer?.id_usuario || selectedService.value?.rawData?.cliente?.id_usuario || selectedService.value?.rawData?.id_usuario;
+      if (clienteId) {
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          body: {
+            titulo: 'Servicio Asignado',
+            id_usuario: clienteId
+          }
+        });
+      }
+    } catch (errNotif) {
+      console.warn('No se pudo enviar notificación "Servicio Asignado" al cliente:', errNotif);
+    }
+
+    showToast('Aceptación verbal confirmada. Servicio en proceso (pago en efectivo).', 'success')
+    selectedService.value.rawStatus = 'en_proceso'
+    selectedService.value.description = comentarioFinal
+    showVerbalAcceptConfirmation.value = false
+    showServiceModal.value = false
+    await nextTick()
+    loadServices(false)
+  } catch (err) {
+    console.error('[Aceptación verbal] error general:', err)
+    const msg = err?.data?.error || err?.data?.message || err?.message || 'Error al procesar la aceptación verbal'
+    showToast(msg, 'error')
+  } finally {
+    isProcessingVerbal.value = false
+  }
 }
 
 

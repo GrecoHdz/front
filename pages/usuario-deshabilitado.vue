@@ -43,6 +43,16 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/middleware/auth.store'
 
+// SEO and Meta
+useHead({
+  title: 'MiSeguro - Usuario Deshabilitado',
+  meta: [
+    { name: 'description', content: 'MiSeguro - Usuario Deshabilitado' }, 
+    { name: 'keywords', content: 'MiSeguro, Usuario Deshabilitado' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=0.8, user-scalable=no' }
+  ]
+})
+
 const router = useRouter()
 const auth = useAuthStore()
 

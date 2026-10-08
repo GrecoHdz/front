@@ -1661,7 +1661,7 @@
             <div v-else>
               <div v-if="offeredServices.length === 0" class="text-center py-10 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-600">
                 <div class="text-3xl mb-2">📋</div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium px-4">Este técnico no tiene servicios asignados en su perfil todavía.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium px-4">El técnico aún no ha seleccionado que servicios proveerá.</p>
               </div>
               <div v-else class="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
                 <div v-for="service in offeredServices" :key="service.id_tecnico_servicio" class="group p-3 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-200 flex items-center gap-3">

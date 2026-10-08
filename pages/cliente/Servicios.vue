@@ -1356,13 +1356,15 @@
               <!-- Input Billete (Solo si es efectivo) -->
               <Transition name="slide-down">
                 <div v-if="taxiPaymentMethod === 'efectivo'" class="space-y-2">
-                  <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{{ $t('services_page.modals.cash_amount') }}</h4>
+                  <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{{ $t('services_page.modals.cash_amount') }} *</h4>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">L.</span>
                     <input 
                       v-model="taxiCashBillAmount"
                       type="number"
                       inputmode="numeric"
+                      required
+                      min="1"
                       :placeholder="$t('services_page.modals.cash_placeholder')"
                       class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 outline-none font-bold text-sm transition-all"
                     >
@@ -1376,7 +1378,7 @@
                 <button @click="confirmRejectQuotation" :disabled="isProcessingQuotation" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-black rounded-lg text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
                   {{ $t('common.reject') }}
                 </button>
-                <button @click="acceptQuotation" :disabled="isProcessingQuotation" class="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
+                <button @click="acceptQuotation" :disabled="isProcessingQuotation || (taxiPaymentMethod === 'efectivo' && (!taxiCashBillAmount || Number(taxiCashBillAmount) <= 0))" class="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center">
                   <span v-if="!isProcessingQuotation">{{ $t('services_page.modals.confirm_proposal') }}</span>
                   <div v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </button>
@@ -3783,6 +3785,11 @@ const submitRating = async () => {
 // =========================
 
 const acceptQuotation = async () => {
+  if (taxiPaymentMethod.value === 'efectivo' && (!taxiCashBillAmount.value || Number(taxiCashBillAmount.value) <= 0)) {
+    showToast('Por favor ingrese el monto del billete con el que pagará.', 'error');
+    return;
+  }
+
   // Deshabilitar botones mientras se procesa
   isProcessingQuotation.value = true
   
