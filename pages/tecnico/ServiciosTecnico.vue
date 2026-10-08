@@ -183,8 +183,7 @@
       @click="abrirAsistido"
       class="fixed right-4 bottom-20 sm:right-6 sm:bottom-24 z-40 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all duration-200 font-black tracking-wide text-sm border border-white/20">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-      <span class="hidden sm:inline">Iniciar servicio</span>
-      <span class="sm:hidden">Iniciar</span>
+      <span>Iniciar servicio</span> 
     </button>
 
     <FootersFooterTecnico /> 
@@ -1101,11 +1100,11 @@
 
     <!-- Modal Asistido: 2 pasos -->
     <Transition name="modal" enter-active-class="modal-enter-active" leave-active-class="modal-leave-active" enter-from-class="modal-enter-from" leave-to-class="modal-leave-to">
-      <div v-if="showAsistidoModal" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div v-if="showAsistidoModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
         <Transition name="backdrop" enter-active-class="backdrop-enter-active" leave-active-class="backdrop-leave-active" enter-from-class="backdrop-enter-from" leave-to-class="backdrop-leave-to">
           <div v-if="showAsistidoModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="!isSubmittingAsistido && cerrarAsistido()"></div>
         </Transition>
-        <div class="relative w-full sm:max-w-lg bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+        <div class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col z-10">
           <div class="flex items-center justify-between px-5 sm:px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
             <div>
               <h3 class="font-black text-lg sm:text-xl tracking-tight">Iniciar servicio</h3>
@@ -2448,6 +2447,22 @@ const paso2Confirmar = async () => {
         imagen_url: clienteData.imagen_url || null
       }
     })
+    // Notificar al cliente sobre la asignación del servicio
+    try {
+      const clienteUserId = clienteData.id_usuario || asistidoForm.id_cliente;
+      if (clienteUserId) {
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          body: {
+            titulo: 'Servicio Asignado',
+            id_usuario: clienteUserId
+          }
+        });
+      }
+    } catch (notifErr) {
+      console.error('Error al enviar notificación Servicio Asignado:', notifErr);
+    }
+
     // Si el cliente ya existía, enviar mensaje por WhatsApp avisándole que se ha iniciado el servicio
     if (asistidoResult.usuarioExistente) {
       const rawTel = clienteData.telefono || asistidoForm.telefono || ''
