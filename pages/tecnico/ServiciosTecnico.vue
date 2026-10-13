@@ -1132,8 +1132,9 @@
               </div>
               <div>
                 <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Teléfono</label>
-                <input v-model="asistidoForm.telefono" type="tel" maxlength="20" placeholder="Ej. 9988-7766"
+                <input v-model="asistidoForm.telefono" type="tel" maxlength="20" placeholder="Ej. 99887766"
                   :disabled="isSubmittingAsistido"
+                  @paste.prevent="handleAsistidoPhonePaste"
                   class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold placeholder:text-gray-400 dark:placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 transition shadow-sm">
                 <p class="mt-1.5 text-[11px] text-gray-600 dark:text-gray-400 font-medium">Si el teléfono ya está registrado se recuperará el cliente existente.</p>
               </div>
@@ -2331,6 +2332,13 @@ const cerrarAsistido = () => {
   resetAsistidoForm()
   showAsistidoModal.value = false
 }
+// Manejar pegado en el campo de teléfono asistido: elimina espacios y guiones
+const handleAsistidoPhonePaste = (e) => {
+  const pastedText = (e.clipboardData || window.clipboardData).getData('text')
+  // Solo dígitos y el signo +
+  asistidoForm.telefono = pastedText.replace(/[^0-9+]/g, '')
+}
+
 const paso1Siguiente = async () => {
   if (!asistidoForm.nombre || asistidoForm.nombre.trim().length < 2) {
     showToast('Introduce el nombre del cliente (mínimo 2 caracteres)', 'error')
@@ -2338,6 +2346,10 @@ const paso1Siguiente = async () => {
   }
   if (!asistidoForm.telefono || asistidoForm.telefono.replace(/\D/g, '').length < 7) {
     showToast('Introduce un teléfono válido (mínimo 7 dígitos)', 'error')
+    return
+  }
+  if (/[\s\-]/.test(asistidoForm.telefono)) {
+    showToast('El teléfono no debe contener espacios ni guiones. Solo dígitos.', 'error')
     return
   }
   isSubmittingAsistido.value = true

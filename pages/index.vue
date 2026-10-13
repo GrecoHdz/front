@@ -539,6 +539,7 @@
                 autocomplete="tel"
                 @input="formErrors.loginTelefono = ''"
                 @keydown="preventLetterInput"
+                @paste.prevent="handleLoginPhonePaste"
               />
               <p v-if="formErrors.loginTelefono" class="mt-1 text-sm text-red-500">{{ formErrors.loginTelefono }}</p>
             </div>
@@ -2459,7 +2460,15 @@ const validatePhoneNumber = (phoneNumber) => {
   return !formErrors.telefono;
 };
 
-// Manejar pegado en el campo de teléfono
+// Manejar pegado en el campo de teléfono de login: elimina espacios y guiones
+const handleLoginPhonePaste = (e) => {
+  const pastedText = (e.clipboardData || window.clipboardData).getData('text')
+  // Solo dígitos y el signo +
+  form.value.loginTelefono = pastedText.replace(/[^0-9+]/g, '')
+  formErrors.loginTelefono = ''
+}
+
+// Manejar pegado en el campo de teléfono de registro
 const handlePhonePaste = (e) => {
   // Obtener el texto pegado
   const pastedText = (e.clipboardData || window.clipboardData).getData('text');
@@ -2601,7 +2610,10 @@ const sendTechnicianRegistrationMessage = async (nombre, formData = {}) => {
 // Computed property para verificar si el formulario está completo
 const isFormValid = computed(() => {
   if (isLogin.value) {
-    return form.value.loginTelefono && form.value.password;
+    const tel = (form.value.loginTelefono || '').trim()
+    // Rechazar si tiene espacios o guiones
+    const hasInvalidChars = /[\s\-]/.test(tel)
+    return tel && form.value.password && !hasInvalidChars;
   } else {
     const basicFields = form.value.nombre && 
                        form.value.email && 
