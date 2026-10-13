@@ -1131,7 +1131,7 @@
                   class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold placeholder:text-gray-400 dark:placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 transition shadow-sm">
               </div>
               <div>
-                <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Teléfono</label>
+                <label class="block text-xs font-black uppercase text-gray-700 dark:text-gray-300 tracking-wider mb-1.5">Teléfono (sin espacios ni guiones)</label>
                 <input v-model="asistidoForm.telefono" type="tel" maxlength="20" placeholder="Ej. 99887766"
                   :disabled="isSubmittingAsistido"
                   @paste.prevent="handleAsistidoPhonePaste"
@@ -1514,7 +1514,7 @@ const getServiceIcon = (estado, serviceTitle = '') => {
   if (title.includes('fontan') || title.includes('plomer') || title.includes('tubo')) return '💧'
   if (title.includes('electri') || title.includes('luz')) return '💡'
   if (title.includes('edecanes')) return '🧖‍♀️'
-  if (title.includes('fumig')) return '🪲'
+  if (title.includes('fumig')) return '🪳'
   
   const iconMap = {
     'verificando_pagovisita': '💰',
@@ -2339,26 +2339,39 @@ const handleAsistidoPhonePaste = (e) => {
   asistidoForm.telefono = pastedText.replace(/[^0-9+]/g, '')
 }
 
+const normalizarTelefonoAsistido = (raw) => {
+  if (!raw) return ''
+  // Quitar todo excepto dígitos y el signo +
+  let clean = raw.replace(/[^0-9+]/g, '')
+  // Quitar el + inicial si lo hay
+  if (clean.startsWith('+')) clean = clean.substring(1)
+  // Quitar código de país 504 (Honduras) si el número tiene más de 8 dígitos
+  if (clean.startsWith('504') && clean.length > 8) clean = clean.substring(3)
+  // Quitar código de país 00504 también
+  if (clean.startsWith('00504') && clean.length > 9) clean = clean.substring(5)
+  return clean
+}
+
 const paso1Siguiente = async () => {
   if (!asistidoForm.nombre || asistidoForm.nombre.trim().length < 2) {
     showToast('Introduce el nombre del cliente (mínimo 2 caracteres)', 'error')
     return
   }
-  if (!asistidoForm.telefono || asistidoForm.telefono.replace(/\D/g, '').length < 7) {
+  // Normalizar el teléfono antes de validar: quitar espacios, guiones y código de país
+  const telefonoNormalizado = normalizarTelefonoAsistido(asistidoForm.telefono)
+  if (!telefonoNormalizado || telefonoNormalizado.length < 7) {
     showToast('Introduce un teléfono válido (mínimo 7 dígitos)', 'error')
     return
   }
-  if (/[\s\-]/.test(asistidoForm.telefono)) {
-    showToast('El teléfono no debe contener espacios ni guiones. Solo dígitos.', 'error')
-    return
-  }
+  // Actualizar el modelo con el número limpio para que el input lo refleje
+  asistidoForm.telefono = telefonoNormalizado
   isSubmittingAsistido.value = true
   try {
     const res = await $api('/usuarios/registro-asistido', {
       method: 'POST',
       body: {
         nombre: asistidoForm.nombre.trim(),
-        telefono: asistidoForm.telefono.trim()
+        telefono: telefonoNormalizado
       }
     })
     if (!res || !res.success) {

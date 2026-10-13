@@ -1896,7 +1896,7 @@ const getServiceIcon = (serviceName) => {
     'barber': '💈',
     'peluquería': '💈',
     'edecanes': '🧜‍♀️',
-    'fumig': '🪲' 
+    'fumig': '🪳' 
   }
   
   if (!serviceName) return '🛠️'
