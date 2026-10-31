@@ -958,7 +958,7 @@
           <div class="flex items-center space-x-2">
             <!-- Selector de Ciudad (Dinámico) -->
             <multiselect 
-              v-if="['serviceTypeCity', 'techCity', 'cities'].includes(selectedChart)"
+              v-if="['serviceTypeCity', 'techCity', 'techMoneyCity', 'cities'].includes(selectedChart)"
               v-model="selectedCityChart"
               :options="availableCities"
               :searchable="false"
@@ -3618,7 +3618,8 @@ const availableCharts = [
   { id: 'users', name: '👥 Crecimiento de Usuarios' },
   { id: 'cities', name: '🏙️ Servicios por Ciudad' },
   { id: 'serviceTypeCity', name: '🏢 Servicios por Tipo/Ciudad' },
-  { id: 'techCity', name: '👨‍🔧 Servicios Técnicos/Ciudad' }
+  { id: 'techCity', name: '👨‍🔧 Servicios Técnicos/Ciudad' },
+  { id: 'techMoneyCity', name: '💰 Dinero por Técnicos/Ciudad' }
 ];
 
 // Función para etiquetar gráficos
@@ -3664,7 +3665,8 @@ const getChartTitle = () => {
       users: 'Crecimiento de Usuarios',
       cities: 'Servicios por Ciudad',
       serviceTypeCity: selectedCityChart.value?.id_ciudad === 'all' ? 'Servicios por Tipo en cada Ciudad' : `Servicios en ${selectedCityChart.value?.nombre_ciudad}`,
-      techCity: selectedCityChart.value?.id_ciudad === 'all' ? 'Servicios Realizados por Técnicos según su Ciudad' : `Servicios realizados por técnicos en ${selectedCityChart.value?.nombre_ciudad}`
+      techCity: selectedCityChart.value?.id_ciudad === 'all' ? 'Servicios Realizados por Técnicos según su Ciudad' : `Servicios realizados por técnicos en ${selectedCityChart.value?.nombre_ciudad}`,
+      techMoneyCity: selectedCityChart.value?.id_ciudad === 'all' ? 'Dinero Generado por Técnicos según su Ciudad' : `Dinero generado por técnicos en ${selectedCityChart.value?.nombre_ciudad}`
     };
     return chartTitles[selectedChart.value] || 'Gráfico';
   } catch (error) {
@@ -3716,7 +3718,7 @@ const updatePlatformStats = async () => {
       platformStats.totalWithdrawals = data.deudasTecnicos || 0; // Se muestra lo que se DEBE a los técnicos (Pasivos)
       platformStats.totalPaidOut = data.retiros || 0; // Monto real que ya salió de caja (Retiros completados)
       
-      if (response.data.grafico) {
+      if (response.data.grafico && selectedChart.value === 'earnings') {
         updateChart(response.data.grafico);
       }
       
@@ -3901,6 +3903,52 @@ const createChart = async () => {
           }
         };
         break;
+
+      case 'techMoneyCity':
+        config = {
+          type: 'bar',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Mano de obra generada',
+              data: [],
+              backgroundColor: '#10B981',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return 'L. ' + Number(context.raw || 0).toLocaleString('es-HN');
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: {
+                  color: isDark ? '#D1D5DB' : '#374151',
+                  callback: function(value) {
+                    return 'L. ' + (value / 1000) + 'K';
+                  }
+                },
+                grid: { color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }
+              },
+              y: {
+                ticks: { color: isDark ? '#D1D5DB' : '#374151' },
+                grid: { display: false }
+              }
+            }
+          }
+        };
+        break;
       
       case 'serviceTypes':
       case 'cities':
@@ -4016,6 +4064,9 @@ const createChart = async () => {
       case 'techCity':
         await loadTechnicianServicesByCityData();
         break;
+      case 'techMoneyCity':
+        await loadTechnicianEarningsByCityData();
+        break;
     }
   } catch (error) {
     console.error('Error creando gráfico:', error);
@@ -4035,9 +4086,19 @@ const updateChart = (chartData) => {
 };
 
 // ===== FUNCIONES DE CARGA DE DATOS DE GRÁFICOS =====
+
+// Construye el rango de fechas seleccionado para los gráficos
+const getChartDateQuery = () => {
+  const params = new URLSearchParams();
+  if (platformDateFrom.value) params.append('fechaInicio', platformDateFrom.value);
+  if (platformDateTo.value) params.append('fechaFin', platformDateTo.value);
+  return params.toString();
+};
+
 const loadServiceTypesData = async () => {
   try { 
-    const response = await $api('/solicitudservicio/grafica/servicios', {
+    const query = getChartDateQuery();
+    const response = await $api(`/solicitudservicio/grafica/servicios${query ? `?${query}` : ''}`, {
       method: 'GET'
     });
     
@@ -4058,7 +4119,8 @@ const loadServiceTypesData = async () => {
 };
 const loadServicesPerMonthData = async () => {
   try { 
-    const response = await $api('/solicitudservicio/grafica/servicios-por-mes', {
+    const query = getChartDateQuery();
+    const response = await $api(`/solicitudservicio/grafica/servicios-por-mes${query ? `?${query}` : ''}`, {
       method: 'GET'
     });
     
@@ -4077,7 +4139,8 @@ const loadServicesPerMonthData = async () => {
 
 const loadUserGrowthData = async () => {
   try { 
-    const response = await $api('/usuarios/grafica/crecimiento-usuarios', {
+    const query = getChartDateQuery();
+    const response = await $api(`/usuarios/grafica/crecimiento-usuarios${query ? `?${query}` : ''}`, {
       method: 'GET'
     });
     
@@ -4096,7 +4159,8 @@ const loadUserGrowthData = async () => {
 
 const loadServicesByCityData = async () => {
   try { 
-    const response = await $api('/solicitudservicio/grafica/servicios-por-ciudad', {
+    const query = getChartDateQuery();
+    const response = await $api(`/solicitudservicio/grafica/servicios-por-ciudad${query ? `?${query}` : ''}`, {
       method: 'GET'
     });
     
@@ -4119,7 +4183,12 @@ const loadServicesByCityData = async () => {
 const loadServiceTypeByCityData = async () => {
   try { 
     const idCiudad = selectedCityChart.value?.id_ciudad || 'all';
-    const response = await $api(`/solicitudservicio/grafica/servicios-tipo-ciudad?id_ciudad=${idCiudad}`, {
+    const params = new URLSearchParams();
+    params.append('id_ciudad', idCiudad);
+    if (platformDateFrom.value) params.append('fechaInicio', platformDateFrom.value);
+    if (platformDateTo.value) params.append('fechaFin', platformDateTo.value);
+
+    const response = await $api(`/solicitudservicio/grafica/servicios-tipo-ciudad?${params.toString()}`, {
       method: 'GET'
     });
     
@@ -4142,7 +4211,12 @@ const loadServiceTypeByCityData = async () => {
 const loadTechnicianServicesByCityData = async () => {
   try { 
     const idCiudad = selectedCityChart.value?.id_ciudad || 'all';
-    const response = await $api(`/solicitudservicio/grafica/servicios-tecnicos-ciudad?id_ciudad=${idCiudad}`, {
+    const params = new URLSearchParams();
+    params.append('id_ciudad', idCiudad);
+    if (platformDateFrom.value) params.append('fechaInicio', platformDateFrom.value);
+    if (platformDateTo.value) params.append('fechaFin', platformDateTo.value);
+
+    const response = await $api(`/solicitudservicio/grafica/servicios-tecnicos-ciudad?${params.toString()}`, {
       method: 'GET'
     });
     
@@ -4157,6 +4231,32 @@ const loadTechnicianServicesByCityData = async () => {
   } catch (error) {
     console.error('Error al cargar datos de servicios técnicos por ciudad:', error);
     showToast('Error al cargar datos de servicios técnicos por ciudad', 'error');
+  }
+};
+
+const loadTechnicianEarningsByCityData = async () => {
+  try { 
+    const idCiudad = selectedCityChart.value?.id_ciudad || 'all';
+    const params = new URLSearchParams();
+    params.append('id_ciudad', idCiudad);
+    if (platformDateFrom.value) params.append('fechaInicio', platformDateFrom.value);
+    if (platformDateTo.value) params.append('fechaFin', platformDateTo.value);
+
+    const response = await $api(`/solicitudservicio/grafica/dinero-tecnicos-ciudad?${params.toString()}`, {
+      method: 'GET'
+    });
+    
+    if (response?.success && response.data && window.currentChart) {
+      const isSpecificCity = idCiudad !== 'all';
+      
+      window.currentChart.data.labels = response.data.labels || [];
+      window.currentChart.data.datasets[0].data = response.data.data || [];
+      window.currentChart.data.datasets[0].label = isSpecificCity ? 'Mano de obra por Técnico' : 'Mano de obra por Ciudad del Técnico';
+      window.currentChart.update();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de dinero generado por técnicos:', error);
+    showToast('Error al cargar los datos del gráfico de dinero por técnicos', 'error');
   }
 };
 
@@ -6050,6 +6150,17 @@ watch(selectedChart, async (newVal) => {
 // Watch para cuando cambia la ciudad del gráfico
 watch(selectedCityChart, async () => {
   createChart();
+});
+
+// Watch para aplicar el filtro de fechas a los gráficos
+watch([platformDateFrom, platformDateTo], async () => {
+  try {
+    if (selectedChart.value === 'earnings') return; // El gráfico de ingresos se actualiza con updatePlatformStats
+    await nextTick();
+    createChart();
+  } catch (error) {
+    console.error('Error al actualizar gráfico por cambio de fecha:', error);
+  }
 });
 
 const loadCities = async () => {

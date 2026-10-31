@@ -1170,15 +1170,6 @@
                     class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 outline-none text-gray-900 dark:text-white text-base font-bold placeholder:text-gray-400 dark:placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 transition shadow-sm">
                 </div>
               </div>
-              <div v-if="!asistidoResult.usuarioExistente && asistidoResult.enlaceCompletar" class="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3 text-xs text-blue-900 dark:text-blue-100">
-                <p class="font-black text-blue-800 dark:text-blue-300 mb-1">Enlace para completar perfil (Cliente nuevo):</p>
-                <p class="break-all text-blue-950 dark:text-blue-200 font-mono text-[11px] select-all bg-white/80 dark:bg-black/30 p-2 rounded border border-blue-200 dark:border-blue-800 mb-2">{{ asistidoResult.enlaceCompletar }}</p>
-                <p v-if="asistidoResult.wa_me">
-                  <a :href="asistidoResult.wa_me" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-black text-green-700 dark:text-green-400 hover:text-green-800 underline decoration-dotted">
-                    📱 Re-enviar WhatsApp al cliente
-                  </a>
-                </p>
-              </div>
             </template>
           </div>
 
@@ -2387,14 +2378,12 @@ const paso1Siguiente = async () => {
     if (res.usuarioExistente) {
       showToast('Cliente encontrado!', 'success')
     } else {
-      showToast(res.whatsapp_enviado ? 'Cliente creado. Enlace enviado por WhatsApp.' : 'Cliente creado.', res.whatsapp_enviado ? 'success' : 'info')
-    }
-    if (res.wa_me && !res.whatsapp_enviado && !res.usuarioExistente) {
-      try {
-        window.open(res.wa_me, '_blank', 'noopener,noreferrer')
-      } catch (e) {
-        console.warn('No se pudo abrir wa.me:', e)
-      }
+      showToast('Cliente creado.', 'success')
+      // Notificar al administrador que se registró un nuevo cliente
+      $api('/notificaciones/enviar', {
+        method: 'POST',
+        body: { titulo: 'Nuevo registro', nombre_rol: 'sa' }
+      }).catch(() => {})
     }
     asistidoPaso.value = 2
   } catch (err) {
@@ -2489,24 +2478,28 @@ const paso2Confirmar = async () => {
       console.error('Error al enviar notificación Servicio Asignado:', notifErr);
     }
 
-    // Si el cliente ya existía, enviar mensaje por WhatsApp avisándole que se ha iniciado el servicio
-    if (asistidoResult.usuarioExistente) {
-      const rawTel = clienteData.telefono || asistidoForm.telefono || ''
-      const cleanPhone = rawTel.replace(/\D/g, '')
-      if (cleanPhone.length >= 7) {
-        const phoneFormatted = cleanPhone.startsWith('504') ? cleanPhone : `504${cleanPhone}`
-        const originUrl = window.location.origin || 'https://prohogar.com'
+    // Enviar por WhatsApp el enlace correspondiente al confirmar (cliente nuevo o existente)
+    const rawTel = clienteData.telefono || asistidoForm.telefono || ''
+    const cleanPhone = rawTel.replace(/\D/g, '')
+    if (cleanPhone.length >= 7) {
+      const phoneFormatted = cleanPhone.startsWith('504') ? cleanPhone : `504${cleanPhone}`
+      const originUrl = window.location.origin || 'https://prohogar.com'
+      const nombreCliente = clienteData.nombre || asistidoForm.nombre || 'estimado(a) cliente'
+      let textMsg = ''
+      if (asistidoResult.usuarioExistente) {
+        // Cliente existente: enlace para seguir el servicio
         const linkServicios = `${originUrl}/cliente/Servicios`
-        const nombreCliente = clienteData.nombre || asistidoForm.nombre || 'estimado(a) cliente'
-        
-        const textMsg = `Hola ${nombreCliente}, tu servicio ha sido iniciado exitosamente en MiSeguro. Puedes ver más detalles e información de tu servicio aquí:\n${linkServicios}`
-        const waUrl = `https://wa.me/${phoneFormatted}?text=${encodeURIComponent(textMsg)}`
-
-        try {
-          window.open(waUrl, '_blank', 'noopener,noreferrer')
-        } catch (e) {
-          console.warn('No se pudo abrir WhatsApp para notificar al cliente existente:', e)
-        }
+        textMsg = `Hola ${nombreCliente}, tu servicio ha sido iniciado exitosamente en MiSeguro. Puedes ver más detalles e información de tu servicio aquí:\n${linkServicios}`
+      } else {
+        // Cliente nuevo: enlace para completar su perfil
+        const enlaceCompletar = asistidoResult.enlaceCompletar || `${originUrl}/completar-perfil/${asistidoForm.id_cliente}`
+        textMsg = `¡Hola ${nombreCliente}! Tu servicio ha sido registrado exitosamente. Para completar tu perfil y ver el seguimiento del mismo haz clic aquí:\n${enlaceCompletar}`
+      }
+      const waUrl = `https://wa.me/${phoneFormatted}?text=${encodeURIComponent(textMsg)}`
+      try {
+        window.open(waUrl, '_blank', 'noopener,noreferrer')
+      } catch (e) {
+        console.warn('No se pudo abrir WhatsApp para notificar al cliente:', e)
       }
     }
 

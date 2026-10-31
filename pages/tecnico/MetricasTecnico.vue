@@ -2239,15 +2239,16 @@ button:active {
 
 .multiselect-custom .multiselect__tags {
   min-height: 36px !important;
-  background-color: rgb(249 250 251) !important;
-  border: 1px solid rgb(229 231 235) !important;
+  background-color: #ffffff !important;
+  border: 1px solid rgb(209 213 219) !important;
   border-radius: 0.5rem !important;
   padding: 6px 30px 6px 10px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
   transition: all 0.2s ease !important;
 }
 
 .dark .multiselect-custom .multiselect__tags {
-  background-color: rgb(55 65 81) !important;
+  background-color: rgb(31 41 55) !important;
   border-color: rgb(75 85 99) !important;
 }
 

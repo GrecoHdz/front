@@ -963,6 +963,34 @@
                         </span>
                         
                         <div class="flex space-x-0.5">
+                          <button
+                            v-if="service.estado === 'pendiente_cotizacion'"
+                            :disabled="isProcessingVerbal"
+                            @click.stop="handleVerbalAccept(service)"
+                            class="p-0.5 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-all duration-300 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Aceptación verbal del cliente"
+                          >
+                            <svg v-if="isProcessingVerbal" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span v-else class="text-xs leading-none">🤝</span>
+                          </button>
+                          <button
+                            v-if="service.estado === 'en_proceso'"
+                            :disabled="isCompleting"
+                            @click.stop="openCompleteConfirmation(service)"
+                            class="p-0.5 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-all duration-300 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Completar servicio"
+                          >
+                            <svg v-if="isCompleting" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
                           <button 
                             v-if="service.cotizacion?.comentario"
                             @click.stop="openDiagnosisModal(service.cotizacion.comentario)"
@@ -1536,6 +1564,104 @@
       </div>
     </Transition>
 
+    <!-- Modal Confirmación Aceptación Verbal del Cliente -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="showVerbalAcceptConfirmation" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="!isProcessingVerbal && (showVerbalAcceptConfirmation = false)"></div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-5 sm:p-6 relative z-10 text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-2xl bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-2xl mb-4 shadow-sm">
+            🤝
+          </div>
+          <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">
+            Aceptación verbal del cliente
+          </h3>
+          <p class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-6 leading-relaxed">
+            ¿El cliente aceptó la cotización verbalmente? El servicio pasará a estado <strong>'En Proceso'</strong> como <strong>pago en efectivo</strong> (sin créditos ni descuentos de membresía).
+          </p>
+
+          <div class="flex gap-3">
+            <button
+              type="button"
+              @click="showVerbalAcceptConfirmation = false"
+              :disabled="isProcessingVerbal"
+              class="flex-1 py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-200 font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm disabled:opacity-50">
+              Cancelar
+            </button>
+            <button
+              type="button"
+              @click="confirmVerbalAccept"
+              :disabled="isProcessingVerbal"
+              class="flex-1 py-3 px-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition text-sm shadow-lg shadow-green-500/20 disabled:opacity-60 flex items-center justify-center gap-2">
+              <span v-if="!isProcessingVerbal">✓ Confirmar</span>
+              <span v-else class="flex items-center gap-1.5">
+                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Procesando…
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Modal Confirmación Completar Servicio -->
+    <Transition
+      name="modal"
+      enter-active-class="modal-enter-active"
+      leave-active-class="modal-leave-active"
+      enter-from-class="modal-enter-from"
+      leave-to-class="modal-leave-to"
+    >
+      <div v-if="showCompleteConfirmation" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showCompleteConfirmation = false"></div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-5 sm:p-6 relative z-10">
+          <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-3 sm:mb-4">
+              <span class="text-green-600 dark:text-green-400 text-lg sm:text-xl">✅</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-2">¿Completar servicio?</h3>
+            <p class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">
+              ¿Deseas marcar este servicio como completado? Puedes agregar un comentario opcional.
+            </p>
+
+            <div class="mb-3 sm:mb-4 text-left">
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comentario (opcional)</label>
+              <textarea
+                v-model="completeServiceComment"
+                class="w-full px-2.5 sm:px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+                rows="3"></textarea>
+            </div>
+
+            <div class="flex gap-2 sm:gap-3">
+              <button
+                @click="showCompleteConfirmation = false"
+                :disabled="isCompleting"
+                class="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm disabled:opacity-50">
+                Cancelar
+              </button>
+              <button
+                @click="confirmCompleteService"
+                :disabled="isCompleting"
+                class="flex-1 px-3 sm:px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center text-sm disabled:opacity-60">
+                <span v-if="!isCompleting">Sí, completar</span>
+                <svg v-else class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- ======================================================= -->
     <!-- Modal: Seleccionar canal de notificación WhatsApp        -->
     <!-- ======================================================= -->
@@ -1984,6 +2110,10 @@
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Mano de obra:</span>
                     <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_manodeobra || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Materiales:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">L. {{ serviceToPayment.cotizacion.monto_materiales || 0 }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-gray-400">Descuento membresía:</span>
@@ -2809,6 +2939,14 @@ const showPackagePaymentDetailsModal = ref(false)
 const showFacturaModal = ref(false)
 const showDeleteConfirmModal = ref(false)
 const serviceToDelete = ref(null)
+// Modal de aceptación verbal del cliente (admin)
+const showVerbalAcceptConfirmation = ref(false)
+const isProcessingVerbal = ref(false)
+// Modal completar servicio (admin)
+const showCompleteConfirmation = ref(false)
+const isCompleting = ref(false)
+const currentServiceToComplete = ref(null)
+const completeServiceComment = ref('')
 // Modal de selección del canal de WhatsApp
 const showWhatsAppSelectModal = ref(false)
 const pendingWhatsAppData = ref(null) // { technician, service }
@@ -2827,6 +2965,8 @@ const anyModalOpen = computed(() => {
          showFacturaModal.value ||
          showDeleteConfirmModal.value ||
          showWhatsAppSelectModal.value ||
+         showVerbalAcceptConfirmation.value ||
+         showCompleteConfirmation.value ||
          showDiagnosisModal.value
 })
 
@@ -4418,6 +4558,272 @@ const deleteService = async () => {
   } catch (error) {
     console.error('Error al eliminar solicitud:', error)
     showError('Error al eliminar la solicitud')
+  }
+}
+
+// ===== ACEPTACIÓN VERBAL DEL CLIENTE (mismo flujo que el técnico) =====
+const handleVerbalAccept = (service) => {
+  if (!service || !service.id_solicitud) {
+    showError('No hay servicio seleccionado')
+    return
+  }
+  selectedService.value = service
+  showVerbalAcceptConfirmation.value = true
+}
+
+const confirmVerbalAccept = async () => {
+  const service = selectedService.value
+  if (!service || !service.id_solicitud) {
+    showError('No hay servicio seleccionado')
+    showVerbalAcceptConfirmation.value = false
+    return
+  }
+  if (isProcessingVerbal.value) return
+  isProcessingVerbal.value = true
+  try {
+    // 1) Resolver la cotización (cargarla si no la tenemos)
+    let cotizacionId = service.cotizacion?.id_cotizacion || null
+    if (!cotizacionId) {
+      try {
+        const resp = await $api(`cotizacion/solicitud/${service.id_solicitud}`, { method: 'GET' })
+        if (resp && resp.status === 'success' && resp.data && resp.data.id_cotizacion) {
+          cotizacionId = resp.data.id_cotizacion
+          service.cotizacion = {
+            id_cotizacion: resp.data.id_cotizacion,
+            monto_manodeobra: parseFloat(resp.data.monto_manodeobra) || 0,
+            monto_materiales: parseFloat(resp.data.monto_materiales) || 0,
+            comentario: resp.data.comentario || '',
+            estado: resp.data.estado
+          }
+        }
+      } catch (errCot) {
+        console.warn('No se pudo cargar la cotización existente:', errCot)
+      }
+    }
+    if (!cotizacionId) {
+      showError('No hay una cotización registrada para este servicio.')
+      showVerbalAcceptConfirmation.value = false
+      return
+    }
+
+    // 2) Marcar la cotización como aceptada sin créditos ni descuentos (pago en efectivo)
+    try {
+      await $api(`cotizacion/${cotizacionId}`, {
+        method: 'PUT',
+        body: {
+          estado: 'aceptado',
+          descuento_membresia: 0,
+          credito_usado: 0
+        }
+      })
+    } catch (errUpd) {
+      console.warn('PUT cotización error (no crítico si el backend ya lo actualizó):', errUpd)
+    }
+
+    // 3) Pasar la solicitud a 'en_proceso' con bandera de pago en efectivo
+    const descripcionOriginal = service.descripcion || ''
+    const banda = '\n\n— [Pago efectivo — Aceptación verbal]'
+    const descripcionFinal = descripcionOriginal.includes('[Pago efectivo') ? descripcionOriginal : (descripcionOriginal + banda)
+    try {
+      await $api(`/solicitudservicio/${service.id_solicitud}`, {
+        method: 'PUT',
+        body: {
+          estado: 'en_proceso',
+          descripcion: descripcionFinal
+        }
+      })
+    } catch (errSol) {
+      console.error('PUT solicitudservicio error:', errSol)
+      showError('Aceptación registrada pero no se pudo cambiar el estado del servicio.')
+    }
+
+    // 4) Registrar el ingreso del técnico (comisión de mano de obra)
+    try {
+      const idTecnico = service.tecnico?.id_tecnico || service.id_tecnico || null
+      if (idTecnico) {
+        const montoManoObra = Number(service.cotizacion?.monto_manodeobra || 0)
+
+        // Obtener el porcentaje de comisión configurado
+        let porcentajeComision = 20 // Valor por defecto
+        try {
+          const configResponse = await $api('/config/valor/comision_por_servicio', { method: 'GET' })
+          if (configResponse?.valor) {
+            porcentajeComision = parseFloat(configResponse.valor)
+          }
+        } catch (errConfig) {
+          console.warn('No se pudo obtener la comisión por servicio, usando 20% por defecto:', errConfig)
+        }
+
+        const factorComision = porcentajeComision / 100
+        const montoTecnicoComision = montoManoObra * factorComision
+        const montoClienteTecnico = Number((montoManoObra - montoTecnicoComision).toFixed(2))
+
+        await $api('/movimientos', {
+          method: 'POST',
+          body: {
+            id_usuario: idTecnico,
+            id_solicitud: service.id_solicitud,
+            id_cotizacion: cotizacionId,
+            tipo: 'ingreso',
+            monto: montoClienteTecnico,
+            descripcion: 'Ingreso técnico - Aceptación verbal cliente (efectivo)',
+            estado: 'pendiente'
+          }
+        })
+      } else {
+        console.warn('El servicio no tiene técnico asignado; se omite el movimiento de ingreso.')
+      }
+    } catch (errMov) {
+      console.warn('No se pudo crear el movimiento (continuando flujo).', errMov)
+    }
+
+    // 5) Notificar al cliente sobre la aceptación del servicio
+    try {
+      const clienteId = service.cliente?.id_cliente || service.id_usuario || null
+      if (clienteId) {
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          body: {
+            titulo: 'Servicio Asignado',
+            id_usuario: clienteId
+          }
+        })
+      }
+    } catch (errNotif) {
+      console.warn('No se pudo enviar la notificación al cliente:', errNotif)
+    }
+
+    showSuccess('Aceptación verbal confirmada. Servicio en proceso (pago en efectivo).')
+    service.estado = 'en_proceso'
+    service.descripcion = descripcionFinal
+    showVerbalAcceptConfirmation.value = false
+    showDetailModal.value = false
+    await nextTick()
+    await loadHistoryServices(currentHistoryPage.value, true)
+  } catch (err) {
+    console.error('[Aceptación verbal] error general:', err)
+    const msg = err?.data?.error || err?.data?.message || err?.message || 'Error al procesar la aceptación verbal'
+    showError(msg)
+  } finally {
+    isProcessingVerbal.value = false
+  }
+}
+
+// ===== COMPLETAR SERVICIO (mismo flujo que el técnico) =====
+const isCashService = (description = '') => {
+  return (description || '').toLowerCase().includes('pago efectivo')
+}
+
+const openCompleteConfirmation = (service) => {
+  if (!service || !service.id_solicitud) {
+    showError('No hay servicio seleccionado')
+    return
+  }
+  currentServiceToComplete.value = service
+  selectedService.value = service
+  completeServiceComment.value = ''
+  showCompleteConfirmation.value = true
+}
+
+const confirmCompleteService = async () => {
+  const service = currentServiceToComplete.value
+  if (!service || !service.id_solicitud) {
+    showError('No hay servicio seleccionado')
+    showCompleteConfirmation.value = false
+    return
+  }
+  if (isCompleting.value) return
+  isCompleting.value = true
+  try {
+    const isCashPayment = isCashService(service.descripcion)
+    const setAsFinalized = isCashPayment
+
+    // 1) Actualizar estado (finalizado directo si es pago en efectivo, o pendiente de pago)
+    await $api(`/solicitudservicio/${service.id_solicitud}`, {
+      method: 'PUT',
+      body: {
+        estado: setAsFinalized ? 'finalizado' : 'pendiente_pagoservicio',
+        comentario: completeServiceComment.value || (isCashPayment ? 'Servicio cobrado en efectivo' : 'Completado')
+      }
+    })
+
+    // 2) Si se finalizó directo, confirmar la cotización asociada
+    if (setAsFinalized) {
+      try {
+        const quotationRes = await $api(`cotizacion/solicitud/${service.id_solicitud}`, { method: 'GET' })
+        const cotizacion = quotationRes?.data || quotationRes
+        const cotId = cotizacion?.id_cotizacion || cotizacion?.id
+        if (cotId) {
+          await $api(`/cotizacion/${cotId}`, {
+            method: 'PUT',
+            body: { estado: 'confirmado' }
+          })
+
+          // Pago en efectivo: crear retiro automático para balancear el ingreso ya recibido en mano
+          if (isCashPayment) {
+            try {
+              const manoObra = parseFloat(cotizacion.monto_manodeobra) || 0
+              let porcentajeComision = 20 // Valor por defecto
+              try {
+                const configResponse = await $api('/config/valor/comision_por_servicio', { method: 'GET' })
+                if (configResponse?.valor) porcentajeComision = parseFloat(configResponse.valor)
+              } catch (errConfig) {
+                console.warn('No se pudo obtener la comisión por servicio, usando 20% por defecto:', errConfig)
+              }
+              const techCommissionRate = (100 - porcentajeComision) / 100
+              const gananciaConductor = manoObra * techCommissionRate
+              const idTecnico = service.tecnico?.id_tecnico || service.id_tecnico || null
+              if (gananciaConductor > 0 && idTecnico) {
+                await $api('/movimientos', {
+                  method: 'POST',
+                  body: {
+                    id_usuario: idTecnico,
+                    id_cotizacion: cotId,
+                    tipo: 'retiro',
+                    monto: Number(gananciaConductor.toFixed(2)),
+                    estado: 'completado',
+                    descripcion: `Retiro automático (Ganancia pago en efectivo) - Servicio #${service.id_solicitud}`
+                  }
+                })
+              }
+            } catch (movError) {
+              console.error('Error al crear movimiento de retiro automático:', movError)
+            }
+          }
+        }
+      } catch (quotationError) {
+        console.error('Error al confirmar cotización para servicio finalizado:', quotationError)
+      }
+    }
+
+    // 3) Notificar al cliente sobre la finalización
+    try {
+      const clienteId = service.cliente?.id_cliente || service.id_usuario || null
+      if (clienteId) {
+        await $api('/notificaciones/enviar', {
+          method: 'POST',
+          body: {
+            titulo: setAsFinalized ? 'Servicio Finalizado' : 'Pago de Servicio Pendiente',
+            id_usuario: clienteId
+          }
+        })
+      }
+    } catch (notificationError) {
+      console.error('Error al enviar notificación de servicio completado:', notificationError)
+    }
+
+    showSuccess('Servicio marcado como completado exitosamente')
+    service.estado = setAsFinalized ? 'finalizado' : 'pendiente_pagoservicio'
+    showCompleteConfirmation.value = false
+    completeServiceComment.value = ''
+    showDetailModal.value = false
+    await nextTick()
+    await loadHistoryServices(currentHistoryPage.value, true)
+  } catch (error) {
+    console.error('Error al completar el servicio:', error)
+    showError('Error al completar el servicio. Por favor, inténtalo de nuevo.')
+  } finally {
+    isCompleting.value = false
   }
 }
 

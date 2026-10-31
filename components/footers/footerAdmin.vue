@@ -1,11 +1,19 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const router = useRouter()
 const route = useRoute()
 const isLoading = ref(false)
+
+// Montaje en cliente: el footer se teletransporta a <body> para no quedar
+// atrapado en contenedores con overflow (html/body/#__nuxt), que hacían que
+// el nav fixed se moviera junto al scroll.
+const isMounted = ref(false)
+onMounted(() => {
+  isMounted.value = true
+})
 
 // Determine active tab based on current route
 const activeTab = computed(() => {
@@ -39,15 +47,16 @@ const navigateTo = async (path, tabName) => {
 </script>
 
 <template>
-  <!-- LoadingSpinner para navegación -->
-  <LoadingSpinner 
-    v-if="isLoading"
-    :loading="isLoading"
-    :hideDefaultMessage="true"
-    class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
-  />
-  
-  <nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-40">
+  <Teleport v-if="isMounted" to="body">
+    <!-- LoadingSpinner para navegación -->
+    <LoadingSpinner 
+      v-if="isLoading"
+      :loading="isLoading"
+      :hideDefaultMessage="true"
+      class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
+    />
+    
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-40">
     <div class="px-4 py-3">
       <div class="flex justify-around items-center">
         <!-- Dashboard -->
@@ -127,5 +136,6 @@ const navigateTo = async (path, tabName) => {
         </button>
       </div>
     </div>
-  </nav>
+    </nav>
+  </Teleport>
 </template>
