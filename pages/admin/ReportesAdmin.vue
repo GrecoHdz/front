@@ -3910,7 +3910,7 @@ const createChart = async () => {
           data: {
             labels: [],
             datasets: [{
-              label: 'Mano de obra generada',
+              label: 'Dinero generado (neto)',
               data: [],
               backgroundColor: '#10B981',
               borderRadius: 4
@@ -4251,7 +4251,7 @@ const loadTechnicianEarningsByCityData = async () => {
       
       window.currentChart.data.labels = response.data.labels || [];
       window.currentChart.data.datasets[0].data = response.data.data || [];
-      window.currentChart.data.datasets[0].label = isSpecificCity ? 'Mano de obra por Técnico' : 'Mano de obra por Ciudad del Técnico';
+      window.currentChart.data.datasets[0].label = isSpecificCity ? 'Dinero por Técnico (neto)' : 'Dinero por Ciudad del Técnico (neto)';
       window.currentChart.update();
     }
   } catch (error) {
