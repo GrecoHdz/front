@@ -2216,6 +2216,8 @@ const completeRegistration = async (isTechnician) => {
     // Mostrar mensaje de éxito
     if (isTechnician) {
       showToast('¡Solicitud de técnico enviada! Tu perfil está en revisión.', 'success');
+    } else if (responseData.perfil_completado) {
+      showToast('¡Perfil completado! Iniciando sesión...', 'success');
     } else {
       showToast('¡Registro exitoso! Iniciando sesión...', 'success');
     }

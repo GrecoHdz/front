@@ -3043,6 +3043,11 @@ const mapApiServiceToLocal = (apiService) => {
   // Inicializar los estados de pago
   const pagovisitaRechazado = apiService.pago_estado === 'rechazado';
   const cotizacionRechazada = apiService.cotizacion_estado === 'rechazado';
+
+  // Detectar si el servicio lo inició el técnico: en ese flujo la visita se
+  // registra automáticamente con el comprobante "ASISTIDO-<id>" y debe cobrarse al cliente.
+  const comprobanteVisita = String(apiService.pagoVisita?.num_comprobante || '');
+  const iniciadoPorTecnico = comprobanteVisita.startsWith('ASISTIDO-');
   
   // Crear objeto con los datos del servicio
   const servicioMapeado = {
@@ -3066,6 +3071,9 @@ const mapApiServiceToLocal = (apiService) => {
     },
     description: apiService.descripcion, 
     pagar_visita: apiService.pagar_visita == 1,  
+    // Flujo iniciado por el técnico: la visita ya quedó registrada y se suma al pago
+    iniciadoPorTecnico: iniciadoPorTecnico,
+    montoVisita: iniciadoPorTecnico ? (Number(apiService.pagoVisita?.monto) || 0) : 0,
     serviceDescription: apiService.descripcion,
     diagnosis: 'Diagnóstico pendiente...',
     technician: apiService.id_tecnico,
@@ -3425,6 +3433,9 @@ const openPaymentModal = async (service) => {
     // Actualizar el ID del servicio seleccionado en lugar de la propiedad computada
     selectedServiceId.value = service?.id || null
     
+    // Visita por cobrar (solo cuando el servicio lo inició el técnico)
+    visitaPendienteCliente.value = Number(service?.montoVisita || 0) || 0
+    
     // Mostrar el modal según el tipo de servicio
     if (isViajePrivado(service?.title)) {
       showTaxiPaymentModal.value = true
@@ -3464,6 +3475,7 @@ const closePaymentModal = () => {
   selectedAccount.value = ''
   comprobante.value = ''
   isProcessingPayment.value = false
+  visitaPendienteCliente.value = 0
 }
 
 const getDiscountedPrice = () => {
@@ -4174,6 +4186,9 @@ const processPayment = async () => {
   
   isProcessingPayment.value = true;
   
+  // La visita solo se cobra cuando el servicio lo inició el técnico
+  const montoVisitaPago = Number(visitaPendienteCliente.value || 0);
+  
   const payload = {
     id_cotizacion: Number(quotationData.value.id_cotizacion),
     id_solicitud: Number(selectedService.value.id),
@@ -4181,7 +4196,9 @@ const processPayment = async () => {
     // CORRECCIÓN: Usar monto_credito en lugar de monto_credito_mostrado
     monto_credito: Number(parseFloat(creditApplied.value || 0)),
     num_comprobante: comprobante.value,
-    monto_manodeobra: Number(totalAPagar.value) || 0,
+    // La mano de obra excluye la visita para no afectar comisiones ni reportes
+    monto_manodeobra: Number((totalAPagar.value - montoVisitaPago) || 0),
+    monto_visita: montoVisitaPago,
     id_usuario: auth.user.id_usuario,
     nombre: auth.user.nombre
   };
@@ -4361,6 +4378,8 @@ const resetFilters = () => {
 // =========================
 
 const totalAPagar = ref(0)
+// Visita por cobrar cuando el servicio lo inició el técnico (costo fijo, no afecto a créditos)
+const visitaPendienteCliente = ref(0)
 
 // Función para calcular el total basado en los beneficios dinámicos
 const calcularTotal = () => {
@@ -4382,7 +4401,11 @@ const calcularTotal = () => {
 
     // Guardar el crédito realmente aplicado para mostrarlo en el template
     creditApplied.value = actualCreditUsed;
-    
+
+    // 4. Sumar la visita pendiente (solo flujo iniciado por el técnico).
+    //    Es un costo fijo: se suma después de aplicar créditos.
+    currentTotal += Number(visitaPendienteCliente.value || 0);
+
     return currentTotal;
   } catch (error) {
     console.error('Error en calcularTotal:', error);
@@ -4396,6 +4419,7 @@ watch([() => quotationData.value?.monto_manodeobra,
       () => membresiaProgreso.value?.monto_credito,
       () => membresiaProgreso.value?.mesesProgreso,
       () => discountPercentage.value,
+      () => visitaPendienteCliente.value,
       () => membresiaBeneficios.value], 
 () => {
   try {
