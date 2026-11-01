@@ -751,7 +751,7 @@
                 <div class="space-y-2">
                   <div class="flex justify-between items-center text-xs">
                     <span class="text-gray-600 dark:text-gray-400 font-bold">{{ $t('services_page.payment.labor') }}</span>
-                    <span class="font-black text-gray-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
+                    <span class="font-black text-gray-900 dark:text-white">L. {{ formatCurrency(manoDeObraMostrada) }}</span>
                   </div>
                   
                   <!-- Crédito Aplicado -->
@@ -1291,7 +1291,7 @@
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 space-y-3">
                   <div class="flex justify-between items-center text-xs">
                     <span class="text-blue-800 dark:text-blue-200 font-bold">{{ $t('services_page.payment.labor') }}</span>
-                    <span class="font-black text-blue-900 dark:text-white">L. {{ formatCurrency(quotationData?.monto_manodeobra) }}</span>
+                    <span class="font-black text-blue-900 dark:text-white">L. {{ formatCurrency(manoDeObraMostrada) }}</span>
                   </div>
 
                   <div v-if="shouldShowCreditBenefit && parseFloat(membresiaProgreso?.monto_credito || 0) > 0" class="flex justify-between items-center text-xs pt-2 border-t border-blue-200/50 dark:border-blue-800">
@@ -1301,7 +1301,7 @@
 
                   <div class="flex justify-between items-center pt-2 border-t-2 border-blue-300 dark:border-blue-700">
                     <span class="text-sm font-black text-blue-900 dark:text-white">{{ $t('services_page.modals.net_total') }}</span>
-                    <span class="text-lg font-black text-blue-900 dark:text-white">L. {{ formatCurrency(getDiscountedPrice()) }}</span>
+                    <span class="text-lg font-black text-blue-900 dark:text-white">L. {{ formatCurrency(totalCotizacionMostrado) }}</span>
                   </div>
                 </div>
 
@@ -3047,7 +3047,10 @@ const mapApiServiceToLocal = (apiService) => {
   // Detectar si el servicio lo inició el técnico: en ese flujo la visita se
   // registra automáticamente con el comprobante "ASISTIDO-<id>" y debe cobrarse al cliente.
   const comprobanteVisita = String(apiService.pagoVisita?.num_comprobante || '');
-  const iniciadoPorTecnico = comprobanteVisita.startsWith('ASISTIDO-');
+  // Viaje Privado y Barbería no cobran visita en ningún flujo
+  const nombreServicio = (apiService.servicio?.nombre || '').trim().toLowerCase();
+  const servicioSinVisita = ['viaje privado', 'barbería', 'barberia'].includes(nombreServicio);
+  const iniciadoPorTecnico = comprobanteVisita.startsWith('ASISTIDO-') && !servicioSinVisita;
   
   // Crear objeto con los datos del servicio
   const servicioMapeado = {
@@ -4380,6 +4383,12 @@ const resetFilters = () => {
 const totalAPagar = ref(0)
 // Visita por cobrar cuando el servicio lo inició el técnico (costo fijo, no afecto a créditos)
 const visitaPendienteCliente = ref(0)
+// Visita incluida en el flujo asistido (solo vista para el cliente, no afecta el backend)
+const montoVisitaMostrado = computed(() => Number(selectedService.value?.montoVisita || 0) || 0)
+// Mano de obra mostrada: suma la visita cuando el servicio lo inició el técnico (solo UI)
+const manoDeObraMostrada = computed(() => (parseFloat(quotationData.value?.monto_manodeobra || 0) || 0) + montoVisitaMostrado.value)
+// Total neto mostrado en el modal de cotización (incluye la visita, solo UI)
+const totalCotizacionMostrado = computed(() => (parseFloat(getDiscountedPrice()) || 0) + montoVisitaMostrado.value)
 
 // Función para calcular el total basado en los beneficios dinámicos
 const calcularTotal = () => {

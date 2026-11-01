@@ -3613,10 +3613,8 @@ let chart = null;
 
 const availableCharts = [
   { id: 'earnings', name: '📈 Ingresos Mensuales' },
-  { id: 'serviceTypes', name: '🛠️ Servicios por Tipo' },
   { id: 'services', name: '📊 Servicios por Mes' },
   { id: 'users', name: '👥 Crecimiento de Usuarios' },
-  { id: 'cities', name: '🏙️ Servicios por Ciudad' },
   { id: 'serviceTypeCity', name: '🏢 Servicios por Tipo/Ciudad' },
   { id: 'techCity', name: '👨‍🔧 Servicios Técnicos/Ciudad' },
   { id: 'techMoneyCity', name: '💰 Dinero por Técnicos/Ciudad' }
@@ -3852,6 +3850,11 @@ const createChart = async () => {
                 tooltip: {
                   mode: 'index',
                   intersect: false
+                },
+                datalabels: {
+                  display: true,
+                  color: '#FFFFFF',
+                  font: { weight: 'bold', size: 10 }
                 }
               },
               scales: {
@@ -3859,6 +3862,12 @@ const createChart = async () => {
                   beginAtZero: true,
                   ticks: { color: isDark ? '#D1D5DB' : '#374151' },
                   grid: { color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }
+                },
+                y1: {
+                  position: 'right',
+                  beginAtZero: true,
+                  ticks: { color: isDark ? '#D1D5DB' : '#374151' },
+                  grid: { display: false }
                 },
                 x: {
                   ticks: { color: isDark ? '#D1D5DB' : '#374151' },
@@ -3887,7 +3896,12 @@ const createChart = async () => {
             maintainAspectRatio: false,
             indexAxis: 'y',
             plugins: {
-              legend: { display: false }
+              legend: { display: false },
+              datalabels: {
+                display: true,
+                color: '#FFFFFF',
+                font: { weight: 'bold', size: 10 }
+              }
             },
             scales: {
               x: {
@@ -3928,6 +3942,12 @@ const createChart = async () => {
                     return 'L. ' + Number(context.raw || 0).toLocaleString('es-HN');
                   }
                 }
+              },
+              datalabels: {
+                display: true,
+                color: '#FFFFFF',
+                font: { weight: 'bold', size: 10 },
+                formatter: (value) => 'L. ' + Number(value || 0).toLocaleString('es-HN')
               }
             },
             scales: {
@@ -4197,8 +4217,38 @@ const loadServiceTypeByCityData = async () => {
         window.currentChart.data.labels = response.data.labels || [];
         window.currentChart.data.datasets[0].data = response.data.data || [];
       } else {
-        window.currentChart.data.labels = response.data.labels || [];
-        window.currentChart.data.datasets = response.data.datasets || [];
+        const isDark = document.documentElement.classList.contains('dark');
+        const labels = response.data.labels || [];
+        const datasets = response.data.datasets || [];
+
+        // Total de servicios por ciudad (suma de todos los tipos)
+        const totales = labels.map((_, index) =>
+          datasets.reduce((sum, ds) => sum + (Number(ds.data[index]) || 0), 0)
+        );
+
+        // Serie de línea con el total por ciudad (usa el eje secundario)
+        datasets.push({
+          type: 'line',
+          label: 'Total',
+          data: totales,
+          borderColor: '#111827',
+          backgroundColor: '#111827',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#111827',
+          tension: 0.3,
+          yAxisID: 'y1',
+          order: 1,
+          datalabels: {
+            display: true,
+            align: 'top',
+            color: isDark ? '#F3F4F6' : '#111827',
+            font: { weight: 'bold', size: 9 }
+          }
+        });
+
+        window.currentChart.data.labels = labels;
+        window.currentChart.data.datasets = datasets;
       }
       window.currentChart.update();
     }
