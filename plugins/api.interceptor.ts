@@ -39,6 +39,8 @@ export default defineNuxtPlugin(() => {
     /^\/auth\/refresh-token$/,
     /^\/auth\/logout$/,
     /^\/auth\/forgot-password$/,
+    /^\/auth\/verify-reset-token\/[^/]+$/,
+    /^\/auth\/reset-password\/[^/]+$/,
     /^\/registro$/,
     /^\/usuario-deshabilitado$/,
     /^\/reset-password$/,

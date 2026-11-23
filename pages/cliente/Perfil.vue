@@ -957,6 +957,7 @@
 
         <div class="mb-4 flex-shrink-0">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('profile.terms') }}</h3> 
+          <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.terms_last_update') }}</p>
         </div>
 
         <div class="overflow-y-auto flex-1 pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300">
