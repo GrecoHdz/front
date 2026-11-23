@@ -226,18 +226,23 @@
           "Realizar los pagos únicamente a través de los medios autorizados."
         ]
       },
-      {
-      "title": "Pagos, Visitas y Cancelaciones",
-      "text": "Si no tienes membresía, cada visita inicial tendrá un costo de L. 150. Si decides rechazar la cotización presentada por el técnico, se cobrará un total de L. 500 por cuestiones de movilización, diagnóstico y cotización y se asignará otro técnico para una nueva evaluación. Si aceptas la cotización, se procederá con el servicio según el monto acordado."
-      },
-      {
-        "title": "Conducta en el Sitio",
-        "text": "No se permite el uso de la plataforma para fines ilícitos o para contactar técnicos por fuera del sistema oficial."
-      },
-      {
-        "title": "Garantías",
-        "text": "Todos los servicios realizados a través de MiSeguro cuentan con una garantía de cumplimiento según los estándares de la industria."
-      }
+      
+  {
+    "title": "Pagos",
+    "text": "Los pagos de los servicios se realizan de acuerdo con la cotización previamente aceptada por el cliente."
+  },
+  {
+    "title": "Visitas",
+    "text": "Los usuarios que no cuentan con membresía deberán pagar L. 150 por cada visita inicial del técnico."
+  },
+  {
+    "title": "Cancelaciones",
+    "text": "Si el cliente decide rechazar la cotización presentada por el técnico, se cobrará L. 500 por la visita y se asignará otro técnico para una nueva evaluación."
+  },
+  {
+    "title": "Garantías",
+    "text": "En MiSeguro trabajamos con los más altos estándares de calidad para garantizar un servicio bien realizado. En caso de reparaciones, la garantía es un beneficio exclusivo para los usuarios con membresía vigente."
+  }
     ],
     "privacy_content": [
       {
